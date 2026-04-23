@@ -52,6 +52,7 @@ import { ReferenceUpload } from "@/components/image-editor/ReferenceUpload";
 import { ImageChainBreadcrumb } from "@/components/image-editor/ImageChainBreadcrumb";
 import { RefinementPanel } from "@/components/image-editor/RefinementPanel";
 import { ProModePanel, ProModeControls } from "@/components/image-editor/ProModePanel";
+import { AI_MODEL_OPTIONS, IMAGE_GEN_RESOLUTION_OPTIONS } from "@/config/imageSettings";
 import { GeneratingLoader } from "@/components/forge/GeneratingLoader";
 import ThumbnailRibbon from "@/components/image-editor/ThumbnailRibbon";
 import MadisonPanel from "@/components/image-editor/MadisonPanel";
@@ -172,6 +173,20 @@ export default function ImageEditor() {
 
   // Pro Mode Controls State
   const [proModeControls, setProModeControls] = useState<ProModeControls>({});
+
+  const updateProAiProvider = useCallback((value: string) => {
+    setProModeControls((prev) => ({
+      ...prev,
+      aiProvider: value === "auto" ? undefined : value,
+    }));
+  }, []);
+
+  const updateProResolution = useCallback((value: string) => {
+    setProModeControls((prev) => ({
+      ...prev,
+      resolution: value === "standard" ? undefined : value,
+    }));
+  }, []);
 
   // Product Context State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -574,7 +589,9 @@ export default function ImageEditor() {
               collection: selectedProduct.collection || 'Unknown',
               scent_family: selectedProduct.scentFamily || 'Unspecified',
               category: selectedProduct.category
-            } : undefined
+            } : undefined,
+            aiProvider: proModeControls.aiProvider || "auto",
+            resolution: proModeControls.resolution || "standard",
           }
         }
       );
@@ -882,7 +899,9 @@ export default function ImageEditor() {
             brandContext: brandContext || undefined,
             isRefinement: true,
             refinementInstruction,
-            parentImageId: selectedForRefinement.id
+            parentImageId: selectedForRefinement.id,
+            aiProvider: proModeControls.aiProvider || "auto",
+            resolution: proModeControls.resolution || "standard",
           }
         }
       );
@@ -1116,7 +1135,9 @@ export default function ImageEditor() {
               brandContext: brandContext || undefined,
               isRefinement: true,
               refinementInstruction: defaultInstruction,
-              parentImageId: latestImage.id
+              parentImageId: latestImage.id,
+              aiProvider: proModeControls.aiProvider || "auto",
+              resolution: proModeControls.resolution || "standard",
             }
           }
         );
@@ -1799,6 +1820,54 @@ export default function ImageEditor() {
 
           {/* Prompt Bar (Fixed Bottom) */}
           <footer className="border-t border-charcoal/50 bg-charcoal/30 backdrop-blur-sm sticky bottom-0 z-[15] overflow-hidden">
+            {/* AI backend (always visible — was only in Pro drawer, so requests defaulted to Auto → Gemini) */}
+            <div className="px-6 py-2 border-b border-charcoal/50 flex flex-wrap items-center gap-3 bg-ink-black/20">
+              <span className="text-xxs font-medium text-parchment-white/50 uppercase tracking-wide shrink-0">
+                Image AI
+              </span>
+              <Select
+                value={proModeControls.aiProvider || "auto"}
+                onValueChange={updateProAiProvider}
+                disabled={isGenerating}
+              >
+                <SelectTrigger className="h-8 w-[min(100%,220px)] max-w-[260px] bg-charcoal border-stone/20 text-parchment-white text-xs">
+                  <SelectValue placeholder="Model" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[280px]">
+                  {AI_MODEL_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">
+                      {option.label}
+                      {option.badge ? (
+                        <span className="text-parchment-white/40 ml-1">({option.badge})</span>
+                      ) : null}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-1 flex-1 min-w-[140px] max-w-[320px]">
+                {IMAGE_GEN_RESOLUTION_OPTIONS.map((option) => {
+                  const isSelected =
+                    proModeControls.resolution === option.value ||
+                    (!proModeControls.resolution && option.value === "standard");
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      disabled={isGenerating}
+                      onClick={() => updateProResolution(option.value)}
+                      className={cn(
+                        "flex-1 rounded border py-1.5 text-xxs font-medium transition-colors",
+                        isSelected
+                          ? "border-aged-brass bg-aged-brass/15 text-parchment-white"
+                          : "border-charcoal/80 bg-charcoal/50 text-parchment-white/70 hover:border-stone/30",
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             {/* Pro Mode Status Indicator */}
             {Object.keys(proModeControls).length > 0 && (
               <div className="px-6 pr-6 py-2 border-b border-charcoal/50 bg-aged-brass/5">

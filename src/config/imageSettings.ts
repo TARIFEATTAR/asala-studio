@@ -278,3 +278,42 @@ export function calculateDimensions(
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// AI MODEL + RESOLUTION (generate-madison-image — shared by Dark Room & Image Editor)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface AiModelOption {
+  value: string;
+  label: string;
+  description: string;
+  badge: string | null;
+  group: "auto" | "gemini" | "openai" | "freepik";
+}
+
+/** Values must stay in sync with `generate-madison-image` aiProvider mapping. */
+export const AI_MODEL_OPTIONS: AiModelOption[] = [
+  { value: "auto", label: "Auto (Nano Banana 2)", description: "Best for most uses", badge: "DEFAULT", group: "auto" },
+  { value: "gemini-3.1-flash-image-preview", label: "Nano Banana 2", description: "Fast, improved aspect ratio", badge: "NEW", group: "gemini" },
+  { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", description: "Highest quality — slower", badge: "BEST", group: "gemini" },
+  { value: "gemini-2.5-flash-image", label: "Nano Banana", description: "Stable fallback", badge: "FREE", group: "gemini" },
+  { value: "openai-image-2", label: "GPT Image 2", description: "OpenAI flagship — fast, strong text + layout", badge: "NEW", group: "openai" },
+  { value: "freepik-seedream-4", label: "Seedream 4", description: "4K capable", badge: "4K", group: "freepik" },
+  { value: "freepik-flux-pro", label: "Flux Pro v1.1", description: "Premium", badge: "NEW", group: "freepik" },
+  { value: "freepik-hyperflux", label: "Hyperflux", description: "Ultra-fast", badge: "FAST", group: "freepik" },
+  { value: "freepik-flux", label: "Flux Dev", description: "Community favorite", badge: "POPULAR", group: "freepik" },
+  { value: "freepik-mystic", label: "Mystic", description: "2K resolution", badge: null, group: "freepik" },
+];
+
+export interface ImageGenResolutionOption {
+  value: string;
+  label: string;
+  description: string;
+  badge?: string;
+}
+
+export const IMAGE_GEN_RESOLUTION_OPTIONS: ImageGenResolutionOption[] = [
+  { value: "standard", label: "Standard", description: "1K (1024px)" },
+  { value: "high", label: "High", description: "2K (2048px)" },
+  { value: "4k", label: "4K Ultra", description: "4K (4096px)", badge: "Signature" },
+];
+

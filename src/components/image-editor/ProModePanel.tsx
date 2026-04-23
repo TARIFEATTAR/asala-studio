@@ -1,4 +1,4 @@
-import { Camera, Sun, MapPin, X } from "lucide-react";
+import { Camera, Sun, MapPin, X, Cpu, Maximize2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,11 +10,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCameraOptions, getLightingOptions, getEnvironmentOptions } from "@/utils/promptFormula";
+import { cn } from "@/lib/utils";
+import { AI_MODEL_OPTIONS, IMAGE_GEN_RESOLUTION_OPTIONS } from "@/config/imageSettings";
 
 export interface ProModeControls {
   camera?: string;
   lighting?: string;
   environment?: string;
+  /** Passed to generate-madison-image as `aiProvider` (e.g. openai-image-2). */
+  aiProvider?: string;
+  /** Passed to generate-madison-image as `resolution` (standard | high | 4k). */
+  resolution?: string;
 }
 
 interface ProModePanelProps {
@@ -42,11 +48,28 @@ export function ProModePanel({ onControlsChange, initialValues = {} }: ProModePa
     onControlsChange(newControls);
   };
 
+  const handleAiProviderChange = (value: string) => {
+    onControlsChange({ ...initialValues, aiProvider: value === "auto" ? undefined : value });
+  };
+
+  const handleResolutionChange = (value: string) => {
+    onControlsChange({
+      ...initialValues,
+      resolution: value === "standard" ? undefined : value,
+    });
+  };
+
   const handleClearAll = () => {
     onControlsChange({});
   };
 
-  const hasSelections = !!(initialValues.camera || initialValues.lighting || initialValues.environment);
+  const hasSelections = !!(
+    initialValues.camera ||
+    initialValues.lighting ||
+    initialValues.environment ||
+    (initialValues.aiProvider && initialValues.aiProvider !== "auto") ||
+    (initialValues.resolution && initialValues.resolution !== "standard")
+  );
 
   return (
     <div className="space-y-4 p-4 bg-[#252220]/50 rounded-lg border border-[#3D3935]">
@@ -78,6 +101,79 @@ export function ProModePanel({ onControlsChange, initialValues = {} }: ProModePa
       </div>
 
       <div className="space-y-3">
+        {/* AI model — must be sent on generate-madison-image body or requests stay on Auto → Gemini */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-[#A8A39E] flex items-center gap-1.5">
+            <Cpu className="h-3.5 w-3.5" />
+            AI model
+          </Label>
+          <Select
+            value={initialValues.aiProvider || "auto"}
+            onValueChange={handleAiProviderChange}
+          >
+            <SelectTrigger className="h-9 bg-[#252220] border-[#3D3935] text-[#FFFCF5] text-sm">
+              <SelectValue placeholder="Select model..." />
+            </SelectTrigger>
+            <SelectContent className="max-h-[280px]">
+              {AI_MODEL_OPTIONS.map((option, idx) => {
+                const prev = idx > 0 ? AI_MODEL_OPTIONS[idx - 1] : null;
+                const showGroupHeader = !prev || prev.group !== option.group;
+                const groupLabels: Record<string, string> = {
+                  gemini: "Google Gemini",
+                  openai: "OpenAI",
+                  freepik: "Freepik",
+                };
+                return (
+                  <div key={option.value}>
+                    {showGroupHeader && option.group !== "auto" && (
+                      <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {groupLabels[option.group] || option.group}
+                      </div>
+                    )}
+                    <SelectItem value={option.value} className="text-sm">
+                      <span className="flex items-center gap-2">
+                        {option.label}
+                        {option.badge && (
+                          <span className="text-[10px] text-muted-foreground">({option.badge})</span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  </div>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-[#A8A39E] flex items-center gap-1.5">
+            <Maximize2 className="h-3.5 w-3.5" />
+            Output resolution
+          </Label>
+          <div className="flex gap-1">
+            {IMAGE_GEN_RESOLUTION_OPTIONS.map((option) => {
+              const isSelected =
+                initialValues.resolution === option.value ||
+                (!initialValues.resolution && option.value === "standard");
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleResolutionChange(option.value)}
+                  className={cn(
+                    "flex-1 rounded border py-2 text-center text-xs font-medium transition-colors",
+                    isSelected
+                      ? "border-[#B8956A] bg-[#B8956A]/10 text-[#FFFCF5]"
+                      : "border-[#3D3935] bg-[#252220] text-[#D4CFC8] hover:border-[#3D3935]/80",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Camera/Lens */}
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-[#A8A39E] flex items-center gap-1.5">

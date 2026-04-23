@@ -51,7 +51,9 @@ import {
   getEnvironmentOptions,
 } from "@/utils/promptFormula";
 import {
+  AI_MODEL_OPTIONS,
   COMMON_ASPECT_RATIOS,
+  IMAGE_GEN_RESOLUTION_OPTIONS,
   VISUAL_SQUADS,
   type VisualSquad,
 } from "@/config/imageSettings";
@@ -74,26 +76,6 @@ interface ProductSlot {
   imageUrl: string | null;
   name?: string;
 }
-
-// AI Model options
-const AI_MODEL_OPTIONS = [
-  { value: "auto", label: "Auto (Nano Banana 2)", description: "Best for most uses", badge: "DEFAULT", group: "auto" },
-  { value: "gemini-3.1-flash-image-preview", label: "Nano Banana 2", description: "Fast, improved aspect ratio", badge: "NEW", group: "gemini" },
-  { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", description: "Highest quality — slower", badge: "BEST", group: "gemini" },
-  { value: "gemini-2.5-flash-image", label: "Nano Banana", description: "Stable fallback", badge: "FREE", group: "gemini" },
-  { value: "openai-image-2", label: "GPT Image 2", description: "OpenAI's flagship — 4× faster, better text + layout", badge: "NEW", group: "openai" },
-  { value: "freepik-seedream-4", label: "Seedream 4", description: "4K capable", badge: "4K", group: "freepik" },
-  { value: "freepik-flux-pro", label: "Flux Pro v1.1", description: "Premium", badge: "NEW", group: "freepik" },
-  { value: "freepik-hyperflux", label: "Hyperflux", description: "Ultra-fast", badge: "FAST", group: "freepik" },
-  { value: "freepik-flux", label: "Flux Dev", description: "Community favorite", badge: "POPULAR", group: "freepik" },
-  { value: "freepik-mystic", label: "Mystic", description: "2K resolution", badge: null, group: "freepik" },
-];
-
-const RESOLUTION_OPTIONS = [
-  { value: "standard", label: "Standard", description: "1K (1024px)" },
-  { value: "high", label: "High", description: "2K (2048px)" },
-  { value: "4k", label: "4K Ultra", description: "4K (4096px)", badge: "Signature" },
-];
 
 // Aspect ratios are read directly from COMMON_ASPECT_RATIOS where needed.
 
@@ -637,6 +619,114 @@ export function RightPanel({
     }
   };
 
+  /** Shown on Madison and Settings so model choice isn’t hidden behind Settings only. */
+  const aiModelAndResolutionSection =
+    proSettings && onProSettingsChange ? (
+      <>
+        <div className="camera-panel p-2.5 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <LEDIndicator
+              state={proSettings.aiProvider && proSettings.aiProvider !== "auto" ? "active" : "ready"}
+              size="sm"
+            />
+            <Cpu className="w-3 h-3 text-[var(--darkroom-accent)]" />
+            <span className="text-[11px] font-medium text-[var(--darkroom-text)]">AI Model</span>
+          </div>
+          <Select
+            value={proSettings.aiProvider || "auto"}
+            onValueChange={(v) => handleSettingChange("aiProvider", v)}
+            disabled={isGenerating}
+          >
+            <SelectTrigger className="w-full h-8 bg-[var(--camera-body-deep)] border-white/[0.06] text-[var(--darkroom-text)] text-[11px] rounded">
+              <SelectValue placeholder="Select model..." />
+            </SelectTrigger>
+            <SelectContent className="bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] max-h-[280px]">
+              {AI_MODEL_OPTIONS.map((option, idx) => {
+                const prevOption = idx > 0 ? AI_MODEL_OPTIONS[idx - 1] : null;
+                const showGroupHeader = !prevOption || prevOption.group !== option.group;
+                const groupLabels: Record<string, string> = {
+                  gemini: "Google Gemini",
+                  openai: "OpenAI",
+                  freepik: "Freepik Models",
+                };
+
+                return (
+                  <div key={option.value}>
+                    {showGroupHeader && option.group !== "auto" && (
+                      <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-[var(--darkroom-text-dim)] font-medium border-t border-[var(--darkroom-border)] mt-1 first:mt-0 first:border-t-0">
+                        {groupLabels[option.group] || option.group}
+                      </div>
+                    )}
+                    <SelectItem value={option.value} className="text-[var(--darkroom-text)] text-[11px]">
+                      <span className="flex items-center gap-1.5">
+                        <span>{option.label}</span>
+                        {option.badge && (
+                          <span className={cn(
+                            "text-[8px] px-1 py-0.5 rounded font-medium",
+                            option.badge === "BEST" && "bg-purple-500/20 text-purple-400",
+                            option.badge === "FREE" && "bg-emerald-500/20 text-emerald-400",
+                            option.badge === "DEFAULT" && "bg-white/10 text-[var(--darkroom-text-muted)]",
+                            option.badge === "NEW" && "bg-emerald-500/20 text-emerald-400",
+                            option.badge === "FAST" && "bg-cyan-500/20 text-cyan-400",
+                            option.badge === "4K" && "bg-amber-500/20 text-amber-400",
+                            option.badge === "POPULAR" && "bg-blue-500/20 text-blue-400"
+                          )}>
+                            {option.badge}
+                          </span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  </div>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="camera-panel p-2.5 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <LEDIndicator
+              state={proSettings.resolution && proSettings.resolution !== "standard" ? "active" : "off"}
+              size="sm"
+            />
+            <Maximize2 className="w-3 h-3 text-[var(--darkroom-accent)]" />
+            <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Resolution</span>
+          </div>
+          <div className="flex gap-1">
+            {IMAGE_GEN_RESOLUTION_OPTIONS.map((option) => {
+              const isSelected = proSettings.resolution === option.value ||
+                (!proSettings.resolution && option.value === "standard");
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSettingChange("resolution", option.value)}
+                  disabled={isGenerating}
+                  className={cn(
+                    "flex-1 py-2 px-1.5 rounded transition-all text-center border",
+                    isSelected
+                      ? "bg-white/[0.06] border-white/[0.12]"
+                      : "bg-[var(--camera-body-deep)] border-white/[0.04] hover:border-white/[0.08]"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[11px] font-medium block",
+                    isSelected ? "text-[var(--darkroom-text)]" : "text-[var(--darkroom-text-muted)]"
+                  )}>
+                    {option.label}
+                  </span>
+                  {option.badge && (
+                    <span className="text-[9px] text-purple-400 block">{option.badge}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </>
+    ) : null;
+
   // Generate context-aware tips
   const contextTips = [];
   if (!hasProduct) {
@@ -777,108 +867,7 @@ export function RightPanel({
                 </div>
               </div>
 
-              {/* AI Model */}
-              <div className="camera-panel p-2.5 space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <LEDIndicator
-                    state={proSettings.aiProvider && proSettings.aiProvider !== "auto" ? "active" : "ready"}
-                    size="sm"
-                  />
-                  <Cpu className="w-3 h-3 text-[var(--darkroom-accent)]" />
-                  <span className="text-[11px] font-medium text-[var(--darkroom-text)]">AI Model</span>
-                </div>
-                <Select
-                  value={proSettings.aiProvider || "auto"}
-                  onValueChange={(v) => handleSettingChange("aiProvider", v)}
-                  disabled={isGenerating}
-                >
-                  <SelectTrigger className="w-full h-8 bg-[var(--camera-body-deep)] border-white/[0.06] text-[var(--darkroom-text)] text-[11px] rounded">
-                    <SelectValue placeholder="Select model..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] max-h-[280px]">
-                    {AI_MODEL_OPTIONS.map((option, idx) => {
-                      const prevOption = idx > 0 ? AI_MODEL_OPTIONS[idx - 1] : null;
-                      const showGroupHeader = !prevOption || prevOption.group !== option.group;
-                      const groupLabels: Record<string, string> = {
-                        "gemini": "Google Gemini",
-                        "openai": "OpenAI",
-                        "freepik": "Freepik Models",
-                      };
-
-                      return (
-                        <div key={option.value}>
-                          {showGroupHeader && option.group !== "auto" && (
-                            <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-[var(--darkroom-text-dim)] font-medium border-t border-[var(--darkroom-border)] mt-1 first:mt-0 first:border-t-0">
-                              {groupLabels[option.group] || option.group}
-                            </div>
-                          )}
-                          <SelectItem value={option.value} className="text-[var(--darkroom-text)] text-[11px]">
-                            <span className="flex items-center gap-1.5">
-                              <span>{option.label}</span>
-                              {option.badge && (
-                                <span className={cn(
-                                  "text-[8px] px-1 py-0.5 rounded font-medium",
-                                  option.badge === "BEST" && "bg-purple-500/20 text-purple-400",
-                                  option.badge === "FREE" && "bg-emerald-500/20 text-emerald-400",
-                                  option.badge === "DEFAULT" && "bg-white/10 text-[var(--darkroom-text-muted)]",
-                                  option.badge === "NEW" && "bg-emerald-500/20 text-emerald-400",
-                                  option.badge === "FAST" && "bg-cyan-500/20 text-cyan-400",
-                                  option.badge === "4K" && "bg-amber-500/20 text-amber-400",
-                                  option.badge === "POPULAR" && "bg-blue-500/20 text-blue-400"
-                                )}>
-                                  {option.badge}
-                                </span>
-                              )}
-                            </span>
-                          </SelectItem>
-                        </div>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Resolution */}
-              <div className="camera-panel p-2.5 space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <LEDIndicator
-                    state={proSettings.resolution && proSettings.resolution !== "standard" ? "active" : "off"}
-                    size="sm"
-                  />
-                  <Maximize2 className="w-3 h-3 text-[var(--darkroom-accent)]" />
-                  <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Resolution</span>
-                </div>
-                <div className="flex gap-1">
-                  {RESOLUTION_OPTIONS.map((option) => {
-                    const isSelected = proSettings.resolution === option.value ||
-                      (!proSettings.resolution && option.value === "standard");
-
-                    return (
-                      <button
-                        key={option.value}
-                        onClick={() => handleSettingChange("resolution", option.value)}
-                        disabled={isGenerating}
-                        className={cn(
-                          "flex-1 py-2 px-1.5 rounded transition-all text-center border",
-                          isSelected
-                            ? "bg-white/[0.06] border-white/[0.12]"
-                            : "bg-[var(--camera-body-deep)] border-white/[0.04] hover:border-white/[0.08]"
-                        )}
-                      >
-                        <span className={cn(
-                          "text-[11px] font-medium block",
-                          isSelected ? "text-[var(--darkroom-text)]" : "text-[var(--darkroom-text-muted)]"
-                        )}>
-                          {option.label}
-                        </span>
-                        {option.badge && (
-                          <span className="text-[9px] text-purple-400 block">{option.badge}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              {aiModelAndResolutionSection}
 
               {/* Aspect ratio lives in the Madison tab (primary / always-open
                   view). Duplicating it here previously let users set
@@ -1039,6 +1028,7 @@ export function RightPanel({
           {/* === MADISON TAB - Multi-Product & Aspect Ratio === */}
           {activeTab === "madison" && (
             <div className="space-y-2">
+              {aiModelAndResolutionSection}
 
               {/* Context Tips - "Madison's Thoughts" */}
               {contextTips.length > 0 && (

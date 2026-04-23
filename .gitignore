@@ -12,6 +12,9 @@
 # Logs
 *.log
 
+# Playwright MCP traces (local debug output)
+.playwright-mcp/
+
 # env files
 .env*
 
