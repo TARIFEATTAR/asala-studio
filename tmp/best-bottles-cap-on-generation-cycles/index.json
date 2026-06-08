@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-06-08T13:49:06.803Z",
+  "pipelineLaneId": "grid-card-2000x2200",
+  "mode": "cap-on",
+  "totalRows": 1599,
+  "cycles": [
+    {
+      "cycleId": "cycle-01",
+      "launchOrder": 1,
+      "totalRows": 400,
+      "manifestPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-cap-on-generation-cycles/cycle-01.json"
+    },
+    {
+      "cycleId": "cycle-02",
+      "launchOrder": 2,
+      "totalRows": 400,
+      "manifestPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-cap-on-generation-cycles/cycle-02.json"
+    },
+    {
+      "cycleId": "cycle-03",
+      "launchOrder": 3,
+      "totalRows": 400,
+      "manifestPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-cap-on-generation-cycles/cycle-03.json"
+    },
+    {
+      "cycleId": "cycle-04",
+      "launchOrder": 4,
+      "totalRows": 399,
+      "manifestPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-cap-on-generation-cycles/cycle-04.json"
+    }
+  ]
+}
