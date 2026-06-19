@@ -13,6 +13,7 @@ import {
   type PipelineSkuJob,
   type PipelineSkuJobStatus,
 } from "@/lib/bestBottlesPipeline";
+import { buildBestBottlesShopifyPushItemFromSkuJob } from "@/lib/bestBottlesShopifyPushIdentity";
 import type { ProductHub } from "@/hooks/useProducts";
 
 type BestBottlesProductHubJob = PipelineSkuJob & {
@@ -693,16 +694,10 @@ export function useBestBottlesProductHub(): UseBestBottlesProductHubResult {
       const { data, error } = await supabase.functions.invoke("push-shopify-product-images", {
         body: {
           organizationId: currentOrganizationId,
-          items: approvedJobs.map((job) => ({
-            imageId: job.approved_image_id,
-            imageUrl: job.approved_image_url,
-            sku: job.shopify_sku ?? job.website_sku,
-            websiteSku: job.website_sku,
-            graceSku: job.grace_sku,
-            altText: job.product_group_display_name ?? job.website_sku,
-          })),
+          items: approvedJobs.map(buildBestBottlesShopifyPushItemFromSkuJob),
           attachToVariant: true,
           syncBestBottlesConvex: true,
+          enforceBestBottlesFinishMatch: true,
         },
       });
 
@@ -722,13 +717,14 @@ export function useBestBottlesProductHub(): UseBestBottlesProductHubResult {
             mediaId?: string | null;
             shopifyImageUrl?: string | null;
             matchedShopifySku?: string | null;
+            actualShopifySku?: string | null;
             bestBottlesConvex?: unknown;
           }) =>
             markPipelineSkuJobSyncedBySku({
               organizationId: currentOrganizationId,
               patch: {
                 sku: result.sku,
-                shopifySku: result.matchedShopifySku ?? result.sku,
+                shopifySku: result.actualShopifySku ?? result.matchedShopifySku ?? result.sku,
                 shopifyProductId: result.shopifyProductId ?? null,
                 shopifyVariantId: result.shopifyVariantId ?? null,
                 shopifyMediaId: result.mediaId ?? null,

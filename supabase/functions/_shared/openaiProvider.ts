@@ -57,10 +57,11 @@ export type OpenAIImageSize =
   // dall-e-3 legacy sizes (kept for the dall-e-3 code path)
   | "1792x1024"
   | "1024x1792"
-  // gpt-image-2 — additional sizes (Image API; generations path). Edits stay on 1024-class.
+  // gpt-image-2 — additional sizes (Image API; Best Bottles edits pass 2080x2288).
   | "1152x2048"
   | "2048x1152"
   | "2048x2048"
+  | "2080x2288"
   | "2160x3840"
   | "2880x2880"
   | "3840x2160";
@@ -174,7 +175,8 @@ function effectiveBackground(
 
 /**
  * gpt-image-2 accepts many output sizes; map Madison resolution + aspect to
- * documented 2K/4K presets on the generations endpoint only.
+ * documented 2K/4K presets on the generations endpoint. Best Bottles
+ * reference-locked edits pass the exact 2080x2288 master size explicitly.
  */
 function mapGptImage2GenerationSize(
   aspectRatio: string | undefined,
@@ -224,8 +226,8 @@ function mapGptImage2GenerationSize(
 /**
  * Map a caller-neutral aspect ratio ("1:1", "16:9", "9:16", "2:3", …) to one
  * of OpenAI's supported discrete sizes. gpt-image-2 supports higher-res
- * generation sizes while edits stay on 1024-class shapes. dall-e-3 has its
- * own wide set but we keep the mapping
+ * generation sizes and Best Bottles can pass an explicit exact edit size.
+ * dall-e-3 has its own wide set but we keep the mapping
  * aligned on aspect family, not exact pixels.
  */
 export function mapAspectRatioToSize(

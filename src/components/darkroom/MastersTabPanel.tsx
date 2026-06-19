@@ -60,21 +60,6 @@ const MASTER_IMAGE_MODEL_OPTIONS = [
     label: "GPT Image 2",
     description: "Primary high-fidelity reference edit model",
   },
-  {
-    value: "gemini-3-pro-image-preview",
-    label: "Gemini Pro Image",
-    description: "High-detail Gemini comparison model",
-  },
-  {
-    value: "gemini-3.1-flash-image-preview",
-    label: "Gemini Flash Image",
-    description: "Fast Gemini comparison model",
-  },
-  {
-    value: "gemini-2.5-flash-image",
-    label: "Gemini Flash stable",
-    description: "Stable Gemini fallback path",
-  },
 ] as const;
 
 type MasterImageModelValue = (typeof MASTER_IMAGE_MODEL_OPTIONS)[number]["value"];
@@ -265,6 +250,10 @@ import {
   getBestBottlesReferenceUrlIssue,
   isBestBottlesReferenceUrlUsable,
 } from "@/lib/bestBottlesReferenceValidation";
+import {
+  buildBestBottlesGenerationIdentity,
+  getBestBottlesGenerationIdentityIssue,
+} from "@/lib/bestBottlesGenerationIdentity";
 import { updatePipelineSkuJobReference } from "@/lib/bestBottlesPipeline";
 
 interface FolderReferenceEntry {
@@ -277,6 +266,7 @@ interface FolderReferenceEntry {
 type UploadedReferenceImage = { url: string; file?: File; name?: string };
 
 type ParsedReferenceFilename = { graceSku: string; modifier?: string };
+type ParsedReferenceFilenameToken = { raw: string; key: string; modifier?: string };
 
 type BatchScope = "current-group" | "current-applicator" | "selected-skus" | "full-family";
 
@@ -291,6 +281,7 @@ interface BatchPreflightEntry {
   reference: UploadedReferenceImage | FolderReferenceEntry | null;
   referenceIssue: string | null;
   measurementIssue: string | null;
+  identityIssue: string | null;
   referenceSource: "uploaded" | "synced" | "path-only" | "missing";
 }
 
@@ -502,6 +493,26 @@ function parseGraceSkuFilename(filename: string): ParsedReferenceFilename | null
   if (!graceSku) return null;
   const modifier = rest.length > 0 ? rest.join("--").trim().toLowerCase() : undefined;
   return { graceSku, modifier };
+}
+
+function parseReferenceFilenameTokens(filename: string): ParsedReferenceFilenameToken[] {
+  const stem = filename
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/^\d+\.\s*/, "")
+    .trim();
+  if (!stem) return [];
+
+  return stem
+    .split("__")
+    .map((token) => token.trim())
+    .filter(Boolean)
+    .map((raw) => {
+      const [skuPart, ...modifierParts] = raw.split("--");
+      const key = skuPart.trim().toUpperCase();
+      const modifier = modifierParts.length > 0 ? modifierParts.join("--").trim().toLowerCase() : undefined;
+      return { raw, key, modifier };
+    })
+    .filter((token) => Boolean(token.key));
 }
 
 function normalizeReferenceStem(filename: string): string {
@@ -837,6 +848,41 @@ function resolveReferenceFilenameMatch(
   familyProducts: Product[],
 ): ParsedReferenceFilename | null {
   const allProducts = uniqueProductsByGraceSku([...preferredProducts, ...familyProducts]);
+  const filenameTokens = parseReferenceFilenameTokens(filename);
+
+  const websiteSkuMatch = allProducts.find((product) => {
+    const websiteSku = product.websiteSku?.trim().toUpperCase();
+    return Boolean(websiteSku && filenameTokens.some((token) => token.key === websiteSku));
+  });
+  if (websiteSkuMatch) {
+    return {
+      graceSku: websiteSkuMatch.graceSku.toUpperCase(),
+      modifier: filenameTokens.find((token) => token.key === websiteSkuMatch.websiteSku?.trim().toUpperCase())?.modifier,
+    };
+  }
+
+  const graceSkuTokenMatch = allProducts.find((product) =>
+    filenameTokens.some((token) => token.key === product.graceSku.toUpperCase()),
+  );
+  if (graceSkuTokenMatch) {
+    return {
+      graceSku: graceSkuTokenMatch.graceSku.toUpperCase(),
+      modifier: filenameTokens.find((token) => token.key === graceSkuTokenMatch.graceSku.toUpperCase())?.modifier,
+    };
+  }
+
+  for (const token of filenameTokens) {
+    const tokenMatch =
+      allProducts.find((product) => product.websiteSku?.trim().toUpperCase() === token.key) ??
+      allProducts.find((product) => product.graceSku.toUpperCase() === token.key);
+    if (tokenMatch) {
+      return {
+        graceSku: tokenMatch.graceSku.toUpperCase(),
+        modifier: token.modifier,
+      };
+    }
+  }
+
   if (parsed && allProducts.some((product) => product.graceSku.toUpperCase() === parsed.graceSku)) {
     return parsed;
   }
@@ -1986,6 +2032,19 @@ export function MastersTabPanel({
     const skuSpecularityTag = skuBodyMaterial.includes("aluminum") || skuBodyMaterial.includes("metal atomizer")
       ? "metal-specularity-ref"
       : "glass-specularity-ref";
+    const generationIdentity = buildBestBottlesGenerationIdentity(sku, {
+      bodyMaterial: skuBodyMaterial,
+      sourceReference: referenceUrl ?? sku.imageUrl ?? null,
+    });
+    const identityIssue = getBestBottlesGenerationIdentityIssue(generationIdentity);
+    if (identityIssue) {
+      toast({
+        title: "SKU identity blocked",
+        description: `${sku.graceSku}: ${identityIssue}`,
+        variant: "destructive",
+      });
+      return null;
+    }
 
     return generate(assembled, {
       aiProvider: masterAiProvider,
@@ -2011,6 +2070,21 @@ export function MastersTabPanel({
         capColor: sku.capColor ?? null,
         trimColor: sku.trimColor ?? null,
         applicator: sku.applicator ?? null,
+        tasselColor: generationIdentity.tasselColor,
+        bulbColor: generationIdentity.bulbColor,
+        hoseColor: generationIdentity.hoseColor,
+        collarFinish: generationIdentity.collarFinish,
+        ringPresent: generationIdentity.ringPresent,
+        accessoryCode: generationIdentity.accessoryCode,
+        reducerFinish: generationIdentity.reducerFinish,
+        sourceReference: generationIdentity.sourceReference,
+        identityStatus: generationIdentity.identityStatus,
+        identityBlockers: generationIdentity.identityBlockers,
+        identityHash: generationIdentity.identityHash,
+        promptVersion: generationIdentity.promptVersion,
+        rigVersion: generationIdentity.rigVersion,
+        qaStatus: generationIdentity.qaStatus,
+        canvas: generationIdentity.canvas,
       },
       sceneOverlay,
       // Human-readable identifiers live on library tags. sessionId is a uuid
@@ -2024,6 +2098,10 @@ export function MastersTabPanel({
         glassSpecularityReference?.url ? "material-specularity-ref" : null,
         glassSpecularityReference?.url ? skuSpecularityTag : null,
         `model:${masterAiProvider}`,
+        `prompt:${generationIdentity.promptVersion}`,
+        `rig:${generationIdentity.rigVersion}`,
+        `identity:${generationIdentity.identityHash}`,
+        `qa:${generationIdentity.qaStatus}`,
         ...sceneTags,
       ].filter((t): t is string => Boolean(t)),
     });
@@ -2036,6 +2114,19 @@ export function MastersTabPanel({
       toast({
         title: "Missing measurements",
         description: `${selectedProduct.graceSku}: ${measurementIssue} Add or measure dimensions before generating.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    const identity = buildBestBottlesGenerationIdentity(selectedProduct, {
+      bodyMaterial: inferBestBottlesBodyMaterial(selectedProduct),
+      sourceReference: customReference?.url ?? selectedProduct.imageUrl ?? null,
+    });
+    const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
+    if (identityIssue) {
+      toast({
+        title: "SKU identity blocked",
+        description: `${selectedProduct.graceSku}: ${identityIssue}`,
         variant: "destructive",
       });
       return;
@@ -2152,6 +2243,10 @@ export function MastersTabPanel({
     () =>
       batchScopeCandidates.map((product) => {
         const { reference, source } = lookupReferenceCandidateForDiagnostics(product, presetId);
+        const identity = buildBestBottlesGenerationIdentity(product, {
+          bodyMaterial: inferBestBottlesBodyMaterial(product),
+          sourceReference: reference?.url ?? product.imageUrl ?? null,
+        });
         return {
           product,
           reference,
@@ -2159,6 +2254,7 @@ export function MastersTabPanel({
             ? getBestBottlesReferenceUrlIssue(reference.url)
             : "No usable reference is attached.",
           measurementIssue: getMeasurementIssue(product),
+          identityIssue: getBestBottlesGenerationIdentityIssue(identity),
           referenceSource: source,
         };
       }),
@@ -2179,7 +2275,8 @@ export function MastersTabPanel({
         (entry) =>
           entry.reference !== null &&
           entry.referenceIssue === null &&
-          entry.measurementIssue === null,
+          entry.measurementIssue === null &&
+          entry.identityIssue === null,
       ),
     [batchPreflightEntries],
   );
@@ -2199,8 +2296,12 @@ export function MastersTabPanel({
   const batchMeasurementBlockedCount = batchPreflightEntries.filter(
     (entry) => entry.measurementIssue !== null,
   ).length;
+  const batchIdentityBlockedCount = batchPreflightEntries.filter(
+    (entry) => entry.identityIssue !== null,
+  ).length;
   const batchBlockedCount =
-    batchMissingReferenceCount + batchInvalidReferenceCount + batchMeasurementBlockedCount;
+    batchMissingReferenceCount + batchInvalidReferenceCount + batchMeasurementBlockedCount +
+    batchIdentityBlockedCount;
   const effectiveBatchResolution: "standard" | "high" =
     hasFlexibleOverlay ? sceneResolution : "standard";
   const batchCostEstimate = estimateOpenAiBatchCost(
@@ -2283,6 +2384,18 @@ export function MastersTabPanel({
           });
           continue;
         }
+        const identity = buildBestBottlesGenerationIdentity(sku, {
+          bodyMaterial: inferBestBottlesBodyMaterial(sku),
+          sourceReference: ref.url ?? sku.imageUrl ?? null,
+        });
+        const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
+        if (identityIssue) {
+          failures.push({
+            graceSku: sku.graceSku,
+            error: identityIssue,
+          });
+          continue;
+        }
         const result = await generateOne(sku, ref?.url ?? null);
         if (!result) {
           failures.push({ graceSku: sku.graceSku, error: "Generation returned no result" });
@@ -2308,7 +2421,7 @@ export function MastersTabPanel({
     if (batchEligibleEntries.length === 0) {
       toast({
         title: "No eligible SKUs",
-        description: "This scope has no SKUs with both a matched reference and complete measurements.",
+        description: "This scope has no SKUs with a matched reference, complete measurements, and resolved product identity.",
         variant: "destructive",
       });
       return;
@@ -3409,10 +3522,15 @@ export function MastersTabPanel({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <BatchPreflightMetric label="SKU count" value={String(batchPreflightEntries.length)} />
               <BatchPreflightMetric label="Will generate" value={String(batchEligibleEntries.length)} tone="ok" />
               <BatchPreflightMetric label="Refs matched" value={`${batchReferenceMatchedCount}/${batchPreflightEntries.length}`} />
+              <BatchPreflightMetric
+                label="Identity"
+                value={String(batchIdentityBlockedCount)}
+                tone={batchIdentityBlockedCount > 0 ? "warn" : "ok"}
+              />
               <BatchPreflightMetric
                 label="Blocked"
                 value={String(batchBlockedCount)}
@@ -3552,7 +3670,16 @@ export function MastersTabPanel({
                     const { reference, source } = lookupReferenceCandidateForDiagnostics(product, presetId);
                     const referenceIssue = getBestBottlesReferenceUrlIssue(reference?.url);
                     const measurementIssue = getMeasurementIssue(product);
-                    const blocked = reference === null || referenceIssue !== null || measurementIssue !== null;
+                    const identity = buildBestBottlesGenerationIdentity(product, {
+                      bodyMaterial: inferBestBottlesBodyMaterial(product),
+                      sourceReference: reference?.url ?? product.imageUrl ?? null,
+                    });
+                    const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
+                    const blocked =
+                      reference === null ||
+                      referenceIssue !== null ||
+                      measurementIssue !== null ||
+                      identityIssue !== null;
                     return (
                       <label
                         key={key}
@@ -3575,9 +3702,11 @@ export function MastersTabPanel({
                           <span className="text-[10px] text-amber-300">
                             {measurementIssue
                               ? "Needs measurements"
-                              : source === "path-only"
-                                ? "Import path-only ref"
-                                : "Needs usable ref"}
+                              : identityIssue
+                                ? "Identity blocked"
+                                : source === "path-only"
+                                  ? "Import path-only ref"
+                                  : "Needs usable ref"}
                           </span>
                         )}
                       </label>

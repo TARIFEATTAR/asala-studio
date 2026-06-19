@@ -159,7 +159,7 @@ export function displayBestBottlesVisualIdentity(value: string): string {
   return found ?? value.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function bestBottlesVisualIdentitiesCompatible(
+export function bestBottlesVisualIdentitiesCompatible(
   expected: string,
   resolved: string,
   productType: BestBottlesProductType,
@@ -167,6 +167,12 @@ function bestBottlesVisualIdentitiesCompatible(
   if (expected === resolved) return true;
   const copperFamily = new Set(["copper", "matte copper"]);
   if (copperFamily.has(expected) && copperFamily.has(resolved)) return true;
+
+  const goldFamily = new Set(["gold", "shiny gold"]);
+  if (goldFamily.has(expected) && goldFamily.has(resolved)) return true;
+
+  const silverFamily = new Set(["silver", "shiny silver"]);
+  if (silverFamily.has(expected) && silverFamily.has(resolved)) return true;
 
   if (productType === "metal-atomizer") {
     const blueFamily = new Set(["blue", "cobalt blue"]);

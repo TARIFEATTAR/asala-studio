@@ -8,6 +8,7 @@ import { enhancePromptWithOntology } from "../_shared/photographyOntology.ts";
 import { generateImage as generateFreepikImage, type FreepikImageModel, type FreepikResolution, IMAGE_MODELS } from "../_shared/freepikProvider.ts";
 import { generateImage as generateOpenAIImage, type OpenAIImageModel } from "../_shared/openaiProvider.ts";
 import { getVisualStyleDirective, type VisualSquad } from "../_shared/visualMasters.ts";
+import { buildBestBottlesFamilyRigPromptAdjustment } from "../_shared/bestBottlesFamilyRigPrompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -180,11 +181,11 @@ function buildBestBottlesApplicatorPromptRules(
       glassMaterialLine:
         "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, and visible separation between front and back walls. No fake bevels or plastic glass.",
       fitmentMaterialLine:
-        "- Roller/cap: preserve the exact roller ball plug, over-cap state, and closure color from Image 1; no sprayer, bulb, hose, tassel, or dip tube.",
-      shadowContact: "bottle base and roller/cap contact points visible in the reference",
+        "- Roller/cap: preserve the exact roller ball plug, over-cap state, and closure color from Image 1; no sprayer, bulb, hose, tassel, or dip tube. If the over-cap is detached, keep the exposed roller ball plug seated on the bottle neck centerline and place the matching over-cap upright to the right on the same baseline with a consistent gap and scale.",
+      shadowContact: "bottle base, roller plug, and detached over-cap contact points visible in the reference",
       forbiddenLines: [
         "- No new colors, color drift, substituted roller/cap colors, changed finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped roller/cap, or product edge touching the canvas.",
+        "- No zoomed-in crop, scale inflation, cropped roller/cap, sideways-drifting roller plug, floating cap, far-away cap, overlapping cap, or product edge touching the canvas.",
         sharedNoAddedAtomizer,
       ],
     };
@@ -279,6 +280,26 @@ function getBestBottlesProductText(productContext?: Record<string, unknown> | nu
     .filter((value): value is string => typeof value === "string")
     .join(" ")
     .toLowerCase();
+}
+
+function buildCylinderQualityAndAlignmentPrompt(
+  productContext?: Record<string, unknown> | null,
+): string | null {
+  const family = typeof productContext?.family === "string"
+    ? productContext.family.trim().toLowerCase()
+    : "";
+  if (family !== "cylinder" && family !== "tall cylinder") {
+    return null;
+  }
+
+  return [
+    "CYLINDER FAMILY QUALITY AND ALIGNMENT CONTRACT:",
+    "- Render as a high-end editorial photorealistic studio image for premium ecommerce, not a legacy catalog cutout.",
+    "- Preserve the Cylinder bottle's exact tube geometry, circular base, straight vertical sidewalls, shoulder/neck proportions, cap state, and SKU-specific component identity.",
+    "- Increase perceived quality through sharper glass edge definition, realistic wall thickness, controlled refraction, clean neck threads, believable base mass, subtle caustics, precise cap material finish, and a physically plausible contact shadow.",
+    "- Baseline alignment is mandatory: all Cylinder siblings of the same capacity must share the same imaginary shelf line, vertical bottle centerline, object scale, side margins, top air, bottom padding, camera distance, and optical compression.",
+    "- If the model must choose between beauty and family alignment, choose family alignment. Do not zoom, crop, enlarge, shrink, tilt, or recompose to make the image feel more dramatic.",
+  ].join("\n");
 }
 
 function buildBestBottlesBodyMaterialPromptRules(
@@ -449,6 +470,20 @@ function buildReferenceLockedBestBottlesPrompt(
     typeof productContext?.capColor === "string" ? `${applicatorRules.colorLabel}: ${productContext.capColor}` : null,
     typeof productContext?.trimColor === "string" ? `Trim metal: ${productContext.trimColor}` : null,
     typeof productContext?.applicator === "string" ? `Applicator: ${productContext.applicator}` : null,
+    typeof productContext?.tasselColor === "string" ? `Tassel color: ${productContext.tasselColor}` : null,
+    typeof productContext?.bulbColor === "string" ? `Bulb color: ${productContext.bulbColor}` : null,
+    typeof productContext?.hoseColor === "string" ? `Hose color: ${productContext.hoseColor}` : null,
+    typeof productContext?.collarFinish === "string" ? `Collar finish: ${productContext.collarFinish}` : null,
+    typeof productContext?.ringPresent === "boolean" ? `Ring present: ${productContext.ringPresent ? "yes" : "no"}` : null,
+    typeof productContext?.accessoryCode === "string" ? `Accessory code: ${productContext.accessoryCode}` : null,
+    typeof productContext?.reducerFinish === "string" ? `Reducer/leather finish: ${productContext.reducerFinish}` : null,
+  ].filter(Boolean).join("\n");
+  const qaMetadata = [
+    typeof productContext?.identityHash === "string" ? `Identity hash: ${productContext.identityHash}` : null,
+    typeof productContext?.promptVersion === "string" ? `Prompt version: ${productContext.promptVersion}` : null,
+    typeof productContext?.rigVersion === "string" ? `Rig version: ${productContext.rigVersion}` : null,
+    typeof productContext?.canvas === "string" ? `Canvas contract: ${productContext.canvas}` : null,
+    typeof productContext?.sourceReference === "string" ? `Source reference: ${productContext.sourceReference}` : null,
   ].filter(Boolean).join("\n");
   const measurementLock = [
     typeof productContext?.sku === "string" ? `SKU: ${productContext.sku}` : null,
@@ -462,11 +497,20 @@ function buildReferenceLockedBestBottlesPrompt(
     typeof operatorRefinement === "string" && operatorRefinement.trim()
       ? operatorRefinement.trim().slice(0, 900)
       : "";
+  const cylinderQualityAndAlignmentPrompt = buildCylinderQualityAndAlignmentPrompt(productContext);
+  const familyRigPrompt = buildBestBottlesFamilyRigPromptAdjustment(productContext);
+  const capStateLine = familyRigPrompt.rigImposed
+    ? "- Preserve the exact cap/component state and visible components from Image 1. If a detached cap or over-cap is present, keep the cap-off/exploded relationship but place it according to the imposed rig baseline, gap, and spacing. For roll-on references, the exposed roller ball plug stays centered on the bottle neck and the detached over-cap stays upright to the right."
+    : "- Preserve the exact cap/component state from Image 1: if an actuator/nozzle or roller ball is exposed and a detached cap is visible beside the bottle, keep both exactly as photographed. Do not add, remove, close, or relocate the cap.";
+  const operatorConflictScope = familyRigPrompt.rigImposed
+    ? "reference identity lock and imposed studio rig"
+    : "reference lock";
 
   return [
     "REFERENCE-LOCKED BEST BOTTLES LUXURY PRODUCT PHOTOGRAPHY V5.1.",
     "",
-    "Task: transform the uploaded real product reference into a photorealistic high-end editorial PDP master. The product geometry, proportions, colors, component shapes, camera angle, material identity, canvas placement, centerline, baseline, crop, camera distance, and scale are locked. The flat white source background, weak lighting, missing shadow, and extracted-PNG look are not locked.",
+    familyRigPrompt.taskLine,
+    cylinderQualityAndAlignmentPrompt,
     "",
     "GEOMETRY LOCK VS PACK-SHOT UPGRADE:",
     ...bodyMaterialRules.packshotRules.map((rule) => `- ${rule}`),
@@ -474,23 +518,17 @@ function buildReferenceLockedBestBottlesPrompt(
     "SOURCE OF TRUTH:",
     `- Use Image 1 only as the product reference: ${sourceTruth}`,
     secondaryStyleScope || null,
-    "- Preserve the source camera angle, product component relationships, bounding-box footprint, centerline, baseline, crop, camera distance, and relative scale inside the 2080 x 2288 canvas. Do not redesign, redraw, recolor, rotate, stretch, simplify, recenter, zoom, crop, or reinterpret the product.",
-    "- Family alignment is mission-critical: this SKU must align with sibling images from the same family/capacity as if all were photographed on one fixed studio rig. The bottle base sits on the same imaginary horizontal baseline; the bottle body uses the same vertical centerline and visual height envelope.",
-    "- Catalog grid standard: render this as part of a professional e-commerce product family grid, not as an isolated creative hero. Keep a stable invisible shelf line, consistent object magnification, matching top air, matching side margins, and identical body footprint across sibling cards.",
-    "- Cap/closure/roller/sprayer color, finish, or cap height may change only the purchasable component. It must not change zoom, camera distance, product body size, body width, base position, top clearance, detached-cap scale, or overall framing.",
-    "- Do not preserve the reference image's flat lighting, pure-white background, weak shadow, or low-end capture finish. Re-stage the same locked product as a luxury catalog photograph without moving it.",
-    "- For perfume spray pump references, preserve the exact cap state: if the actuator/nozzle is exposed and a detached cap is visible beside the bottle, keep both exactly as photographed. Do not add, remove, close, or relocate the cap.",
+    ...familyRigPrompt.sourceTruthLines,
+    capStateLine,
     `- ${applicatorRules.fullVisibility}`,
     "",
     "CANVAS AND COMPOSITION:",
-    "- Canvas: exact 2080 x 2288, 10:11 portrait PDP master.",
-    "- The uploaded reference canvas is the placement lock. Preserve the same product centerline, baseline, bounding-box footprint, side padding, top padding, and bottom padding.",
-    "- Fixed-family QA target: centerline drift <= 10 px, baseline drift <= 12 px, and product-height drift <= 2% versus the attached reference or family master. Do not exceed these tolerances.",
+    familyRigPrompt.canvasCompositionLines[0],
     `- ${applicatorRules.canvasBounds}`,
-    "- Do not recompose or normalize the product to a new fill percentage. The image must read like the same product photo professionally retouched.",
+    ...familyRigPrompt.canvasCompositionLines.slice(1),
     "",
     "PHOTOGRAPHIC STYLE:",
-    "- Photorealistic luxury product photography, as if captured on a Hasselblad medium-format studio camera with a 100mm macro/product lens at f/8–f/11, ISO 100, tripod-stable capture, high dynamic range, controlled exposure, crisp edge acuity, and realistic optical compression.",
+    "- High-end editorial photorealistic studio image, as if captured on a Hasselblad medium-format studio camera with a 100mm macro/product lens at f/8–f/11, ISO 100, tripod-stable capture, high dynamic range, controlled exposure, crisp edge acuity, and realistic optical compression.",
     "- Quiet luxury editorial restraint: Kinfolk-like negative space and warmth, Aesop-like minimal product staging and material honesty. Match only the mood, restraint, warm neutrals, and premium photographic discipline. Do not imitate Aesop products, labels, packaging, typography, or brand assets.",
     bodyMaterialRules.photographicStyleLine,
     "",
@@ -505,7 +543,7 @@ function buildReferenceLockedBestBottlesPrompt(
     "",
     "BACKGROUND AND SHADOW:",
     "- Replace background with seamless Best Bottles Bone #F5F3EF. It must visibly read as warm cream, not white, with no horizon line, tabletop edge, vignette, props, labels, or decorative frame.",
-    `- Add physically plausible grounding: visible soft contact shadow and ambient occlusion under ${applicatorRules.shadowContact}. Shadow should be elegant but present, about 18-28% opacity at contact points, feathering outward naturally.`,
+    `- Add physically plausible grounding: a beautiful soft Kinfolk-like editorial drop shadow falling back-right across the Bone surface, anchored by visible contact shadow and ambient occlusion under ${applicatorRules.shadowContact}. Shadow should be elegant but present, about 25-35% opacity at the densest contact points, feathering outward naturally without darkening the overall background.`,
     "- Remove only dirt, low-quality capture artifacts, jagged edges, compression noise, and background contamination outside the product silhouette.",
     "",
     "FORBIDDEN:",
@@ -522,9 +560,10 @@ function buildReferenceLockedBestBottlesPrompt(
     "- No label, text, badge, watermark, brand name, UI pill, card frame, rounded border, props, hands, flowers, spray mist, pure-white cutout look, tabletop edge, vignette, or decorative canvas treatment.",
     "",
     cleanOperatorRefinement
-      ? `OPERATOR RETOUCH REQUEST — apply only if it does not conflict with the reference lock:\n${cleanOperatorRefinement}`
+      ? `OPERATOR RETOUCH REQUEST — apply only if it does not conflict with the ${operatorConflictScope}:\n${cleanOperatorRefinement}`
       : null,
     expectedColor ? `SKU COLOR LOCK:\n${expectedColor}` : null,
+    qaMetadata ? `GENERATION QA METADATA:\n${qaMetadata}` : null,
     measurementLock ? `MEASUREMENT LOCK:\n${measurementLock}` : null,
     refNote || null,
     aspectRatio ? `OUTPUT: ${aspectRatio} aspect ratio, exact 2080 x 2288 PDP canvas when available.` : null,
@@ -549,6 +588,18 @@ function getBestBottlesMeasurementIssue(productContext?: Record<string, unknown>
   if (heightMm == null) return "Missing body height.";
   if (widthMm == null) return "Missing face width/diameter.";
   return null;
+}
+
+function getBestBottlesIdentityIssue(productContext?: Record<string, unknown> | null): string | null {
+  if (!productContext || productContext.identityStatus !== "blocked") return null;
+  const blockers = Array.isArray(productContext.identityBlockers)
+    ? productContext.identityBlockers.filter((entry): entry is string =>
+        typeof entry === "string" && entry.trim().length > 0
+      )
+    : [];
+  return blockers.length > 0
+    ? blockers.join(" ")
+    : "Best Bottles product identity is blocked.";
 }
 
 /**
@@ -1660,10 +1711,11 @@ serve(async (req) => {
       categorizedRefs.product.length > 0;
 
     if (!isRefinement && isBestBottlesStudioMasterRequest) {
+      const normalizedProductContext = productContext && typeof productContext === "object"
+        ? productContext as Record<string, unknown>
+        : null;
       const measurementIssue = getBestBottlesMeasurementIssue(
-        productContext && typeof productContext === "object"
-          ? productContext as Record<string, unknown>
-          : null,
+        normalizedProductContext,
       );
       if (measurementIssue) {
         console.warn(
@@ -1674,6 +1726,15 @@ serve(async (req) => {
               ? (productContext as Record<string, unknown>).sku
               : undefined,
           },
+        );
+      }
+      const identityIssue = getBestBottlesIdentityIssue(normalizedProductContext);
+      if (identityIssue) {
+        return new Response(
+          JSON.stringify({
+            error: `Best Bottles product identity is unresolved: ${identityIssue}`,
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
     }
@@ -2061,6 +2122,20 @@ serve(async (req) => {
       madisonResolution: resolution ?? "(default standard)",
     });
 
+    if (isBestBottlesReferenceLocked) {
+      if (effectiveProvider !== "openai" || effectiveOpenAIModel !== "gpt-image-2") {
+        console.log(
+          "Best Bottles reference-locked master -> forcing OpenAI GPT Image 2; no Gemini/Freepik fallback on this path.",
+          {
+            requestedProvider: effectiveProvider,
+            requestedModel: aiProvider ?? provider ?? "(none)",
+          },
+        );
+      }
+      effectiveProvider = "openai";
+      effectiveOpenAIModel = "gpt-image-2";
+    }
+
     if (effectiveProvider === "auto") {
       console.log(
         `ℹ️ Provider Auto → prefer OpenAI GPT Image 2, then fall back to Gemini 3.1 Pro if OpenAI is unavailable or fails.`,
@@ -2085,16 +2160,22 @@ serve(async (req) => {
     }
 
     // Determine which provider to use based on tier and request.
-    // Default path now prefers GPT Image 2; Gemini 3.1 Pro is the fallback.
+    // Best Bottles reference-locked masters are OpenAI GPT Image 2 only.
+    // Other modes keep the broader Madison fallback behavior.
     let selectedProvider: "gemini" | "freepik" | "openai" = "gemini";
     let tierRestrictionApplied = false;
 
     if (effectiveProvider === "openai") {
       // OpenAI GPT Image 2 is the Darkroom default and primary path.
-      // OPENAI_API_KEY must be configured; if it isn't we transparently fall
-      // back to Gemini instead of failing the request.
       if (Deno.env.get("OPENAI_API_KEY")) {
         selectedProvider = "openai";
+      } else if (isBestBottlesReferenceLocked) {
+        return new Response(
+          JSON.stringify({
+            error: "Best Bottles reference-locked master generation requires OPENAI_API_KEY for GPT Image 2.",
+          }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       } else {
         console.warn("⚠️ OpenAI requested but OPENAI_API_KEY not set — falling back to Gemini");
         tierRestrictionApplied = true;
@@ -2239,7 +2320,7 @@ serve(async (req) => {
           model: effectiveOpenAIModel,
           aspectRatio,
           resolution,
-          size: isBestBottlesReferenceLocked ? "auto" : undefined,
+          size: isBestBottlesReferenceLocked ? "2080x2288" : undefined,
           referenceImages: referenceImagesPayload.length > 0
             ? referenceImagesPayload
             : undefined,

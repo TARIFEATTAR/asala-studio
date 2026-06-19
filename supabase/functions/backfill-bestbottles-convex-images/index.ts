@@ -711,8 +711,10 @@ serve(async (req) => {
       { websiteSku, imageUrl: shopifyImageUrl, writeToken: bbConvexWriteToken },
     );
 
-    if (!mutation.ok) {
+    const mutationValue = mutation.body?.value as { success?: boolean; error?: string } | null | undefined;
+    if (!mutation.ok || mutationValue?.success === false) {
       const message =
+        mutationValue?.error ||
         mutation.body?.errorMessage ||
         `Best Bottles Convex sync failed with status ${mutation.status}`;
       await supabase

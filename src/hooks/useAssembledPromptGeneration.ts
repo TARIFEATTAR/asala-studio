@@ -61,6 +61,21 @@ export interface AssembledGenerateOptions {
     capColor?: string | null;
     trimColor?: string | null;
     applicator?: string | null;
+    tasselColor?: string | null;
+    bulbColor?: string | null;
+    hoseColor?: string | null;
+    collarFinish?: string | null;
+    ringPresent?: boolean | null;
+    accessoryCode?: string | null;
+    reducerFinish?: string | null;
+    sourceReference?: string | null;
+    identityStatus?: "ready" | "blocked";
+    identityBlockers?: string[];
+    identityHash?: string;
+    promptVersion?: string;
+    rigVersion?: string;
+    qaStatus?: "pending" | string;
+    canvas?: "2080x2288" | string;
   };
   /** Extra tags merged into `extraLibraryTags` alongside preset/canvas tags. */
   extraLibraryTags?: string[];
@@ -193,7 +208,7 @@ export function useAssembledPromptGeneration() {
         description:
           [
             "Canonical bottle reference (PSD-rendered PNG).",
-            `Use this image as an exact product-identity lock: preserve the bottle geometry, camera angle, scale relationships, body material/substrate (${bodyMaterialLabel}), cap texture, fitment, applicator, body color, hose/bulb/tassel color, trim metal, and all surface details.`,
+            `Use this image as an exact product-identity lock: preserve the bottle geometry, camera angle, scale relationships, body material/substrate (${bodyMaterialLabel}), cap texture, fitment, applicator, body color, hose/bulb/tassel color, collar/ring details, reducer finish, trim metal, and all surface details.`,
             "Do not redesign, restyle, recolor, rotate, or reinterpret the product components.",
             "Do allow luxury catalog staging, lighting, background replacement, shadow, and refined PDP canvas placement as instructed by the server prompt.",
           ].join(" "),

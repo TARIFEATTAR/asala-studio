@@ -109,8 +109,8 @@ const GRID_BONE_BACKGROUND_DESCRIPTION =
 function framingLanguage(productHeightPercent: [number, number]): string {
   const [lo, hi] = productHeightPercent;
   return (
-    `product perfectly centered horizontally on the fixed grid centerline; base resting at the canonical anchor line with a natural contact shadow; ` +
-    `product fills approximately ${lo}–${hi}% of the vertical canvas height; generous padding on all sides so nothing ` +
+    `product stays in the exact placement, scale, centerline, baseline, side margins, top air, and bottom padding shown in the attached reference image; ` +
+    `the ${lo}–${hi}% height range is a fallback only when no reference image exists and must be ignored whenever it conflicts with the reference; ` +
     `feels cramped and the full product assembly (including any bulb, tassel, or sprayer extending beyond the body) ` +
     `remains visible inside the frame; do not drift, zoom, crop, or re-place the product after the canvas is set`
   );

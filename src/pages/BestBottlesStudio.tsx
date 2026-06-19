@@ -46,6 +46,10 @@ import {
   listPipelineSkuJobs,
   updatePipelineGroupStatus,
 } from "@/lib/bestBottlesPipeline";
+import {
+  applyBestBottlesMeasurementOverrides,
+  type BestBottlesMeasurementOverridesPayload,
+} from "@/lib/bestBottlesMeasurementOverrides";
 import "@/styles/darkroom.css";
 
 type StudioTab = "masters" | "components" | "compose";
@@ -70,6 +74,16 @@ const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
 
 function applicatorCategoryKey(applicator: string): string {
   return applicator.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+async function loadMeasurementOverrides() {
+  const response = await fetch("/data/best-bottles-measurement-overrides.json");
+  if (response.status === 404) return [];
+  if (!response.ok) {
+    throw new Error(`Unable to load measurement overrides (${response.status})`);
+  }
+  const payload = (await response.json()) as BestBottlesMeasurementOverridesPayload;
+  return payload.overrides ?? [];
 }
 
 export default function BestBottlesStudio() {
@@ -99,7 +113,11 @@ export default function BestBottlesStudio() {
     enabled: Boolean(groupSlug),
   });
 
-  const applicatorBuckets: ApplicatorBucket[] = data?.applicatorBuckets ?? [];
+  const { data: measurementOverrides = [] } = useQuery({
+    queryKey: ["best-bottles-measurement-overrides"],
+    queryFn: loadMeasurementOverrides,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const { data: persistedSkuJobs = [], isFetched: hasFetchedPersistedSkuJobs } = useQuery({
     queryKey: ["best-bottles-studio-sku-job-references", currentOrganizationId, data?.group.family],
@@ -125,18 +143,39 @@ export default function BestBottlesStudio() {
     );
   }, [persistedSkuJobs]);
 
+  const hydratedData = useMemo(() => {
+    if (!data) return null;
+    const hydratedVariants = applyBestBottlesMeasurementOverrides(data.variants, measurementOverrides);
+    const hydratedAllFamilyProducts = applyBestBottlesMeasurementOverrides(
+      data.allFamilyProducts,
+      measurementOverrides,
+    );
+    return {
+      ...data,
+      variants: hydratedVariants,
+      allFamilyProducts: hydratedAllFamilyProducts,
+      applicatorBuckets: data.applicatorBuckets.map((bucket) => ({
+        ...bucket,
+        variants: applyBestBottlesMeasurementOverrides(bucket.variants, measurementOverrides),
+      })),
+    };
+  }, [data, measurementOverrides]);
+
+  const studioData = hydratedData ?? data;
+  const studioApplicatorBuckets: ApplicatorBucket[] = studioData?.applicatorBuckets ?? [];
+
   useEffect(() => {
-    if (!data?.variants?.length) return;
-    const shouldWaitForPersistedRefs = Boolean(currentOrganizationId && data?.group.family);
+    if (!studioData?.variants?.length) return;
+    const shouldWaitForPersistedRefs = Boolean(currentOrganizationId && studioData?.group.family);
     if (shouldWaitForPersistedRefs && !hasFetchedPersistedSkuJobs) return;
 
-    const isPrimaryGroupVariant = (variant: (typeof data.variants)[number]) => {
-      if (variant.productGroupId && variant.productGroupId === data.group._id) return true;
-      if (variant.productGroupSlug && variant.productGroupSlug === data.group.slug) return true;
+    const isPrimaryGroupVariant = (variant: (typeof studioData.variants)[number]) => {
+      if (variant.productGroupId && variant.productGroupId === studioData.group._id) return true;
+      if (variant.productGroupSlug && variant.productGroupSlug === studioData.group.slug) return true;
       return false;
     };
-    const primaryGroupVariants = data.variants.filter(isPrimaryGroupVariant);
-    const selectionPool = primaryGroupVariants.length > 0 ? primaryGroupVariants : data.variants;
+    const primaryGroupVariants = studioData.variants.filter(isPrimaryGroupVariant);
+    const selectionPool = primaryGroupVariants.length > 0 ? primaryGroupVariants : studioData.variants;
 
     if (selectedSku && selectionPool.some((variant) => variant.graceSku === selectedSku)) {
       return;
@@ -148,10 +187,10 @@ export default function BestBottlesStudio() {
     setSelectedSku(firstReferencedVariant.graceSku);
   }, [
     currentOrganizationId,
-    data?.group.family,
-    data?.group._id,
-    data?.group.slug,
-    data?.variants,
+    studioData?.group.family,
+    studioData?.group._id,
+    studioData?.group.slug,
+    studioData?.variants,
     hasFetchedPersistedSkuJobs,
     persistedReferenceImagesBySku,
     selectedSku,
@@ -160,16 +199,16 @@ export default function BestBottlesStudio() {
   // Component target math — paper-doll asset inventory for this family.
   // 1 body PNG + one fitment PNG per unique applicator-colorway combo.
   const componentTargetCount = useMemo(() => {
-    if (!data?.variants) return 0;
+    if (!studioData?.variants) return 0;
     const uniqueCombos = new Set(
-      data.variants.map((v) => `${v.applicator ?? "?"}||${v.capColor ?? "?"}`),
+      studioData.variants.map((v) => `${v.applicator ?? "?"}||${v.capColor ?? "?"}`),
     );
     return 1 + uniqueCombos.size;
-  }, [data?.variants]);
+  }, [studioData?.variants]);
 
   const selectedVariant = useMemo(
-    () => data?.variants.find((v) => v.graceSku === selectedSku) ?? null,
-    [data?.variants, selectedSku],
+    () => studioData?.variants.find((v) => v.graceSku === selectedSku) ?? null,
+    [studioData?.variants, selectedSku],
   );
 
   const [collapsedBuckets, setCollapsedBuckets] = useState<Set<string>>(new Set());
@@ -244,7 +283,7 @@ export default function BestBottlesStudio() {
         </div>
       )}
 
-      {data && (
+      {studioData && (
         <div className="grid grid-cols-12 gap-4 p-4">
           {/* LEFT RAIL — SKU list + family metadata */}
           <aside className="camera-panel col-span-3 min-h-[600px]">
@@ -270,10 +309,10 @@ export default function BestBottlesStudio() {
                   style={{ color: "var(--darkroom-text-dim)" }}
                 >
                   <span>Variants by applicator</span>
-                  <span>{data.variants.length} total</span>
+                  <span>{studioData.variants.length} total</span>
                 </div>
                 <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-                  {applicatorBuckets.map((bucket) => {
+                  {studioApplicatorBuckets.map((bucket) => {
                     const key = applicatorCategoryKey(bucket.applicator);
                     const collapsed = collapsedBuckets.has(key);
                     return (
@@ -370,9 +409,9 @@ export default function BestBottlesStudio() {
                 {activeTab === "masters" && (
                   <MastersTabPanel
                     selectedProduct={selectedVariant}
-                    familyVariants={data.variants}
-                    allFamilyProducts={data.allFamilyProducts}
-                    familyName={data.group.family}
+                    familyVariants={studioData.variants}
+                    allFamilyProducts={studioData.allFamilyProducts}
+                    familyName={studioData.group.family}
                     persistedReferenceImagesBySku={persistedReferenceImagesBySku}
                     onApproveMaster={async (result, product) => {
                       if (!currentOrganizationId || !groupSlug) {
@@ -423,10 +462,10 @@ export default function BestBottlesStudio() {
 
                 {activeTab === "components" && (
                   <ComponentsTabPanel
-                    applicatorBuckets={applicatorBuckets}
-                    variants={data.variants}
-                    familyName={data.group.family}
-                    cohortSlug={data.group.slug ?? groupSlug ?? null}
+                    applicatorBuckets={studioApplicatorBuckets}
+                    variants={studioData.variants}
+                    familyName={studioData.group.family}
+                    cohortSlug={studioData.group.slug ?? groupSlug ?? null}
                   />
                 )}
 

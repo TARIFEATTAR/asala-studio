@@ -255,6 +255,7 @@ Deno.serve(async (req) => {
         ],
         attachToVariant: true,
         syncBestBottlesConvex: true,
+        enforceBestBottlesFinishMatch: true,
       }),
     });
 

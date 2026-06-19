@@ -34,6 +34,11 @@ import {
   buildProductHubPromptBlock,
   type ProductHubLike,
 } from "./productHubPromptInjector";
+import {
+  buildImposedRigBlock,
+  hasFamilyRig,
+  type RigCapState,
+} from "./familyRig";
 
 /**
  * Paper-doll body variant. Two bodies cover every SKU in a family/capacity/
@@ -70,40 +75,80 @@ export const GLOBAL_SYSTEM_BLOCK = [
   "If a request conflicts with realism or geometry, prioritize realism and product accuracy.",
 ].join("\n");
 
-export const REFERENCE_LOCK_BLOCK = [
-  "REFERENCE IMAGE CONTRACT:",
-  "When a reference image is attached, treat it as immutable product truth.",
-  "",
-  "This is product-locked visual enhancement, not creative product generation.",
-  "",
-  "PRESERVE FROM THE REFERENCE EXACTLY:",
-  "- product geometry",
-  "- silhouette and outline",
-  "- height-to-width ratio",
-  "- cap, closure, fitment, and applicator shape",
-  "- cap-on versus cap-off state",
-  "- number of visible components",
-  "- component placement and spacing",
-  "- crop, scale, and framing relationship inside the canvas",
-  "- camera angle, rotation, and perspective",
-  "",
-  "ENHANCE ONLY:",
-  "- background cleanliness and approved active-preset color",
-  "- lighting quality",
-  "- glass clarity",
-  "- metallic, leather, fabric, or plastic material rendering",
-  "- dust/noise cleanup",
-  "- subtle realistic grounding shadow",
-  "",
-  "BACKGROUND REQUIREMENTS:",
-  "- flat, seamless product-page background using the exact color specified by the active preset",
-  "- no paper texture, canvas texture, fabric texture, grain pattern, vertical banding, border artifacts, or decorative backdrop",
-  "- no visible seams, blocks, gradients, vignettes, or generated background patterning",
-  "",
-  "Do not normalize the product to fill a target percentage of the canvas when that conflicts with the reference image.",
-  "Do not zoom in, zoom out, recenter, rotate, straighten, redesign, simplify, beautify, add components, remove components, or invent a better-looking version.",
-  "The final image must read as the SAME product photo professionally retouched.",
-].join("\n");
+/**
+ * Reference-lock contract. `rigImposed` drops the composition-preservation
+ * lines (crop/scale/centerline/baseline/footprint/padding) and the
+ * "fill a target percentage / do not recenter" framing language, because the
+ * IMPOSED STUDIO RIG block becomes the composition authority for rig families
+ * (Cylinder first). The geometry/material/component guards stay locked to the
+ * reference either way — the rig only governs WHERE and HOW BIG, never WHAT.
+ */
+export function buildReferenceLockBlock(opts?: { rigImposed?: boolean }): string {
+  const rigImposed = opts?.rigImposed ?? false;
+  return [
+    "REFERENCE IMAGE CONTRACT:",
+    "When a reference image is attached, treat it as immutable product truth.",
+    "",
+    "This is product-locked visual enhancement, not creative product generation.",
+    rigImposed
+      ? "Use the attached reference as Image 1: the source of product IDENTITY (shape, components, material). Composition is set by the IMPOSED STUDIO RIG block, not by the reference."
+      : "Use the attached reference as Image 1: the product photo and spatial template.",
+    "Change only the background/lighting/material polish listed below; keep everything else the same.",
+    "",
+    "PRESERVE FROM IMAGE 1 EXACTLY:",
+    "- product geometry",
+    "- silhouette and outline",
+    "- height-to-width ratio",
+    "- cap, closure, fitment, and applicator shape",
+    "- cap-on versus cap-off state",
+    "- number of visible components",
+    "- component placement and spacing",
+    // Composition lock lines — only when the rig is NOT imposing placement.
+    ...(rigImposed
+      ? []
+      : [
+          "- crop, scale, and framing relationship inside the canvas",
+        ]),
+    "- camera angle, rotation, and perspective",
+    ...(rigImposed
+      ? []
+      : [
+          "- centerline, baseline, object bounds, top padding, side padding, and bottom padding",
+          "- original object footprint: do not move, resize, recenter, straighten, rotate, or normalize it",
+        ]),
+    "",
+    "SURGICAL EDIT SCOPE — CHANGE ONLY:",
+    "- background cleanliness and approved active-preset color behind the product",
+    rigImposed
+      ? "- lighting quality without changing the camera angle or the product's identity"
+      : "- lighting quality without changing shadow anchor, camera angle, object bounds, or product placement",
+    "- glass clarity",
+    "- metallic, leather, fabric, or plastic material rendering",
+    "- dust/noise cleanup",
+    rigImposed
+      ? "- subtle realistic grounding shadow anchored to the rig baseline"
+      : "- subtle realistic grounding shadow that starts from the same reference baseline",
+    "",
+    "BACKGROUND REQUIREMENTS:",
+    "- flat, seamless product-page background using the exact color specified by the active preset",
+    "- no paper texture, canvas texture, fabric texture, grain pattern, vertical banding, border artifacts, or decorative backdrop",
+    "- no visible seams, blocks, gradients, vignettes, or generated background patterning",
+    "",
+    ...(rigImposed
+      ? [
+          "Do not redesign, simplify, beautify, add components, remove components, or invent a better-looking version of the product.",
+          "Re-place and re-scale the product per the IMPOSED STUDIO RIG below; the rig — not the reference — sets crop, scale, baseline, and centerline.",
+        ]
+      : [
+          "Do not normalize the product to fill a target percentage of the canvas when that conflicts with the reference image.",
+          "Do not zoom in, zoom out, recenter, rotate, straighten, redesign, simplify, beautify, add components, remove components, or invent a better-looking version.",
+          "The final image must read as the SAME product photo professionally retouched.",
+        ]),
+  ].join("\n");
+}
+
+/** Back-compat: the full reference-lock block (no rig imposed). */
+export const REFERENCE_LOCK_BLOCK = buildReferenceLockBlock();
 
 export const CONSTRAINT_BLOCK = [
   "CONSTRAINT LAYER:",
@@ -131,9 +176,40 @@ function isBestBottlesGridHeroPreset(preset: ImagePreset): boolean {
   return preset.id === "grid-card-2000x2200" || preset.id === "grid-card-exploded-2000x2200";
 }
 
-export function buildGridHeroFixedFrameBlock(preset: ImagePreset): string {
+function productTextForRigCapState(sku: ConvexProductLike): string {
+  return [
+    sku.graceSku,
+    sku.websiteSku,
+    sku.itemName,
+    sku.itemDescription,
+    sku.applicator,
+  ].filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .toLowerCase();
+}
+
+function skuLooksLikeRollOn(sku: ConvexProductLike): boolean {
+  const text = productTextForRigCapState(sku);
+  return (
+    /\b(?:roll-on|roll on|roller|roller ball|rollerball|metal roller|plastic roller)\b/.test(text) ||
+    /(?:^|[-_\s])(?:rol|mrl|rbl)(?:[-_\s]|$)/.test(text) ||
+    /\bgb\w*(?:rol|mrl|rbl)\w*\b/.test(text)
+  );
+}
+
+function resolveRigCapState(preset: ImagePreset, sku: ConvexProductLike): RigCapState {
+  if (preset.id === "grid-card-exploded-2000x2200") return "detached";
+  if (skuLooksLikeRollOn(sku)) return "detached";
+  return "assembled";
+}
+
+export function buildGridHeroFixedFrameBlock(
+  preset: ImagePreset,
+  opts?: { rigImposed?: boolean },
+): string {
   const { widthPx, heightPx } = preset.canvas;
   const isExploded = preset.id === "grid-card-exploded-2000x2200";
+  const rigImposed = opts?.rigImposed ?? false;
   const placementRule = isExploded
     ? "Preserve the reference's exact bottle/cap relative placement: bottle left-of-center, cap to the right, both sharing the same baseline."
     : "The single product item is perfectly centered horizontally on the fixed canvas centerline.";
@@ -141,22 +217,60 @@ export function buildGridHeroFixedFrameBlock(preset: ImagePreset): string {
   return [
     "BEST BOTTLES GRID HERO FIXED-FRAME CONTRACT:",
     `- Final canvas is fixed at exactly ${widthPx} × ${heightPx} px. Do not change aspect ratio, crop, trim, extend, or create a different canvas.`,
-    `- ${placementRule}`,
-    "- Product placement is locked once the reference is attached: preserve the same centerline, baseline, bounding-box footprint, side padding, top padding, and bottom padding from the reference.",
+    // Placement / footprint: only lock to the reference when the rig is NOT
+    // imposing composition. With the rig on, the IMPOSED STUDIO RIG block
+    // owns placement, baseline, and scale.
+    ...(rigImposed
+      ? [
+          "- Placement, baseline, centerline, crop, and product scale are set by the IMPOSED STUDIO RIG block below — NOT copied from the reference image. Do not try to match the reference's framing or footprint.",
+          "- Do not alter saturation, contrast, labels, cap geometry, or component relationships except for the explicit background/lighting cleanup requested. (Placement and scale come from the rig.)",
+        ]
+      : [
+          `- ${placementRule}`,
+          "- Product placement is locked once the reference is attached: preserve the same centerline, baseline, bounding-box footprint, side padding, top padding, and bottom padding from the reference.",
+          "- This is a surgical edit: change only the photographic treatment, not the spatial layout. Keep the original product footprint exactly where Image 1 places it.",
+          "- Do not alter layout, crop, saturation, contrast, object bounds, camera angle, baseline, centerline, top clearance, side clearance, labels, cap geometry, or surrounding object relationships except for the explicit background/lighting cleanup requested.",
+        ]),
     "- Family alignment is the highest priority: sibling SKUs in this family must share an imaginary horizontal baseline through the bottle base and a common vertical centerline through the bottle body.",
     "- Match the family visual envelope: bottle body height, body width, base position, cap/top clearance, and detached-cap scale must remain consistent with sibling images of the same family/capacity.",
     "- Catalog grid standard: render this like an e-commerce product family grid, with a stable invisible shelf line across all cards, consistent object magnification, matching top air, matching side margins, and no per-SKU zoom changes.",
     "- When the only difference is cap, closure, roller, sprayer, color, or finish, keep the bottle body locked to the same pixel footprint as its sibling SKUs.",
     "- Do not make one variant appear closer to camera, farther from camera, taller, smaller, wider, narrower, more zoomed-in, or more zoomed-out than its family siblings when the physical SKU dimensions are the same.",
-    "- Fixed-frame QA target: centerline drift <= 10 px, baseline drift <= 12 px, and product-height drift <= 2% compared with the attached reference or family master. Do not exceed these tolerances.",
+    // The drift-vs-reference QA target is the root contradiction; it is
+    // omitted entirely under the rig (the rig sets the target, not the ref).
+    ...(rigImposed
+      ? []
+      : [
+          "- Fixed-frame QA target: centerline drift <= 10 px, baseline drift <= 12 px, and product-height drift <= 2% compared with the attached reference or family master. Do not exceed these tolerances.",
+        ]),
     "- Background color changes happen behind the product only. Do not let the Bone plate change product scale, crop, camera distance, camera angle, or placement.",
     "- Chiaroscuro is allowed only through product lighting, glass edge contrast, cap/specular definition, and the grounding shadow; do not add background gradients, vignettes, spotlights, or color shifts.",
     "- Any attached lighting/style reference may influence only the photographic treatment: warm directional light, glass refraction quality, edge density, caustics, and quiet dramatic shadow. It may not influence product shape, cap design, label, props, surface, room, or background scene.",
     "- Exposure must be protected: clear glass should retain visible edge lines, inner-wall refraction, and base thickness. Do not blow the glass out to white.",
     "- The full product assembly must remain constrained inside the canvas with no cropped cap, sprayer, bulb, tassel, tube, bottle base, shadow, or detached component.",
-    "- Do not zoom, recenter, enlarge, shrink, rotate, tilt, straighten, shift upward, shift downward, move left, move right, or re-compose the product to make the image feel more editorial.",
+    rigImposed
+      ? "- Do not re-compose the product to feel more editorial; follow the imposed rig for placement and scale, and apply only surface-level photographic improvements otherwise."
+      : "- Do not zoom, recenter, enlarge, shrink, rotate, tilt, straighten, shift upward, shift downward, move left, move right, or re-compose the product to make the image feel more editorial.",
     "- The only allowed changes are surface-level photographic improvements: background color consistency, lighting quality, material realism, cleanup, and the approved chiaroscuro shadow.",
-    "- If a style instruction conflicts with fixed placement, fixed canvas, or product geometry, ignore the style instruction.",
+    rigImposed
+      ? "- If a style instruction conflicts with the imposed rig, the fixed canvas, or product geometry, ignore the style instruction."
+      : "- If a style instruction conflicts with fixed placement, fixed canvas, or product geometry, ignore the style instruction.",
+  ].join("\n");
+}
+
+export function buildFamilyQualityUpgradeBlock(family: string | null | undefined): string | null {
+  const normalizedFamily = family?.trim().toLowerCase();
+  if (normalizedFamily !== "cylinder" && normalizedFamily !== "tall cylinder") {
+    return null;
+  }
+
+  return [
+    "CYLINDER FAMILY QUALITY AND ALIGNMENT CONTRACT:",
+    "- Render as a high-end editorial photorealistic studio image for premium ecommerce, not a legacy catalog cutout.",
+    "- Preserve the Cylinder bottle's exact tube geometry, circular base, straight vertical sidewalls, shoulder/neck proportions, cap state, and SKU-specific component identity.",
+    "- Increase perceived quality through sharper glass edge definition, realistic wall thickness, controlled refraction, clean neck threads, believable base mass, subtle caustics, precise cap material finish, and a physically plausible contact shadow.",
+    "- Baseline alignment is mandatory: all Cylinder siblings of the same capacity must share the same imaginary shelf line, vertical bottle centerline, object scale, side margins, top air, bottom padding, camera distance, and optical compression.",
+    "- If the model must choose between beauty and family alignment, choose family alignment. Do not zoom, crop, enlarge, shrink, tilt, or recompose to make the image feel more dramatic.",
   ].join("\n");
 }
 
@@ -472,6 +586,7 @@ export interface AssembledPrompt {
      * component-scope renders.
      */
     brand: string | null;
+    familyQuality?: string | null;
     preset: string;
     sku: string;
     chipOverrides: string | null;
@@ -561,14 +676,38 @@ export function assemblePrompt(input: AssemblePromptInput): AssembledPrompt {
   const marketingCopyBlock = input.marketingCopy
     ? buildMarketingCopyBlock(input.marketingCopy)
     : null;
+
+  // IMPOSED STUDIO RIG — for families with a rig config (Cylinder first), the
+  // rig becomes the composition authority: it sets baseline, centerline, and
+  // a fit-to-box-with-floor scale driven by the SKU's real mm height instead
+  // of inheriting (inconsistent) framing from the source reference. Builds
+  // only when the SKU has a body height; otherwise we fall back to the legacy
+  // reference-locked composition (rigImposed stays false).
+  const rigCapState = resolveRigCapState(preset, input.sku);
+  // The rig is a catalog-grid construct: impose it only for the grid-card PDP
+  // master presets, not editorial / scene-flexible presets (which keep their
+  // own freeform composition language).
+  const rigBlock =
+    isBestBottlesGridHeroPreset(preset) && hasFamilyRig(input.sku.family)
+      ? buildImposedRigBlock({
+          family: input.sku.family ?? "",
+          capState: rigCapState,
+        })
+      : null;
+  const rigImposed = rigBlock !== null;
+
+  const referenceLockBlock = buildReferenceLockBlock({ rigImposed });
   const fixedFrameBlock = isBestBottlesGridHeroPreset(preset)
-    ? buildGridHeroFixedFrameBlock(preset)
+    ? buildGridHeroFixedFrameBlock(preset, { rigImposed })
     : null;
+  const familyQualityBlock = buildFamilyQualityUpgradeBlock(input.sku.family);
 
   const sections = [
     GLOBAL_SYSTEM_BLOCK,
-    REFERENCE_LOCK_BLOCK,
+    referenceLockBlock,
     fixedFrameBlock,
+    familyQualityBlock,
+    rigBlock,
     brandBlock,
     presetBlock,
     cameraAngleBlock,
@@ -586,6 +725,7 @@ export function assemblePrompt(input: AssemblePromptInput): AssembledPrompt {
     blocks: {
       global: GLOBAL_SYSTEM_BLOCK,
       brand: brandBlock,
+      familyQuality: familyQualityBlock,
       preset: presetBlock,
       sku: skuBlock,
       chipOverrides: chipBlock,

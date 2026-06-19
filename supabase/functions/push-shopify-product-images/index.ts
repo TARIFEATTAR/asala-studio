@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
+  bestBottlesVisualIdentitiesCompatible,
   canonicalBestBottlesVisualIdentity,
+  type BestBottlesVisualProduct,
   validateBestBottlesImageIdentity,
 } from "../_shared/bestBottlesVisualIdentity.ts";
 
@@ -77,6 +79,24 @@ type BestBottlesProductLookup = {
   itemName?: unknown;
 };
 
+function toBestBottlesVisualProduct(
+  product: BestBottlesProductLookup | null,
+): BestBottlesVisualProduct | null {
+  if (!product) return null;
+  return {
+    websiteSku: getString(product.websiteSku) || null,
+    graceSku: getString(product.graceSku) || null,
+    category: getString(product.category) || null,
+    family: getString(product.family) || null,
+    color: getString(product.color) || null,
+    applicator: getString(product.applicator) || null,
+    capStyle: getString(product.capStyle) || null,
+    capColor: getString(product.capColor) || null,
+    trimColor: getString(product.trimColor) || null,
+    itemName: getString(product.itemName) || null,
+  };
+}
+
 type PipelineSkuJobLookup = {
   id?: string | null;
   grace_sku?: string | null;
@@ -96,6 +116,8 @@ type ResolvedBestBottlesProduct = {
 const SHOPIFY_IMAGE_ALT_TEXT_MAX_CHARS = 512;
 const SHOPIFY_MEDIA_READY_MAX_ATTEMPTS = 12;
 const SHOPIFY_MEDIA_READY_POLL_MS = 1000;
+const GLASS_WAND_9ML_VIAL_GRACE_SKU = "GB-CYL-CLR-9ML-T-01";
+const GLASS_WAND_9ML_VIAL_WEBSITE_SKU = "GB09BlackCapApp";
 const BEST_BOTTLES_SHOPIFY_SKU_ALIASES: Array<{ matches: string[]; aliases: string[] }> = [
   {
     matches: [
@@ -105,6 +127,14 @@ const BEST_BOTTLES_SHOPIFY_SKU_ALIASES: Array<{ matches: string[]; aliases: stri
       "BB-ALU250SPRYBL",
     ],
     aliases: ["BB-ALU250SPRYBL", "Alu250SpryBl"],
+  },
+  {
+    matches: [
+      GLASS_WAND_9ML_VIAL_GRACE_SKU,
+      GLASS_WAND_9ML_VIAL_WEBSITE_SKU,
+      "vial-9ml-clear-18-400-glasswand",
+    ],
+    aliases: [GLASS_WAND_9ML_VIAL_GRACE_SKU, GLASS_WAND_9ML_VIAL_WEBSITE_SKU],
   },
 ];
 
@@ -131,6 +161,25 @@ function uniqueTrimmedStrings(values: Array<string | null | undefined>): string[
         .filter(Boolean),
     ),
   );
+}
+
+function matchesGlassWand9MlVialSku(value: string | null | undefined): boolean {
+  const text = (value ?? "").trim().toLowerCase();
+  return (
+    text === GLASS_WAND_9ML_VIAL_GRACE_SKU.toLowerCase() ||
+    text === GLASS_WAND_9ML_VIAL_WEBSITE_SKU.toLowerCase() ||
+    text === "vial-9ml-clear-18-400-glasswand"
+  );
+}
+
+function expandBestBottlesSkuCandidates(values: Array<string | null | undefined>): string[] {
+  const base = uniqueTrimmedStrings(values);
+  if (!base.some(matchesGlassWand9MlVialSku)) return base;
+  return uniqueTrimmedStrings([
+    GLASS_WAND_9ML_VIAL_GRACE_SKU,
+    GLASS_WAND_9ML_VIAL_WEBSITE_SKU,
+    ...base,
+  ]);
 }
 
 function compactSku(value: string): string {
@@ -303,7 +352,14 @@ function assertBestBottlesFinishMatch(
   manualApproval?: RequestItem["manualVisualIdentityApproval"],
   expectedVisualIdentityFromSku = "",
 ): void {
-  const validation = validateBestBottlesImageIdentity(expectedCapColor, product);
+  const declaredExpectedVisualIdentity =
+    expectedCapColor ||
+    manualApproval?.visualFinish?.trim() ||
+    expectedVisualIdentityFromSku;
+  const validation = validateBestBottlesImageIdentity(
+    declaredExpectedVisualIdentity,
+    toBestBottlesVisualProduct(product),
+  );
   if (validation.ok) return;
 
   const manualReviewable =
@@ -327,8 +383,11 @@ function assertBestBottlesFinishMatch(
   if (manualReviewable && manuallyApproved) {
     if (
       expectedVisualIdentityFromSku &&
-      canonicalBestBottlesVisualIdentity(manualApproval?.visualFinish) !==
-        canonicalBestBottlesVisualIdentity(expectedVisualIdentityFromSku)
+      !bestBottlesVisualIdentitiesCompatible(
+        canonicalBestBottlesVisualIdentity(manualApproval?.visualFinish),
+        canonicalBestBottlesVisualIdentity(expectedVisualIdentityFromSku),
+        validation.resolution.productApplicatorType,
+      )
     ) {
       throw new Error(
         `Manual visual identity ${manualApproval?.visualFinish} does not match selected SKU identity ${expectedVisualIdentityFromSku}.`,
@@ -487,13 +546,7 @@ async function resolveBestBottlesProduct(
   rawSku: string,
   alternates: string[] = [],
 ): Promise<ResolvedBestBottlesProduct | null> {
-  const skuCandidates = Array.from(
-    new Set(
-      [rawSku, ...alternates]
-        .map((candidate) => candidate.trim())
-        .filter(Boolean),
-    ),
-  );
+  const skuCandidates = expandBestBottlesSkuCandidates([rawSku, ...alternates]);
   if (skuCandidates.length === 0) return null;
 
   for (const inputSku of skuCandidates) {
@@ -755,7 +808,6 @@ async function findVariantBySku(config: ShopifyConfig, sku: string): Promise<Sho
       nodes.find((node) => node.sku === sku) ??
       nodes.find((node) => node.sku?.toUpperCase() === sku.toUpperCase());
     if (exact) return exact;
-    if (nodes[0]) return nodes[0];
   }
 
   return null;
@@ -1218,7 +1270,7 @@ serve(async (req) => {
           }
         }
 
-        const baseShopifySkuCandidates = uniqueTrimmedStrings([
+        const baseShopifySkuCandidates = expandBestBottlesSkuCandidates([
             pipelineSkuJob?.shopify_sku,
             pipelineSkuJob?.grace_sku,
             sku,
@@ -1252,6 +1304,7 @@ serve(async (req) => {
           });
           continue;
         }
+        const actualShopifySku = variant.sku ?? matchedShopifySku;
 
         const media = await createProductMedia(
           shopifyConfig,
@@ -1323,6 +1376,7 @@ serve(async (req) => {
             source: "image_library_batch",
             sku,
             matchedShopifySku,
+            actualShopifySku,
             requestedWebsiteSku: requestedWebsiteSku ?? null,
             requestedGraceSku: requestedGraceSku ?? null,
             expectedCapColor: expectedCapColor ?? null,
@@ -1367,6 +1421,7 @@ serve(async (req) => {
               shopify_variant_id: variant.id,
               shopify_media_id: media.id,
               shopify_image_url: shopifyImageUrl,
+              shopify_sku: actualShopifySku,
               shopify_pushed_at: new Date().toISOString(),
               convex_synced_at: syncBestBottlesConvex ? new Date().toISOString() : null,
               last_error: null,
@@ -1378,6 +1433,7 @@ serve(async (req) => {
           imageId: item.imageId,
           sku,
           matchedShopifySku,
+          actualShopifySku,
           expectedCapColor: expectedCapColor ?? null,
           manualVisualIdentityApproval: manualVisualIdentityApproval ?? null,
           mode,

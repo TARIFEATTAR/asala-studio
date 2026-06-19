@@ -138,12 +138,14 @@ Deno.serve(async (req) => {
           {
             imageUrl,
             sku: requestedWebsiteSku,
+            websiteSku: requestedWebsiteSku,
             altText: requestedWebsiteSku,
             mode,
           },
         ],
         attachToVariant: true,
         syncBestBottlesConvex: true,
+        enforceBestBottlesFinishMatch: true,
       }),
     });
 
