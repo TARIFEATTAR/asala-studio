@@ -50,6 +50,7 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
     assert.match(block, /IMPOSED STUDIO RIG/);
     assert.match(block, /SUPERSEDES/);
     assert.match(block, /12.?14% up from the canvas bottom/);
+    assert.match(block, /FINAL ALIGNMENT QA/);
     // Size is NOT encoded by capacity — that's the display layer's job.
     assert.match(block, /Do NOT vary the on-canvas size by ml capacity/i);
   });
@@ -62,6 +63,7 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
     assert.match(block, /ONE two-object assembly/);
     assert.match(block, /bottle\+cap assembly is visually centered/i);
     assert.match(block, /same horizontal baseline/i);
+    assert.match(block, /no sibling variant may float higher/i);
     assert.match(block, /6-10% of canvas width/i);
     assert.match(block, /roller ball plug seated on the bottle neck centerline/i);
     assert.match(block, /over-cap upright to the right/i);

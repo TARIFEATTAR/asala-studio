@@ -9,6 +9,8 @@ export interface BestBottlesFamilyRigProductContext {
   applicator?: unknown;
   capState?: unknown;
   mode?: unknown;
+  presetId?: unknown;
+  sourceReference?: unknown;
 }
 
 export interface BestBottlesFamilyRigPromptAdjustment {
@@ -29,6 +31,10 @@ function contextText(productContext?: BestBottlesFamilyRigProductContext | null)
     productContext?.name,
     productContext?.itemDescription,
     productContext?.applicator,
+    productContext?.capState,
+    productContext?.mode,
+    productContext?.presetId,
+    productContext?.sourceReference,
   ].map(textValue).join(" ").toLowerCase();
 }
 
@@ -38,6 +44,14 @@ function looksLikeRollOn(productContext?: BestBottlesFamilyRigProductContext | n
     /\b(?:roll-on|roll on|roller|roller ball|rollerball|metal roller|plastic roller)\b/.test(text) ||
     /(?:^|[-_\s])(?:rol|mrl|rbl)(?:[-_\s]|$)/.test(text) ||
     /\bgb\w*(?:rol|mrl|rbl)\w*\b/.test(text)
+  );
+}
+
+function looksLikeCapOffOrDetached(productContext?: BestBottlesFamilyRigProductContext | null): boolean {
+  const text = contextText(productContext);
+  return (
+    /\b(?:cap[-_\s]?off|cap\s+removed|detached|exploded|over[-_\s]?cap|overcap|loose\s+cap|cap\s+beside|cap\s+to\s+the\s+right)\b/.test(text) ||
+    /(?:^|[-_/\\\s])(?:cap-off|cap_off|capoff|detached|exploded)(?:[-_/\\\s.]|$)/.test(text)
   );
 }
 
@@ -61,6 +75,9 @@ function resolveCapState(productContext?: BestBottlesFamilyRigProductContext | n
     return "assembled";
   }
   if (looksLikeRollOn(productContext)) {
+    return "detached";
+  }
+  if (looksLikeCapOffOrDetached(productContext)) {
     return "detached";
   }
   return "assembled";

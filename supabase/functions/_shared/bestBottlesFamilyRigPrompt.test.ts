@@ -81,4 +81,36 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.match(composition, /roller ball plug seated on the bottle neck centerline/i);
     assert.match(composition, /over-cap upright to the right/i);
   });
+
+  it("infers detached-cap rig for Cylinder sprayers from exploded preset/source references", () => {
+    const adjustment = buildBestBottlesFamilyRigPromptAdjustment({
+      family: "Cylinder",
+      sku: "GB-CYL-AMB-9ML-SPR-MSLV",
+      websiteSku: "GBCylAmb9SpryMtSlv",
+      applicator: "Perfume Spray Pump",
+      presetId: "grid-card-exploded-2000x2200",
+      sourceReference: "/best-bottles/cylinder/amber-9ml/cap-off/GB-CYL-AMB-9ML-SPR-MSLV.png",
+    });
+
+    assert.equal(adjustment.rigImposed, true);
+    const composition = adjustment.canvasCompositionLines.join("\n");
+    assert.match(composition, /CYLINDER/);
+    assert.match(composition, /ONE two-object assembly/);
+    assert.match(composition, /DETACHED cap upright to the RIGHT/);
+    assert.match(composition, /same horizontal baseline/i);
+  });
+
+  it("keeps sprayers assembled without a cap-off/exploded signal", () => {
+    const adjustment = buildBestBottlesFamilyRigPromptAdjustment({
+      family: "Cylinder",
+      sku: "GB-CYL-AMB-9ML-SPR-MSLV",
+      websiteSku: "GBCylAmb9SpryMtSlv",
+      applicator: "Perfume Spray Pump",
+    });
+
+    assert.equal(adjustment.rigImposed, true);
+    const composition = adjustment.canvasCompositionLines.join("\n");
+    assert.match(composition, /assembled bottle centered/i);
+    assert.doesNotMatch(composition, /ONE two-object assembly/);
+  });
 });

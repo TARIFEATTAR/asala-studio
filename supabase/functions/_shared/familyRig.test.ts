@@ -43,6 +43,7 @@ describe("Deno familyRig twin", () => {
     assert.ok(block);
     assert.match(block, /IMPOSED STUDIO RIG/);
     assert.match(block, /SAME generous size/i);
+    assert.match(block, /FINAL ALIGNMENT QA/);
     assert.match(block, /Do NOT vary the on-canvas size by ml capacity/i);
   });
 
@@ -57,6 +58,7 @@ describe("Deno familyRig twin", () => {
     assert.match(block, /ONE two-object assembly/);
     assert.match(block, /bottle\+cap assembly is visually centered/i);
     assert.match(block, /same horizontal baseline/i);
+    assert.match(block, /no sibling variant may float higher/i);
     assert.match(block, /6-10% of canvas width/i);
     assert.match(block, /roller ball plug seated on the bottle neck centerline/i);
     assert.match(block, /over-cap upright to the right/i);

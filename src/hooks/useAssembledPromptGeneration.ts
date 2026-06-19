@@ -19,6 +19,7 @@ import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import type { AssembledPrompt } from "@/lib/product-image/promptAssembler";
 import { getBestBottlesReferenceUrlIssue } from "@/lib/bestBottlesReferenceValidation";
 import { colorCorrectToTarget, dataUrlToBlob } from "@/lib/product-image/colorCorrect";
+import { normalizeBestBottlesRigBaseline } from "@/lib/product-image/rigPostprocess";
 
 const PAPER_DOLL_TARGET_CREAM = "#EEE6D4";
 
@@ -50,6 +51,9 @@ export interface AssembledGenerateOptions {
     collection?: string;
     family?: string | null;
     category?: string;
+    presetId?: string | null;
+    capState?: string | null;
+    mode?: string | null;
     bodyMaterial?: string | null;
     color?: string | null;
     scent_family?: string;
@@ -393,28 +397,42 @@ export function useAssembledPromptGeneration() {
         return null;
       }
 
-      // Snap the rendered cream background to the exact target hex.
-      // gpt-image-2 drifts a few percent off #EEE6D4 even when the prompt
-      // locks the hex; without this, library renders show inconsistent
-      // cream tones across batches. Only runs for Best Bottles renders
-      // that target the canonical cream plate (Scene-Flexible custom
-      // backgrounds are left alone).
+      // Snap the rendered cream background to the exact target hex and apply
+      // the client-side rig baseline pass. The Edge function stays a provider
+      // coordinator because 2080x2288 image re-encoding can exhaust worker
+      // limits; the browser can safely perform the final Studio acceptance
+      // pass before the Library URL is patched.
       const savedImageId = data.savedImageId ?? null;
-      const shouldColorCorrect =
+      const shouldPostProcessBestBottlesMaster =
         extraLibraryTags.includes("brand:best-bottles") &&
         !options.sceneOverlay?.backgroundPresetId &&
         !options.sceneOverlay?.backgroundPrompt;
       let finalImageUrl = data.imageUrl;
-      if (shouldColorCorrect && currentOrganizationId) {
+      if (shouldPostProcessBestBottlesMaster && currentOrganizationId) {
         try {
           const correctedDataUrl = await colorCorrectToTarget(
             data.imageUrl,
             PAPER_DOLL_TARGET_CREAM,
           );
-          const blob = dataUrlToBlob(correctedDataUrl);
+          const rigged = await normalizeBestBottlesRigBaseline(correctedDataUrl, {
+            family: options.productContext?.family,
+            capState: options.productContext?.capState,
+            mode: options.productContext?.mode,
+            targetBackgroundHex: PAPER_DOLL_TARGET_CREAM,
+          });
+          console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess", {
+            shifted: rigged.shifted,
+            shiftYPx: rigged.shiftYPx,
+            detectedBaselineYPx: rigged.detectedBaselineYPx,
+            targetBaselineYPx: rigged.targetBaselineYPx,
+            family: options.productContext?.family,
+            capState: options.productContext?.capState,
+            mode: options.productContext?.mode,
+          });
+          const blob = dataUrlToBlob(rigged.dataUrl);
           const ts = Date.now();
           const rand = Math.random().toString(36).slice(2, 8);
-          const path = `${currentOrganizationId}/${user.id}/paper-doll/master_corrected_${ts}_${rand}.png`;
+          const path = `${currentOrganizationId}/${user.id}/paper-doll/master_rigged_${ts}_${rand}.png`;
           const { error: uploadError } = await supabase.storage
             .from("generated-images")
             .upload(path, blob, {
@@ -423,7 +441,7 @@ export function useAssembledPromptGeneration() {
               contentType: "image/png",
             });
           if (uploadError) {
-            console.warn("[useAssembledPromptGeneration] color-corrected upload failed", uploadError);
+            console.warn("[useAssembledPromptGeneration] rigged master upload failed", uploadError);
           } else {
             const { data: urlData } = supabase.storage
               .from("generated-images")
@@ -437,7 +455,7 @@ export function useAssembledPromptGeneration() {
                   .eq("id", savedImageId);
                 if (updateError) {
                   console.warn(
-                    "[useAssembledPromptGeneration] generated_images.image_url patch failed",
+                    "[useAssembledPromptGeneration] generated_images.image_url rig patch failed",
                     updateError,
                   );
                 }
@@ -445,7 +463,7 @@ export function useAssembledPromptGeneration() {
             }
           }
         } catch (e) {
-          console.warn("[useAssembledPromptGeneration] color correction skipped", e);
+          console.warn("[useAssembledPromptGeneration] Best Bottles rig postprocess skipped", e);
         }
       }
 

@@ -153,6 +153,7 @@ export function buildImposedRigBlock(input: {
     `- Render the product at a generous, CONSISTENT catalog size: the whole assembly fills the frame the same way for every ${familyLabel} SKU. Fit it fully within ~${cfg.fillHeightPct}% of the canvas height and ~${cfg.fillWidthPct}% of the width, centered, with comfortable even margins.`,
     "- Do not leave the product small with large empty margins, and do not crop any part (cap, base, applicator, detached cap, or grounding shadow).",
     "- Do NOT vary the on-canvas size by ml capacity. A small-capacity and a large-capacity bottle are framed at the SAME generous size here — true relative size is applied later at display time, not in this image.",
+    "- FINAL ALIGNMENT QA: before accepting the image, seat the bottle base and any detached cap bottom on the shared rig baseline; no sibling variant may float higher, sink lower, or use a different floor line.",
     "- Same fixed studio rig for the whole family: identical camera distance, lens, optical compression, baseline, and centerline. Only the purchasable component differences change between siblings.",
   ].join("\n");
 }
