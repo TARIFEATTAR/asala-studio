@@ -133,31 +133,31 @@ export function useOnboarding() {
           orgId = newOrg.id;
           setCurrentOrganizationId(orgId);
 
-          // Run member insertion and collection creation in parallel (non-blocking)
-          Promise.all([
-            supabase
-              .from("organization_members")
-              .insert({
-                organization_id: orgId,
-                user_id: user.id,
-                role: "owner",
-              }),
-            supabase
-              .from("brand_collections")
-              .insert({
-                organization_id: orgId,
-                name: "General",
-                description: "Default collection for getting started",
-                sort_order: 1,
-              })
-          ]).then(([memberResult, collectionResult]) => {
-            if (memberResult.error) {
-              logger.error("Failed to add user as organization owner:", memberResult.error);
-            }
-            if (collectionResult.error) {
-              logger.error("Failed to create default collection:", collectionResult.error);
-            }
-          });
+          // Membership must exist before brand_collections — the brand_collections
+          // INSERT policy checks org membership, so running these in parallel races.
+          const { error: memberError } = await supabase
+            .from("organization_members")
+            .insert({
+              organization_id: orgId,
+              user_id: user.id,
+              role: "owner",
+            });
+          if (memberError) {
+            logger.error("Failed to add user as organization owner:", memberError);
+            throw memberError;
+          }
+
+          const { error: collectionError } = await supabase
+            .from("brand_collections")
+            .insert({
+              organization_id: orgId,
+              name: "General",
+              description: "Default collection for getting started",
+              sort_order: 1,
+            });
+          if (collectionError) {
+            logger.error("Failed to create default collection:", collectionError);
+          }
         }
 
         // Show appropriate UI based on step

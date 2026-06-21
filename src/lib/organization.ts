@@ -69,7 +69,7 @@ export async function getOrCreateOrganizationId(userId: string) {
 }
 
 async function ensureMembership(userId: string, organizationId: string) {
-  await supabase
+  const { error } = await supabase
     .from("organization_members")
     .upsert(
       {
@@ -82,6 +82,10 @@ async function ensureMembership(userId: string, organizationId: string) {
         ignoreDuplicates: true,
       }
     );
+  if (error) {
+    logger.error("[ensureMembership] Failed to upsert membership:", error);
+    throw error;
+  }
 }
 
 
