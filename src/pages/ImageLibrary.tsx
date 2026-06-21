@@ -25,6 +25,7 @@ import {
   ChevronsUpDown,
   CheckCircle2,
   AlertTriangle,
+  Layers,
 } from "lucide-react";
 import { MagicWand02 } from "@untitledui/icons";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,27 @@ import {
   type BestBottlesImageProvenanceKind,
 } from "@/lib/bestBottlesImageProvenance";
 import {
+  BEST_BOTTLES_LINEAGE_TAG_CLEAN,
+  BEST_BOTTLES_LINEAGE_TAG_LEGACY,
+  getBestBottlesReferenceLineage,
+} from "@/lib/bestBottlesImageCoverage";
+import {
+  BEST_BOTTLES_DARKROOM_ASSET_TAG_SOURCE,
+  BEST_BOTTLES_DARKROOM_IDENTITY_TAG_MATCHED,
+  BEST_BOTTLES_DARKROOM_IDENTITY_TAG_NEEDS_PRODUCT_MATCH,
+  BEST_BOTTLES_DARKROOM_INTENDED_USE_PDP_CANDIDATE,
+  BEST_BOTTLES_DARKROOM_PUSH_BLOCKED_TAG,
+  BEST_BOTTLES_DARKROOM_SKU_BOUND_CANDIDATE_TAGS,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_CONCEPT,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_NEEDS_PRODUCT_MATCH,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_REJECTED,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_SKU_BOUND_CANDIDATE,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_TRUTH_CONFLICT,
+  getBestBottlesDarkroomAssetWorkflow,
+  type BestBottlesDarkroomAssetStatus,
+  type BestBottlesDarkroomAssetWorkflow,
+} from "@/lib/bestBottlesDarkroomAssetWorkflow";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -122,12 +144,21 @@ type AssetTypeFilter =
   | "product-photography"
   | "generated-output"
   | "reference-imports"
+  | "needs-product-match"
   | "lifestyle"
   | "background"
   | "style"
   | "roll-ons"
   | "empty-plates";
 type SkuSizeFilter = "all" | string;
+/**
+ * Axis-1 (lineage) filter for the Best Bottles Image Library — see
+ * docs/BEST-BOTTLES-IMAGE-PIPELINE-BRIEF.md target #2. `clean` shows only the
+ * new drift-free pipeline work (`reference-lineage:clean`); `legacy` shows
+ * everything else (old generations + keeper imports + untagged); `all` shows
+ * both. Defaults to `clean` so the rebuilt pipeline gets its own clean surface.
+ */
+type ReferenceLineageFilter = "clean" | "legacy" | "all";
 type SortOption = "recent" | "oldest" | "category";
 type PublishDestination = "tarife-sanity" | "best-bottles-grid" | "best-bottles-pdp";
 type BestBottlesPdpMode = "cap-on" | "cap-off";
@@ -155,6 +186,7 @@ type BulkShopifyRow = {
   graceSku: string;
   expectedCapColor: string;
   manualVisualIdentityApproval: ManualVisualIdentityApproval;
+  darkroomWorkflow: BestBottlesDarkroomAssetWorkflow;
 };
 type BestBottlesFamilyOption = {
   family: string;
@@ -786,6 +818,53 @@ function matchesEmptyPlateScope(image: GeneratedImage): boolean {
   return tags.includes(BACKGROUND_SCENE_TAG);
 }
 
+const BEST_BOTTLES_DARKROOM_WORKFLOW_MUTABLE_TAGS = [
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_CONCEPT,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_NEEDS_PRODUCT_MATCH,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_REJECTED,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_SKU_BOUND_CANDIDATE,
+  BEST_BOTTLES_DARKROOM_STATUS_TAG_TRUTH_CONFLICT,
+  BEST_BOTTLES_DARKROOM_IDENTITY_TAG_MATCHED,
+  BEST_BOTTLES_DARKROOM_IDENTITY_TAG_NEEDS_PRODUCT_MATCH,
+  BEST_BOTTLES_DARKROOM_PUSH_BLOCKED_TAG,
+] as const;
+
+function bestBottlesDarkroomStatusLabel(status: BestBottlesDarkroomAssetStatus): string {
+  switch (status) {
+    case "unassigned":
+      return "Unassigned";
+    case "needs-product-match":
+      return "Needs product match";
+    case "sku-bound-candidate":
+      return "SKU-bound candidate";
+    case "approved":
+      return "Approved";
+    case "ready-to-push":
+      return "Ready to push";
+    case "concept":
+      return "Concept";
+    case "rejected":
+      return "Rejected";
+    case "truth-conflict":
+      return "Truth conflict";
+    default:
+      return "";
+  }
+}
+
+function bestBottlesDarkroomStatusClassName(status: BestBottlesDarkroomAssetStatus): string {
+  if (status === "sku-bound-candidate" || status === "approved" || status === "ready-to-push") {
+    return "border-emerald-400/45 bg-emerald-500/15 text-emerald-100";
+  }
+  if (status === "truth-conflict" || status === "rejected") {
+    return "border-red-400/45 bg-red-500/15 text-red-100";
+  }
+  if (status === "concept") {
+    return "border-sky-400/45 bg-sky-500/15 text-sky-100";
+  }
+  return "border-amber-300/45 bg-amber-400/15 text-amber-100";
+}
+
 async function fetchGeneratedImagesForScope(
   column: "organization_id" | "user_id",
   value: string,
@@ -829,6 +908,10 @@ export default function ImageLibrary() {
   const [assetTypeFilter, setAssetTypeFilter] = useState<AssetTypeFilter>("all");
   const [bestBottlesFamilyFilter, setBestBottlesFamilyFilter] = useState<string>("all");
   const [skuSizeFilter, setSkuSizeFilter] = useState<SkuSizeFilter>("all");
+  // Lineage (axis 1): default to the new clean pipeline work so legacy is hidden
+  // until the operator opts into it. Clean = 0 today, so this view starts empty
+  // and fills only with drift-free generations.
+  const [referenceLineageFilter, setReferenceLineageFilter] = useState<ReferenceLineageFilter>("clean");
   const [imageLibraryRowLimit, setImageLibraryRowLimit] = useState(IMAGE_LIBRARY_INITIAL_ROWS);
   const [viewMode, setViewMode] = useState<"grid" | "masonry">("grid");
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
@@ -1044,6 +1127,24 @@ export default function ImageLibrary() {
     );
   }, [resolveBestBottlesProductForSku]);
 
+  const getBestBottlesDarkroomWorkflowForImage = useCallback(
+    (image: GeneratedImage): BestBottlesDarkroomAssetWorkflow => {
+      const websiteSku = detectWebsiteSku(image);
+      const graceSku = detectGraceSku(image) || detectShopifySku(image);
+      const product =
+        (websiteSku ? resolveBestBottlesProductForSku(websiteSku) : null) ??
+        (graceSku ? resolveBestBottlesProductForSku(graceSku) : null);
+      return getBestBottlesDarkroomAssetWorkflow({
+        libraryTags: image.library_tags,
+        brandContextUsed: image.brand_context_used,
+        hasWebsiteSku: Boolean(websiteSku || product?.websiteSku),
+        hasGraceSku: Boolean(graceSku || product?.graceSku),
+        hasVerifiedProductMatch: Boolean(product),
+      });
+    },
+    [resolveBestBottlesProductForSku],
+  );
+
   const resolveBestBottlesImageCapacityMl = useCallback((image: GeneratedImage): number | null => {
     const product = resolveBestBottlesProductForImage(image);
     if (product?.capacityMl != null) return product.capacityMl;
@@ -1240,6 +1341,7 @@ export default function ImageLibrary() {
       image.final_prompt,
       ...(image.library_tags ?? []),
     ].filter(Boolean).join(" "));
+    const darkroomWorkflow = getBestBottlesDarkroomWorkflowForImage(image);
 
     return {
       imageId: image.id,
@@ -1253,8 +1355,9 @@ export default function ImageLibrary() {
         expectedCapColor,
         inferManualCapHeight({ sku, websiteSku, graceSku }, product),
       ),
+      darkroomWorkflow,
     };
-  }, [bestBottlesProductsByGraceSku, bestBottlesProductsByWebsiteSku]);
+  }, [bestBottlesProductsByGraceSku, bestBottlesProductsByWebsiteSku, getBestBottlesDarkroomWorkflowForImage]);
 
   const resolveBestBottlesProductGroupSlug = useCallback(
     (image: GeneratedImage) => {
@@ -1450,6 +1553,15 @@ export default function ImageLibrary() {
       result = result.filter(matchesGeneratedBestBottlesOutput);
     } else if (assetTypeFilter === "reference-imports") {
       result = result.filter(matchesReferenceLikeBestBottlesAsset);
+    } else if (assetTypeFilter === "needs-product-match") {
+      result = result.filter((img) => {
+        const workflow = getBestBottlesDarkroomWorkflowForImage(img);
+        return (
+          workflow.status === "unassigned" ||
+          workflow.status === "needs-product-match" ||
+          workflow.status === "truth-conflict"
+        );
+      });
     } else if (assetTypeFilter === "lifestyle") {
       result = result.filter(matchesLifestyleAsset);
     } else if (assetTypeFilter === "product") {
@@ -1460,11 +1572,24 @@ export default function ImageLibrary() {
       result = result.filter(matchesStyleReferenceAsset);
     }
 
+    // Lineage (axis 1): only applies for Best Bottles. `clean` keeps drift-free
+    // new work; `legacy` keeps everything that is NOT clean (old generations,
+    // keeper imports, and untagged rows); `all` is a no-op.
+    if (isBestBottlesOrg && referenceLineageFilter !== "all" && assetTypeFilter !== "needs-product-match") {
+      result = result.filter((img) => {
+        const isClean = getBestBottlesReferenceLineage(img.library_tags) === "clean";
+        return referenceLineageFilter === "clean" ? isClean : !isClean;
+      });
+    }
+
     return result;
   }, [
     assetTypeFilter,
     bestBottlesFamilyLabels,
+    getBestBottlesDarkroomWorkflowForImage,
     images,
+    isBestBottlesOrg,
+    referenceLineageFilter,
     resolveBestBottlesFamilyKey,
     searchQuery,
   ]);
@@ -1648,6 +1773,15 @@ export default function ImageLibrary() {
 
   const openBulkBestBottlesPublish = () => {
     const selected = images.filter((image) => selectedImages.has(image.id));
+    const blocked = selected.find((image) => getBestBottlesDarkroomWorkflowForImage(image).pushBlocked);
+    if (blocked) {
+      toast({
+        title: "Attach image to product first",
+        description: "One or more selected Darkroom images are unassigned, concepts, rejected, or in truth conflict.",
+        variant: "destructive",
+      });
+      return;
+    }
     setBulkBestBottlesRows(
       selected.map((image) => ({
         imageId: image.id,
@@ -1729,6 +1863,15 @@ export default function ImageLibrary() {
 
   const openBulkShopifyPublish = () => {
     const selected = images.filter((image) => selectedImages.has(image.id));
+    const blocked = selected.find((image) => getBestBottlesDarkroomWorkflowForImage(image).pushBlocked);
+    if (blocked) {
+      toast({
+        title: "Attach image to product first",
+        description: "One or more selected Darkroom images are unassigned, concepts, rejected, or in truth conflict.",
+        variant: "destructive",
+      });
+      return;
+    }
     setBulkShopifyRows(selected.map((image) => buildBulkShopifyRow(image)));
     setBulkShopifyOpen(true);
   };
@@ -1765,6 +1908,15 @@ export default function ImageLibrary() {
           websiteSku: nextWebsiteSku,
           graceSku: nextGraceSku,
           expectedCapColor: nextExpectedCapColor,
+          darkroomWorkflow: nextProduct
+            ? {
+                ...suggested.darkroomWorkflow,
+                status: "sku-bound-candidate",
+                identityStatus: "matched",
+                pushBlocked: false,
+                allowedActions: ["visual-qa", "keep-as-concept", "reject"],
+              }
+            : suggested.darkroomWorkflow,
           manualVisualIdentityApproval: {
             ...row.manualVisualIdentityApproval,
             visualFinish: row.manualVisualIdentityApproval.visualFinish || nextExpectedCapColor,
@@ -1809,12 +1961,22 @@ export default function ImageLibrary() {
               }) ||
               row.expectedCapColor
             : row.expectedCapColor;
+        const nextDarkroomWorkflow = productFromEnteredSku
+          ? {
+              ...row.darkroomWorkflow,
+              status: "sku-bound-candidate" as const,
+              identityStatus: "matched" as const,
+              pushBlocked: false,
+              allowedActions: ["visual-qa" as const, "keep-as-concept" as const, "reject" as const],
+            }
+          : row.darkroomWorkflow;
         return {
           ...row,
           sku,
           graceSku: nextGraceSku,
           websiteSku: nextWebsiteSku,
           expectedCapColor: nextExpectedCapColor,
+          darkroomWorkflow: nextDarkroomWorkflow,
           manualVisualIdentityApproval: {
             ...row.manualVisualIdentityApproval,
             visualFinish: productFromEnteredSku
@@ -1851,6 +2013,13 @@ export default function ImageLibrary() {
               graceSku: product.graceSku || row.graceSku,
               websiteSku: product.websiteSku || row.websiteSku,
               expectedCapColor: visualFinish,
+              darkroomWorkflow: {
+                ...row.darkroomWorkflow,
+                status: "sku-bound-candidate",
+                identityStatus: "matched",
+                pushBlocked: false,
+                allowedActions: ["visual-qa", "keep-as-concept", "reject"],
+              },
               manualVisualIdentityApproval: createManualVisualIdentityApproval(
                 visualFinish,
                 inferManualCapHeight(
@@ -1958,6 +2127,7 @@ export default function ImageLibrary() {
 
   const canPublishBulkShopifyRow = useCallback(
     (row: BulkShopifyRow) => {
+      if (isBestBottlesOrg && row.darkroomWorkflow.pushBlocked) return false;
       if (!row.sku.trim()) return true;
       if (!isBestBottlesOrg) return true;
       const product = getBulkShopifyRowProduct(row);
@@ -1998,6 +2168,7 @@ export default function ImageLibrary() {
       ].join(" ");
       const extraLibraryTags = [
         LIBRARY_ROLE_PRODUCT,
+        ...BEST_BOTTLES_DARKROOM_SKU_BOUND_CANDIDATE_TAGS,
         "revisionType:finish-correct",
         `revisionOf:${row.imageId}`,
         `requiredFinish:${requiredFinish}`,
@@ -2016,6 +2187,7 @@ export default function ImageLibrary() {
             name: `${targetSku || row.imageId} finish-correct reference`,
           },
           extraLibraryTags,
+          generationMode: "finish-correct-revision",
         },
       });
 
@@ -2061,6 +2233,7 @@ export default function ImageLibrary() {
         .join(" ");
       const extraLibraryTags = [
         LIBRARY_ROLE_PRODUCT,
+        ...BEST_BOTTLES_DARKROOM_SKU_BOUND_CANDIDATE_TAGS,
         "generationMode:create-missing-variant-asset",
         `referenceIdentityIgnored:${referenceIdentity}`,
         `requiredFinish:${requiredFinish}`,
@@ -2125,13 +2298,15 @@ export default function ImageLibrary() {
     if (unsafeRow) {
       const product = getBulkShopifyRowProduct(unsafeRow);
       const manualReviewable = isBulkShopifyRowManualReviewable(unsafeRow, product);
+      const darkroomBlocked = unsafeRow.darkroomWorkflow.pushBlocked;
       toast({
-        title: "Visual identity confirmation required",
-        description:
-          (manualReviewable
-            ? "Confirm the visual finish and cap height, and make sure the selected finish matches the SKU before pushing."
-            : getBestBottlesFinishConflict(unsafeRow.expectedCapColor, product)) ||
-          `Declare the image visual identity before pushing to this variant.`,
+        title: darkroomBlocked ? "Attach image to product first" : "Visual identity confirmation required",
+        description: darkroomBlocked
+          ? "This Darkroom image is still unassigned, a concept, rejected, or in truth conflict. Attach it to a verified website SKU before pushing."
+          : (manualReviewable
+              ? "Confirm the visual finish and cap height, and make sure the selected finish matches the SKU before pushing."
+              : getBestBottlesFinishConflict(unsafeRow.expectedCapColor, product)) ||
+            `Declare the image visual identity before pushing to this variant.`,
         variant: "destructive",
       });
       return;
@@ -2281,7 +2456,60 @@ export default function ImageLibrary() {
     setTagsEditOpen(true);
   };
 
+  const handleBestBottlesDarkroomAttachToProduct = (image: GeneratedImage) => {
+    openTagsEdit(image);
+    toast({
+      title: "Add product tags",
+      description: "Add websiteSku:... and sku:... once the image matches verified Best Bottles product truth.",
+    });
+  };
+
+  const handleBestBottlesDarkroomWorkflowStatus = async (
+    image: GeneratedImage,
+    status: "concept" | "rejected",
+  ) => {
+    const nextStatusTag =
+      status === "concept"
+        ? BEST_BOTTLES_DARKROOM_STATUS_TAG_CONCEPT
+        : BEST_BOTTLES_DARKROOM_STATUS_TAG_REJECTED;
+    for (const tag of BEST_BOTTLES_DARKROOM_WORKFLOW_MUTABLE_TAGS) {
+      const next = await removeLibraryTag(image.id, tag);
+      if (!next) {
+        toast({ title: "Could not update workflow", variant: "destructive" });
+        return;
+      }
+    }
+    for (const tag of [
+      BEST_BOTTLES_DARKROOM_ASSET_TAG_SOURCE,
+      BEST_BOTTLES_DARKROOM_INTENDED_USE_PDP_CANDIDATE,
+      nextStatusTag,
+      BEST_BOTTLES_DARKROOM_PUSH_BLOCKED_TAG,
+    ]) {
+      const next = await addLibraryTag(image.id, tag);
+      if (!next) {
+        toast({ title: "Could not update workflow", variant: "destructive" });
+        return;
+      }
+    }
+    toast({
+      title: status === "concept" ? "Kept as concept" : "Rejected",
+      description:
+        status === "concept"
+          ? "This image remains in Madison but is blocked from PDP, Shopify, and Grace."
+          : "This image is marked rejected and remains blocked from publishing.",
+    });
+    await refetch();
+  };
+
   const openSanityPublish = (image: GeneratedImage) => {
+    if (isBestBottlesOrg && getBestBottlesDarkroomWorkflowForImage(image).pushBlocked) {
+      toast({
+        title: "Attach image to product first",
+        description: "This Darkroom image needs a verified website SKU before it can publish to Best Bottles.",
+        variant: "destructive",
+      });
+      return;
+    }
     const resolvedWebsiteSku = isBestBottlesOrg ? resolveBestBottlesWebsiteSku(image) : "";
     const resolvedGroupSlug = isBestBottlesOrg
       ? resolveBestBottlesProductGroupSlug(image) || detectProductGroupSlug(image)
@@ -2305,6 +2533,18 @@ export default function ImageLibrary() {
 
   const handleConfirmSanityPublish = async () => {
     if (!sanityPublishImage) return;
+    if (
+      isBestBottlesOrg &&
+      (publishDestination === "best-bottles-grid" || publishDestination === "best-bottles-pdp") &&
+      getBestBottlesDarkroomWorkflowForImage(sanityPublishImage).pushBlocked
+    ) {
+      toast({
+        title: "Attach image to product first",
+        description: "This Darkroom image needs a verified website SKU before it can publish to Best Bottles.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (publishDestination === "best-bottles-grid") {
       const slug = resolveEnteredBestBottlesGroupSlug(bestBottlesSlug);
       if (!slug) return;
@@ -2487,6 +2727,41 @@ export default function ImageLibrary() {
     }
   };
 
+  /**
+   * Move an image between the legacy and clean lineage buckets (axis 1). Keeps
+   * the reference-lineage:* tags mutually exclusive — adds the target tag and
+   * removes the opposite. Reclassify only; never archives or deletes content.
+   */
+  const handleReclassifyLineage = async (
+    image: GeneratedImage,
+    target: "clean" | "legacy",
+  ) => {
+    const addTag =
+      target === "clean" ? BEST_BOTTLES_LINEAGE_TAG_CLEAN : BEST_BOTTLES_LINEAGE_TAG_LEGACY;
+    const removeTag =
+      target === "clean" ? BEST_BOTTLES_LINEAGE_TAG_LEGACY : BEST_BOTTLES_LINEAGE_TAG_CLEAN;
+    // Remove the opposite tag FIRST and bail if it fails — otherwise a row could
+    // end up carrying both lineage tags, and the parser's clean-wins precedence
+    // would make a failed "move to legacy" silently look like it stayed clean.
+    const removed = await removeLibraryTag(image.id, removeTag);
+    if (!removed) {
+      toast({ title: "Could not reclassify image", variant: "destructive" });
+      return;
+    }
+    const next = await addLibraryTag(image.id, addTag);
+    if (next) {
+      toast({
+        title: target === "clean" ? "Moved to clean" : "Moved to legacy",
+        description: target === "clean"
+          ? "This image now shows in the Clean / new view."
+          : "This image now shows under Legacy imports.",
+      });
+      await refetch();
+    } else {
+      toast({ title: "Could not reclassify image", variant: "destructive" });
+    }
+  };
+
   const getCategoryBadgeColor = (category: string | null) => {
     switch (category?.toLowerCase()) {
       case "product":
@@ -2633,6 +2908,7 @@ export default function ImageLibrary() {
                 {isBestBottlesOrg && (
                   <>
                     <SelectItem value="generated-output" className="text-[var(--darkroom-text)]">Generated outputs</SelectItem>
+                    <SelectItem value="needs-product-match" className="text-[var(--darkroom-text)]">Needs product match</SelectItem>
                     <SelectItem value="reference-imports" className="text-[var(--darkroom-text)]">Reference / keeper imports</SelectItem>
                   </>
                 )}
@@ -2660,6 +2936,22 @@ export default function ImageLibrary() {
                       {capacityMl} mL
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {isBestBottlesOrg && (
+              <Select
+                value={referenceLineageFilter}
+                onValueChange={(v) => setReferenceLineageFilter(v as ReferenceLineageFilter)}
+              >
+                <SelectTrigger className="w-full md:w-[170px] bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] text-sm">
+                  <SelectValue placeholder="Lineage" />
+                </SelectTrigger>
+                <SelectContent className="bg-[var(--darkroom-surface)] border-[var(--darkroom-border)]">
+                  <SelectItem value="clean" className="text-[var(--darkroom-text)]">Clean / new only</SelectItem>
+                  <SelectItem value="legacy" className="text-[var(--darkroom-text)]">Legacy imports</SelectItem>
+                  <SelectItem value="all" className="text-[var(--darkroom-text)]">All lineages</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -2820,22 +3112,42 @@ export default function ImageLibrary() {
         ) : filteredImages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 md:py-20 text-center px-4">
             <Camera className="w-12 h-12 md:w-16 md:h-16 text-[var(--darkroom-text)]/20 mb-4" />
-            <h3 className="text-lg md:text-xl font-serif text-[var(--darkroom-text)] mb-2">No images yet</h3>
+            <h3 className="text-lg md:text-xl font-serif text-[var(--darkroom-text)] mb-2">
+              {isBestBottlesOrg && referenceLineageFilter === "clean"
+                ? "No clean work yet"
+                : "No images yet"}
+            </h3>
             <p className="text-sm md:text-base text-[var(--darkroom-text)]/60 mb-6 max-w-md">
-              {searchQuery || assetTypeFilter !== "all"
+              {isBestBottlesOrg && referenceLineageFilter === "clean"
+                ? "This view shows only new, drift-free pipeline work. It fills as you generate from clean references — switch to “Legacy imports” or “All lineages” to see existing images."
+                : searchQuery || assetTypeFilter !== "all"
                 ? assetTypeFilter === "empty-plates"
                   ? "No empty plates match these filters. Turn on Background plate mode in Dark Room to create empty scenes, or widen your search."
                   : "No images match your filters. Try adjusting your search or asset type."
                 : "Start creating stunning product images in the Dark Room."}
             </p>
-            <Button
-              onClick={() => navigate("/darkroom")}
-              className="bg-[var(--darkroom-accent)] hover:bg-[var(--darkroom-accent-hover)] text-[var(--darkroom-bg)]"
-              size="sm"
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              Go to Dark Room
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {isBestBottlesOrg && referenceLineageFilter === "clean" && (
+                <Button
+                  type="button"
+                  onClick={() => setReferenceLineageFilter("all")}
+                  variant="outline"
+                  size="sm"
+                  className="border-[var(--darkroom-border)] text-[var(--darkroom-text)]/80 hover:bg-[var(--darkroom-surface)]"
+                >
+                  <Layers className="w-4 h-4 mr-2" />
+                  Show all lineages
+                </Button>
+              )}
+              <Button
+                onClick={() => navigate("/darkroom")}
+                className="bg-[var(--darkroom-accent)] hover:bg-[var(--darkroom-accent-hover)] text-[var(--darkroom-bg)]"
+                size="sm"
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Go to Dark Room
+              </Button>
+            </div>
           </div>
         ) : (
           <div
@@ -2957,6 +3269,73 @@ export default function ImageLibrary() {
                             <Tags className="w-4 h-4 mr-2" />
                             Edit library tags
                           </DropdownMenuItem>
+                          {isBestBottlesOrg && (() => {
+                            const workflow = getBestBottlesDarkroomWorkflowForImage(image);
+                            if (workflow.status === "not-darkroom-workflow" || workflow.status === "rejected") {
+                              return null;
+                            }
+                            return (
+                              <>
+                                {workflow.pushBlocked && (
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleBestBottlesDarkroomAttachToProduct(image);
+                                    }}
+                                    className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                                  >
+                                    <Tags className="w-4 h-4 mr-2" />
+                                    Attach to product
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    void handleBestBottlesDarkroomWorkflowStatus(image, "concept");
+                                  }}
+                                  className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                                >
+                                  <Layers className="w-4 h-4 mr-2" />
+                                  Keep as concept
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    void handleBestBottlesDarkroomWorkflowStatus(image, "rejected");
+                                  }}
+                                  className="text-red-300 focus:bg-[var(--darkroom-border)]"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Reject
+                                </DropdownMenuItem>
+                              </>
+                            );
+                          })()}
+                          {isBestBottlesOrg && (
+                            getBestBottlesReferenceLineage(image.library_tags) === "clean" ? (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReclassifyLineage(image, "legacy");
+                                }}
+                                className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                              >
+                                <Layers className="w-4 h-4 mr-2" />
+                                Move to legacy
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReclassifyLineage(image, "clean");
+                                }}
+                                className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                              >
+                                <Layers className="w-4 h-4 mr-2" />
+                                Move to clean
+                              </DropdownMenuItem>
+                            )
+                          )}
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -2973,6 +3352,24 @@ export default function ImageLibrary() {
 
                     {/* Category Badge - use goal_type for display */}
                     <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 items-end">
+                    {isBestBottlesOrg && (() => {
+                      const workflow = getBestBottlesDarkroomWorkflowForImage(image);
+                      if (workflow.status === "not-darkroom-workflow") return null;
+                      return (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px]",
+                            bestBottlesDarkroomStatusClassName(workflow.status),
+                          )}
+                          title={workflow.pushBlocked
+                            ? "Blocked from PDP, Shopify, and Grace until matched to verified product truth."
+                            : "SKU-bound candidate; continue visual QA before publish."}
+                        >
+                          {bestBottlesDarkroomStatusLabel(workflow.status)}
+                        </Badge>
+                      );
+                    })()}
                     {(() => {
                       const provenance = isBestBottlesOrg ? resolveBestBottlesImageProvenance(image) : null;
                       if (provenance && provenance.kind !== "unknown") {
@@ -3296,6 +3693,17 @@ export default function ImageLibrary() {
                     <div className="min-w-0 self-center">
                       <div className="text-xs text-[var(--darkroom-text)]/50">Image {index + 1}</div>
                       <div className="truncate text-sm text-[var(--darkroom-text)]">{row.label}</div>
+                      {row.darkroomWorkflow.status !== "not-darkroom-workflow" && (
+                        <div
+                          className={cn(
+                            "mt-1 inline-flex rounded border px-1.5 py-0.5 text-[10px] font-medium",
+                            bestBottlesDarkroomStatusClassName(row.darkroomWorkflow.status),
+                          )}
+                        >
+                          {bestBottlesDarkroomStatusLabel(row.darkroomWorkflow.status)}
+                          {row.darkroomWorkflow.pushBlocked ? " · push blocked" : ""}
+                        </div>
+                      )}
                       {matchedProduct && (
                         <div className="mt-1 space-y-0.5 text-[10px] text-[var(--darkroom-text)]/55">
                           <div>

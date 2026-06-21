@@ -14,6 +14,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { markBestBottlesImageApprovedKeep } from "./imageLibraryTags";
 
 export type PipelineStatus =
   | "not-started"
@@ -129,6 +130,11 @@ export interface PipelineSkuJob {
   expected_canonical_filename: string | null;
   best_reference_candidate_path: string | null;
   coverage_status: string | null;
+  reference_source: "canonical-render" | "local-legacy" | "bestbottles-live" | "manual" | "none" | null;
+  reference_source_path: string | null;
+  reference_source_url: string | null;
+  reference_imported_at: string | null;
+  reference_issue: string | null;
   status: PipelineSkuJobStatus;
   generated_image_id: string | null;
   generated_image_url: string | null;
@@ -571,6 +577,10 @@ interface PipelineSkuJobSeedRow {
   expected_canonical_filename: string | null;
   best_reference_candidate_path: string | null;
   coverage_status: string | null;
+  reference_source: PipelineSkuJob["reference_source"];
+  reference_source_path: string | null;
+  reference_source_url: string | null;
+  reference_issue: string | null;
   status: PipelineSkuJobStatus;
 }
 
@@ -605,6 +615,14 @@ function initialSkuJobStatus(job: PipelineSkuCoverageInput): PipelineSkuJobStatu
     return "ready-to-generate";
   }
   return "needs-reference";
+}
+
+function inferSeedReferenceSource(referencePath: string | null): PipelineSkuJob["reference_source"] {
+  if (!referencePath) return "none";
+  if (/^https?:\/\/www\.bestbottles\.com\//i.test(referencePath)) return "bestbottles-live";
+  if (/^https?:\/\//i.test(referencePath)) return "manual";
+  if (referencePath.includes("pipeline/madison-hero-sync/renders")) return "canonical-render";
+  return "local-legacy";
 }
 
 export async function seedPipelineSkuJobsFromCoverage(params: {
@@ -642,6 +660,8 @@ export async function seedPipelineSkuJobsFromCoverage(params: {
         ? existing.status
         : seededStatus;
     const group = groupsBySlug.get(productGroupSlug);
+    const referencePath = toNullableText(product.bestReferenceCandidatePath);
+    const referenceSource = inferSeedReferenceSource(referencePath);
 
     payload.push({
       organization_id: organizationId,
@@ -660,8 +680,12 @@ export async function seedPipelineSkuJobsFromCoverage(params: {
       website_sku: websiteSku,
       shopify_sku: toNullableText(product.shopifySku),
       expected_canonical_filename: toNullableText(product.expectedCanonicalFilename),
-      best_reference_candidate_path: toNullableText(product.bestReferenceCandidatePath),
+      best_reference_candidate_path: referencePath,
       coverage_status: toNullableText(product.coverageStatus),
+      reference_source: referenceSource,
+      reference_source_path: referencePath && !/^https?:\/\//i.test(referencePath) ? referencePath : null,
+      reference_source_url: referencePath && /^https?:\/\//i.test(referencePath) ? referencePath : null,
+      reference_issue: null,
       status,
     });
   }
@@ -785,6 +809,11 @@ export async function updatePipelineSkuJob(
       | "shopify_sku"
       | "shopify_pushed_at"
       | "convex_synced_at"
+      | "reference_source"
+      | "reference_source_path"
+      | "reference_source_url"
+      | "reference_imported_at"
+      | "reference_issue"
       | "last_error"
     >
   >,
@@ -801,6 +830,9 @@ export async function updatePipelineSkuJobReference(params: {
   graceSku: string;
   referenceUrl: string;
   referenceName?: string | null;
+  referenceSource?: PipelineSkuJob["reference_source"];
+  referenceSourcePath?: string | null;
+  referenceSourceUrl?: string | null;
 }): Promise<void> {
   const graceSku = params.graceSku.trim();
   if (!graceSku) return;
@@ -822,6 +854,11 @@ export async function updatePipelineSkuJobReference(params: {
       best_reference_candidate_path: params.referenceUrl,
       expected_canonical_filename: params.referenceName ?? undefined,
       coverage_status: "covered_canonical",
+      reference_source: params.referenceSource ?? "manual",
+      reference_source_path: params.referenceSourcePath ?? null,
+      reference_source_url: params.referenceSourceUrl ?? null,
+      reference_imported_at: new Date().toISOString(),
+      reference_issue: null,
       status,
       last_error: null,
     })
@@ -954,6 +991,7 @@ type ShopifyProductImagePublishContent = {
   source?: string | null;
   sku?: string | null;
   matchedShopifySku?: string | null;
+  actualShopifySku?: string | null;
   mode?: string | null;
   imageId?: string | null;
   imageUrl?: string | null;
@@ -997,6 +1035,7 @@ function normalizeShopifyPublishContent(value: unknown): ShopifyProductImagePubl
     source: textValue(obj.source),
     sku: textValue(obj.sku),
     matchedShopifySku: textValue(obj.matchedShopifySku),
+    actualShopifySku: textValue(obj.actualShopifySku),
     mode: textValue(obj.mode),
     imageId: textValue(obj.imageId),
     imageUrl: textValue(obj.imageUrl),
@@ -1095,6 +1134,7 @@ export async function reconcilePipelineShopifyPushes(params: {
     const skuCandidates = [
       content.sku,
       content.matchedShopifySku,
+      content.actualShopifySku,
       content.bestBottlesConvex?.websiteSku,
     ]
       .map(skuLookupKey)
@@ -1146,7 +1186,7 @@ export async function reconcilePipelineShopifyPushes(params: {
       shopify_variant_id: shopifyVariantId,
       shopify_media_id: shopifyMediaId,
       shopify_image_url: shopifyImageUrl,
-      shopify_sku: content.matchedShopifySku ?? content.sku ?? job.shopify_sku,
+      shopify_sku: content.actualShopifySku ?? content.matchedShopifySku ?? content.sku ?? job.shopify_sku,
       shopify_pushed_at: job.shopify_pushed_at ?? publishedAt,
       convex_synced_at: nextStatus === "synced" ? (job.convex_synced_at ?? publishedAt) : job.convex_synced_at,
       last_error: null,
@@ -1246,6 +1286,9 @@ export async function markPipelineRowsApproved(params: {
     madison_notes: params.notes ?? null,
     madison_last_error: null,
   });
+  // Write the axis-2 verdict through to the image so the completeness metric and
+  // Image Library read the approval from the durable library_tags surface.
+  await markBestBottlesImageApprovedKeep(params.imageId);
 }
 
 /**

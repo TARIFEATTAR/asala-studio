@@ -14,6 +14,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { BEST_BOTTLES_STATUS_TAG_APPROVED_KEEP } from "./bestBottlesImageCoverage";
 
 // Supabase's generated types derive from the deployed schema, so until the
 // 20260422010000_library_tags_column migration is applied AND types are
@@ -125,6 +126,22 @@ export async function toggleLibraryTag(
 export const markImageAsHero = (id: string) => addLibraryTag(id, HERO_TAG);
 export const unmarkImageAsHero = (id: string) => removeLibraryTag(id, HERO_TAG);
 export const toggleImageHero = (id: string) => toggleLibraryTag(id, HERO_TAG);
+
+/**
+ * Stamp the axis-2 quality verdict `status:approved-keep` on an approved Best
+ * Bottles image so the pipeline completeness metric and any quality filter read
+ * the approval from the durable tag (not a stale export). Best-effort and
+ * idempotent — a no-op if the id is blank or the tag is already present, and it
+ * never throws, so it can be awaited inside an approval flow without risking the
+ * primary status write.
+ */
+export async function markBestBottlesImageApprovedKeep(
+  imageId: string | null | undefined,
+): Promise<string[] | null> {
+  const id = imageId?.trim();
+  if (!id) return null;
+  return addLibraryTag(id, BEST_BOTTLES_STATUS_TAG_APPROVED_KEEP);
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Batch helpers

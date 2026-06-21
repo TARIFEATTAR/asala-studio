@@ -6,7 +6,7 @@ import { formatVisualContext } from "../_shared/productFieldFilters.ts";
 import { callGeminiImage } from "../_shared/aiProviders.ts";
 import { enhancePromptWithOntology } from "../_shared/photographyOntology.ts";
 import { generateImage as generateFreepikImage, type FreepikImageModel, type FreepikResolution, IMAGE_MODELS } from "../_shared/freepikProvider.ts";
-import { generateImage as generateOpenAIImage, type OpenAIImageModel } from "../_shared/openaiProvider.ts";
+import { generateImage as generateOpenAIImage, type OpenAIImageModel, type OpenAIImageSize } from "../_shared/openaiProvider.ts";
 import { getVisualStyleDirective, type VisualSquad } from "../_shared/visualMasters.ts";
 import { buildBestBottlesFamilyRigPromptAdjustment } from "../_shared/bestBottlesFamilyRigPrompt.ts";
 
@@ -17,6 +17,19 @@ const corsHeaders = {
 };
 
 const BEST_BOTTLES_BONE_CANVAS_RGBA = 0xF5F3EFFF;
+const MAX_REQUESTED_CANVAS_PIXELS = 12_000_000;
+const OPENAI_EXACT_SIZE_ALLOWLIST = new Set([
+  "1024x1024",
+  "1024x1536",
+  "1536x1024",
+  "1152x2048",
+  "2048x1152",
+  "2048x2048",
+  "2080x2288",
+  "2160x3840",
+  "2880x2880",
+  "3840x2160",
+]);
 
 function getExactCanvasForAspectRatio(aspectRatio?: string): { width: number; height: number } | null {
   const normalized = aspectRatio?.trim().toLowerCase().replace(/\s+/g, "");
@@ -24,6 +37,46 @@ function getExactCanvasForAspectRatio(aspectRatio?: string): { width: number; he
     return { width: 2080, height: 2288 };
   }
   return null;
+}
+
+function greatestCommonDivisor(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) {
+    const next = x % y;
+    x = y;
+    y = next;
+  }
+  return x || 1;
+}
+
+function parseRequestedOutputCanvas(
+  imageConstraints: unknown,
+): { width: number; height: number } | null {
+  if (!imageConstraints || typeof imageConstraints !== "object") return null;
+  const constraints = imageConstraints as Record<string, unknown>;
+  const canvas = constraints.outputCanvas;
+  if (!canvas || typeof canvas !== "object") return null;
+  const { width, height } = canvas as Record<string, unknown>;
+  const w = Number(width);
+  const h = Number(height);
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
+  const rounded = { width: Math.round(w), height: Math.round(h) };
+  if (rounded.width * rounded.height > MAX_REQUESTED_CANVAS_PIXELS) return null;
+  return rounded;
+}
+
+function aspectRatioForCanvas(canvas: { width: number; height: number }): string {
+  const divisor = greatestCommonDivisor(canvas.width, canvas.height);
+  return `${canvas.width / divisor}:${canvas.height / divisor}`;
+}
+
+function openAIExactSizeForCanvas(
+  canvas: { width: number; height: number } | null,
+): OpenAIImageSize | undefined {
+  if (!canvas) return undefined;
+  const size = `${canvas.width}x${canvas.height}`;
+  return OPENAI_EXACT_SIZE_ALLOWLIST.has(size) ? size as OpenAIImageSize : undefined;
 }
 
 async function conformGeneratedImage(
@@ -1319,6 +1372,10 @@ serve(async (req) => {
       extraLibraryTags,
       productContext,
     } = body;
+    const requestedOutputCanvas = parseRequestedOutputCanvas(imageConstraints);
+    const generationAspectRatio = requestedOutputCanvas
+      ? aspectRatioForCanvas(requestedOutputCanvas)
+      : aspectRatio;
 
     // Resolve the two separate roles from whatever fields the client sent.
     const effectiveVariationPrompt: string | undefined =
@@ -1400,6 +1457,12 @@ serve(async (req) => {
       //     so we can join an image back to the exact SKUs it serves.
       const structuredTags: string[] = [
         "brand:best-bottles",
+        // Axis-1 lineage (two-axis model): every pipeline-launched generation is
+        // born from the new clean references, so it is stamped clean here. This
+        // is what fills the Image Library "Clean / new" filter over time. Mirror
+        // of BEST_BOTTLES_LINEAGE_TAG_CLEAN in src/lib/bestBottlesImageCoverage.ts
+        // (literal here because Deno edge functions can't import src/lib).
+        "reference-lineage:clean",
         `family:${familySlug}`,
       ];
       if (capSlug) structuredTags.push(`capacity:${capSlug}`);
@@ -1541,7 +1604,10 @@ serve(async (req) => {
 
     console.log("🎨 Incoming Request", {
       goalType,
-      aspectRatio,
+      aspectRatio: generationAspectRatio,
+      requestedCanvas: requestedOutputCanvas
+        ? `${requestedOutputCanvas.width}×${requestedOutputCanvas.height}`
+        : undefined,
       isRefinement,
       references: referenceImages?.length || 0,
       proMode: !!proModeControls,
@@ -1803,7 +1869,7 @@ serve(async (req) => {
       // art-directed prompt back into this path.
       enhancedPrompt = buildReferenceLockedBestBottlesPrompt(
         categorizedRefs,
-        aspectRatio,
+        generationAspectRatio,
         productContext && typeof productContext === "object"
           ? productContext as Record<string, unknown>
           : null,
@@ -1818,7 +1884,7 @@ serve(async (req) => {
       // polish/stage the reference instead of re-art-directing it.
       enhancedPrompt = buildReferenceLockedBestBottlesPrompt(
         categorizedRefs,
-        aspectRatio,
+        generationAspectRatio,
         productContext && typeof productContext === "object"
           ? productContext as Record<string, unknown>
           : null,
@@ -1831,7 +1897,7 @@ serve(async (req) => {
         proModeControls,
         brandKnowledge,
         productData,
-        aspectRatio,
+        generationAspectRatio,
         visualMasterContext,
         {
           backgroundPresetId,
@@ -2241,7 +2307,7 @@ serve(async (req) => {
           prompt: enhancedPrompt,
           model: (effectiveFreepikModel as FreepikImageModel) || "mystic",
           resolution: finalResolution as FreepikResolution,
-          aspectRatio: aspectRatio as any,
+          aspectRatio: generationAspectRatio as any,
           seed: randomSeed,
           referenceImages: freepikReferenceImages,
         });
@@ -2253,6 +2319,27 @@ serve(async (req) => {
           throw new Error(`Failed to fetch Freepik image for re-upload: ${freepikFetch.status}`);
         }
         const freepikBuffer = await freepikFetch.arrayBuffer();
+        let freepikUploadBytes = new Uint8Array(freepikBuffer);
+        const freepikExactCanvas = requestedOutputCanvas ?? getExactCanvasForAspectRatio(generationAspectRatio);
+
+        if (freepikExactCanvas) {
+          const conformed = await conformGeneratedImage(
+            encode(freepikBuffer),
+            generationAspectRatio,
+            freepikExactCanvas,
+            isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
+          );
+          freepikUploadBytes = new Uint8Array(decode(conformed.base64));
+
+          console.log("🖼️ Freepik canvas conformance:", {
+            requested: generationAspectRatio,
+            exactCanvas: `${freepikExactCanvas.width}×${freepikExactCanvas.height}`,
+            originalDimensions: `${conformed.originalWidth}×${conformed.originalHeight}`,
+            finalDimensions: `${conformed.width}×${conformed.height}`,
+            modified: conformed.wasModified,
+          });
+        }
+
         // Pipeline-aware storage path when launched from the Grid Pipeline;
         // UUID path (unchanged) for everything else.
         const freepikShortId = crypto.randomUUID().slice(0, 8);
@@ -2266,7 +2353,7 @@ serve(async (req) => {
 
         const { error: freepikUploadErr } = await supabase.storage
           .from("generated-images")
-          .upload(freepikFilename, freepikBuffer, { contentType: "image/png" });
+          .upload(freepikFilename, freepikUploadBytes, { contentType: "image/png" });
 
         if (freepikUploadErr) {
           console.error("Storage upload error for Freepik image", freepikUploadErr);
@@ -2310,41 +2397,53 @@ serve(async (req) => {
       console.log("🎨 Using OpenAI for image generation...", {
         model: effectiveOpenAIModel,
         resolution,
-        aspectRatio,
+        aspectRatio: generationAspectRatio,
+        requestedCanvas: requestedOutputCanvas
+          ? `${requestedOutputCanvas.width}×${requestedOutputCanvas.height}`
+          : undefined,
         references: referenceImagesPayload.length,
       });
 
       try {
+        const exactCanvas = requestedOutputCanvas ?? getExactCanvasForAspectRatio(generationAspectRatio);
+        const requestedOpenAIExactSize = openAIExactSizeForCanvas(exactCanvas);
         const openaiResult = await generateOpenAIImage({
           prompt: enhancedPrompt,
           model: effectiveOpenAIModel,
-          aspectRatio,
+          aspectRatio: generationAspectRatio,
           resolution,
-          size: isBestBottlesReferenceLocked ? "2080x2288" : undefined,
+          size: requestedOpenAIExactSize ??
+            (isBestBottlesReferenceLocked ? "2080x2288" : undefined),
           referenceImages: referenceImagesPayload.length > 0
             ? referenceImagesPayload
             : undefined,
           user: userId ?? undefined,
         });
 
-        const exactCanvas = getExactCanvasForAspectRatio(aspectRatio);
         let openaiImageBase64 = openaiResult.imageBase64;
         let openaiMimeType = openaiResult.mimeType;
+        const shouldTrustOpenAIExactCanvas =
+          Boolean(exactCanvas && requestedOpenAIExactSize && effectiveOpenAIModel === "gpt-image-2");
 
-        if (exactCanvas && isBestBottlesReferenceLocked) {
+        if (exactCanvas && (isBestBottlesReferenceLocked || shouldTrustOpenAIExactCanvas)) {
           // A 2080×2288 decode + contain + PNG re-encode can exhaust Supabase
           // Edge Function CPU/memory and return 546 before our catch block runs.
-          // Keep the function as a coordinator on this path; the prompt/provider
-          // carries the PDP canvas instruction.
-          console.log("🖼️ OpenAI canvas conformance skipped for Best Bottles reference-locked run", {
-            requested: aspectRatio,
+          // Keep the function as a coordinator on this path. For GPT Image 2,
+          // we already requested the exact supported size, so another decode
+          // and re-encode here is redundant and can kill interactive Darkroom
+          // generations before our catch block can return a useful JSON error.
+          console.log("🖼️ OpenAI canvas conformance skipped for exact-size run", {
+            requested: generationAspectRatio,
             targetCanvas: `${exactCanvas.width}×${exactCanvas.height}`,
-            reason: "avoid edge WORKER_LIMIT during ImageScript resize/re-encode",
+            exactSizeRequested: requestedOpenAIExactSize ?? "(none)",
+            reason: shouldTrustOpenAIExactCanvas
+              ? "exact GPT Image 2 output size requested; avoid edge WORKER_LIMIT during ImageScript resize/re-encode"
+              : "avoid edge WORKER_LIMIT during ImageScript resize/re-encode",
           });
         } else {
           const openaiImage = await conformGeneratedImage(
             openaiResult.imageBase64,
-            aspectRatio,
+            generationAspectRatio,
             exactCanvas,
             isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
           );
@@ -2352,7 +2451,7 @@ serve(async (req) => {
           openaiMimeType = openaiImage.wasModified ? "image/png" : openaiResult.mimeType;
 
           console.log("🖼️ OpenAI canvas conformance:", {
-            requested: aspectRatio,
+            requested: generationAspectRatio,
             exactCanvas: exactCanvas ? `${exactCanvas.width}×${exactCanvas.height}` : "(aspect only)",
             originalDimensions: `${openaiImage.originalWidth}×${openaiImage.originalHeight}`,
             finalDimensions: `${openaiImage.width}×${openaiImage.height}`,
@@ -2467,7 +2566,7 @@ serve(async (req) => {
         try {
           geminiImage = await callGeminiImage({
             prompt: enhancedPrompt,
-            aspectRatio,
+            aspectRatio: generationAspectRatio,
             imageSize: geminiImageSize,
             seed: randomSeed,
             model: candidateModel,
@@ -2503,26 +2602,26 @@ serve(async (req) => {
       // Image providers can bias toward square output even when we pass the
       // requested aspect ratio via native config. For Best Bottles catalog
       // product masters, conform all saved images to the canonical PDP canvas.
-      const exactCanvas = getExactCanvasForAspectRatio(aspectRatio);
+      const exactCanvas = requestedOutputCanvas ?? getExactCanvasForAspectRatio(generationAspectRatio);
       let base64Image = rawBase64Image;
 
       if (exactCanvas && isBestBottlesReferenceLocked) {
         console.log("🖼️ Gemini canvas conformance skipped for Best Bottles reference-locked run", {
-          requested: aspectRatio,
+          requested: generationAspectRatio,
           targetCanvas: `${exactCanvas.width}×${exactCanvas.height}`,
           reason: "avoid edge WORKER_LIMIT during ImageScript resize/re-encode",
         });
       } else {
         const conformed = await conformGeneratedImage(
           rawBase64Image,
-          aspectRatio,
+          generationAspectRatio,
           exactCanvas,
           isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
         );
         base64Image = conformed.base64;
 
         console.log("🖼️ Gemini aspect-ratio conformance:", {
-          requested: aspectRatio,
+          requested: generationAspectRatio,
           exactCanvas: exactCanvas ? `${exactCanvas.width}×${exactCanvas.height}` : "(aspect only)",
           originalDimensions: `${conformed.originalWidth}×${conformed.originalHeight}`,
           finalDimensions: `${conformed.width}×${conformed.height}`,
@@ -2591,7 +2690,7 @@ serve(async (req) => {
       session_id: sessionId,
       goal_type: goalType,
       library_category: libraryCategory, // For Image Library filtering
-      aspect_ratio: aspectRatio,
+      aspect_ratio: generationAspectRatio,
       output_format: outputFormat,
       final_prompt: enhancedPrompt,
       image_url: imageUrl,

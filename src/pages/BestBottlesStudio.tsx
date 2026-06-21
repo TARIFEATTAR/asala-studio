@@ -46,6 +46,7 @@ import {
   listPipelineSkuJobs,
   updatePipelineGroupStatus,
 } from "@/lib/bestBottlesPipeline";
+import { markBestBottlesImageApprovedKeep } from "@/lib/imageLibraryTags";
 import {
   applyBestBottlesMeasurementOverrides,
   type BestBottlesMeasurementOverridesPayload,
@@ -440,6 +441,9 @@ export default function BestBottlesStudio() {
                           madison_approved_at: new Date().toISOString(),
                           madison_approved_by: user?.id ?? null,
                         });
+                        // Write the approved-keep verdict through to the image so
+                        // the completeness metric + clean library read the approval.
+                        await markBestBottlesImageApprovedKeep(result.savedImageId);
                         await queryClient.invalidateQueries({
                           queryKey: ["best-bottles-pipeline-groups"],
                         });
