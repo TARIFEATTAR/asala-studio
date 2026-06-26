@@ -63,4 +63,78 @@ describe("buildBestBottlesGenerationIdentity", () => {
     assert.equal(identity.identityStatus, "ready");
     assert.equal(identity.reducerFinish, "Black Leather");
   });
+
+  it("blocks generic roll-on SKUs when cap color cannot be resolved", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-T-11",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Clear",
+      applicator: "Plastic Roller Ball",
+      capColor: "Clear",
+      itemName: "9 ml Clear Cylinder Roll On",
+    });
+
+    assert.equal(identity.identityStatus, "blocked");
+    assert.match(getBestBottlesGenerationIdentityIssue(identity) ?? "", /cap\/closure color/i);
+  });
+
+  it("resolves generic roll-on cap color from website SKU evidence", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-T-11",
+      websiteSku: "GBCylSwrl9RollWht",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Clear",
+      applicator: "Plastic Roller Ball",
+      itemName: "9 ml Clear Cylinder Roll On White Cap",
+    });
+
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.capColor, "White");
+  });
+
+  it("uses product description cap evidence over leaked Clear capColor on generic rows", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-T-11",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Clear",
+      applicator: "Plastic Roller Ball",
+      capColor: "Clear",
+      itemDescription: "Cylinder design 9ml clear glass bottle with plastic roller ball plug and black shiny cap with dots.",
+    });
+
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.capColor, "Shiny Black");
+  });
+
+  it("does not treat matte silver spray website SKU evidence as a tassel", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-SPR-MSLV-01",
+      websiteSku: "GBCylSwrl9SpryMattSl",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Swirl",
+      applicator: "Fine Mist Sprayer",
+    });
+
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.capColor, "Matte Silver");
+    assert.equal(identity.tasselColor, null);
+  });
+
+  it("resolves generic turquoise spray identity from website SKU evidence", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-T-27",
+      websiteSku: "GBCylSwrl9SpryTur",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Swirl",
+      applicator: "Fine Mist Sprayer",
+    });
+
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.capColor, "Turquoise");
+  });
 });

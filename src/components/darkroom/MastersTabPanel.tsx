@@ -42,6 +42,7 @@ import { LEDIndicator } from "@/components/darkroom/LEDIndicator";
 import {
   DEFAULT_IMAGE_PRESET_ID,
   IMAGE_PRESET_LIST,
+  getBestBottlesCatalogPresetIdForFamily,
 } from "@/config/imagePresets";
 import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import {
@@ -49,10 +50,16 @@ import {
   getRandomBackgroundVariation,
 } from "@/components/darkroom/RightPanel";
 import { isSquareCrossSection, parseDimensionMm } from "@/lib/product-image/skuInjector";
+import { BEST_BOTTLES_PROMPT_SYSTEM } from "@/lib/bestBottlesPromptCompilerConfig";
+import {
+  buildBestBottlesPromptPreflight,
+  type BestBottlesPromptPreflight,
+} from "@/lib/bestBottlesPromptPreflight";
 
 const SCENE_FLEXIBLE_PRESET_ID = "master-scene-flexible-2000x2200";
 const ANGLE_PRESET_ID = "master-angle-2080x2288";
 const MARKETING_PRESET_ID = "master-marketing-2080x2288";
+const CYLINDER_MASK_CONTROL_ENABLED = false;
 
 const MASTER_IMAGE_MODEL_OPTIONS = [
   {
@@ -251,6 +258,19 @@ import {
   isBestBottlesReferenceUrlUsable,
 } from "@/lib/bestBottlesReferenceValidation";
 import {
+  getBestBottlesCylinderProductTruthReferenceIssue,
+  getRetiredTransparentBestBottlesReferenceIssue,
+  isRetiredTransparentBestBottlesReferenceCandidate,
+} from "@/lib/bestBottlesReferenceFilters";
+import {
+  classifyBestBottlesReferenceSlot,
+  getBestBottlesMaskControlReadiness,
+  getBestBottlesProductTruthReferenceIssue,
+  isBestBottlesReferenceOverrideActive,
+  runBestBottlesReferenceMaskQc,
+  type BestBottlesAlphaMaskQcResult,
+} from "@/lib/bestBottlesReferenceMaskQc";
+import {
   buildBestBottlesGenerationIdentity,
   getBestBottlesGenerationIdentityIssue,
 } from "@/lib/bestBottlesGenerationIdentity";
@@ -263,10 +283,11 @@ interface FolderReferenceEntry {
   matchKey: string;
 }
 
-type UploadedReferenceImage = { url: string; file?: File; name?: string };
+type UploadedReferenceImage = { url: string; file?: File; name?: string; libraryTags?: string[] };
 
 type ParsedReferenceFilename = { graceSku: string; modifier?: string };
 type ParsedReferenceFilenameToken = { raw: string; key: string; modifier?: string };
+type ReferenceImportMode = "product-truth" | "mask-control";
 
 type BatchScope = "current-group" | "current-applicator" | "selected-skus" | "full-family";
 
@@ -279,9 +300,12 @@ interface BatchScopeOption {
 interface BatchPreflightEntry {
   product: Product;
   reference: UploadedReferenceImage | FolderReferenceEntry | null;
+  maskReference: UploadedReferenceImage | FolderReferenceEntry | null;
   referenceIssue: string | null;
+  maskIssue: string | null;
   measurementIssue: string | null;
   identityIssue: string | null;
+  promptPreflight: BestBottlesPromptPreflight;
   referenceSource: "uploaded" | "synced" | "path-only" | "missing";
 }
 
@@ -462,21 +486,30 @@ function inferBestBottlesBodyMaterial(product: Product): string {
 }
 
 /**
- * Presets that swap the canonical bottle composition (e.g. exploded cap-beside
- * layout) need a separate reference PNG. A file named
- * `GB-EMP-CLR-100ML-BST-BLK--exploded.png` is the exploded variant of the
- * standard `GB-EMP-CLR-100ML-BST-BLK.png`. The map below tells the lookup
- * which suffix to prefer for a given preset id.
+ * Presets that swap the canonical bottle composition to cap-off need a
+ * separate reference PNG. A file named
+ * `GB-EMP-CLR-100ML-BST-BLK--cap-off.png` is the cap-off variant of the
+ * standard `GB-EMP-CLR-100ML-BST-BLK.png`. Legacy terms such as "exploded"
+ * are accepted at import time but normalized to the canonical cap-off state.
  */
 const PRESET_MODIFIER: Record<string, string> = {
-  "grid-card-exploded-2000x2200": "exploded",
+  "grid-card-exploded-2000x2200": "cap-off",
 };
+
+function canonicalReferenceModifier(modifier: string | undefined): string | undefined {
+  const value = modifier?.trim().toLowerCase();
+  if (!value) return undefined;
+  if (["exploded", "detached", "uncapped", "cap-side", "capside"].includes(value)) {
+    return "cap-off";
+  }
+  return value;
+}
 
 /**
  * Parse a reference filename into its Grace SKU + optional modifier suffix.
  *
  *   `48. GB-EMP-CLR-100ML-BST-BLK.png`           → ["GB-EMP-CLR-100ML-BST-BLK", undefined]
- *   `GB-EMP-CLR-100ML-BST-BLK--exploded.png`     → ["GB-EMP-CLR-100ML-BST-BLK", "exploded"]
+ *   `GB-EMP-CLR-100ML-BST-BLK--cap-off.png`      → ["GB-EMP-CLR-100ML-BST-BLK", "cap-off"]
  *
  * The leading "48. " ordering prefix that ships with PSD exports is stripped
  * defensively. Modifier separator is `--` (double dash) so it never collides
@@ -491,7 +524,7 @@ function parseGraceSkuFilename(filename: string): ParsedReferenceFilename | null
   const [skuPart, ...rest] = stem.split("--");
   const graceSku = skuPart.trim().toUpperCase();
   if (!graceSku) return null;
-  const modifier = rest.length > 0 ? rest.join("--").trim().toLowerCase() : undefined;
+  const modifier = canonicalReferenceModifier(rest.length > 0 ? rest.join("--") : undefined);
   return { graceSku, modifier };
 }
 
@@ -509,7 +542,7 @@ function parseReferenceFilenameTokens(filename: string): ParsedReferenceFilename
     .map((raw) => {
       const [skuPart, ...modifierParts] = raw.split("--");
       const key = skuPart.trim().toUpperCase();
-      const modifier = modifierParts.length > 0 ? modifierParts.join("--").trim().toLowerCase() : undefined;
+      const modifier = canonicalReferenceModifier(modifierParts.length > 0 ? modifierParts.join("--") : undefined);
       return { raw, key, modifier };
     })
     .filter((token) => Boolean(token.key));
@@ -958,6 +991,11 @@ function getMeasurementIssue(product: Product): string | null {
   return null;
 }
 
+function isCylinderFamilyName(family?: string | null): boolean {
+  const normalized = (family ?? "").trim().toLowerCase();
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
 interface MastersTabPanelProps {
   /** Selected variant from the Studio's left rail. */
   selectedProduct: Product | null;
@@ -980,6 +1018,10 @@ interface MastersTabPanelProps {
   familyName?: string | null;
   /** Recovered/persisted product references keyed by Grace SKU. */
   persistedReferenceImagesBySku?: Record<string, UploadedReferenceImage>;
+  /** Optional callback after a master generation succeeds. Parent can persist SKU-job lineage. */
+  onMasterGenerated?: (result: AssembledGenerationResult, product: Product) => void | Promise<void>;
+  /** Optional callback after a batch generation attempt fails for a SKU. */
+  onMasterGenerationFailed?: (errorMessage: string, product: Product) => void | Promise<void>;
   /** Optional callback when a master is approved. Parent can persist. */
   onApproveMaster?: (result: AssembledGenerationResult, product: Product) => void;
 }
@@ -990,6 +1032,8 @@ export function MastersTabPanel({
   allFamilyProducts,
   familyName,
   persistedReferenceImagesBySku,
+  onMasterGenerated,
+  onMasterGenerationFailed,
   onApproveMaster,
 }: MastersTabPanelProps) {
   const [presetId, setPresetId] = useState<string>(DEFAULT_IMAGE_PRESET_ID);
@@ -1017,6 +1061,19 @@ export function MastersTabPanel({
   // Aspect / resolution overlay surfaces for any of the three flexible
   // presets. Catalog presets stay locked at the preset's canonical ratio.
   const hasFlexibleOverlay = isSceneFlexible || isAngles || isMarketing;
+  const routedCatalogPresetId = useMemo(
+    () =>
+      getBestBottlesCatalogPresetIdForFamily(
+        selectedProduct?.family ?? selectedProduct?.bottleCollection ?? familyName,
+      ),
+    [familyName, selectedProduct?.bottleCollection, selectedProduct?.family],
+  );
+
+  useEffect(() => {
+    setPresetId(routedCatalogPresetId);
+    setShowAssembledPrompt(false);
+    setAssembledCache(null);
+  }, [routedCatalogPresetId]);
 
   // Camera-angle chip — only consulted when isAngles. Default front so the
   // first generation matches the front-facing reference faithfully.
@@ -1042,6 +1099,11 @@ export function MastersTabPanel({
   const [customReference, setCustomReference] = useState<UploadedReferenceImage | null>(null);
   const [glassSpecularityReference, setGlassSpecularityReference] =
     useState<UploadedReferenceImage | null>(null);
+  const [maskQcResult, setMaskQcResult] = useState<BestBottlesAlphaMaskQcResult | null>(null);
+  const [isCheckingMaskQc, setIsCheckingMaskQc] = useState(false);
+  const [productTruthAlphaQcResult, setProductTruthAlphaQcResult] =
+    useState<BestBottlesAlphaMaskQcResult | null>(null);
+  const [isCheckingProductTruthQc, setIsCheckingProductTruthQc] = useState(false);
   const [isUploadingRef, setIsUploadingRef] = useState(false);
   const [isUploadingGlassRef, setIsUploadingGlassRef] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
@@ -1057,20 +1119,59 @@ export function MastersTabPanel({
   const [referenceFolder, setReferenceFolder] = useState<
     Map<string, FolderReferenceEntry>
   >(new Map());
+  const [maskReferenceFolder, setMaskReferenceFolder] = useState<
+    Map<string, FolderReferenceEntry>
+  >(new Map());
+  const [maskReferenceQcByKey, setMaskReferenceQcByKey] = useState<
+    Map<string, BestBottlesAlphaMaskQcResult>
+  >(new Map());
   const [uploadFailures, setUploadFailures] = useState<
     Array<{ name: string; error: string }>
   >([]);
   const [isFolderUploading, setIsFolderUploading] = useState(false);
-  const [folderUserOverride, setFolderUserOverride] = useState<boolean>(false);
+  const [folderUserOverrideKey, setFolderUserOverrideKey] = useState<string | null>(null);
+  const [maskFolderUserOverrideKey, setMaskFolderUserOverrideKey] = useState<string | null>(null);
+  const selectedProductKey = selectedProduct ? productBatchKey(selectedProduct) : null;
+  const folderUserOverride = isBestBottlesReferenceOverrideActive({
+    selectedKey: selectedProductKey,
+    overrideKey: folderUserOverrideKey,
+  });
+  const maskFolderUserOverride = isBestBottlesReferenceOverrideActive({
+    selectedKey: selectedProductKey,
+    overrideKey: maskFolderUserOverrideKey,
+  });
+  const isCylinderReferenceWorkflow = isCylinderFamilyName(
+    selectedProduct?.family ?? familyName,
+  );
+  const getCylinderRetiredReferenceIssue = (
+    candidateValues: readonly unknown[],
+    sku: Product | null = selectedProduct,
+  ): string | null => {
+    if (!isCylinderFamilyName(sku?.family ?? familyName)) return null;
+    return getBestBottlesCylinderProductTruthReferenceIssue(candidateValues);
+  };
+  const isRetiredCylinderProductTruthCandidate = (
+    candidateValues: readonly unknown[],
+    sku: Product | null = selectedProduct,
+  ): boolean => getCylinderRetiredReferenceIssue(candidateValues, sku) !== null;
+  const setFolderUserOverride = (active: boolean) => {
+    setFolderUserOverrideKey(active && selectedProductKey ? selectedProductKey : null);
+  };
+  const setMaskFolderUserOverride = (active: boolean) => {
+    setMaskFolderUserOverrideKey(active && selectedProductKey ? selectedProductKey : null);
+  };
   const [usePersistedReferences, setUsePersistedReferences] = useState<boolean>(true);
   const [referenceImportPreflight, setReferenceImportPreflight] =
     useState<ReferenceImportPreflight | null>(null);
+  const [referenceImportMode, setReferenceImportMode] =
+    useState<ReferenceImportMode>("product-truth");
   const [isReferenceImportOpen, setIsReferenceImportOpen] = useState(false);
   const [referenceImportProgress, setReferenceImportProgress] = useState<{
     completed: number;
     total: number;
   } | null>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const maskFolderInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useAuth();
   const { currentOrganizationId } = useOnboarding();
@@ -1079,7 +1180,7 @@ export function MastersTabPanel({
 
   /**
    * Look up a folder entry for the given SKU + preset. If the preset has a
-   * registered modifier (e.g. "exploded"), prefer the variant key first and
+   * registered modifier (e.g. "cap-off"), prefer the variant key first and
    * fall back to the plain Grace SKU. Centralized so the effect, the memo,
    * and clearCustomReference all agree on the lookup rule.
    *
@@ -1092,6 +1193,8 @@ export function MastersTabPanel({
     sku: Product,
     preset: string,
   ): FolderReferenceEntry | null => {
+    const allowedEntry = (entry: FolderReferenceEntry | undefined): FolderReferenceEntry | null =>
+      entry && !isRetiredCylinderProductTruthCandidate([entry], sku) ? entry : null;
     const baseKey = folderKey(sku.graceSku);
     const aliasKey = baseSkuKey(sku.graceSku);
     let modifier = PRESET_MODIFIER[preset];
@@ -1099,21 +1202,57 @@ export function MastersTabPanel({
       modifier = selectedAngleVariant.referenceModifier;
     }
     if (modifier) {
-      const variant = referenceFolder.get(folderKey(sku.graceSku, modifier));
+      const variant = allowedEntry(referenceFolder.get(folderKey(sku.graceSku, modifier)));
       if (variant) return variant;
       if (aliasKey !== baseKey) {
-        const aliasVariant = referenceFolder.get(folderKey(aliasKey, modifier));
+        const aliasVariant = allowedEntry(referenceFolder.get(folderKey(aliasKey, modifier)));
         if (aliasVariant) return aliasVariant;
       }
     }
-    const direct = referenceFolder.get(baseKey);
+    const direct = allowedEntry(referenceFolder.get(baseKey));
     if (direct) return direct;
     if (aliasKey !== baseKey) {
-      const alias = referenceFolder.get(aliasKey);
+      const alias = allowedEntry(referenceFolder.get(aliasKey));
       if (alias) return alias;
     }
 
     for (const [key, entry] of referenceFolder.entries()) {
+      const [entryBase, entryModifier] = key.split("--");
+      if (modifier && entryModifier !== modifier.toLowerCase()) continue;
+      if (baseSkuKey(entryBase) === aliasKey) {
+        const fallback = allowedEntry(entry);
+        if (fallback) return fallback;
+      }
+    }
+    return null;
+  };
+
+  const lookupMaskFolderReference = (
+    sku: Product,
+    preset: string,
+  ): FolderReferenceEntry | null => {
+    const baseKey = folderKey(sku.graceSku);
+    const aliasKey = baseSkuKey(sku.graceSku);
+    let modifier = PRESET_MODIFIER[preset];
+    if (preset === ANGLE_PRESET_ID && selectedAngleVariant.referenceModifier) {
+      modifier = selectedAngleVariant.referenceModifier;
+    }
+    if (modifier) {
+      const variant = maskReferenceFolder.get(folderKey(sku.graceSku, modifier));
+      if (variant) return variant;
+      if (aliasKey !== baseKey) {
+        const aliasVariant = maskReferenceFolder.get(folderKey(aliasKey, modifier));
+        if (aliasVariant) return aliasVariant;
+      }
+    }
+    const direct = maskReferenceFolder.get(baseKey);
+    if (direct) return direct;
+    if (aliasKey !== baseKey) {
+      const alias = maskReferenceFolder.get(aliasKey);
+      if (alias) return alias;
+    }
+
+    for (const [key, entry] of maskReferenceFolder.entries()) {
       const [entryBase, entryModifier] = key.split("--");
       if (modifier && entryModifier !== modifier.toLowerCase()) continue;
       if (baseSkuKey(entryBase) === aliasKey) return entry;
@@ -1121,7 +1260,7 @@ export function MastersTabPanel({
     return null;
   };
 
-  const lookupPersistedReferenceCandidateFromMap = (sku: Product): UploadedReferenceImage | null => {
+  const lookupRawPersistedReferenceCandidateFromMap = (sku: Product): UploadedReferenceImage | null => {
     if (!persistedReferenceImagesBySku) return null;
     const exact =
       persistedReferenceImagesBySku[sku.graceSku] ??
@@ -1136,6 +1275,13 @@ export function MastersTabPanel({
       if (baseSkuKey(key) === aliasKey) return entry;
     }
     return null;
+  };
+
+  const lookupPersistedReferenceCandidateFromMap = (sku: Product): UploadedReferenceImage | null => {
+    const candidate = lookupRawPersistedReferenceCandidateFromMap(sku);
+    if (!candidate) return null;
+    if (getCylinderRetiredReferenceIssue([candidate], sku)) return null;
+    return candidate;
   };
 
   const lookupPersistedReferenceFromMap = (sku: Product): UploadedReferenceImage | null => {
@@ -1158,6 +1304,50 @@ export function MastersTabPanel({
     return folderReference ?? lookupPersistedReference(sku);
   };
 
+  const lookupMaskControlForSku = (
+    sku: Product,
+    preset: string,
+  ): {
+    reference: UploadedReferenceImage | FolderReferenceEntry | null;
+    qcResult: BestBottlesAlphaMaskQcResult | null;
+    isChecking: boolean;
+  } => {
+    if (!CYLINDER_MASK_CONTROL_ENABLED || !isCylinderFamilyName(sku.family)) {
+      return { reference: null, qcResult: null, isChecking: false };
+    }
+
+    const folderReference =
+      maskReferenceFolder.size > 0 ? lookupMaskFolderReference(sku, preset) : null;
+    if (folderReference) {
+      return {
+        reference: folderReference,
+        qcResult: maskReferenceQcByKey.get(folderReference.matchKey) ?? null,
+        isChecking: false,
+      };
+    }
+
+    if (selectedProduct && productBatchKey(selectedProduct) === productBatchKey(sku)) {
+      return {
+        reference: glassSpecularityReference,
+        qcResult: maskQcResult,
+        isChecking: isCheckingMaskQc,
+      };
+    }
+
+    return { reference: null, qcResult: null, isChecking: false };
+  };
+
+  const getMaskControlIssueForSku = (sku: Product, preset: string): string | null => {
+    const maskControl = lookupMaskControlForSku(sku, preset);
+    return getBestBottlesMaskControlReadiness({
+      isCylinderTwoSourcePilot:
+        CYLINDER_MASK_CONTROL_ENABLED && isCylinderFamilyName(sku.family),
+      maskReferenceUrl: maskControl.reference?.url ?? null,
+      isCheckingMaskQc: maskControl.isChecking,
+      maskQcResult: maskControl.qcResult,
+    }).issue;
+  };
+
   const lookupReferenceCandidateForDiagnostics = (
     sku: Product,
     preset: string,
@@ -1178,7 +1368,10 @@ export function MastersTabPanel({
     };
   };
 
-  const buildReferenceImportPreflight = (files: FileList | File[]): ReferenceImportPreflight => {
+  const buildReferenceImportPreflight = (
+    files: FileList | File[],
+    mode: ReferenceImportMode = "product-truth",
+  ): ReferenceImportPreflight => {
     const inputFiles = Array.from(files).filter((file) => file.name && file.name !== ".DS_Store");
     const preferredProducts = familyVariants ?? [];
     const familyProducts = allFamilyProducts ?? preferredProducts;
@@ -1199,6 +1392,34 @@ export function MastersTabPanel({
           modifier: null,
           status: "unsupported",
           reason: `${extension || "Unknown"} is not uploaded. Use PNG, JPG, or WebP only.`,
+        };
+      }
+
+      if (
+        mode === "product-truth" &&
+        isCylinderReferenceWorkflow &&
+        isRetiredTransparentBestBottlesReferenceCandidate([
+          {
+            name,
+            fileName: name,
+            relativePath,
+            path: relativePath,
+            type: file.type,
+            webkitRelativePath: (file as File & { webkitRelativePath?: string }).webkitRelativePath,
+          },
+        ])
+      ) {
+        return {
+          file,
+          name,
+          relativePath,
+          size: file.size,
+          key: null,
+          graceSku: null,
+          modifier: null,
+          status: "unsupported",
+          reason:
+            "Transparent/background-removed references are retired for Cylinder masters. Use the flattened Photoshop export with the source background.",
         };
       }
 
@@ -1267,8 +1488,20 @@ export function MastersTabPanel({
     };
   };
 
-  const handleReferenceImportScan = (files: FileList | File[]) => {
-    const preflight = buildReferenceImportPreflight(files);
+  const handleReferenceImportScan = (
+    files: FileList | File[],
+    mode: ReferenceImportMode = "product-truth",
+  ) => {
+    if (mode === "mask-control" && !CYLINDER_MASK_CONTROL_ENABLED) {
+      toast({
+        title: "Mask/control retired",
+        description: "Cylinder masters now use one flattened product-truth reference. Import the flattened Photoshop exports instead.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const preflight = buildReferenceImportPreflight(files, mode);
+    setReferenceImportMode(mode);
     setReferenceImportPreflight(preflight);
     setIsReferenceImportOpen(true);
     setUploadFailures([]);
@@ -1313,6 +1546,17 @@ export function MastersTabPanel({
     persistedReferenceImagesBySku,
     usePersistedReferences,
   ]);
+
+  useEffect(() => {
+    if (!selectedProduct || !customReference?.url) return;
+    if (!isCylinderFamilyName(selectedProduct.family ?? familyName)) return;
+    const staleSyncedReference = lookupRawPersistedReferenceCandidateFromMap(selectedProduct);
+    if (staleSyncedReference?.url !== customReference.url) return;
+    if (!getCylinderRetiredReferenceIssue([staleSyncedReference], selectedProduct)) return;
+    setCustomReference(null);
+    setFolderUserOverride(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct, familyName, customReference?.url, persistedReferenceImagesBySku]);
 
   /**
    * Upload a folder of PSD-rendered PNGs. Each filename is resolved to the
@@ -1359,6 +1603,23 @@ export function MastersTabPanel({
     await Promise.all(
       arr.map(async (file) => {
         try {
+          if (
+            isCylinderReferenceWorkflow &&
+            isRetiredTransparentBestBottlesReferenceCandidate([
+              {
+                name: file.name,
+                fileName: file.name,
+                relativePath: getFileRelativePath(file),
+                path: getFileRelativePath(file),
+                type: file.type,
+              },
+            ])
+          ) {
+            throw new Error(
+              "Transparent/background-removed references are retired for Cylinder masters. Use the flattened Photoshop export with the source background.",
+            );
+          }
+
           const parsed = parseGraceSkuFilename(file.name);
           const match = resolveReferenceFilenameMatch(
             file.name,
@@ -1432,6 +1693,14 @@ export function MastersTabPanel({
     setFolderUserOverride(false);
   };
 
+  const clearMaskReferenceFolder = () => {
+    setMaskReferenceFolder(new Map());
+    setMaskReferenceQcByKey(new Map());
+    setGlassSpecularityReference(null);
+    setMaskQcResult(null);
+    setMaskFolderUserOverride(false);
+  };
+
   /** Compute whether the currently-selected SKU has a matched folder entry. */
   const folderMatchForCurrentSku = useMemo(() => {
     if (!selectedProduct || referenceFolder.size === 0) return null;
@@ -1446,9 +1715,11 @@ export function MastersTabPanel({
   const usablePersistedReferenceCount = useMemo(
     () =>
       Object.values(persistedReferenceImagesBySku ?? {}).filter((entry) =>
-        isBestBottlesReferenceUrlUsable(entry.url),
+        isBestBottlesReferenceUrlUsable(entry.url) &&
+        (!isCylinderReferenceWorkflow ||
+          getBestBottlesCylinderProductTruthReferenceIssue([entry]) === null),
       ).length,
-    [persistedReferenceImagesBySku],
+    [isCylinderReferenceWorkflow, persistedReferenceImagesBySku],
   );
   const unusablePersistedReferenceCount =
     persistedReferenceCount - usablePersistedReferenceCount;
@@ -1463,7 +1734,8 @@ export function MastersTabPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allFamilyProducts, familyVariants, persistedReferenceImagesBySku]);
   const hasAnyReferenceSource =
-    referenceFolder.size > 0 || (usePersistedReferences && usablePersistedReferenceCount > 0);
+    referenceFolder.size > 0 ||
+    (usePersistedReferences && usablePersistedReferenceCount > 0);
 
   const availableReferenceForCurrentSku = useMemo(() => {
     if (!selectedProduct) return null;
@@ -1479,14 +1751,17 @@ export function MastersTabPanel({
   ]);
   const unusablePersistedReferenceForCurrentSku = useMemo(() => {
     if (!selectedProduct) return null;
-    const candidate = lookupPersistedReferenceCandidateFromMap(selectedProduct);
+    const candidate = lookupRawPersistedReferenceCandidateFromMap(selectedProduct);
     if (!candidate) return null;
-    const issue = getBestBottlesReferenceUrlIssue(candidate.url);
+    const issue =
+      getCylinderRetiredReferenceIssue([candidate], selectedProduct) ??
+      getBestBottlesReferenceUrlIssue(candidate.url);
     return issue ? { reference: candidate, issue } : null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProduct, persistedReferenceImagesBySku]);
   const customReferenceIssue = customReference?.url
-    ? getBestBottlesReferenceUrlIssue(customReference.url)
+    ? getCylinderRetiredReferenceIssue([customReference]) ??
+      getBestBottlesReferenceUrlIssue(customReference.url)
     : null;
 
   /**
@@ -1551,13 +1826,18 @@ export function MastersTabPanel({
     if (!hasAnyReferenceSource) return [];
     const source = uniqueProductsByGraceSku(allFamilyProducts ?? familyVariants ?? []);
     return source.filter(
-      (v) => lookupAvailableReference(v, presetId) !== null && getMeasurementIssue(v) === null,
+      (v) =>
+        lookupAvailableReference(v, presetId) !== null &&
+        getMaskControlIssueForSku(v, presetId) === null &&
+        getMeasurementIssue(v) === null,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     allFamilyProducts,
     familyVariants,
     referenceFolder,
+    maskReferenceFolder,
+    maskReferenceQcByKey,
     presetId,
     selectedAngleId,
     persistedReferenceImagesBySku,
@@ -1588,7 +1868,24 @@ export function MastersTabPanel({
     ? inferBestBottlesBodyMaterial(selectedProduct)
     : "glass";
   const isSelectedAluminum = selectedBodyMaterial.includes("aluminum");
-  const specularityReferenceCopy = isSelectedAluminum
+  const isCylinderTwoSourcePilot = isCylinderFamilyName(selectedProduct?.family ?? familyName);
+  const isCylinderMaskControlEnabled =
+    CYLINDER_MASK_CONTROL_ENABLED && isCylinderTwoSourcePilot;
+  const shouldShowSecondaryReference = !isCylinderTwoSourcePilot;
+  const specularityReferenceCopy = isCylinderMaskControlEnabled
+    ? {
+        title: "Mask / canvas control",
+        dropLabel: "Drop transparent PNG mask",
+        description:
+          "Background-removed PNG from the same flattened source. Used for Alpha QC, bounds, and recanvas control only; it is not sent to GPT as a style reference.",
+        uploading: "Uploading transparent mask/control PNG to Supabase...",
+        modalTitle: "Select transparent mask/control reference",
+        toastTitle: "Mask/control reference uploaded",
+        toastDescription: "Alpha QC will verify transparency before Cylinder generation is allowed.",
+        errorTitle: "Mask/control reference upload failed",
+        tag: "mask-control-ref",
+      }
+    : isSelectedAluminum
     ? {
         title: "Aluminum lighting reference",
         dropLabel: "Drop lighting-only metal reference",
@@ -1614,9 +1911,173 @@ export function MastersTabPanel({
         errorTitle: "Glass reference upload failed",
         tag: "glass-specularity-ref",
       };
-  const specularityLibraryTags = isSelectedAluminum
+  const specularityLibraryTags = isCylinderMaskControlEnabled
+    ? ["mask-control-ref", "reference-mask-control", "brand:best-bottles", "studio-master"]
+    : isSelectedAluminum
     ? ["material-specularity-ref", "metal-specularity-ref", "brand:best-bottles", "studio-master"]
     : ["material-specularity-ref", "glass-specularity-ref", "brand:best-bottles", "studio-master"];
+  const productTruthLibraryTags = isCylinderTwoSourcePilot
+    ? [
+        "role:product-reference",
+        "source:reference-import",
+        "truth-ref:flattened-png",
+        "reference-lineage:flattened-single-source",
+      ]
+    : ["brand:best-bottles", "studio-master", "paper-doll-component"];
+  const productTruthLibraryTagExcludes = isCylinderTwoSourcePilot
+    ? [
+        "studio-master",
+        "paper-doll-component",
+        "mask-control-ref",
+        "reference-mask-control",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "source:darkroom-generated",
+      ]
+    : [];
+  const productTruthLibraryUrlExcludes = isCylinderTwoSourcePilot
+    ? [
+        "/paper-doll/",
+        "clean-references/cylinder/",
+        "reference-imports/background-removed",
+        "reference-imports/bg-removed",
+        "mask-control",
+        "mask-ref",
+        "transparent",
+        "background-removed",
+        "bg-removed",
+        "studio-mask-control-references",
+        "madison-hero-sync",
+        "local-generation",
+        "cdn.shopify.com",
+      ]
+    : [];
+
+  useEffect(() => {
+    if (!isCylinderMaskControlEnabled || maskFolderUserOverride) return;
+    if (!selectedProduct) return;
+
+    const matched =
+      maskReferenceFolder.size > 0 ? lookupMaskFolderReference(selectedProduct, presetId) : null;
+    if (matched) {
+      setGlassSpecularityReference({ url: matched.url, name: matched.name });
+      setMaskQcResult(maskReferenceQcByKey.get(matched.matchKey) ?? null);
+    } else if (maskReferenceFolder.size > 0) {
+      setGlassSpecularityReference(null);
+      setMaskQcResult(null);
+    }
+    // selectedAngleId is in the dep list so cap-off/angle modifiers update
+    // the matched mask/control PNG alongside the product-truth reference.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedProduct,
+    presetId,
+    maskReferenceFolder,
+    maskReferenceQcByKey,
+    maskFolderUserOverride,
+    selectedAngleId,
+    isCylinderMaskControlEnabled,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setProductTruthAlphaQcResult(null);
+    setIsCheckingProductTruthQc(false);
+    if (!isCylinderTwoSourcePilot || !customReference?.url) return;
+
+    const candidate = customReference;
+    setIsCheckingProductTruthQc(true);
+    runBestBottlesReferenceMaskQc(candidate.url).then((qc) => {
+      if (cancelled) return;
+      setProductTruthAlphaQcResult(qc);
+      const slot = classifyBestBottlesReferenceSlot({
+        isCylinderTwoSourcePilot,
+        alphaMaskQc: qc,
+      });
+      if (slot !== "mask-control") return;
+
+      const existingMaskUrl = glassSpecularityReference?.url ?? null;
+      setFolderUserOverride(true);
+      setGlassSpecularityReference(null);
+      setMaskQcResult(null);
+      setCustomReference((current) => (current?.url === candidate.url ? null : current));
+      toast({
+        title: "Flattened product truth required",
+        description: existingMaskUrl && existingMaskUrl !== candidate.url
+          ? "Transparent PNG masks are retired for Cylinder masters. The existing secondary reference was cleared; upload the flattened Photoshop export here."
+          : "Transparent PNG masks are retired for Cylinder masters. Upload the flattened Photoshop export here.",
+        variant: "destructive",
+      });
+    }).finally(() => {
+      if (!cancelled) setIsCheckingProductTruthQc(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    customReference,
+    glassSpecularityReference?.url,
+    isCylinderTwoSourcePilot,
+    maskFolderUserOverride,
+    toast,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMaskQcResult(null);
+    setIsCheckingMaskQc(false);
+
+    if (!isCylinderMaskControlEnabled || !glassSpecularityReference?.url) return;
+
+    setIsCheckingMaskQc(true);
+    runBestBottlesReferenceMaskQc(glassSpecularityReference.url)
+      .then((qc) => {
+        if (!cancelled) setMaskQcResult(qc);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMaskQcResult({
+            passed: false,
+            reasons: [error instanceof Error ? error.message : String(error)],
+            foregroundPixelRatio: 0,
+            transparentPixelRatio: 0,
+            partialAlphaPixelRatio: 0,
+            significantForegroundComponents: 0,
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsCheckingMaskQc(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [glassSpecularityReference?.url, isCylinderMaskControlEnabled]);
+
+  const selectedMaskControlReadiness = getBestBottlesMaskControlReadiness({
+    isCylinderTwoSourcePilot: isCylinderMaskControlEnabled,
+    maskReferenceUrl: glassSpecularityReference?.url ?? null,
+    isCheckingMaskQc,
+    maskQcResult,
+  });
+  const maskControlIssue = selectedMaskControlReadiness.issue;
+  const productTruthReferenceIssue = getBestBottlesProductTruthReferenceIssue({
+    isCylinderTwoSourcePilot,
+    referenceUrl: customReference?.url ?? null,
+    isCheckingReferenceQc: isCheckingProductTruthQc,
+    referenceAlphaMaskQc: productTruthAlphaQcResult,
+  });
+  const isActiveCylinderReferenceReady =
+    !isCylinderReferenceWorkflow ||
+    (availableReferenceForCurrentSku !== null &&
+      Boolean(customReference?.url) &&
+      customReferenceIssue === null &&
+      productTruthReferenceIssue === null);
+  const canShowBatchGenerateShortcuts =
+    hasAnyReferenceSource &&
+    (isActiveCylinderReferenceReady || allReferenceMatchedVariants.length > 0);
 
   /**
    * UploadZone returns either a freshly-picked File (drag-drop or browse) or
@@ -1628,6 +2089,7 @@ export function MastersTabPanel({
     img: UploadedReferenceImage,
     storageDir:
       | "studio-references"
+      | "studio-mask-control-references"
       | "studio-glass-specularity-references"
       | "studio-material-lighting-references",
   ): Promise<UploadedReferenceImage | null> => {
@@ -1674,6 +2136,17 @@ export function MastersTabPanel({
     }
 
     const entries = referenceImportPreflight.ready;
+    const importMode = referenceImportMode;
+    const isMaskImport = importMode === "mask-control";
+    if (isMaskImport && !CYLINDER_MASK_CONTROL_ENABLED) {
+      toast({
+        title: "Mask/control retired",
+        description: "Cylinder masters now use one flattened product-truth reference. Import the flattened Photoshop exports instead.",
+        variant: "destructive",
+      });
+      setIsReferenceImportOpen(false);
+      return;
+    }
     if (entries.length === 0) {
       toast({
         title: "No importable references",
@@ -1686,9 +2159,12 @@ export function MastersTabPanel({
     setReferenceImportProgress({ completed: 0, total: entries.length });
     setIsFolderUploading(true);
     const nextReferenceFolder = new Map(referenceFolder);
+    const nextMaskReferenceFolder = new Map(maskReferenceFolder);
+    const nextMaskReferenceQcByKey = new Map(maskReferenceQcByKey);
     const failures: Array<{ name: string; error: string }> = [];
     let uploaded = 0;
     let persistedCanonical = 0;
+    let alphaQcAccepted = 0;
 
     try {
       for (const entry of entries) {
@@ -1713,7 +2189,7 @@ export function MastersTabPanel({
             currentOrganizationId,
             user.id,
             "best-bottles",
-            "reference-imports",
+            isMaskImport ? "mask-imports" : "reference-imports",
             familySegment,
             `${storageName}_${ts}_${rand}.${ext}`,
           ].join("/");
@@ -1732,14 +2208,58 @@ export function MastersTabPanel({
             .getPublicUrl(storagePath);
           if (!urlData?.publicUrl) throw new Error("No public URL returned.");
 
-          nextReferenceFolder.set(entry.key, {
-            url: urlData.publicUrl,
-            name: entry.name,
-            matchKey: entry.key,
-          });
+          if (
+            !isMaskImport &&
+            isCylinderTwoSourcePilot &&
+            isRetiredTransparentBestBottlesReferenceCandidate([
+              {
+                url: urlData.publicUrl,
+                name: entry.name,
+                relativePath: entry.relativePath,
+                storagePath,
+                path: storagePath,
+              },
+            ])
+          ) {
+            throw new Error(
+              "Transparent/background-removed references are retired for Cylinder masters. Use the flattened Photoshop export with the source background.",
+            );
+          }
+
+          if (isMaskImport) {
+            const qc = await runBestBottlesReferenceMaskQc(urlData.publicUrl);
+            if (!qc.passed) {
+              throw new Error(`Alpha QC failed: ${qc.reasons.join(" ")}`);
+            }
+            nextMaskReferenceFolder.set(entry.key, {
+              url: urlData.publicUrl,
+              name: entry.name,
+              matchKey: entry.key,
+            });
+            nextMaskReferenceQcByKey.set(entry.key, qc);
+            alphaQcAccepted += 1;
+          } else {
+            if (isCylinderTwoSourcePilot) {
+              const qc = await runBestBottlesReferenceMaskQc(urlData.publicUrl);
+              const productTruthIssue = getBestBottlesProductTruthReferenceIssue({
+                isCylinderTwoSourcePilot,
+                referenceUrl: urlData.publicUrl,
+                isCheckingReferenceQc: false,
+                referenceAlphaMaskQc: qc,
+              });
+              if (productTruthIssue) {
+                throw new Error(productTruthIssue);
+              }
+            }
+            nextReferenceFolder.set(entry.key, {
+              url: urlData.publicUrl,
+              name: entry.name,
+              matchKey: entry.key,
+            });
+          }
           uploaded += 1;
 
-          if (!entry.modifier) {
+          if (!isMaskImport && !entry.modifier) {
             await updatePipelineSkuJobReference({
               organizationId: currentOrganizationId,
               graceSku: entry.graceSku,
@@ -1765,21 +2285,35 @@ export function MastersTabPanel({
         }
       }
     } finally {
-      setReferenceFolder(nextReferenceFolder);
+      if (isMaskImport) {
+        setMaskReferenceFolder(nextMaskReferenceFolder);
+        setMaskReferenceQcByKey(nextMaskReferenceQcByKey);
+        setMaskFolderUserOverride(false);
+      } else {
+        setReferenceFolder(nextReferenceFolder);
+        setFolderUserOverride(false);
+      }
       setUploadFailures((prev) => [...prev, ...failures]);
-      setFolderUserOverride(false);
       setIsFolderUploading(false);
       setReferenceImportProgress(null);
       setIsReferenceImportOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["best-bottles-studio-sku-job-references"] });
-      queryClient.invalidateQueries({ queryKey: ["best-bottles-pipeline-sku-jobs"] });
+      if (!isMaskImport) {
+        queryClient.invalidateQueries({ queryKey: ["best-bottles-studio-sku-job-references"] });
+        queryClient.invalidateQueries({ queryKey: ["best-bottles-pipeline-sku-jobs"] });
+      }
     }
 
     toast({
-      title: failures.length > 0 ? "Reference import completed with errors" : "Reference import complete",
+      title: failures.length > 0
+        ? isMaskImport
+          ? "Mask import completed with errors"
+          : "Reference import completed with errors"
+        : isMaskImport
+          ? "Mask import complete"
+          : "Reference import complete",
       description: [
         `${uploaded} uploaded`,
-        `${persistedCanonical} canonical synced to Pipeline`,
+        isMaskImport ? `${alphaQcAccepted} Alpha-QC passed` : `${persistedCanonical} canonical synced to Pipeline`,
         failures.length > 0 ? `${failures.length} failed` : null,
       ]
         .filter(Boolean)
@@ -1789,6 +2323,33 @@ export function MastersTabPanel({
   };
 
   const handleReferencePicked = async (img: UploadedReferenceImage) => {
+    const retiredReferenceIssue = isCylinderTwoSourcePilot
+      ? getRetiredTransparentBestBottlesReferenceIssue([
+          {
+            url: img.url,
+            name: img.name,
+            libraryTags: img.libraryTags ?? [],
+            fileName: img.file?.name,
+            type: img.file?.type,
+            webkitRelativePath: img.file
+              ? (img.file as File & { webkitRelativePath?: string }).webkitRelativePath
+              : undefined,
+          },
+        ])
+      : null;
+    if (retiredReferenceIssue) {
+      setFolderUserOverride(true);
+      setCustomReference(null);
+      setGlassSpecularityReference(null);
+      setMaskQcResult(null);
+      toast({
+        title: "Flattened product truth required",
+        description: retiredReferenceIssue,
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Manual single-image upload takes precedence over folder auto-match.
     // Mark the override so SKU navigation doesn't silently overwrite this
     // user-chosen reference.
@@ -1797,6 +2358,50 @@ export function MastersTabPanel({
     try {
       const uploaded = await uploadReferenceToStorage(img, "studio-references");
       if (uploaded) {
+        const uploadedRetiredReferenceIssue = isCylinderTwoSourcePilot
+          ? getRetiredTransparentBestBottlesReferenceIssue([
+              {
+                url: uploaded.url,
+                name: uploaded.name,
+                originalName: img.name,
+                libraryTags: img.libraryTags ?? [],
+                fileName: img.file?.name,
+              },
+            ])
+          : null;
+        if (uploadedRetiredReferenceIssue) {
+          setCustomReference(null);
+          setGlassSpecularityReference(null);
+          setMaskQcResult(null);
+          toast({
+            title: "Flattened product truth required",
+            description: uploadedRetiredReferenceIssue,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (isCylinderTwoSourcePilot) {
+          setIsCheckingProductTruthQc(true);
+          const qc = await runBestBottlesReferenceMaskQc(uploaded.url);
+          setProductTruthAlphaQcResult(qc);
+          setIsCheckingProductTruthQc(false);
+          const slot = classifyBestBottlesReferenceSlot({
+            isCylinderTwoSourcePilot,
+            alphaMaskQc: qc,
+          });
+          if (slot === "mask-control") {
+            setCustomReference(null);
+            setGlassSpecularityReference(null);
+            setMaskQcResult(null);
+            toast({
+              title: "Flattened product truth required",
+              description:
+                "Transparent PNG masks are retired for Cylinder masters. Upload the flattened Photoshop export here.",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
         setCustomReference(uploaded);
         toast({
           title: "Reference uploaded",
@@ -1812,16 +2417,31 @@ export function MastersTabPanel({
         variant: "destructive",
       });
     } finally {
+      setIsCheckingProductTruthQc(false);
       setIsUploadingRef(false);
     }
   };
 
   const handleGlassSpecularityReferencePicked = async (img: UploadedReferenceImage) => {
+    if (isCylinderTwoSourcePilot && !isCylinderMaskControlEnabled) {
+      toast({
+        title: "Mask/control retired",
+        description:
+          "Cylinder masters now use one flattened product-truth reference. Upload the flattened Photoshop export in the Product truth slot.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (isCylinderTwoSourcePilot) {
+      setMaskFolderUserOverride(true);
+    }
     setIsUploadingGlassRef(true);
     try {
       const uploaded = await uploadReferenceToStorage(
         img,
-        isSelectedAluminum
+        isCylinderTwoSourcePilot
+          ? "studio-mask-control-references"
+          : isSelectedAluminum
           ? "studio-material-lighting-references"
           : "studio-glass-specularity-references",
       );
@@ -1886,6 +2506,20 @@ export function MastersTabPanel({
     () => MASTERS_PRESETS.find((p) => p.id === presetId) ?? MASTERS_PRESETS[0],
     [presetId],
   );
+  const buildPromptPreflightForSku = (
+    product: Product,
+    referenceImagePath: string | null | undefined,
+  ): BestBottlesPromptPreflight =>
+    buildBestBottlesPromptPreflight({
+      product,
+      referenceImagePath,
+      bodyMaterial: inferBestBottlesBodyMaterial(product),
+      canvas: selectedPreset.canvas,
+      system: BEST_BOTTLES_PROMPT_SYSTEM,
+    });
+  const selectedPromptPreflight = selectedProduct
+    ? buildPromptPreflightForSku(selectedProduct, customReference?.url ?? null)
+    : null;
   const selectedImageModel = useMemo(
     () => MASTER_IMAGE_MODEL_OPTIONS.find((model) => model.value === masterAiProvider) ?? MASTER_IMAGE_MODEL_OPTIONS[0],
     [masterAiProvider],
@@ -1905,6 +2539,8 @@ export function MastersTabPanel({
         `Reference: ${customReference?.name ?? "required uploaded/folder match"}`,
       ].join("\n")
     : "";
+  const selectedCompiledPromptPreview =
+    selectedPromptPreflight?.record?.final_prompt ?? serverPromptPreview;
 
   const handleAssemble = async (): Promise<AssembledPrompt | null> => {
     if (!selectedProduct) return null;
@@ -1941,7 +2577,14 @@ export function MastersTabPanel({
    * batch-generate loop can fire the same payload shape per variant
    * without duplicating logic.
    */
-  const generateOne = async (sku: Product, referenceUrl: string | null) => {
+  const generateOne = async (
+    sku: Product,
+    referenceUrl: string | null,
+    maskControl?: {
+      reference: UploadedReferenceImage | FolderReferenceEntry | null;
+      qcResult: BestBottlesAlphaMaskQcResult | null;
+    },
+  ) => {
     const liquid: LiquidSpec | null = liquidEnabled
       ? { present: true, color: liquidColor, fillPercent: liquidFill }
       : null;
@@ -2029,6 +2672,36 @@ export function MastersTabPanel({
       ].filter((t): t is string => Boolean(t));
     }
     const skuBodyMaterial = inferBestBottlesBodyMaterial(sku);
+    const isCylinderSku = isCylinderFamilyName(sku.family);
+    const retiredReferenceIssue =
+      isCylinderSku && referenceUrl
+        ? getRetiredTransparentBestBottlesReferenceIssue([
+            {
+              url: referenceUrl,
+              sourceReference: referenceUrl,
+            },
+          ])
+        : null;
+    if (retiredReferenceIssue) {
+      toast({
+        title: "Flattened product truth required",
+        description: `${sku.graceSku}: ${retiredReferenceIssue}`,
+        variant: "destructive",
+      });
+      return null;
+    }
+    const usesCylinderMaskControl = CYLINDER_MASK_CONTROL_ENABLED && isCylinderSku;
+    const isSelectedSku =
+      selectedProduct && productBatchKey(selectedProduct) === productBatchKey(sku);
+    const cylinderMaskReference = usesCylinderMaskControl
+      ? maskControl?.reference ?? (isSelectedSku ? glassSpecularityReference : null)
+      : null;
+    const cylinderMaskQcResult = usesCylinderMaskControl
+      ? maskControl?.qcResult ?? (isSelectedSku ? maskQcResult : null)
+      : null;
+    const secondaryReferenceForGeneration = isCylinderSku
+      ? null
+      : glassSpecularityReference?.url ?? null;
     const skuSpecularityTag = skuBodyMaterial.includes("aluminum") || skuBodyMaterial.includes("metal atomizer")
       ? "metal-specularity-ref"
       : "glass-specularity-ref";
@@ -2045,6 +2718,15 @@ export function MastersTabPanel({
       });
       return null;
     }
+    const promptPreflight = buildPromptPreflightForSku(sku, referenceUrl ?? null);
+    if (promptPreflight.status === "error" || !promptPreflight.record || !promptPreflight.sku) {
+      toast({
+        title: "Prompt preflight blocked",
+        description: `${sku.graceSku}: ${promptPreflight.issue ?? "Compiled prompt is missing."}`,
+        variant: "destructive",
+      });
+      return null;
+    }
 
     return generate(assembled, {
       aiProvider: masterAiProvider,
@@ -2052,7 +2734,7 @@ export function MastersTabPanel({
       // legacy .gif imageUrl — the latter is silently dropped by the
       // unsupported-format filter in useAssembledPromptGeneration.
       referenceImageUrl: referenceUrl ?? sku.imageUrl,
-      glassSpecularityReferenceImageUrl: glassSpecularityReference?.url ?? null,
+      glassSpecularityReferenceImageUrl: secondaryReferenceForGeneration,
       productContext: {
         name: sku.itemName,
         websiteSku: sku.websiteSku ?? null,
@@ -2070,7 +2752,7 @@ export function MastersTabPanel({
         heightWithoutCap: sku.heightWithoutCap,
         heightWithCap: sku.heightWithCap,
         diameter: sku.diameter,
-        capColor: sku.capColor ?? null,
+        capColor: generationIdentity.capColor,
         trimColor: sku.trimColor ?? null,
         applicator: sku.applicator ?? null,
         tasselColor: generationIdentity.tasselColor,
@@ -2081,6 +2763,17 @@ export function MastersTabPanel({
         accessoryCode: generationIdentity.accessoryCode,
         reducerFinish: generationIdentity.reducerFinish,
         sourceReference: generationIdentity.sourceReference,
+        referenceWorkflow: isCylinderSku
+          ? "single-flattened-product-truth"
+          : null,
+        maskReference: usesCylinderMaskControl ? cylinderMaskReference?.url ?? null : null,
+        maskQcStatus: usesCylinderMaskControl
+          ? cylinderMaskQcResult?.passed
+            ? "passed"
+            : cylinderMaskReference?.url
+              ? "pending-or-failed"
+              : "missing"
+          : null,
         identityStatus: generationIdentity.identityStatus,
         identityBlockers: generationIdentity.identityBlockers,
         identityHash: generationIdentity.identityHash,
@@ -2095,11 +2788,21 @@ export function MastersTabPanel({
       extraLibraryTags: [
         "brand:best-bottles",
         "studio-master",
+        "prompt-source:json-precompiler",
+        `prompt-family:${promptPreflight.sku.product_family}`,
+        `prompt-material:${promptPreflight.sku.body_material}`,
+        `prompt-closure:${promptPreflight.sku.closure_type}`,
+        `prompt-frame:${promptPreflight.sku.frame_class}`,
+        `prompt-qa:${promptPreflight.status}`,
         familyName ? `family:${familyName.toLowerCase().replace(/\s+/g, "-")}` : null,
         `sku:${sku.graceSku}`,
         sku.websiteSku ? `websiteSku:${sku.websiteSku}` : null,
-        glassSpecularityReference?.url ? "material-specularity-ref" : null,
-        glassSpecularityReference?.url ? skuSpecularityTag : null,
+        isCylinderSku ? "reference-lineage:flattened-single-source" : null,
+        isCylinderSku ? "truth-ref:flattened-png" : null,
+        usesCylinderMaskControl && cylinderMaskReference?.url ? "mask-ref:transparent-png" : null,
+        usesCylinderMaskControl && cylinderMaskQcResult?.passed ? "mask-qc:passed" : null,
+        !isCylinderSku && glassSpecularityReference?.url ? "material-specularity-ref" : null,
+        !isCylinderSku && glassSpecularityReference?.url ? skuSpecularityTag : null,
         `model:${masterAiProvider}`,
         `prompt:${generationIdentity.promptVersion}`,
         `rig:${generationIdentity.rigVersion}`,
@@ -2107,6 +2810,7 @@ export function MastersTabPanel({
         `qa:${generationIdentity.qaStatus}`,
         ...sceneTags,
       ].filter((t): t is string => Boolean(t)),
+      precompiledPromptRecord: promptPreflight.record,
     });
   };
 
@@ -2151,8 +2855,39 @@ export function MastersTabPanel({
       });
       return;
     }
+    if (productTruthReferenceIssue) {
+      toast({
+        title: "Flattened product truth required",
+        description: productTruthReferenceIssue,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (selectedPromptPreflight?.status === "error") {
+      toast({
+        title: "Prompt preflight blocked",
+        description: `${selectedProduct.graceSku}: ${selectedPromptPreflight.issue ?? "Compiled prompt is missing."}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (maskControlIssue) {
+      toast({
+        title: "Mask/control reference required",
+        description: maskControlIssue,
+        variant: "destructive",
+      });
+      return;
+    }
     await handleAssemble(); // populate assembledCache for the prompt-preview button
-    await generateOne(selectedProduct, customReference?.url ?? null);
+    const result = await generateOne(
+      selectedProduct,
+      customReference?.url ?? null,
+      lookupMaskControlForSku(selectedProduct, presetId),
+    );
+    if (result) {
+      await onMasterGenerated?.(result, selectedProduct);
+    }
   };
 
   /**
@@ -2184,11 +2919,18 @@ export function MastersTabPanel({
   /** Every variant in the current cohort that has a folder or synced pipeline reference. */
   const matchedFamilyVariants = useMemo(() => {
     if (!familyVariants || !hasAnyReferenceSource) return [];
-    return familyVariants.filter((v) => lookupAvailableReference(v, presetId) !== null && getMeasurementIssue(v) === null);
+    return familyVariants.filter(
+      (v) =>
+        lookupAvailableReference(v, presetId) !== null &&
+        getMaskControlIssueForSku(v, presetId) === null &&
+        getMeasurementIssue(v) === null,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     familyVariants,
     referenceFolder,
+    maskReferenceFolder,
+    maskReferenceQcByKey,
     presetId,
     selectedAngleId,
     persistedReferenceImagesBySku,
@@ -2246,18 +2988,40 @@ export function MastersTabPanel({
     () =>
       batchScopeCandidates.map((product) => {
         const { reference, source } = lookupReferenceCandidateForDiagnostics(product, presetId);
+        const maskControl = lookupMaskControlForSku(product, presetId);
+        const referenceIsMaskControl =
+          CYLINDER_MASK_CONTROL_ENABLED &&
+          isCylinderFamilyName(product.family) &&
+          Boolean(reference?.url && maskControl.reference?.url && reference.url === maskControl.reference.url);
+        const retiredReferenceIssue =
+          reference && isCylinderFamilyName(product.family)
+            ? getRetiredTransparentBestBottlesReferenceIssue([reference])
+            : null;
+        const maskReadiness = getBestBottlesMaskControlReadiness({
+          isCylinderTwoSourcePilot:
+            CYLINDER_MASK_CONTROL_ENABLED && isCylinderFamilyName(product.family),
+          maskReferenceUrl: maskControl.reference?.url ?? null,
+          isCheckingMaskQc: maskControl.isChecking,
+          maskQcResult: maskControl.qcResult,
+        });
         const identity = buildBestBottlesGenerationIdentity(product, {
           bodyMaterial: inferBestBottlesBodyMaterial(product),
           sourceReference: reference?.url ?? product.imageUrl ?? null,
         });
+        const promptPreflight = buildPromptPreflightForSku(product, reference?.url ?? null);
         return {
           product,
           reference,
-          referenceIssue: reference
-            ? getBestBottlesReferenceUrlIssue(reference.url)
+          maskReference: maskControl.reference,
+          referenceIssue: referenceIsMaskControl
+            ? "Product truth reference is the transparent mask/control PNG. Import the flattened Photoshop export for this SKU."
+            : reference
+            ? retiredReferenceIssue ?? getBestBottlesReferenceUrlIssue(reference.url)
             : "No usable reference is attached.",
+          maskIssue: maskReadiness.issue,
           measurementIssue: getMeasurementIssue(product),
           identityIssue: getBestBottlesGenerationIdentityIssue(identity),
+          promptPreflight,
           referenceSource: source,
         };
       }),
@@ -2266,7 +3030,10 @@ export function MastersTabPanel({
       batchScopeCandidates,
       presetId,
       referenceFolder,
+      maskReferenceFolder,
+      maskReferenceQcByKey,
       selectedAngleId,
+      selectedPreset,
       persistedReferenceImagesBySku,
       usePersistedReferences,
     ],
@@ -2278,8 +3045,10 @@ export function MastersTabPanel({
         (entry) =>
           entry.reference !== null &&
           entry.referenceIssue === null &&
+          entry.maskIssue === null &&
           entry.measurementIssue === null &&
-          entry.identityIssue === null,
+          entry.identityIssue === null &&
+          entry.promptPreflight.status !== "error",
       ),
     [batchPreflightEntries],
   );
@@ -2293,6 +3062,9 @@ export function MastersTabPanel({
   const batchInvalidReferenceCount = batchPreflightEntries.filter(
     (entry) => entry.reference !== null && entry.referenceIssue !== null,
   ).length;
+  const batchMaskBlockedCount = batchPreflightEntries.filter(
+    (entry) => entry.maskIssue !== null,
+  ).length;
   const batchPathOnlyReferenceCount = batchPreflightEntries.filter(
     (entry) => entry.referenceSource === "path-only",
   ).length;
@@ -2302,9 +3074,18 @@ export function MastersTabPanel({
   const batchIdentityBlockedCount = batchPreflightEntries.filter(
     (entry) => entry.identityIssue !== null,
   ).length;
+  const batchPromptBlockedCount = batchPreflightEntries.filter(
+    (entry) =>
+      entry.reference !== null &&
+      entry.referenceIssue === null &&
+      entry.promptPreflight.status === "error",
+  ).length;
+  const batchPromptWarningCount = batchPreflightEntries.filter(
+    (entry) => entry.promptPreflight.status === "warn",
+  ).length;
   const batchBlockedCount =
     batchMissingReferenceCount + batchInvalidReferenceCount + batchMeasurementBlockedCount +
-    batchIdentityBlockedCount;
+    batchIdentityBlockedCount + batchMaskBlockedCount + batchPromptBlockedCount;
   const effectiveBatchResolution: "standard" | "high" =
     hasFlexibleOverlay ? sceneResolution : "standard";
   const batchCostEstimate = estimateOpenAiBatchCost(
@@ -2322,6 +3103,22 @@ export function MastersTabPanel({
   const batchColorSummary = compactFacetList(
     batchPreflightEntries.map((entry) => entry.product.color),
     "Unspecified color",
+  );
+  const batchPromptFamilySummary = compactFacetList(
+    batchPreflightEntries.map((entry) => entry.promptPreflight.sku?.product_family),
+    "Unknown family",
+  );
+  const batchPromptMaterialSummary = compactFacetList(
+    batchPreflightEntries.map((entry) => entry.promptPreflight.sku?.body_material),
+    "Unknown material",
+  );
+  const batchPromptClosureSummary = compactFacetList(
+    batchPreflightEntries.map((entry) => entry.promptPreflight.sku?.closure_type),
+    "Unknown closure",
+  );
+  const batchPromptFrameSummary = compactFacetList(
+    batchPreflightEntries.map((entry) => entry.promptPreflight.sku?.frame_class),
+    "Unknown frame",
   );
   const batchHasMixedCapacity =
     new Set(batchPreflightEntries.map((entry) => entry.product.capacityMl ?? "unknown")).size > 1;
@@ -2343,7 +3140,11 @@ export function MastersTabPanel({
     if (!usePersistedReferences && persistedReferenceCount > 0) {
       setUsePersistedReferences(true);
     }
-    openBatchPreflight("current-group");
+    openBatchPreflight(
+      matchedFamilyVariants.length === 0 && allReferenceMatchedVariants.length > 0
+        ? "full-family"
+        : "current-group",
+    );
   };
 
   const toggleSelectedBatchSku = (product: Product, checked: boolean) => {
@@ -2369,9 +3170,14 @@ export function MastersTabPanel({
   const handleGenerateBatch = async (variantsToGenerate: Product[]) => {
     if (variantsToGenerate.length === 0) return;
     const failures: Array<{ graceSku: string; error: string }> = [];
+    const recordFailure = async (sku: Product, error: string) => {
+      failures.push({ graceSku: sku.graceSku, error });
+      await onMasterGenerationFailed?.(error, sku);
+    };
     for (let i = 0; i < variantsToGenerate.length; i++) {
       const sku = variantsToGenerate[i];
       const ref = lookupAvailableReference(sku, presetId);
+      const maskControl = lookupMaskControlForSku(sku, presetId);
       setBatchProgress({
         current: i + 1,
         total: variantsToGenerate.length,
@@ -2379,12 +3185,24 @@ export function MastersTabPanel({
         failures,
       });
       try {
-        const referenceIssue = getBestBottlesReferenceUrlIssue(ref?.url);
+        const referenceIssue =
+          ref && isCylinderFamilyName(sku.family)
+            ? getRetiredTransparentBestBottlesReferenceIssue([ref]) ??
+              getBestBottlesReferenceUrlIssue(ref.url)
+            : getBestBottlesReferenceUrlIssue(ref?.url);
         if (!ref || referenceIssue) {
-          failures.push({
-            graceSku: sku.graceSku,
-            error: referenceIssue ?? "No usable reference is attached.",
-          });
+          await recordFailure(sku, referenceIssue ?? "No usable reference is attached.");
+          continue;
+        }
+        const maskIssue = getBestBottlesMaskControlReadiness({
+          isCylinderTwoSourcePilot:
+            CYLINDER_MASK_CONTROL_ENABLED && isCylinderFamilyName(sku.family),
+          maskReferenceUrl: maskControl.reference?.url ?? null,
+          isCheckingMaskQc: maskControl.isChecking,
+          maskQcResult: maskControl.qcResult,
+        }).issue;
+        if (maskIssue) {
+          await recordFailure(sku, maskIssue);
           continue;
         }
         const identity = buildBestBottlesGenerationIdentity(sku, {
@@ -2393,19 +3211,23 @@ export function MastersTabPanel({
         });
         const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
         if (identityIssue) {
-          failures.push({
-            graceSku: sku.graceSku,
-            error: identityIssue,
-          });
+          await recordFailure(sku, identityIssue);
           continue;
         }
-        const result = await generateOne(sku, ref?.url ?? null);
+        const promptPreflight = buildPromptPreflightForSku(sku, ref.url ?? null);
+        if (promptPreflight.status === "error" || !promptPreflight.record) {
+          await recordFailure(sku, promptPreflight.issue ?? "Prompt preflight failed.");
+          continue;
+        }
+        const result = await generateOne(sku, ref?.url ?? null, maskControl);
         if (!result) {
-          failures.push({ graceSku: sku.graceSku, error: "Generation returned no result" });
+          await recordFailure(sku, "Generation returned no result");
+        } else {
+          await onMasterGenerated?.(result, sku);
         }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
-        failures.push({ graceSku: sku.graceSku, error: msg });
+        await recordFailure(sku, msg);
       }
     }
     setBatchProgress(null);
@@ -2802,9 +3624,8 @@ export function MastersTabPanel({
         </div>
       )}
 
-      {/* REFERENCE SOURCES — synced Pipeline references auto-load by Grace SKU.
-          Operators can still drop a folder of assembled-bottle PNGs once per
-          family; folder files win over synced references for quick overrides. */}
+      {/* REFERENCE SOURCES — Cylinder masters use flattened product-truth exports only.
+          Other families can still auto-load synced Pipeline references by Grace SKU. */}
       <div className="space-y-2 pt-1 border-t" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
         <div className="flex items-center justify-between pt-2">
           <Label className="text-xs uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
@@ -2835,6 +3656,18 @@ export function MastersTabPanel({
                 <X className="w-3 h-3 mr-1" /> Clear folder
               </Button>
             )}
+            {isCylinderMaskControlEnabled && maskReferenceFolder.size > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearMaskReferenceFolder}
+                className="h-6 px-2 text-[10px]"
+                style={{ color: "var(--darkroom-text-dim)" }}
+              >
+                <X className="w-3 h-3 mr-1" /> Clear masks
+              </Button>
+            )}
           </div>
         </div>
 
@@ -2848,11 +3681,28 @@ export function MastersTabPanel({
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
-              handleReferenceImportScan(e.target.files);
+              handleReferenceImportScan(e.target.files, "product-truth");
               e.target.value = "";
             }
           }}
         />
+        {isCylinderMaskControlEnabled && (
+          <input
+            ref={maskFolderInputRef}
+            type="file"
+            multiple
+            // @ts-expect-error — webkitdirectory is a non-standard attribute
+            webkitdirectory=""
+            directory=""
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleReferenceImportScan(e.target.files, "mask-control");
+                e.target.value = "";
+              }
+            }}
+          />
+        )}
         <input
           type="file"
           accept="image/png,image/jpeg,image/webp,.psd,.psb,.tif,.tiff,.gif,.heic,.bmp"
@@ -2861,11 +3711,26 @@ export function MastersTabPanel({
           id="masters-folder-files-fallback"
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
-              handleReferenceImportScan(e.target.files);
+              handleReferenceImportScan(e.target.files, "product-truth");
               e.target.value = "";
             }
           }}
         />
+        {isCylinderMaskControlEnabled && (
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            className="hidden"
+            id="masters-mask-folder-files-fallback"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                handleReferenceImportScan(e.target.files, "mask-control");
+                e.target.value = "";
+              }
+            }}
+          />
+        )}
 
         <div
           className="rounded border-2 border-dashed p-3 text-center space-y-2 transition-colors"
@@ -2885,7 +3750,7 @@ export function MastersTabPanel({
             e.preventDefault();
             e.stopPropagation();
             if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-              handleReferenceImportScan(e.dataTransfer.files);
+              handleReferenceImportScan(e.dataTransfer.files, "product-truth");
             }
           }}
         >
@@ -2899,32 +3764,53 @@ export function MastersTabPanel({
 	              {isFolderUploading
 	                ? "Importing validated references…"
 	                : referenceFolder.size > 0
-	                  ? `${referenceFolder.size} uploaded reference${referenceFolder.size === 1 ? "" : "s"} loaded`
+	                  ? `${referenceFolder.size} truth reference${referenceFolder.size === 1 ? "" : "s"} loaded`
 	                  : persistedReferenceCount > 0
 	                    ? usePersistedReferences
 	                      ? `${familyPersistedReferenceMatchCount} usable family synced reference${familyPersistedReferenceMatchCount === 1 ? "" : "s"} active`
 	                      : `${persistedReferenceCount} synced pipeline reference${persistedReferenceCount === 1 ? "" : "s"} hidden`
+	                    : isCylinderReferenceWorkflow
+	                    ? "Scan flattened Cylinder product-truth exports"
 	                  : "Scan a folder of reference exports"}
 	            </span>
           </div>
           <p className="text-[10px]" style={{ color: "var(--darkroom-text-dim)" }}>
-            Synced Pipeline references auto-load when available. For local folders, filenames can equal the Convex Grace SKU — e.g.{" "}
-            <code>GB-EMP-CLR-100ML-BST-BLK.png</code> — or a supported Empire reference name like{" "}
-            <code>empire-50ml-bulb-tassel-red.png</code>. Preset variants use a{" "}
-            <code>--modifier</code> suffix:{" "}
-            <code>GB-EMP-CLR-100ML-BST-BLK--exploded.png</code>.
-            Leading <code>"48. "</code> ordering prefixes from PSD exports are stripped automatically.
-            Scan first; nothing uploads until the import preflight is confirmed. Use PNG/JPEG/WebP references for OpenAI edits.
+            {isCylinderReferenceWorkflow ? (
+              <>
+                Flattened synced Pipeline refs auto-load by Grace SKU when available. Retired
+                transparent/background-removed Pipeline refs are skipped. Scan or upload flattened Photoshop exports
+                when a SKU has no usable synced ref. Filenames can equal the Convex Grace SKU, e.g.{" "}
+                <code>GB-SPR-CLR-3ML-BLK.png</code>.
+              </>
+            ) : (
+              <>
+                Synced Pipeline references auto-load when available. For local folders, scan flattened product-truth PNGs first. Filenames can equal the Convex Grace SKU — e.g.{" "}
+                <code>GB-EMP-CLR-100ML-BST-BLK.png</code> — or a supported Empire reference name like{" "}
+                <code>empire-50ml-bulb-tassel-red.png</code>. Preset variants use a{" "}
+                <code>--modifier</code> suffix:{" "}
+                <code>GB-EMP-CLR-100ML-BST-BLK--cap-off.png</code>.
+                Leading <code>"48. "</code> ordering prefixes from PSD exports are stripped automatically.
+                Scan first; nothing uploads until the import preflight is confirmed. Use PNG/JPEG/WebP references for OpenAI edits.
+              </>
+            )}
           </p>
 	          {(hasAnyReferenceSource || persistedReferenceCount > 0) && (
 	            <div className="flex flex-wrap items-center justify-center gap-2 text-[10px]" style={{ color: "var(--darkroom-text-dim)" }}>
 	              {referenceFolder.size > 0 && (
 	                <>
                   <span>
-                    {referenceFolder.size} uploaded
+                    {referenceFolder.size} truth uploaded
                   </span>
                   <span className="opacity-50">·</span>
                 </>
+	              )}
+	              {isCylinderMaskControlEnabled && maskReferenceFolder.size > 0 && (
+	                <>
+	                  <span>
+	                    {maskReferenceFolder.size} masks Alpha-QC passed
+	                  </span>
+	                  <span className="opacity-50">·</span>
+	                </>
 	              )}
 	              {persistedReferenceCount > 0 && (
 	                <>
@@ -2961,8 +3847,8 @@ export function MastersTabPanel({
             <div
               className="rounded border border-amber-500/30 bg-amber-500/5 p-2 text-[10px] leading-snug text-amber-200"
             >
-              {unusablePersistedReferenceCount} synced reference{unusablePersistedReferenceCount === 1 ? "" : "s"} point to local pipeline paths or unsupported files.
-              They are not used for generation until imported/uploaded as public PNG/JPG/WebP URLs.
+              {unusablePersistedReferenceCount} synced reference{unusablePersistedReferenceCount === 1 ? "" : "s"} point to retired transparent/background-removed refs, local pipeline paths, or unsupported files.
+              They are not used for generation until replaced by flattened public PNG/JPG/WebP product-truth exports.
             </div>
           )}
           <div className="flex items-center justify-center gap-2">
@@ -2974,8 +3860,20 @@ export function MastersTabPanel({
               disabled={isFolderUploading}
               className="h-7 text-[11px] border-white/15 bg-white/[0.02] text-white hover:bg-white/[0.06] hover:text-white"
             >
-              Scan folder
+              Scan truth folder
             </Button>
+            {isCylinderMaskControlEnabled && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => maskFolderInputRef.current?.click()}
+                disabled={isFolderUploading}
+                className="h-7 text-[11px] border-emerald-500/30 bg-emerald-500/5 text-emerald-100 hover:bg-emerald-500/10 hover:text-white"
+              >
+                Scan mask folder
+              </Button>
+            )}
             <Button
               type="button"
               size="sm"
@@ -2987,6 +3885,19 @@ export function MastersTabPanel({
 	            >
 	              Or pick files
 	            </Button>
+	            {isCylinderMaskControlEnabled && (
+	              <Button
+	                type="button"
+	                size="sm"
+	                variant="ghost"
+	                onClick={() => document.getElementById("masters-mask-folder-files-fallback")?.click()}
+	                disabled={isFolderUploading}
+	                className="h-7 text-[11px]"
+	                style={{ color: "var(--darkroom-text-dim)" }}
+	              >
+	                Pick mask files
+	              </Button>
+	            )}
 	            {persistedReferenceCount > 0 && (
 	              <>
 	                <Button
@@ -3017,9 +3928,15 @@ export function MastersTabPanel({
         <Dialog open={isReferenceImportOpen} onOpenChange={setIsReferenceImportOpen}>
           <DialogContent className="max-w-4xl max-h-[86vh] overflow-y-auto border-white/10 bg-[#11100f] text-white">
             <DialogHeader>
-              <DialogTitle className="text-2xl">Import references preflight</DialogTitle>
+              <DialogTitle className="text-2xl">
+                {referenceImportMode === "mask-control"
+                  ? "Import mask/control preflight"
+                  : "Import references preflight"}
+              </DialogTitle>
               <DialogDescription className="text-base text-white/60">
-                Review matches, duplicates, unsupported files, and estimated storage before anything uploads to Supabase.
+                {referenceImportMode === "mask-control"
+                  ? "Review matched transparent PNG masks. Only Alpha-QC-passing masks become usable for Cylinder generation."
+                  : "Review matches, duplicates, unsupported files, and estimated storage before anything uploads to Supabase."}
               </DialogDescription>
             </DialogHeader>
 
@@ -3055,13 +3972,15 @@ export function MastersTabPanel({
                 <div className="rounded border border-white/10 bg-white/[0.02] p-3 text-sm text-white/75">
                   <div className="font-medium text-white">Upload policy</div>
                   <div className="mt-1 text-xs leading-relaxed text-white/60">
-                    Only validated PNG, JPG, and WebP files whose names resolve to a loaded Grace SKU are uploaded.
-                    PSDs, rejected output folders, unknown files, duplicates, and unmatched filenames stay local.
-                    Canonical SKU matches update the Pipeline synced reference URL; modifier refs upload for this Studio session but are not promoted as canonical.
+                    {referenceImportMode === "mask-control"
+                      ? "Only validated PNG, JPG, and WebP files whose names resolve to a loaded Grace SKU are uploaded, then Alpha QC checks real transparency and usable foreground bounds. Mask imports do not update the canonical Pipeline reference URL."
+                      : "Only validated PNG, JPG, and WebP files whose names resolve to a loaded Grace SKU are uploaded. PSDs, rejected output folders, unknown files, duplicates, and unmatched filenames stay local. Canonical SKU matches update the Pipeline synced reference URL; modifier refs upload for this Studio session but are not promoted as canonical."}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
                     <span className="rounded border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 text-emerald-200">
-                      {referenceImportPreflight.canonicalReady.length} canonical
+                      {referenceImportMode === "mask-control"
+                        ? `${referenceImportPreflight.canonicalReady.length} canonical masks`
+                        : `${referenceImportPreflight.canonicalReady.length} canonical`}
                     </span>
                     <span className="rounded border border-sky-500/25 bg-sky-500/10 px-2 py-1 text-sky-200">
                       {referenceImportPreflight.modifierReady.length} modifier
@@ -3156,7 +4075,10 @@ export function MastersTabPanel({
                 ) : (
                   <>
                     <UploadCloud className="mr-2 h-4 w-4" />
-                    Upload {referenceImportPreflight?.ready.length ?? 0} reference{referenceImportPreflight?.ready.length === 1 ? "" : "s"}
+                    Upload {referenceImportPreflight?.ready.length ?? 0}{" "}
+                    {referenceImportMode === "mask-control"
+                      ? `mask${referenceImportPreflight?.ready.length === 1 ? "" : "s"}`
+                      : `reference${referenceImportPreflight?.ready.length === 1 ? "" : "s"}`}
                   </>
                 )}
               </Button>
@@ -3316,14 +4238,14 @@ export function MastersTabPanel({
       <div className="space-y-2 pt-1 border-t" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
         <div className="flex items-center justify-between pt-2">
           <Label className="text-xs uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
-            Reference image (single override)
+            Product truth + glass detail
           </Label>
         </div>
 
         <UploadZone
           type="product"
-          label="Drop reference PNG here"
-          description="Drag-drop, browse, or pick from Image Library — overrides folder auto-match for one-off testing."
+          label="Drop flattened product-truth image"
+          description="Flattened Photoshop export with the source background. GPT uses this for product identity, clear-glass edges, cap, tube, and material detail."
           image={customReference}
           onUpload={handleReferencePicked}
           onRemove={clearCustomReference}
@@ -3346,42 +4268,120 @@ export function MastersTabPanel({
             setIsLibraryOpen(false);
           }}
           title="Select reference image"
-          libraryTagContainsAny={["brand:best-bottles", "studio-master", "paper-doll-component"]}
+          libraryTagContainsAny={productTruthLibraryTags}
+          libraryTagExcludeAny={productTruthLibraryTagExcludes}
+          imageUrlExcludeContainsAny={productTruthLibraryUrlExcludes}
+          excludeRetiredBestBottlesTransparentReferences={isCylinderTwoSourcePilot}
         />
 
-        <div className="space-y-2 pt-3 border-t" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-          <Label className="text-xs uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
-            {specularityReferenceCopy.title}
-          </Label>
-          <UploadZone
-            type="style"
-            label={specularityReferenceCopy.dropLabel}
-            description={specularityReferenceCopy.description}
-            image={glassSpecularityReference}
-            onUpload={handleGlassSpecularityReferencePicked}
-            onRemove={() => setGlassSpecularityReference(null)}
-            onLibraryOpen={() => setIsGlassLibraryOpen(true)}
-            disabled={isUploadingGlassRef}
-          />
-
-          {isUploadingGlassRef && (
-            <div className="flex items-center gap-2 text-[11px]" style={{ color: "var(--darkroom-text-muted)" }}>
-              <Loader2 className="w-3 h-3 animate-spin" />
-              {specularityReferenceCopy.uploading}
+        {selectedPromptPreflight && customReference?.url && (
+          <div
+            className={`rounded border p-2 text-[11px] leading-snug ${
+              selectedPromptPreflight.status === "error"
+                ? "border-red-500/30 bg-red-500/[0.06] text-red-100"
+                : selectedPromptPreflight.status === "warn"
+                  ? "border-amber-500/30 bg-amber-500/[0.06] text-amber-100"
+                  : "border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-100"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-[10px] uppercase tracking-wider opacity-70">Prompt QA</div>
+              <div className="font-mono text-[10px]">
+                {selectedPromptPreflight.status === "error"
+                  ? "blocked"
+                  : selectedPromptPreflight.status === "warn"
+                    ? "warning"
+                    : "ready"}
+              </div>
             </div>
-          )}
+            {selectedPromptPreflight.sku && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                <span className="rounded border border-white/10 bg-black/15 px-1.5 py-0.5">
+                  {selectedPromptPreflight.sku.product_family}
+                </span>
+                <span className="rounded border border-white/10 bg-black/15 px-1.5 py-0.5">
+                  {selectedPromptPreflight.sku.body_material}
+                </span>
+                <span className="rounded border border-white/10 bg-black/15 px-1.5 py-0.5">
+                  {selectedPromptPreflight.sku.closure_type}
+                </span>
+                <span className="rounded border border-white/10 bg-black/15 px-1.5 py-0.5">
+                  {selectedPromptPreflight.sku.frame_class}
+                </span>
+              </div>
+            )}
+            {(selectedPromptPreflight.issue || selectedPromptPreflight.warnings[0]) && (
+              <div className="mt-1 opacity-80">
+                {selectedPromptPreflight.issue ?? selectedPromptPreflight.warnings[0]}
+                {selectedPromptPreflight.warnings.length > 1
+                  ? ` +${selectedPromptPreflight.warnings.length - 1} more`
+                  : ""}
+              </div>
+            )}
+          </div>
+        )}
 
-          <ImageLibraryModal
-            open={isGlassLibraryOpen}
-            onOpenChange={setIsGlassLibraryOpen}
-            onSelectImage={(img) => {
-              handleGlassSpecularityReferencePicked(img);
-              setIsGlassLibraryOpen(false);
-            }}
-            title={specularityReferenceCopy.modalTitle}
-            libraryTagContainsAny={specularityLibraryTags}
-          />
-        </div>
+        {shouldShowSecondaryReference && (
+          <div className="space-y-2 pt-3 border-t" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+            <Label className="text-xs uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
+              {specularityReferenceCopy.title}
+            </Label>
+            <UploadZone
+              type="style"
+              label={specularityReferenceCopy.dropLabel}
+              description={specularityReferenceCopy.description}
+              image={glassSpecularityReference}
+              onUpload={handleGlassSpecularityReferencePicked}
+              onRemove={() => {
+                setGlassSpecularityReference(null);
+                setMaskQcResult(null);
+              }}
+              onLibraryOpen={() => setIsGlassLibraryOpen(true)}
+              disabled={isUploadingGlassRef}
+            />
+
+            {isUploadingGlassRef && (
+              <div className="flex items-center gap-2 text-[11px]" style={{ color: "var(--darkroom-text-muted)" }}>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {specularityReferenceCopy.uploading}
+              </div>
+            )}
+
+            {isCylinderMaskControlEnabled && glassSpecularityReference?.url && (
+              <div
+                className="rounded border p-2 text-[11px] leading-snug"
+                style={{
+                  borderColor: maskQcResult?.passed
+                    ? "rgba(16, 185, 129, 0.35)"
+                    : "rgba(245, 158, 11, 0.35)",
+                  background: maskQcResult?.passed
+                    ? "rgba(16, 185, 129, 0.06)"
+                    : "rgba(245, 158, 11, 0.06)",
+                  color: maskQcResult?.passed ? "#6EE7B7" : "#FBBF24",
+                }}
+              >
+                {isCheckingMaskQc
+                  ? "Alpha QC is checking the transparent mask/control PNG..."
+                  : maskQcResult?.passed
+                    ? `Alpha QC passed · foreground ${(maskQcResult.foregroundPixelRatio * 100).toFixed(1)}% · transparent ${(maskQcResult.transparentPixelRatio * 100).toFixed(1)}%`
+                    : maskQcResult
+                      ? maskQcResult.reasons.join(" ")
+                      : "Alpha QC has not completed yet."}
+              </div>
+            )}
+
+            <ImageLibraryModal
+              open={isGlassLibraryOpen}
+              onOpenChange={setIsGlassLibraryOpen}
+              onSelectImage={(img) => {
+                handleGlassSpecularityReferencePicked(img);
+                setIsGlassLibraryOpen(false);
+              }}
+              title={specularityReferenceCopy.modalTitle}
+              libraryTagContainsAny={specularityLibraryTags}
+            />
+          </div>
+        )}
       </div>
 
       {!customReference && (
@@ -3395,10 +4395,32 @@ export function MastersTabPanel({
         >
           <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
           <div className="text-[11px] leading-snug">
-            <div className="font-medium">No reference image attached</div>
+            <div className="font-medium">
+              {isCylinderReferenceWorkflow ? "Flattened product-truth reference required" : "No reference image attached"}
+            </div>
             <div className="opacity-90">
-              Generation is blocked until a usable reference is attached. Scan a folder
-              named after Grace SKUs above, or upload a single PNG/JPG/WebP below.
+              {isCylinderReferenceWorkflow
+                ? "Generation is blocked until this SKU has a flattened Photoshop export attached. Use Upload file, Library, or scan the flattened family folder. Transparent/background-removed PNGs are retired and blocked."
+                : "Generation is blocked until a usable reference is attached. Scan a folder named after Grace SKUs above, or upload a single PNG/JPG/WebP below."}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hasAnyReferenceSource && isCylinderReferenceWorkflow && !isActiveCylinderReferenceReady && (
+        <div
+          className="rounded border p-2 flex items-start gap-2"
+          style={{
+            borderColor: "rgba(245, 158, 11, 0.4)",
+            background: "rgba(245, 158, 11, 0.05)",
+            color: "#FBBF24",
+          }}
+        >
+          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+          <div className="text-[11px] leading-snug">
+            <div className="font-medium">Batch generation locked for this SKU</div>
+            <div className="opacity-90">
+              This active SKU needs its own flattened product-truth image before single-SKU generation. Matched SKUs elsewhere in the family can still run from Batch preflight or the full-family shortcut.
             </div>
           </div>
         </div>
@@ -3428,7 +4450,7 @@ export function MastersTabPanel({
         </div>
       )}
 
-      {hasAnyReferenceSource &&
+      {canShowBatchGenerateShortcuts &&
         (matchedFamilyVariants.length > 1 ||
           allReferenceMatchedVariants.length > matchedFamilyVariants.length) && (
           <div className="space-y-2">
@@ -3525,10 +4547,28 @@ export function MastersTabPanel({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <div className={`grid grid-cols-2 sm:grid-cols-3 ${isCylinderMaskControlEnabled ? "lg:grid-cols-7" : "lg:grid-cols-6"} gap-2`}>
               <BatchPreflightMetric label="SKU count" value={String(batchPreflightEntries.length)} />
               <BatchPreflightMetric label="Will generate" value={String(batchEligibleEntries.length)} tone="ok" />
               <BatchPreflightMetric label="Refs matched" value={`${batchReferenceMatchedCount}/${batchPreflightEntries.length}`} />
+              <BatchPreflightMetric
+                label="Prompt QA"
+                value={
+                  batchPromptBlockedCount > 0
+                    ? `${batchPromptBlockedCount} blocked`
+                    : batchPromptWarningCount > 0
+                      ? `${batchPromptWarningCount} warn`
+                      : "Ready"
+                }
+                tone={batchPromptBlockedCount > 0 || batchPromptWarningCount > 0 ? "warn" : "ok"}
+              />
+              {isCylinderMaskControlEnabled && (
+                <BatchPreflightMetric
+                  label="Masks"
+                  value={String(batchMaskBlockedCount)}
+                  tone={batchMaskBlockedCount > 0 ? "warn" : "ok"}
+                />
+              )}
               <BatchPreflightMetric
                 label="Identity"
                 value={String(batchIdentityBlockedCount)}
@@ -3579,9 +4619,11 @@ export function MastersTabPanel({
                 )}
               </div>
               <div className="rounded border border-white/10 bg-white/[0.02] p-3 space-y-1">
-                <div className="text-[10px] uppercase tracking-wider text-white/45">Prompt policy summary</div>
-                <div>Shared prompt: lighting, material, canvas, and brand style.</div>
-                <div>Per SKU: capacity, dimensions, color, applicator, cap/trim, and reference.</div>
+                <div className="text-[10px] uppercase tracking-wider text-white/45">Prompt compiler</div>
+                <div>Family: <span className="font-mono text-white/75">{batchPromptFamilySummary}</span></div>
+                <div>Material: <span className="font-mono text-white/75">{batchPromptMaterialSummary}</span></div>
+                <div>Closure: <span className="font-mono text-white/75">{batchPromptClosureSummary}</span></div>
+                <div>Frame: <span className="font-mono text-white/75">{batchPromptFrameSummary}</span></div>
                 {(batchHasMixedCapacity || batchHasMixedApplicator) && (
                   <div className="text-amber-300">
                     Mixed scope: avoid prompt text naming one capacity or applicator.
@@ -3590,7 +4632,11 @@ export function MastersTabPanel({
               </div>
             </div>
 
-            {(batchMissingReferenceCount > 0 || batchInvalidReferenceCount > 0 || batchMeasurementBlockedCount > 0) && (
+            {(batchMissingReferenceCount > 0 ||
+              batchInvalidReferenceCount > 0 ||
+              batchMaskBlockedCount > 0 ||
+              batchMeasurementBlockedCount > 0 ||
+              batchPromptBlockedCount > 0) && (
               <div className="rounded border border-amber-500/25 bg-amber-500/5 p-3 text-[11px] leading-snug text-amber-200">
                 {batchMissingReferenceCount > 0 && (
                   <div>{batchMissingReferenceCount} SKU{batchMissingReferenceCount === 1 ? "" : "s"} omitted: no usable reference.</div>
@@ -3603,11 +4649,114 @@ export function MastersTabPanel({
                       : ""}
                   </div>
                 )}
+                {batchMaskBlockedCount > 0 && (
+                  <div>
+                    {batchMaskBlockedCount} SKU{batchMaskBlockedCount === 1 ? "" : "s"} omitted:{" "}
+                    {isCylinderMaskControlEnabled
+                      ? "missing or failed transparent mask/control PNG."
+                      : "failed the retired reference guardrail."}
+                  </div>
+                )}
                 {batchMeasurementBlockedCount > 0 && (
                   <div>{batchMeasurementBlockedCount} SKU{batchMeasurementBlockedCount === 1 ? "" : "s"} omitted: missing measurements.</div>
                 )}
+                {batchPromptBlockedCount > 0 && (
+                  <div>{batchPromptBlockedCount} SKU{batchPromptBlockedCount === 1 ? "" : "s"} omitted: prompt compiler could not resolve a required module.</div>
+                )}
               </div>
             )}
+
+            <div className="rounded border border-white/10 bg-white/[0.02] p-3 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider text-white/45">Prompt QA by SKU</div>
+                </div>
+                <div
+                  className={`rounded-full border px-2 py-1 text-[10px] font-medium ${
+                    batchPromptBlockedCount > 0
+                      ? "border-red-400/30 bg-red-500/10 text-red-200"
+                      : batchPromptWarningCount > 0
+                        ? "border-amber-400/30 bg-amber-500/10 text-amber-200"
+                        : "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
+                  }`}
+                >
+                  {batchPromptBlockedCount > 0
+                    ? `${batchPromptBlockedCount} blocked`
+                    : batchPromptWarningCount > 0
+                      ? `${batchPromptWarningCount} warning`
+                      : "ready"}
+                </div>
+              </div>
+              <div className="max-h-44 space-y-1 overflow-auto pr-1">
+                {batchPreflightEntries.map((entry) => {
+                  const compiledSku = entry.promptPreflight.sku;
+                  const promptStatus = entry.promptPreflight.status;
+                  const promptStatusLabel =
+                    promptStatus === "error" ? "Blocked" : promptStatus === "warn" ? "Warning" : "Ready";
+                  const promptMessage =
+                    entry.promptPreflight.issue ??
+                    entry.promptPreflight.warnings[0] ??
+                    "Compiled prompt ready.";
+                  return (
+                    <div
+                      key={`prompt-qa-${productBatchKey(entry.product)}`}
+                      className="rounded border border-white/[0.06] bg-black/15 p-2 text-[10px]"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="truncate font-mono text-white/80">{entry.product.graceSku}</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {compiledSku ? (
+                              <>
+                                <span className="rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-white/55">
+                                  {compiledSku.product_family}
+                                </span>
+                                <span className="rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-white/55">
+                                  {compiledSku.body_material}
+                                </span>
+                                <span className="rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-white/55">
+                                  {compiledSku.closure_type}
+                                </span>
+                                <span className="rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-white/55">
+                                  {compiledSku.frame_class}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-white/35">No compiled modules</span>
+                            )}
+                          </div>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full border px-1.5 py-0.5 ${
+                            promptStatus === "error"
+                              ? "border-red-400/30 text-red-200"
+                              : promptStatus === "warn"
+                                ? "border-amber-400/30 text-amber-200"
+                                : "border-emerald-400/30 text-emerald-200"
+                          }`}
+                        >
+                          {promptStatusLabel}
+                        </span>
+                      </div>
+                      <div
+                        className={`mt-1 leading-snug ${
+                          promptStatus === "error"
+                            ? "text-red-200/80"
+                            : promptStatus === "warn"
+                              ? "text-amber-200/80"
+                              : "text-white/35"
+                        }`}
+                      >
+                        {promptMessage}
+                        {entry.promptPreflight.warnings.length > 1
+                          ? ` +${entry.promptPreflight.warnings.length - 1} more`
+                          : ""}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             {batchScope === "selected-skus" && (
               <div className="rounded border border-white/10 bg-white/[0.02] p-3 space-y-3">
@@ -3638,6 +4787,7 @@ export function MastersTabPanel({
                             .filter(
                               (product) =>
                                 lookupAvailableReference(product, presetId) !== null &&
+                                getMaskControlIssueForSku(product, presetId) === null &&
                                 getMeasurementIssue(product) === null,
                             )
                             .slice(0, 8),
@@ -3671,7 +4821,12 @@ export function MastersTabPanel({
                   {fullFamilyBatchCandidates.map((product) => {
                     const key = productBatchKey(product);
                     const { reference, source } = lookupReferenceCandidateForDiagnostics(product, presetId);
-                    const referenceIssue = getBestBottlesReferenceUrlIssue(reference?.url);
+                    const maskIssue = getMaskControlIssueForSku(product, presetId);
+                    const referenceIssue =
+                      reference && isCylinderFamilyName(product.family)
+                        ? getRetiredTransparentBestBottlesReferenceIssue([reference]) ??
+                          getBestBottlesReferenceUrlIssue(reference.url)
+                        : getBestBottlesReferenceUrlIssue(reference?.url);
                     const measurementIssue = getMeasurementIssue(product);
                     const identity = buildBestBottlesGenerationIdentity(product, {
                       bodyMaterial: inferBestBottlesBodyMaterial(product),
@@ -3681,6 +4836,7 @@ export function MastersTabPanel({
                     const blocked =
                       reference === null ||
                       referenceIssue !== null ||
+                      maskIssue !== null ||
                       measurementIssue !== null ||
                       identityIssue !== null;
                     return (
@@ -3707,6 +4863,10 @@ export function MastersTabPanel({
                               ? "Needs measurements"
                               : identityIssue
                                 ? "Identity blocked"
+                                : maskIssue
+                                  ? isCylinderMaskControlEnabled
+                                    ? "Needs mask"
+                                    : "Reference blocked"
                                 : source === "path-only"
                                   ? "Import path-only ref"
                                   : "Needs usable ref"}
@@ -3755,7 +4915,15 @@ export function MastersTabPanel({
       <div className="flex gap-2">
         <Button
           onClick={handleGenerate}
-          disabled={isGenerating || batchProgress !== null || !customReference?.url || customReferenceIssue !== null}
+          disabled={
+            isGenerating ||
+            batchProgress !== null ||
+            !customReference?.url ||
+            customReferenceIssue !== null ||
+            productTruthReferenceIssue !== null ||
+            maskControlIssue !== null ||
+            selectedPromptPreflight?.status === "error"
+          }
           className="flex-1 bg-[var(--darkroom-accent,#B8956A)] text-black hover:bg-[var(--darkroom-accent,#B8956A)]/90"
         >
           {isGenerating ? (
@@ -3773,21 +4941,23 @@ export function MastersTabPanel({
         <Button
           variant="outline"
           onClick={async () => {
-            const a = await handleAssemble();
-            setShowAssembledPrompt(Boolean(a));
+            if (!assembledCache) {
+              await handleAssemble();
+            }
+            setShowAssembledPrompt(Boolean(selectedCompiledPromptPreview));
           }}
           className="border-white/15 bg-white/[0.02] text-white hover:bg-white/[0.06] hover:text-white"
-          title="Preview the reference-locked server prompt mode"
+          title="Preview the compiled Best Bottles prompt"
         >
           <Wand2 className="w-4 h-4" />
         </Button>
       </div>
 
-      {showAssembledPrompt && assembledCache && (
+      {showAssembledPrompt && selectedCompiledPromptPreview && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
-              {result ? "Actual server prompt" : "Reference-locked server mode"}
+              {result ? "Actual server prompt" : "Compiled catalog prompt"}
             </Label>
             <Button
               variant="ghost"
@@ -3801,10 +4971,10 @@ export function MastersTabPanel({
           <p className="text-[11px] leading-relaxed" style={{ color: "var(--darkroom-text-dim)" }}>
             {result
               ? "This is the final prompt returned by the Edge Function for the generated image."
-              : "Best Bottles master generations replace the old assembled prompt with a server-side reference-locked prompt. The GLOBAL SYSTEM context is only SKU/spec data and is not the OpenAI prompt."}
+              : "This is the precompiled JSON prompt record Studio sends for this Best Bottles master generation."}
           </p>
           <Textarea
-            value={result?.prompt ?? serverPromptPreview}
+            value={result?.prompt ?? selectedCompiledPromptPreview}
             readOnly
             className="min-h-[180px] font-mono text-[10px] bg-white/[0.03] border-white/10 text-white/80"
           />
@@ -3901,8 +5071,16 @@ export function MastersTabPanel({
           <span>
             {customReferenceIssue
               ? "The selected reference is not usable yet. Import or upload a public PNG, JPG, or WebP before generating."
+              : productTruthReferenceIssue
+                ? productTruthReferenceIssue
+              : selectedPromptPreflight?.status === "error"
+                ? selectedPromptPreflight.issue ?? "Prompt preflight blocked this SKU."
+              : maskControlIssue
+                ? maskControlIssue
               : customReference?.url
-                ? "Click Generate master to produce this SKU with the attached product reference."
+                ? isCylinderTwoSourcePilot
+                  ? "Click Generate master to produce this SKU from the flattened product-truth PNG."
+                  : "Click Generate master to produce this SKU with the attached product reference."
                 : unusablePersistedReferenceForCurrentSku
                   ? "A synced reference candidate exists, but it is not fetchable yet. Import or upload the recovered PNG before generating."
                   : "Add a product reference before generating this SKU."}

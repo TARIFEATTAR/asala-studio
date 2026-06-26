@@ -52,6 +52,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ImageEditorModal, type ImageEditorImage } from "@/components/image-editor/ImageEditorModal";
 import { ProductSelector } from "@/components/forge/ProductSelector";
+import { SanityMediaPlacementDialog } from "@/components/library/SanityMediaPlacementDialog";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import {
   getBestBottlesCatalogProducts,
@@ -93,6 +94,11 @@ import {
   BEST_BOTTLES_LINEAGE_TAG_LEGACY,
   getBestBottlesReferenceLineage,
 } from "@/lib/bestBottlesImageCoverage";
+import {
+  getDefaultImageLibraryPublishDestination,
+  getImageLibraryPublishDestinations,
+  type ImageLibraryPublishDestination as PublishDestination,
+} from "@/lib/imageLibraryPublishDestinations";
 import {
   BEST_BOTTLES_DARKROOM_ASSET_TAG_SOURCE,
   BEST_BOTTLES_DARKROOM_IDENTITY_TAG_MATCHED,
@@ -160,7 +166,6 @@ type SkuSizeFilter = "all" | string;
  */
 type ReferenceLineageFilter = "clean" | "legacy" | "all";
 type SortOption = "recent" | "oldest" | "category";
-type PublishDestination = "tarife-sanity" | "best-bottles-grid" | "best-bottles-pdp";
 type BestBottlesPdpMode = "cap-on" | "cap-off";
 type BulkBestBottlesRow = {
   imageId: string;
@@ -899,7 +904,11 @@ export default function ImageLibrary() {
   const { user } = useAuth();
   const { currentOrganizationId } = useOnboarding();
   const { enabled: isBestBottlesOrg } = useGridPipelineFeatureFlag();
-  const publishLabel = isBestBottlesOrg ? "Publish to Best Bottles" : "Publish to website";
+  const publishLabel = isBestBottlesOrg ? "Publish to Shopify" : "Publish to website";
+  const publishDestinations = useMemo(
+    () => getImageLibraryPublishDestinations(isBestBottlesOrg),
+    [isBestBottlesOrg],
+  );
   const { toast } = useToast();
 
   // State
@@ -929,7 +938,7 @@ export default function ImageLibrary() {
   const [newLibraryTag, setNewLibraryTag] = useState("");
   const [tagActionLoading, setTagActionLoading] = useState(false);
 
-  // Publish live: Best Bottles Shopify media or Tarife mainImage.
+  // Publish live: Best Bottles Shopify media or non-Best-Bottles website media.
   const [sanityPublishOpen, setSanityPublishOpen] = useState(false);
   const [sanityPublishImage, setSanityPublishImage] = useState<GeneratedImage | null>(null);
   const [sanityPublishProduct, setSanityPublishProduct] = useState<Product | null>(null);
@@ -944,6 +953,8 @@ export default function ImageLibrary() {
   const [bestBottlesGroupSearch, setBestBottlesGroupSearch] = useState("");
   const [bestBottlesSkuPickerOpen, setBestBottlesSkuPickerOpen] = useState(false);
   const [bestBottlesSkuSearch, setBestBottlesSkuSearch] = useState("");
+  const [sanityMediaOpen, setSanityMediaOpen] = useState(false);
+  const [sanityMediaImage, setSanityMediaImage] = useState<GeneratedImage | null>(null);
   const [bulkBestBottlesOpen, setBulkBestBottlesOpen] = useState(false);
   const [bulkBestBottlesRows, setBulkBestBottlesRows] = useState<BulkBestBottlesRow[]>([]);
   const [bulkBestBottlesMode, setBulkBestBottlesMode] =
@@ -2514,21 +2525,26 @@ export default function ImageLibrary() {
     const resolvedGroupSlug = isBestBottlesOrg
       ? resolveBestBottlesProductGroupSlug(image) || detectProductGroupSlug(image)
       : "";
-    const bestBottlesDestination: PublishDestination = resolvedGroupSlug
-      ? "best-bottles-grid"
-      : resolvedWebsiteSku
-        ? "best-bottles-pdp"
-        : "best-bottles-grid";
+    const defaultDestination = getDefaultImageLibraryPublishDestination({
+      isBestBottlesOrg,
+      resolvedGroupSlug,
+      resolvedWebsiteSku,
+    });
 
     setSanityPublishImage(image);
     setSanityPublishProduct(null);
-    setPublishDestination(isBestBottlesOrg ? bestBottlesDestination : "tarife-sanity");
-    setBestBottlesSlug(bestBottlesDestination === "best-bottles-grid" ? resolvedGroupSlug : "");
-    setBestBottlesWebsiteSku(bestBottlesDestination === "best-bottles-pdp" ? resolvedWebsiteSku : "");
+    setPublishDestination(defaultDestination);
+    setBestBottlesSlug(defaultDestination === "best-bottles-grid" ? resolvedGroupSlug : "");
+    setBestBottlesWebsiteSku(defaultDestination === "best-bottles-pdp" ? resolvedWebsiteSku : "");
     setBestBottlesPdpMode("cap-on");
     setBestBottlesGroupSearch("");
     setBestBottlesSkuSearch("");
     setSanityPublishOpen(true);
+  };
+
+  const openSanityMediaPlacement = (image: GeneratedImage) => {
+    setSanityMediaImage(image);
+    setSanityMediaOpen(true);
   };
 
   const handleConfirmSanityPublish = async () => {
@@ -3259,6 +3275,18 @@ export default function ImageLibrary() {
                             <Upload className="w-4 h-4 mr-2" />
                             {publishLabel}
                           </DropdownMenuItem>
+                          {isBestBottlesOrg && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openSanityMediaPlacement(image);
+                              }}
+                              className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Push to Sanity
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -3350,6 +3378,39 @@ export default function ImageLibrary() {
                       </DropdownMenu>
                     </div>
 
+                    {isBestBottlesOrg && (
+                      <div className="absolute top-12 right-2 z-10 flex flex-col items-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSanityPublish(image);
+                          }}
+                          title="Publish this image to Best Bottles Shopify media"
+                          className="h-8 border border-[#95BF47] bg-[#95BF47] px-2 text-xs font-semibold text-[#0B1F0A] shadow-[0_0_0_1px_rgba(149,191,71,0.25)] hover:bg-[#A7D65A]"
+                        >
+                          <ShoppingBag className="h-3.5 w-3.5 md:mr-1" />
+                          <span className="hidden md:inline">Publish Shopify</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSanityMediaPlacement(image);
+                          }}
+                          title="Push this image into Sanity media"
+                          className="h-8 border-white/55 bg-black/65 px-2 text-xs font-semibold text-white hover:bg-black/80 hover:text-white"
+                        >
+                          <Upload className="h-3.5 w-3.5 md:mr-1" />
+                          <span className="hidden md:inline">Push to Sanity</span>
+                          <span className="md:hidden">Sanity</span>
+                        </Button>
+                      </div>
+                    )}
+
                     {/* Category Badge - use goal_type for display */}
                     <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 items-end">
                     {isBestBottlesOrg && (() => {
@@ -3435,6 +3496,33 @@ export default function ImageLibrary() {
           </div>
         </div>
       </div>
+
+      <SanityMediaPlacementDialog
+        open={sanityMediaOpen}
+        onOpenChange={(open) => {
+          setSanityMediaOpen(open);
+          if (!open) setSanityMediaImage(null);
+        }}
+        organizationId={currentOrganizationId}
+        image={sanityMediaImage}
+        isBestBottlesOrg={isBestBottlesOrg}
+        initialFamilySlug={
+          sanityMediaImage
+            ? resolveBestBottlesProductGroupSlug(sanityMediaImage) ||
+              detectProductGroupSlug(sanityMediaImage)
+            : ""
+        }
+        initialWebsiteSku={
+          sanityMediaImage ? resolveBestBottlesWebsiteSku(sanityMediaImage) : ""
+        }
+        initialGraceSku={
+          sanityMediaImage
+            ? resolveBestBottlesProductForSku(
+              resolveBestBottlesWebsiteSku(sanityMediaImage),
+            )?.graceSku || detectGraceSku(sanityMediaImage)
+            : ""
+        }
+      />
 
       <Dialog
         open={heroAssignOpen}
@@ -4074,9 +4162,9 @@ export default function ImageLibrary() {
           <DialogHeader>
             <DialogTitle>Publish live</DialogTitle>
             <DialogDescription className="text-[var(--darkroom-text)]/70">
-              Send this render through Shopify for Best Bottles variant media or catalog hero
-              thumbnails, then reconcile the Shopify CDN URL into Convex for the live site. Tarife
-              still publishes to Sanity via Product Hub.
+              {isBestBottlesOrg
+                ? "Send this render through Shopify for Best Bottles variant media or catalog hero thumbnails, then reconcile the Shopify CDN URL into Convex for the live site."
+                : "Send this render to the website publishing path for this organization."}
             </DialogDescription>
           </DialogHeader>
           {sanityPublishImage && (
@@ -4087,8 +4175,9 @@ export default function ImageLibrary() {
                 className="w-20 h-20 rounded-md object-cover border border-[var(--darkroom-border)] shrink-0"
               />
               <p className="text-xs text-[var(--darkroom-text)]/60 line-clamp-4">
-                Choose whether this render updates Best Bottles Shopify-backed variant media, a
-                Shopify-backed catalog hero/thumbnail, or a Tarife fragrance main image.
+                {isBestBottlesOrg
+                  ? "Choose whether this render updates Best Bottles Shopify-backed variant media or a Shopify-backed catalog hero/thumbnail."
+                  : "Choose the website destination for this render."}
               </p>
             </div>
           )}
@@ -4130,17 +4219,11 @@ export default function ImageLibrary() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {isBestBottlesOrg && (
-                  <>
-                    <SelectItem value="best-bottles-grid">
-                      Best Bottles group hero / grid thumbnail via Shopify
-                    </SelectItem>
-                    <SelectItem value="best-bottles-pdp">
-                      Best Bottles variant PDP image via Shopify
-                    </SelectItem>
-                  </>
-                )}
-                <SelectItem value="tarife-sanity">Tarife product main image</SelectItem>
+                {publishDestinations.map((destination) => (
+                  <SelectItem key={destination.value} value={destination.value}>
+                    {destination.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

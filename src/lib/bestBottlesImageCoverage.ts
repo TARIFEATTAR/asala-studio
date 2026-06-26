@@ -90,6 +90,7 @@ export function isBestBottlesCleanLineage(
 
 export type BestBottlesReferenceSource =
   | "canonical-render"
+  | "flattened-product-truth"
   | "local-legacy"
   | "bestbottles-live"
   | "manual"
@@ -462,6 +463,7 @@ function isHttpReference(value: string | null | undefined): boolean {
 function hasLocalReferenceCandidate(job: SkuJobCoverageInput): boolean {
   return Boolean(
     job.referenceSource === "local-legacy" ||
+      job.referenceSource === "flattened-product-truth" ||
       job.referenceSource === "canonical-render" ||
       job.referenceSource === "manual" ||
       job.referenceSourcePath ||

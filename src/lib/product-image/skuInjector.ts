@@ -456,10 +456,10 @@ export function buildProductSpecBlock(
   } else {
     lines.push("PHYSICAL CONSTRAINTS — MANDATORY DIMENSIONS:");
     lines.push(
-      "These measurements come directly from Grace's catalog and are NOT approximations. The rendered bottle MUST match these dimensions exactly. Do not invent, scale, or interpolate.",
+      "These measurements come directly from Grace's catalog and are NOT approximations. The rendered bottle MUST match these dimensions exactly. Do not invent, distort, or interpolate product geometry.",
     );
     lines.push(
-      "- SIZE SCALE LOCK: Use the millimeter dimensions as real physical scale within the fixed catalog frame. Do NOT enlarge smaller capacities to fill the canvas like larger siblings. A 30ml bottle must remain visibly smaller/shorter than a 50ml sibling when its dimensions are smaller, and a 50ml bottle must remain visibly smaller/shorter than a 100ml sibling when its dimensions are smaller.",
+      "- PDP FRAMING NOTE: measurements define physical proportions, component relationships, and identity QA. Madison's imposed studio rig controls the product's on-canvas framing for PDP masters so small bottles remain inspectable and comparable. True relative size belongs in comparison grids and measurement copy, not in the master PNG zoom.",
     );
     if (heightMm != null && diameterMm != null) {
       const ratio = (heightMm / diameterMm).toFixed(2);
@@ -511,7 +511,7 @@ export function buildProductSpecBlock(
       "- Internal tube length (for fitments with a dip tube) must reach to within ~3 mm of the bottle's interior base, calculated from the body height above.",
     );
     lines.push(
-      "- 50ml and 100ml variants of the same family share cross-section width but DIFFER in body height. Do not render a 100ml SKU at 50ml proportions or vice versa — the height number above is authoritative.",
+      "- 50ml and 100ml variants of the same family may share cross-section width but differ in body height. Do not render a 100ml SKU at 50ml proportions or vice versa — the height number above is authoritative for shape/proportion even when PDP framing is normalized.",
     );
   }
 

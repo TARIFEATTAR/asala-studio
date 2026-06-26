@@ -36,7 +36,7 @@ function sku(overrides: Partial<ReferenceIntakeSkuRow>): ReferenceIntakeSkuRow {
 }
 
 describe("Best Bottles clean-lane cutover (coverage derivation + classification)", () => {
-  it("classifies the clean reference lane as canonical-render and everything else as local-legacy", () => {
+  it("classifies clean, flattened product truth, and legacy reference lanes distinctly", () => {
     assert.equal(
       sourceForPath(
         "/x/pipeline/best-bottles-reference-images-clean/01-transparent-png-candidates/_dryrun-2026-06-21/GB-CYL-CLR-50ML-RDC-WHT.png",
@@ -49,7 +49,7 @@ describe("Best Bottles clean-lane cutover (coverage derivation + classification)
     );
     assert.equal(
       sourceForPath("/x/pipeline/aios-shopify-pdp-images/00-input/reference-flattened/foo.png"),
-      "local-legacy",
+      "flattened-product-truth",
     );
   });
 
@@ -58,6 +58,10 @@ describe("Best Bottles clean-lane cutover (coverage derivation + classification)
     assert.equal(deriveReferenceCoverageStatus("canonical-render", "missing_local_reference_image"), "covered_canonical");
     // a legacy/opaque match keeps "needs canonical copy"; never auto-promoted
     assert.equal(deriveReferenceCoverageStatus("local-legacy", "covered_needs_canonical_copy"), "covered_needs_canonical_copy");
+    assert.equal(
+      deriveReferenceCoverageStatus("flattened-product-truth", "covered_needs_canonical_copy"),
+      "covered_needs_canonical_copy",
+    );
     // website-only / no match preserve the incoming state (no demotion either)
     assert.equal(deriveReferenceCoverageStatus("bestbottles-live", "missing_local_reference_image"), "missing_local_reference_image");
     assert.equal(deriveReferenceCoverageStatus("none", "covered_needs_canonical_copy"), "covered_needs_canonical_copy");
@@ -104,6 +108,90 @@ describe("Best Bottles reference intake planner", () => {
     assert.equal(plan.rows[0].matchKind, "grace-sku");
     assert.equal(plan.rows[0].referenceSourcePath, strongerGraceMatch);
     assert.equal(plan.rows[0].referenceIssue, null);
+  });
+
+  it("accepts flattened Cylinder product-truth exports named by exact Grace SKU", () => {
+    const root = mkdtempSync(join(tmpdir(), "bb-ref-intake-"));
+    const flattened = join(root, "reference-flattened", "Cylinder", "GB-CYL-CLR-9ML-SPR-GLD.png");
+    mkdirSync(join(flattened, ".."), { recursive: true });
+    writeFileSync(flattened, "png");
+
+    const plan = buildReferenceIntakePlan({
+      rows: [
+        sku({
+          graceSku: "GB-CYL-CLR-9ML-SPR-GLD",
+          websiteSku: "GB9MlGoldSprayer",
+          family: "Cylinder",
+          productGroupSlug: "cylinder-9ml-swirl-17-415-finemist",
+          productGroupDisplayName: "Cylinder 9 ml Swirl 17-415 Fine Mist",
+        }),
+      ],
+      localRoots: [root],
+    });
+
+    assert.equal(plan.rows[0].referenceSource, "flattened-product-truth");
+    assert.equal(plan.rows[0].matchKind, "grace-sku");
+    assert.equal(plan.rows[0].referenceSourcePath, flattened);
+    assert.equal(plan.rows[0].referenceIssue, null);
+    assert.equal(plan.rows[0].nextAction, "import-local-reference");
+  });
+
+  it("rejects retired Cylinder transparent clean-lane references during intake", () => {
+    const root = mkdtempSync(join(tmpdir(), "bb-ref-intake-"));
+    const transparent = join(
+      root,
+      "pipeline",
+      "best-bottles-reference-images-clean",
+      "01-transparent-png-candidates",
+      "cylinder",
+      "cylinder-9ml-swirl-17-415-finemist",
+      "GB-CYL-CLR-9ML-SPR-GLD.png",
+    );
+    mkdirSync(join(transparent, ".."), { recursive: true });
+    writeFileSync(transparent, "png");
+
+    const plan = buildReferenceIntakePlan({
+      rows: [
+        sku({
+          graceSku: "GB-CYL-CLR-9ML-SPR-GLD",
+          websiteSku: "GB9MlGoldSprayer",
+          family: "Cylinder",
+          productGroupSlug: "cylinder-9ml-swirl-17-415-finemist",
+          productGroupDisplayName: "Cylinder 9 ml Swirl 17-415 Fine Mist",
+        }),
+      ],
+      localRoots: [root],
+    });
+
+    assert.equal(plan.rows[0].referenceSource, "none");
+    assert.equal(plan.rows[0].referenceSourcePath, null);
+    assert.equal(plan.rows[0].nextAction, "needs-source-match");
+  });
+
+  it("does not auto-bind duplicate website-SKU aliases for Cylinder references", () => {
+    const root = mkdtempSync(join(tmpdir(), "bb-ref-intake-"));
+    const first = join(root, "reference-flattened", "Cylinder", "GB9MlGoldSprayer__v001.png");
+    const second = join(root, "reference-flattened", "Cylinder", "GB9MlGoldSprayer__v002.png");
+    mkdirSync(join(first, ".."), { recursive: true });
+    writeFileSync(first, "png");
+    writeFileSync(second, "png");
+
+    const plan = buildReferenceIntakePlan({
+      rows: [
+        sku({
+          graceSku: "GB-CYL-CLR-9ML-SPR-GLD",
+          websiteSku: "GB9MlGoldSprayer",
+          family: "Cylinder",
+          productGroupSlug: "cylinder-9ml-swirl-17-415-finemist",
+          productGroupDisplayName: "Cylinder 9 ml Swirl 17-415 Fine Mist",
+        }),
+      ],
+      localRoots: [root],
+    });
+
+    assert.equal(plan.rows[0].referenceSource, "none");
+    assert.equal(plan.rows[0].matchKind, "none");
+    assert.equal(plan.rows[0].nextAction, "needs-source-match");
   });
 
   it("flags GIF local matches for conversion/import instead of treating them as generation-ready", () => {

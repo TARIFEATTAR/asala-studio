@@ -1,18 +1,18 @@
 # Best Bottles Cap-On Generation Cycles
 
-Generated: 2026-06-08T13:49:06.803Z
+Generated: 2026-06-09T01:41:57.505Z
 
 ## Sources
 
 - Readiness JSON: /Users/jordanrichter/Projects/Madison Studio/madison-app/public/data/best-bottles-generation-readiness.json
-- Readiness generated at: 2026-05-20T16:25:29.425Z
+- Readiness generated at: 2026-06-09T01:41:57.127Z
 - Source-of-truth date: 2026-05-14
 - Output directory: /Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-cap-on-generation-cycles
 - Pipeline lane: grid-card-2000x2200
 
 ## Summary
 
-- Eligible cap-on rows: 1599
+- Eligible cap-on rows: 1593
 - Cycles: 4
 - Missing reference files on disk: 0
 
@@ -20,23 +20,23 @@ Generated: 2026-06-08T13:49:06.803Z
 
 | Cycle | Rows | Manifest |
 | --- | ---: | --- |
-| cycle-01 | 400 | cycle-01.json |
-| cycle-02 | 400 | cycle-02.json |
-| cycle-03 | 400 | cycle-03.json |
-| cycle-04 | 399 | cycle-04.json |
+| cycle-01 | 399 | cycle-01.json |
+| cycle-02 | 398 | cycle-02.json |
+| cycle-03 | 398 | cycle-03.json |
+| cycle-04 | 398 | cycle-04.json |
 
 ## Families
 
 | Family | Rows |
 | --- | ---: |
-| Cylinder | 272 |
+| Cylinder | 270 |
 | Elegant | 204 |
 | Circle | 197 |
 | Round | 174 |
 | Diva | 168 |
 | Sleek | 148 |
 | Slim | 123 |
-| Empire | 93 |
+| Empire | 89 |
 | Diamond | 43 |
 | Grace | 43 |
 | Rectangle | 25 |

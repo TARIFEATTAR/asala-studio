@@ -12,6 +12,7 @@ import {
   type BestBottlesNeedsWorkAction,
   type BestBottlesReferenceSource,
 } from "../src/lib/bestBottlesImageCoverage.ts";
+import { getBestBottlesCylinderProductTruthReferenceIssue } from "../src/lib/bestBottlesReferenceFilters.ts";
 import { getBestBottlesReferenceUrlIssue } from "../src/lib/bestBottlesReferenceValidation.ts";
 
 export interface ReferenceIntakeSkuRow {
@@ -210,10 +211,10 @@ function safeSegment(value: string | null | undefined): string {
 }
 
 export function sourceForPath(filePath: string): ReferenceFileCandidate["referenceSource"] {
-  // The clean transparent reference lane (Cowork's PSD -> alpha-preserving PNG
-  // output) is the canonical source post-cutover. Everything else (flattened /
-  // legacy / old opaque renders) is the legacy that still needs a clean copy.
-  return filePath.includes("/best-bottles-reference-images-clean/") ? "canonical-render" : "local-legacy";
+  const normalizedPath = filePath.replace(/\\/g, "/");
+  if (normalizedPath.includes("/best-bottles-reference-images-clean/")) return "canonical-render";
+  if (normalizedPath.includes("/reference-flattened/")) return "flattened-product-truth";
+  return "local-legacy";
 }
 
 /**
@@ -316,6 +317,7 @@ function rankCandidate(candidate: ReferenceFileCandidate): number {
   // Prefer the clean canonical reference over the opaque legacy renders so a SKU
   // with a clean cutout binds to it (and thus flips to covered_canonical).
   if (candidate.referenceSource === "canonical-render") score += 40;
+  else if (candidate.referenceSource === "flattened-product-truth") score += 35;
   else if (candidate.referenceSource === "local-legacy") score += 20;
   if (candidate.relativePath.includes("madison-upload-website-sku-png")) score += 10;
   if (candidate.extension === ".png") score += 5;
@@ -330,6 +332,27 @@ function pickCandidate(candidates: ReferenceFileCandidate[]): ReferenceFileCandi
   })[0];
 }
 
+function isCylinderReferenceRow(row: ReferenceIntakeSkuRow): boolean {
+  return (
+    /cylinder/i.test(row.family ?? "") ||
+    /cylinder/i.test(row.productGroupSlug ?? "") ||
+    /cylinder/i.test(row.productGroupDisplayName ?? "")
+  );
+}
+
+function isRetiredCylinderReferenceCandidate(
+  row: ReferenceIntakeSkuRow,
+  candidate: ReferenceFileCandidate,
+): boolean {
+  if (!isCylinderReferenceRow(row)) return false;
+  return getBestBottlesCylinderProductTruthReferenceIssue([
+    candidate.absolutePath,
+    candidate.relativePath,
+    candidate.keys,
+    candidate.referenceSource,
+  ]) !== null;
+}
+
 function findLocalMatch(
   row: ReferenceIntakeSkuRow,
   index: Map<string, ReferenceFileCandidate[]>,
@@ -341,7 +364,12 @@ function findLocalMatch(
   ].filter((probe) => probe.key);
 
   for (const probe of probes) {
-    const candidates = index.get(probe.key) ?? [];
+    const candidates = (index.get(probe.key) ?? []).filter(
+      (candidate) => !isRetiredCylinderReferenceCandidate(row, candidate),
+    );
+    if (probe.matchKind !== "grace-sku" && candidates.length > 1) {
+      continue;
+    }
     if (candidates.length > 0) {
       return {
         candidate: pickCandidate(candidates),
@@ -687,7 +715,11 @@ export function summarizeReferenceIntake(rows: ReferenceIntakePlanRow[]): Refere
 
   for (const row of rows) {
     byNextAction[row.nextAction] += 1;
-    if (row.referenceSource === "local-legacy" || row.referenceSource === "canonical-render") {
+    if (
+      row.referenceSource === "local-legacy" ||
+      row.referenceSource === "flattened-product-truth" ||
+      row.referenceSource === "canonical-render"
+    ) {
       localMatches += 1;
       if (row.referenceIssue) conversionRequired += 1;
       else supportedLocalMatches += 1;
@@ -701,7 +733,11 @@ export function summarizeReferenceIntake(rows: ReferenceIntakePlanRow[]): Refere
     const family = row.family?.trim() || "(blank)";
     const counts = familyCounts.get(family) ?? { family, total: 0, local: 0, live: 0, unresolved: 0 };
     counts.total += 1;
-    if (row.referenceSource === "local-legacy" || row.referenceSource === "canonical-render") counts.local += 1;
+    if (
+      row.referenceSource === "local-legacy" ||
+      row.referenceSource === "flattened-product-truth" ||
+      row.referenceSource === "canonical-render"
+    ) counts.local += 1;
     else if (row.referenceSource === "bestbottles-live") counts.live += 1;
     else if (row.referenceSource === "none") counts.unresolved += 1;
     familyCounts.set(family, counts);

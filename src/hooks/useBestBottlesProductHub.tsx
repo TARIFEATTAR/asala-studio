@@ -14,6 +14,7 @@ import {
   type PipelineSkuJobStatus,
 } from "@/lib/bestBottlesPipeline";
 import { buildBestBottlesShopifyPushItemFromSkuJob } from "@/lib/bestBottlesShopifyPushIdentity";
+import { auditProductSeo, type ProductSeoAuditResult } from "@/lib/productSeoAudit";
 import type { ProductHub } from "@/hooks/useProducts";
 
 type BestBottlesProductHubJob = PipelineSkuJob & {
@@ -83,6 +84,7 @@ export interface BestBottlesProductGroupHub {
     needsReference: number;
   };
   hasSeo: boolean;
+  seoAudit: ProductSeoAuditResult;
   hasSpecs: boolean;
   missingSpecFields: string[];
   hasPrimaryMedia: boolean;
@@ -215,12 +217,23 @@ function hasBottleSpecs(product: ProductHubWithHero | null): boolean {
   return missingBottleSpecFields(product).length === 0;
 }
 
-function productHasSeo(product: ProductHubWithHero | null): boolean {
-  return Boolean(
-    text(product?.seo_title) &&
-      text(product?.seo_description) &&
-      (text(product?.long_description) || text(product?.short_description)),
-  );
+function auditProductHubSeo(product: ProductHubWithHero | null): ProductSeoAuditResult {
+  const metadata = asRecord(product?.metadata);
+  const seoMetadata = asRecord(metadata.seo);
+  return auditProductSeo({
+    name: product?.name,
+    slug: product?.slug,
+    category: product?.category,
+    productType: product?.product_type,
+    seoTitle: product?.seo_title,
+    seoDescription: product?.seo_description,
+    seoKeywords: product?.seo_keywords,
+    shortDescription: product?.short_description,
+    longDescription: product?.long_description,
+    heroImageUrl: productPrimaryImageUrl(product),
+    heroAltText: text(seoMetadata.hero_alt ?? seoMetadata.heroAlt) || null,
+    metadata: product?.metadata,
+  });
 }
 
 function productPrimaryImageUrl(product: ProductHubWithHero | null): string | null {
@@ -462,6 +475,7 @@ function groupJobs(params: {
       const hasApprovedMedia = Boolean(approvedImageUrl);
       const hasShopifyMedia = Boolean(shopifyImageUrl || counts.shopifyPushedOrLater > 0);
       const missingSpecFields = missingBottleSpecFields(hub);
+      const seoAudit = auditProductHubSeo(hub);
 
       return {
         slug,
@@ -480,7 +494,8 @@ function groupJobs(params: {
         jobs: groupJobsForSlug,
         pipelineRows: rows,
         counts,
-        hasSeo: productHasSeo(hub),
+        hasSeo: seoAudit.isPublicReady,
+        seoAudit,
         hasSpecs: hasBottleSpecs(hub),
         missingSpecFields,
         hasPrimaryMedia,
@@ -639,7 +654,7 @@ export function useBestBottlesProductHub(): UseBestBottlesProductHubResult {
             hero_image_id: null,
             hero_image_external_url: imageUrl,
             metadata: nextMetadata,
-          } as any)
+          })
           .eq("id", group.productHub.id);
         if (error) throw error;
         return;
@@ -661,7 +676,7 @@ export function useBestBottlesProductHub(): UseBestBottlesProductHubResult {
         seo_description: group.productHub?.seo_description ?? null,
         tags: ["best-bottles", group.family, group.slug].filter(Boolean),
         metadata: nextMetadata,
-      } as any);
+      });
       if (error) throw error;
     },
     onSuccess: () => {

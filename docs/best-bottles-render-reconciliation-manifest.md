@@ -1,6 +1,6 @@
 # Best Bottles Render Reconciliation Manifest
 
-Generated: 2026-05-24T02:20:37.882Z
+Generated: 2026-06-09T01:41:58.109Z
 
 Dry run only. This report does not copy, move, rename, upload, or mutate images.
 
@@ -8,12 +8,12 @@ Dry run only. This report does not copy, move, rename, upload, or mutate images.
 
 | Metric | Count |
 | --- | ---: |
-| catalogProducts | 3404 |
+| catalogProducts | 2321 |
 | pipelineProducts | 2483 |
-| diskImages | 5166 |
-| diskFilesWithCatalogGraceSku | 4752 |
+| diskImages | 5167 |
+| diskFilesWithCatalogGraceSku | 4753 |
 | diskFilesNeedingGraceSku | 414 |
-| manifestEntries | 3818 |
+| manifestEntries | 2735 |
 
 ## Status Counts
 
@@ -21,7 +21,7 @@ Dry run only. This report does not copy, move, rename, upload, or mutate images.
 | --- | ---: |
 | ready_to_index | 0 |
 | needs_grace_sku | 414 |
-| missing_source_image | 1680 |
+| missing_source_image | 597 |
 | possible_duplicate | 1724 |
 
 ## Status By Family
@@ -32,85 +32,61 @@ Dry run only. This report does not copy, move, rename, upload, or mutate images.
 | possible_duplicate | Cylinder | 270 |
 | possible_duplicate | Elegant | 204 |
 | possible_duplicate | Circle | 195 |
-| missing_source_image | Cap/Closure | 181 |
 | possible_duplicate | Round | 174 |
 | possible_duplicate | Diva | 168 |
 | possible_duplicate | Sleek | 148 |
-| missing_source_image | Cylinder | 146 |
-| missing_source_image | Boston Round | 140 |
-| missing_source_image | Component | 137 |
-| missing_source_image | Sprayer | 137 |
+| missing_source_image | Boston Round | 123 |
 | possible_duplicate | Slim | 123 |
-| missing_source_image | Elegant | 106 |
+| missing_source_image | Cylinder | 103 |
 | possible_duplicate | Empire | 91 |
-| missing_source_image | Roll-On Bottle | 90 |
-| missing_source_image | Diva | 69 |
-| missing_source_image | Tulip | 63 |
-| missing_source_image | Dropper | 62 |
-| missing_source_image | Sleek | 57 |
-| missing_source_image | Rectangle | 45 |
+| missing_source_image | Elegant | 50 |
+| missing_source_image | Tulip | 49 |
 | possible_duplicate | Diamond | 43 |
 | possible_duplicate | Grace | 43 |
-| missing_source_image | Circle | 42 |
 | possible_duplicate | Sprayer | 41 |
-| missing_source_image | Roll-On Cap | 38 |
+| missing_source_image | Rectangle | 38 |
+| missing_source_image | Sleek | 38 |
 | possible_duplicate | Roll-On Cap | 34 |
-| missing_source_image | Gift Bag | 33 |
-| missing_source_image | Pump | 27 |
-| missing_source_image | Round | 25 |
 | possible_duplicate | Rectangle | 25 |
-| missing_source_image | Lotion Pump | 23 |
 | possible_duplicate | Atomizer | 23 |
-| missing_source_image | Flair | 21 |
+| missing_source_image | Gift Bag | 21 |
 | possible_duplicate | Dropper | 21 |
-| missing_source_image | Square | 20 |
-| missing_source_image | Gift Box | 19 |
-| missing_source_image | Royal | 19 |
-| missing_source_image | Packaging Supply | 18 |
+| missing_source_image | Circle | 19 |
+| missing_source_image | Flair | 19 |
+| missing_source_image | Royal | 18 |
+| missing_source_image | Square | 18 |
 | possible_duplicate | Cap/Closure | 18 |
-| missing_source_image | Cream Jar | 17 |
-| missing_source_image | Reducer | 17 |
-| missing_source_image | Slim | 16 |
 | possible_duplicate | Vial | 16 |
-| missing_source_image | Vial | 15 |
-| missing_source_image | Pillar | 14 |
+| missing_source_image | Gift Box | 15 |
+| missing_source_image | Cap/Closure | 14 |
+| missing_source_image | Packaging Supply | 12 |
 | possible_duplicate | Royal | 12 |
-| missing_source_image | Bell | 11 |
 | possible_duplicate | Cream Jar | 11 |
 | possible_duplicate | Flair | 11 |
 | possible_duplicate | Square | 11 |
 | possible_duplicate | Tulip | 11 |
-| missing_source_image | Empire | 10 |
 | possible_duplicate | Decorative | 10 |
-| missing_source_image | Decorative | 8 |
-| missing_source_image | Heart | 8 |
+| missing_source_image | Diva | 8 |
+| missing_source_image | Vial | 8 |
+| missing_source_image | Cream Jar | 7 |
 | possible_duplicate | Lotion Pump | 7 |
-| missing_source_image | Diamond | 6 |
-| missing_source_image | Grace | 5 |
+| missing_source_image | Bell | 6 |
 | possible_duplicate | Apothecary | 5 |
-| missing_source_image | Aluminum Bottle | 4 |
 | missing_source_image | Lotion Bottle | 4 |
-| missing_source_image | Tool | 4 |
+| missing_source_image | Pillar | 4 |
+| missing_source_image | Round | 4 |
+| missing_source_image | Sprayer | 4 |
 | possible_duplicate | Aluminum Bottle | 4 |
+| missing_source_image | Aluminum Bottle | 3 |
+| missing_source_image | Tool | 3 |
 | possible_duplicate | Teardrop | 3 |
-| missing_source_image | Cap | 2 |
 | missing_source_image | Cap/Component | 2 |
-| missing_source_image | Dram | 2 |
-| missing_source_image | Euro | 2 |
+| missing_source_image | Decorative | 2 |
 | missing_source_image | Plastic Bottle | 2 |
-| missing_source_image | Plug | 2 |
 | possible_duplicate | Plastic Bottle | 2 |
-| missing_source_image | Aluminium | 1 |
-| missing_source_image | Apothecary | 1 |
-| missing_source_image | Caesar | 1 |
-| missing_source_image | Candy | 1 |
-| missing_source_image | Cube | 1 |
-| missing_source_image | Label | 1 |
-| missing_source_image | Octagonal | 1 |
-| missing_source_image | Tall Cylinder | 1 |
-| missing_source_image | Tiara | 1 |
+| missing_source_image | Dropper | 1 |
+| missing_source_image | Roll-On Cap | 1 |
 | missing_source_image | Unknown | 1 |
-| missing_source_image | Wide Slim | 1 |
 
 ## Possible Duplicate Samples
 
@@ -151,28 +127,15 @@ Dry run only. This report does not copy, move, rename, upload, or mutate images.
 
 | Family | Grace SKU | Website SKU | Product Group |
 | --- | --- | --- | --- |
-| Aluminium | GB-ALU-SLV-250ML | BOAlu250ml |  |
 | Aluminum Bottle | AB-ALU-CLR-100ML-SPR-BLK | Alu100mlSprayBlack | aluminum-bottle-100ml-mixed-20-410 |
-| Aluminum Bottle | AB-ALU-CLR-250ML-SPR-BLK | Alu250mlSprayBlack | aluminum-bottle-250ml-clear-20-410-finemist |
 | Aluminum Bottle | AB-ALU-CLR-500ML | Alu500 | aluminum-bottle-500ml-mixed-20-410 |
 | Aluminum Bottle | BB-ALU250SPRYBL | Alu250SpryBl | fine-mist-sprayer-20-410 |
-| Apothecary | GB-APT-CLR-15ML | GB15Apth |  |
-| Bell | GB-BEL-CLR-10ML | BOBell12 |  |
-| Bell | GB-BEL-CLR-10ML-BLK | GBBell12BlkSht |  |
-| Bell | GB-BEL-CLR-10ML-GLD | GBBell10Gl |  |
 | Bell | GB-BEL-CLR-10ML-MRL-BLDOT | GBBell10MtlRollBlkDot | bell-10ml-clear-13-415-rollon |
 | Bell | GB-BEL-CLR-10ML-ROL-BLDOT | GBBell10RollBlkDot | bell-10ml-clear-13-415-rollon |
 | Bell | GB-BEL-CLR-10ML-SHT-SBLK | GBBell10BlkShSht | bell-10ml-clear-13-415-capclosure |
-| Bell | GB-BEL-CLR-10ML-SLV | GBBell10Sl |  |
 | Bell | GB-BEL-CLR-10ML-SPR-SBLK | GBBell10SpryBlkSh | bell-10ml-clear-13-415-finemist |
-| Bell | GB-BEL-CLR-10ML-WHT | GBBell10WhtSht |  |
 | Bell | GB-BLL-CLR-10ML-MRL-BDOT | GBBell10MtlRollBlkDot | bell-10ml-clear-13-415 |
 | Bell | GB-BLL-CLR-10ML-RBL-BDOT | GBBell10RollBlkDot | bell-10ml-clear-13-415 |
-| Boston Round | GB-BSR-AMB-01 | BO2ozBostonRndAmber |  |
-| Boston Round | GB-BSR-AMB-02 | BOBstnAmb2oz |  |
-| Boston Round | GB-BSR-AMB-03 | GB1ozRndAmb |  |
-| Boston Round | GB-BSR-AMB-04 | GB2ozRndAmb |  |
-| Boston Round | GB-BSR-AMB-15ML | BOBstnAmb15 |  |
 | Boston Round | GB-BSR-AMB-15ML-BLK-S | GBBstnAmb15mlBlkCapSht | boston-round-15ml-amber-18-400 |
 | Boston Round | GB-BSR-AMB-15ML-BLK-T-01 | GBBstnAmb15mlBlkDropper | boston-round-15ml-amber-18-400-dropper |
 | Boston Round | GB-BSR-AMB-15ML-BLK-T-02 | GBBstnAmb15mlBlkDropperGlTrim | boston-round-15ml-amber-18-400-dropper |
@@ -180,4 +143,17 @@ Dry run only. This report does not copy, move, rename, upload, or mutate images.
 | Boston Round | GB-BSR-AMB-15ML-WHT-T-01 | GBBstnAmb15mlWhtDropper | boston-round-15ml-amber-18-400-dropper |
 | Boston Round | GB-BSR-AMB-15ML-WHT-T-02 | GBBstnAmb15mlWhtDropperGlTrim | boston-round-15ml-amber-18-400-dropper |
 | Boston Round | GB-BSR-AMB-15ML-WHT-T-03 | GBBstnAmb15mlWhtDropperSlTrim | boston-round-15ml-amber-18-400-dropper |
-| Boston Round | GB-BSR-AMB-30ML | BOBstnAmb1oz |  |
+| Boston Round | GB-BSR-AMB-30ML-BLK-S | GBBstnAmb1ozBlkCapSht | boston-round-30ml-amber-20-400 |
+| Boston Round | GB-BSR-AMB-30ML-BLK-T-01 | GBBstnAmb1ozBlkDropper | boston-round-30ml-amber-20-400-dropper |
+| Boston Round | GB-BSR-AMB-30ML-BLK-T-02 | GBBstnAmb1ozBlkDrpShnGl | boston-round-30ml-amber-20-400-dropper |
+| Boston Round | GB-BSR-AMB-30ML-MRL-MBLK | GBBstnAmb1ozMtlRollonMattBlk | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-MRL-MGLD | GBBstnAmb1ozMtlRollonMattGl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-MRL-MSLV | GBBstnAmb1ozMtlRollonMattSl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-MRL-SBLK | GBBstnAmb1ozMtlRollonShnBlk | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-MRL-SSLV | GBBstnAmb1ozMtlRollonShnSl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-MRO-GLD | GBBstnAmb1ozMtlRollonGl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-RBL-SBLK | GBBstnAmb1ozRollonShnBlk | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-RON-GLD | GBBstnAmb1ozRollonGl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-RON-MBLK | GBBstnAmb1ozRollonMattBlk | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-RON-MGLD | GBBstnAmb1ozRollonMattGl | boston-round-30ml-amber-20-400-rollon |
+| Boston Round | GB-BSR-AMB-30ML-RON-MSLV | GBBstnAmb1ozRollonMattSl | boston-round-30ml-amber-20-400-rollon |

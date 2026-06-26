@@ -209,6 +209,17 @@ describe("Best Bottles SKU image coverage next action", () => {
     assert.equal(
       getSkuJobNextAction(
         job({
+          referenceSource: "flattened-product-truth",
+          referenceSourcePath:
+            "/tmp/reference-flattened/Cylinder/cylinder-9ml-swirl-17-415-finemist/GB-CYL-CLR-9ML-SPR-GLD.png",
+        }),
+      ),
+      "import-local-reference",
+    );
+
+    assert.equal(
+      getSkuJobNextAction(
+        job({
           referenceSource: "bestbottles-live",
           referenceSourceUrl: "https://www.bestbottles.com/images/store/enlarged_pics/GBFoo.gif",
         }),

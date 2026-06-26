@@ -1,0 +1,192 @@
+{
+  "version": "1.0.0",
+  "modules": {
+    "clear_glass": {
+      "display_name": "clear glass",
+      "truth": "transparent clear glass with visible wall thickness, rim glints, edge density, internal back-wall separation, and controlled refraction.",
+      "prompt_lines": [
+        "Use clear glass material truth: visible wall thickness, rim highlights, subtle gray/cream edge density, and clean transparent body structure.",
+        "Glass may show small caustics and refracted background bends only inside or immediately under the glass."
+      ],
+      "avoid": ["milky plastic", "blank white cutout", "smoky gray body", "cloudy blotchy glass"],
+      "qa": ["glass_visible_not_cloudy"]
+    },
+    "swirl_glass": {
+      "display_name": "swirl-fluted clear glass",
+      "truth": "transparent clear glass with molded diagonal helical flutes/swirl ribs, visible wall thickness, rim glints, edge density, internal back-wall separation, and controlled refraction.",
+      "prompt_lines": [
+        "Use swirl-fluted clear glass material truth: preserve diagonal helical ribs molded into the clear glass body, with transparent peaks and valleys visible through refraction.",
+        "The swirl texture belongs only to the glass body; keep caps, sprayers, collars, tubes, pumps, bulbs, tassels, and detached over-caps smooth and non-swirl.",
+        "Glass may show small caustics and refracted background bends only inside or immediately under the glass."
+      ],
+      "avoid": [
+        "smooth plain cylinder when swirl is required",
+        "swirl texture on caps or sprayers",
+        "milky plastic",
+        "blank white cutout",
+        "cloudy blotchy glass"
+      ],
+      "qa": ["swirl_flutes_preserved", "glass_visible_not_cloudy"]
+    },
+    "frosted_glass": {
+      "display_name": "frosted glass",
+      "truth": "translucent frosted glass with soft diffusion, visible wall thickness, satin glow, and gentle edge density.",
+      "prompt_lines": [
+        "Use frosted glass material truth: translucent satin diffusion, thicker edge density, soft rim highlights, and no clear see-through interior.",
+        "Keep frost even and premium, not dirty, smoky, or blotchy."
+      ],
+      "avoid": ["clear glass transparency", "opaque plastic", "dirty haze"],
+      "qa": ["frost_even"]
+    },
+    "amber_glass": {
+      "display_name": "amber glass",
+      "truth": "transparent amber glass with warm brown-gold body color, rim density, refraction, and base mass.",
+      "prompt_lines": [
+        "Use amber glass material truth: transparent warm amber body, darker edge density, rim thickness, and subtle base caustics.",
+        "Do not turn amber glass into opaque brown plastic."
+      ],
+      "avoid": ["opaque plastic", "muddy brown", "flat silhouette"],
+      "qa": ["amber_transparency_preserved"]
+    },
+    "cobalt_glass": {
+      "display_name": "cobalt glass",
+      "truth": "transparent cobalt blue glass with saturated blue edge density, rim glints, and controlled refraction.",
+      "prompt_lines": [
+        "Use cobalt glass material truth: saturated blue transparent body, deeper blue edges, bright rim glints, and clean optical volume.",
+        "Do not bleach cobalt to pale blue or make it opaque plastic."
+      ],
+      "avoid": ["washed-out blue", "opaque plastic", "black silhouette"],
+      "qa": ["cobalt_color_preserved"]
+    },
+    "green_glass": {
+      "display_name": "green glass",
+      "truth": "transparent green glass with natural green edge density, rim glints, and optical volume.",
+      "prompt_lines": [
+        "Use green glass material truth: transparent green body, darker green edges, controlled refraction, and visible wall thickness.",
+        "Do not turn green glass into opaque resin or plastic."
+      ],
+      "avoid": ["opaque plastic", "muddy green", "lost transparency"],
+      "qa": ["green_transparency_preserved"]
+    },
+    "clear_molded_plastic": {
+      "display_name": "clear molded plastic",
+      "truth": "clear molded plastic with softer transparency, molded edge seams if present, lighter weight, and less optical caustic behavior than glass.",
+      "prompt_lines": [
+        "Use clear molded plastic material truth: lighter-weight transparent plastic, soft molded edges, subtle seam evidence if present, and no heavy glass caustics.",
+        "Do not make clear plastic look like crystal, thick luxury glass, or smoky glass."
+      ],
+      "avoid": ["glass caustics", "thick crystal base", "heavy refraction", "smoky glass"],
+      "qa": ["plastic_not_glass"]
+    },
+    "frosted_plastic": {
+      "display_name": "frosted plastic",
+      "truth": "frosted plastic with soft matte diffusion, molded edges, and low-gloss surface response.",
+      "prompt_lines": [
+        "Use frosted plastic material truth: matte translucent plastic, soft molded edges, and restrained non-glass highlights.",
+        "Do not add glass rim sparkle, caustics, or thick refraction."
+      ],
+      "avoid": ["glass caustics", "crystal refraction", "metal grain"],
+      "qa": ["frosted_plastic_preserved"]
+    },
+    "white_plastic": {
+      "display_name": "white plastic",
+      "truth": "opaque white plastic with visible edge separation, molded curvature, and soft specular highlights.",
+      "prompt_lines": [
+        "Use white plastic material truth: opaque white molded plastic with visible edges, top lips, sidewalls, and subtle gray shadow separation.",
+        "White plastic must not disappear into the Bone background."
+      ],
+      "avoid": ["background-colored cap", "erased white plastic", "glass transparency"],
+      "qa": ["white_caps_visible"]
+    },
+    "black_plastic": {
+      "display_name": "black plastic",
+      "truth": "opaque black plastic with controlled reflection, visible molded shape, and preserved silhouette.",
+      "prompt_lines": [
+        "Use black plastic material truth: opaque molded plastic, controlled soft highlights, clean edge separation, and no chrome reflectivity.",
+        "Do not crush black plastic into a featureless silhouette."
+      ],
+      "avoid": ["chrome", "metal grain", "featureless black"],
+      "qa": ["black_plastic_detail_visible"]
+    },
+    "polished_gold_metal": {
+      "display_name": "polished gold metal",
+      "truth": "polished gold metal with warm specular bands, dark edge cards, and mirror-like but controlled reflection.",
+      "prompt_lines": [
+        "Use polished gold metal truth: warm metallic reflection, dark edge-card separation, clean cylindrical highlights, and no flat yellow plastic.",
+        "Gold trim must remain gold, not bronze, black, or white."
+      ],
+      "avoid": ["yellow plastic", "muddy brass", "flat color"],
+      "qa": ["gold_trim_preserved"]
+    },
+    "polished_silver_metal": {
+      "display_name": "polished silver metal",
+      "truth": "polished silver metal with cool specular bands, dark edge cards, and crisp metal highlights.",
+      "prompt_lines": [
+        "Use polished silver metal truth: cool reflective metal, edge-card definition, and clean highlight bands.",
+        "Do not turn silver metal into white plastic or gray rubber."
+      ],
+      "avoid": ["white plastic", "flat gray", "cloudy metal"],
+      "qa": ["silver_trim_preserved"]
+    },
+    "brushed_aluminum": {
+      "display_name": "brushed aluminum",
+      "truth": "opaque brushed or satin aluminum with fine grain, soft vertical sheen, and no transparency.",
+      "prompt_lines": [
+        "Use brushed aluminum truth: opaque satin metal, fine grain, soft vertical highlight bands, and no glass refraction.",
+        "Do not show liquid, back-wall refraction, internal tubes, or transparent edges through aluminum."
+      ],
+      "avoid": ["transparent body", "glass caustics", "liquid interior", "crystal edges"],
+      "qa": ["opaque_aluminum_preserved"]
+    },
+    "rubber_bulb": {
+      "display_name": "rubber bulb",
+      "truth": "soft rubber bulb with tactile matte/satin surface, rounded compression form, and accurate color.",
+      "prompt_lines": [
+        "Use rubber bulb truth: soft rounded rubber surface, subtle satin highlight, tactile texture, and accurate bulb color.",
+        "Do not make rubber look like metal, glass, or hard plastic."
+      ],
+      "avoid": ["metallic bulb", "glass bulb", "wrong color"],
+      "qa": ["rubber_bulb_preserved"]
+    },
+    "glass_pipette": {
+      "display_name": "glass pipette",
+      "truth": "thin clear glass pipette with precise tube geometry, rim glints, and subtle internal highlight.",
+      "prompt_lines": [
+        "Use glass pipette truth: thin transparent tube, tiny rim glints, precise straight geometry, and no melting or bending.",
+        "Do not thicken the pipette into a straw or plastic tube."
+      ],
+      "avoid": ["plastic straw", "bent pipette", "missing pipette"],
+      "qa": ["pipette_visible"]
+    },
+    "organza_fabric": {
+      "display_name": "organza fabric",
+      "truth": "sheer organza fabric with fine woven texture, translucent folds, drawstring detail, and soft shadowing.",
+      "prompt_lines": [
+        "Use organza fabric truth: sheer woven texture, translucent folds, drawstring detail, and soft fabric shadows.",
+        "Do not make organza glossy plastic, paper, glass, or metal."
+      ],
+      "avoid": ["plastic shine", "paper carton", "metal sheen"],
+      "qa": ["organza_texture_preserved"]
+    },
+    "velvet_fabric": {
+      "display_name": "velvet fabric",
+      "truth": "velvet fabric with soft pile, directional nap, rich color, and dimensional folds.",
+      "prompt_lines": [
+        "Use velvet fabric truth: soft pile, directional nap, tactile folds, and rich non-glossy color.",
+        "Do not make velvet look like satin plastic, metal, or paper."
+      ],
+      "avoid": ["plastic gloss", "flat paper", "metal sheen"],
+      "qa": ["velvet_texture_preserved"]
+    },
+    "folding_carton_paperboard": {
+      "display_name": "folding carton paperboard",
+      "truth": "folding carton paperboard with flat panels, crisp folds, soft paper fiber finish, and no transparency.",
+      "prompt_lines": [
+        "Use folding carton paperboard truth: flat paper panels, crisp scored folds, subtle matte paper texture, and clean edge definition.",
+        "Do not use glass-style optical effects, liquid-bending effects, metal grain, fabric weave, or transparency."
+      ],
+      "avoid": ["glass caustics", "transparent glass", "metal grain", "fabric weave"],
+      "qa": ["paperboard_panels_preserved"]
+    }
+  }
+}

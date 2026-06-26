@@ -22,6 +22,43 @@ export const PIPELINE_OPENAI_RAW_PX = {
 export const PIPELINE_OPENAI_RAW_RATIO = 2080 / 2288;
 
 /**
+ * Best Bottles routed catalog canvas tiers.
+ *
+ * The tall tier is the existing Madison master. The tall/narrow, square, and
+ * wide tiers are additional production canvases for cylinder, round/square,
+ * and low/wide product families found in the flattened Best Bottles reference
+ * set. All sizes are supported by the image-generation exact-size allowlist.
+ */
+export const BEST_BOTTLES_TALL_PORTRAIT_CANVAS_PX = PIPELINE_OPENAI_RAW_PX;
+
+/** Aspect width:height = 10:11 (exact). */
+export const BEST_BOTTLES_TALL_PORTRAIT_CANVAS_RATIO = PIPELINE_OPENAI_RAW_RATIO;
+
+/** Native tall/slender Cylinder output canvas, aspect width:height = 2:3. */
+export const BEST_BOTTLES_TALL_NARROW_CANVAS_PX = {
+  width: 1024,
+  height: 1536,
+} as const;
+
+export const BEST_BOTTLES_TALL_NARROW_CANVAS_RATIO = 1024 / 1536;
+
+/** Square round/squat product canvas, aspect width:height = 1:1. */
+export const BEST_BOTTLES_SQUARE_ROUND_CANVAS_PX = {
+  width: 2048,
+  height: 2048,
+} as const;
+
+export const BEST_BOTTLES_SQUARE_ROUND_CANVAS_RATIO = 1;
+
+/** Landscape low/wide product canvas, aspect width:height = 3:2. */
+export const BEST_BOTTLES_WIDE_LOW_CANVAS_PX = {
+  width: 1536,
+  height: 1024,
+} as const;
+
+export const BEST_BOTTLES_WIDE_LOW_CANVAS_RATIO = 1536 / 1024;
+
+/**
  * Representative live Sanity CDN hero from a paper-doll group (sample; actual
  * assets may vary slightly with transforms).
  */

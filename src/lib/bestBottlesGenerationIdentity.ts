@@ -97,6 +97,27 @@ function sourceText(product: BestBottlesIdentityProductLike): string {
   ].filter(Boolean).join(" ");
 }
 
+function isAmbiguousCapColor(value: string | null | undefined): boolean {
+  const normalized = normalizeColor(value);
+  return normalized === "clear" || normalized === "transparent";
+}
+
+function capColorEvidenceText(product: BestBottlesIdentityProductLike): string {
+  const explicit = optionalText(product.capColor);
+  return [
+    product.graceSku,
+    product.websiteSku,
+    product.family,
+    product.color,
+    product.applicator,
+    product.capStyle,
+    explicit && !isAmbiguousCapColor(explicit) ? explicit : null,
+    product.trimColor,
+    product.itemName,
+    product.itemDescription,
+  ].filter(Boolean).join(" ");
+}
+
 function inferBodyColorFromWebsiteSku(product: BestBottlesIdentityProductLike): string | null {
   const value = [product.websiteSku, product.itemName, product.itemDescription]
     .filter(Boolean)
@@ -181,6 +202,27 @@ function inferReducerFinish(product: BestBottlesIdentityProductLike): string | n
   ]);
 }
 
+function inferCapColor(product: BestBottlesIdentityProductLike): string | null {
+  const explicit = optionalText(product.capColor);
+  const inferred = inferColorFromPatterns(capColorEvidenceText(product), [
+    [/matte\s*black|mt\s*black|mblk|mblck/i, "Matte Black"],
+    [/shiny\s*black|sblk|shnblk|blkdot|black\s*(?:shiny|dot|dots)/i, "Shiny Black"],
+    [/matte\s*silver|mt\s*silver|mslv|mtslv/i, "Matte Silver"],
+    [/shiny\s*silver|sslv|shnslv/i, "Shiny Silver"],
+    [/matte\s*gold|mt\s*gold|mgld|mtgld/i, "Matte Gold"],
+    [/shiny\s*gold|sgld|shngld/i, "Shiny Gold"],
+    [/\bcopper\b|cpr/i, "Copper"],
+    [/sprytur|(?:^|[\s_-])tur(?:$|[\s_-])|\bturq(?:uoise)?\b|\btrq\b/i, "Turquoise"],
+    [/\bwhite\b|wht/i, "White"],
+    [/\bblack\b|blk/i, "Black"],
+    [/\bsilver\b|slv/i, "Silver"],
+    [/\bgold\b|gld/i, "Gold"],
+  ]);
+  if (inferred) return inferred;
+  if (explicit && !isAmbiguousCapColor(explicit)) return explicit;
+  return null;
+}
+
 function inferRingPresent(product: BestBottlesIdentityProductLike): boolean | null {
   const explicit =
     boolOrNull((product as Record<string, unknown>).ringPresent) ??
@@ -230,8 +272,13 @@ export function buildBestBottlesGenerationIdentity(
   const graceColor = bodyColorCodeFromGraceSku(graceSku);
   const textLower = sourceText(product).toLowerCase();
   const applicator = optionalText(product.applicator);
+  const capColor = inferCapColor(product);
+  const websiteSkuEvidence = text(product.websiteSku);
   const isTassel =
-    /tassel|tsl/.test(textLower) ||
+    /\btassel\b/.test(textLower) ||
+    /\btsl\b/i.test(sourceText(product)) ||
+    /ansptsl/i.test(websiteSkuEvidence) ||
+    /Tsl(?:[A-Z]|$)/.test(websiteSkuEvidence) ||
     /tassel/i.test(applicator ?? "");
   const isReducer =
     /reducer/.test(textLower) ||
@@ -253,6 +300,10 @@ export function buildBestBottlesGenerationIdentity(
 
   const blockers: string[] = [];
   const skuLooksGeneric = /-(?:T|S)-\d{1,3}$/i.test(graceSku ?? "");
+  const needsCapColor =
+    /roll|roller|spray|sprayer|pump|fine\s*mist|cap|closure|applicator/i.test(
+      [applicator, product.itemName, product.itemDescription, websiteSku].filter(Boolean).join(" "),
+    );
   if (isTassel && !tasselColor) {
     blockers.push("Tassel SKU is missing tassel color.");
   }
@@ -261,6 +312,9 @@ export function buildBestBottlesGenerationIdentity(
   }
   if (isReducer && skuLooksGeneric && !reducerFinish) {
     blockers.push("Generic reducer SKU is missing reducer/leather finish.");
+  }
+  if (skuLooksGeneric && needsCapColor && !capColor) {
+    blockers.push("Generic SKU is missing cap/closure color; attach website SKU evidence or explicit cap color before generation.");
   }
   if (
     skuLooksGeneric &&
@@ -294,7 +348,7 @@ export function buildBestBottlesGenerationIdentity(
     product.neckThreadSize,
     applicator,
     product.capStyle,
-    product.capColor,
+    capColor,
     product.trimColor,
     tasselColor,
     bulbColor,
@@ -321,7 +375,7 @@ export function buildBestBottlesGenerationIdentity(
     neckThreadSize: optionalText(product.neckThreadSize),
     applicator,
     capStyle: optionalText(product.capStyle),
-    capColor: optionalText(product.capColor),
+    capColor,
     trimColor: optionalText(product.trimColor),
     tasselColor,
     bulbColor,

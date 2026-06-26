@@ -10,6 +10,7 @@ export interface BestBottlesFamilyRigProductContext {
   capState?: unknown;
   mode?: unknown;
   presetId?: unknown;
+  referenceWorkflow?: unknown;
   sourceReference?: unknown;
 }
 
@@ -36,15 +37,6 @@ function contextText(productContext?: BestBottlesFamilyRigProductContext | null)
     productContext?.presetId,
     productContext?.sourceReference,
   ].map(textValue).join(" ").toLowerCase();
-}
-
-function looksLikeRollOn(productContext?: BestBottlesFamilyRigProductContext | null): boolean {
-  const text = contextText(productContext);
-  return (
-    /\b(?:roll-on|roll on|roller|roller ball|rollerball|metal roller|plastic roller)\b/.test(text) ||
-    /(?:^|[-_\s])(?:rol|mrl|rbl)(?:[-_\s]|$)/.test(text) ||
-    /\bgb\w*(?:rol|mrl|rbl)\w*\b/.test(text)
-  );
 }
 
 function looksLikeCapOffOrDetached(productContext?: BestBottlesFamilyRigProductContext | null): boolean {
@@ -74,13 +66,16 @@ function resolveCapState(productContext?: BestBottlesFamilyRigProductContext | n
   ) {
     return "assembled";
   }
-  if (looksLikeRollOn(productContext)) {
-    return "detached";
-  }
   if (looksLikeCapOffOrDetached(productContext)) {
     return "detached";
   }
   return "assembled";
+}
+
+function usesFlattenedProductTruthReference(
+  productContext?: BestBottlesFamilyRigProductContext | null,
+): boolean {
+  return textValue(productContext?.referenceWorkflow).toLowerCase() === "single-flattened-product-truth";
 }
 
 const LEGACY_TASK_LINE =
@@ -104,6 +99,15 @@ const LEGACY_CANVAS_COMPOSITION_LINES = [
 export function buildBestBottlesFamilyRigPromptAdjustment(
   productContext?: BestBottlesFamilyRigProductContext | null,
 ): BestBottlesFamilyRigPromptAdjustment {
+  if (usesFlattenedProductTruthReference(productContext)) {
+    return {
+      rigImposed: false,
+      taskLine: LEGACY_TASK_LINE,
+      sourceTruthLines: LEGACY_SOURCE_TRUTH_LINES,
+      canvasCompositionLines: LEGACY_CANVAS_COMPOSITION_LINES,
+    };
+  }
+
   const family = textValue(productContext?.family);
   const rig = getFamilyRig(family);
   const rigBlock = rig
@@ -129,9 +133,11 @@ export function buildBestBottlesFamilyRigPromptAdjustment(
     sourceTruthLines: [
       "- Preserve the source camera angle and product component relationships. The reference governs product identity, geometry, proportions, color, cap state, component count, and material truth; the imposed studio rig governs placement and scale.",
       "- Do not preserve the reference image's canvas placement, centerline, baseline, crop, camera distance, or scale when it conflicts with the imposed studio rig.",
+      "- If the uploaded background-removed PNG has excess transparent padding, a tiny foreground, or an oversized foreground, mentally trim to the true product/component bounds before applying the rig. The source foreground size is not product truth.",
       "- Family alignment is mission-critical: this SKU must align with sibling images from the same family as if all were photographed on one fixed studio rig. The imposed rig supplies the shared shelf line, vertical centerline, visual height envelope, and uniform master framing.",
       "- Catalog grid standard: render this as part of a professional e-commerce product family grid, not as an isolated creative hero. Keep the stable invisible shelf line and fixed camera system defined by the imposed rig.",
       "- Cap/closure/roller/sprayer color, finish, or cap height may change only the purchasable component. It must not change product body identity, camera angle, component relationships, or the imposed rig placement.",
+      "- Applicator type is not cap state: roll-on, roller-ball, sprayer, pump, and closure SKUs remain assembled/cap-on unless product context or reference filename explicitly says cap-off, detached, exploded, over-cap, loose cap, cap beside, or cap to the right.",
       "- Do not preserve the reference image's flat lighting, pure-white background, weak shadow, or low-end capture finish. Re-stage the same locked product as a luxury catalog photograph on the imposed rig.",
     ],
     canvasCompositionLines: [

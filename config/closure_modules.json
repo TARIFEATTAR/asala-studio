@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "modules": {
+    "fine_mist_sprayer": {
+      "display_name": "Fine mist sprayer",
+      "prompt_lines": [
+        "Preserve the fine mist sprayer actuator, nozzle face, collar, cap state, trim finish, and visible internal dip tube if present in the reference.",
+        "White, clear, translucent, or pale cap/actuator/over-cap surfaces must remain visible against the Bone background: preserve rim ellipse, top lip, sidewall edges, nozzle face, subtle edge density, tiny highlights, and local contact separation."
+      ],
+      "forbidden": ["missing actuator", "erased cap", "ghost over-cap", "extra cap", "sprayer changed into pump"],
+      "qa": ["white_caps_visible", "sprayer_present", "cap_count_correct"]
+    },
+    "metal_roller_ball": {
+      "display_name": "Metal roller ball",
+      "prompt_lines": [
+        "Preserve the roller ball plug, over-cap state, cap color, ball seat, neck fit, and cap scale.",
+        "If cap-off, the bottle top shows the exposed roller plug only, and the matching over-cap sits upright to the right on the same baseline."
+      ],
+      "forbidden": ["sprayer added", "pump added", "missing roller ball", "duplicate cap"],
+      "qa": ["roller_ball_present", "cap_state_preserved"]
+    },
+    "dropper": {
+      "display_name": "Dropper",
+      "prompt_lines": [
+        "Preserve the dropper collar, rubber bulb, pipette geometry if visible, cap color, and seated relationship to the bottle neck.",
+        "Do not add sprayer, hose, tassel, or roller components."
+      ],
+      "forbidden": ["sprayer added", "roller added", "missing bulb", "wrong cap color"],
+      "qa": ["dropper_preserved"]
+    },
+    "classic_spray_pump": {
+      "display_name": "Classic spray pump",
+      "prompt_lines": [
+        "Preserve pump/actuator geometry, nozzle direction, collar, cap state, and visible dip tube if present.",
+        "Keep pale plastic pump details readable with edge separation."
+      ],
+      "forbidden": ["pump changed to roller", "missing nozzle", "erased pale pump"],
+      "qa": ["sprayer_present", "nozzle_visible"]
+    },
+    "atomizer_sprayer": {
+      "display_name": "Atomizer sprayer",
+      "prompt_lines": [
+        "Preserve the atomizer sprayer top, sleeve/cap transitions, actuator geometry, and opaque metal shell relationship.",
+        "Do not expose a transparent bottle interior through an atomizer shell."
+      ],
+      "forbidden": ["glass body added", "liquid interior", "transparent shell"],
+      "qa": ["opaque_metal_preserved"]
+    },
+    "vintage_bulb_sprayer": {
+      "display_name": "Vintage bulb sprayer",
+      "prompt_lines": [
+        "Preserve bulb, hose, tassel if present, collar, trim, textile color, and full component visibility.",
+        "Keep hose and tassel inside the safe zone with tactile fabric/rubber detail."
+      ],
+      "forbidden": ["missing bulb", "missing hose", "modern actuator added", "wrong tassel color"],
+      "qa": ["bulb_visible", "hose_visible", "tassel_preserved"]
+    },
+    "orifice_reducer": {
+      "display_name": "Orifice reducer",
+      "prompt_lines": [
+        "Preserve the reducer insert, drop-control opening, neck finish, closure state, and small aperture geometry.",
+        "Do not replace the reducer with a dropper, pump, sprayer, or roller."
+      ],
+      "forbidden": ["dropper added", "sprayer added", "missing reducer insert"],
+      "qa": ["reducer_visible"]
+    },
+    "splash_cap": {
+      "display_name": "Splash cap",
+      "prompt_lines": [
+        "Preserve splash closure or open-neck state exactly as shown, including thread finish and cap placement.",
+        "Do not add a pump, sprayer, dropper, roller, hose, or tassel."
+      ],
+      "forbidden": ["extra applicator", "wrong closure", "missing mouth"],
+      "qa": ["splash_neck_preserved"]
+    },
+    "lotion_pump": {
+      "display_name": "Lotion pump",
+      "prompt_lines": [
+        "Preserve lotion pump head, stem, collar, direction, height, and seated relationship to the bottle.",
+        "Keep pump edges readable, especially white or pale plastic parts."
+      ],
+      "forbidden": ["pump head missing", "sprayer substituted", "wrong pump direction"],
+      "qa": ["pump_present"]
+    },
+    "screw_cap": {
+      "display_name": "Screw cap",
+      "prompt_lines": [
+        "Preserve screw cap height, diameter, color, finish, thread relationship, and cap state.",
+        "Pale caps must retain visible sidewalls, top ellipse, and edge separation against Bone."
+      ],
+      "forbidden": ["missing cap", "wrong cap color", "extra cap"],
+      "qa": ["cap_state_preserved", "white_caps_visible"]
+    },
+    "none": {
+      "display_name": "No closure",
+      "prompt_lines": [
+        "Do not add a closure, cap, pump, sprayer, dropper, roller, or decorative applicator unless visible in the reference."
+      ],
+      "forbidden": ["invented closure", "extra applicator"],
+      "qa": ["no_extra_components"]
+    }
+  }
+}

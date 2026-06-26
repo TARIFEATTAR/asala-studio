@@ -3,6 +3,11 @@ import path from "node:path";
 import process from "node:process";
 
 import { FAMILY_BODY_SHAPE_DESCRIPTORS } from "../src/config/familyShapeDescriptors";
+import {
+  resolveBestBottlesReadinessCatalogJoin,
+  type BestBottlesCatalogJoinIssue,
+  type BestBottlesCatalogJoinMatchKind,
+} from "../src/lib/bestBottlesGenerationReadinessCatalogJoin";
 
 type ReadinessStatus =
   | "ready"
@@ -124,6 +129,8 @@ interface ReadinessRow {
   diameter: string | null;
   catalogHeightWithoutCap: string | null;
   catalogDiameter: string | null;
+  catalogJoinMatch: BestBottlesCatalogJoinMatchKind;
+  catalogJoinIssue: BestBottlesCatalogJoinIssue | null;
   measurementSource: "catalog" | "manual-override" | "missing";
   measurementOverrideSource: string | null;
   measurementOverrideUrl: string | null;
@@ -268,6 +275,7 @@ function buildIssues(
   product: PipelineProduct,
   catalog: CatalogProduct | undefined,
   override: MeasurementOverride | undefined,
+  catalogJoinIssue: BestBottlesCatalogJoinIssue | null,
 ): string[] {
   const issues: string[] = [];
   if (isComponentException(product)) {
@@ -276,6 +284,7 @@ function buildIssues(
     return issues;
   }
   if (!catalog) issues.push("missing_catalog_join");
+  if (catalogJoinIssue && catalogJoinIssue !== "no_catalog_match") issues.push(catalogJoinIssue);
   if (!hasMeasurements(catalog, override)) issues.push("missing_measurement");
   if (override) issues.push("measurement_override_pending_convex_sync");
   if (!truthyText(product.bestReferenceCandidatePath)) issues.push("missing_reference");
@@ -313,19 +322,18 @@ function buildRows(
   catalog: CatalogPayload,
   measurementOverrides: MeasurementOverridesPayload,
 ): ReadinessRow[] {
-  const catalogBySku = new Map(
-    (catalog.products ?? []).map((product) => [skuKey(product.graceSku), product]),
-  );
+  const catalogProducts = catalog.products ?? [];
   const measurementOverrideBySku = new Map(
     (measurementOverrides.overrides ?? []).map((override) => [skuKey(override.graceSku), override]),
   );
 
   return (pipeline.products ?? [])
     .map((product): ReadinessRow => {
-      const catalogProduct = catalogBySku.get(skuKey(product.graceSku));
+      const catalogJoin = resolveBestBottlesReadinessCatalogJoin(product, catalogProducts);
+      const catalogProduct = catalogJoin.catalogProduct;
       const measurementOverride = measurementOverrideBySku.get(skuKey(product.graceSku));
       const status = primaryStatus(product, catalogProduct, measurementOverride);
-      const issues = buildIssues(product, catalogProduct, measurementOverride);
+      const issues = buildIssues(product, catalogProduct, measurementOverride, catalogJoin.issue);
       return {
         status,
         issues,
@@ -347,6 +355,8 @@ function buildRows(
         diameter: effectiveDiameter(catalogProduct, measurementOverride),
         catalogHeightWithoutCap: catalogProduct?.heightWithoutCap ?? null,
         catalogDiameter: catalogProduct?.diameter ?? null,
+        catalogJoinMatch: catalogJoin.matchKind,
+        catalogJoinIssue: catalogJoin.issue,
         measurementSource: measurementSource(catalogProduct, measurementOverride),
         measurementOverrideSource: measurementOverride?.source ?? null,
         measurementOverrideUrl: measurementOverride?.sourceUrl ?? null,
@@ -582,6 +592,8 @@ function toCsv(rows: ReadinessRow[]): string {
     "diameter",
     "catalogHeightWithoutCap",
     "catalogDiameter",
+    "catalogJoinMatch",
+    "catalogJoinIssue",
     "measurementSource",
     "measurementOverrideSource",
     "measurementOverrideUrl",

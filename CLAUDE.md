@@ -1,5 +1,22 @@
 # Madison app — agent notes
 
+## Best Bottles image pipeline — READ FIRST
+Before touching the Best Bottles image / library / pipeline / coverage surface, read
+**`docs/BEST-BOTTLES-IMAGE-PIPELINE-BRIEF.md`**. It defines the two-axis model
+(lineage vs quality), why "done" = `status:approved-keep` (NOT "has any image"), the
+`library_tags` vocabulary, the `coverageStatus` state machine, the UI build targets
+(provenance-gated completeness, the legacy/clean library filter, the from-zero
+worklist), and the two-agent lane split (this repo owns the app + Supabase +
+generation; Cowork owns reference prep + Shopify + QA via reviewed artifacts).
+
+The **Gap worklist** surface (per-family lists of variants still missing a clean
+reference, lane-segmented by Cowork) is documented in
+**`docs/best-bottles-gap-worklist.md`**: Cowork drops
+`public/data/audits/<family>-gap-worklist-<date>.csv`, Madison re-indexes with
+`npm run bestbottles:gap-worklist:index` and displays it — **never re-deriving the
+lanes**. Lib: `src/lib/bestBottlesGapWorklist.ts`. View:
+`src/components/bestbottles/GapWorklistView.tsx`.
+
 ## Product image pipeline — pixel sizes
 
 | Stage | Dimensions | Ratio |

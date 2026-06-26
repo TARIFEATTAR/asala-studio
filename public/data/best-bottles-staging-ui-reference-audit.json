@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-06-16T05:08:00.878Z",
+  "source": "audit_staging_ui_reference_images.mjs",
+  "baseUrl": "http://localhost:3000",
+  "rule": "Flag rendered product images only when URL/provenance is legacy or reference-backed, or when June 15 audit evidence already identifies the row as reference risk.",
+  "summary": {
+    "renderedImagesChecked": 0,
+    "flaggedRows": 0,
+    "rowsNeedingGeneration": 0,
+    "rowsNeedingSyncOrPush": 0,
+    "blockedTruthReviewRows": 0,
+    "byFamily": {},
+    "byGenerationBucket": {},
+    "byImageClassification": {}
+  },
+  "rows": [],
+  "inputs": {
+    "auditRoot": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/data/audits/stage-in-sight-image-sync-2026-06-15",
+    "targets": 4,
+    "renderedImages": 0,
+    "targetErrors": [],
+    "surfaces": [
+      "catalog",
+      "pdp"
+    ],
+    "families": [
+      "Cylinder"
+    ]
+  }
+}

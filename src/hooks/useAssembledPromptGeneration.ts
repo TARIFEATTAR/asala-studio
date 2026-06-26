@@ -18,8 +18,15 @@ import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import type { AssembledPrompt } from "@/lib/product-image/promptAssembler";
 import { getBestBottlesReferenceUrlIssue } from "@/lib/bestBottlesReferenceValidation";
+import { getRetiredTransparentBestBottlesReferenceIssue } from "@/lib/bestBottlesReferenceFilters";
 import { colorCorrectToTarget, dataUrlToBlob } from "@/lib/product-image/colorCorrect";
 import { normalizeBestBottlesRigBaseline } from "@/lib/product-image/rigPostprocess";
+import { shouldRunBestBottlesRigPostprocess } from "@/lib/product-image/bestBottlesRigPostprocessPolicy";
+import {
+  getExactOutputCanvasConstraints,
+  resolveExactCanvasForAspectRatio,
+} from "@/lib/product-image/exactOutputCanvas";
+import type { PromptRecord } from "@/lib/bestBottlesPromptCompiler";
 
 const PAPER_DOLL_TARGET_CREAM = "#EEE6D4";
 
@@ -73,6 +80,9 @@ export interface AssembledGenerateOptions {
     accessoryCode?: string | null;
     reducerFinish?: string | null;
     sourceReference?: string | null;
+    referenceWorkflow?: string | null;
+    maskReference?: string | null;
+    maskQcStatus?: string | null;
     identityStatus?: "ready" | "blocked";
     identityBlockers?: string[];
     identityHash?: string;
@@ -81,6 +91,8 @@ export interface AssembledGenerateOptions {
     qaStatus?: "pending" | string;
     canvas?: "2080x2288" | string;
   };
+  /** JSON-driven Best Bottles prompt compiler output, used as the authoritative prompt for Studio masters. */
+  precompiledPromptRecord?: PromptRecord | null;
   /** Extra tags merged into `extraLibraryTags` alongside preset/canvas tags. */
   extraLibraryTags?: string[];
   /**
@@ -102,13 +114,6 @@ export interface AssembledGenerateOptions {
     aspectRatioOverride?: string | null;
     resolutionOverride?: "standard" | "high" | null;
   };
-}
-
-function getExactCanvasForAspectRatio(aspectRatio: string): { widthPx: number; heightPx: number } | null {
-  const normalized = aspectRatio.trim().toLowerCase().replace(/\s+/g, "");
-  return normalized === "10:11" || normalized === "2080:2288" || normalized === "2080x2288"
-    ? { widthPx: 2080, heightPx: 2288 }
-    : null;
 }
 
 function getBodyMaterialLabel(productContext: AssembledGenerateOptions["productContext"]): string {
@@ -135,6 +140,13 @@ function getBodyMaterialLabel(productContext: AssembledGenerateOptions["productC
     return "opaque colored/anodized metal atomizer casing";
   }
   return "the exact referenced bottle body material";
+}
+
+function isCylinderBestBottlesContext(
+  productContext: AssembledGenerateOptions["productContext"],
+): boolean {
+  const family = productContext?.family?.trim().toLowerCase();
+  return family === "cylinder" || family === "tall cylinder";
 }
 
 export function useAssembledPromptGeneration() {
@@ -180,16 +192,69 @@ export function useAssembledPromptGeneration() {
     // actually sees the reference. Always pass objects.
     const rawRef = options.referenceImageUrl?.trim() || "";
     const rawGlassRef = options.glassSpecularityReferenceImageUrl?.trim() || "";
+    const rawMaskRef = options.productContext?.maskReference?.trim() || "";
     const isBestBottlesStudioMasterRequest =
       Boolean(options.extraLibraryTags?.includes("brand:best-bottles")) &&
       Boolean(options.extraLibraryTags?.includes("studio-master"));
+    const isCylinderBestBottlesMasterRequest =
+      isBestBottlesStudioMasterRequest &&
+      isCylinderBestBottlesContext(options.productContext);
+    const requiresMaskControlledRecanvas =
+      isBestBottlesStudioMasterRequest &&
+      options.productContext?.referenceWorkflow === "two-source-flattened-truth-transparent-mask";
     const productReferenceIssue = getBestBottlesReferenceUrlIssue(rawRef);
+    const retiredReferenceIssue =
+      isCylinderBestBottlesMasterRequest
+        ? getRetiredTransparentBestBottlesReferenceIssue([
+            {
+              url: rawRef,
+              sourceReference: options.productContext?.sourceReference,
+              referenceWorkflow: options.productContext?.referenceWorkflow,
+            },
+          ])
+        : null;
+    if (retiredReferenceIssue) {
+      const message = retiredReferenceIssue;
+      setError(message);
+      setIsGenerating(false);
+      toast({
+        title: "Flattened product truth required",
+        description: message,
+        variant: "destructive",
+      });
+      return null;
+    }
+    if (isCylinderBestBottlesMasterRequest && rawMaskRef) {
+      const message =
+        "Cylinder master generation no longer accepts a mask/control reference. Use one flattened product-truth reference only.";
+      setError(message);
+      setIsGenerating(false);
+      toast({
+        title: "Mask/control retired",
+        description: message,
+        variant: "destructive",
+      });
+      return null;
+    }
     if (isBestBottlesStudioMasterRequest && productReferenceIssue) {
       const message = `Reference is not usable: ${productReferenceIssue}`;
       setError(message);
       setIsGenerating(false);
       toast({
         title: "Usable reference required",
+        description: message,
+        variant: "destructive",
+      });
+      return null;
+    }
+    if (requiresMaskControlledRecanvas && (!rawMaskRef || options.productContext?.maskQcStatus !== "passed")) {
+      const message = rawMaskRef
+        ? "Transparent mask/control PNG has not passed Alpha QC."
+        : "Transparent mask/control PNG is required for Cylinder two-source generation.";
+      setError(message);
+      setIsGenerating(false);
+      toast({
+        title: "Mask/control required",
         description: message,
         variant: "destructive",
       });
@@ -256,8 +321,9 @@ export function useAssembledPromptGeneration() {
       hasProductReference &&
       extraLibraryTags.includes("brand:best-bottles") &&
       extraLibraryTags.includes("studio-master");
+    const precompiledPrompt = options.precompiledPromptRecord?.final_prompt?.trim() || null;
     const requestPrompt = isBestBottlesStudioMaster
-      ? [
+      ? precompiledPrompt ?? [
           "REFERENCE-LOCKED BEST BOTTLES LUXURY PRODUCT PHOTOGRAPHY V5.1.",
           "Use the uploaded product reference as the source of truth.",
           "Server will build the full locked prompt from productContext, measurements, and reference metadata.",
@@ -296,6 +362,9 @@ export function useAssembledPromptGeneration() {
             // stream the response so high-resolution returns aren't
             // gated by wall-clock budget.
             resolution: options.sceneOverlay?.resolutionOverride ?? "standard",
+            imageConstraints: options.sceneOverlay?.aspectRatioOverride
+              ? undefined
+              : getExactOutputCanvasConstraints(assembled.preset.canvas),
             // Background overlay flows through the same fields Dark Room
             // uses; the edge function's Director Mode appends them as a
             // BACKGROUND STYLE block ahead of the bottle's product spec.
@@ -303,6 +372,7 @@ export function useAssembledPromptGeneration() {
             backgroundPrompt: options.sceneOverlay?.backgroundPrompt ?? undefined,
             extraLibraryTags,
             productContext: options.productContext,
+            precompiledPromptRecord: options.precompiledPromptRecord ?? undefined,
           },
         },
       );
@@ -397,18 +467,26 @@ export function useAssembledPromptGeneration() {
         return null;
       }
 
+      const resolvedAspectRatio =
+        options.sceneOverlay?.aspectRatioOverride ?? assembled.preset.aspectRatio;
+      const resolvedCanvas =
+        resolveExactCanvasForAspectRatio(resolvedAspectRatio) ?? assembled.canvas;
+
       // Snap the rendered cream background to the exact target hex and apply
       // the client-side rig baseline pass. The Edge function stays a provider
       // coordinator because 2080x2288 image re-encoding can exhaust worker
       // limits; the browser can safely perform the final Studio acceptance
       // pass before the Library URL is patched.
       const savedImageId = data.savedImageId ?? null;
-      const shouldPostProcessBestBottlesMaster =
-        extraLibraryTags.includes("brand:best-bottles") &&
-        !options.sceneOverlay?.backgroundPresetId &&
-        !options.sceneOverlay?.backgroundPrompt;
+      const rigPostprocessDecision = shouldRunBestBottlesRigPostprocess({
+        libraryTags: extraLibraryTags,
+        family: options.productContext?.family,
+        aspectRatio: resolvedAspectRatio,
+        canvas: resolvedCanvas,
+        sceneOverlay: options.sceneOverlay,
+      });
       let finalImageUrl = data.imageUrl;
-      if (shouldPostProcessBestBottlesMaster && currentOrganizationId) {
+      if (rigPostprocessDecision.run && currentOrganizationId) {
         try {
           const correctedDataUrl = await colorCorrectToTarget(
             data.imageUrl,
@@ -419,12 +497,24 @@ export function useAssembledPromptGeneration() {
             capState: options.productContext?.capState,
             mode: options.productContext?.mode,
             targetBackgroundHex: PAPER_DOLL_TARGET_CREAM,
+            maskReferenceUrl: rawMaskRef || null,
+            requireMaskControl: requiresMaskControlledRecanvas,
           });
+          if (rigged.detectedBaselineYPx === null || rigged.targetBaselineYPx === null) {
+            throw new Error("Rig baseline was not detectable in the generated image.");
+          }
+          if (rigged.qaIssues.length > 0) {
+            throw new Error(`Rig QA failed: ${rigged.qaIssues.join(" ")}`);
+          }
           console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess", {
             shifted: rigged.shifted,
             shiftYPx: rigged.shiftYPx,
+            scale: rigged.scale,
+            maskControlled: rigged.maskControlled,
+            qaIssues: rigged.qaIssues,
             detectedBaselineYPx: rigged.detectedBaselineYPx,
             targetBaselineYPx: rigged.targetBaselineYPx,
+            reason: rigPostprocessDecision.reason,
             family: options.productContext?.family,
             capState: options.productContext?.capState,
             mode: options.productContext?.mode,
@@ -441,36 +531,47 @@ export function useAssembledPromptGeneration() {
               contentType: "image/png",
             });
           if (uploadError) {
-            console.warn("[useAssembledPromptGeneration] rigged master upload failed", uploadError);
+            throw new Error(`Rigged master upload failed: ${uploadError.message}`);
           } else {
             const { data: urlData } = supabase.storage
               .from("generated-images")
               .getPublicUrl(path);
-            if (urlData?.publicUrl) {
-              finalImageUrl = urlData.publicUrl;
-              if (savedImageId) {
-                const { error: updateError } = await supabase
-                  .from("generated_images")
-                  .update({ image_url: finalImageUrl })
-                  .eq("id", savedImageId);
-                if (updateError) {
-                  console.warn(
-                    "[useAssembledPromptGeneration] generated_images.image_url rig patch failed",
-                    updateError,
-                  );
-                }
+            if (!urlData?.publicUrl) {
+              throw new Error("Rigged master upload returned no public URL.");
+            }
+            finalImageUrl = urlData.publicUrl;
+            if (savedImageId) {
+              const { error: updateError } = await supabase
+                .from("generated_images")
+                .update({ image_url: finalImageUrl })
+                .eq("id", savedImageId);
+              if (updateError) {
+                throw new Error(`Library row rig patch failed: ${updateError.message}`);
               }
             }
           }
         } catch (e) {
-          console.warn("[useAssembledPromptGeneration] Best Bottles rig postprocess skipped", e);
+          const message = e instanceof Error ? e.message : "Best Bottles rig postprocess failed.";
+          console.error("[useAssembledPromptGeneration] Best Bottles rig postprocess failed", {
+            error: e,
+            savedImageId,
+            rawImageUrl: data.imageUrl,
+            family: options.productContext?.family,
+          });
+          setError(message);
+          toast({ title: "Rig post-process failed", description: message, variant: "destructive" });
+          return null;
         }
+      } else if (extraLibraryTags.includes("brand:best-bottles") && extraLibraryTags.includes("studio-master")) {
+        console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess not required", {
+          reason: rigPostprocessDecision.reason,
+          family: options.productContext?.family,
+          aspectRatio: resolvedAspectRatio,
+          canvas: resolvedCanvas,
+          sceneOverlay: options.sceneOverlay,
+        });
       }
 
-      const resolvedAspectRatio =
-        options.sceneOverlay?.aspectRatioOverride ?? assembled.preset.aspectRatio;
-      const resolvedCanvas =
-        getExactCanvasForAspectRatio(resolvedAspectRatio) ?? assembled.canvas;
       const generated: AssembledGenerationResult = {
         imageUrl: finalImageUrl,
         savedImageId,

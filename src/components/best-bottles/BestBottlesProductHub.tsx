@@ -193,11 +193,21 @@ function StatusPills({ group }: { group: BestBottlesProductGroupHub }) {
 }
 
 function QualityBadges({ group }: { group: BestBottlesProductGroupHub }) {
+  const seoTone = group.hasSeo
+    ? "border-emerald-500/40 text-emerald-700"
+    : group.seoAudit.publicCopyUnsafe
+      ? "border-red-500/40 text-red-700"
+      : "border-amber-500/40 text-amber-700";
   return (
     <div className="flex flex-wrap gap-1.5">
-      <Badge variant="outline" className={group.hasSeo ? "border-emerald-500/40 text-emerald-700" : "border-amber-500/40 text-amber-700"}>
-        {group.hasSeo ? "SEO" : "Needs SEO"}
+      <Badge variant="outline" className={seoTone} title={[...group.seoAudit.missingFields, ...group.seoAudit.warnings].join(", ")}>
+        SEO {group.seoAudit.grade} · {group.seoAudit.score}
       </Badge>
+      {group.seoAudit.publicCopyUnsafe && (
+        <Badge variant="outline" className="border-red-500/40 text-red-700">
+          Public copy unsafe
+        </Badge>
+      )}
       <Badge variant="outline" className={group.hasSpecs ? "border-emerald-500/40 text-emerald-700" : "border-amber-500/40 text-amber-700"}>
         {group.hasSpecs ? "Specs" : "Needs specs"}
       </Badge>
@@ -620,11 +630,36 @@ export default function BestBottlesProductHub() {
                         </div>
                       )}
                       <div className="grid gap-4 sm:grid-cols-2">
+                        <DetailField label="SEO score" value={`${selectedGroup.seoAudit.score} (${selectedGroup.seoAudit.grade})`} />
                         <DetailField label="SEO title" value={selectedGroup.productHub?.seo_title} />
                         <DetailField label="SEO description" value={selectedGroup.productHub?.seo_description} />
                         <DetailField label="Short description" value={selectedGroup.productHub?.short_description} />
                         <DetailField label="Long description" value={selectedGroup.productHub?.long_description} />
                       </div>
+                      {(selectedGroup.seoAudit.missingFields.length > 0 || selectedGroup.seoAudit.warnings.length > 0) && (
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                          {selectedGroup.seoAudit.missingFields.length > 0 && (
+                            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Missing SEO fields</p>
+                              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-amber-800">
+                                {selectedGroup.seoAudit.missingFields.map((field) => (
+                                  <li key={field}>{field}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {selectedGroup.seoAudit.warnings.length > 0 && (
+                            <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-red-800">SEO warnings</p>
+                              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-red-800">
+                                {selectedGroup.seoAudit.warnings.map((warning) => (
+                                  <li key={warning}>{warning}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </section>
 

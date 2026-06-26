@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "geometry_drift",
+      "category": "identity",
+      "prompt": "No geometry drift: do not change body shape, silhouette, proportions, base footprint, neck finish, shoulder shape, molded detail, swirl, facet, panel, embossing, or camera angle.",
+      "qa_key": "geometry_preserved"
+    },
+    {
+      "id": "material_swap",
+      "category": "material",
+      "prompt": "No material swaps: glass remains glass, plastic remains plastic, metal remains metal, paperboard remains paperboard, and fabric remains fabric.",
+      "qa_key": "material_truth_preserved"
+    },
+    {
+      "id": "blotchy_rendering",
+      "category": "material",
+      "prompt": "No blotchy rendering, cloudy body, dirty haze, pale matte rectangle, compression artifacts, stained background, or washed-out product edges.",
+      "qa_key": "no_blotchy_rendering"
+    },
+    {
+      "id": "missing_caps",
+      "category": "cap_applicator",
+      "prompt": "No missing, erased, ghosted, background-colored, duplicated, or extra caps; detached components visible in the reference must remain visible.",
+      "qa_key": "caps_and_detached_components_visible"
+    },
+    {
+      "id": "mutated_applicator",
+      "category": "cap_applicator",
+      "prompt": "No mutated applicator: do not turn sprayers into rollers, rollers into sprayers, droppers into pumps, reducers into droppers, or bulb sprayers into modern actuators.",
+      "qa_key": "applicator_preserved"
+    },
+    {
+      "id": "bad_shadow",
+      "category": "background_shadow",
+      "prompt": "No heavy, long, hard, smeared, directional, detached, duplicate, or floor-plane shadow.",
+      "qa_key": "shadow_clean"
+    },
+    {
+      "id": "inconsistent_framing",
+      "category": "framing",
+      "prompt": "No off-center product, baseline drift, inconsistent family scale, cropped cap, cropped base, cropped detached component, or product edge touching the canvas.",
+      "qa_key": "framing_consistent"
+    },
+    {
+      "id": "content_pollution",
+      "category": "content",
+      "prompt": "No added labels, text, logos, badges, watermarks, props, hands, flowers, lifestyle scenes, tabletop edges, curtains, wood surfaces, or decorative canvas treatments.",
+      "qa_key": "no_content_pollution"
+    }
+  ]
+}

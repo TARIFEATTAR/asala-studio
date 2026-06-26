@@ -9,12 +9,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useCurrentOrganizationId } from "./useIndustryConfig";
+import { isRetiredTransparentBestBottlesReferenceCandidate } from "@/lib/bestBottlesReferenceFilters";
 
 export interface UseImageLibraryOptions {
   /** When set, only rows whose `library_tags` contains this string are returned. */
   libraryTagContains?: string;
   /** When set, rows that contain any of these tags (OR). Overrides `libraryTagContains` if both are passed. */
   libraryTagContainsAny?: string[];
+  /** Exclude rows whose `library_tags` include any of these exact tokens. */
+  libraryTagExcludeAny?: string[];
+  /** Exclude rows whose image_url contains any of these case-insensitive fragments. */
+  imageUrlExcludeContainsAny?: string[];
+  /** Exclude retired Best Bottles transparent/background-removed reference rows. */
+  excludeRetiredBestBottlesTransparentReferences?: boolean;
 }
 
 export interface LibraryImage {
@@ -25,6 +32,7 @@ export interface LibraryImage {
     goalType?: string;
     aspectRatio?: string;
     prompt?: string;
+    libraryTags?: string[];
 }
 
 interface GeneratedImageRow {
@@ -97,23 +105,77 @@ async function fetchGeneratedImageRowsForLibrary(
     return data ?? [];
 }
 
+function normalizeContainsList(values?: string[]) {
+    return (values ?? [])
+        .map((value) => value.trim().toLowerCase())
+        .filter(Boolean);
+}
+
+function rowHasExcludedTag(row: GeneratedImageRow, excludedTags: string[]): boolean {
+    if (excludedTags.length === 0) return false;
+    const tags = (row.library_tags ?? []).map((tag) => tag.toLowerCase());
+    return tags.some((tag) => excludedTags.includes(tag));
+}
+
+function rowUrlContainsExcludedToken(row: GeneratedImageRow, excludedUrlTokens: string[]): boolean {
+    if (excludedUrlTokens.length === 0) return false;
+    const url = row.image_url.toLowerCase();
+    return excludedUrlTokens.some((token) => url.includes(token));
+}
+
+function rowIsRetiredBestBottlesTransparentReference(row: GeneratedImageRow): boolean {
+    return isRetiredTransparentBestBottlesReferenceCandidate([
+        {
+            url: row.image_url,
+            imageUrl: row.image_url,
+            name: row.session_name,
+            sessionName: row.session_name,
+            libraryTags: row.library_tags ?? [],
+            library_tags: row.library_tags ?? [],
+        },
+    ]);
+}
+
 export function useImageLibrary(options: UseImageLibraryOptions = {}) {
-    const { libraryTagContains, libraryTagContainsAny } = options;
+    const {
+        libraryTagContains,
+        libraryTagContainsAny,
+        libraryTagExcludeAny,
+        imageUrlExcludeContainsAny,
+        excludeRetiredBestBottlesTransparentReferences = false,
+    } = options;
     const tagFilters =
         libraryTagContainsAny && libraryTagContainsAny.length > 0
             ? libraryTagContainsAny
             : libraryTagContains
               ? [libraryTagContains]
               : [];
+    const tagExcludes = normalizeContainsList(libraryTagExcludeAny);
+    const urlExcludes = normalizeContainsList(imageUrlExcludeContainsAny);
     const { user } = useAuth();
     const { orgId } = useCurrentOrganizationId();
 
     return useQuery({
-        queryKey: ["image-library-hook", orgId, user?.id, tagFilters],
+        queryKey: [
+            "image-library-hook",
+            orgId,
+            user?.id,
+            tagFilters,
+            tagExcludes,
+            urlExcludes,
+            excludeRetiredBestBottlesTransparentReferences,
+        ],
         queryFn: async (): Promise<LibraryImage[]> => {
             if (!user) return [];
 
-            console.log("📸 useImageLibrary fetching...", { orgId, userId: user.id, tagFilters });
+            console.log("📸 useImageLibrary fetching...", {
+                orgId,
+                userId: user.id,
+                tagFilters,
+                tagExcludes,
+                urlExcludes,
+                excludeRetiredBestBottlesTransparentReferences,
+            });
 
             let data: GeneratedImageRow[];
 
@@ -137,6 +199,14 @@ export function useImageLibrary(options: UseImageLibraryOptions = {}) {
                 data = data.slice(0, 200);
             }
 
+            data = data.filter(
+                (row) =>
+                    !rowHasExcludedTag(row, tagExcludes) &&
+                    !rowUrlContainsExcludedToken(row, urlExcludes) &&
+                    (!excludeRetiredBestBottlesTransparentReferences ||
+                        !rowIsRetiredBestBottlesTransparentReference(row)),
+            );
+
             console.log(`✅ useImageLibrary loaded ${data?.length || 0} images`);
 
             // Transform to LibraryImage format for the modal
@@ -148,6 +218,7 @@ export function useImageLibrary(options: UseImageLibraryOptions = {}) {
                 goalType: img.goal_type || undefined,
                 aspectRatio: img.aspect_ratio || undefined,
                 prompt: img.final_prompt || undefined,
+                libraryTags: img.library_tags ?? [],
             }));
         },
         enabled: !!user,

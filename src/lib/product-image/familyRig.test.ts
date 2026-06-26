@@ -16,7 +16,7 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
   const H = 2288;
 
   it("fit-to-box binds on height for a tall, narrow assembly", () => {
-    const cfg = FAMILY_RIG.cylinder; // fillHeightPct 80, fillWidthPct 60
+    const cfg = FAMILY_RIG.cylinder; // fillHeightPct 72, fillWidthPct 62
     const scale = computeRigFitScale(cfg, 200, 1000, W, H);
     assert.ok(approx(scale, (cfg.fillHeightPct / 100) * H / 1000));
   });
@@ -35,23 +35,30 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
     assert.ok(approx(scale, Math.min(sH, sW)));
   });
 
-  it("normalizes Tall Cylinder to the Cylinder rig and enables Circle", () => {
+  it("normalizes Tall Cylinder to the Cylinder rig, enables Circle, and falls back to the universal PDP rig", () => {
     assert.equal(getFamilyRig("Tall Cylinder"), FAMILY_RIG.cylinder);
     assert.equal(hasFamilyRig("Tall Cylinder"), true);
     assert.deepEqual(getFamilyRig("Circle"), FAMILY_RIG.circle);
     assert.equal(hasFamilyRig("Circle"), true);
-    assert.equal(hasFamilyRig("Boston Round"), false);
+    assert.deepEqual(getFamilyRig("Boston Round"), FAMILY_RIG.defaultPdp);
+    assert.deepEqual(getFamilyRig("Decorative"), FAMILY_RIG.defaultPdp);
+    assert.equal(hasFamilyRig("Boston Round"), true);
   });
 
   it("builds a size-agnostic imposed rig block with composition authority", () => {
     const block = buildImposedRigBlock({ family: "Cylinder", capState: "assembled" });
 
     assert.ok(block);
+    assert.equal(FAMILY_RIG.cylinder.fillHeightPct, 72);
     assert.match(block, /IMPOSED STUDIO RIG/);
     assert.match(block, /SUPERSEDES/);
-    assert.match(block, /12.?14% up from the canvas bottom/);
+    assert.match(block, /8.?10% up from the canvas bottom/);
+    assert.match(block, /visible bottom contact pixels/i);
+    assert.match(block, /Do not lift the bottle base above this shelf line/i);
     assert.match(block, /FINAL ALIGNMENT QA/);
     // Size is NOT encoded by capacity — that's the display layer's job.
+    assert.match(block, /balanced, inspectable, CONSISTENT PDP catalog size/i);
+    assert.match(block, /~72% of the canvas height and ~62% of the width/);
     assert.match(block, /Do NOT vary the on-canvas size by ml capacity/i);
   });
 
@@ -69,6 +76,15 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
     assert.match(block, /over-cap upright to the right/i);
   });
 
+  it("guards cap-off sprayers against duplicate loose caps", () => {
+    const block = buildImposedRigBlock({ family: "Cylinder", capState: "detached" });
+
+    assert.ok(block);
+    assert.match(block, /bottle top is the exposed sprayer/i);
+    assert.match(block, /only detached object is the matching over-cap/i);
+    assert.match(block, /Do not render a second loose cap/i);
+  });
+
   it("builds a Circle rig with a wider round-bottle envelope", () => {
     const block = buildImposedRigBlock({ family: "Circle", capState: "detached" });
 
@@ -76,5 +92,16 @@ describe("family rig (size-agnostic, fit-to-box)", () => {
     assert.match(block, /IMPOSED STUDIO RIG/);
     assert.match(block, /CIRCLE/);
     assert.match(block, /~78% of the canvas height and ~68% of the width/);
+  });
+
+  it("builds a universal PDP rig for families without a custom override", () => {
+    const block = buildImposedRigBlock({ family: "Decorative", capState: "assembled" });
+
+    assert.ok(block);
+    assert.equal(FAMILY_RIG.defaultPdp.fillHeightPct, 67);
+    assert.match(block, /IMPOSED STUDIO RIG/);
+    assert.match(block, /UNIVERSAL PDP/);
+    assert.match(block, /~67% of the canvas height and ~60% of the width/);
+    assert.match(block, /Do NOT vary the on-canvas size by ml capacity/i);
   });
 });

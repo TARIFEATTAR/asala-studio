@@ -6,9 +6,17 @@ import { formatVisualContext } from "../_shared/productFieldFilters.ts";
 import { callGeminiImage } from "../_shared/aiProviders.ts";
 import { enhancePromptWithOntology } from "../_shared/photographyOntology.ts";
 import { generateImage as generateFreepikImage, type FreepikImageModel, type FreepikResolution, IMAGE_MODELS } from "../_shared/freepikProvider.ts";
-import { generateImage as generateOpenAIImage, type OpenAIImageModel, type OpenAIImageSize } from "../_shared/openaiProvider.ts";
+import { generateImage as generateOpenAIImage, type OpenAIImageModel, type OpenAIImageSize, type OpenAIOutputFormat } from "../_shared/openaiProvider.ts";
 import { getVisualStyleDirective, type VisualSquad } from "../_shared/visualMasters.ts";
 import { buildBestBottlesFamilyRigPromptAdjustment } from "../_shared/bestBottlesFamilyRigPrompt.ts";
+import { buildInlineRefinementStabilizerBlock } from "../_shared/inlineRefinementPrompt.ts";
+import { buildBestBottlesApplicatorPromptRules } from "../_shared/bestBottlesApplicatorPromptRules.ts";
+import {
+  BEST_BOTTLES_REFERENCE_LOCKED_BONE_CANVAS_RGBA,
+  buildBestBottlesBackgroundAndShadowPrompt,
+} from "../_shared/bestBottlesBackgroundAndShadowPrompt.ts";
+import { formatBestBottlesBodyMaterialSkuLock } from "../_shared/bestBottlesBodyMaterialPrompt.ts";
+import { resolveBestBottlesPrecompiledPrompt } from "../_shared/bestBottlesPrecompiledPrompt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +24,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const BEST_BOTTLES_BONE_CANVAS_RGBA = 0xF5F3EFFF;
 const MAX_REQUESTED_CANVAS_PIXELS = 12_000_000;
 const OPENAI_EXACT_SIZE_ALLOWLIST = new Set([
   "1024x1024",
@@ -79,6 +86,15 @@ function openAIExactSizeForCanvas(
   return OPENAI_EXACT_SIZE_ALLOWLIST.has(size) ? size as OpenAIImageSize : undefined;
 }
 
+function normalizeOpenAIOutputFormat(value: unknown): OpenAIOutputFormat {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (normalized === "jpg") return "jpeg";
+  if (normalized === "jpeg" || normalized === "webp" || normalized === "png") {
+    return normalized;
+  }
+  return "png";
+}
+
 async function conformGeneratedImage(
   base64Image: string,
   aspectRatio: string | undefined,
@@ -89,220 +105,6 @@ async function conformGeneratedImage(
   return exactCanvas
     ? containImageOnCanvas(base64Image, exactCanvas.width, exactCanvas.height, backgroundColor)
     : conformImageToAspectRatio(base64Image, aspectRatio);
-}
-
-interface BestBottlesApplicatorPromptRules {
-  colorLabel: string;
-  sourceTruth: string;
-  fullVisibility: string;
-  canvasBounds: string;
-  glassMaterialLine: string;
-  fitmentMaterialLine: string;
-  textileMaterialLine?: string;
-  shadowContact: string;
-  forbiddenLines: string[];
-}
-
-function buildBestBottlesApplicatorPromptRules(
-  productContext?: Record<string, unknown> | null,
-): BestBottlesApplicatorPromptRules {
-  const applicator = typeof productContext?.applicator === "string"
-    ? productContext.applicator.trim()
-    : "";
-  const label = applicator || "the referenced closure/fitment";
-  const normalized = label.toLowerCase();
-
-  const hasTassel = normalized.includes("tassel");
-  const hasBulb = hasTassel || normalized.includes("bulb");
-  const isStopper =
-    normalized.includes("stopper") ||
-    normalized.includes("glass rod") ||
-    normalized.includes("ground glass");
-  const isDropper = normalized.includes("dropper");
-  const isRoller = normalized.includes("roller");
-  const isSprayer =
-    !hasBulb &&
-    (
-      normalized.includes("spray") ||
-      normalized.includes("sprayer") ||
-      normalized.includes("atomizer") ||
-      normalized.includes("mist") ||
-      normalized.includes("pump")
-    );
-  const isCapOrReducer =
-    normalized.includes("cap") ||
-    normalized.includes("closure") ||
-    normalized.includes("reducer");
-
-  const sharedNoAddedAtomizer =
-    "- No added bulb, hose, tassel, atomizer, spray actuator, pump, dip tube, or detached cap unless that exact component is visibly present in Image 1.";
-
-  if (hasTassel) {
-    return {
-      colorLabel: "Cap / hose / bulb / tassel color",
-      sourceTruth:
-        "exact bottle body, bulb, hose, tassel, cap/collar, trim, dip tube if visible, glass thickness, silhouette, proportions, component relationships, colors, and material identity.",
-      fullVisibility: "Keep the full product visible, including full bulb, hose, and tassel.",
-      canvasBounds:
-        "No cap, bulb, hose, bottle base, tassel strands, shadow, detached cap, or tassel end may touch or leave the canvas.",
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, visible separation between front wall, back wall, and dip tube if present. No fake bevels or plastic glass.",
-      fitmentMaterialLine:
-        "- Cap/collar/metal: preserve the exact bulb-sprayer collar, connector rings, trim finish, and cap state from Image 1; polish metal with nuanced black/white reflection-card gradients, realistic depth, and no broad CGI stripe.",
-      textileMaterialLine:
-        "- Textile: sharper weave/thread detail in hose, bulb, and tassel; tactile dimensional softness; locked textile color remains accurate and rich, not crushed or gray.",
-      shadowContact: "bottle base, bulb, tassel, and hose contact points",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted cap/tassel colors, changed textile color, changed metal finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped tassel, cropped bulb, or product edge touching the canvas.",
-      ],
-    };
-  }
-
-  if (hasBulb) {
-    return {
-      colorLabel: "Cap / hose / bulb color",
-      sourceTruth:
-        "exact bottle body, bulb, hose, cap/collar, trim, dip tube if visible, glass thickness, silhouette, proportions, component relationships, colors, and material identity. No tassel may be added unless Image 1 shows one.",
-      fullVisibility: "Keep the full product visible, including full bulb and hose.",
-      canvasBounds:
-        "No cap, bulb, hose, bottle base, shadow, detached cap, or product edge may touch or leave the canvas.",
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, visible separation between front wall, back wall, and dip tube if present. No fake bevels or plastic glass.",
-      fitmentMaterialLine:
-        "- Cap/collar/metal: preserve the exact bulb-sprayer collar, connector rings, trim finish, and cap state from Image 1; polish metal with nuanced black/white reflection-card gradients, realistic depth, and no broad CGI stripe.",
-      textileMaterialLine:
-        "- Textile: sharper weave/thread detail in hose and bulb; tactile dimensional softness; locked textile color remains accurate and rich, not crushed or gray. No tassel unless Image 1 shows one.",
-      shadowContact: "bottle base, bulb, and hose contact points",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted cap/bulb colors, changed textile color, changed metal finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped bulb, added tassel, or product edge touching the canvas.",
-      ],
-    };
-  }
-
-  if (isStopper) {
-    return {
-      colorLabel: "Glass stopper / closure color",
-      sourceTruth:
-        `exact bottle body, ${label}, glass thickness, silhouette, proportions, component relationships, colors, and material identity. Preserve the solid ground-glass stopper/plug form exactly; no bulb, hose, tassel, atomizer, pump, spray actuator, or dip tube may be added.`,
-      fullVisibility: `Keep the full product visible, including the full ${label} and bottle base.`,
-      canvasBounds:
-        `No ${label}, bottle base, shadow, or product edge may touch or leave the canvas.`,
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip, stopper, and base, realistic base weight, and visible separation between front and back walls. No fake bevels, plastic glass, or invented dip tube.",
-      fitmentMaterialLine:
-        `- Stopper/closure: preserve the exact ${label} shape from Image 1: solid glass, tapered ground-glass plug seated in the neck, decorative finial top as photographed, no mechanism, no tube, no sprayer, no bulb, no hose, no tassel.`,
-      shadowContact: "bottle base and any stopper/closure contact points visible in the reference",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted stopper/closure color, changed glass finish, new bottle shape, changed angle, changed stopper height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped stopper, cropped bottle base, or product edge touching the canvas.",
-        sharedNoAddedAtomizer,
-      ],
-    };
-  }
-
-  if (isDropper) {
-    return {
-      colorLabel: "Dropper / cap color",
-      sourceTruth:
-        "exact bottle body, dropper collar, rubber bulb, glass pipette, trim, glass thickness, silhouette, proportions, component relationships, colors, and material identity. No hose, tassel, atomizer, or sprayer may be added.",
-      fullVisibility: "Keep the full product visible, including the full dropper assembly and bottle base.",
-      canvasBounds:
-        "No dropper, pipette, bottle base, shadow, or product edge may touch or leave the canvas.",
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, and exact pipette shape if visible. No fake bevels or plastic glass.",
-      fitmentMaterialLine:
-        "- Dropper: preserve the exact collar, rubber bulb, and glass pipette from Image 1; no sprayer, atomizer, hose, bulb sprayer, or tassel.",
-      shadowContact: "bottle base and dropper contact points visible in the reference",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted dropper/cap colors, changed metal or rubber finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped dropper, or product edge touching the canvas.",
-        sharedNoAddedAtomizer,
-      ],
-    };
-  }
-
-  if (isRoller) {
-    return {
-      colorLabel: "Roller / cap color",
-      sourceTruth:
-        "exact bottle body, roller ball plug, over-cap if present, trim, glass thickness, silhouette, proportions, component relationships, colors, and material identity. No hose, tassel, atomizer, pump, sprayer, or dip tube may be added.",
-      fullVisibility: "Keep the full product visible, including the roller/cap assembly and bottle base.",
-      canvasBounds:
-        "No roller/cap assembly, bottle base, shadow, or product edge may touch or leave the canvas.",
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, and visible separation between front and back walls. No fake bevels or plastic glass.",
-      fitmentMaterialLine:
-        "- Roller/cap: preserve the exact roller ball plug, over-cap state, and closure color from Image 1; no sprayer, bulb, hose, tassel, or dip tube. If the over-cap is detached, keep the exposed roller ball plug seated on the bottle neck centerline and place the matching over-cap upright to the right on the same baseline with a consistent gap and scale.",
-      shadowContact: "bottle base, roller plug, and detached over-cap contact points visible in the reference",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted roller/cap colors, changed finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped roller/cap, sideways-drifting roller plug, floating cap, far-away cap, overlapping cap, or product edge touching the canvas.",
-        sharedNoAddedAtomizer,
-      ],
-    };
-  }
-
-  if (isSprayer) {
-    return {
-      colorLabel: "Sprayer / pump / cap color",
-      sourceTruth:
-        `exact bottle body, ${label}, actuator/nozzle/collar, trim, dip tube if visible, glass thickness, silhouette, proportions, component relationships, colors, and material identity. No bulb, hose, or tassel may be added unless Image 1 shows them.`,
-      fullVisibility: `Keep the full product visible, including the full ${label} and bottle base.`,
-      canvasBounds:
-        `No ${label}, actuator/nozzle, bottle base, shadow, detached cap, or product edge may touch or leave the canvas.`,
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, visible separation between front wall, back wall, and dip tube if present. No fake bevels or plastic glass.",
-      fitmentMaterialLine:
-        `- Sprayer/pump: preserve the exact ${label}, actuator, nozzle, collar, cap state, and trim finish from Image 1; no bulb, hose, or tassel unless Image 1 shows them.`,
-      shadowContact: "bottle base and sprayer/pump contact points visible in the reference",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted sprayer/cap colors, changed metal or plastic finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped sprayer/pump, added bulb, added hose, added tassel, or product edge touching the canvas.",
-      ],
-    };
-  }
-
-  if (isCapOrReducer) {
-    return {
-      colorLabel: "Cap / closure color",
-      sourceTruth:
-        `exact bottle body, ${label}, trim, glass thickness, silhouette, proportions, component relationships, colors, and material identity. No mechanism, bulb, hose, tassel, sprayer, pump, or dip tube may be added unless Image 1 shows one.`,
-      fullVisibility: `Keep the full product visible, including the full ${label} and bottle base.`,
-      canvasBounds:
-        `No ${label}, bottle base, shadow, or product edge may touch or leave the canvas.`,
-      glassMaterialLine:
-        "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, and visible separation between front and back walls. No fake bevels, plastic glass, or invented dip tube.",
-      fitmentMaterialLine:
-        `- Closure: preserve the exact ${label} shape, finish, height, and cap state from Image 1; no added mechanism or ornamentation.`,
-      shadowContact: "bottle base and closure contact points visible in the reference",
-      forbiddenLines: [
-        "- No new colors, color drift, substituted closure color, changed finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-        "- No zoomed-in crop, scale inflation, cropped closure, or product edge touching the canvas.",
-        sharedNoAddedAtomizer,
-      ],
-    };
-  }
-
-  return {
-    colorLabel: "Closure / fitment color",
-    sourceTruth:
-      `exact bottle body, ${label}, trim, glass thickness, silhouette, proportions, component relationships, colors, and material identity. Only render components that are visible in Image 1.`,
-    fullVisibility: "Keep the full referenced product visible, including every component that is visible in Image 1.",
-    canvasBounds:
-      "No referenced component, bottle base, shadow, or product edge may touch or leave the canvas.",
-    glassMaterialLine:
-      "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, and visible separation between front and back walls. No fake bevels or plastic glass.",
-    fitmentMaterialLine:
-      `- Closure/fitment: preserve the exact ${label} shape, finish, cap state, and placement from Image 1; do not invent missing components.`,
-    shadowContact: "bottle base and any referenced component contact points",
-    forbiddenLines: [
-      "- No new colors, color drift, substituted closure/fitment colors, changed finish, new bottle shape, changed angle, changed cap height, changed body width/depth, or changed product proportions.",
-      "- No zoomed-in crop, scale inflation, cropped closure/fitment, or product edge touching the canvas.",
-      sharedNoAddedAtomizer,
-    ],
-  };
 }
 
 interface BestBottlesBodyMaterialPromptRules {
@@ -488,6 +290,7 @@ function buildReferenceLockedBestBottlesPrompt(
   aspectRatio?: string,
   productContext?: Record<string, unknown> | null,
   operatorRefinement?: string,
+  inlineRefinementStabilizerBlock?: string | null,
 ): string {
   const refNote = categorizedRefs.product
     .map((ref, idx) => ref.description ? `Reference ${idx + 1}: ${ref.description}` : null)
@@ -517,7 +320,7 @@ function buildReferenceLockedBestBottlesPrompt(
         ].join(" ")
       : applicatorRules.sourceTruth;
   const expectedColor = [
-    typeof productContext?.bodyMaterial === "string" ? `Body material: ${productContext.bodyMaterial}` : null,
+    formatBestBottlesBodyMaterialSkuLock(bodyMaterialRules.kind, productContext?.bodyMaterial),
     typeof productContext?.family === "string" ? `Family: ${productContext.family}` : null,
     typeof productContext?.color === "string" ? `Body color: ${productContext.color}` : null,
     typeof productContext?.capColor === "string" ? `${applicatorRules.colorLabel}: ${productContext.capColor}` : null,
@@ -594,10 +397,9 @@ function buildReferenceLockedBestBottlesPrompt(
     applicatorRules.fitmentMaterialLine,
     applicatorRules.textileMaterialLine || null,
     "",
-    "BACKGROUND AND SHADOW:",
-    "- Replace background with seamless Best Bottles Bone #F5F3EF. It must visibly read as warm cream, not white, with no horizon line, tabletop edge, vignette, props, labels, or decorative frame.",
-    `- Add physically plausible grounding: a beautiful soft Kinfolk-like editorial drop shadow falling back-right across the Bone surface, anchored by visible contact shadow and ambient occlusion under ${applicatorRules.shadowContact}. Shadow should be elegant but present, about 25-35% opacity at the densest contact points, feathering outward naturally without darkening the overall background.`,
-    "- Remove only dirt, low-quality capture artifacts, jagged edges, compression noise, and background contamination outside the product silhouette.",
+    ...buildBestBottlesBackgroundAndShadowPrompt({
+      shadowContact: applicatorRules.shadowContact,
+    }),
     "",
     "FORBIDDEN:",
     ...applicatorRules.forbiddenLines,
@@ -612,6 +414,8 @@ function buildReferenceLockedBestBottlesPrompt(
     "- No copied reference bottle shape, designer perfume logo, label typography, decorative cap, curtain scene, flower prop, wood surface, mirror tabletop, or lifestyle room setup.",
     "- No label, text, badge, watermark, brand name, UI pill, card frame, rounded border, props, hands, flowers, spray mist, pure-white cutout look, tabletop edge, vignette, or decorative canvas treatment.",
     "",
+    inlineRefinementStabilizerBlock || null,
+    inlineRefinementStabilizerBlock ? "" : null,
     cleanOperatorRefinement
       ? `OPERATOR RETOUCH REQUEST — apply only if it does not conflict with the ${operatorConflictScope}:\n${cleanOperatorRefinement}`
       : null,
@@ -653,6 +457,151 @@ function getBestBottlesIdentityIssue(productContext?: Record<string, unknown> | 
   return blockers.length > 0
     ? blockers.join(" ")
     : "Best Bottles product identity is blocked.";
+}
+
+const RETIRED_TRANSPARENT_BEST_BOTTLES_REFERENCE_TOKENS = [
+  "best-bottles/clean-references/cylinder/",
+  "clean-references/cylinder/",
+  "reference-imports/background-removed",
+  "reference-imports/bg-removed",
+  "/paper-doll/",
+  "paper-doll/",
+  "paperdoll",
+  "mask-control",
+  "mask_control",
+  "maskcontrol",
+  "mask-ref",
+  "mask_ref",
+  "maskref",
+  "studio-mask-control-references",
+  "best-bottles/mask-imports/",
+  "mask-imports",
+  "transparent",
+  "transparent-png",
+  "background-removed",
+  "background_removed",
+  "backgroundremoved",
+  "bg-removed",
+  "bg_removed",
+  "bgremoved",
+  "remove-background",
+  "removed-background",
+  "removed_background",
+  "background removed",
+  "remove background",
+];
+
+const RETIRED_REFERENCE_METADATA_KEY_FRAGMENTS = [
+  "url",
+  "path",
+  "name",
+  "filename",
+  "file",
+  "storage",
+  "session",
+  "tag",
+  "library",
+  "source",
+  "lineage",
+  "role",
+  "label",
+  "metadata",
+  "meta",
+  "reference",
+  "origin",
+  "folder",
+  "directory",
+  "key",
+];
+
+const RETIRED_REFERENCE_METADATA_SKIP_KEYS = new Set([
+  "prompt",
+  "finalprompt",
+  "final_prompt",
+  "description",
+  "body",
+  "content",
+  "text",
+]);
+
+function normalizeReferenceFingerprint(value: unknown): string {
+  if (value == null) return "";
+  let normalized = String(value).trim().toLowerCase().replace(/\\/g, "/");
+  try {
+    normalized = decodeURIComponent(normalized);
+  } catch {
+    // Keep the raw fingerprint when decoding fails.
+  }
+  return normalized.replace(/\s+/g, " ");
+}
+
+function isRetiredTransparentBestBottlesReferenceValue(value: unknown): boolean {
+  const normalized = normalizeReferenceFingerprint(value);
+  if (!normalized) return false;
+  return RETIRED_TRANSPARENT_BEST_BOTTLES_REFERENCE_TOKENS.some((token) =>
+    normalized.includes(token),
+  );
+}
+
+function normalizeMetadataKey(value: string): string {
+  return normalizeReferenceFingerprint(value).replace(/[^a-z0-9]+/g, "");
+}
+
+function shouldInspectRetiredReferenceMetadataValue(key: string): boolean {
+  const normalizedKey = normalizeMetadataKey(key);
+  if (!normalizedKey || RETIRED_REFERENCE_METADATA_SKIP_KEYS.has(normalizedKey)) {
+    return false;
+  }
+  if (isRetiredTransparentBestBottlesReferenceValue(key)) return true;
+  return RETIRED_REFERENCE_METADATA_KEY_FRAGMENTS.some((fragment) =>
+    normalizedKey.includes(fragment),
+  );
+}
+
+function collectReferenceFingerprintValues(
+  value: unknown,
+  seen = new WeakSet<object>(),
+  depth = 0,
+): unknown[] {
+  if (value == null || depth > 5) return [];
+  if (typeof value !== "object") return [value];
+  if (seen.has(value)) return [];
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => collectReferenceFingerprintValues(entry, seen, depth + 1));
+  }
+
+  const record = value as Record<string, unknown>;
+  const values: unknown[] = [];
+  for (const [key, entry] of Object.entries(record)) {
+    if (!shouldInspectRetiredReferenceMetadataValue(key)) continue;
+    if (
+      isRetiredTransparentBestBottlesReferenceValue(key) &&
+      entry !== false &&
+      entry != null
+    ) {
+      values.push(key);
+    }
+    values.push(...collectReferenceFingerprintValues(entry, seen, depth + 1));
+  }
+  return values;
+}
+
+function getRetiredTransparentBestBottlesReferenceIssue(values: readonly unknown[]): string | null {
+  const retired = values
+    .flatMap((value) => collectReferenceFingerprintValues(value))
+    .some(isRetiredTransparentBestBottlesReferenceValue);
+  return retired
+    ? "Cylinder master generation requires one flattened product-truth reference with the original/source background. Transparent/background-removed references are retired."
+    : null;
+}
+
+function isCylinderBestBottlesProductContext(productContext?: Record<string, unknown> | null): boolean {
+  const family = typeof productContext?.family === "string"
+    ? productContext.family.trim().toLowerCase()
+    : "";
+  return family === "cylinder" || family === "tall cylinder";
 }
 
 /**
@@ -1371,11 +1320,13 @@ serve(async (req) => {
       // library_tags alongside the group-level pipelineMeta tags below.
       extraLibraryTags,
       productContext,
+      precompiledPromptRecord,
     } = body;
     const requestedOutputCanvas = parseRequestedOutputCanvas(imageConstraints);
     const generationAspectRatio = requestedOutputCanvas
       ? aspectRatioForCanvas(requestedOutputCanvas)
       : aspectRatio;
+    const openAIOutputFormat = normalizeOpenAIOutputFormat(outputFormat);
 
     // Resolve the two separate roles from whatever fields the client sent.
     const effectiveVariationPrompt: string | undefined =
@@ -1400,6 +1351,25 @@ serve(async (req) => {
       callerExtraTagsEarly.includes("studio-master") &&
       Array.isArray(referenceImages) &&
       referenceImages.length > 0;
+    const precompiledPromptResolution = resolveBestBottlesPrecompiledPrompt(
+      precompiledPromptRecord,
+      { isBestBottlesStudioMasterRequest },
+    );
+    if (precompiledPromptResolution.error) {
+      return new Response(
+        JSON.stringify({ error: precompiledPromptResolution.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (!isRefinement && isBestBottlesStudioMasterRequest && !precompiledPromptResolution.prompt) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "Best Bottles Studio master generation now requires a JSON precompiled prompt record.",
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // ─── Best Bottles Pipeline meta ───────────────────────────────────
     // When this run was launched from the Grid Pipeline, compute a
@@ -1744,6 +1714,7 @@ serve(async (req) => {
      */
     let actualReferenceImages = referenceImages || [];
     let parentImageTags: string[] = [];
+    let parentImagePrompt: string | null = null;
 
     // Auto-include parent image for refinements
     if (isRefinement && parentImageId) {
@@ -1757,6 +1728,7 @@ serve(async (req) => {
         parentImageTags = Array.isArray(parent.library_tags)
           ? parent.library_tags.filter((tag): tag is string => typeof tag === "string")
           : [];
+        parentImagePrompt = typeof parent.final_prompt === "string" ? parent.final_prompt : null;
         actualReferenceImages = [
           {
             url: parent.image_url,
@@ -1775,11 +1747,61 @@ serve(async (req) => {
       bestBottlesTagSet.has("brand:best-bottles") &&
       bestBottlesTagSet.has("studio-master") &&
       categorizedRefs.product.length > 0;
+    const normalizedProductContext = productContext && typeof productContext === "object"
+      ? productContext as Record<string, unknown>
+      : null;
+    const isCylinderBestBottlesStudioMasterRequest =
+      !isRefinement &&
+      isBestBottlesStudioMasterRequest &&
+      isCylinderBestBottlesProductContext(normalizedProductContext);
+
+    if (isCylinderBestBottlesStudioMasterRequest) {
+      const totalReferences =
+        categorizedRefs.product.length +
+        categorizedRefs.background.length +
+        categorizedRefs.style.length;
+      if (totalReferences !== 1 || categorizedRefs.product.length !== 1) {
+        return new Response(
+          JSON.stringify({
+            error:
+              "Cylinder master generation accepts exactly one flattened product-truth reference. Remove mask/control, paper-doll, background, and style references.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const maskReference = typeof normalizedProductContext?.maskReference === "string"
+        ? normalizedProductContext.maskReference.trim()
+        : "";
+      if (maskReference) {
+        return new Response(
+          JSON.stringify({
+            error:
+              "Cylinder master generation no longer accepts a mask/control reference. Use one flattened product-truth reference only.",
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const retiredReferenceIssue = getRetiredTransparentBestBottlesReferenceIssue([
+        ...categorizedRefs.product.map((ref) => ({
+          url: ref.url,
+          label: ref.label,
+        })),
+        {
+          sourceReference: normalizedProductContext?.sourceReference,
+          referenceWorkflow: normalizedProductContext?.referenceWorkflow,
+        },
+      ]);
+      if (retiredReferenceIssue) {
+        return new Response(
+          JSON.stringify({ error: retiredReferenceIssue }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
 
     if (!isRefinement && isBestBottlesStudioMasterRequest) {
-      const normalizedProductContext = productContext && typeof productContext === "object"
-        ? productContext as Record<string, unknown>
-        : null;
       const measurementIssue = getBestBottlesMeasurementIssue(
         normalizedProductContext,
       );
@@ -1863,10 +1885,18 @@ serve(async (req) => {
      */
     let enhancedPrompt: string;
 
-    if (isBestBottlesReferenceLocked) {
+    if (!isRefinement && isBestBottlesStudioMasterRequest && precompiledPromptResolution.prompt) {
+      enhancedPrompt = precompiledPromptResolution.prompt;
+      console.log("🧾 Best Bottles precompiled prompt accepted", {
+        sku: precompiledPromptResolution.sku,
+        qaCount: precompiledPromptResolution.qaChecklist.length,
+        promptLength: enhancedPrompt.length,
+      });
+    } else if (isBestBottlesReferenceLocked) {
       // Best Bottles PDP masters and their Image Editor refinements are
-      // retouch passes over real references. Never chain the old assembled
-      // art-directed prompt back into this path.
+      // retouch passes over real references. Inline editor refinements keep
+      // the parent prompt as a bounded stabilizer block while the operator
+      // request remains a short delta, so the model edits instead of recreating.
       enhancedPrompt = buildReferenceLockedBestBottlesPrompt(
         categorizedRefs,
         generationAspectRatio,
@@ -1874,6 +1904,9 @@ serve(async (req) => {
           ? productContext as Record<string, unknown>
           : null,
         isRefinement ? refinementInstruction || prompt : undefined,
+        isRefinement
+          ? buildInlineRefinementStabilizerBlock(parentPrompt || parentImagePrompt || prompt)
+          : null,
       );
     } else if (isRefinement && refinementInstruction) {
       // Refinements use chain logic
@@ -2327,7 +2360,7 @@ serve(async (req) => {
             encode(freepikBuffer),
             generationAspectRatio,
             freepikExactCanvas,
-            isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
+            isBestBottlesReferenceLocked ? BEST_BOTTLES_REFERENCE_LOCKED_BONE_CANVAS_RGBA : undefined,
           );
           freepikUploadBytes = new Uint8Array(decode(conformed.base64));
 
@@ -2397,6 +2430,7 @@ serve(async (req) => {
       console.log("🎨 Using OpenAI for image generation...", {
         model: effectiveOpenAIModel,
         resolution,
+        outputFormat: openAIOutputFormat,
         aspectRatio: generationAspectRatio,
         requestedCanvas: requestedOutputCanvas
           ? `${requestedOutputCanvas.width}×${requestedOutputCanvas.height}`
@@ -2414,6 +2448,7 @@ serve(async (req) => {
           resolution,
           size: requestedOpenAIExactSize ??
             (isBestBottlesReferenceLocked ? "2080x2288" : undefined),
+          outputFormat: openAIOutputFormat,
           referenceImages: referenceImagesPayload.length > 0
             ? referenceImagesPayload
             : undefined,
@@ -2445,7 +2480,7 @@ serve(async (req) => {
             openaiResult.imageBase64,
             generationAspectRatio,
             exactCanvas,
-            isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
+            isBestBottlesReferenceLocked ? BEST_BOTTLES_REFERENCE_LOCKED_BONE_CANVAS_RGBA : undefined,
           );
           openaiImageBase64 = openaiImage.base64;
           openaiMimeType = openaiImage.wasModified ? "image/png" : openaiResult.mimeType;
@@ -2616,7 +2651,7 @@ serve(async (req) => {
           rawBase64Image,
           generationAspectRatio,
           exactCanvas,
-          isBestBottlesReferenceLocked ? BEST_BOTTLES_BONE_CANVAS_RGBA : undefined,
+          isBestBottlesReferenceLocked ? BEST_BOTTLES_REFERENCE_LOCKED_BONE_CANVAS_RGBA : undefined,
         );
         base64Image = conformed.base64;
 

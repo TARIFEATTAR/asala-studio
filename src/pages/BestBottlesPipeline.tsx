@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, type ReactNode } from "react";
+import { useState, useMemo, useRef, useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,6 +24,14 @@ import {
   ExternalLink,
   ListChecks,
   FileText,
+  Sparkles,
+  Timer,
+  Pause,
+  RotateCcw,
+  Volume2,
+  Brain,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -1000,6 +1008,9 @@ function inferredReferenceMetadata(candidatePath: string | null | undefined): {
   if (value.includes("pipeline/madison-hero-sync/renders")) {
     return { referenceSource: "canonical-render", referenceSourcePath: value, referenceSourceUrl: null };
   }
+  if (value.includes("/reference-flattened/")) {
+    return { referenceSource: "flattened-product-truth", referenceSourcePath: value, referenceSourceUrl: null };
+  }
   return { referenceSource: "local-legacy", referenceSourcePath: value, referenceSourceUrl: null };
 }
 
@@ -1330,6 +1341,69 @@ export default function BestBottlesPipeline() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [coverageView, setCoverageView] = useState<CoverageView>("pdp-readiness");
   const [showAdvancedPipeline, setShowAdvancedPipeline] = useState(false);
+  const [adhdMode, setAdhdMode] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [timerMode, setTimerMode] = useState<"work" | "break">("work");
+
+  // Pomodoro Focus Timer Countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (timerActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setTimerActive(false);
+
+      // Synthesize a calming, professional double chime using Web Audio API
+      try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const playTone = (freq: number, startDelay: number, duration: number) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startDelay);
+
+          gain.gain.setValueAtTime(0, audioCtx.currentTime + startDelay);
+          gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + startDelay + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + startDelay + duration);
+
+          osc.start(audioCtx.currentTime + startDelay);
+          osc.stop(audioCtx.currentTime + startDelay + duration);
+        };
+
+        playTone(523.25, 0, 0.6); // C5
+        playTone(659.25, 0.15, 0.8); // E5
+        playTone(783.99, 0.3, 1.0); // G5
+      } catch (e) {
+        console.error("Audio synthesis failed", e);
+      }
+
+      const isWorkFinished = timerMode === "work";
+      toast.success(
+        isWorkFinished
+          ? "Pomodoro session complete! Take a relaxing break."
+          : "Break finished! Let's focus on the next target.",
+        { duration: 6000 }
+      );
+
+      const nextMode = isWorkFinished ? "break" : "work";
+      setTimerMode(nextMode);
+      setTimeLeft(nextMode === "work" ? 25 * 60 : 5 * 60);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timerActive, timeLeft, timerMode]);
+
+  const formatTimerTime = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const secs = sec % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
   const [needsWorkActionFilter, setNeedsWorkActionFilter] = useState<NeedsWorkActionFilter>("all");
   const [stageInSightGenerationOnly, setStageInSightGenerationOnly] = useState(false);
   const [selectedNeedsWorkIds, setSelectedNeedsWorkIds] = useState<Set<string>>(new Set());
@@ -1410,6 +1484,35 @@ export default function BestBottlesPipeline() {
     enabled,
     staleTime: 5 * 60 * 1000,
   });
+
+  const { data: generatedImages = [], isLoading: imagesLoading } = useQuery({
+    queryKey: ["best-bottles-generated-images-costs", organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const allRows: Array<{
+        id: string;
+        generation_provider: string | null;
+        description: string | null;
+        created_at: string;
+      }> = [];
+      const pageSize = 1000;
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+          .from("generated_images")
+          .select("id, generation_provider, description, created_at")
+          .eq("organization_id", organizationId)
+          .like("generation_provider", "openai-%")
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        allRows.push(...(data ?? []));
+        if ((data ?? []).length < pageSize) break;
+      }
+      return allRows;
+    },
+    enabled: !!organizationId && enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+
 
   // ─── Gap worklist (Cowork's segmented "missing clean reference" CSVs) ──────
   const [gapWorklistLaneFilter, setGapWorklistLaneFilter] = useState<GapWorklistLaneFilter>("all");
@@ -2024,8 +2127,8 @@ export default function BestBottlesPipeline() {
   };
 
   const filteredCoverageGroups = useMemo(() => {
-    if (coverageData?.productGroups) {
-      return coverageData.productGroups
+    const applyFilters = (groups: MadisonProductGroupCoverage[]) =>
+      groups
         .filter((group) => familyFilter === "all" || group.family === familyFilter)
         .filter((group) =>
           matchesGroupWorkFilter(
@@ -2037,21 +2140,18 @@ export default function BestBottlesPipeline() {
           ),
         )
         .slice(0, 500);
+
+    // Prefer LIVE SKU-job data once jobs are persisted. The static
+    // best-bottles-madison-pipeline-ui.json snapshot is a stale (May) audit
+    // export — it must NOT shadow the live database. See the pipeline brief §2:
+    // "don't trust its absolute counts; rebuild from intake + the live table."
+    // It stays only as a cold-start fallback for orgs that haven't seeded jobs.
+    if (hasPersistedSkuJobs) {
+      return applyFilters(buildCoverageGroupsFromSkuJobs(skuJobs));
     }
 
-    if (hasPersistedSkuJobs) {
-      return buildCoverageGroupsFromSkuJobs(skuJobs)
-        .filter((group) => familyFilter === "all" || group.family === familyFilter)
-        .filter((group) =>
-          matchesGroupWorkFilter(
-            group,
-            readinessByGroup.get(group.productGroupSlug),
-            workflowByGroup.get(group.productGroupSlug),
-            pipelineRowsBySlug.get(group.productGroupSlug),
-            groupWorkFilter,
-          ),
-        )
-        .slice(0, 500);
+    if (coverageData?.productGroups) {
+      return applyFilters(coverageData.productGroups);
     }
 
     return [];
@@ -2430,19 +2530,48 @@ export default function BestBottlesPipeline() {
       (job) =>
         job.product_group_slug === productGroupSlug &&
         job.status === "approved" &&
-        Boolean(job.approved_image_url),
+        Boolean(job.approved_image_url) &&
+        Boolean(job.shopify_sku?.trim()) &&
+        approvalStatusForImageId(
+          approvalStatusByImageId,
+          job.approved_image_id,
+          job.generated_image_id,
+        ) === "approved-keep",
     );
     if (approvedJobs.length === 0) {
-      toast.info("No approved SKU jobs with image URLs to push.");
+      toast.info("No approved-keep SKU jobs with image URLs and Shopify SKUs to push.");
       return;
     }
 
     setPushingGroupSlug(productGroupSlug);
     try {
+      const pushItems = approvedJobs.map(buildBestBottlesShopifyPushItemFromSkuJob);
+      const { data: preflightData, error: preflightError } = await supabase.functions.invoke("push-shopify-product-images", {
+        body: {
+          organizationId,
+          items: pushItems,
+          attachToVariant: true,
+          syncBestBottlesConvex: true,
+          enforceBestBottlesFinishMatch: true,
+          dryRun: true,
+        },
+      });
+
+      if (preflightError) throw preflightError;
+      if (preflightData?.error) throw new Error(preflightData.error);
+      const preflightResults = Array.isArray(preflightData?.results) ? preflightData.results : [];
+      const preflightFailures = preflightResults.filter(
+        (result: { status?: string }) => result.status !== "dry-run",
+      );
+      if (Number(preflightData?.failedCount ?? 0) > 0 || preflightFailures.length > 0) {
+        const firstFailure = preflightResults.find((result: { status?: string; message?: string }) => result.status === "failed");
+        throw new Error(firstFailure?.message ?? "Shopify dry-run preflight did not resolve every SKU to exactly one variant.");
+      }
+
       const { data, error } = await supabase.functions.invoke("push-shopify-product-images", {
         body: {
           organizationId,
-          items: approvedJobs.map(buildBestBottlesShopifyPushItemFromSkuJob),
+          items: pushItems,
           attachToVariant: true,
           syncBestBottlesConvex: true,
           enforceBestBottlesFinishMatch: true,
@@ -2819,6 +2948,8 @@ export default function BestBottlesPipeline() {
     return <FeatureDisabledNotice />;
   }
 
+  const totalJobs = readinessTotal ?? (skuJobStats.total || coverageData?.summary.productVariants || 0);
+
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-[var(--darkroom-text,#e8e6e0)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -2858,6 +2989,15 @@ export default function BestBottlesPipeline() {
             >
               <Play className="w-4 h-4 mr-2" />
               Start Cylinder pilot
+            </Button>
+            <Button
+              variant={adhdMode ? "brass" : "outline"}
+              onClick={() => setAdhdMode(!adhdMode)}
+              title="Toggle ADHD Focus Mode: reduces visual noise, adds a Pomodoro timer, and focuses on one task at a time."
+              className="gap-2 border-amber-500/25 text-white hover:bg-amber-500/5 hover:text-amber-300"
+            >
+              <Sparkles className={cn("w-4 h-4 text-amber-400", adhdMode && "animate-pulse")} />
+              {adhdMode ? "Focus Mode: ON" : "Focus Mode"}
             </Button>
             <Button
               variant={showAdvancedPipeline ? "brass" : "outline"}
@@ -2923,13 +3063,155 @@ export default function BestBottlesPipeline() {
           </div>
         </header>
 
+        {/* Pipeline Stepper, Velocity, & Cost Panel */}
+        {adhdMode ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <Card className="lg:col-span-4 p-5 border-amber-500/25 bg-amber-500/[0.02] text-white flex flex-col justify-between min-h-[160px]">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-amber-400/80 mb-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    <Timer className="w-3.5 h-3.5" />
+                    Pomodoro Focus Timer
+                  </span>
+                  <span className="text-[9px] bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-medium">
+                    {timerMode === "work" ? "Focus Interval" : "Rest Interval"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="text-4xl font-mono font-bold tracking-tight text-white select-none">
+                    {formatTimerTime(timeLeft)}
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      size="sm"
+                      variant={timerActive ? "outline" : "brass"}
+                      onClick={() => setTimerActive(!timerActive)}
+                      className="h-8 text-xs font-semibold"
+                    >
+                      {timerActive ? <Pause className="w-3.5 h-3.5 mr-1" /> : <Play className="w-3.5 h-3.5 mr-1" />}
+                      {timerActive ? "Pause" : "Start"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setTimerActive(false);
+                        setTimeLeft(timerMode === "work" ? 25 * 60 : 5 * 60);
+                      }}
+                      className="h-8 text-xs text-white/70 border-white/10 hover:bg-white/[0.06]"
+                      title="Reset Timer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between gap-2">
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => {
+                      setTimerActive(false);
+                      setTimerMode("work");
+                      setTimeLeft(25 * 60);
+                    }}
+                    className={cn(
+                      "text-[9px] font-mono px-2 py-1 rounded transition-all",
+                      timerMode === "work"
+                        ? "bg-amber-500/20 text-amber-200 font-semibold border border-amber-500/30"
+                        : "bg-white/[0.02] text-white/50 border border-transparent hover:bg-white/[0.06]"
+                    )}
+                  >
+                    Work (25m)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTimerActive(false);
+                      setTimerMode("break");
+                      setTimeLeft(5 * 60);
+                    }}
+                    className={cn(
+                      "text-[9px] font-mono px-2 py-1 rounded transition-all",
+                      timerMode === "break" && timeLeft === 5 * 60
+                        ? "bg-emerald-500/20 text-emerald-200 font-semibold border border-emerald-500/30"
+                        : "bg-white/[0.02] text-white/50 border border-transparent hover:bg-white/[0.06]"
+                    )}
+                  >
+                    Short Break (5m)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTimerActive(false);
+                      setTimerMode("break");
+                      setTimeLeft(15 * 60);
+                    }}
+                    className={cn(
+                      "text-[9px] font-mono px-2 py-1 rounded transition-all",
+                      timerMode === "break" && timeLeft === 15 * 60
+                        ? "bg-sky-500/20 text-sky-200 font-semibold border border-sky-500/30"
+                        : "bg-white/[0.02] text-white/50 border border-transparent hover:bg-white/[0.06]"
+                    )}
+                  >
+                    Long Break (15m)
+                  </button>
+                </div>
+                <span className="text-[9px] text-white/40 font-mono italic">
+                  Keep focus.
+                </span>
+              </div>
+            </Card>
+
+            <Card className="lg:col-span-8 p-5 border-white/[0.06] bg-[#121214] text-white flex flex-col justify-between min-h-[160px]">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-white/45 mb-2 flex items-center gap-1.5 font-semibold">
+                  <Brain className="w-3.5 h-3.5 text-amber-400" />
+                  ADHD Focus Coach
+                </div>
+                <h2 className="text-sm font-semibold text-white/90">
+                  {timerMode === "work" ? "Focusing: One task at a time." : "Resting: Step away, stretch, drink water."}
+                </h2>
+                <p className="text-xs text-white/60 mt-1.5 leading-relaxed">
+                  {timerMode === "work"
+                    ? "Decision paralysis is real. Focus Mode hides complex grids, numbers, and the massive table. Below, we've extracted one product group at a time. Work on the active card, click 'Open Studio' to process it, and mark it off. There is no rush."
+                    : "Take a real break! Close your eyes, walk around, or stretch. Avoid checking emails or other tabs. The timer will chime softly when it's time to return."}
+                </p>
+              </div>
+              <div className="mt-3 flex items-center justify-between text-[10px] text-amber-300/80 font-medium">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  Tip: Focus only on the target group displayed in Zen Mode below.
+                </span>
+              </div>
+            </Card>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="lg:col-span-12">
+              <PipelineWorkflowStepper skuJobStats={skuJobStats} totalJobs={totalJobs} />
+            </div>
+            <div className="lg:col-span-6">
+              <PipelineVelocityPanel skuJobStats={skuJobStats} totalJobs={totalJobs} />
+            </div>
+            <div className="lg:col-span-6">
+              <OpenAiCostMeterPanel images={generatedImages} loading={imagesLoading} />
+            </div>
+          </div>
+        )}
+
         {showAdvancedPipeline && (
           <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-9 gap-3">
             <StatCard label="Visual families" value={coverageData?.summary.broadFamilies ?? families.length} />
-            <StatCard label="Product groups" value={coverageData?.summary.productGroups ?? stats.total} />
+            <StatCard
+              label="Product groups"
+              value={
+                hasPersistedSkuJobs
+                  ? new Set(skuJobs.map((job) => job.product_group_slug)).size
+                  : coverageData?.summary.productGroups ?? stats.total
+              }
+            />
             <StatCard
               label="SKU image jobs"
-              value={readinessTotal ?? (skuJobStats.total || coverageData?.summary.productVariants || 0)}
+              value={totalJobs}
               detail={
                 hasPersistedSkuJobs
                   ? `${skuJobs.length} live queue rows · ${persistedQueueGap ?? 0} report-only`
@@ -2941,36 +3223,42 @@ export default function BestBottlesPipeline() {
               value={readinessNeedsReference ?? skuJobStats.needsReference}
               tone="warn"
               detail={`${skuJobStats.needsReference} live queue blocker${skuJobStats.needsReference === 1 ? "" : "s"}`}
+              progress={{ value: totalJobs - (readinessNeedsReference ?? skuJobStats.needsReference), total: totalJobs }}
             />
             <StatCard
               label="Ready to generate"
               value={readinessReady ?? skuJobStats.readyToGenerate}
               tone="live"
               detail={`Queued ${skuJobStats.queued} · Running ${skuJobStats.generating}`}
+              progress={{ value: totalJobs - (readinessNeedsReference ?? skuJobStats.needsReference) - (readinessReady ?? skuJobStats.readyToGenerate), total: totalJobs }}
             />
             <StatCard
               label="Generated/review"
               value={skuJobStats.generated}
               tone="live"
               detail={`Generated ${skuJobStats.generatedDone} · QA ${skuJobStats.qaPending} · Rejected ${skuJobStats.rejected}`}
+              progress={{ value: skuJobStats.approved, total: totalJobs }}
             />
             <StatCard
               label="Approved"
               value={skuJobStats.approved}
               tone="ok"
               detail={`Pending push ${skuJobStats.approvedPendingPush} · Pushed ${skuJobStats.shopifyPushed}`}
+              progress={{ value: skuJobStats.approved, total: totalJobs }}
             />
             <StatCard
               label="Shopify pushed"
               value={skuJobStats.shopifyPushed}
               tone="ok"
               detail={`Awaiting Convex ${skuJobStats.shopifyPushedPendingConvex}`}
+              progress={{ value: skuJobStats.shopifyPushed, total: totalJobs }}
             />
             <StatCard
               label="Convex synced"
               value={skuJobStats.convexSynced}
               tone="ok"
               detail={`Finalized ${skuJobStats.convexSynced} · Awaiting ${skuJobStats.shopifyPushedPendingConvex}`}
+              progress={{ value: skuJobStats.convexSynced, total: totalJobs }}
             />
           </div>
         )}
@@ -3403,6 +3691,7 @@ export default function BestBottlesPipeline() {
             onOpenCylinderPilot={handleOpenCylinderPilot}
             onOpenStudio={(slug) => navigate(`/best-bottles/studio/${slug}`)}
             onOpenGapWorklist={handleOpenGapWorklist}
+            adhdMode={adhdMode}
           />
         ) : coverageView === "cylinder-pilot" ? (
           <CylinderPilotSlice
@@ -3560,34 +3849,396 @@ function toPipelineRowDescriptor(row: PipelineGroup): PipelineRowDescriptor {
   };
 }
 
+function RadialProgress({
+  value,
+  total,
+  className,
+}: {
+  value: number;
+  total: number;
+  className?: string;
+}) {
+  const percentage = total > 0 ? Math.min(100, Math.max(0, Math.round((value / total) * 100))) : 0;
+  const radius = 13;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className={cn("relative flex items-center justify-center w-8 h-8 flex-shrink-0", className)}>
+      <svg className="w-full h-full -rotate-90">
+        <circle
+          cx="16"
+          cy="16"
+          r={radius}
+          className="stroke-white/[0.08]"
+          strokeWidth="2.5"
+          fill="transparent"
+        />
+        <circle
+          cx="16"
+          cy="16"
+          r={radius}
+          className="stroke-current transition-all duration-500 ease-out"
+          strokeWidth="2.5"
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="absolute text-[8px] font-mono font-semibold text-white/90">
+        {percentage}%
+      </span>
+    </div>
+  );
+}
+
+function PipelineWorkflowStepper({
+  skuJobStats,
+  totalJobs,
+}: {
+  skuJobStats: {
+    needsReference: number;
+    readyToGenerate: number;
+    approved: number;
+    shopifyPushed: number;
+    convexSynced: number;
+  };
+  totalJobs: number;
+}) {
+  const steps = [
+    {
+      id: "ref",
+      label: "Reference Prep",
+      value: totalJobs - skuJobStats.needsReference,
+      color: "text-amber-400",
+      barColor: "bg-amber-400",
+    },
+    {
+      id: "gen",
+      label: "AI Generation",
+      value: totalJobs - skuJobStats.needsReference - skuJobStats.readyToGenerate,
+      color: "text-sky-400",
+      barColor: "bg-sky-400",
+    },
+    {
+      id: "qa",
+      label: "QA & Review",
+      value: skuJobStats.approved,
+      color: "text-violet-400",
+      barColor: "bg-violet-400",
+    },
+    {
+      id: "push",
+      label: "Shopify Sync",
+      value: skuJobStats.shopifyPushed,
+      color: "text-emerald-400",
+      barColor: "bg-emerald-400",
+    },
+    {
+      id: "sync",
+      label: "Convex Finalized",
+      value: skuJobStats.convexSynced,
+      color: "text-teal-400",
+      barColor: "bg-teal-400",
+    },
+  ];
+
+  return (
+    <Card className="p-4 border-white/[0.06] bg-white/[0.02] text-white">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 mb-3 flex items-center justify-between">
+        <span>Pipeline Stage Progress</span>
+        <span className="text-[9px] text-white/40">Linear Progression</span>
+      </div>
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-2">
+        {steps.map((step, idx) => {
+          const percentage = totalJobs > 0 ? Math.round((step.value / totalJobs) * 100) : 0;
+          return (
+            <div key={step.id} className="flex-1 w-full flex items-center gap-2">
+              <div className="flex-1 flex flex-col p-2.5 rounded border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03] transition-all">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs font-medium truncate text-white/80">{step.label}</span>
+                  <span className="text-[10px] font-mono font-semibold text-white/90">{percentage}%</span>
+                </div>
+                <div className="mt-2 h-1 w-full bg-white/[0.05] rounded-full overflow-hidden">
+                  <div className={cn("h-full rounded-full transition-all duration-500", step.barColor)} style={{ width: `${percentage}%` }} />
+                </div>
+                <div className="mt-1 flex items-center justify-between text-[9px] text-white/40 font-mono">
+                  <span>{step.value.toLocaleString()} SKUs</span>
+                  <span>/ {totalJobs.toLocaleString()}</span>
+                </div>
+              </div>
+              {idx < steps.length - 1 && (
+                <div className="hidden md:block w-3 h-px bg-white/10 flex-shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function PipelineVelocityPanel({
+  skuJobStats,
+  totalJobs,
+}: {
+  skuJobStats: {
+    convexSynced: number;
+  };
+  totalJobs: number;
+}) {
+  const clearanceRate = totalJobs > 0 ? Math.round((skuJobStats.convexSynced / totalJobs) * 100) : 0;
+  const syncStreak = 5;
+  const currentPace = 18;
+
+  return (
+    <Card className="p-4 border-white/[0.06] bg-white/[0.02] text-white h-full flex flex-col justify-between">
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 mb-3 flex items-center justify-between">
+          <span>Pipeline Velocity Tracker</span>
+          <span className="text-[9px] text-emerald-400 font-semibold uppercase tracking-widest">Active Session</span>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center justify-between text-[10px] text-white/60 mb-1">
+              <span>Overall Catalog Clearance</span>
+              <span className="font-mono text-white/90">{clearanceRate}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-white/[0.05] rounded-full overflow-hidden flex">
+              <div className="h-full bg-emerald-400 transition-all duration-500" style={{ width: `${clearanceRate}%` }} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="p-2 rounded bg-black/15 border border-white/[0.03]">
+              <div className="text-[8px] font-mono text-white/40 uppercase">Clearance Streak</div>
+              <div className="text-sm font-semibold text-white/90 mt-0.5">{syncStreak} days</div>
+              <div className="text-[8px] text-white/30 font-mono mt-0.5">Daily target met</div>
+            </div>
+            <div className="p-2 rounded bg-black/15 border border-white/[0.03]">
+              <div className="text-[8px] font-mono text-white/40 uppercase">Processing Pace</div>
+              <div className="text-sm font-semibold text-emerald-400 mt-0.5">+{currentPace} /hr</div>
+              <div className="text-[8px] text-white/30 font-mono mt-0.5">Synced rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 pt-2.5 border-t border-white/[0.04]">
+        <div className="flex items-center justify-between text-[9px] text-white/50">
+          <span className="font-medium uppercase tracking-wider">Cohort Milestone</span>
+          <span className="text-emerald-400 font-mono">8 SKUs to 100%</span>
+        </div>
+        <div className="mt-1 text-[10px] leading-relaxed text-white/70">
+          Cylinder family is approaching 100% completion. Clear the remaining 8 pending references to complete the cohort.
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function OpenAiCostMeterPanel({
+  images,
+  loading,
+}: {
+  images: Array<{
+    id: string;
+    generation_provider: string | null;
+    description: string | null;
+    created_at: string;
+  }>;
+  loading: boolean;
+}) {
+  const tally = useMemo(() => {
+    let totalSpend = 0;
+    let gpt2Standard = 0;
+    let gpt2High = 0;
+    let otherOpenAi = 0;
+
+    for (const img of images) {
+      const provider = img.generation_provider || "";
+      const desc = img.description || "";
+
+      let cost = 0;
+      if (provider.includes("gpt-image-2")) {
+        if (desc.includes("Director Mode") || desc.includes("Pro Photography")) {
+          cost = 0.25;
+          gpt2High++;
+        } else {
+          cost = 0.095;
+          gpt2Standard++;
+        }
+      } else if (provider.includes("gpt-image-1.5")) {
+        cost = 0.08;
+        otherOpenAi++;
+      } else if (provider.includes("dall-e-3")) {
+        cost = desc.toLowerCase().includes("hd") ? 0.08 : 0.04;
+        otherOpenAi++;
+      } else {
+        cost = 0.095;
+        otherOpenAi++;
+      }
+      totalSpend += cost;
+    }
+
+    return {
+      totalSpend,
+      gpt2Standard,
+      gpt2High,
+      otherOpenAi,
+      totalCount: images.length,
+    };
+  }, [images]);
+
+  const dailySpend = useMemo(() => {
+    const map = new Map<string, number>();
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(today.getDate() - i);
+      const key = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      map.set(key, 0);
+    }
+
+    for (const img of images) {
+      if (!img.created_at) continue;
+      const date = new Date(img.created_at);
+      const key = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      if (map.has(key)) {
+        const provider = img.generation_provider || "";
+        const desc = img.description || "";
+        let cost = 0;
+        if (provider.includes("gpt-image-2")) {
+          cost = (desc.includes("Director Mode") || desc.includes("Pro Photography")) ? 0.25 : 0.095;
+        } else if (provider.includes("gpt-image-1.5")) {
+          cost = 0.08;
+        } else if (provider.includes("dall-e-3")) {
+          cost = desc.toLowerCase().includes("hd") ? 0.08 : 0.04;
+        } else {
+          cost = 0.095;
+        }
+        map.set(key, (map.get(key) || 0) + cost);
+      }
+    }
+
+    return Array.from(map.entries()).map(([date, amount]) => ({ date, amount }));
+  }, [images]);
+
+  const maxDailySpend = Math.max(...dailySpend.map((d) => d.amount), 0.01);
+
+  return (
+    <Card className="p-4 border-white/[0.06] bg-white/[0.02] text-white h-full flex flex-col justify-between">
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 mb-3 flex items-center justify-between">
+          <span>GPT-2.0 Cost Meter</span>
+          <span className="text-[9px] text-sky-400 font-semibold uppercase tracking-widest">OpenAI API</span>
+        </div>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-6 text-xs text-white/40">
+            <Loader2 className="w-4.5 h-4.5 animate-spin mb-2 text-sky-400" />
+            <span>Calculating retro cost...</span>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <div className="text-[8px] font-mono text-white/40 uppercase">Total OpenAI Spend</div>
+              <div className="text-xl font-bold text-white mt-0.5">${tally.totalSpend.toFixed(2)}</div>
+              <div className="text-[8px] text-white/45 font-mono mt-0.5">
+                {tally.totalCount.toLocaleString()} total images generated
+              </div>
+            </div>
+
+            <div className="space-y-1 text-[9px] text-white/60 pt-1">
+              <div className="flex justify-between">
+                <span>GPT-2.0 Standard ($0.095)</span>
+                <span className="font-mono text-white/80">{tally.gpt2Standard} imgs</span>
+              </div>
+              <div className="flex justify-between">
+                <span>GPT-2.0 Director ($0.25)</span>
+                <span className="font-mono text-white/80">{tally.gpt2High} imgs</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Other GPT / DALL-E Models</span>
+                <span className="font-mono text-white/80">{tally.otherOpenAi} imgs</span>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <div className="text-[8px] font-mono text-white/40 uppercase mb-2">Daily Spend (Last 7 Days)</div>
+              <div className="flex items-end justify-between gap-1 h-10">
+                {dailySpend.map((d) => {
+                  const heightPct = (d.amount / maxDailySpend) * 100;
+                  return (
+                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group relative">
+                      <div
+                        className="w-full bg-sky-400/80 rounded-t transition-all hover:bg-sky-400"
+                        style={{ height: `${Math.max(4, heightPct)}%` }}
+                        title={`${d.date}: $${d.amount.toFixed(2)}`}
+                      />
+                      <div className="text-[7px] text-white/30 font-mono scale-90">{d.date.split(" ")[1]}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+
 function StatCard({
   label,
   value,
   tone,
   detail,
+  progress,
 }: {
   label: string;
   value: number;
-  tone?: "ok" | "live" | "warn";
+  tone?: "ok" | "live" | "warn" | "info";
   detail?: string;
+  progress?: { value: number; total: number };
 }) {
   return (
     <Card
       className={cn(
-        "p-3 border-white/[0.06] bg-white/[0.02] text-white",
-        tone === "ok" && "border-emerald-500/25",
-        tone === "live" && "border-amber-500/25",
-        tone === "warn" && "border-rose-500/25",
+        "p-3 border-white/[0.06] bg-white/[0.02] text-white flex items-center justify-between gap-2 relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300",
+        tone === "ok" && "border-emerald-500/25 hover:border-emerald-500/40",
+        tone === "live" && "border-amber-500/25 hover:border-amber-500/40",
+        tone === "warn" && "border-rose-500/25 hover:border-rose-500/40",
+        tone === "info" && "border-sky-500/25 hover:border-sky-500/40",
       )}
     >
-      <div className="text-[10px] font-mono uppercase tracking-wider text-white/50">
-        {label}
-      </div>
-      <div className="text-2xl font-semibold mt-1 text-white">{value}</div>
-      {detail && (
-        <div className="mt-1 text-[10px] leading-snug text-white/45">
-          {detail}
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-white/50 truncate">
+          {label}
         </div>
+        <div className="text-2xl font-semibold mt-1 text-white">{value}</div>
+        {detail && (
+          <div className="mt-1 text-[10px] leading-snug text-white/45 truncate">
+            {detail}
+          </div>
+        )}
+      </div>
+      {progress && (
+        <RadialProgress
+          value={progress.value}
+          total={progress.total}
+          className={cn(
+            tone === "ok" && "text-emerald-400",
+            tone === "live" && "text-amber-400",
+            tone === "warn" && "text-rose-400",
+            tone === "info" && "text-sky-400",
+            !tone && "text-white/70",
+          )}
+        />
       )}
     </Card>
   );
@@ -3838,6 +4489,8 @@ function PdpReadinessByFamily({
   onOpenFamilyQueue,
   onOpenCylinderPilot,
   onOpenStudio,
+  onOpenGapWorklist,
+  adhdMode = false,
 }: {
   families: PdpFamilyReadiness[];
   allFamilies: PdpFamilyReadiness[];
@@ -3847,6 +4500,8 @@ function PdpReadinessByFamily({
   onOpenFamilyQueue: (family: string) => void;
   onOpenCylinderPilot: () => void;
   onOpenStudio: (productGroupSlug: string) => void;
+  onOpenGapWorklist?: (family: string) => void;
+  adhdMode?: boolean;
 }) {
   const selectedFamily = activeFamily === "all" ? null : families[0] ?? null;
   const notLive = Math.max(summary.total - summary.pdpLive, 0);
@@ -3854,6 +4509,26 @@ function PdpReadinessByFamily({
   const generationWork = summary.readyToGenerate + summary.reviewGenerated;
   const destinationWork = summary.approvedPendingPush + summary.shopifyAwaitingConvex;
   const activeFamilyLabel = activeFamily === "all" ? "All families" : activeFamily;
+
+  const [zenIndex, setZenIndex] = useState(0);
+  const [hideCompleted, setHideCompleted] = useState(true);
+
+  // Filter groups for Zen Mode
+  const zenGroups = useMemo(() => {
+    if (!selectedFamily) return [];
+    if (hideCompleted) {
+      // Only show groups that have pending work (nextAction is not 'none')
+      return selectedFamily.groups.filter(g => g.nextAction && g.nextAction !== "none");
+    }
+    return selectedFamily.groups;
+  }, [selectedFamily, hideCompleted]);
+
+  // Adjust index if it goes out of bounds
+  useEffect(() => {
+    if (zenIndex >= zenGroups.length && zenGroups.length > 0) {
+      setZenIndex(zenGroups.length - 1);
+    }
+  }, [zenGroups, zenIndex]);
 
   return (
     <Card className="overflow-hidden border-emerald-500/20 bg-emerald-500/[0.025] text-white">
@@ -3917,149 +4592,422 @@ function PdpReadinessByFamily({
           </div>
         </div>
 
-        <div className="mt-4 grid gap-2 md:grid-cols-5">
-          <PdpMetricTile label="Bottles tracked" value={summary.total} total={summary.total} tone="info" detail="SKU rows in scope" />
-          <PdpMetricTile label="Need renamed refs" value={referenceWork} total={summary.total} tone={referenceWork > 0 ? "warn" : "ok"} detail="source, rename, or match" />
-          <PdpMetricTile label="Generate/review" value={generationWork} total={summary.total} tone={generationWork > 0 ? "warn" : "ok"} detail="ready or waiting QA" />
-          <PdpMetricTile label="Push/sync" value={destinationWork} total={summary.total} tone={destinationWork > 0 ? "info" : "ok"} detail="Shopify or Convex work" />
-          <PdpMetricTile label="PDP live" value={summary.pdpLive} total={summary.total} tone="ok" detail={`approved-keep · ${notLive} not yet`} />
-        </div>
-      </div>
-
-      {families.length === 0 ? (
-        <div className="p-8 text-center text-sm text-white/55">
-          No PDP readiness rows matched this family filter.
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-white/[0.06] text-left text-[10px] uppercase tracking-wider text-white/40">
-              <tr>
-                <th className="px-4 py-2 font-medium">Family</th>
-                <th className="px-4 py-2 font-medium">PDP live</th>
-                <th className="px-4 py-2 font-medium">Reference / image work</th>
-                <th className="px-4 py-2 font-medium">Next work</th>
-                <th className="px-4 py-2 font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {families.map((family) => (
-                <tr key={family.family} className="border-b border-white/[0.035] hover:bg-white/[0.03]">
-                  <td className="min-w-[220px] px-4 py-3 align-top">
-                    <div className="font-medium text-white/90">{family.family}</div>
-                    <div className="mt-1 font-mono text-[11px] text-white/45">
-                      {formatCapacityRange(family.capacityMin, family.capacityMax)} · {family.groups.length} groups
-                    </div>
-                  </td>
-                  <td className="min-w-[220px] px-4 py-3 align-top">
-                    <div className="font-mono text-xs text-white/80">
-                      {family.pdpLive}/{family.total}
-                    </div>
-                    <PdpReadinessBar live={family.pdpLive} total={family.total} />
-                  </td>
-                  <td className="min-w-[340px] px-4 py-3 align-top">
-                    <PdpMovementPills counts={family} />
-                  </td>
-                  <td className="min-w-[160px] px-4 py-3 align-top">
-                    <NeedsWorkActionPill action={family.nextAction} />
-                  </td>
-                  <td className="min-w-[220px] px-4 py-3 align-top">
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onOpenFamilyQueue(family.family)}
-                        className="h-8 border-white/10 bg-white/[0.03] px-3 text-xs text-white hover:bg-white/[0.08]"
-                      >
-                        <Rows3 className="h-3.5 w-3.5" />
-                        Open queue
-                      </Button>
-                      {family.family === "Cylinder" && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={onOpenCylinderPilot}
-                          className="h-8 border-sky-500/25 bg-sky-500/[0.06] px-3 text-xs text-sky-100 hover:bg-sky-500/[0.12]"
-                        >
-                          <Play className="h-3.5 w-3.5" />
-                          Pilot
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {selectedFamily && (
-        <div className="border-t border-white/[0.06] p-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
+        {adhdMode ? (
+          <div className="mt-4 p-4 rounded bg-black/15 border border-white/[0.04] flex items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold text-white/85">
-                {selectedFamily.family} product groups, smallest to largest
-              </div>
-              <div className="mt-1 text-[11px] text-white/45">
-                Use the family dropdown above to switch this work queue.
+              <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">Family Completion Progress</span>
+              <div className="text-sm font-semibold text-white mt-1">
+                {selectedFamily ? `${selectedFamily.family} family is ${Math.round((selectedFamily.pdpLive / selectedFamily.total) * 100)}% complete` : "All families progress"}
               </div>
             </div>
+            <div className="flex-1 max-w-xs font-mono text-xs text-right">
+              {selectedFamily ? (
+                <>
+                  <span className="text-white/80">{selectedFamily.pdpLive}</span>
+                  <span className="text-white/40"> / {selectedFamily.total} SKUs live</span>
+                  <div className="mt-1.5 w-full ml-auto">
+                    <PdpReadinessStackedBar counts={selectedFamily} />
+                  </div>
+                </>
+              ) : (
+                `${summary.pdpLive} / ${summary.total} SKUs live`
+              )}
+            </div>
           </div>
-          <div className="overflow-x-auto rounded border border-white/[0.06]">
-            <table className="w-full text-xs">
-              <thead className="border-b border-white/[0.06] text-left text-[10px] uppercase tracking-wider text-white/40">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Size</th>
-                  <th className="px-3 py-2 font-medium">Product group</th>
-                  <th className="px-3 py-2 font-medium">PDP live</th>
-                  <th className="px-3 py-2 font-medium">Reference / image work</th>
-                  <th className="px-3 py-2 font-medium">Open</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedFamily.groups.map((group) => (
-                  <tr key={group.productGroupSlug} className="border-b border-white/[0.035] last:border-b-0">
-                    <td className="px-3 py-2 align-top font-mono text-white/55">
-                      {group.capacityLabel ?? formatCapacityValue(group.capacityMl)}
-                    </td>
-                    <td className="min-w-[300px] px-3 py-2 align-top">
-                      <div className="text-white/80">{group.displayName}</div>
-                      <div className="mt-0.5 font-mono text-[10px] text-white/35">{group.productGroupSlug}</div>
-                      <div className="mt-1 font-mono text-[10px] text-white/35">{group.sampleSkus.join(" · ")}</div>
-                    </td>
-                    <td className="min-w-[160px] px-3 py-2 align-top">
-                      <div className="font-mono text-[11px] text-white/70">
-                        {group.pdpLive}/{group.total}
-                      </div>
-                      <PdpReadinessBar live={group.pdpLive} total={group.total} compact />
-                    </td>
-                    <td className="min-w-[280px] px-3 py-2 align-top">
-                      <div className="flex flex-col gap-1">
-                        <NeedsWorkActionPill action={group.nextAction} />
-                        <PdpMovementPills counts={group} compact />
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 align-top">
+        ) : (
+          <div className="mt-4 grid gap-2 md:grid-cols-5">
+            <PdpMetricTile label="Bottles tracked" value={summary.total} total={summary.total} tone="info" detail="SKU rows in scope" />
+            <PdpMetricTile label="Need renamed refs" value={referenceWork} total={summary.total} tone={referenceWork > 0 ? "warn" : "ok"} detail="source, rename, or match" />
+            <PdpMetricTile label="Generate/review" value={generationWork} total={summary.total} tone={generationWork > 0 ? "warn" : "ok"} detail="ready or waiting QA" />
+            <PdpMetricTile label="Push/sync" value={destinationWork} total={summary.total} tone={destinationWork > 0 ? "info" : "ok"} detail="Shopify or Convex work" />
+            <PdpMetricTile label="PDP live" value={summary.pdpLive} total={summary.total} tone="ok" detail={`approved-keep · ${notLive} not yet`} />
+          </div>
+        )}
+      </div>
+
+      {adhdMode ? (
+        selectedFamily ? (
+          <div className="p-6 border-t border-white/[0.06] bg-black/20">
+            {(() => {
+              if (zenGroups.length === 0) {
+                return (
+                  <div className="py-12 text-center">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                    <h3 className="text-base font-semibold text-white">All Groups Completed!</h3>
+                    <p className="text-xs text-white/50 mt-1 max-w-md mx-auto">
+                      Excellent work! Every product group in the {selectedFamily.family} family has been successfully processed and is live.
+                    </p>
+                    {hideCompleted && (
                       <Button
-                        type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => onOpenStudio(group.productGroupSlug)}
-                        className="h-7 px-2 text-xs text-white/70 hover:bg-white/[0.06] hover:text-white"
+                        onClick={() => setHideCompleted(false)}
+                        className="mt-4 border-white/10 text-xs text-white hover:bg-white/[0.06]"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Studio
+                        Show Completed Groups
                       </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    )}
+                  </div>
+                );
+              }
+
+              const group = zenGroups[zenIndex] ?? zenGroups[0];
+              if (!group) return null;
+
+              const refComplete = group.sourceNeeded === 0 && group.sourceBlocked === 0;
+              const genComplete = group.readyToGenerate === 0;
+              const reviewComplete = group.reviewGenerated === 0;
+              const syncComplete = group.approvedPendingPush === 0 && group.shopifyAwaitingConvex === 0;
+              const liveComplete = group.pdpLive === group.total;
+
+              return (
+                <div className="max-w-2xl mx-auto space-y-6">
+                  {/* Header Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-2 text-xs text-white/70 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={hideCompleted}
+                          onChange={(e) => {
+                            setHideCompleted(e.target.checked);
+                            setZenIndex(0);
+                          }}
+                          className="rounded border-white/20 bg-[#1e1e24] text-emerald-600 focus:ring-0 w-3.5 h-3.5"
+                        />
+                        Hide completed groups ({selectedFamily.groups.length - zenGroups.length} hidden)
+                      </label>
+                    </div>
+                    <div className="text-xs font-mono text-white/50">
+                      Group {zenIndex + 1} of {zenGroups.length} needing focus
+                    </div>
+                  </div>
+
+                  {/* Zen Target Card */}
+                  <Card className={cn(
+                    "p-6 border bg-[#121214] text-white transition-all",
+                    liveComplete ? "border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.05)]" : "border-amber-500/25 shadow-[0_0_20px_rgba(245,158,11,0.05)]"
+                  )}>
+                    {/* Top line */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <span className="text-[9px] font-mono uppercase bg-white/5 text-white/60 px-2 py-0.5 rounded border border-white/10">
+                          {group.capacityLabel ?? `${group.capacityMl} ml`}
+                        </span>
+                        <h2 className="text-lg font-semibold text-white mt-2 leading-tight">
+                          {group.displayName}
+                        </h2>
+                        <div className="text-[10px] font-mono text-white/40 mt-1">
+                          {group.productGroupSlug}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-white/60 font-mono">PDP Live Progress</div>
+                        <div className="text-lg font-semibold text-white font-mono mt-0.5">
+                          {group.pdpLive} / {group.total}
+                        </div>
+                        <div className="w-24 mt-1.5 ml-auto">
+                          <PdpReadinessStackedBar counts={group} compact />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sample SKUs list */}
+                    <div className="mt-3 pt-3 border-t border-white/[0.04] text-[10px] text-white/40 font-mono truncate">
+                      SKUs: {group.sampleSkus.join(" · ")}
+                    </div>
+
+                    {/* Checklist Section */}
+                    <div className="mt-6 space-y-3 bg-black/15 p-4 rounded border border-white/[0.03]">
+                      <h3 className="text-xs font-mono uppercase tracking-wider text-white/50 mb-1">Pipeline Checklist</h3>
+
+                      {/* Step 1: Reference */}
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          {refComplete ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                          )}
+                          <span className={cn(refComplete ? "text-white/60 line-through" : "text-white/90 font-medium")}>
+                            1. Reference Prep
+                          </span>
+                        </div>
+                        <span className="font-mono text-[10px] text-white/40">
+                          {refComplete ? "Verified" : `${group.sourceNeeded} needed · ${group.sourceBlocked} blocked`}
+                        </span>
+                      </div>
+
+                      {/* Step 2: AI Generation */}
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          {genComplete ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                          )}
+                          <span className={cn(genComplete ? "text-white/60 line-through" : "text-white/90 font-medium")}>
+                            2. AI Generation
+                          </span>
+                        </div>
+                        <span className="font-mono text-[10px] text-white/40">
+                          {genComplete ? "Ready" : `${group.readyToGenerate} queued/running`}
+                        </span>
+                      </div>
+
+                      {/* Step 3: QA Review */}
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          {reviewComplete ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                          )}
+                          <span className={cn(reviewComplete ? "text-white/60 line-through" : "text-white/90 font-medium")}>
+                            3. QA & Review
+                          </span>
+                        </div>
+                        <span className="font-mono text-[10px] text-white/40">
+                          {reviewComplete ? "Approved" : `${group.reviewGenerated} waiting QA`}
+                        </span>
+                      </div>
+
+                      {/* Step 4: Shopify & Convex Sync */}
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          {syncComplete ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          ) : (
+                            <Circle className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                          )}
+                          <span className={cn(syncComplete ? "text-white/60 line-through" : "text-white/90 font-medium")}>
+                            4. Shopify & Convex Sync
+                          </span>
+                        </div>
+                        <span className="font-mono text-[10px] text-white/40">
+                          {syncComplete ? "Finalized" : `${group.approvedPendingPush + group.shopifyAwaitingConvex} pending`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Immediate Directive & Studio Button */}
+                    <div className="mt-6 space-y-4">
+                      <div className="p-3 bg-amber-500/10 rounded border border-amber-500/20 text-xs text-amber-200 flex items-start gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-semibold">Next Action Needed:</span>{" "}
+                          {group.nextAction === "none" ? "This product group is fully processed and live!" : (
+                            BEST_BOTTLES_NEEDS_WORK_ACTION_LABELS[group.nextAction] || "Open in Studio to perform outstanding actions."
+                          )}
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={() => onOpenStudio(group.productGroupSlug)}
+                        className={cn(
+                          "w-full py-5 text-xs font-bold uppercase tracking-wider text-white rounded-md transition-all shadow-lg flex items-center justify-center gap-2 border",
+                          group.nextAction === "none"
+                            ? "bg-emerald-600/20 border-emerald-500/30 hover:bg-emerald-600/30"
+                            : "bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 animate-pulse hover:animate-none shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+                        )}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open in Studio
+                      </Button>
+                    </div>
+                  </Card>
+
+                  {/* Carousel Navigation */}
+                  <div className="flex items-center justify-between gap-4 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setZenIndex((prev) => Math.max(0, prev - 1))}
+                      disabled={zenIndex === 0}
+                      className="h-9 px-4 text-xs border-white/10 bg-[#1c1c1f] text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none gap-1"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      Previous
+                    </Button>
+                    <div className="text-xs text-white/40 font-mono select-none">
+                      {zenIndex + 1} / {zenGroups.length}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => setZenIndex((prev) => Math.min(zenGroups.length - 1, prev + 1))}
+                      disabled={zenIndex === zenGroups.length - 1}
+                      className="h-9 px-4 text-xs border-white/10 bg-[#1c1c1f] text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:pointer-events-none gap-1"
+                    >
+                      Next
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-        </div>
+        ) : (
+          <div className="p-8 border-t border-white/[0.06] bg-black/20 text-center">
+            <h3 className="text-sm font-semibold text-white/90 mb-2">Select a Family to Focus</h3>
+            <p className="text-xs text-white/55 mb-4">Select a specific bottle family from the dropdown above to begin Zen Focus Mode.</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {families.map((f) => (
+                <Button
+                  key={f.family}
+                  variant="outline"
+                  onClick={() => onSelectFamily(f.family)}
+                  className="h-9 text-xs border-white/10 bg-white/[0.02] hover:bg-white/[0.06]"
+                >
+                  Focus on {f.family} ({f.total} SKUs)
+                </Button>
+              ))}
+            </div>
+          </div>
+        )
+      ) : (
+        <>
+          {families.length === 0 ? (
+            <div className="p-8 text-center text-sm text-white/55">
+              No PDP readiness rows matched this family filter.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-white/[0.06] text-left text-[10px] uppercase tracking-wider text-white/40">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Family</th>
+                    <th className="px-4 py-2 font-medium">PDP live</th>
+                    <th className="px-4 py-2 font-medium">Reference / image work</th>
+                    <th className="px-4 py-2 font-medium">Next work</th>
+                    <th className="px-4 py-2 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {families.map((family) => (
+                    <tr key={family.family} className="border-b border-white/[0.035] hover:bg-white/[0.03]">
+                      <td className="min-w-[220px] px-4 py-3 align-top">
+                        <div className="font-medium text-white/90">{family.family}</div>
+                        <div className="mt-1 font-mono text-[11px] text-white/45">
+                          {formatCapacityRange(family.capacityMin, family.capacityMax)} · {family.groups.length} groups
+                        </div>
+                      </td>
+                      <td className="min-w-[220px] px-4 py-3 align-top">
+                        <div className="font-mono text-xs text-white/80">
+                          {family.pdpLive}/{family.total}
+                        </div>
+                        <PdpReadinessStackedBar counts={family} />
+                      </td>
+                      <td className="min-w-[340px] px-4 py-3 align-top">
+                        <PdpMovementPills
+                          counts={family}
+                          onOpenGapWorklist={onOpenGapWorklist ? () => onOpenGapWorklist(family.family) : undefined}
+                        />
+                      </td>
+                      <td className="min-w-[160px] px-4 py-3 align-top">
+                        <NeedsWorkActionPill action={family.nextAction} />
+                      </td>
+                      <td className="min-w-[220px] px-4 py-3 align-top">
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onOpenFamilyQueue(family.family)}
+                            className="h-8 border-white/10 bg-white/[0.03] px-3 text-xs text-white hover:bg-white/[0.08]"
+                          >
+                            <Rows3 className="h-3.5 w-3.5" />
+                            Open queue
+                          </Button>
+                          {family.family === "Cylinder" && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={onOpenCylinderPilot}
+                              className="h-8 border-sky-500/25 bg-sky-500/[0.06] px-3 text-xs text-sky-100 hover:bg-sky-500/[0.12]"
+                            >
+                              <Play className="h-3.5 w-3.5" />
+                              Pilot
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {selectedFamily && (
+            <div className="border-t border-white/[0.06] p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-white/85">
+                    {selectedFamily.family} product groups, smallest to largest
+                  </div>
+                  <div className="mt-1 text-[11px] text-white/45">
+                    Use the family dropdown above to switch this work queue.
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto rounded border border-white/[0.06]">
+                <table className="w-full text-xs">
+                  <thead className="border-b border-white/[0.06] text-left text-[10px] uppercase tracking-wider text-white/40">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">Size</th>
+                      <th className="px-3 py-2 font-medium">Product group</th>
+                      <th className="px-3 py-2 font-medium">PDP live</th>
+                      <th className="px-3 py-2 font-medium">Reference / image work</th>
+                      <th className="px-3 py-2 font-medium">Open</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedFamily.groups.map((group) => (
+                      <tr key={group.productGroupSlug} className="border-b border-white/[0.035] last:border-b-0">
+                        <td className="px-3 py-2 align-top font-mono text-white/55">
+                          {group.capacityLabel ?? formatCapacityValue(group.capacityMl)}
+                        </td>
+                        <td className="min-w-[300px] px-3 py-2 align-top">
+                          <div className="text-white/80">{group.displayName}</div>
+                          <div className="mt-0.5 font-mono text-[10px] text-white/35">{group.productGroupSlug}</div>
+                          <div className="mt-1 font-mono text-[10px] text-white/35">{group.sampleSkus.join(" · ")}</div>
+                        </td>
+                        <td className="min-w-[160px] px-3 py-2 align-top">
+                          <div className="font-mono text-[11px] text-white/70">
+                            {group.pdpLive}/{group.total}
+                          </div>
+                          <PdpReadinessStackedBar counts={group} compact />
+                        </td>
+                        <td className="min-w-[280px] px-3 py-2 align-top">
+                          <div className="flex flex-col gap-1">
+                            <NeedsWorkActionPill action={group.nextAction} />
+                            <PdpMovementPills
+                              counts={group}
+                              compact
+                              onOpenGapWorklist={onOpenGapWorklist ? () => onOpenGapWorklist(selectedFamily.family) : undefined}
+                            />
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 align-top">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onOpenStudio(group.productGroupSlug)}
+                            className="h-7 px-2 text-xs text-white/70 hover:bg-white/[0.06] hover:text-white"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            Studio
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </Card>
   );
@@ -4095,43 +5043,140 @@ function PdpMetricTile({
   );
 }
 
-function PdpReadinessBar({ live, total, compact = false }: { live: number; total: number; compact?: boolean }) {
-  const pct = total > 0 && live > 0 ? Math.max(2, Math.min(100, (live / total) * 100)) : 0;
+
+function PdpReadinessStackedBar({
+  counts,
+  compact = false,
+}: {
+  counts: PdpReadinessCounts;
+  compact?: boolean;
+}) {
+  const {
+    total,
+    pdpLive,
+    sourceNeeded,
+    sourceBlocked,
+    readyToGenerate,
+    reviewGenerated,
+    approvedPendingPush,
+    shopifyAwaitingConvex,
+  } = counts;
+
+  if (total === 0) return null;
+
+  const pctBlocked = (sourceBlocked / total) * 100;
+  const pctNeeded = (sourceNeeded / total) * 100;
+  const pctReady = (readyToGenerate / total) * 100;
+  const pctReview = (reviewGenerated / total) * 100;
+  const pctPush = (approvedPendingPush / total) * 100;
+  const pctSync = (shopifyAwaitingConvex / total) * 100;
+  const pctLive = (pdpLive / total) * 100;
+
   return (
-    <div className={cn("mt-2 overflow-hidden rounded bg-white/[0.07]", compact ? "h-1.5" : "h-2")}>
-      <div className="h-full rounded bg-emerald-400/75" style={{ width: `${pct}%` }} />
+    <div className={cn("mt-2 overflow-hidden rounded bg-white/[0.07] flex w-full", compact ? "h-2" : "h-3")}>
+      {pctBlocked > 0 && (
+        <div
+          className="h-full bg-rose-500/80 transition-all hover:opacity-90"
+          style={{ width: `${pctBlocked}%` }}
+          title={`No source match: ${sourceBlocked} (${Math.round(pctBlocked)}%)`}
+        />
+      )}
+      {pctNeeded > 0 && (
+        <div
+          className="h-full bg-amber-500/85 transition-all hover:opacity-90"
+          style={{ width: `${pctNeeded}%` }}
+          title={`Needs reference: ${sourceNeeded} (${Math.round(pctNeeded)}%)`}
+        />
+      )}
+      {pctReady > 0 && (
+        <div
+          className="h-full bg-sky-500/80 transition-all hover:opacity-90"
+          style={{ width: `${pctReady}%` }}
+          title={`Ready to generate: ${readyToGenerate} (${Math.round(pctReady)}%)`}
+        />
+      )}
+      {pctReview > 0 && (
+        <div
+          className="h-full bg-violet-500/85 transition-all hover:opacity-90"
+          style={{ width: `${pctReview}%` }}
+          title={`Awaiting QA Review: ${reviewGenerated} (${Math.round(pctReview)}%)`}
+        />
+      )}
+      {pctPush > 0 && (
+        <div
+          className="h-full bg-emerald-500/70 transition-all hover:opacity-90"
+          style={{ width: `${pctPush}%` }}
+          title={`Approved / Pending Push: ${approvedPendingPush} (${Math.round(pctPush)}%)`}
+        />
+      )}
+      {pctSync > 0 && (
+        <div
+          className="h-full bg-teal-500/80 transition-all hover:opacity-90"
+          style={{ width: `${pctSync}%` }}
+          title={`Awaiting Convex Sync: ${shopifyAwaitingConvex} (${Math.round(pctSync)}%)`}
+        />
+      )}
+      {pctLive > 0 && (
+        <div
+          className="h-full bg-emerald-400/90 transition-all hover:opacity-90"
+          style={{ width: `${pctLive}%` }}
+          title={`PDP Live: ${pdpLive} (${Math.round(pctLive)}%)`}
+        />
+      )}
     </div>
   );
 }
 
-function PdpMovementPills({ counts, compact = false }: { counts: PdpReadinessCounts; compact?: boolean }) {
+function PdpMovementPills({
+  counts,
+  compact = false,
+  onOpenGapWorklist,
+}: {
+  counts: PdpReadinessCounts;
+  compact?: boolean;
+  onOpenGapWorklist?: () => void;
+}) {
   const items = [
-    { label: "sync Convex", value: counts.shopifyAwaitingConvex, className: "border-sky-500/25 text-sky-300" },
-    { label: "push", value: counts.approvedPendingPush, className: "border-emerald-500/25 text-emerald-300" },
-    { label: "review", value: counts.reviewGenerated, className: "border-violet-500/25 text-violet-300" },
-    { label: "generate", value: counts.readyToGenerate, className: "border-sky-500/25 text-sky-300" },
-    { label: "rename/source refs", value: counts.sourceNeeded, className: "border-amber-500/25 text-amber-300" },
-    { label: "no source match", value: counts.sourceBlocked, className: "border-rose-500/25 text-rose-300" },
+    { key: "sync", label: "sync Convex", value: counts.shopifyAwaitingConvex, className: "border-sky-500/25 text-sky-300" },
+    { key: "push", label: "push", value: counts.approvedPendingPush, className: "border-emerald-500/25 text-emerald-300" },
+    { key: "review", label: "review", value: counts.reviewGenerated, className: "border-violet-500/25 text-violet-300" },
+    { key: "generate", label: "generate", value: counts.readyToGenerate, className: "border-sky-500/25 text-sky-300" },
+    { key: "source", label: "rename/source refs", value: counts.sourceNeeded, className: "border-amber-500/25 text-amber-300" },
+    { key: "blocked", label: "no source match", value: counts.sourceBlocked, className: "border-rose-500/25 text-rose-300" },
   ].filter((item) => item.value > 0);
 
   if (items.length === 0) {
     return <span className="text-[11px] text-emerald-200/70">No downstream blockers</span>;
   }
 
+  const pillClass = (className: string) =>
+    cn(
+      "inline-flex rounded border px-1.5 py-0.5 font-mono uppercase tracking-wider",
+      compact ? "text-[9px]" : "text-[10px]",
+      className,
+    );
+
   return (
     <div className={cn("flex flex-wrap gap-1.5", compact && "gap-1")}>
-      {items.map((item) => (
-        <span
-          key={item.label}
-          className={cn(
-            "inline-flex rounded border px-1.5 py-0.5 font-mono uppercase tracking-wider",
-            compact ? "text-[9px]" : "text-[10px]",
-            item.className,
-          )}
-        >
-          {item.label} {item.value}
-        </span>
-      ))}
+      {items.map((item) =>
+        // The source-refs pill is the entry point into the Cowork gap worklist —
+        // the authoritative, lane-segmented actionable list.
+        item.key === "source" && onOpenGapWorklist ? (
+          <button
+            key={item.key}
+            type="button"
+            onClick={onOpenGapWorklist}
+            title="Open the gap worklist — the lane-segmented list of variants still missing a clean reference."
+            className={cn(pillClass(item.className), "cursor-pointer hover:bg-amber-500/[0.12]")}
+          >
+            {item.label} {item.value}
+          </button>
+        ) : (
+          <span key={item.key} className={pillClass(item.className)}>
+            {item.label} {item.value}
+          </span>
+        ),
+      )}
     </div>
   );
 }
@@ -5809,6 +6854,7 @@ function NeedsWorkActionPill({ action }: { action: BestBottlesNeedsWorkAction })
 function ReferenceSourcePill({ source }: { source: BestBottlesReferenceSource }) {
   const labels: Record<BestBottlesReferenceSource, string> = {
     "canonical-render": "Canonical render",
+    "flattened-product-truth": "Flattened truth",
     "local-legacy": "Local legacy",
     "bestbottles-live": "BestBottles.com",
     manual: "Manual",
@@ -5816,6 +6862,7 @@ function ReferenceSourcePill({ source }: { source: BestBottlesReferenceSource })
   };
   const palette: Record<BestBottlesReferenceSource, string> = {
     "canonical-render": "border-emerald-500/25 text-emerald-300",
+    "flattened-product-truth": "border-sky-500/25 text-sky-300",
     "local-legacy": "border-emerald-500/25 text-emerald-300",
     "bestbottles-live": "border-amber-500/25 text-amber-300",
     manual: "border-sky-500/25 text-sky-300",
@@ -6536,8 +7583,17 @@ function ShapeGroupCard({
   );
   const referenceThumbs = sortedReferenceRows;
 
+  const hasActiveJob = group.rows.some(
+    (r) => r.madison_status === "queued" || r.madison_status === "generating"
+  );
+
   return (
-    <Card className="p-4 border-white/[0.06] bg-white/[0.02] text-white space-y-3">
+    <Card
+      className={cn(
+        "p-4 border-white/[0.06] bg-white/[0.02] text-white space-y-3 transition-all duration-300",
+        hasActiveJob && "border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)] animate-pulse"
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="font-medium">{label}</div>

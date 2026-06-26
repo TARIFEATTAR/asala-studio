@@ -14,6 +14,13 @@
  *   [GLOBAL] + [PRESET] + [SKU DATA] + [CHIPS] + [CONSTRAINTS]
  */
 
+import {
+  BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER,
+  BEST_BOTTLES_TALL_NARROW_CANVAS_TIER,
+  BEST_BOTTLES_WIDE_LOW_CANVAS_TIER,
+  getBestBottlesCanvasTierForFamily,
+} from "./productImageCanvasTiers";
+
 export type ImagePresetKind = "final_render" | "paper_doll_layer";
 
 export type ImagePresetOrientation = "portrait" | "landscape" | "square";
@@ -186,6 +193,63 @@ export const GRID_CARD_2000X2200: ImagePreset = {
   lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
   shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
   compositionLanguage: framingLanguage([72, 78]),
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
+export const GRID_CARD_TALL_NARROW_1024X1536: ImagePreset = {
+  id: "grid-card-tall-narrow-1024x1536",
+  label: "Grid Card · Tall/Narrow · 1024 × 1536",
+  purpose:
+    "Native catalog grid tile for tall, slender Best Bottles Cylinder products. Uses the same prompt canon and Bone studio language while preserving the narrow 2:3 output frame needed by cylinder bottles.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "tall, slender product centered on the native 1024 x 1536 portrait canvas with the complete assembly fully visible; preserve the exact reference centerline, baseline, cap, collar, tube, base, and grounding shadow; use the vertical frame naturally so the bottle does not feel compressed, but do not zoom, crop, stretch, square-recanvas, or add extra negative space beyond the product-truth reference",
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
+export const GRID_CARD_SQUARE_ROUND_2048X2048: ImagePreset = {
+  id: "grid-card-square-round-2048x2048",
+  label: "Grid Card · Square/Round · 2048 × 2048",
+  purpose:
+    "Catalog grid tile for Best Bottles round, square, atomizer, cap/closure, and squat vial families. Same brand language as the canonical grid card, with a square canvas for wide shoulders and round bodies.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "product centered on the square canvas with a stable front-facing PDP catalog read; keep the complete assembly fully visible, including any cap, collar, atomizer, or applicator; product fills approximately 72–82% of the canvas height or width, whichever protects the full silhouette with comfortable margins; do not crop shoulders, sides, cap, base, or grounding shadow",
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
+export const GRID_CARD_WIDE_LOW_1536X1024: ImagePreset = {
+  id: "grid-card-wide-low-1536x1024",
+  label: "Grid Card · Wide/Low · 1536 × 1024",
+  purpose:
+    "Catalog grid tile for Best Bottles low, wide products such as cream jars and heart bottles. Same brand language as the canonical grid card, with a landscape canvas so squat products do not float in portrait negative space.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "low/wide product centered on the landscape canvas with a grounded PDP catalog read; product fills approximately 70–84% of the canvas width while keeping 22–30% vertical breathing room above and below the silhouette; base sits naturally on the same implied studio floor with a back-right contact shadow; do not make the product tiny, and do not stretch, crop, or add props to fill the landscape frame",
   qualityLanguage: SHARED_QUALITY_LANGUAGE,
   negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
 };
@@ -531,6 +595,9 @@ export const SQUARE_MARKETPLACE_1800X1800: ImagePreset = {
 
 export const IMAGE_PRESETS: Record<string, ImagePreset> = {
   [GRID_CARD_2000X2200.id]: GRID_CARD_2000X2200,
+  [GRID_CARD_TALL_NARROW_1024X1536.id]: GRID_CARD_TALL_NARROW_1024X1536,
+  [GRID_CARD_SQUARE_ROUND_2048X2048.id]: GRID_CARD_SQUARE_ROUND_2048X2048,
+  [GRID_CARD_WIDE_LOW_1536X1024.id]: GRID_CARD_WIDE_LOW_1536X1024,
   [GRID_CARD_EXPLODED_2000X2200.id]: GRID_CARD_EXPLODED_2000X2200,
   [MASTER_SCENE_FLEXIBLE_2000X2200.id]: MASTER_SCENE_FLEXIBLE_2000X2200,
   [MASTER_ANGLE_2080X2288.id]: MASTER_ANGLE_2080X2288,
@@ -544,6 +611,9 @@ export const IMAGE_PRESETS: Record<string, ImagePreset> = {
 
 export const IMAGE_PRESET_LIST: ImagePreset[] = [
   GRID_CARD_2000X2200,
+  GRID_CARD_TALL_NARROW_1024X1536,
+  GRID_CARD_SQUARE_ROUND_2048X2048,
+  GRID_CARD_WIDE_LOW_1536X1024,
   GRID_CARD_EXPLODED_2000X2200,
   MASTER_SCENE_FLEXIBLE_2000X2200,
   MASTER_ANGLE_2080X2288,
@@ -576,6 +646,16 @@ export function getPaperDollPresetIdForFamily(family: string | null | undefined)
     return PAPER_DOLL_FAMILY_PRESETS[family];
   }
   return PAPER_DOLL_COMPONENT_1000X1300.id;
+}
+
+export function getBestBottlesCatalogPresetIdForFamily(
+  family: string | null | undefined,
+): string {
+  const tier = getBestBottlesCanvasTierForFamily(family);
+  if (tier.id === "tall-narrow") return GRID_CARD_TALL_NARROW_1024X1536.id;
+  if (tier.id === "square-round") return GRID_CARD_SQUARE_ROUND_2048X2048.id;
+  if (tier.id === "wide-low") return GRID_CARD_WIDE_LOW_1536X1024.id;
+  return GRID_CARD_2000X2200.id;
 }
 
 export function getImagePreset(id: string): ImagePreset {

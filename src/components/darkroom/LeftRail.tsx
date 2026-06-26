@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Package, Image, Palette, Layers, BookOpen, Info } from "lucide-react";
+import { Package, Image, Palette, Layers, BookOpen, Info, Route, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -16,6 +16,7 @@ import { LEDIndicator } from "./LEDIndicator";
 import type { ProModeSettings } from "./ProSettings";
 import { ProductSelector } from "@/components/forge/ProductSelector";
 import { Product } from "@/hooks/useProducts";
+import type { DarkroomProductContextSummary } from "@/lib/darkroomProductContext";
 import { cn } from "@/lib/utils";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
 import {
@@ -24,6 +25,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { DarkroomSchematicPromptMode } from "@/lib/darkroomSchematicPrompts";
+import type { BestBottlesStoneHeroArrangement } from "@/lib/darkroomHeroPrompts";
 
 interface UploadedImage {
   url: string;
@@ -35,6 +38,10 @@ interface LeftRailProps {
   // Product
   selectedProduct: Product | null;
   onProductSelect: (product: Product | null) => void;
+  /** Compact, render-ready enrichment summary for the Product Context card. */
+  productContextSummary?: DarkroomProductContextSummary | null;
+  /** Explicit operator action to load (or replace with) the product's reference image. */
+  onLoadReferenceImage?: () => void;
 
   // Images
   productImage: UploadedImage | null;
@@ -52,6 +59,8 @@ interface LeftRailProps {
   isGenerating: boolean;
   canGenerate: boolean;
   onGenerate: () => void;
+  onUseSchematicPrompt: (mode: DarkroomSchematicPromptMode) => void;
+  onUseBestBottlesHeroPrompt: (arrangement: BestBottlesStoneHeroArrangement) => void;
 
   // Session info
   sessionCount: number;
@@ -88,9 +97,91 @@ function InlineHelp({ children }: { children: ReactNode }) {
   );
 }
 
+function ContextRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-[9px] font-mono uppercase tracking-[0.08em] text-[var(--darkroom-text-dim)]">
+        {label}
+      </span>
+      <span className="truncate text-[10px] font-medium text-[var(--darkroom-text)]" title={value}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/** Compact enrichment readout: identifiers, measurements, and reference-image status. */
+function ProductContextCard({
+  summary,
+  onLoadReferenceImage,
+}: {
+  summary: DarkroomProductContextSummary;
+  onLoadReferenceImage?: () => void;
+}) {
+  const statusLabel =
+    summary.imageStatus === "missing"
+      ? "Missing image"
+      : summary.isBestBottles && !summary.hasMeasurements
+        ? "Missing measurements"
+        : "Full context loaded";
+
+  const statusReady = statusLabel === "Full context loaded";
+
+  return (
+    <div className="mt-3 space-y-2 rounded-lg border border-[var(--darkroom-border)] bg-[var(--camera-body-deep)]/40 p-2.5">
+      <div className="flex items-center gap-2">
+        <Badge
+          variant="outline"
+          className={cn(
+            "px-1.5 py-0 text-[8px] font-mono uppercase tracking-wider",
+            statusReady
+              ? "border-[var(--led-ready)]/30 bg-[var(--led-ready)]/10 text-[var(--led-ready)]"
+              : "border-amber-500/30 bg-amber-500/10 text-amber-400",
+          )}
+        >
+          {statusLabel}
+        </Badge>
+      </div>
+
+      <div className="space-y-1">
+        {summary.sku && <ContextRow label="SKU" value={summary.sku} />}
+        {summary.graceSku && summary.graceSku !== summary.sku && (
+          <ContextRow label="Grace SKU" value={summary.graceSku} />
+        )}
+        {summary.websiteSku && <ContextRow label="Website SKU" value={summary.websiteSku} />}
+        {summary.capacity && <ContextRow label="Capacity" value={summary.capacity} />}
+        {summary.heightWithoutCap && <ContextRow label="Body height" value={summary.heightWithoutCap} />}
+        {summary.diameter && <ContextRow label="Diameter" value={summary.diameter} />}
+        {summary.applicator && <ContextRow label="Applicator" value={summary.applicator} />}
+        <ContextRow label="Image" value={summary.imageSourceLabel} />
+        {summary.isBestBottles && !summary.hasMeasurements && (
+          <p className="pt-0.5 text-[9px] leading-relaxed text-amber-400/80">
+            Measurements unavailable — generation falls back to catalog defaults.
+          </p>
+        )}
+      </div>
+
+      {onLoadReferenceImage && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onLoadReferenceImage}
+          className="h-7 w-full border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[9px] font-mono uppercase tracking-wider text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+        >
+          <Image className="mr-1.5 h-3 w-3" />
+          {summary.imageStatus === "missing" ? "Load product image" : "Use product reference"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function LeftRail({
   selectedProduct,
   onProductSelect,
+  productContextSummary,
+  onLoadReferenceImage,
   productImage,
   onProductImageUpload,
   backgroundImage,
@@ -102,6 +193,8 @@ export function LeftRail({
   isGenerating,
   canGenerate,
   onGenerate,
+  onUseSchematicPrompt,
+  onUseBestBottlesHeroPrompt,
   sessionCount,
   maxImages,
   backgroundPlateMode,
@@ -178,6 +271,13 @@ export function LeftRail({
                 Change
               </Button>
             </div>
+
+            {productContextSummary && (
+              <ProductContextCard
+                summary={productContextSummary}
+                onLoadReferenceImage={onLoadReferenceImage}
+              />
+            )}
           </motion.div>
         ) : (
           <div className="product-selector-wrapper space-y-2">
@@ -261,6 +361,95 @@ export function LeftRail({
             onLibraryOpen={() => setShowProductLibrary(true)}
             disabled={isGenerating || backgroundPlateMode}
           />
+          <div className="mt-3 rounded-lg border border-[var(--darkroom-border)] bg-[var(--camera-body-deep)]/50 p-2.5">
+            <div className="mb-2 flex items-center gap-2">
+              <Route className="h-3 w-3 text-[var(--darkroom-accent)]" />
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--darkroom-text-dim)]">
+                Schematic preset
+              </span>
+              <InlineHelp>
+                Prefills the prompt for GPT Image 2 reference editing while preserving the source canvas and product identity.
+              </InlineHelp>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGenerating || backgroundPlateMode || !productImage}
+                onClick={() => onUseSchematicPrompt("whole-product")}
+                className="h-9 justify-start gap-2 border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[10px] text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+                title="Prefill a whole-product schematic prompt"
+              >
+                <Package className="h-3.5 w-3.5" />
+                Whole
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGenerating || backgroundPlateMode || !productImage}
+                onClick={() => onUseSchematicPrompt("exploded")}
+                className="h-9 justify-start gap-2 border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[10px] text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+                title="Prefill an exploded assembly schematic prompt"
+              >
+                <Layers className="h-3.5 w-3.5" />
+                Exploded
+              </Button>
+            </div>
+          </div>
+          <div className="mt-3 rounded-lg border border-[var(--darkroom-border)] bg-[var(--camera-body-deep)]/50 p-2.5">
+            <div className="mb-1.5 flex items-center gap-2">
+              <Landmark className="h-3 w-3 text-[var(--darkroom-accent)]" />
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--darkroom-text-dim)]">
+                Best Bottles hero
+              </span>
+              <InlineHelp>
+                Prefills a client-specific homepage hero prompt. The product identity stays locked while the stone plinth style cycles through eight Best Bottles stone set directions.
+              </InlineHelp>
+            </div>
+            <p className="mb-2 text-[10px] leading-relaxed text-[var(--darkroom-text-muted)]">
+              Uses selected aspect ratio; defaults to 16:9. Cycles 8 stone styles on Bone #EEE6D4.
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGenerating || backgroundPlateMode || !productImage}
+                onClick={() => onUseBestBottlesHeroPrompt("single-stone")}
+                className="h-9 justify-start gap-1.5 border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[10px] text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+                title="Prefill a homepage hero prompt with one stone plinth"
+              >
+                <Package className="h-3.5 w-3.5" />
+                1 stone
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGenerating || backgroundPlateMode || !productImage}
+                onClick={() => onUseBestBottlesHeroPrompt("two-stone")}
+                className="h-9 justify-start gap-1.5 border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[10px] text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+                title="Prefill a homepage hero prompt with two stone forms"
+              >
+                <Landmark className="h-3.5 w-3.5" />
+                2 stones
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGenerating || backgroundPlateMode || !productImage}
+                onClick={() => onUseBestBottlesHeroPrompt("stone-cluster")}
+                className="h-9 justify-start gap-1.5 border-[var(--darkroom-border)] bg-[var(--darkroom-bg)]/40 px-2 text-[10px] text-[var(--darkroom-text-muted)] hover:border-[var(--darkroom-accent)] hover:text-[var(--darkroom-accent)]"
+                title="Prefill a homepage hero prompt with a restrained stone cluster"
+              >
+                <Layers className="h-3.5 w-3.5" />
+                Cluster
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Secondary Uploads: Collapsed by Default */}

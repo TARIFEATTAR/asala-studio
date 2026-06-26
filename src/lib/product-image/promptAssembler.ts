@@ -679,10 +679,9 @@ export function assemblePrompt(input: AssemblePromptInput): AssembledPrompt {
 
   // IMPOSED STUDIO RIG — for families with a rig config (Cylinder first), the
   // rig becomes the composition authority: it sets baseline, centerline, and
-  // a fit-to-box-with-floor scale driven by the SKU's real mm height instead
-  // of inheriting (inconsistent) framing from the source reference. Builds
-  // only when the SKU has a body height; otherwise we fall back to the legacy
-  // reference-locked composition (rigImposed stays false).
+  // a size-agnostic fit-to-box-with-floor scale instead of inheriting
+  // inconsistent framing from the source reference. SKU measurements remain
+  // product geometry/proportion truth; they do not drive PDP master zoom.
   const rigCapState = resolveRigCapState(preset, input.sku);
   // The rig is a catalog-grid construct: impose it only for the grid-card PDP
   // master presets, not editorial / scene-flexible presets (which keep their

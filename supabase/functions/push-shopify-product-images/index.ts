@@ -6,6 +6,7 @@ import {
   type BestBottlesVisualProduct,
   validateBestBottlesImageIdentity,
 } from "../_shared/bestBottlesVisualIdentity.ts";
+import { buildShopifyPushDryRunResult } from "../_shared/shopifyPushDryRun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,6 +49,12 @@ type ShopifyVariant = {
     handle: string | null;
     legacyResourceId?: string | null;
   };
+};
+
+type ShopifyVariantMedia = {
+  id: string;
+  alt: string | null;
+  imageUrl: string | null;
 };
 
 type ShopifyGraphqlBody<T> = {
@@ -804,10 +811,11 @@ async function findVariantBySku(config: ShopifyConfig, sku: string): Promise<Sho
       { query: search },
     );
     const nodes = data.productVariants?.nodes ?? [];
-    const exact =
-      nodes.find((node) => node.sku === sku) ??
-      nodes.find((node) => node.sku?.toUpperCase() === sku.toUpperCase());
-    if (exact) return exact;
+    const exactMatches = nodes.filter((node) => node.sku === sku || node.sku?.toUpperCase() === sku.toUpperCase());
+    if (exactMatches.length > 1) {
+      throw new Error(`Multiple Shopify variants found for SKU ${sku}; expected exactly one.`);
+    }
+    if (exactMatches.length === 1) return exactMatches[0];
   }
 
   return null;
@@ -915,6 +923,13 @@ async function listVariantMediaIds(
   config: ShopifyConfig,
   variantId: string,
 ): Promise<string[]> {
+  return (await listVariantMedia(config, variantId)).map((media) => media.id);
+}
+
+async function listVariantMedia(
+  config: ShopifyConfig,
+  variantId: string,
+): Promise<ShopifyVariantMedia[]> {
   const query = `
     query VariantAttachedMedia($variantId: ID!) {
       node(id: $variantId) {
@@ -922,6 +937,12 @@ async function listVariantMediaIds(
           media(first: 20) {
             nodes {
               id
+              alt
+              ... on MediaImage {
+                image {
+                  url
+                }
+              }
             }
           }
         }
@@ -930,12 +951,24 @@ async function listVariantMediaIds(
   `;
 
   const data = await shopifyGraphql<{
-    node?: { media?: { nodes?: Array<{ id?: string | null }> } } | null;
+    node?: {
+      media?: {
+        nodes?: Array<{
+          id?: string | null;
+          alt?: string | null;
+          image?: { url?: string | null } | null;
+        }>;
+      };
+    } | null;
   }>(config, query, { variantId });
 
   return (data.node?.media?.nodes ?? [])
-    .map((node) => node.id?.trim() ?? "")
-    .filter(Boolean);
+    .map((node) => ({
+      id: node.id?.trim() ?? "",
+      alt: node.alt ?? null,
+      imageUrl: node.image?.url ?? null,
+    }))
+    .filter((media) => Boolean(media.id));
 }
 
 async function detachMediaFromVariant(
@@ -1111,6 +1144,8 @@ serve(async (req) => {
       attachToVariant?: boolean;
       syncBestBottlesConvex?: boolean;
       enforceBestBottlesFinishMatch?: boolean;
+      dryRun?: boolean;
+      includeExistingVariantMedia?: boolean;
     };
     const items = Array.isArray(body.items) ? body.items as RequestItem[] : [];
     if (items.length === 0) {
@@ -1127,16 +1162,17 @@ serve(async (req) => {
       ? body.organizationId!
       : await resolveOrganizationId(supabase, user!.id, body.organizationId);
     const shopifyConfig = await getShopifyConfig(supabase, organizationId);
+    const dryRun = body.dryRun === true;
     const syncBestBottlesConvex = body.syncBestBottlesConvex === true;
     const bbConvexUrl = syncBestBottlesConvex ? getBestBottlesConvexUrl() : "";
-    const bbConvexWriteToken = syncBestBottlesConvex ? getBestBottlesConvexWriteToken() : "";
+    const bbConvexWriteToken = syncBestBottlesConvex && !dryRun ? getBestBottlesConvexWriteToken() : "";
     if (syncBestBottlesConvex && !bbConvexUrl) {
       return jsonResponse({
         error:
           "BESTBOTTLES_CONVEX_URL is required when syncBestBottlesConvex is true.",
       }, 500);
     }
-    if (syncBestBottlesConvex && !bbConvexWriteToken) {
+    if (syncBestBottlesConvex && !dryRun && !bbConvexWriteToken) {
       return jsonResponse({
         error:
           "BEST_BOTTLES_CONVEX_WRITE_TOKEN is required when syncBestBottlesConvex is true.",
@@ -1306,6 +1342,36 @@ serve(async (req) => {
         }
         const actualShopifySku = variant.sku ?? matchedShopifySku;
 
+        if (dryRun) {
+          const field = mode === "cap-off" ? "imageUrlCapOff" : "imageUrl";
+          const existingVariantMedia = body.includeExistingVariantMedia === true
+            ? await listVariantMedia(shopifyConfig, variant.id)
+            : [];
+          results.push(buildShopifyPushDryRunResult({
+            imageId: item.imageId,
+            sku,
+            matchedShopifySku,
+            actualShopifySku,
+            expectedCapColor: expectedCapColor ?? null,
+            manualVisualIdentityApproval: manualVisualIdentityApproval ?? null,
+            mode,
+            variant,
+            bestBottlesConvex: bestBottlesProduct
+              ? {
+                  websiteSku: bestBottlesProduct.websiteSku,
+                  graceSku: bestBottlesProduct.graceSku,
+                  resolvedVia: bestBottlesProduct.resolvedVia,
+                  field,
+                }
+              : null,
+            existingVariantMedia,
+            legacyMediaCleanupDisposition: existingVariantMedia.length > 0
+              ? "detach-after-successful-replacement"
+              : "no-existing-variant-media",
+          }));
+          continue;
+        }
+
         const media = await createProductMedia(
           shopifyConfig,
           variant.product.id,
@@ -1455,11 +1521,12 @@ serve(async (req) => {
       }
     }
 
-    const successCount = results.filter((result) => result.status === "success").length;
+    const successCount = results.filter((result) => result.status === "success" || result.status === "dry-run").length;
     const failedCount = results.length - successCount;
 
     return jsonResponse({
       success: failedCount === 0,
+      dryRun,
       successCount,
       failedCount,
       results,

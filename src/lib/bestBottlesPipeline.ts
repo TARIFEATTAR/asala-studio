@@ -15,6 +15,14 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { markBestBottlesImageApprovedKeep } from "./imageLibraryTags";
+import { normalizePipelineSkuLookupKey } from "./bestBottlesPipelineSkuJobs";
+
+export {
+  findPipelineSkuJobForProductIdentity,
+  normalizePipelineSkuLookupKey,
+  shouldRecordGeneratedImageForSkuJob,
+  type PipelineProductIdentityInput,
+} from "./bestBottlesPipelineSkuJobs";
 
 export type PipelineStatus =
   | "not-started"
@@ -130,7 +138,7 @@ export interface PipelineSkuJob {
   expected_canonical_filename: string | null;
   best_reference_candidate_path: string | null;
   coverage_status: string | null;
-  reference_source: "canonical-render" | "local-legacy" | "bestbottles-live" | "manual" | "none" | null;
+  reference_source: "canonical-render" | "flattened-product-truth" | "local-legacy" | "bestbottles-live" | "manual" | "none" | null;
   reference_source_path: string | null;
   reference_source_url: string | null;
   reference_imported_at: string | null;
@@ -584,6 +592,51 @@ interface PipelineSkuJobSeedRow {
   status: PipelineSkuJobStatus;
 }
 
+const OPTIONAL_REFERENCE_METADATA_COLUMNS = new Set([
+  "reference_source",
+  "reference_source_path",
+  "reference_source_url",
+  "reference_imported_at",
+  "reference_issue",
+]);
+
+function missingPipelineSkuJobColumn(error: unknown): string | null {
+  const message =
+    typeof error === "object" && error && "message" in error
+      ? String((error as { message?: unknown }).message ?? "")
+      : String(error ?? "");
+  const patterns = [
+    /best_bottles_pipeline_sku_jobs\.([a-zA-Z0-9_]+)/i,
+    /'([a-zA-Z0-9_]+)'\s+column\s+of\s+'best_bottles_pipeline_sku_jobs'/i,
+    /Could not find the '([a-zA-Z0-9_]+)' column/i,
+  ];
+  for (const pattern of patterns) {
+    const match = message.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+}
+
+function isOptionalReferenceMetadataColumnMissing(error: unknown): boolean {
+  const column = missingPipelineSkuJobColumn(error);
+  if (column && OPTIONAL_REFERENCE_METADATA_COLUMNS.has(column)) return true;
+  const message =
+    typeof error === "object" && error && "message" in error
+      ? String((error as { message?: unknown }).message ?? "")
+      : String(error ?? "");
+  return Array.from(OPTIONAL_REFERENCE_METADATA_COLUMNS).some((field) =>
+    message.includes(field),
+  );
+}
+
+function withoutOptionalReferenceMetadata<T extends Record<string, unknown>>(row: T): T {
+  const next = { ...row };
+  for (const column of OPTIONAL_REFERENCE_METADATA_COLUMNS) {
+    delete next[column];
+  }
+  return next;
+}
+
 const TERMINAL_SKU_JOB_STATUSES = new Set<PipelineSkuJobStatus>([
   "approved",
   "shopify-pushed",
@@ -622,6 +675,7 @@ function inferSeedReferenceSource(referencePath: string | null): PipelineSkuJob[
   if (/^https?:\/\/www\.bestbottles\.com\//i.test(referencePath)) return "bestbottles-live";
   if (/^https?:\/\//i.test(referencePath)) return "manual";
   if (referencePath.includes("pipeline/madison-hero-sync/renders")) return "canonical-render";
+  if (referencePath.includes("/reference-flattened/")) return "flattened-product-truth";
   return "local-legacy";
 }
 
@@ -698,7 +752,17 @@ export async function seedPipelineSkuJobsFromCoverage(params: {
         onConflict: "organization_id,grace_sku",
         ignoreDuplicates: false,
       });
-    if (error) throw error;
+    if (error) {
+      if (!isOptionalReferenceMetadataColumnMissing(error)) throw error;
+      const fallbackChunk = chunk.map((row) => withoutOptionalReferenceMetadata(row));
+      const { error: fallbackError } = await supabase
+        .from("best_bottles_pipeline_sku_jobs")
+        .upsert(fallbackChunk, {
+          onConflict: "organization_id,grace_sku",
+          ignoreDuplicates: false,
+        });
+      if (fallbackError) throw fallbackError;
+    }
   }
 
   return {
@@ -815,6 +879,9 @@ export async function updatePipelineSkuJob(
       | "reference_imported_at"
       | "reference_issue"
       | "last_error"
+      | "best_reference_candidate_path"
+      | "expected_canonical_filename"
+      | "coverage_status"
     >
   >,
 ): Promise<void> {
@@ -822,7 +889,16 @@ export async function updatePipelineSkuJob(
     .from("best_bottles_pipeline_sku_jobs")
     .update(patch)
     .eq("id", id);
-  if (error) throw error;
+  if (error) {
+    if (!isOptionalReferenceMetadataColumnMissing(error)) throw error;
+    const fallbackPatch = withoutOptionalReferenceMetadata(patch);
+    if (Object.keys(fallbackPatch).length === 0) return;
+    const { error: fallbackError } = await supabase
+      .from("best_bottles_pipeline_sku_jobs")
+      .update(fallbackPatch)
+      .eq("id", id);
+    if (fallbackError) throw fallbackError;
+  }
 }
 
 export async function updatePipelineSkuJobReference(params: {
@@ -848,23 +924,18 @@ export async function updatePipelineSkuJobReference(params: {
   if (!job) return;
 
   const status = job.status === "needs-reference" ? "ready-to-generate" : job.status;
-  const { error } = await supabase
-    .from("best_bottles_pipeline_sku_jobs")
-    .update({
-      best_reference_candidate_path: params.referenceUrl,
-      expected_canonical_filename: params.referenceName ?? undefined,
-      coverage_status: "covered_canonical",
-      reference_source: params.referenceSource ?? "manual",
-      reference_source_path: params.referenceSourcePath ?? null,
-      reference_source_url: params.referenceSourceUrl ?? null,
-      reference_imported_at: new Date().toISOString(),
-      reference_issue: null,
-      status,
-      last_error: null,
-    })
-    .eq("id", job.id);
-
-  if (error) throw error;
+  await updatePipelineSkuJob(job.id, {
+    best_reference_candidate_path: params.referenceUrl,
+    ...(params.referenceName ? { expected_canonical_filename: params.referenceName } : {}),
+    coverage_status: "covered_canonical",
+    reference_source: params.referenceSource ?? "manual",
+    reference_source_path: params.referenceSourcePath ?? null,
+    reference_source_url: params.referenceSourceUrl ?? null,
+    reference_imported_at: new Date().toISOString(),
+    reference_issue: null,
+    status,
+    last_error: null,
+  });
 }
 
 export async function markPipelineSkuJobsQueued(params: {
@@ -1059,8 +1130,8 @@ function isUuid(value: string | null | undefined): value is string {
 }
 
 function skuLookupKey(value: string | null | undefined): string | null {
-  const text = value?.trim().toLowerCase();
-  return text && text.length > 0 ? text : null;
+  const text = normalizePipelineSkuLookupKey(value);
+  return text || null;
 }
 
 async function listShopifyPublishLogs(organizationId: string): Promise<ShopifyPublishLogRow[]> {

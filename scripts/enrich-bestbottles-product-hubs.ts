@@ -2,6 +2,7 @@ import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { auditProductSeo, normalizeProductSeoName } from "../src/lib/productSeoAudit.ts";
 
 type PipelineProduct = {
   productGroupSlug?: string;
@@ -46,6 +47,7 @@ type ExistingProductHub = {
   long_description: string | null;
   seo_title: string | null;
   seo_description: string | null;
+  seo_keywords: string[] | null;
   tags: string[] | null;
   metadata: Record<string, unknown> | null;
   external_ids: Record<string, unknown> | null;
@@ -154,11 +156,19 @@ function toNumber(value: unknown): number | null {
 
 function truncate(text: string, max: number): string {
   if (text.length <= max) return text;
-  return text.slice(0, max - 1).trimEnd();
+  const clipped = text.slice(0, max).trimEnd();
+  const lastSpace = clipped.lastIndexOf(" ");
+  return lastSpace > max * 0.75 ? clipped.slice(0, lastSpace).trimEnd() : clipped;
 }
 
 function unique(values: Array<string | null | undefined>): string[] {
   return [...new Set(values.map(clean).filter(Boolean))];
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function firstText(values: unknown[]): string | null {
@@ -191,6 +201,7 @@ function inferThreadSize(...values: unknown[]): string | null {
 }
 
 function isComponentGroup(family: string, category: string | null, displayName: string): boolean {
+  if (/\b(bottle|jar|vial)\b/i.test(`${family} ${category ?? ""}`)) return false;
   if (COMPONENT_FAMILIES.has(family)) return true;
   if (category && COMPONENT_CATEGORIES.has(category)) return true;
   return /\b(cap|closure|sprayer|pump|dropper|fitment|component|accessory|bag|box|tool)\b/i.test(displayName);
@@ -306,14 +317,14 @@ function buildCircleDescription(group: Group): { short: string; long: string; se
   const long = [
     `The ${group.displayName} family is built around a rounded ${slugPhrase} silhouette with ${neckDescription} and SKU-level component options.`,
     `This group supports refined perfume, fragrance, beauty, and specialty packaging presentations where the bottle shape, closure finish, and applicator style need to feel consistent across a collection.`,
-    `Use this Product Hub record to manage canonical SKUs, Shopify-backed product imagery, Convex media reconciliation, and customer-facing copy for ${componentSummary} variants.`,
-    `Each purchasable variant should keep its own Grace SKU, website SKU, Shopify media URL, and resolved visual identity so the Best Bottles product detail page reflects the exact component shown.`,
+    `Use this product group to compare canonical SKUs, product imagery, and customer-facing copy for ${componentSummary} variants.`,
+    `Each purchasable variant should keep its own Grace SKU, website SKU, and resolved visual identity so the product detail page reflects the exact component shown.`,
     `Avoid unverified claims about leakproof performance, formula compatibility, regulatory compliance, or dispensing behavior unless those details are confirmed in the product database.`,
   ].join(" ");
   const seoTitle = truncate(`${capacity} ${glassColor} Circle Bottle with ${titleCase(componentPhrase)} | Best Bottles`, 70);
   const seoDescription = truncate(
     `Shop the ${capacity} ${glassColor} Circle ${neckPhrase}bottle with ${lowerComponent} options for fragrance, beauty, and specialty packaging.`,
-    320,
+    160,
   );
 
   return { short, long, seoTitle, seoDescription };
@@ -323,6 +334,7 @@ function buildDescription(group: Group): { short: string; long: string; seoTitle
   const circleDescription = buildCircleDescription(group);
   if (circleDescription) return circleDescription;
 
+  const displayName = normalizeProductSeoName(group.displayName);
   const applicators = unique(group.products.map((product) => product.applicator));
   const colors = unique(group.products.map((product) => clean(product.canonicalColor) || clean(product.color)));
   const skuCount = group.products.length;
@@ -337,18 +349,20 @@ function buildDescription(group: Group): { short: string; long: string; seoTitle
       ? ` Body dimensions: ${dimension.heightWithoutCap} mm height without cap x ${dimension.diameter} mm diameter.`
       : "";
 
-  const short = `${group.displayName} is a Best Bottles ${group.family} product group for ${capacity} ${color.toLowerCase()} ${material}packaging${applicatorPhrase}.`;
+  const useCase = group.isComponentException ? "beauty and fragrance packaging programs" : "fragrance, beauty, and personal care packaging programs";
+  const short = `${displayName} is a Best Bottles ${group.family} option for ${capacity} ${color.toLowerCase()} ${material}packaging${applicatorPhrase}.`;
   const long = [
     short,
-    `This Product Hub record centralizes SKU, media, image-generation, Shopify, and Convex sync data for ${skuCount} SKU${skuCount === 1 ? "" : "s"}.`,
+    `Use it for ${useCase} where capacity, finish, material, and component fit need to stay consistent across product variants.`,
+    `This group includes ${skuCount} SKU${skuCount === 1 ? "" : "s"} with product-level specs for merchandising and catalog management.`,
     threadPhrase.trim(),
     dimensionPhrase.trim(),
     group.catalogReferencePages ? `Catalog reference pages: ${group.catalogReferencePages}.` : "",
   ].filter(Boolean).join(" ");
-  const seoTitle = truncate(`${group.displayName} | Best Bottles`, 70);
+  const seoTitle = truncate(`${displayName} | Best Bottles`, 70);
   const seoDescription = truncate(
-    `${group.displayName}: ${capacity} ${group.family.toLowerCase()} packaging with SKU-level specs, media, and Shopify sync data from Best Bottles.`,
-    320,
+    `Shop ${displayName} for ${capacity} ${group.family.toLowerCase()} packaging${applicatorPhrase}. Review specs, finish, material, and SKU options.`,
+    160,
   );
 
   return { short, long, seoTitle, seoDescription };
@@ -517,6 +531,10 @@ function mergeMetadata(existing: Record<string, unknown> | null | undefined, gro
       ...currentBottleSpecs,
       ...buildBottleSpecs(group),
     },
+    seo: {
+      ...asRecord(current.seo),
+      ...buildSeoMetadata(group, buildDescription(group)),
+    },
   };
 }
 
@@ -549,7 +567,7 @@ function buildGroups(products: PipelineProduct[]): Group[] {
         products: rows,
       };
       const missingSpecFields = missingSpecFieldsForGroup(partial);
-      const containerType = inferContainerType({ ...partial, containerType: "", missingSpecFields, specsComplete: false });
+      const containerType = inferContainerType(partial);
 
       return {
         ...partial,
@@ -565,6 +583,65 @@ function buildTags(group: Group, existing: string[] | null | undefined): string[
   return unique([...(existing ?? []), "best-bottles", group.family, group.slug, group.material, group.containerType]);
 }
 
+function buildSeoKeywords(group: Group): string[] {
+  const displayName = normalizeProductSeoName(group.displayName);
+  return unique([
+    displayName.toLowerCase(),
+    group.capacityMl ? `${group.capacityMl} ml ${group.family}`.toLowerCase() : null,
+    group.neckThread ? `${group.neckThread} ${group.family}`.toLowerCase() : null,
+    group.material ? `${group.material} packaging`.toLowerCase() : null,
+    group.canonicalColor ? `${group.canonicalColor} ${group.family}`.toLowerCase() : null,
+    ...group.products.map((product) => product.applicator ? `${product.applicator} packaging`.toLowerCase() : null),
+    "best bottles",
+  ]).slice(0, 10);
+}
+
+function buildHeroAlt(group: Group): string {
+  return unique([
+    normalizeProductSeoName(group.displayName),
+    group.capacityMl ? `${group.capacityMl} ml` : null,
+    group.canonicalColor,
+    group.material,
+    group.neckThread ? `${group.neckThread} neck finish` : null,
+  ]).join(", ");
+}
+
+function buildSeoMetadata(group: Group, copy: ReturnType<typeof buildDescription>): Record<string, unknown> {
+  return {
+    generation_version: "best-bottles-seo-audit-v1",
+    public_copy_source: "generated_from_pipeline_specs",
+    copy_review_status: "draft",
+    hero_alt: buildHeroAlt(group),
+    keywords: buildSeoKeywords(group),
+    faqs: [
+      {
+        question: `What size is ${normalizeProductSeoName(group.displayName)}?`,
+        answer: group.capacityMl ? `This product group is ${group.capacityMl} ml.` : "Capacity varies by SKU in this product group.",
+      },
+      {
+        question: "What finish or closure does this product use?",
+        answer: group.neckThread ? `The stored finish is ${group.neckThread}.` : "The finish should be verified before publishing.",
+      },
+    ],
+    structured_data: {
+      "@type": "Product",
+      name: normalizeProductSeoName(group.displayName),
+      description: copy.seoDescription,
+      brand: "Best Bottles",
+      category: group.category ?? group.family,
+      material: group.material,
+      color: group.canonicalColor,
+      sku: clean(group.products[0]?.graceSku) || clean(group.products[0]?.websiteSku) || null,
+      additionalProperty: [
+        group.capacityMl ? { name: "Capacity", value: `${group.capacityMl} ml` } : null,
+        group.neckThread ? { name: "Neck finish", value: group.neckThread } : null,
+        group.material ? { name: "Material", value: group.material } : null,
+        group.catalogReferencePages ? { name: "Catalog reference pages", value: group.catalogReferencePages } : null,
+      ].filter(Boolean),
+    },
+  };
+}
+
 function nonEmptyOr(value: string | null | undefined, fallback: string, overwrite: boolean): string {
   if (overwrite) return fallback;
   return clean(value) || fallback;
@@ -573,6 +650,7 @@ function nonEmptyOr(value: string | null | undefined, fallback: string, overwrit
 function buildUpdatePayload(group: Group, existing: ExistingProductHub | null, overwriteCopy: boolean): Record<string, unknown> {
   const first = group.products[0];
   const copy = buildDescription(group);
+  const seoKeywords = buildSeoKeywords(group);
   return {
     sku: clean(existing?.sku) || clean(first.graceSku) || null,
     category: clean(existing?.category) || group.category || "Packaging",
@@ -583,6 +661,7 @@ function buildUpdatePayload(group: Group, existing: ExistingProductHub | null, o
     long_description: nonEmptyOr(existing?.long_description, copy.long, overwriteCopy),
     seo_title: nonEmptyOr(existing?.seo_title, copy.seoTitle, overwriteCopy),
     seo_description: nonEmptyOr(existing?.seo_description, copy.seoDescription, overwriteCopy),
+    seo_keywords: existing?.seo_keywords?.length ? existing.seo_keywords : seoKeywords,
     external_ids: {
       ...(existing?.external_ids ?? {}),
       best_bottles_product_group_slug: group.slug,
@@ -593,7 +672,7 @@ function buildUpdatePayload(group: Group, existing: ExistingProductHub | null, o
   };
 }
 
-function buildInsertPayload(group: Group, organizationId: string, overwriteCopy: boolean): Record<string, unknown> {
+function buildInsertPayload(group: Group, organizationId: string, _overwriteCopy: boolean): Record<string, unknown> {
   const first = group.products[0];
   const copy = buildDescription(group);
   return {
@@ -611,6 +690,7 @@ function buildInsertPayload(group: Group, organizationId: string, overwriteCopy:
     long_description: copy.long,
     seo_title: copy.seoTitle,
     seo_description: copy.seoDescription,
+    seo_keywords: buildSeoKeywords(group),
     tags: buildTags(group, null),
     external_ids: {
       best_bottles_product_group_slug: group.slug,
@@ -631,7 +711,7 @@ async function applyEnrichment(groups: Group[], organizationId: string, overwrit
   const slugs = groups.map((group) => group.slug);
   const { data: existingRows, error: existingError } = await supabase
     .from("product_hubs")
-    .select("id,name,slug,sku,category,product_type,product_line,short_description,long_description,seo_title,seo_description,tags,metadata,external_ids,hero_image_id,hero_image_external_url")
+    .select("id,name,slug,sku,category,product_type,product_line,short_description,long_description,seo_title,seo_description,seo_keywords,tags,metadata,external_ids,hero_image_id,hero_image_external_url")
     .eq("organization_id", organizationId)
     .in("slug", slugs);
 
@@ -679,6 +759,15 @@ function writePreview(groups: Group[]): void {
         "neckThread",
         "heightWithoutCapMm",
         "diameterMm",
+        "seoScore",
+        "seoGrade",
+        "publicCopyUnsafe",
+        "missingSeoFields",
+        "seoWarnings",
+        "generatedSeoTitle",
+        "generatedSeoDescription",
+        "generatedSeoKeywords",
+        "generatedHeroAlt",
         "primaryGraceSku",
         "primaryWebsiteSku",
         "primaryShopifySku",
@@ -686,6 +775,22 @@ function writePreview(groups: Group[]): void {
       ...groups.map((group) => {
         const first = group.products[0];
         const dimensions = firstDimensions(group.products);
+        const copy = buildDescription(group);
+        const seoKeywords = buildSeoKeywords(group);
+        const heroAlt = buildHeroAlt(group);
+        const audit = auditProductSeo({
+          name: normalizeProductSeoName(group.displayName),
+          slug: group.slug,
+          category: group.category,
+          productType: group.family,
+          seoTitle: copy.seoTitle,
+          seoDescription: copy.seoDescription,
+          seoKeywords,
+          shortDescription: copy.short,
+          longDescription: copy.long,
+          heroAltText: heroAlt,
+          metadata: { seo: buildSeoMetadata(group, copy) },
+        });
         return [
           group.slug,
           group.displayName,
@@ -699,6 +804,15 @@ function writePreview(groups: Group[]): void {
           group.neckThread,
           dimensions?.heightWithoutCap,
           dimensions?.diameter,
+          audit.score,
+          audit.grade,
+          audit.publicCopyUnsafe ? "yes" : "no",
+          audit.missingFields,
+          audit.warnings,
+          copy.seoTitle,
+          copy.seoDescription,
+          seoKeywords,
+          heroAlt,
           clean(first.graceSku),
           clean(first.websiteSku),
           clean(first.shopifySku),
@@ -720,18 +834,22 @@ function writeReviewSql(groups: Group[], organizationId: string, overwriteCopy: 
     const first = group.products[0];
     const copy = buildDescription(group);
     const tags = buildTags(group, null);
+    const seoKeywords = buildSeoKeywords(group);
+    const seoKeywordsSql = `ARRAY[${seoKeywords.map(sqlString).join(", ")}]::text[]`;
     const copyAssignments = overwriteCopy
       ? [
           `short_description = ${sqlString(copy.short)}`,
           `long_description = ${sqlString(copy.long)}`,
           `seo_title = ${sqlString(copy.seoTitle)}`,
           `seo_description = ${sqlString(copy.seoDescription)}`,
+          `seo_keywords = ${seoKeywordsSql}`,
         ]
       : [
           `short_description = COALESCE(NULLIF(short_description, ''), ${sqlString(copy.short)})`,
           `long_description = COALESCE(NULLIF(long_description, ''), ${sqlString(copy.long)})`,
           `seo_title = COALESCE(NULLIF(seo_title, ''), ${sqlString(copy.seoTitle)})`,
           `seo_description = COALESCE(NULLIF(seo_description, ''), ${sqlString(copy.seoDescription)})`,
+          `seo_keywords = CASE WHEN COALESCE(array_length(seo_keywords, 1), 0) = 0 THEN ${seoKeywordsSql} ELSE seo_keywords END`,
         ];
     const metadata = mergeMetadata({}, group);
     const externalIds = {
@@ -760,7 +878,7 @@ function writeReviewSql(groups: Group[], organizationId: string, overwriteCopy: 
         ")",
         "INSERT INTO public.product_hubs (",
         "  organization_id, name, slug, sku, category, product_type, product_line, status, visibility, development_stage,",
-        "  short_description, long_description, seo_title, seo_description, tags, external_ids, metadata",
+        "  short_description, long_description, seo_title, seo_description, seo_keywords, tags, external_ids, metadata",
         ")",
         "SELECT",
         `  ${sqlString(organizationId)}::uuid,`,
@@ -777,6 +895,7 @@ function writeReviewSql(groups: Group[], organizationId: string, overwriteCopy: 
         `  ${sqlString(copy.long)},`,
         `  ${sqlString(copy.seoTitle)},`,
         `  ${sqlString(copy.seoDescription)},`,
+        `  ${seoKeywordsSql},`,
         `  ARRAY[${tags.map(sqlString).join(", ")}]::text[],`,
         `  ${sqlJson(externalIds)},`,
         `  ${sqlJson(metadata)}`,
