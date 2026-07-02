@@ -1,6 +1,14 @@
 /**
  * QC scaffolding for the paper-doll lane.
  *
+ * STATUS (as of 2026-07): implemented but NOT YET WIRED into any generation
+ * path. `runBodyQc` / `runVariantQc` / `runComponentQc` / `runAssemblyQc` have
+ * zero callers today — no generation currently hard-fails or auto-retries on a
+ * QC result. Wiring this into the post-generation flow (fail + retry gate) is
+ * a planned improvement. NOTE: the pixel sampler uses browser/worker globals
+ * (`createImageBitmap`, `OffscreenCanvas`), so it runs client-side, not inside
+ * a Supabase edge function without a polyfill.
+ *
  * Deterministic checks (background hex, canvas size, center alignment,
  * bottom anchor, internal-checkerboard, variant silhouette / position) are
  * implemented via a small pixel-sampler that runs against a Blob/HTMLImage.

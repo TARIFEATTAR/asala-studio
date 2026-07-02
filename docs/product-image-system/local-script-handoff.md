@@ -5,7 +5,7 @@ existing local extraction script (the ~10-step pipeline they already run)
 stays on their machine. This document defines the contract between the
 script's output and Madison's Paper-Doll Drawer ingest.
 
-**Pixel sizes across the wider pipeline** (OpenAI raw grid, Sanity heroes, vs. this canvas) live in [`pixel-contracts.md`](./pixel-contracts.md) and `src/config/productImageDimensions.ts`. The **paper-doll composition canvas** ingested here is **1000 × 1300** (10:13) unless you intentionally change the script contract for a run.
+**Pixel sizes across the wider pipeline** (OpenAI raw grid, Sanity heroes, vs. this canvas) live in [`pixel-contracts.md`](./pixel-contracts.md) and `src/config/productImageDimensions.ts`. The **paper-doll composition canvas** ingested here is **2080 × 2288** (10:11), aligned 2026-04-28 to `PAPER_DOLL_CANVAS_PX` in `src/config/productImageDimensions.ts`. (The former **1000 × 1300** / 10:13 spec is retained only as `PAPER_DOLL_CANVAS_PX_LEGACY` for recanvas/migration tooling.)
 
 ## 1. The folder layout
 
@@ -43,27 +43,27 @@ cyl-9ml-17-415-run-2026-04-23-1430/        ← folder name is informational only
   "threadSize":        "17-415",
   "glassColor":        "Clear",
 
-  "canonicalCanvas":   { "widthPx": 1000, "heightPx": 1300 },
+  "canonicalCanvas":   { "widthPx": 2080, "heightPx": 2288 },
   "centerXLocked":     true,
-  "bottomAnchor":      { "y": 1219 },
+  "bottomAnchor":      { "y": 2145 },
 
   "components": [
     {
       "role":     "bottle",
       "file":     "bottle.png",
-      "anchorY":  1219
+      "anchorY":  2145
     },
     {
       "role":     "fitment",
       "file":     "fitment-roller-ball-metal.png",
       "type":     "roller-ball-metal",
-      "anchorY":  244
+      "anchorY":  429
     },
     {
       "role":     "cap",
       "file":     "cap-screw-metal.png",
       "type":     "screw-metal",
-      "anchorY":  108
+      "anchorY":  190
     }
   ]
 }
@@ -78,7 +78,7 @@ cyl-9ml-17-415-run-2026-04-23-1430/        ← folder name is informational only
 | `capacityMl` | Integer. Must match `PipelineGroup.capacity_ml`. |
 | `threadSize` | Must match `PipelineGroup.thread_size`. The first number (before the dash) encodes neck outer diameter in mm and is parsed by Madison at ingest time. |
 | `glassColor` | For the pilot, always `"Clear"` — the script extracts the clear master; material variants are derived by Madison via `gpt-image-2`, not by the script. |
-| `canonicalCanvas` | Canvas the script composited the components onto. Madison stores this in `geometry_spec.canonicalCanvas`. Default paper-doll contract is **1000 × 1300** — see [`pixel-contracts.md`](./pixel-contracts.md). |
+| `canonicalCanvas` | Canvas the script composited the components onto. Madison stores this in `geometry_spec.canonicalCanvas`. Default paper-doll contract is **2080 × 2288** (10:11) — see [`pixel-contracts.md`](./pixel-contracts.md). |
 | `bottomAnchor.y` | Pixel Y coordinate of the bottle bottom. All components in the run share the same canvas and are aligned to this anchor. |
 | `components[].role` | One of `"bottle"`, `"fitment"`, `"cap"`. Any other role is ignored in this pilot. |
 | `components[].type` | Fitment/cap sub-type (e.g., `"roller-ball-metal"`). Used to look up default `fitmentSeatDepthMm` in Madison's config. Omitted for `bottle`. |
