@@ -17,8 +17,16 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import type { AssembledPrompt } from "@/lib/product-image/promptAssembler";
-import { colorCorrectToTarget, dataUrlToBlob } from "@/lib/product-image/colorCorrect";
+import {
+  colorCorrectToTarget,
+  conformToCanvas,
+  dataUrlToBlob,
+} from "@/lib/product-image/colorCorrect";
+import { runMasterRenderQc } from "@/lib/product-image/qc";
+import type { QcResult } from "@/lib/product-image/types";
+import { addLibraryTag } from "@/lib/imageLibraryTags";
 
+/** Fallback plate when the preset doesn't specify a solid background. */
 const PAPER_DOLL_TARGET_CREAM = "#EEE6D4";
 
 export interface AssembledGenerationResult {
@@ -31,6 +39,8 @@ export interface AssembledGenerationResult {
   sessionId: string;
   /** Seed the edge function generated with — reuse it to reproduce this render. */
   seed: number | null;
+  /** QC gate outcome: true/false when the gate ran, null when it didn't apply. */
+  qcPassed: boolean | null;
 }
 
 export interface AssembledGenerateOptions {
@@ -92,6 +102,12 @@ export interface AssembledGenerateOptions {
    * keep the server's random-seed-per-call behavior.
    */
   seed?: number;
+  /**
+   * Total generation attempts the QC gate may spend (initial + retries with
+   * a stepped seed) before returning the last render tagged qc:failed.
+   * Default 2. Set 1 to disable retries (the gate still tags results).
+   */
+  qcMaxAttempts?: number;
 }
 
 /**
@@ -238,7 +254,39 @@ export function useAssembledPromptGeneration() {
       fixedSeed = (stableSeedFromIdentity(identity) + attempt) & 0x7fffffff;
     }
 
+    // Post-processing + QC targets, fixed for the whole call. The plate hex
+    // comes from the PRESET (Bone #F5F3EF for grid heroes, parchment
+    // #EEE6D4 for paper-doll components) — previously everything was
+    // snapped to #EEE6D4 regardless of preset. Conform target: the preset's
+    // exact canvas, or the known canvas for an aspect override; null means
+    // "no exact contract" (skip conform + size check).
+    const resolvedAspectRatio =
+      options.sceneOverlay?.aspectRatioOverride ?? assembled.preset.aspectRatio;
+    const plateHex =
+      assembled.preset.backgroundHex !== "transparent"
+        ? assembled.preset.backgroundHex
+        : PAPER_DOLL_TARGET_CREAM;
+    const conformTarget = options.sceneOverlay?.aspectRatioOverride
+      ? getExactCanvasForAspectRatio(resolvedAspectRatio)
+      : assembled.canvas;
+    const shouldColorCorrect =
+      extraLibraryTags.includes("brand:best-bottles") &&
+      !options.sceneOverlay?.backgroundPresetId &&
+      !options.sceneOverlay?.backgroundPrompt;
+    // QC gate applies exactly where the canonical plate applies: Best
+    // Bottles renders on the preset's solid background. Marketing/scene
+    // overrides are exempt (compositions are off-plate by design).
+    const qcEnabled = shouldColorCorrect;
+    const maxAttempts = qcEnabled ? Math.max(1, options.qcMaxAttempts ?? 2) : 1;
+    let lastQc: QcResult | null = null;
+
     try {
+      for (let qcAttempt = 0; qcAttempt < maxAttempts; qcAttempt++) {
+      // QC retries step the seed so the retry explores a different render
+      // instead of reproducing the failed one on seed-capable providers.
+      const attemptSeed =
+        fixedSeed !== undefined ? (fixedSeed + qcAttempt) & 0x7fffffff : undefined;
+
       const { data, error: invokeError } = await supabase.functions.invoke(
         "generate-madison-image",
         {
@@ -277,7 +325,7 @@ export function useAssembledPromptGeneration() {
             backgroundPrompt: options.sceneOverlay?.backgroundPrompt ?? undefined,
             extraLibraryTags,
             productContext: options.productContext,
-            fixedSeed,
+            fixedSeed: attemptSeed,
           },
         },
       );
@@ -372,25 +420,27 @@ export function useAssembledPromptGeneration() {
         return null;
       }
 
-      // Snap the rendered cream background to the exact target hex.
-      // gpt-image-2 drifts a few percent off #EEE6D4 even when the prompt
-      // locks the hex; without this, library renders show inconsistent
-      // cream tones across batches. Only runs for Best Bottles renders
-      // that target the canonical cream plate (Scene-Flexible custom
-      // backgrounds are left alone).
+      // Post-process: snap the rendered plate to the preset's exact hex
+      // (gpt-image-2 drifts a few percent off even when the prompt locks
+      // it), then conform onto the preset's exact canvas — providers return
+      // model-native sizes and the edge function skips conformance on this
+      // path, so the pixel contract is enforced here. Only runs for Best
+      // Bottles renders on the canonical plate (custom scene backgrounds
+      // are left alone).
       const savedImageId = data.savedImageId ?? null;
-      const shouldColorCorrect =
-        extraLibraryTags.includes("brand:best-bottles") &&
-        !options.sceneOverlay?.backgroundPresetId &&
-        !options.sceneOverlay?.backgroundPrompt;
       let finalImageUrl = data.imageUrl;
+      let qcBlob: Blob | null = null;
       if (shouldColorCorrect && currentOrganizationId) {
         try {
           const correctedDataUrl = await colorCorrectToTarget(
             data.imageUrl,
-            PAPER_DOLL_TARGET_CREAM,
+            plateHex,
           );
-          const blob = dataUrlToBlob(correctedDataUrl);
+          const conformedDataUrl = conformTarget
+            ? await conformToCanvas(correctedDataUrl, conformTarget, plateHex)
+            : correctedDataUrl;
+          const blob = dataUrlToBlob(conformedDataUrl);
+          qcBlob = blob;
           const ts = Date.now();
           const rand = Math.random().toString(36).slice(2, 8);
           const path = `${currentOrganizationId}/${user.id}/paper-doll/master_corrected_${ts}_${rand}.png`;
@@ -428,8 +478,49 @@ export function useAssembledPromptGeneration() {
         }
       }
 
-      const resolvedAspectRatio =
-        options.sceneOverlay?.aspectRatioOverride ?? assembled.preset.aspectRatio;
+      // QC gate: verify plate hex, exact canvas, and centering on the final
+      // bytes. Hard fail → tag the row and retry with a stepped seed; the
+      // last attempt is returned either way (tagged qc:failed) so the
+      // operator decides, instead of silently shipping an out-of-contract
+      // render into the Library.
+      lastQc = null;
+      if (qcEnabled && qcBlob) {
+        try {
+          lastQc = await runMasterRenderQc(qcBlob, {
+            plateHex,
+            expectedCanvas: conformTarget ?? undefined,
+            checkCenter: !options.sceneOverlay,
+          });
+          if (savedImageId) {
+            const failedIds = lastQc.checks
+              .filter((c) => c.severity === "hard_fail" && !c.passed)
+              .map((c) => c.id);
+            const rowId = savedImageId;
+            const passed = lastQc.passed;
+            void (async () => {
+              await addLibraryTag(rowId, passed ? "qc:passed" : "qc:failed");
+              for (const id of failedIds) await addLibraryTag(rowId, `qc-fail:${id}`);
+            })();
+          }
+          if (!lastQc.passed && qcAttempt < maxAttempts - 1) {
+            console.warn(
+              "[useAssembledPromptGeneration] QC hard fail — retrying with stepped seed",
+              lastQc.retryReasons,
+            );
+            toast({
+              title: `QC failed — retrying (${qcAttempt + 2}/${maxAttempts})`,
+              description: lastQc.retryReasons[0] ?? "Render out of contract.",
+            });
+            continue;
+          }
+        } catch (qcError) {
+          // QC needs createImageBitmap/OffscreenCanvas — if unavailable,
+          // skip the gate rather than block generation.
+          console.warn("[useAssembledPromptGeneration] QC gate skipped", qcError);
+          lastQc = null;
+        }
+      }
+
       const resolvedCanvas =
         getExactCanvasForAspectRatio(resolvedAspectRatio) ?? assembled.canvas;
       const generated: AssembledGenerationResult = {
@@ -442,14 +533,29 @@ export function useAssembledPromptGeneration() {
         canvas: resolvedCanvas,
         presetId: assembled.preset.id,
         sessionId,
-        seed: typeof data.seed === "number" ? data.seed : fixedSeed ?? null,
+        seed: typeof data.seed === "number" ? data.seed : attemptSeed ?? null,
+        qcPassed: lastQc ? lastQc.passed : null,
       };
       setResult(generated);
-      toast({
-        title: "Image generated",
-        description: `${assembled.preset.label} · ${resolvedCanvas.widthPx} × ${resolvedCanvas.heightPx}`,
-      });
+      if (lastQc && !lastQc.passed) {
+        toast({
+          title: "Generated — QC failed",
+          description:
+            lastQc.retryReasons[0] ??
+            "Render is out of contract after all attempts; tagged qc:failed in the Library.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Image generated",
+          description: `${assembled.preset.label} · ${resolvedCanvas.widthPx} × ${resolvedCanvas.heightPx}${lastQc?.passed ? " · QC passed" : ""}`,
+        });
+      }
       return generated;
+      }
+      // Unreachable: the loop always returns or continues, and the final
+      // iteration always returns.
+      return null;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unexpected generation error.";
       setError(message);

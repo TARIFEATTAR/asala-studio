@@ -1,13 +1,14 @@
 /**
  * QC scaffolding for the paper-doll lane.
  *
- * STATUS (as of 2026-07): implemented but NOT YET WIRED into any generation
- * path. `runBodyQc` / `runVariantQc` / `runComponentQc` / `runAssemblyQc` have
- * zero callers today — no generation currently hard-fails or auto-retries on a
- * QC result. Wiring this into the post-generation flow (fail + retry gate) is
- * a planned improvement. NOTE: the pixel sampler uses browser/worker globals
- * (`createImageBitmap`, `OffscreenCanvas`), so it runs client-side, not inside
- * a Supabase edge function without a polyfill.
+ * STATUS (as of 2026-07): `runMasterRenderQc` is WIRED into the Best Bottles
+ * pipeline via useAssembledPromptGeneration (post-generation gate with
+ * seed-stepped retry). The paper-doll lane runners (`runBodyQc` /
+ * `runVariantQc` / `runComponentQc` / `runAssemblyQc`) still have zero
+ * callers — they await the paper-doll wiring PR. NOTE: the pixel sampler
+ * uses browser/worker globals (`createImageBitmap`, `OffscreenCanvas`), so
+ * it runs client-side, not inside a Supabase edge function without a
+ * polyfill.
  *
  * Deterministic checks (background hex, canvas size, center alignment,
  * bottom anchor, internal-checkerboard, variant silhouette / position) are
@@ -425,4 +426,61 @@ function assembleResult(checks: QcCheck[]): QcResult {
     retryNeeded: hardFails.length > 0,
     retryReasons: hardFails.map((c) => c.note),
   };
+}
+
+// ─── Master-render gate (Best Bottles pipeline lane) ────────────────────────
+
+export interface MasterRenderQcInput {
+  /** Canonical plate hex for this preset (Bone #F5F3EF, parchment #EEE6D4, …). */
+  plateHex: string;
+  /**
+   * Exact canvas the render must match. Omit to skip the size check (e.g.
+   * scene-flexible aspect overrides with no known exact canvas).
+   */
+  expectedCanvas?: { widthPx: number; heightPx: number };
+  /**
+   * Verify the product centroid sits on the horizontal center. Disable for
+   * presets that compose off-center by design (marketing layouts).
+   */
+  checkCenter?: boolean;
+}
+
+/**
+ * QC gate for catalog master renders (grid heroes / PDP masters) — the
+ * subset of checks that applies without a paper-doll `GeometrySpec`:
+ * background plate hex, exact canvas size, and horizontal centering.
+ * Callers conform the render to the target canvas BEFORE this gate;
+ * a size mismatch here means the conform step itself failed.
+ */
+export async function runMasterRenderQc(
+  image: Blob,
+  input: MasterRenderQcInput,
+): Promise<QcResult> {
+  const src = await loadPixelSource(image);
+  const checks: QcCheck[] = [];
+
+  checks.push(checkBackgroundExactHex(src, input.plateHex));
+
+  if (input.expectedCanvas) {
+    const ok =
+      src.width === input.expectedCanvas.widthPx &&
+      src.height === input.expectedCanvas.heightPx;
+    checks.push({
+      id: "canvas_size_matches_family",
+      passed: ok,
+      severity: "hard_fail",
+      note: ok
+        ? `Canvas ${src.width}×${src.height} matches preset spec.`
+        : `Canvas ${src.width}×${src.height} expected ${input.expectedCanvas.widthPx}×${input.expectedCanvas.heightPx}.`,
+    });
+  }
+
+  if (input.checkCenter !== false) {
+    const fg = computeForegroundStats(src, input.plateHex);
+    // Scale the legacy 15px-per-1000px tolerance to the actual canvas width.
+    const tolerance = Math.max(15, Math.round(src.width * 0.015));
+    checks.push(checkCenterAlignment(fg, src, tolerance));
+  }
+
+  return assembleResult(checks);
 }

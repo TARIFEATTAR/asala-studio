@@ -102,6 +102,62 @@ export async function colorCorrectToTarget(
 }
 
 /**
+ * Conform an image onto an exact canvas: contain-fit (never crop the
+ * product), centered, remaining area filled with the plate hex. This is the
+ * client-side enforcement of the pixel contract — providers return
+ * model-native sizes (e.g. gpt-image-2 edits → 1024-class), and the edge
+ * function skips server-side conformance on the Best Bottles path to stay
+ * under worker CPU limits, so the exact canvas is produced here instead.
+ *
+ * Run AFTER `colorCorrectToTarget` so the model's drifted cream is already
+ * snapped to the target hex and the filled bars are indistinguishable from
+ * the render's own background. No-op shortcut when the image already matches
+ * the canvas exactly. Returns a base64 PNG data URL.
+ */
+export async function conformToCanvas(
+  imageUrl: string,
+  canvasPx: { widthPx: number; heightPx: number },
+  backgroundHex: string,
+): Promise<string> {
+  const bg = hexToRgb(backgroundHex);
+  if (!bg) throw new Error(`Invalid background hex: ${backgroundHex}`);
+
+  const img = await loadImage(imageUrl);
+  const alreadyExact =
+    img.naturalWidth === canvasPx.widthPx &&
+    img.naturalHeight === canvasPx.heightPx;
+  if (alreadyExact && imageUrl.startsWith("data:")) return imageUrl;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = canvasPx.widthPx;
+  canvas.height = canvasPx.heightPx;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Unable to acquire 2d canvas context");
+
+  if (alreadyExact) {
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL("image/png");
+  }
+
+  ctx.fillStyle = backgroundHex;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const scale = Math.min(
+    canvas.width / img.naturalWidth,
+    canvas.height / img.naturalHeight,
+  );
+  const drawW = Math.round(img.naturalWidth * scale);
+  const drawH = Math.round(img.naturalHeight * scale);
+  const dx = Math.round((canvas.width - drawW) / 2);
+  const dy = Math.round((canvas.height - drawH) / 2);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, dx, dy, drawW, drawH);
+
+  return canvas.toDataURL("image/png");
+}
+
+/**
  * Convenience: convert a data URL produced by `colorCorrectToTarget` into a
  * Blob suitable for `supabase.storage.from(...).upload()`.
  */
