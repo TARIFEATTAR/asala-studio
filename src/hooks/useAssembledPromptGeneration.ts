@@ -9,7 +9,7 @@
  * optional-field handling.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +29,8 @@ export interface AssembledGenerationResult {
   canvas: { widthPx: number; heightPx: number };
   presetId: string;
   sessionId: string;
+  /** Seed the edge function generated with — reuse it to reproduce this render. */
+  seed: number | null;
 }
 
 export interface AssembledGenerateOptions {
@@ -77,6 +79,33 @@ export interface AssembledGenerateOptions {
     aspectRatioOverride?: string | null;
     resolutionOverride?: "standard" | "high" | null;
   };
+  /**
+   * Explicit seed for reproducible generation (e.g. re-running the exact
+   * recipe of a previous render — read it from the result's `seed`, the
+   * Library `seed:` tag, or generated_images.generation_seed).
+   *
+   * When omitted, Best Bottles studio-master runs derive a STABLE seed from
+   * the generation identity (SKU + preset + scene tags), so a catalog run
+   * over the same inputs is reproducible by default; repeat attempts for the
+   * same identity within this hook instance step the seed deterministically
+   * (attempt 1, 2, …) so "generate again" still explores. Non-pipeline runs
+   * keep the server's random-seed-per-call behavior.
+   */
+  seed?: number;
+}
+
+/**
+ * FNV-1a 32-bit hash → non-negative INT32 (Gemini seed range). Stable across
+ * sessions/devices so the same SKU + preset + scene always maps to the same
+ * base seed.
+ */
+function stableSeedFromIdentity(identity: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < identity.length; i++) {
+    hash ^= identity.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0) & 0x7fffffff;
 }
 
 function getExactCanvasForAspectRatio(aspectRatio: string): { widthPx: number; heightPx: number } | null {
@@ -94,6 +123,13 @@ export function useAssembledPromptGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AssembledGenerationResult | null>(null);
+
+  // Attempt counter per generation identity (SKU + preset + scene). First
+  // attempt in a session uses the stable base seed — reproducible across
+  // sessions — and each retry of the same identity steps the seed by one so
+  // regenerating explores instead of repeating the identical render on
+  // seed-capable providers. Every seed used is recorded on the saved row.
+  const attemptByIdentity = useRef(new Map<string, number>());
 
   const generate = async (
     assembled: AssembledPrompt,
@@ -191,6 +227,17 @@ export function useAssembledPromptGeneration() {
         ].join("\n")
       : assembled.prompt;
 
+    // Seed resolution. Explicit seed wins; otherwise pipeline (Best Bottles
+    // studio-master) runs derive a stable per-identity seed so the 2,300-SKU
+    // catalog regenerates reproducibly; everything else stays random.
+    let fixedSeed: number | undefined = options.seed;
+    if (fixedSeed === undefined && isBestBottlesStudioMaster) {
+      const identity = [...extraLibraryTags].sort().join("|");
+      const attempt = attemptByIdentity.current.get(identity) ?? 0;
+      attemptByIdentity.current.set(identity, attempt + 1);
+      fixedSeed = (stableSeedFromIdentity(identity) + attempt) & 0x7fffffff;
+    }
+
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
         "generate-madison-image",
@@ -230,6 +277,7 @@ export function useAssembledPromptGeneration() {
             backgroundPrompt: options.sceneOverlay?.backgroundPrompt ?? undefined,
             extraLibraryTags,
             productContext: options.productContext,
+            fixedSeed,
           },
         },
       );
@@ -394,6 +442,7 @@ export function useAssembledPromptGeneration() {
         canvas: resolvedCanvas,
         presetId: assembled.preset.id,
         sessionId,
+        seed: typeof data.seed === "number" ? data.seed : fixedSeed ?? null,
       };
       setResult(generated);
       toast({

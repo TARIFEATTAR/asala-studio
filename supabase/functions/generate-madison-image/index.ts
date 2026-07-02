@@ -583,7 +583,11 @@ function buildDirectorModePrompt(
     backgroundPrompt?: string;
     compositionPresetId?: string;
     compositionPrompt?: string;
-  }
+  },
+  // Keys the default lighting/composition rotation. Same seed + same inputs
+  // → identical prompt text; a random seed per call preserves the old
+  // variety behavior. Falls back to a clock value only if omitted.
+  variationSeed?: number,
 ): string {
   let prompt = "";
 
@@ -797,8 +801,11 @@ function buildDirectorModePrompt(
       { setup: "Broad", quality: "Even and flattering", contrast: "2.5:1" },
     ];
     
-    // Randomly select a lighting variation (using timestamp for pseudo-randomness)
-    const lightingIndex = Date.now() % lightingVariations.length;
+    // Seed-keyed lighting selection: deterministic when the caller fixes the
+    // seed, varied when the seed is random. (Was Date.now() — clock-based
+    // rotation made identical requests produce different prompts.)
+    const rotationKey = variationSeed ?? Date.now();
+    const lightingIndex = rotationKey % lightingVariations.length;
     const selectedLighting = lightingVariations[lightingIndex];
     
     if (categorizedRefs.style.length > 0) {
@@ -821,7 +828,7 @@ function buildDirectorModePrompt(
         "Negative space (minimalist, elegant)",
         "Diagonal composition (energetic, modern)",
       ];
-      const compositionIndex = (Date.now() + 1) % compositionStyles.length;
+      const compositionIndex = ((variationSeed ?? Date.now()) + 1) % compositionStyles.length;
       prompt += `COMPOSITION: ${compositionStyles[compositionIndex]}\n`;
     }
     
@@ -1099,12 +1106,15 @@ serve(async (req) => {
       compositionPresetId,
       compositionPrompt,
 
-      // Consistency Mode (bulk variation generation) — OPTIONAL.
-      // When fixedSeed is provided, the edge function uses it instead of a
-      // random seed, guaranteeing identical random initialization across
-      // every variation in a set. consistencySetId groups related outputs
-      // in the Library. See migration 20260422000000_consistency_set_columns.
-      fixedSeed, // number | undefined — identical seed across a variation set
+      // Deterministic generation — OPTIONAL. When fixedSeed is provided the
+      // edge function uses it instead of a random seed: it keys the prompt
+      // variation rotation (all providers) and is passed as the provider
+      // seed where supported (Gemini, Freepik). Callers: Consistency Mode
+      // (one seed per variation set) and the Best Bottles pipeline (stable
+      // per-SKU seed via useAssembledPromptGeneration). consistencySetId
+      // groups related outputs in the Library. See migrations
+      // 20260422000000_consistency_set_columns and 20260702090000.
+      fixedSeed, // number | undefined — reproducible seed for this render
       consistencySetId, // UUID | undefined — groups variations in the Library
       // variationPrompt: the RICH prompt fragment appended to the AI
       // instructions (e.g. "BOTTLE BODY: hand-swirled artisan glass …").
@@ -1594,6 +1604,33 @@ serve(async (req) => {
     }
 
     /**
+     * Seed selection — computed BEFORE prompt assembly so prompt-level
+     * variation (lighting/composition rotation in Director Mode) is keyed
+     * off the seed, not the wall clock. One seed value now governs the whole
+     * generation: prompt rotation for every provider, plus the provider-level
+     * seed where the API supports one (Gemini, Freepik; OpenAI gpt-image-2
+     * has no seed parameter, so its determinism comes from the prompt +
+     * reference lock only).
+     *
+     * When the caller supplies fixedSeed the generation is reproducible;
+     * otherwise a random seed is drawn per call (variety), and either way the
+     * seed is returned in the response, tagged on the Library row, and stored
+     * in generation_seed/generation_settings so a good render can be re-run.
+     * Gemini API requires INT32 (0 – 2_147_483_647).
+     */
+    const MAX_INT32 = 2147483647;
+    const clampedFixedSeed = typeof fixedSeed === "number" && Number.isFinite(fixedSeed)
+      ? Math.max(0, Math.min(MAX_INT32, Math.floor(fixedSeed)))
+      : null;
+    const generationSeed = clampedFixedSeed ?? Math.floor(Math.random() * MAX_INT32);
+    if (clampedFixedSeed !== null) {
+      console.log("🔒 Fixed seed supplied — deterministic generation:", clampedFixedSeed, {
+        consistencySetId: consistencySetId ?? "(none)",
+        setPosition: setPosition ?? "(none)",
+      });
+    }
+
+    /**
      * 8. Build enhanced prompt based on mode
      */
     let enhancedPrompt: string;
@@ -1639,7 +1676,8 @@ serve(async (req) => {
           backgroundPrompt,
           compositionPresetId,
           compositionPrompt,
-        }
+        },
+        generationSeed,
       );
 
       // Add product visual DNA if available
@@ -1871,22 +1909,8 @@ serve(async (req) => {
       );
     }
 
-    // Seed selection. Default: random seed per call for variety. Consistency
-    // Mode (bulk variation) overrides with a fixed seed shared by every
-    // variation in the set — combined with the same reference image and
-    // prompt base, this drives Gemini toward pixel-stable output.
-    // Gemini API requires INT32 (0 – 2_147_483_647).
-    const MAX_INT32 = 2147483647;
-    const clampedFixedSeed = typeof fixedSeed === "number" && Number.isFinite(fixedSeed)
-      ? Math.max(0, Math.min(MAX_INT32, Math.floor(fixedSeed)))
-      : null;
-    const randomSeed = clampedFixedSeed ?? Math.floor(Math.random() * MAX_INT32);
-    if (clampedFixedSeed !== null) {
-      console.log("🔒 Consistency Mode active — using fixed seed:", clampedFixedSeed, {
-        consistencySetId: consistencySetId ?? "(none)",
-        setPosition: setPosition ?? "(none)",
-      });
-    }
+    // Seed selection happens earlier (before prompt assembly) so the prompt
+    // rotation and the provider seed share one `generationSeed` value.
 
     // Determine which provider to use based on tier and request.
     // Default path now prefers GPT Image 2; Gemini 3.1 Pro is the fallback.
@@ -1965,7 +1989,7 @@ serve(async (req) => {
           model: (effectiveFreepikModel as FreepikImageModel) || "mystic",
           resolution: finalResolution as FreepikResolution,
           aspectRatio: aspectRatio as any,
-          seed: randomSeed,
+          seed: generationSeed,
           referenceImages: freepikReferenceImages,
         });
 
@@ -2188,7 +2212,7 @@ serve(async (req) => {
             prompt: enhancedPrompt,
             aspectRatio,
             imageSize: geminiImageSize,
-            seed: randomSeed,
+            seed: generationSeed,
             model: candidateModel,
             referenceImages: referenceImagesPayload.length > 0
               ? referenceImagesPayload
@@ -2316,9 +2340,29 @@ serve(async (req) => {
       image_url: imageUrl,
       generation_provider: usedProvider,
       media_type: "image",
-      description: isDirectorMode 
-        ? `${usedProvider} generated image (Director Mode - Pro Photography)` 
+      description: isDirectorMode
+        ? `${usedProvider} generated image (Director Mode - Pro Photography)`
         : `${usedProvider} generated image (Essential Mode)`,
+      // Reproducibility recipe (columns added in migration 20260702090000;
+      // insertGeneratedImageRecord strips them gracefully pre-migration).
+      generation_seed: generationSeed,
+      generation_settings: {
+        seed: generationSeed,
+        seedSource: clampedFixedSeed !== null ? "client-fixed" : "server-random",
+        providerRequested: effectiveProvider,
+        providerUsed: usedProvider,
+        aspectRatio,
+        resolution: resolution ?? "standard",
+        promptMode: isBestBottlesReferenceLocked
+          ? "best-bottles-reference-locked"
+          : isDirectorMode
+            ? "director"
+            : "essential",
+        backgroundPresetId: backgroundPresetId ?? null,
+        compositionPresetId: compositionPresetId ?? null,
+        visualSquad: visualSquad ?? null,
+        referenceImageCount: actualReferenceImages?.length ?? 0,
+      },
     };
 
     if (selectedTemplate) insertPayload.selected_template = selectedTemplate;
@@ -2374,7 +2418,7 @@ serve(async (req) => {
           (t): t is string => typeof t === "string" && t.length > 0,
         )
       : [];
-    if (pipelineMeta || parentImageTags.length > 0 || callerExtraTags.length > 0) {
+    {
       const existing = Array.isArray(insertPayload.library_tags)
         ? (insertPayload.library_tags as string[])
         : [];
@@ -2384,6 +2428,9 @@ serve(async (req) => {
           ...parentImageTags,
           ...(pipelineMeta ? pipelineMeta.libraryTags : []),
           ...callerExtraTags,
+          // Always stamp the seed so any Library render is reproducible even
+          // if the generation_seed column hasn't been migrated yet.
+          `seed:${generationSeed}`,
         ]),
       );
     }
@@ -2416,6 +2463,8 @@ serve(async (req) => {
         imageUrl,
         savedImageId: savedImage?.id,
         finalPrompt: enhancedPrompt,
+        seed: generationSeed,
+        seedSource: clampedFixedSeed !== null ? "client-fixed" : "server-random",
         usedProvider,
         promptMode: isBestBottlesReferenceLocked
           ? "best-bottles-reference-locked"
