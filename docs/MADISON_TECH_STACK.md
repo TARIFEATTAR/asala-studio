@@ -460,10 +460,9 @@ supabase/
 ### **AI & Content Generation**
 1. `generate-with-claude` - Primary AI content generation
 2. `think-mode-chat` - Advanced AI conversation
-3. `generate-image-with-nano` - AI image generation
-4. `generate-madison-image` - Madison-specific images
-5. `generate-madison-video` - Video generation
-6. `repurpose-content` - Content repurposing
+3. `generate-madison-image` - AI image generation (multi-provider: OpenAI/Gemini/Freepik)
+4. `generate-madison-video` - Video generation
+5. `repurpose-content` - Content repurposing
 
 ### **Brand Intelligence**
 7. `process-brand-document` - Extract brand knowledge from PDFs

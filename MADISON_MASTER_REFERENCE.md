@@ -1367,11 +1367,11 @@ const { data, error } = await supabase.functions.invoke('generate-with-claude', 
 4. Tokens stored securely in database
 5. Calendar events auto-sync
 
-### 10.3 Image Generation (Nano)
+### 10.3 Image Generation (Madison)
 
-**Service**: Nano Image Generation
+**Service**: Madison Image Generation (multi-provider)
 
-**Edge Function**: `supabase/functions/generate-image-with-nano/index.ts`
+**Edge Function**: `supabase/functions/generate-madison-image/index.ts`
 
 **Capabilities**:
 - Product photography
@@ -1381,7 +1381,7 @@ const { data, error } = await supabase.functions.invoke('generate-with-claude', 
 
 **Request**:
 ```typescript
-const { data, error } = await supabase.functions.invoke('generate-image-with-nano', {
+const { data, error } = await supabase.functions.invoke('generate-madison-image', {
   body: {
     prompt: imagePrompt,
     style: 'product_photography',
@@ -1426,8 +1426,7 @@ const { data, error } = await supabase.functions.invoke('generate-image-with-nan
 1. **generate-with-claude** - Primary AI content generation
 2. **repurpose-content** - Transform master content into derivatives
 3. **think-mode-chat** - Advanced AI conversation interface
-4. **generate-image-with-nano** - AI image generation
-5. **generate-madison-image** - Madison-specific image generation
+4. **generate-madison-image** - AI image generation (multi-provider: OpenAI/Gemini/Freepik)
 6. **process-brand-document** - Extract brand knowledge from PDFs
 7. **scrape-brand-website** - Extract brand info from websites
 8. **extract-brand-knowledge** - Structure brand intelligence
@@ -2115,7 +2114,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 - `generate-with-claude` - Primary AI generation
 - `repurpose-content` - Content repurposing
 - `think-mode-chat` - Advanced AI chat
-- `generate-image-with-nano` - Image generation
+- `generate-madison-image` - Image generation (multi-provider)
 - `process-brand-document` - Brand document processing
 - `scrape-brand-website` - Website scraping
 - `sync-to-google-calendar` - Calendar sync

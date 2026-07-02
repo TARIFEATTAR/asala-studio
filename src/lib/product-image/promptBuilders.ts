@@ -1,6 +1,15 @@
 /**
  * Prompt builders for the paper-doll lane.
  *
+ * STATUS (as of 2026-07): NOT YET WIRED. This module has zero executable
+ * callers today — the model invocation is still stubbed (see below) and the
+ * live product-image generation path uses `promptAssembler.ts` instead. It is
+ * intentionally-preserved scaffolding for the planned Paper-Doll wiring PR
+ * whose data layer (geometry_spec, approved-assets tables) has already shipped.
+ * Do not assume any builder here runs in production. If this lane is abandoned,
+ * delete this file together with the retry-prompt logic; the prompt text can be
+ * reconstructed from `docs/product-image-system/prompt-pack.md`.
+ *
  * Target model: OpenAI `gpt-image-2`. Builders return a payload describing
  * what to send (prompt text, mode, whether a reference image is required);
  * the actual model invocation is stubbed in a later PR so wiring the model

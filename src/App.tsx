@@ -44,6 +44,7 @@ const CreateShopifyListing = lazy(() => import("./pages/marketplace/CreateShopif
 const BrandHealth = lazy(() => import("./pages/BrandHealth"));
 const BrandBuilder = lazy(() => import("./pages/BrandBuilder"));
 const ImageEditor = lazy(() => import("./pages/ImageEditor"));
+const AddTextToImage = lazy(() => import("./pages/AddTextToImage"));
 const DarkRoom = lazy(() => import("./pages/DarkRoom"));
 const BestBottlesPipeline = lazy(() => import("./pages/BestBottlesPipeline"));
 const BestBottlesStudio = lazy(() => import("./pages/BestBottlesStudio"));
@@ -363,6 +364,7 @@ const AppContent = () => {
                     <Route path="/marketplace/tiktok_shop" element={<ProtectedRoute><EcommerceGuard><RouteErrorBoundary routeName="Create TikTok Shop Listing"><CreateTikTokShopListing /></RouteErrorBoundary></EcommerceGuard></ProtectedRoute>} />
                     <Route path="/marketplace/shopify" element={<ProtectedRoute><EcommerceGuard><RouteErrorBoundary routeName="Create Shopify Listing"><CreateShopifyListing /></RouteErrorBoundary></EcommerceGuard></ProtectedRoute>} />
                     <Route path="/image-editor" element={<ProtectedRoute><RouteErrorBoundary routeName="Image Editor"><ImageEditor /></RouteErrorBoundary></ProtectedRoute>} />
+                    <Route path="/add-text-to-image" element={<ProtectedRoute><RouteErrorBoundary routeName="Add Text to Image"><AddTextToImage /></RouteErrorBoundary></ProtectedRoute>} />
                     <Route path="/darkroom" element={<ProtectedRoute><RouteErrorBoundary routeName="Dark Room"><DarkRoom /></RouteErrorBoundary></ProtectedRoute>} />
                     <Route path="/dark-room" element={<Navigate to="/darkroom" replace />} />
                     <Route path="/best-bottles/pipeline" element={<ProtectedRoute><RouteErrorBoundary routeName="Best Bottles Pipeline"><BestBottlesPipeline /></RouteErrorBoundary></ProtectedRoute>} />

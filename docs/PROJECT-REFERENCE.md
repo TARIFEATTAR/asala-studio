@@ -1040,7 +1040,7 @@ scriptora/
 │   ├── functions/                 # Edge functions
 │   │   ├── generate-with-claude/  # Claude AI integration
 │   │   ├── repurpose-content/     # Content repurposing
-│   │   ├── generate-image-with-nano/ # Image generation
+│   │   ├── generate-madison-image/  # Image generation (multi-provider: OpenAI/Gemini/Freepik)
 │   │   ├── google-calendar-oauth/ # Google OAuth
 │   │   ├── sync-to-google-calendar/ # Calendar sync
 │   │   ├── process-brand-document/ # Brand doc processing
@@ -1234,9 +1234,9 @@ const { data, error } = await supabase.functions.invoke('generate-with-claude', 
 
 ### 4. Image Generation
 
-**Service**: Nano Image Generation
+**Service**: Madison Image Generation (multi-provider)
 
-**Edge Function**: `supabase/functions/generate-image-with-nano/index.ts`
+**Edge Function**: `supabase/functions/generate-madison-image/index.ts`
 
 **Capabilities**:
 - Product photography
@@ -1246,7 +1246,7 @@ const { data, error } = await supabase.functions.invoke('generate-with-claude', 
 
 **Request**:
 ```typescript
-const { data, error } = await supabase.functions.invoke('generate-image-with-nano', {
+const { data, error } = await supabase.functions.invoke('generate-madison-image', {
   body: {
     prompt: imagePrompt,
     style: 'product_photography',
