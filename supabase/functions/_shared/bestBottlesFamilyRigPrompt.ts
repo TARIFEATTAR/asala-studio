@@ -1,4 +1,4 @@
-import { buildImposedRigBlock, getFamilyRig, type RigCapState } from "./familyRig.ts";
+import { buildImposedRigBlock, getFamilyRigForProduct, type RigCapState } from "./familyRig.ts";
 
 export interface BestBottlesFamilyRigProductContext {
   family?: unknown;
@@ -12,6 +12,13 @@ export interface BestBottlesFamilyRigProductContext {
   presetId?: unknown;
   referenceWorkflow?: unknown;
   sourceReference?: unknown;
+  bottleCollection?: unknown;
+  category?: unknown;
+  capacity?: unknown;
+  capacityMl?: unknown;
+  heightWithCap?: unknown;
+  heightWithoutCap?: unknown;
+  diameter?: unknown;
 }
 
 export interface BestBottlesFamilyRigPromptAdjustment {
@@ -72,12 +79,6 @@ function resolveCapState(productContext?: BestBottlesFamilyRigProductContext | n
   return "assembled";
 }
 
-function usesFlattenedProductTruthReference(
-  productContext?: BestBottlesFamilyRigProductContext | null,
-): boolean {
-  return textValue(productContext?.referenceWorkflow).toLowerCase() === "single-flattened-product-truth";
-}
-
 const LEGACY_TASK_LINE =
   "Task: transform the uploaded real product reference into a high-end editorial photorealistic studio image and PDP master. The product geometry, proportions, colors, component shapes, camera angle, material identity, canvas placement, centerline, baseline, crop, camera distance, and scale are locked. The flat white source background, weak lighting, missing shadow, and extracted-PNG look are not locked.";
 
@@ -99,21 +100,27 @@ const LEGACY_CANVAS_COMPOSITION_LINES = [
 export function buildBestBottlesFamilyRigPromptAdjustment(
   productContext?: BestBottlesFamilyRigProductContext | null,
 ): BestBottlesFamilyRigPromptAdjustment {
-  if (usesFlattenedProductTruthReference(productContext)) {
-    return {
-      rigImposed: false,
-      taskLine: LEGACY_TASK_LINE,
-      sourceTruthLines: LEGACY_SOURCE_TRUTH_LINES,
-      canvasCompositionLines: LEGACY_CANVAS_COMPOSITION_LINES,
-    };
-  }
-
   const family = textValue(productContext?.family);
-  const rig = getFamilyRig(family);
+  const rig = getFamilyRigForProduct({
+    family,
+    bottleCollection: textValue(productContext?.bottleCollection),
+    category: textValue(productContext?.category),
+    sku: textValue(productContext?.sku),
+    websiteSku: textValue(productContext?.websiteSku),
+    name: textValue(productContext?.name),
+    itemDescription: textValue(productContext?.itemDescription),
+    applicator: textValue(productContext?.applicator),
+    capacity: textValue(productContext?.capacity),
+    capacityMl: typeof productContext?.capacityMl === "number" ? productContext.capacityMl : null,
+    heightWithCap: textValue(productContext?.heightWithCap),
+    heightWithoutCap: textValue(productContext?.heightWithoutCap),
+    diameter: textValue(productContext?.diameter),
+  });
   const rigBlock = rig
     ? buildImposedRigBlock({
         family,
         capState: resolveCapState(productContext),
+        rig,
       })
     : null;
 

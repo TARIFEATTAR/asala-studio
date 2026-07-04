@@ -2,7 +2,7 @@
  * Client-side color-correction pass that snaps a generated image's cream
  * background to an exact target hex. gpt-image-2 only approximates a
  * requested cream — the output drifts a few percent off, leaving a visible
- * seam between the model's cream and the website's #EEE6D4 canvas.
+ * seam between the model's cream and the website's #F5F3EF Bone canvas.
  *
  * Approach: sample a "pure background" corner pixel, compute the RGB delta
  * to the target, apply that delta uniformly to every pixel. Background hits

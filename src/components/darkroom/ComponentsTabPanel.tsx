@@ -60,7 +60,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useToast } from "@/hooks/use-toast";
 
-const PAPER_DOLL_TARGET_CREAM = "#EEE6D4";
+const PAPER_DOLL_TARGET_BONE = "#F5F3EF";
 
 interface Slot {
   id: string;
@@ -284,10 +284,10 @@ function SlotCard({
         style={{
           aspectRatio: `${canvasW} / ${canvasH}`,
           borderColor: "var(--darkroom-border-subtle)",
-          // Cream preview background matches the paper-doll canvas color, so
-          // uploaded layers on cream preview naturally instead of against a
+          // Bone preview background matches the paper-doll canvas color, so
+          // uploaded layers preview naturally instead of against a
           // dark panel that misrepresents how they'll actually composite.
-          background: "#EEE6D4",
+          background: PAPER_DOLL_TARGET_BONE,
         }}
       >
         {result ? (
@@ -487,12 +487,12 @@ export function ComponentsTabPanel({
    * Two-pass post-process on a freshly generated/enhanced image:
    *
    *   1. Color-correct on canvas — sample a corner pixel, compute the RGB
-   *      delta to #EEE6D4 (rgb 238,230,212), apply the offset to every
-   *      pixel. Background hits the exact target; cream-through-glass
+   *      delta to #F5F3EF (rgb 245,243,239), apply the offset to every
+   *      pixel. Background hits the exact target; Bone-through-glass
    *      shifts proportionally and harmonizes with the surrounding canvas.
-   *   2. fal.ai BiRefNet — strip the (now exact-cream) background outside
-   *      the bottle silhouette to alpha=0. Slot's cream container shows
-   *      through, producing pixel-exact cream around the bottle.
+   *   2. fal.ai BiRefNet — strip the (now exact-Bone) background outside
+   *      the bottle silhouette to alpha=0. Slot's Bone container shows
+   *      through, producing pixel-exact Bone around the bottle.
    *
    * The corrected image is uploaded to Supabase Storage between passes so
    * BiRefNet receives a real URL to fetch (the raw data URL from canvas
@@ -507,7 +507,7 @@ export function ComponentsTabPanel({
       try {
         const correctedDataUrl = await colorCorrectToTarget(
           imageUrl,
-          PAPER_DOLL_TARGET_CREAM,
+          PAPER_DOLL_TARGET_BONE,
         );
         const blob = dataUrlToBlob(correctedDataUrl);
         const ts = Date.now();
@@ -714,7 +714,7 @@ export function ComponentsTabPanel({
             source: "generated",
           },
         }));
-        // Auto-fire fal.ai BiRefNet so the slot preview shows exact #EEE6D4.
+        // Auto-fire fal.ai BiRefNet so the slot preview shows exact #F5F3EF.
         const transparentUrl = await cleanBackground(result.imageUrl);
         if (transparentUrl) {
           setSlotResults((prev) => ({
@@ -741,7 +741,7 @@ export function ComponentsTabPanel({
    * Run a reference-anchored AI enhancement on an uploaded PSD layer. The
    * upload's public URL is passed to gpt-image-2 `/images/edits` as the
    * reference; the paper-doll preset supplies locked lighting / material /
-   * cream-background language; componentScope ("body" | "fitment") tells the
+   * Bone-background language; componentScope ("body" | "fitment") tells the
    * SKU injector to describe the right subset of the SKU. Output is a new
    * image with geometry anchored to the upload and material/lighting polished.
    */
@@ -792,8 +792,8 @@ export function ComponentsTabPanel({
             originalUploadUrl: existing.imageUrl,
           },
         }));
-        // Auto-fire fal.ai BiRefNet so background hits exact #EEE6D4 via the
-        // slot's transparent → cream-canvas show-through.
+        // Auto-fire fal.ai BiRefNet so background hits exact #F5F3EF via the
+        // slot's transparent → Bone-canvas show-through.
         const transparentUrl = await cleanBackground(result.imageUrl);
         if (transparentUrl) {
           setSlotResults((prev) => ({
@@ -1135,7 +1135,7 @@ export function ComponentsTabPanel({
         <span className="font-mono">
           {paperDollPreset.canvas.widthPx} × {paperDollPreset.canvas.heightPx}
         </span>{" "}
-        paper-doll canvas on cream <span className="font-mono">#EEE6D4</span> — matching the fixed
+        paper-doll canvas on Bone <span className="font-mono">#F5F3EF</span> — matching the fixed
         paper-doll canvas color on bestbottles.com so glass refraction reads correctly once
         composited. Flow: <span className="font-mono">PSD upload</span> →{" "}
         <span className="font-mono">Enhance</span> (gpt-image-2 with upload as reference, geometry

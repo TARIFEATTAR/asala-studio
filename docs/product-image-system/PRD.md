@@ -1,5 +1,12 @@
 # PRD — Product Image System (Paper-Doll Lane / Lane A)
 
+> **⛔ DEPRECATED (2026-07).** The paper-doll lane is not used for Best Bottles catalog
+> images. Its builder module (`src/lib/product-image/promptBuilders.ts`) and prompt pack
+> (`prompt-pack.md`) have been removed. The authoritative catalog prompt is the vendored
+> canon `src/config/bestBottlesCatalogCanon.ts` + per-family framing profile
+> `src/config/bestBottlesFamilyProfiles.ts`, assembled by `buildFinalPrompt()` in
+> `src/lib/bestBottlesPromptPreflight.ts`. Kept for historical reference only.
+
 ## Three image lanes — what this PRD is and isn't
 
 Madison Studio has three distinct image-generation surfaces. They are
@@ -50,7 +57,7 @@ group, a **Paper-Doll** button opens a drawer that does three things:
    the pipeline row.
 2. **Generate.** Using `gpt-image-2` in Thinking mode with the clear-body PNG
    as a reference image, derive four material variants (cobalt / amber /
-   frosted / swirl) on the locked `#EEE6D4` parchment plate. Preserves
+   frosted / swirl) on the locked `#F5F3EF` parchment plate. Preserves
    geometry exactly.
 3. **Sign off.** Operator reviews the five-variant lineup, clicks Approve.
    `madison_status` transitions `queued` → `generating` → `generated` →
@@ -98,7 +105,7 @@ group, a **Paper-Doll** button opens a drawer that does three things:
 
 ## Decisions locked
 
-1. Final background for bodies in this lane: **`#EEE6D4`** (parchment cream).
+1. Final background for bodies in this lane: **`#F5F3EF`** (Best Bottles Bone).
    Not transparency. Rendered on plate (Option A).
 2. Clear glass is the canonical master. Cobalt / amber / frosted / swirl
    derive from it via `gpt-image-2` Thinking mode with reference image input.
@@ -169,7 +176,7 @@ Numbers are the dominant cyl-9ml configuration in
   time. Pilot expectation is a portrait canvas (roughly 2000 × 2400 px) with
   `centerXLocked: true` and a fixed `bottomAnchor.y`; the script is the
   source of truth for exact numbers.
-- Default environment plate: `parchment_cream_v1` (`#EEE6D4`).
+- Default environment plate: `best_bottles_bone_v1` (`#F5F3EF`).
 
 ## Future phases (not this PR)
 

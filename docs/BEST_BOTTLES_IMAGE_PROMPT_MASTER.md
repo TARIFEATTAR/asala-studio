@@ -2,6 +2,18 @@
 
 _Last updated: 2026-04-25_
 
+> **⚠️ ARCHITECTURE RECONCILIATION (2026-07).** This document proposed a 5-layer
+> `compilePrompt(sku, presetId)` assembler living in a new `src/config/imagePromptModules.ts`.
+> **That file/function was never built** and does not exist. The concepts here (brand
+> foundation, preservation contract, lighting recipe, material dictionary, family modules,
+> negatives) are real and largely implemented — just distributed differently than described.
+> The ACTUAL shipping catalog prompt is: the vendored canon
+> `src/config/bestBottlesCatalogCanon.ts` (glass-type parametrized: clear vs colored/frosted/swirl)
+> + a per-family framing profile `src/config/bestBottlesFamilyProfiles.ts`, assembled by
+> `buildFinalPrompt()` in `src/lib/bestBottlesPromptPreflight.ts`, sent to `gpt-image-2` via
+> `supabase/functions/generate-madison-image`. Treat this doc as design rationale, not as a
+> map of the code. See `docs/BEST-BOTTLES-IMAGE-PIPELINE-BRIEF.md` for the current wiring.
+
 > Companion document to `src/config/imagePresets.ts` and the Best Bottles Design System (`Best Bottles Design System.zip`). Authoritative source for AI image generation across all 2,300+ SKUs and 27 bottle families.
 
 ---
@@ -37,7 +49,7 @@ Pulled verbatim from the Best Bottles Design System. Every compiled prompt must 
 | Token | Hex | Where it shows up in image |
 |---|---|---|
 | `--bone` | `#F5F3EF` | Page-level surfaces (bottle pages on web) |
-| `--travertine` | `#EEE6D4` | **Default image card backdrop** — preset locks this in |
+| `--travertine` | `#F5F3EF` | **Default image card backdrop** — preset locks this in |
 | `--parchment` | `#ECE5D8` | Alt grid backdrop |
 | `--warm-white` | `#FDFBF8` | Near-white card option |
 | `--linen` | `#FAF8F5` | Section surface |
@@ -84,14 +96,14 @@ This block goes in BEFORE the visual foundation language so the model parses it 
 
 ## 4. The backdrop decision (resolved)
 
-**Locked policy: the catalog grid uses the parchment-cream `#EEE6D4` (travertine) backdrop already specified in `GRID_CARD_2000×2200`. Single surface, no family variation. Period.**
+**Locked policy: the catalog grid uses the Best Bottles Bone `#F5F3EF` (travertine) backdrop already specified in `GRID_CARD_2000×2200`. Single surface, no family variation. Period.**
 
 Variation appears at *other* layers:
 
 | Layer | Backdrop policy | Use case |
 |---|---|---|
-| **Catalog grid** (`GRID_CARD_2000×2200`) | Locked travertine `#EEE6D4` | Every product card on /shop, /family/*, /search |
-| **Sanity hero** (`SANITY_HERO_928×1152`) | Locked travertine `#EEE6D4` | PDP hero, paper-doll group hero |
+| **Catalog grid** (`GRID_CARD_2000×2200`) | Locked travertine `#F5F3EF` | Every product card on /shop, /family/*, /search |
+| **Sanity hero** (`SANITY_HERO_928×1152`) | Locked travertine `#F5F3EF` | PDP hero, paper-doll group hero |
 | **Family landing hero** (TODO: add preset) | Themed signature surface per family | One per family-landing page only |
 | **Marketplace** (`SQUARE_MARKETPLACE_1800×1800`) | Locked travertine | Etsy / Faire feeds |
 | **Landscape hero** (`LANDSCAPE_HERO_2400×1350`) | Travertine OR signature surface | Homepage / category banner |
@@ -173,7 +185,7 @@ COLOR SCIENCE
 Reusable language modules. The compiled prompt picks 1-3 of these per SKU based on the components present.
 
 ### Glass
-- **Clear flint glass** — "crystal-clear flint glass, slight cyan-leaning highlights on edges, faint internal caustics where the glass thickens at the base, no green tint, no bluish-purple reflections, base thickness visible through the bottom of the bottle, refractions of the parchment-cream backdrop reading as warm cream behind the glass walls"
+- **Clear flint glass** — "crystal-clear flint glass, slight cyan-leaning highlights on edges, faint internal caustics where the glass thickens at the base, no green tint, no bluish-purple reflections, base thickness visible through the bottom of the bottle, refractions of the Best Bottles Bone backdrop reading as warm cream behind the glass walls"
 - **Frosted / satin glass** — "satin frosted glass, milky translucency with even matte surface, soft frosted halo at the edge, no plastic look, no specular hot-spots, slight warm cast through the body"
 - **Amber glass** — "deep cognac-amber glass, transparent enough to read as glass not plastic, internal warmth glow from refracted light, edge tone deepens to oxblood at the thickest point"
 - **Cobalt glass** — "saturated cobalt blue, ultramarine through-body color, edges read slightly violet, no neon push"
@@ -467,7 +479,7 @@ For each fitment present:
 
 {TECHNICAL FOOTER}
 - Aspect: {preset.aspect_ratio}
-- Backdrop: parchment-cream {preset.backgroundHex}
+- Backdrop: Best Bottles Bone {preset.backgroundHex}
 - Image-to-image strength: 0.25–0.35
 - Reference image: {sku.reference_png_url} (anchor; do not regenerate subject)
 ```
@@ -530,7 +542,7 @@ COLORWAY: black — true black, rich obsidian-leaning, low chroma.
 NEGATIVES
 [full §10 block]
 
-Aspect: 15:13 portrait. Backdrop: parchment-cream #EEE6D4. Reference image
+Aspect: 15:13 portrait. Backdrop: Best Bottles Bone #F5F3EF. Reference image
 anchor: empire-50ml-bulb-tassel-black.png. Image-to-image strength
 0.25–0.35.
 ```
@@ -562,7 +574,7 @@ The `compilePrompt` function does the assembly per the recipe in §11. Madison's
 Before any image is committed to Sanity / shipped to bestbottles.com:
 
 - [ ] Geometry: bottle silhouette matches reference within 2% tolerance (use SSIM or pixel-diff against the source PNG)
-- [ ] Backdrop: parchment-cream `#EEE6D4` (sample 4 corner pixels)
+- [ ] Backdrop: Best Bottles Bone `#F5F3EF` (sample 4 corner pixels)
 - [ ] Lighting: shadow is grounded contact-only, no harsh edge, ≤30% opacity
 - [ ] Material: glass reads as glass (visible refraction through body)
 - [ ] No bluish-purple anywhere in the frame

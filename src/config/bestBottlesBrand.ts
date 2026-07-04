@@ -26,8 +26,8 @@ export const BEST_BOTTLES_COLORS = {
   champagne: "#D4C5A9",
   /** Soft surface (cards, sections). */
   linen: "#FAF8F5",
-  /** Warmer surface — used for product image stages. THIS is the catalog background. */
-  travertine: "#EEE6D4",
+  /** Retired product stage alias. Product photography now resolves to Bone. */
+  travertine: "#F5F3EF",
   /** Grid wrappers, filter rails. */
   parchment: "#ECE5D8",
   /** Near-white, warm. */
@@ -64,7 +64,7 @@ export const BEST_BOTTLES_RULES = [
   "Voice is precise and warm — never salesy. 'Beautifully Contained.' / 'Find your thread.' / 'Talk with Grace →' — never 'Unlock your perfect bottle!'",
   "Restrained shadows. Use shadow-sm by default; step up only on hover or for drawers.",
   "Section rhythm is 96px (--sp-24) padding on desktop.",
-  "Product photography stages on parchment (#ECE5D8) or travertine (#EEE6D4) with generous padding.",
+  "Product photography stages use Bone (#F5F3EF) with generous padding.",
   "Editorial > promotional. If a section feels empty, solve it with scale and composition — not more content.",
 ] as const;
 
@@ -149,9 +149,9 @@ export function buildBestBottlesBrandBlock(): string {
     "The bottle in the output is sold by Best Bottles, a premium glass-bottle and packaging brand. The visual language is editorial restraint, warm neutrals, and quiet confidence. Treat the rendering style as if it were photographed for a 2026-era luxury fragrance catalog, not a wholesale supplier brochure.",
     "",
     "Brand surface palette (use ONLY these approved surfaces as backgrounds and surrounding tones):",
-    `- Bone ${BEST_BOTTLES_COLORS.bone} — primary catalog background and current Madison grid hero plate`,
-    `- Travertine ${BEST_BOTTLES_COLORS.travertine} — warmer product stage (preferred for catalog tiles)`,
-    `- Parchment ${BEST_BOTTLES_COLORS.parchment} — slightly cooler grid wrapper`,
+    `- Bone ${BEST_BOTTLES_COLORS.bone} — required catalog background and current Madison grid hero plate`,
+    `- Travertine ${BEST_BOTTLES_COLORS.travertine} — retired product-stage alias; resolves to Bone for image generation`,
+    `- Parchment ${BEST_BOTTLES_COLORS.parchment} — UI wrapper only, not a product-photo background`,
     `- Linen ${BEST_BOTTLES_COLORS.linen} — soft card surface`,
     `- Warm white ${BEST_BOTTLES_COLORS.warmWhite} — near-white when needed`,
     "",
@@ -174,7 +174,7 @@ export function buildBestBottlesBrandBlock(): string {
     "- NO 'Beauty Packaging Experts' tagline or any tagline other than 'Beautifully Contained.'",
     "- NO double-bordered frames around the canvas (the legacy catalog used a thick navy outer frame plus a thin inner frame — both are off-brand now).",
     "- NO call-to-action chrome (phone numbers, web URLs, 'Click here', star ribbons like '1,000+ BOTTLE STYLES'). The new brand is restrained — no shouty marketing chrome.",
-    "- NO bright color blocks behind product photos. Stage on bone, travertine, parchment, or linen only. For current grid hero production, use Bone exactly; no sage, green, or olive cast.",
+    "- NO bright color blocks behind product photos. For product-photo generation, stage on Bone exactly; no travertine/parchment fallback, no sage, green, or olive cast.",
     "- NO sales-flyer composition. The output should read as a 2026 luxury fragrance editorial, not a 2010 wholesale supplier sheet.",
     "",
     'Editorial principle: "Less. Quieter. More air. Editorial > promotional. If a section feels empty, solve it with scale and composition, not more content."',

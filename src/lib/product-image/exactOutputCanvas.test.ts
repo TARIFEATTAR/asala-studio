@@ -7,14 +7,14 @@ import {
 } from "./exactOutputCanvas";
 
 describe("exact output canvas constraints", () => {
-  it("allows Cylinder's native 1024 x 1536 canvas", () => {
+  it("allows the legacy 1024 x 1536 exact canvas", () => {
     assert.deepEqual(
       getExactOutputCanvasConstraints({ widthPx: 1024, heightPx: 1536 }),
       { outputCanvas: { width: 1024, height: 1536 } },
     );
   });
 
-  it("resolves 2:3 aspect requests to the Cylinder native canvas", () => {
+  it("resolves 2:3 aspect requests to the legacy tall-narrow canvas", () => {
     assert.deepEqual(resolveExactCanvasForAspectRatio("2:3"), {
       widthPx: 1024,
       heightPx: 1536,

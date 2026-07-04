@@ -80,7 +80,7 @@ export const BOTTLE_COLORS: VariationOption[] = [
     id: "clear",
     label: "Clear",
     prompt:
-      "The BOTTLE BODY is crystal clear flint glass — fully transparent and colourless with high transparency. Render true three-dimensional glass volume: visible light refraction through the walls, a sense of thickness and depth at the shoulder and base, defined edges catching a faint rim-highlight so the silhouette reads clearly (not a cut-out), and a subtle caustic light pattern where the key light bends through the bottle onto the backdrop. Include a faint mould seam down one side of the body and subtle tooling marks at the base — real-glass micro-imperfections. NOT metallic. The CAP remains exactly as specified in the CAP section below; do not tint or recolour the cap.",
+      "The BOTTLE BODY is crystal clear flint glass — fully transparent and colourless with high transparency. Render true three-dimensional glass volume: visible light refraction through the walls, a sense of thickness and depth at the shoulder and base, defined edges catching a faint rim-highlight so the silhouette reads clearly (not a cut-out), and clean base rim/refraction highlights where the key light bends through the bottle. Do not create cloudy internal fill or a chalky base blob. Include a faint mould seam down one side of the body and subtle tooling marks at the base — real-glass micro-imperfections. NOT metallic. The CAP remains exactly as specified in the CAP section below; do not tint or recolour the cap.",
     swatch: "#EDEDE8",
   },
   {
@@ -94,21 +94,21 @@ export const BOTTLE_COLORS: VariationOption[] = [
     id: "blue",
     label: "Cobalt Blue",
     prompt:
-      "The BOTTLE BODY is deep cobalt blue glass — jewel-toned, richly saturated blue tint integrated throughout the glass, still transparent with visible depth-of-tint (darker where the glass is thicker at the shoulder and base). Render true glass volume: crisp edge-rim-highlights, visible light refraction through the coloured glass, and a subtle blue-tinted caustic cast on the backdrop where the key light bends through the bottle. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT blue.",
+      "The BOTTLE BODY is deep cobalt blue glass — jewel-toned, richly saturated blue tint integrated throughout the glass, still transparent with visible depth-of-tint (darker where the glass is thicker at the shoulder and base). Render true glass volume: crisp edge-rim-highlights, visible light refraction through the coloured glass, and a subtle clean blue-tinted refraction cast on the backdrop where the key light bends through the bottle. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT blue.",
     swatch: "#1E3A8A",
   },
   {
     id: "amber",
     label: "Amber",
     prompt:
-      "The BOTTLE BODY is warm amber glass — honey-brown apothecary tint integrated throughout the glass, transparent with rich colour depth (deeper amber where the glass is thicker at the shoulder and base). Render true glass volume: crisp edge-rim-highlights, visible light refraction through the coloured glass, and a warm honey-tinted caustic cast on the backdrop where the key light bends through the bottle. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT amber.",
+      "The BOTTLE BODY is warm amber glass — honey-brown apothecary tint integrated throughout the glass, transparent with rich colour depth (deeper amber where the glass is thicker at the shoulder and base). Render true glass volume: crisp edge-rim-highlights, visible light refraction through the coloured glass, and a warm clean honey-tinted refraction cast on the backdrop where the key light bends through the bottle. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT amber.",
     swatch: "#9A5A1C",
   },
   {
     id: "green",
     label: "Green",
     prompt:
-      "The BOTTLE BODY is deep emerald green glass — forest-green tint integrated throughout the glass, transparent with visible depth-of-tint and darker saturation where the glass thickens at the shoulder and base. Render true glass volume: crisp warm edge-rim-highlights, visible light refraction through the coloured glass, and a subtle green caustic cast on the cream backdrop where the key light bends through the bottle. Keep the tone olivine to forest-green, never neon, never blue-leaning. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT green.",
+      "The BOTTLE BODY is deep emerald green glass — forest-green tint integrated throughout the glass, transparent with visible depth-of-tint and darker saturation where the glass thickens at the shoulder and base. Render true glass volume: crisp warm edge-rim-highlights, visible light refraction through the coloured glass, and a subtle clean green refraction cast on the cream backdrop where the key light bends through the bottle. Keep the tone olivine to forest-green, never neon, never blue-leaning. Include a faint mould seam and base tooling marks. NOT metallic. The CAP remains exactly as specified in the CAP section below; the cap is NOT green.",
     swatch: "#2F5F3A",
   },
   {
@@ -858,7 +858,7 @@ function buildStudioAnchor(studio: StudioSettings): string {
  */
 const UNIVERSAL_MATERIAL_RULES = [
   // Realism + refraction (glass-specific)
-  "Materials must read as real physical objects photographed in a real studio, not as a CG render and not as an AI-stylised illustration. For the glass BODY: crystal clear transparency with visible light refraction through the glass, subtle caustic light cast on the backdrop where light bends through the bottle, a faint rim-highlight along the edges of the glass so the silhouette is DEFINED rather than a cut-out, and tiny natural micro-imperfections (faint seam line down one side, subtle tooling marks near the base) that a real bottle would have.",
+  "Materials must read as real physical objects photographed in a real studio, not as a CG render and not as an AI-stylised illustration. For the glass BODY: crystal clear transparency with visible light refraction through the glass, clean base rim/refraction highlights where light bends through the bottle, a faint rim-highlight along the edges of the glass so the silhouette is DEFINED rather than a cut-out, and tiny natural micro-imperfections (faint seam line down one side, subtle tooling marks near the base) that a real bottle would have. Do not create cloudy internal fill, a chalky base blob, or opaque white material inside clear glass.",
   // Cap behaviour (phenolic plastic, NOT metal)
   "For the CAP: premium moulded phenolic-plastic surface behaviour — softly diffused highlights rather than hard machined-metal specular hotspots, even when the cap's finish is metallic-looking gold, silver, or copper. The cap is NEVER chrome, NEVER polished steel — it is lacquered or metallised plastic with the characteristic slightly-softer reflectivity of moulded resin.",
   // Negative constraints

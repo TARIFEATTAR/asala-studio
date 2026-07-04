@@ -245,7 +245,7 @@ export function buildGridHeroFixedFrameBlock(
         ]),
     "- Background color changes happen behind the product only. Do not let the Bone plate change product scale, crop, camera distance, camera angle, or placement.",
     "- Chiaroscuro is allowed only through product lighting, glass edge contrast, cap/specular definition, and the grounding shadow; do not add background gradients, vignettes, spotlights, or color shifts.",
-    "- Any attached lighting/style reference may influence only the photographic treatment: warm directional light, glass refraction quality, edge density, caustics, and quiet dramatic shadow. It may not influence product shape, cap design, label, props, surface, room, or background scene.",
+    "- Any attached lighting/style reference may influence only the photographic treatment: warm directional light, glass refraction quality, edge density, clean base rim/refraction highlights, and quiet dramatic shadow. It may not influence product shape, cap design, label, props, surface, room, or background scene.",
     "- Exposure must be protected: clear glass should retain visible edge lines, inner-wall refraction, and base thickness. Do not blow the glass out to white.",
     "- The full product assembly must remain constrained inside the canvas with no cropped cap, sprayer, bulb, tassel, tube, bottle base, shadow, or detached component.",
     rigImposed
@@ -268,7 +268,7 @@ export function buildFamilyQualityUpgradeBlock(family: string | null | undefined
     "CYLINDER FAMILY QUALITY AND ALIGNMENT CONTRACT:",
     "- Render as a high-end editorial photorealistic studio image for premium ecommerce, not a legacy catalog cutout.",
     "- Preserve the Cylinder bottle's exact tube geometry, circular base, straight vertical sidewalls, shoulder/neck proportions, cap state, and SKU-specific component identity.",
-    "- Increase perceived quality through sharper glass edge definition, realistic wall thickness, controlled refraction, clean neck threads, believable base mass, subtle caustics, precise cap material finish, and a physically plausible contact shadow.",
+    "- Increase perceived quality through sharper glass edge definition, realistic wall thickness, controlled refraction, clean neck threads, believable clean base mass, precise cap material finish, and a physically plausible contact shadow.",
     "- Baseline alignment is mandatory: all Cylinder siblings of the same capacity must share the same imaginary shelf line, vertical bottle centerline, object scale, side margins, top air, bottom padding, camera distance, and optical compression.",
     "- If the model must choose between beauty and family alignment, choose family alignment. Do not zoom, crop, enlarge, shrink, tilt, or recompose to make the image feel more dramatic.",
   ].join("\n");
@@ -515,12 +515,12 @@ function buildPaperDollComponentPrompt(
     `The output must be visually identical to the reference in form. ONLY the photographic quality should differ.`,
     ``,
     `ENHANCE ONLY:`,
-    `- Glass quality: editorial-grade specular reflective highlights along edges and curves, beautiful clean rim-light, realistic refraction through transparent areas, subtle internal caustics, believable wall thickness, natural rim highlights — luxury glass-photography quality, the kind of specular reflection seen on premium fragrance bottles in high-end campaigns`,
+    `- Glass quality: editorial-grade specular reflective highlights along edges and curves, beautiful clean rim-light, realistic refraction through transparent areas, clean internal rim/refraction cues without cloudy fill, believable wall thickness, natural rim highlights — luxury glass-photography quality, the kind of specular reflection seen on premium fragrance bottles in high-end campaigns`,
     `- Material rendering: authentic surface treatment for each material (polished metal reads as polished metal, mesh reads as mesh, silk reads as silk, rubber reads as rubber)`,
     `- Lighting: soft multi-directional studio lighting with crisp specular accents — IDENTICAL key direction, color temperature, and intensity to companion paper-doll layers in this family so all components composite as one coherent scene`,
     `- Color fidelity: clean, true-to-reference colors with no shift`,
     ``,
-    `Background: smooth seamless parchment-cream plate (#EEE6D4), edge-to-edge, no gradient, no texture, no vignette. Canvas: ${canvasW} × ${canvasH}.`,
+    `Background: smooth seamless Best Bottles Bone plate (#F5F3EF), edge-to-edge, no gradient, no texture, no vignette. Canvas: ${canvasW} × ${canvasH}.`,
     ``,
     `Style: editorial, high-end, luxurious, print-ready product photography — Hasselblad-grade. Ultra-detailed, photorealistic. No CGI sheen, no plastic-looking artifacts, no painterly stylization.`,
   ].join("\n");
@@ -679,9 +679,9 @@ export function assemblePrompt(input: AssemblePromptInput): AssembledPrompt {
 
   // IMPOSED STUDIO RIG — for families with a rig config (Cylinder first), the
   // rig becomes the composition authority: it sets baseline, centerline, and
-  // a size-agnostic fit-to-box-with-floor scale instead of inheriting
-  // inconsistent framing from the source reference. SKU measurements remain
-  // product geometry/proportion truth; they do not drive PDP master zoom.
+  // a resolved fit-to-box-with-floor scale instead of inheriting inconsistent
+  // framing from the source reference. SKU measurements remain product
+  // geometry/proportion truth; profile tiers can drive PDP master framing.
   const rigCapState = resolveRigCapState(preset, input.sku);
   // The rig is a catalog-grid construct: impose it only for the grid-card PDP
   // master presets, not editorial / scene-flexible presets (which keep their

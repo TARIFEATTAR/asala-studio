@@ -213,6 +213,7 @@ function inferCapColor(product: BestBottlesIdentityProductLike): string | null {
     [/shiny\s*gold|sgld|shngld/i, "Shiny Gold"],
     [/\bcopper\b|cpr/i, "Copper"],
     [/sprytur|(?:^|[\s_-])tur(?:$|[\s_-])|\bturq(?:uoise)?\b|\btrq\b/i, "Turquoise"],
+    [/spryrd|\bred\b|\brd\b/i, "Red"],
     [/\bwhite\b|wht/i, "White"],
     [/\bblack\b|blk/i, "Black"],
     [/\bsilver\b|slv/i, "Silver"],

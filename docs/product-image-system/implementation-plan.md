@@ -1,5 +1,11 @@
 # Implementation Plan — Paper-Doll Lane (Pilot)
 
+> **⛔ DEPRECATED (2026-07).** The paper-doll lane is not used for Best Bottles catalog
+> images; `src/lib/product-image/promptBuilders.ts` and `prompt-pack.md` have been removed.
+> Authoritative catalog prompt: vendored canon `src/config/bestBottlesCatalogCanon.ts` +
+> per-family framing `src/config/bestBottlesFamilyProfiles.ts` via `buildFinalPrompt()`
+> in `src/lib/bestBottlesPromptPreflight.ts`. Historical reference only.
+
 Executable step-by-step plan. Each numbered step is one logical commit.
 
 ## Branch
@@ -32,7 +38,7 @@ Apply locally: `supabase db push` (dev database). No existing data loss; data ca
 
 New files:
 - `src/lib/product-image/types.ts` — `EnvironmentPlate`, `GeometrySpec`, `ComponentManifest`, `QcResult`, `QcCheck`. Nothing else. Each type tight and documented.
-- `src/config/productImageEnvironment.ts` — registers `parchment_cream_v1` (`#EEE6D4`) as the one-and-only plate.
+- `src/config/productImageEnvironment.ts` — registers `best_bottles_bone_v1` (`#F5F3EF`) as the one-and-only plate.
 - `src/config/productImageGeometry.ts` — hardcoded `cyl_9ml_v1` record using the real v8.3 numbers (body 70 × 20 mm, cap 13 mm, thread `17-415` → neck outer 17 mm, fitment seat depth defaults per fitment type).
 
 Extensions (narrow):

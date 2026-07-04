@@ -137,4 +137,21 @@ describe("buildBestBottlesGenerationIdentity", () => {
     assert.equal(identity.identityStatus, "ready");
     assert.equal(identity.capColor, "Turquoise");
   });
+
+  it("resolves generic red spray identity from website SKU and description evidence", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-CYL-CLR-9ML-T-24",
+      websiteSku: "GBCyl9SpryRd",
+      family: "Cylinder",
+      capacityMl: 9,
+      color: "Clear",
+      applicator: "Fine Mist Sprayer",
+      capColor: "Clear",
+      itemDescription:
+        "Cylinder design 9ml clear glass bottle with fine mist sprayer with red trim and plastic overcap.",
+    });
+
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.capColor, "Red");
+  });
 });

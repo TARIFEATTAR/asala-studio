@@ -1,4 +1,10 @@
-import { getFamilyRig, type FamilyRigConfig, type RigCapState } from "@/lib/product-image/familyRig";
+import { getFamilyRigForProduct, type FamilyRigConfig, type RigCapState } from "@/lib/product-image/familyRig";
+import {
+  buildFramingQaReport,
+  getFramingDecision,
+  type FramingDecision,
+  type FramingQaReport,
+} from "@/lib/product-image/framingQa";
 
 interface Rgb {
   r: number;
@@ -9,16 +15,29 @@ interface Rgb {
 export interface RigBaselineNormalizeResult {
   dataUrl: string;
   shifted: boolean;
+  shiftXPx: number;
   shiftYPx: number;
   scale: number;
   detectedBaselineYPx: number | null;
   targetBaselineYPx: number | null;
   maskControlled: boolean;
   qaIssues: string[];
+  framingQa: FramingQaReport | null;
+  framingDecision: FramingDecision | null;
 }
 
 export interface RigBaselineNormalizeOptions {
   family?: string | null;
+  bottleCollection?: string | null;
+  graceSku?: string | null;
+  websiteSku?: string | null;
+  itemName?: string | null;
+  itemDescription?: string | null;
+  applicator?: string | null;
+  capacityMl?: number | null;
+  heightWithCap?: string | null;
+  heightWithoutCap?: string | null;
+  diameter?: string | null;
   capState?: string | null;
   mode?: string | null;
   targetBackgroundHex?: string;
@@ -52,15 +71,19 @@ export interface RigFrameTransformInput {
   rig: FamilyRigConfig;
   detectedBaselineYPx: number;
   strongBounds: RigStrongBounds | null;
+  capState?: RigCapState;
 }
 
 export interface RigFrameTransform {
   scale: number;
+  shiftXPx: number;
   shiftYPx: number;
   detectedBaselineYPx: number;
   targetBaselineYPx: number;
   transformedTopYPx: number | null;
   transformedBottomYPx: number | null;
+  transformedLeftXPx: number | null;
+  transformedRightXPx: number | null;
 }
 
 export interface RigBackgroundFlattenOptions {
@@ -83,6 +106,7 @@ export interface RigForegroundMatteOptions {
   shadowNeighborhoodPx?: number;
   shadowLumaDelta?: number;
   shadowStartPct?: number;
+  protectedProductBounds?: RigStrongBounds | null;
 }
 
 export interface RigForegroundMatteResult {
@@ -168,7 +192,9 @@ function buildStrongForegroundDistanceMap(
         currentLuma <= bgLuma - options.shadowLumaDelta &&
         distance < options.strongForegroundDistance * 4;
 
-      distances[p] = distance >= options.strongForegroundDistance && !isPaleBackgroundLike && !isLikelyShadowSeed
+      distances[p] = distance >= options.strongForegroundDistance &&
+        !isPaleBackgroundLike &&
+        !isLikelyShadowSeed
         ? 0
         : maxDistance;
     }
@@ -652,6 +678,7 @@ export function applyRigForegroundMatte(
     options.foregroundNeighborhoodPx ?? Math.max(4, Math.round(Math.min(width, height) * 0.06));
   const shadowNeighborhoodPx =
     options.shadowNeighborhoodPx ?? Math.max(foregroundNeighborhoodPx + 1, Math.round(Math.min(width, height) * 0.075));
+  const protectedProductBounds = options.protectedProductBounds ?? null;
   const distanceToStrongForeground = buildStrongForegroundDistanceMap(pixels, width, height, bg, {
     strongForegroundDistance,
     shadowLumaDelta,
@@ -678,6 +705,42 @@ export function applyRigForegroundMatte(
         current.r >= bg.r + 6 &&
         current.g >= bg.g + 10 &&
         current.b >= bg.b + 14;
+      const isProtectedPalePollutionColor =
+        current.r >= bg.r + 3 &&
+        current.g >= bg.g + 3 &&
+        current.b >= bg.b + 3 &&
+        currentLuma >= bgLuma + 5;
+      const foregroundDistance = distanceToStrongForeground[y * width + x];
+      const protectedPaleDetailHaloPx = Math.max(1, Math.round(foregroundNeighborhoodPx * 0.08));
+      const isInsideProtectedProduct =
+        protectedProductBounds !== null &&
+        y >= protectedProductBounds.top &&
+        y <= protectedProductBounds.bottom &&
+        (
+          typeof protectedProductBounds.left !== "number" ||
+          x >= protectedProductBounds.left
+        ) &&
+        (
+          typeof protectedProductBounds.right !== "number" ||
+          x <= protectedProductBounds.right
+        );
+      if (isInsideProtectedProduct) {
+        const isPaleInteriorPollution =
+          isProtectedPalePollutionColor &&
+          foregroundDistance > protectedPaleDetailHaloPx;
+        if (isPaleInteriorPollution) {
+          pixels[i] = bg.r;
+          pixels[i + 1] = bg.g;
+          pixels[i + 2] = bg.b;
+          pixels[i + 3] = 0;
+          mattedBackgroundPixels += 1;
+          continue;
+        }
+        pixels[i + 3] = 255;
+        opaqueForegroundPixels += 1;
+        continue;
+      }
+
       const isLikelyShadowPixel =
         y >= shadowStartY &&
         currentLuma <= bgLuma - shadowLumaDelta &&
@@ -685,9 +748,9 @@ export function applyRigForegroundMatte(
       const isStrongForeground =
         distance >= strongForegroundDistance && !isPaleBackgroundLike && !isLikelyShadowPixel;
       const isNearStrongForeground =
-        distanceToStrongForeground[y * width + x] <= foregroundNeighborhoodPx;
+        foregroundDistance <= foregroundNeighborhoodPx;
       const isNearShadowSource =
-        distanceToStrongForeground[y * width + x] <= shadowNeighborhoodPx;
+        foregroundDistance <= shadowNeighborhoodPx;
       const isPaleForeground =
         isNearStrongForeground &&
         distance >= paleForegroundDistance &&
@@ -845,16 +908,47 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
     shiftY = 0;
   }
 
+  let shiftX = 0;
+  if (
+    input.capState !== "detached" &&
+    bounds &&
+    typeof bounds.left === "number" &&
+    typeof bounds.right === "number" &&
+    bounds.right > bounds.left
+  ) {
+    const baseDrawX = (input.width - input.width * scale) / 2;
+    const boundsCenter = (bounds.left + bounds.right + 1) / 2;
+    const targetCenter = input.width / 2;
+    const requestedShiftX = targetCenter - (boundsCenter * scale + baseDrawX);
+    const minSideAir = Math.round(input.width * 0.06);
+    const transformedLeftWithoutShift = bounds.left * scale + baseDrawX;
+    const transformedRightWithoutShift = bounds.right * scale + baseDrawX;
+    const minShift = minSideAir - transformedLeftWithoutShift;
+    const maxShift = input.width - minSideAir - transformedRightWithoutShift;
+    shiftX = clamp(requestedShiftX, minShift, maxShift);
+    if (Math.abs(shiftX) <= 8) shiftX = 0;
+  }
+
   const transformedTop = bounds ? bounds.top * scale + shiftY : null;
   const transformedBottom = bounds ? bounds.bottom * scale + shiftY : null;
+  const baseDrawX = (input.width - input.width * scale) / 2;
+  const transformedLeft = bounds && typeof bounds.left === "number"
+    ? bounds.left * scale + baseDrawX + shiftX
+    : null;
+  const transformedRight = bounds && typeof bounds.right === "number"
+    ? bounds.right * scale + baseDrawX + shiftX
+    : null;
 
   return {
     scale,
+    shiftXPx: Math.round(shiftX),
     shiftYPx: Math.round(shiftY),
     detectedBaselineYPx: input.detectedBaselineYPx,
     targetBaselineYPx: targetBaseline,
     transformedTopYPx: transformedTop == null ? null : Math.round(transformedTop),
     transformedBottomYPx: transformedBottom == null ? null : Math.round(transformedBottom),
+    transformedLeftXPx: transformedLeft == null ? null : Math.round(transformedLeft),
+    transformedRightXPx: transformedRight == null ? null : Math.round(transformedRight),
   };
 }
 
@@ -862,8 +956,8 @@ export async function normalizeBestBottlesRigBaseline(
   imageUrl: string,
   options: RigBaselineNormalizeOptions,
 ): Promise<RigBaselineNormalizeResult> {
-  const rig = getFamilyRig(options.family ?? "");
-  const bg = hexToRgb(options.targetBackgroundHex ?? "#EEE6D4");
+  const rig = getFamilyRigForProduct(options);
+  const bg = hexToRgb(options.targetBackgroundHex ?? "#F5F3EF");
   if (!rig || !bg) {
     const img = await loadImage(imageUrl);
     const canvas = document.createElement("canvas");
@@ -875,12 +969,15 @@ export async function normalizeBestBottlesRigBaseline(
     return {
       dataUrl: canvas.toDataURL("image/png"),
       shifted: false,
+      shiftXPx: 0,
       shiftYPx: 0,
       scale: 1,
       detectedBaselineYPx: null,
       targetBaselineYPx: null,
       maskControlled: false,
       qaIssues: [],
+      framingQa: null,
+      framingDecision: null,
     };
   }
 
@@ -954,6 +1051,7 @@ export async function normalizeBestBottlesRigBaseline(
       rig,
       detectedBaselineYPx: detectedBaseline,
       strongBounds: maskBounds,
+      capState,
     });
 
     applyMaskControlledForegroundMatte(
@@ -971,12 +1069,25 @@ export async function normalizeBestBottlesRigBaseline(
     out.height = height;
     const outCtx = out.getContext("2d");
     if (!outCtx) throw new Error("Unable to acquire 2d canvas context");
-    outCtx.fillStyle = options.targetBackgroundHex ?? "#EEE6D4";
+    outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
     outCtx.fillRect(0, 0, width, height);
     const scaledWidth = Math.round(width * transform.scale);
     const scaledHeight = Math.round(height * transform.scale);
-    const drawX = Math.round((width - scaledWidth) / 2);
+    const drawX = Math.round((width - scaledWidth) / 2 + transform.shiftXPx);
     outCtx.drawImage(canvas, drawX, transform.shiftYPx, scaledWidth, scaledHeight);
+    const finalImageData = outCtx.getImageData(0, 0, width, height);
+    const finalBounds = detectStrongBounds(finalImageData.data, width, height, bg);
+    const finalBaseline = detectStrongBottomY(finalImageData.data, width, height, bg, capState);
+    const framingQa = buildFramingQaReport({
+      width,
+      height,
+      rig,
+      bounds: finalBounds,
+      baselineYPx: finalBaseline,
+      capState,
+    });
+    const framingDecision = getFramingDecision(framingQa);
+    qaIssues.push(...framingQa.failures);
 
     const targetFillHeight = height * (rig.fillHeightPct / 100);
     const transformedHeight =
@@ -989,13 +1100,16 @@ export async function normalizeBestBottlesRigBaseline(
 
     return {
       dataUrl: out.toDataURL("image/png"),
-      shifted: transform.scale !== 1 || transform.shiftYPx !== 0,
+      shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || transform.shiftYPx !== 0,
+      shiftXPx: transform.shiftXPx,
       shiftYPx: transform.shiftYPx,
       scale: transform.scale,
       detectedBaselineYPx: detectedBaseline,
       targetBaselineYPx: transform.targetBaselineYPx,
       maskControlled: true,
       qaIssues,
+      framingQa,
+      framingDecision,
     };
   }
 
@@ -1010,18 +1124,30 @@ export async function normalizeBestBottlesRigBaseline(
     fallbackOut.height = height;
     const fallbackCtx = fallbackOut.getContext("2d");
     if (!fallbackCtx) throw new Error("Unable to acquire 2d canvas context");
-    fallbackCtx.fillStyle = options.targetBackgroundHex ?? "#EEE6D4";
+    fallbackCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
     fallbackCtx.fillRect(0, 0, width, height);
     fallbackCtx.drawImage(canvas, 0, 0);
+    const framingQa = buildFramingQaReport({
+      width,
+      height,
+      rig,
+      bounds: detectStrongBounds(imageData.data, width, height, bg),
+      baselineYPx: null,
+      capState,
+    });
+
     return {
       dataUrl: fallbackOut.toDataURL("image/png"),
       shifted: false,
+      shiftXPx: 0,
       shiftYPx: 0,
       scale: 1,
       detectedBaselineYPx: null,
       targetBaselineYPx: targetBaseline,
       maskControlled: false,
-      qaIssues: [],
+      qaIssues: ["Product baseline was not detectable for framing QA."],
+      framingQa,
+      framingDecision: getFramingDecision(framingQa),
     };
   }
 
@@ -1032,9 +1158,12 @@ export async function normalizeBestBottlesRigBaseline(
     rig,
     detectedBaselineYPx: detectedBaseline,
     strongBounds,
+    capState,
   });
 
-  applyRigForegroundMatte(imageData.data, width, height, bg);
+  applyRigForegroundMatte(imageData.data, width, height, bg, {
+    protectedProductBounds: strongBounds,
+  });
   ctx.putImageData(imageData, 0, 0);
 
   const out = document.createElement("canvas");
@@ -1042,21 +1171,36 @@ export async function normalizeBestBottlesRigBaseline(
   out.height = height;
   const outCtx = out.getContext("2d");
   if (!outCtx) throw new Error("Unable to acquire 2d canvas context");
-  outCtx.fillStyle = options.targetBackgroundHex ?? "#EEE6D4";
+  outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
   outCtx.fillRect(0, 0, width, height);
   const scaledWidth = Math.round(width * transform.scale);
   const scaledHeight = Math.round(height * transform.scale);
-  const drawX = Math.round((width - scaledWidth) / 2);
+  const drawX = Math.round((width - scaledWidth) / 2 + transform.shiftXPx);
   outCtx.drawImage(canvas, drawX, transform.shiftYPx, scaledWidth, scaledHeight);
+  const finalImageData = outCtx.getImageData(0, 0, width, height);
+  const finalBounds = detectStrongBounds(finalImageData.data, width, height, bg);
+  const finalBaseline = detectStrongBottomY(finalImageData.data, width, height, bg, capState);
+  const framingQa = buildFramingQaReport({
+    width,
+    height,
+    rig,
+    bounds: finalBounds,
+    baselineYPx: finalBaseline,
+    capState,
+  });
+  const framingDecision = getFramingDecision(framingQa);
 
   return {
     dataUrl: out.toDataURL("image/png"),
-    shifted: transform.scale !== 1 || transform.shiftYPx !== 0,
+    shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || transform.shiftYPx !== 0,
+    shiftXPx: transform.shiftXPx,
     shiftYPx: transform.shiftYPx,
     scale: transform.scale,
-    detectedBaselineYPx: detectedBaseline,
+    detectedBaselineYPx: finalBaseline,
     targetBaselineYPx: targetBaseline,
     maskControlled: false,
-    qaIssues: [],
+    qaIssues: framingQa.failures,
+    framingQa,
+    framingDecision,
   };
 }

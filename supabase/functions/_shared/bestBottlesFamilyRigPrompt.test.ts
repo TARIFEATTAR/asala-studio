@@ -4,12 +4,15 @@ import { describe, it } from "node:test";
 import { buildBestBottlesFamilyRigPromptAdjustment } from "./bestBottlesFamilyRigPrompt";
 
 describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
-  it("uses the reference canvas lock for Cylinder flattened product-truth references", () => {
+  it("imposes the Cylinder rig for flattened product-truth references", () => {
     const adjustment = buildBestBottlesFamilyRigPromptAdjustment({
       family: "Cylinder",
       sku: "GB-CYL-CLR-9ML-SPR-GLD",
       websiteSku: "GBCylSwrl9SpryGl",
       applicator: "Fine Mist Sprayer",
+      capacityMl: 9,
+      heightWithCap: "73 mm",
+      heightWithoutCap: "56 mm",
       referenceWorkflow: "single-flattened-product-truth",
       sourceReference: "https://example.com/storage/v1/object/public/generated-images/reference-intake/cylinder/gb-cyl-clr-9ml-spr-gld.png",
     });
@@ -18,12 +21,14 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     const composition = adjustment.canvasCompositionLines.join("\n");
     const fullPromptPart = [adjustment.taskLine, sourceTruth, composition].join("\n");
 
-    assert.equal(adjustment.rigImposed, false);
-    assert.match(adjustment.taskLine, /canvas placement, centerline, baseline, crop, camera distance, and scale are locked/i);
-    assert.match(sourceTruth, /bounding-box footprint, centerline, baseline, crop, camera distance, and relative scale/i);
-    assert.match(composition, /uploaded reference canvas is the placement lock/i);
-    assert.doesNotMatch(fullPromptPart, /Composition is set by the imposed studio rig/i);
-    assert.doesNotMatch(fullPromptPart, /background-removed PNG/i);
+    assert.equal(adjustment.rigImposed, true);
+    assert.match(adjustment.taskLine, /Composition is set by the imposed studio rig/i);
+    assert.match(sourceTruth, /source foreground size is not product truth/i);
+    assert.match(composition, /IMPOSED STUDIO RIG/);
+    assert.match(composition, /~62% of the canvas height/i);
+    assert.match(composition, /approved 60-64% fill-height range/i);
+    assert.doesNotMatch(fullPromptPart, /uploaded reference canvas is the placement lock/i);
+    assert.doesNotMatch(fullPromptPart, /canvas placement, centerline, baseline, crop, camera distance, and scale are locked/i);
   });
 
   it("imposes the Cylinder rig when real body measurements are present", () => {
@@ -41,8 +46,10 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.match(adjustment.sourceTruthLines.join("\n"), /source foreground size is not product truth/i);
     assert.doesNotMatch(adjustment.sourceTruthLines.join("\n"), /bounding-box footprint, centerline, baseline, crop, camera distance, and relative scale/i);
     assert.match(adjustment.canvasCompositionLines.join("\n"), /IMPOSED STUDIO RIG/);
-    assert.match(adjustment.canvasCompositionLines.join("\n"), /balanced, inspectable, CONSISTENT PDP catalog size/i);
-    assert.match(adjustment.canvasCompositionLines.join("\n"), /Do NOT vary the on-canvas size by ml capacity/i);
+    assert.match(adjustment.canvasCompositionLines.join("\n"), /resolved Cylinder Tall PDP framing target/i);
+    assert.match(adjustment.canvasCompositionLines.join("\n"), /~82% of the canvas height/i);
+    assert.match(adjustment.canvasCompositionLines.join("\n"), /approved 80-84% fill-height range/i);
+    assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /Do NOT vary the on-canvas size by ml capacity/i);
     assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /Fixed-family QA target/i);
     assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /uploaded reference canvas is the placement lock/i);
   });
@@ -59,7 +66,7 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.match(adjustment.taskLine, /Composition is set by the imposed studio rig/i);
     assert.match(adjustment.sourceTruthLines.join("\n"), /source foreground size is not product truth/i);
     assert.match(adjustment.canvasCompositionLines.join("\n"), /UNIVERSAL PDP/);
-    assert.match(adjustment.canvasCompositionLines.join("\n"), /Do NOT vary the on-canvas size by ml capacity/i);
+    assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /Do NOT vary the on-canvas size by ml capacity/i);
     assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /uploaded reference canvas is the placement lock/i);
     assert.doesNotMatch(adjustment.canvasCompositionLines.join("\n"), /Fixed-family QA target/i);
   });
@@ -102,7 +109,8 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.equal(adjustment.rigImposed, true);
     assert.match(adjustment.canvasCompositionLines.join("\n"), /IMPOSED STUDIO RIG/);
     assert.match(adjustment.canvasCompositionLines.join("\n"), /CIRCLE/);
-    assert.match(adjustment.canvasCompositionLines.join("\n"), /ONE two-object assembly/);
+    assert.match(adjustment.canvasCompositionLines.join("\n"), /primary bottle BODY centered/i);
+    assert.match(adjustment.canvasCompositionLines.join("\n"), /right-sidecar component/i);
     assert.match(adjustment.canvasCompositionLines.join("\n"), /same horizontal baseline/i);
   });
 
@@ -117,7 +125,9 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.equal(adjustment.rigImposed, true);
     const composition = adjustment.canvasCompositionLines.join("\n");
     const sourceTruth = adjustment.sourceTruthLines.join("\n");
-    assert.match(composition, /CYLINDER/);
+    assert.match(composition, /ROLLER BOTTLE/);
+    assert.match(composition, /~68% of the canvas height/i);
+    assert.match(composition, /approved 65-70% fill-height range/i);
     assert.match(composition, /assembled bottle centered/i);
     assert.doesNotMatch(composition, /ONE two-object assembly/);
     assert.match(composition, /no detached cap/i);
@@ -137,8 +147,8 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.equal(adjustment.rigImposed, true);
     const composition = adjustment.canvasCompositionLines.join("\n");
     assert.match(composition, /CYLINDER/);
-    assert.match(composition, /ONE two-object assembly/);
-    assert.match(composition, /DETACHED cap upright to the RIGHT/);
+    assert.match(composition, /primary bottle BODY centered/i);
+    assert.match(composition, /DETACHED cap upright in the right sidecar zone/);
     assert.match(composition, /only detached object is the matching over-cap/i);
     assert.match(composition, /Do not render a second loose cap/i);
     assert.match(composition, /same horizontal baseline/i);

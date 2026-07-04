@@ -45,8 +45,10 @@ export function buildBestBottlesApplicatorPromptRules(
     "- No added bulb, hose, tassel, atomizer, spray actuator, pump, dip tube, or detached cap unless that exact component is visibly present in Image 1.";
   const requiredDipTubeTruth =
     "visible internal dip tube inside the clear glass bottle, descending from the sprayer/collar centerline to within a few millimeters of the interior base; this tube is required product identity and must be present.";
+  const sprayerPumpGlassBoundaryLine =
+    "- Sprayer/pump boundary: the actuator, nozzle, collar, and pump housing belong to the top closure assembly and must remain contained under/within the cap and seated at the neck. The pump housing must not hang down the front face, float outside the glass walls, or appear as a large white cylinder below the cap. Any short white connector visible below the cap is an internal neck component seen through clear glass, not a separate visible exterior product component. Do not render it as a distinct rectangular white block below the cap. At most, show a tiny translucent neck stem hidden by the cap edge and glass lip, never as a foreground object, outside-wall object, funnel, plug, sleeve, or pump body. Only the narrow dip tube may continue below the neck into the empty clear glass bottle as a faint clean refracted line. Do not render a large white pump chamber, funnel, plug, sleeve, cloudy column, milky block, or opaque mechanism inside the clear glass body or on the outside/front of the glass wall; keep the neck/shoulder boundary clean and transparent.";
   const requiredDipTubeGlassLine =
-    "- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, visible separation between front wall, back wall, and the visible internal dip tube. The dip tube must be present and must descend to within a few millimeters of the interior base. No fake bevels or plastic glass.";
+    `- Glass: clearer transparency, visible wall thickness, refined refraction, crisp vertical edge glints, tiny rim sparkles on lip and base, realistic base weight, visible separation between front wall, back wall, and the visible internal dip tube. The dip tube must be present and must descend to within a few millimeters of the interior base. No fake bevels or plastic glass. ${sprayerPumpGlassBoundaryLine}`;
   const paleCapVisibilityLine =
     "White, clear, translucent, or pale cap/actuator/over-cap surfaces must remain visible against the Bone background: preserve the rim ellipse, top lip, sidewall edges, nozzle face, subtle gray/cream edge density, tiny specular rim highlights, and local contact shadow. If a detached over-cap is present, it stays readable as a full upright cap object, not a faint ghost cylinder.";
 
@@ -165,11 +167,12 @@ export function buildBestBottlesApplicatorPromptRules(
         `No ${label}, actuator/nozzle, bottle base, shadow, detached cap, or product edge may touch or leave the canvas.`,
       glassMaterialLine: requiredDipTubeGlassLine,
       fitmentMaterialLine:
-        `- Sprayer/pump: preserve the exact ${label}, actuator, nozzle, collar, cap state, trim finish, and visible internal dip tube from Image 1; no bulb, hose, or tassel unless Image 1 shows them. ${paleCapVisibilityLine}`,
+        `- Sprayer/pump: preserve the exact ${label}, actuator, nozzle, collar, cap state, trim finish, neck-seated pump mechanism, and visible internal dip tube from Image 1; no bulb, hose, or tassel unless Image 1 shows them. ${sprayerPumpGlassBoundaryLine} ${paleCapVisibilityLine}`,
       shadowContact: "bottle base and sprayer/pump contact points visible in the reference",
       forbiddenLines: [
         "- No new colors, color drift, substituted sprayer/cap colors, changed metal or plastic finish, new bottle shape, changed angle, changed cap height, changed body width/depth, missing internal dip tube, or changed product proportions.",
         "- No disappearing, washed-out, background-colored, ghosted, or erased cap, actuator, nozzle, collar, detached cap, or over-cap; pale cap components need visible rim, sidewall, top edge, and contact separation.",
+        "- No pump body, actuator housing, collar mass, white mechanism block, cloudy column, milky funnel, or opaque plug floating inside the clear glass bottle; only the thin dip tube may continue into the empty glass.",
         "- No zoomed-in crop, scale inflation, cropped sprayer/pump, added bulb, added hose, added tassel, or product edge touching the canvas.",
       ],
     };

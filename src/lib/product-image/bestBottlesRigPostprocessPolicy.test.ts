@@ -16,7 +16,7 @@ describe("shouldRunBestBottlesRigPostprocess", () => {
     assert.deepEqual(decision, { run: true, reason: "rig-family-canonical-master" });
   });
 
-  it("requires the rig pass for Cylinder masters on the native 1024 x 1536 canvas", () => {
+  it("skips old Cylinder masters on the retired 1024 x 1536 canvas", () => {
     const decision = shouldRunBestBottlesRigPostprocess({
       libraryTags: ["brand:best-bottles", "studio-master"],
       family: "Cylinder",
@@ -25,7 +25,7 @@ describe("shouldRunBestBottlesRigPostprocess", () => {
       sceneOverlay: undefined,
     });
 
-    assert.deepEqual(decision, { run: true, reason: "rig-family-canonical-master" });
+    assert.deepEqual(decision, { run: false, reason: "non-canonical-master-canvas" });
   });
 
   it("still runs for angle overlays when the canvas remains the canonical PDP master", () => {

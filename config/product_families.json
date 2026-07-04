@@ -1,5 +1,6 @@
 {
   "version": "1.0.0",
+  "_note": "VALIDATION-ONLY. These module definitions validate a SKU and seed its qa_checklist (buildPromptForSku in src/lib/bestBottlesPromptCompiler.ts). The prompt text they would assemble is DISCARDED and NOT shipped: the prompt that actually reaches the image model is the vendored canon (src/config/bestBottlesCatalogCanon.ts) + the per-family framing profile (src/config/bestBottlesFamilyProfiles.ts), assembled by buildFinalPrompt() in src/lib/bestBottlesPromptPreflight.ts. Do not treat this file as the source of the catalog image prompt.",
   "modules": {
     "roll_on": {
       "display_name": "Roll-on bottle",

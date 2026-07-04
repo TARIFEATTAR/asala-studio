@@ -34,7 +34,8 @@ describe("Best Bottles Darkroom stone hero prompts", () => {
     assert.match(prompt, /one sculptural stone plinth/i);
     assert.match(prompt, /warm honed travertine/i);
     assert.match(prompt, /preserve the exact product identity/i);
-    assert.match(prompt, /Best Bottles Bone #EEE6D4/i);
+    assert.match(prompt, /Best Bottles Bone #F5F3EF/i);
+    assert.doesNotMatch(prompt, /#EEE6D4/i);
     assert.match(prompt, /Amouage-like/i);
     assert.match(prompt, /do not copy Amouage/i);
     assert.match(prompt, /do not paste the source image/i);

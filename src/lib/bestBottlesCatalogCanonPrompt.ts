@@ -1,15 +1,22 @@
-// Madison intentionally imports the Best Bottles pipeline prompt module
-// instead of copying its prompt text. This points at the v1.1 draft while
-// we test it; do not rewrite the catalog prompt in Madison.
-// @ts-expect-error The Canon v1.1 draft module lives in the adjacent Best Bottles repo.
-import { buildCatalogPrompt } from "../../../../Clients/Nemat-International/Best-Bottles-Website-02-20-2026/pipeline/aios-shopify-pdp-images/prompt-template-canon-v1-1-draft.mjs";
+// The canonical catalog prompt now lives IN this repo (vendored, authoritative).
+// See src/config/bestBottlesCatalogCanon.ts — the external Best Bottles pipeline
+// module is a mirror/consumer of this copy, not the source.
+import {
+  BEST_BOTTLES_CATALOG_CANON_VERSION,
+  CLEAR_GLASS,
+  FINAL_V2_STUDIO_CHECK,
+  KEEP_MATERIAL,
+  PRESERVE,
+  STUDIO_DIRECTION,
+  buildPrompt,
+} from "@/config/bestBottlesCatalogCanon";
 
 import type { PromptSku } from "./bestBottlesPromptCompiler";
 
 export const BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH =
-  "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/pipeline/aios-shopify-pdp-images/prompt-template-canon-v1-1-draft.mjs";
+  `src/config/bestBottlesCatalogCanon.ts@${BEST_BOTTLES_CATALOG_CANON_VERSION}`;
 
-export const BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG = "catalog_canon_v1_1_draft_prompt";
+export const BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG = "catalog_canon_v3_prompt";
 
 function normalizedSkuText(sku: PromptSku): string {
   return [
@@ -50,8 +57,21 @@ export function isBestBottlesCatalogClearGlass(sku: PromptSku): boolean {
 }
 
 export function buildBestBottlesCatalogCanonPrompt(sku: PromptSku): string {
-  return buildCatalogPrompt({
-    glassType: getBestBottlesCatalogGlassType(sku),
-    glassIsClear: isBestBottlesCatalogClearGlass(sku),
-  });
+  const isClearGlass = isBestBottlesCatalogClearGlass(sku);
+  return buildPrompt(isClearGlass);
+}
+
+export interface BestBottlesCatalogCanonPromptParts {
+  basePrompt: string;
+  finalStudioDirection: string;
+}
+
+export function buildBestBottlesCatalogCanonPromptParts(
+  sku: PromptSku,
+): BestBottlesCatalogCanonPromptParts {
+  const isClearGlass = isBestBottlesCatalogClearGlass(sku);
+  return {
+    basePrompt: [PRESERVE, isClearGlass ? CLEAR_GLASS : KEEP_MATERIAL].join("\n\n"),
+    finalStudioDirection: [STUDIO_DIRECTION, FINAL_V2_STUDIO_CHECK].join("\n\n"),
+  };
 }

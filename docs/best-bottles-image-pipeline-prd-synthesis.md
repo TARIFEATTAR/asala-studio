@@ -33,7 +33,7 @@ Use Madison's current canonical master, not the PRD's `2028 x 2288` value.
 | Stage | Contract |
 | --- | --- |
 | Studio/GPT raw master | `2080 x 2288`, 10:11 |
-| Deterministic PDP master | `2080 x 2288`, bone background `#EEE6D4` |
+| Deterministic PDP master | `2080 x 2288`, bone background `#F5F3EF` |
 | Paper-doll/component canvas | `2080 x 2288`, 10:11 |
 | Website/staging delivery | Downstream derivative from Shopify CDN/Next.js image layer |
 | Square marketplace derivative | Later export only, not source of truth |

@@ -9,29 +9,57 @@
 
 export interface FamilyRigConfig {
   family: string;
+  profileId?: string;
+  profileLabel?: string;
+  relativeScaleZoneId?: string;
+  relativeScaleZoneLabel?: string;
   fillHeightPct: number;
+  fillHeightRangePct?: { min: number; max: number };
   fillWidthPct: number;
   baselinePct: number;
+  primaryObjectCenterXPct?: number;
+}
+
+export interface FamilyRigProductInput {
+  family?: string | null;
+  bottleCollection?: string | null;
+  category?: string | null;
+  sku?: string | null;
+  websiteSku?: string | null;
+  name?: string | null;
+  itemDescription?: string | null;
+  applicator?: string | null;
+  capacity?: string | null;
+  capacityMl?: number | null;
+  heightWithCap?: string | null;
+  heightWithoutCap?: string | null;
+  diameter?: string | null;
 }
 
 export const FAMILY_RIG: Record<string, FamilyRigConfig> = {
   defaultPdp: {
     family: "universal-pdp",
     fillHeightPct: 67,
+    fillHeightRangePct: { min: 65, max: 69 },
     fillWidthPct: 60,
-    baselinePct: 13,
+    baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
   cylinder: {
     family: "cylinder",
-    fillHeightPct: 72,
+    fillHeightPct: 76,
+    fillHeightRangePct: { min: 72, max: 78 },
     fillWidthPct: 62,
     baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
   circle: {
     family: "circle",
     fillHeightPct: 78,
+    fillHeightRangePct: { min: 76, max: 80 },
     fillWidthPct: 68,
-    baselinePct: 13,
+    baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
 };
 
@@ -43,6 +71,214 @@ export function getFamilyRig(family?: string | null): FamilyRigConfig | null {
   const normalized = normalizeFamily(family);
   if (normalized === "tall cylinder") return FAMILY_RIG.cylinder;
   return FAMILY_RIG[normalized] ?? FAMILY_RIG.defaultPdp;
+}
+
+function normalizeSearchText(input: FamilyRigProductInput): string {
+  return [
+    input.family,
+    input.bottleCollection,
+    input.category,
+    input.sku,
+    input.websiteSku,
+    input.name,
+    input.itemDescription,
+    input.applicator,
+  ]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
+    .trim()
+    .toLowerCase();
+}
+
+function parseFirstNumber(value: string | number | null | undefined): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (!value) return null;
+  const match = value.match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function getCapacityMl(input: FamilyRigProductInput): number | null {
+  if (typeof input.capacityMl === "number" && Number.isFinite(input.capacityMl) && input.capacityMl > 0) {
+    return input.capacityMl;
+  }
+  return parseFirstNumber(input.capacity);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function resolveStandardCylinderFillHeightPct(measuredHeightMm: number | null): number {
+  if (measuredHeightMm == null) return 76;
+  const observedMinMm = 75;
+  const observedMaxMm = 142;
+  const rangeMinPct = 72;
+  const rangeMaxPct = 78;
+  const normalized = (clamp(measuredHeightMm, observedMinMm, observedMaxMm) - observedMinMm) /
+    (observedMaxMm - observedMinMm);
+  return Math.round(rangeMinPct + normalized * (rangeMaxPct - rangeMinPct));
+}
+
+function resolveSmallCylinderFillHeightPct(measuredHeightMm: number | null): number {
+  if (measuredHeightMm == null) return 62;
+  const observedMinMm = 60;
+  const observedMaxMm = 90;
+  const rangeMinPct = 60;
+  const rangeMaxPct = 64;
+  const normalized = (clamp(measuredHeightMm, observedMinMm, observedMaxMm) - observedMinMm) /
+    (observedMaxMm - observedMinMm);
+  return Math.round(rangeMinPct + normalized * (rangeMaxPct - rangeMinPct));
+}
+
+function isSlimTallCylinderProduct(input: FamilyRigProductInput): boolean {
+  const capacityMl = getCapacityMl(input);
+  const heightMm = parseFirstNumber(input.heightWithCap) ?? parseFirstNumber(input.heightWithoutCap);
+  const diameterMm = parseFirstNumber(input.diameter);
+  if (
+    capacityMl == null ||
+    capacityMl <= 4 ||
+    heightMm == null ||
+    diameterMm == null ||
+    diameterMm <= 0
+  ) {
+    return false;
+  }
+
+  return heightMm >= 110 && diameterMm <= 19 && heightMm / diameterMm >= 6;
+}
+
+function isCylinderProduct(input: FamilyRigProductInput): boolean {
+  const family = normalizeFamily(input.family ?? input.bottleCollection).replace(/[_]+/g, "-");
+  if (family === "cylinder" || family === "tall-cylinder") return true;
+  const text = normalizeSearchText(input);
+  return text.includes("cylinder") || /\b(?:gb|lb)-cyl\b/.test(text) || text.includes("-cyl-");
+}
+
+function isSampleVialProduct(input: FamilyRigProductInput): boolean {
+  const capacityMl = getCapacityMl(input);
+  if (capacityMl != null && capacityMl <= 4) return true;
+  const text = normalizeSearchText(input);
+  return /\bvial\b/.test(text) || /\bgb-via\b/.test(text);
+}
+
+function isRollerBottleProduct(input: FamilyRigProductInput): boolean {
+  return /\broll-?on\b|\broller\b|\broller ball\b|\b-mrl-\b|\b-rol-\b/.test(normalizeSearchText(input));
+}
+
+function cylinderProfile(input: FamilyRigProductInput): FamilyRigConfig {
+  const capacityMl = getCapacityMl(input);
+  const heightWithCapMm = parseFirstNumber(input.heightWithCap);
+  const heightWithoutCapMm = parseFirstNumber(input.heightWithoutCap);
+  const measuredHeightMm = heightWithCapMm ?? heightWithoutCapMm;
+
+  if (
+    (capacityMl != null && capacityMl <= 4) ||
+    (heightWithCapMm != null && heightWithCapMm <= 60) ||
+    (heightWithoutCapMm != null && heightWithoutCapMm <= 40)
+  ) {
+    return {
+      family: "sample-vial",
+      profileId: "sample-vial",
+      profileLabel: "Cylinder Sample Vial",
+      relativeScaleZoneId: "sample-vial",
+      relativeScaleZoneLabel: "Sample vials",
+      fillHeightPct: capacityMl != null && capacityMl <= 3 ? 56 : 58,
+      fillHeightRangePct: { min: 55, max: 60 },
+      fillWidthPct: 58,
+      baselinePct: 9,
+      primaryObjectCenterXPct: 50,
+    };
+  }
+
+  if (
+    (capacityMl != null && capacityMl > 30) ||
+    (heightWithCapMm != null && heightWithCapMm >= 142) ||
+    (heightWithoutCapMm != null && heightWithoutCapMm >= 120)
+  ) {
+    return {
+      family: "cylinder",
+      profileId: "cylinder-tall",
+      profileLabel: "Cylinder Tall",
+      relativeScaleZoneId: "large-cylinder",
+      relativeScaleZoneLabel: "Large Cylinder bottles",
+      fillHeightPct: measuredHeightMm != null && measuredHeightMm >= 170 ? 82 : 80,
+      fillHeightRangePct: { min: 80, max: 84 },
+      fillWidthPct: 56,
+      baselinePct: 9,
+      primaryObjectCenterXPct: 50,
+    };
+  }
+
+  if (isSlimTallCylinderProduct(input)) {
+    return {
+      family: "cylinder",
+      profileId: "cylinder-standard",
+      profileLabel: "Cylinder Standard",
+      relativeScaleZoneId: "standard-cylinder",
+      relativeScaleZoneLabel: "Standard Cylinder bottles",
+      fillHeightPct: resolveStandardCylinderFillHeightPct(measuredHeightMm),
+      fillHeightRangePct: { min: 72, max: 78 },
+      fillWidthPct: 60,
+      baselinePct: 9,
+      primaryObjectCenterXPct: 50,
+    };
+  }
+
+  if (
+    (capacityMl != null && capacityMl < 10) ||
+    (measuredHeightMm != null && measuredHeightMm < 90)
+  ) {
+    return {
+      family: "cylinder",
+      profileId: "cylinder-standard",
+      profileLabel: "Cylinder Standard",
+      relativeScaleZoneId: "small-cylinder",
+      relativeScaleZoneLabel: "Small Cylinder bottles",
+      fillHeightPct: resolveSmallCylinderFillHeightPct(measuredHeightMm),
+      fillHeightRangePct: { min: 60, max: 64 },
+      fillWidthPct: 60,
+      baselinePct: 9,
+      primaryObjectCenterXPct: 50,
+    };
+  }
+
+  return {
+    family: "cylinder",
+    profileId: "cylinder-standard",
+    profileLabel: "Cylinder Standard",
+    relativeScaleZoneId: "standard-cylinder",
+    relativeScaleZoneLabel: "Standard Cylinder bottles",
+    fillHeightPct: 76,
+    fillHeightRangePct: { min: 72, max: 78 },
+    fillWidthPct: 60,
+    baselinePct: 9,
+    primaryObjectCenterXPct: 50,
+  };
+}
+
+export function getFamilyRigForProduct(input?: FamilyRigProductInput | null): FamilyRigConfig | null {
+  if (!input) return null;
+
+  if (isSampleVialProduct(input)) return cylinderProfile(input);
+  if (isRollerBottleProduct(input)) {
+    return {
+      family: "roller-bottle",
+      profileId: "roller-bottle",
+      profileLabel: "Roller Bottle",
+      relativeScaleZoneId: "roller-bottle",
+      relativeScaleZoneLabel: "Roller bottles",
+      fillHeightPct: 68,
+      fillHeightRangePct: { min: 65, max: 70 },
+      fillWidthPct: 58,
+      baselinePct: 9,
+      primaryObjectCenterXPct: 50,
+    };
+  }
+  if (isCylinderProduct(input)) return cylinderProfile(input);
+
+  return getFamilyRig(input.family ?? input.bottleCollection);
 }
 
 export function hasFamilyRig(family?: string | null): boolean {
@@ -67,22 +303,32 @@ export type RigCapState = "assembled" | "detached";
 export interface BuildRigBlockInput {
   family: string;
   capState: RigCapState;
+  rig?: FamilyRigConfig | null;
+}
+
+function formatFamilyLabel(cfg: FamilyRigConfig): string {
+  if (cfg.family === "universal-pdp") return "Universal PDP";
+  return (cfg.profileLabel ?? cfg.family)
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function buildImposedRigBlock(input: BuildRigBlockInput): string | null {
-  const cfg = getFamilyRig(input.family);
+  const cfg = input.rig ?? getFamilyRig(input.family);
   if (!cfg) return null;
 
-  const familyLabel = cfg.family === "universal-pdp"
-    ? "Universal PDP"
-    : cfg.family.replace(/\b\w/g, (c) => c.toUpperCase());
+  const familyLabel = formatFamilyLabel(cfg);
   const baselineLow = cfg.baselinePct - 1;
   const baselineHigh = cfg.baselinePct + 1;
+  const fillRangeLine = cfg.fillHeightRangePct
+    ? ` Keep final QA inside the approved ${cfg.fillHeightRangePct.min}-${cfg.fillHeightRangePct.max}% fill-height range.`
+    : "";
   const placementLines = input.capState === "detached"
     ? [
-      "- Treat the bottle plus detached cap as ONE two-object assembly, not two independently framed products.",
-      "- Place the bottle BODY slightly left of the canvas vertical centerline so the combined bottle+cap assembly is visually centered on the canvas.",
-      "- Place the DETACHED cap upright to the RIGHT of the body. Seat the cap bottom on the EXACT SAME horizontal baseline as the bottle base; their bottom contact pixels should align within ~6 px.",
+      "- Keep the primary bottle BODY centered on the canvas vertical centerline. The detached component does not shift the primary bottle.",
+      "- Treat the detached cap as a controlled right-sidecar component, not part of a group-centering calculation.",
+      "- If Image 1 intentionally shows a detached pump, applicator, wand, dropper, or closure outside the bottle, treat that external component as the right-sidecar object on the shared baseline. It must not shift the primary bottle and must not be duplicated inside the bottle.",
+      "- Place the DETACHED cap upright in the right sidecar zone. Seat the cap bottom on the EXACT SAME horizontal baseline as the bottle base; their bottom contact pixels should align within ~6 px.",
       "- Keep a clean, even gap of about 6-10% of canvas width between the bottle's widest right edge and the cap's left edge. Do not let the cap drift far away, tuck behind the bottle, or overlap the bottle.",
       "- Keep the cap's vertical axis parallel to the bottle. Scale it as the real matching cap for this bottle: not tiny, not oversized, and with the cap top around the bottle shoulder/lower-neck zone unless the reference product proves otherwise.",
       "- For sprayer / pump cap-off SKUs, the bottle top is the exposed sprayer, pump, actuator/nozzle, collar, and dip tube assembly seated on the bottle. That top assembly is NOT a detached cap and must not become a second loose object.",
@@ -103,10 +349,9 @@ export function buildImposedRigBlock(input: BuildRigBlockInput): string | null {
     "- Still locked to the reference (do NOT change these): product geometry, silhouette, proportions, height-to-width ratio, colors, component shapes, cap-on vs cap-off state, number of components, and material identity. The reference governs WHAT the product is; this rig governs WHERE and HOW it sits on the canvas.",
     `- Baseline: seat the bottle base's visible bottom contact pixels at ${baselineLow}-${baselineHigh}% up from the canvas bottom. Every ${familyLabel} SKU shares this one horizontal shelf line. Do not lift the bottle base above this shelf line or let it float in the frame.`,
     ...placementLines,
-    `- Render the product at a balanced, inspectable, CONSISTENT PDP catalog size: the whole assembly fills the frame the same way for every ${familyLabel} SKU. Fit it fully within ~${cfg.fillHeightPct}% of the canvas height and ~${cfg.fillWidthPct}% of the width, centered, with comfortable even margins.`,
+    `- Render the product at the resolved ${familyLabel} PDP framing target. Fit the full assembly within ~${cfg.fillHeightPct}% of the canvas height and ~${cfg.fillWidthPct}% of the width, centered, with comfortable even margins.${fillRangeLine}`,
     "- Surface rule: flat Bone background only. No mirror reflection, no glossy floor, no reflective tabletop, no rectangular studio plate, no inner background rectangle, no visible paper edge, no texture patch, and no second background color.",
     "- Do not leave the product tiny with excessive empty margins, and do not crop any part (cap, base, applicator, detached cap, or grounding shadow).",
-    "- Do NOT vary the on-canvas size by ml capacity. A small-capacity and a large-capacity bottle are framed at the SAME generous size here - true relative size is applied later at display time, not in this image.",
     "- FINAL ALIGNMENT QA: before accepting the image, seat the bottle base and any detached cap bottom on the shared rig baseline; no sibling variant may float higher, sink lower, or use a different floor line.",
     "- Same fixed studio rig for the whole family: identical camera distance, lens, optical compression, baseline, and centerline. Only the purchasable component differences change between siblings.",
   ].join("\n");

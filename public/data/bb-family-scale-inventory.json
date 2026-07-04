@@ -1,0 +1,5097 @@
+{
+  "generatedAt": "2026-06-29T04:00:15.102Z",
+  "sourcePath": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/data/audits/2026-06-27-framing-profiles/convex_snapshot.json",
+  "productCount": 2474,
+  "familyCount": 39,
+  "summary": {
+    "mapped": 9,
+    "needs_review": 19,
+    "not_bottle": 10,
+    "blocked": 1
+  },
+  "bottleScaleSummary": {
+    "mapped": 9,
+    "needs_review": 19,
+    "not_bottle": 10,
+    "blocked": 1
+  },
+  "renderingLaneSummary": {
+    "bottle_catalog": 28,
+    "component_enhancement": 7,
+    "packaging_enhancement": 3,
+    "blocked_unknown": 1
+  },
+  "enhancementSummary": {
+    "ready": 0,
+    "needs_review": 38,
+    "blocked": 1
+  },
+  "families": [
+    {
+      "family": "Aluminum Bottle",
+      "count": 8,
+      "bottleCollections": [
+        "Aluminum Bottle"
+      ],
+      "capacitiesMl": [
+        65,
+        100,
+        120,
+        250,
+        500
+      ],
+      "heightWithCapMm": {
+        "min": 127,
+        "max": 186
+      },
+      "heightWithoutCapMm": {
+        "min": 94,
+        "max": 178
+      },
+      "diameterMm": {
+        "min": 36,
+        "max": 74
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Lotion Pump"
+      ],
+      "colors": [
+        "Clear",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "20-410"
+      ],
+      "exampleSkus": [
+        "AB-ALU-CLR-100ML-SPR-BLK",
+        "AB-ALU-CLR-120ML-LPM-BLK",
+        "AB-ALU-CLR-120ML-LPM-WHT",
+        "AB-ALU-CLR-250ML-SPR-BLK",
+        "AB-ALU-CLR-500ML",
+        "AB-ALU-CLR-65ML-LPM-BLK",
+        "AB-CYL-WHT-65ML-LPM-WHT",
+        "BB-ALU250SPRYBL"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "aluminum-bottle",
+      "targetFillHeightRangePct": {
+        "min": 88,
+        "max": 92
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Apothecary",
+      "count": 5,
+      "bottleCollections": [
+        "Apothecary"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        118
+      ],
+      "heightWithCapMm": {
+        "min": 77.3,
+        "max": 98
+      },
+      "heightWithoutCapMm": {
+        "min": 52.2,
+        "max": 58
+      },
+      "diameterMm": {
+        "min": 27.4,
+        "max": 37
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-APT-BLU-15ML-BLU-T",
+        "GB-APT-BLU-30ML-BLU-T",
+        "GB-APT-CLR-30ML-T",
+        "GB-APT-GRN-30ML-GRN-T",
+        "GB-DEC-CLR-118ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Atomizer",
+      "count": 25,
+      "bottleCollections": [
+        "Atomizer Collection"
+      ],
+      "capacitiesMl": [
+        5,
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 81,
+        "max": 104
+      },
+      "heightWithoutCapMm": {
+        "min": 76,
+        "max": 92
+      },
+      "diameterMm": {
+        "min": 15,
+        "max": 23
+      },
+      "applicators": [
+        "Atomizer"
+      ],
+      "colors": [
+        "Black",
+        "Clear",
+        "Cobalt Blue",
+        "Green",
+        "Pink"
+      ],
+      "neckThreadSizes": [
+        "10mm",
+        "13-415",
+        "13mm",
+        "17mm"
+      ],
+      "exampleSkus": [
+        "GB-CYL-BLK-10ML-ATM-BLK-01",
+        "GB-CYL-BLK-10ML-ATM-BLK-02",
+        "GB-CYL-BLK-5ML-ATM-BLK",
+        "GB-CYL-BLK-5ML-ATM-BLK-01",
+        "GB-CYL-BLK-5ML-ATM-BLK-02",
+        "GB-CYL-BLU-10ML-ATM-BLU",
+        "GB-CYL-BLU-5ML-ATM-BLU",
+        "GB-CYL-CLR-10ML-ATM-GLD"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "atomizer",
+      "targetFillHeightRangePct": {
+        "min": 76,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Bell",
+      "count": 6,
+      "bottleCollections": [
+        "Bell",
+        "Bell Collection"
+      ],
+      "capacitiesMl": [
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 66
+      },
+      "heightWithoutCapMm": {
+        "min": 55,
+        "max": 55
+      },
+      "diameterMm": {
+        "min": 22,
+        "max": 27
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "N/A",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-BEL-CLR-10ML-MRL-BLDOT",
+        "GB-BEL-CLR-10ML-ROL-BLDOT",
+        "GB-BEL-CLR-10ML-SHT-SBLK",
+        "GB-BEL-CLR-10ML-SPR-SBLK",
+        "GB-BLL-CLR-10ML-MRL-BDOT",
+        "GB-BLL-CLR-10ML-RBL-BDOT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Boston Round",
+      "count": 123,
+      "bottleCollections": [
+        "Boston Round"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        60
+      ],
+      "heightWithCapMm": {
+        "min": 72,
+        "max": 117
+      },
+      "heightWithoutCapMm": {
+        "min": 60,
+        "max": 94
+      },
+      "diameterMm": {
+        "min": 25,
+        "max": 39
+      },
+      "applicators": [
+        "Dropper",
+        "Metal Roller Ball",
+        "N/A",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue"
+      ],
+      "neckThreadSizes": [
+        "18-400",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "GB-BSR-AMB-15ML-BLK-S",
+        "GB-BSR-AMB-15ML-BLK-T-01",
+        "GB-BSR-AMB-15ML-BLK-T-02",
+        "GB-BSR-AMB-15ML-BLK-T-03",
+        "GB-BSR-AMB-15ML-WHT-T-01",
+        "GB-BSR-AMB-15ML-WHT-T-02",
+        "GB-BSR-AMB-15ML-WHT-T-03",
+        "GB-BSR-AMB-30ML-BLK-S"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "boston-round",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Cap/Closure",
+      "count": 39,
+      "bottleCollections": [
+        "Cap/Closure"
+      ],
+      "capacitiesMl": [
+        0,
+        5,
+        30,
+        40
+      ],
+      "heightWithCapMm": {
+        "min": 9,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 11,
+        "max": 25
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "N/A"
+      ],
+      "colors": [
+        "Black",
+        "Blue",
+        "Brown",
+        "Gold",
+        "Ivory",
+        "Pink",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "13-425",
+        "18-400",
+        "18-415",
+        "20-400",
+        "22-400",
+        "24-400",
+        "8-425",
+        "Press-Fit",
+        "Specialty"
+      ],
+      "exampleSkus": [
+        "CMP-APP-BLK-18-400",
+        "CMP-CAP-13-415",
+        "CMP-CAP-BLK-13-415-01",
+        "CMP-CAP-BLK-13-415-02",
+        "CMP-CAP-BLK-18-400",
+        "CMP-CAP-BLK-18415-LTR",
+        "CMP-CAP-BLK-20-400-1OZ",
+        "CMP-CAP-BLK-20-400-2OZ"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Cap/Component",
+      "count": 2,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 17,
+        "max": 27
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "17-415"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-BDOT-17-415",
+        "CMP-CAP-SBLK-13-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Circle",
+      "count": 209,
+      "bottleCollections": [
+        "Circle"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 62,
+        "max": 136
+      },
+      "heightWithoutCapMm": {
+        "min": 60,
+        "max": 105
+      },
+      "diameterMm": {
+        "min": 35,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "18-400",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-CIR-BLK-30ML-SPR-BLK",
+        "GB-CIR-CLR-100ML-ASP-BLK",
+        "GB-CIR-CLR-100ML-ASP-GLD",
+        "GB-CIR-CLR-100ML-ASP-IVGD",
+        "GB-CIR-CLR-100ML-ASP-IVSL",
+        "GB-CIR-CLR-100ML-ASP-LVN",
+        "GB-CIR-CLR-100ML-ASP-MSLV",
+        "GB-CIR-CLR-100ML-ASP-PNK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Cream Jar",
+      "count": 19,
+      "bottleCollections": [
+        "Cream Jar"
+      ],
+      "capacitiesMl": [
+        3,
+        5,
+        15,
+        20,
+        30,
+        40,
+        60,
+        63
+      ],
+      "heightWithCapMm": {
+        "min": 18,
+        "max": 57
+      },
+      "heightWithoutCapMm": {
+        "min": 16,
+        "max": 51
+      },
+      "diameterMm": {
+        "min": 25,
+        "max": 59
+      },
+      "applicators": [],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "20mm",
+        "27mm",
+        "37mm",
+        "40mm",
+        "45mm",
+        "48/400",
+        "58mm",
+        "PRESS-FIT"
+      ],
+      "exampleSkus": [
+        "BB-CREAMJARAMB5MLSLCAP",
+        "CJ-JAR-20ML-WHT",
+        "CJ-JAR-60ML-WHT",
+        "CJ-JAR-AMB-30ML-BLK",
+        "CJ-JAR-AMB-30ML-SLV",
+        "CJ-JAR-AMB-40ML-01",
+        "CJ-JAR-AMB-40ML-02",
+        "CJ-JAR-AMB-5ML-BLK"
+      ],
+      "proposedArchetype": "low-wide",
+      "visualScaleBand": "low-wide",
+      "targetFillHeightRangePct": {
+        "min": 45,
+        "max": 68
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Cylinder",
+      "count": 382,
+      "bottleCollections": [
+        "Cylinder",
+        "Cylinder Swirl Collection",
+        "Spray Bottle"
+      ],
+      "capacitiesMl": [
+        3,
+        4,
+        5,
+        9,
+        25,
+        28,
+        30,
+        50,
+        100,
+        118,
+        227,
+        454
+      ],
+      "heightWithCapMm": {
+        "min": 54,
+        "max": 199
+      },
+      "heightWithoutCapMm": {
+        "min": 37,
+        "max": 195
+      },
+      "diameterMm": {
+        "min": 14,
+        "max": 42
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "N/A",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "Swirl",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "12mm",
+        "13-415",
+        "16mm",
+        "17-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-CYL-AMB-9ML-MRL-BKDT",
+        "GB-CYL-AMB-9ML-MRL-MCPR",
+        "GB-CYL-AMB-9ML-MRL-MGLD",
+        "GB-CYL-AMB-9ML-MRL-MSLV",
+        "GB-CYL-AMB-9ML-MRL-PKDT",
+        "GB-CYL-AMB-9ML-MRL-SBLK",
+        "GB-CYL-AMB-9ML-MRL-SGLD",
+        "GB-CYL-AMB-9ML-MRL-SLDT"
+      ],
+      "proposedArchetype": "mixed-cylinder",
+      "visualScaleBand": "sample/small/standard/large-cylinder",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Decorative",
+      "count": 12,
+      "bottleCollections": [
+        "Decorative"
+      ],
+      "capacitiesMl": [
+        3,
+        4,
+        5,
+        6,
+        10,
+        32,
+        35,
+        355
+      ],
+      "heightWithCapMm": {
+        "min": 53,
+        "max": 192
+      },
+      "heightWithoutCapMm": {
+        "min": 42,
+        "max": 80
+      },
+      "diameterMm": {
+        "min": 14,
+        "max": 92
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "14.3mm",
+        "17.52mm",
+        "8mm",
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-DEC-CLR-10ML-T",
+        "GB-DEC-CLR-355ML-T",
+        "GB-DEC-CLR-3ML-T",
+        "GB-DEC-CLR-5ML-T",
+        "GB-DEC-CLR-6ML-T",
+        "GB-DEC-FRS-4ML-GST-GLD-T",
+        "GB-DEC-FRS-4ML-GST-RED-T",
+        "GB-ETF-BLU-35ML"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Diamond",
+      "count": 45,
+      "bottleCollections": [
+        "Diamond"
+      ],
+      "capacitiesMl": [
+        60
+      ],
+      "heightWithCapMm": {
+        "min": 92,
+        "max": 115
+      },
+      "heightWithoutCapMm": {
+        "min": 88,
+        "max": 88
+      },
+      "diameterMm": {
+        "min": 39,
+        "max": 39
+      },
+      "applicators": [
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-DMD-CLR-60ML-ASP-BLK",
+        "GB-DMD-CLR-60ML-ASP-GLD",
+        "GB-DMD-CLR-60ML-ASP-IVGD",
+        "GB-DMD-CLR-60ML-ASP-IVSL",
+        "GB-DMD-CLR-60ML-ASP-LVN",
+        "GB-DMD-CLR-60ML-ASP-MSLV",
+        "GB-DMD-CLR-60ML-ASP-PNK",
+        "GB-DMD-CLR-60ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Diva",
+      "count": 225,
+      "bottleCollections": [
+        "Diva"
+      ],
+      "capacitiesMl": [
+        30,
+        46,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 85,
+        "max": 140
+      },
+      "heightWithoutCapMm": {
+        "min": 81,
+        "max": 113
+      },
+      "diameterMm": {
+        "min": 43,
+        "max": 64
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-DVA-CLR-100ML-ASP-BLK",
+        "GB-DVA-CLR-100ML-ASP-GLD",
+        "GB-DVA-CLR-100ML-ASP-IVGD",
+        "GB-DVA-CLR-100ML-ASP-IVSL",
+        "GB-DVA-CLR-100ML-ASP-LVN",
+        "GB-DVA-CLR-100ML-ASP-MSLV",
+        "GB-DVA-CLR-100ML-ASP-PNK",
+        "GB-DVA-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Dropper",
+      "count": 22,
+      "bottleCollections": [
+        "Dropper"
+      ],
+      "capacitiesMl": [
+        0,
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 39
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 21,
+        "max": 23
+      },
+      "applicators": [
+        "Dropper"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "17-415",
+        "18-400",
+        "18-415",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "CMP-DRP-AMB",
+        "CMP-DRP-BKGD-18400-66",
+        "CMP-DRP-BKGD-20400-76",
+        "CMP-DRP-BKGD-20400-90",
+        "CMP-DRP-BKSL-18400-66",
+        "CMP-DRP-BKSL-20400-76",
+        "CMP-DRP-BKSL-20400-90",
+        "CMP-DRP-BLK-18400-90MM"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Elegant",
+      "count": 290,
+      "bottleCollections": [
+        "Elegant"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        60,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 63,
+        "max": 137
+      },
+      "heightWithoutCapMm": {
+        "min": 61,
+        "max": 109
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 78
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "N/A",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-ELG-BLK-30ML-SPR-BLK",
+        "GB-ELG-CLR-100ML-ASP-BLK",
+        "GB-ELG-CLR-100ML-ASP-GLD",
+        "GB-ELG-CLR-100ML-ASP-IVGD",
+        "GB-ELG-CLR-100ML-ASP-IVSL",
+        "GB-ELG-CLR-100ML-ASP-LVN",
+        "GB-ELG-CLR-100ML-ASP-MSLV",
+        "GB-ELG-CLR-100ML-ASP-PNK"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 64,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Empire",
+      "count": 95,
+      "bottleCollections": [
+        "Empire"
+      ],
+      "capacitiesMl": [
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 93,
+        "max": 139
+      },
+      "heightWithoutCapMm": {
+        "min": 88,
+        "max": 107
+      },
+      "diameterMm": {
+        "min": 37,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-EMP-CLR-100ML-ASP-BLK",
+        "GB-EMP-CLR-100ML-ASP-GLD",
+        "GB-EMP-CLR-100ML-ASP-IVGD",
+        "GB-EMP-CLR-100ML-ASP-IVSL",
+        "GB-EMP-CLR-100ML-ASP-LVN",
+        "GB-EMP-CLR-100ML-ASP-MSLV",
+        "GB-EMP-CLR-100ML-ASP-PNK",
+        "GB-EMP-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "large-bottle",
+      "visualScaleBand": "empire-bottle",
+      "targetFillHeightRangePct": {
+        "min": 80,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Flair",
+      "count": 30,
+      "bottleCollections": [
+        "Flair"
+      ],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 58,
+        "max": 77
+      },
+      "heightWithoutCapMm": {
+        "min": 56,
+        "max": 56
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 30
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-FLR-CLR-15ML-BLK-S",
+        "GB-FLR-CLR-15ML-MRL-BKDT",
+        "GB-FLR-CLR-15ML-MRL-MCPR",
+        "GB-FLR-CLR-15ML-MRL-MGLD",
+        "GB-FLR-CLR-15ML-MRL-MSLV",
+        "GB-FLR-CLR-15ML-MRL-PKDT",
+        "GB-FLR-CLR-15ML-MRL-SBLK",
+        "GB-FLR-CLR-15ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Gift Bag",
+      "count": 21,
+      "bottleCollections": [
+        "Gift Bag"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 197
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 23.7
+      },
+      "applicators": [],
+      "colors": [
+        "Black",
+        "Blue",
+        "Gold",
+        "Green",
+        "Ivory",
+        "Lavender",
+        "Pink",
+        "Purple",
+        "Red",
+        "Silver"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-ORG-BLK-4X6",
+        "ACC-ORG-BLK-5X8",
+        "ACC-ORG-CHGN-4X6",
+        "ACC-ORG-CHGN-5X8",
+        "ACC-ORG-GLD-4X6",
+        "ACC-ORG-GLD-5X8",
+        "ACC-ORG-IVY-4X6",
+        "ACC-ORG-LTPR-5X8"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Gift Box",
+      "count": 15,
+      "bottleCollections": [
+        "Gift Box"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 50.8,
+        "max": 127
+      },
+      "heightWithoutCapMm": {
+        "min": 89,
+        "max": 150
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 127
+      },
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Blue",
+        "Clear",
+        "Green",
+        "Matte",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PKG-BOX-BWIN-BLU",
+        "PKG-BOX-BWIN-ERTH",
+        "PKG-BOX-BWIN-GRN",
+        "PKG-BOX-BWIN-ORNG",
+        "PKG-BOX-CWIN-BLU",
+        "PKG-BOX-CWIN-GNPR",
+        "PKG-BOX-CWIN-GNSH",
+        "PKG-BOX-CWIN-SLV"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Grace",
+      "count": 45,
+      "bottleCollections": [
+        "Grace"
+      ],
+      "capacitiesMl": [
+        55
+      ],
+      "heightWithCapMm": {
+        "min": 115,
+        "max": 141
+      },
+      "heightWithoutCapMm": {
+        "min": 90,
+        "max": 113
+      },
+      "diameterMm": {
+        "min": 55,
+        "max": 55
+      },
+      "applicators": [
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-GRC-CLR-55ML-ASP-BLK",
+        "GB-GRC-CLR-55ML-ASP-GLD",
+        "GB-GRC-CLR-55ML-ASP-IVGD",
+        "GB-GRC-CLR-55ML-ASP-IVSL",
+        "GB-GRC-CLR-55ML-ASP-LVN",
+        "GB-GRC-CLR-55ML-ASP-MSLV",
+        "GB-GRC-CLR-55ML-ASP-PNK",
+        "GB-GRC-CLR-55ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Lotion Bottle",
+      "count": 4,
+      "bottleCollections": [
+        "Lotion Bottle"
+      ],
+      "capacitiesMl": [
+        3,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 124,
+        "max": 124
+      },
+      "heightWithoutCapMm": {
+        "min": 118,
+        "max": 118
+      },
+      "diameterMm": {
+        "min": 33,
+        "max": 33
+      },
+      "applicators": [
+        "Lotion Pump"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18mm",
+        "Snap-On"
+      ],
+      "exampleSkus": [
+        "LB-LTB-CLR-30ML-SGLD-T",
+        "LB-LTB-CLR-30ML-SLV-T",
+        "LB-LTB-CLR-30ML-T",
+        "LB-LTB-CLR-3ML-CLR-T"
+      ],
+      "proposedArchetype": "large-bottle",
+      "visualScaleBand": "treatment-pump",
+      "targetFillHeightRangePct": {
+        "min": 80,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Lotion Pump",
+      "count": 10,
+      "bottleCollections": [
+        "Lotion Pump"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 41,
+        "max": 41
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 23,
+        "max": 23
+      },
+      "applicators": [],
+      "colors": [
+        "Black",
+        "Clear",
+        "Copper",
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-LPM-CPR-18-415",
+        "CMP-LPM-MGLD-18-415",
+        "CMP-LPM-MSLV-18-415-01",
+        "CMP-LPM-MSLV-18-415-02",
+        "CMP-LPM-MTCP-18-415-05",
+        "CMP-LPM-MTGD-18-415-07",
+        "CMP-LPM-MTSL-18-415-06",
+        "CMP-LPM-SBLK-18-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Packaging Supply",
+      "count": 12,
+      "bottleCollections": [
+        "Packaging Supply"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 304.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 76.2
+      },
+      "applicators": [],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-RCB-12X15",
+        "ACC-RCB-2X10",
+        "ACC-RCB-2X12",
+        "ACC-RCB-3X12",
+        "ACC-RCB-3X3-02",
+        "ACC-RCB-3X4",
+        "ACC-RCB-4X12",
+        "ACC-RCB-4X5"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Pillar",
+      "count": 4,
+      "bottleCollections": [
+        "Pillar",
+        "Roll-On Collection",
+        "Specialty & Decorative"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 70
+      },
+      "heightWithoutCapMm": {
+        "min": 57,
+        "max": 57
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 43.7
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "17-415"
+      ],
+      "exampleSkus": [
+        "GB-PIL-CLR-9ML-CAP-BLK",
+        "GB-PIL-CLR-9ML-MRL-BDOT",
+        "GB-PIL-CLR-9ML-RBL-BDOT",
+        "GB-PIL-CLR-9ML-SPR-MBLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Mixed decorative and roll-on collection evidence; requires product-truth review before resolver mapping."
+    },
+    {
+      "family": "Plastic Bottle",
+      "count": 4,
+      "bottleCollections": [
+        "Plastic Bottle"
+      ],
+      "capacitiesMl": [
+        10,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 85
+      },
+      "heightWithoutCapMm": {
+        "min": 68,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 23.7
+      },
+      "applicators": [
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "CMP-SPR-CLR-10ML",
+        "CMP-SPR-CLR-30ML",
+        "CMP-SPR-SLV-",
+        "OTH-PLS-CLR-30ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "plastic-bottle",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 78
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Rectangle",
+      "count": 63,
+      "bottleCollections": [
+        "Rectangle"
+      ],
+      "capacitiesMl": [
+        9,
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 53,
+        "max": 121
+      },
+      "heightWithoutCapMm": {
+        "min": 47,
+        "max": 101
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 23
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Glass Stopper",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-RCT-CLR-10ML-BLK-S-01",
+        "GB-RCT-CLR-10ML-BLK-S-02",
+        "GB-RCT-CLR-10ML-GLD-T-01",
+        "GB-RCT-CLR-10ML-GLD-T-02",
+        "GB-RCT-CLR-10ML-MRL",
+        "GB-RCT-CLR-10ML-MRL-BKDT-01",
+        "GB-RCT-CLR-10ML-MRL-BKDT-02",
+        "GB-RCT-CLR-10ML-MRL-MCPR-01"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "rectangular-upright",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 80
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Roll-On Cap",
+      "count": 35,
+      "bottleCollections": [
+        "Roll-On Cap"
+      ],
+      "capacitiesMl": [
+        0,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 10,
+        "max": 35
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 17,
+        "max": 23
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Black",
+        "Copper",
+        "Gold",
+        "Pink",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "17-415",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-BLK-S-13-415",
+        "CMP-CAP-SGLD-13-415-01",
+        "CMP-CAP-SGLD-15-415",
+        "CMP-CAP-SLV-13-415-01",
+        "CMP-CAP-SSLV-15-415",
+        "CMP-CAP-WHT-S-13-415",
+        "CMP-LPM-BLK-17-415",
+        "CMP-LPM-MSLV-17-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Round",
+      "count": 186,
+      "bottleCollections": [
+        "Round"
+      ],
+      "capacitiesMl": [
+        78,
+        128
+      ],
+      "heightWithCapMm": {
+        "min": 77,
+        "max": 135
+      },
+      "heightWithoutCapMm": {
+        "min": 73,
+        "max": 110
+      },
+      "diameterMm": {
+        "min": 59,
+        "max": 85
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-RND-CLR-128ML-ASP-BLK",
+        "GB-RND-CLR-128ML-ASP-GLD",
+        "GB-RND-CLR-128ML-ASP-IVGD",
+        "GB-RND-CLR-128ML-ASP-IVSL",
+        "GB-RND-CLR-128ML-ASP-LVN",
+        "GB-RND-CLR-128ML-ASP-MSLV",
+        "GB-RND-CLR-128ML-ASP-PNK",
+        "GB-RND-CLR-128ML-ASP-RED"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Royal",
+      "count": 30,
+      "bottleCollections": [
+        "Royal"
+      ],
+      "capacitiesMl": [
+        13,
+        14
+      ],
+      "heightWithCapMm": {
+        "min": 58,
+        "max": 92
+      },
+      "heightWithoutCapMm": {
+        "min": 56,
+        "max": 64
+      },
+      "diameterMm": {
+        "min": 16.8,
+        "max": 43.7
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "11mm",
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-RYL-CLR-13ML-BLK-S",
+        "GB-RYL-CLR-13ML-MRL-BKDT",
+        "GB-RYL-CLR-13ML-MRL-MCPR",
+        "GB-RYL-CLR-13ML-MRL-MGLD",
+        "GB-RYL-CLR-13ML-MRL-MSLV",
+        "GB-RYL-CLR-13ML-MRL-PKDT",
+        "GB-RYL-CLR-13ML-MRL-SBLK",
+        "GB-RYL-CLR-13ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Sleek",
+      "count": 192,
+      "bottleCollections": [
+        "Sleek"
+      ],
+      "capacitiesMl": [
+        5,
+        8,
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 47,
+        "max": 199
+      },
+      "heightWithoutCapMm": {
+        "min": 45,
+        "max": 149
+      },
+      "diameterMm": {
+        "min": 18,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-SLK-CLR-100ML-ASP-BLK",
+        "GB-SLK-CLR-100ML-ASP-GLD",
+        "GB-SLK-CLR-100ML-ASP-IVGD",
+        "GB-SLK-CLR-100ML-ASP-IVSL",
+        "GB-SLK-CLR-100ML-ASP-LVN",
+        "GB-SLK-CLR-100ML-ASP-MSLV",
+        "GB-SLK-CLR-100ML-ASP-PNK",
+        "GB-SLK-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Slim",
+      "count": 129,
+      "bottleCollections": [
+        "Slim"
+      ],
+      "capacitiesMl": [
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 91,
+        "max": 197
+      },
+      "heightWithoutCapMm": {
+        "min": 85,
+        "max": 154
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 72
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-SLM-CLR-100ML-ASP-BLK",
+        "GB-SLM-CLR-100ML-ASP-GLD",
+        "GB-SLM-CLR-100ML-ASP-IVGD",
+        "GB-SLM-CLR-100ML-ASP-IVSL",
+        "GB-SLM-CLR-100ML-ASP-LVN",
+        "GB-SLM-CLR-100ML-ASP-MSLV",
+        "GB-SLM-CLR-100ML-ASP-PNK",
+        "GB-SLM-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Sprayer",
+      "count": 64,
+      "bottleCollections": [
+        "Sprayer"
+      ],
+      "capacitiesMl": [
+        0,
+        5
+      ],
+      "heightWithCapMm": {
+        "min": 19,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 65
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "N/A"
+      ],
+      "colors": [
+        "Black",
+        "Gold",
+        "Matte Copper",
+        "Matte Gold",
+        "Matte Silver",
+        "Pink",
+        "Red",
+        "Shiny",
+        "Shiny Black",
+        "Shiny Gold",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "17-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-PNK-18-415",
+        "CMP-SPR-BKSL-18-415-02",
+        "CMP-SPR-BKSLWH-18-415-02",
+        "CMP-SPR-BLK-15-415",
+        "CMP-SPR-BLK-17-415-01",
+        "CMP-SPR-BLK-18-415-02",
+        "CMP-SPR-CLR-17-415",
+        "CMP-SPR-GDIV-18-415-02"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Square",
+      "count": 29,
+      "bottleCollections": [
+        "Square"
+      ],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 55,
+        "max": 73
+      },
+      "heightWithoutCapMm": {
+        "min": 52,
+        "max": 52
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 30
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-SQR-CLR-15ML-MRL-BKDT",
+        "GB-SQR-CLR-15ML-MRL-MCPR",
+        "GB-SQR-CLR-15ML-MRL-MGLD",
+        "GB-SQR-CLR-15ML-MRL-MSLV",
+        "GB-SQR-CLR-15ML-MRL-PKDT",
+        "GB-SQR-CLR-15ML-MRL-SBLK",
+        "GB-SQR-CLR-15ML-MRL-SGLD",
+        "GB-SQR-CLR-15ML-MRL-SLDT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Tall Cylinder",
+      "count": 1,
+      "bottleCollections": [
+        "Tall Cylinder Collection"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 109,
+        "max": 109
+      },
+      "heightWithoutCapMm": {
+        "min": 106,
+        "max": 106
+      },
+      "diameterMm": {
+        "min": 18,
+        "max": 18
+      },
+      "applicators": [
+        "Cap/Closure"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GBTallCyl9WhtSht"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "tall-cylinder-review",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 78
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Single-row tall-cylinder family conflicts with current measured-height resolver behavior; requires explicit resolver test."
+    },
+    {
+      "family": "Teardrop",
+      "count": 3,
+      "bottleCollections": [
+        "Teardrop"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 68,
+        "max": 68
+      },
+      "heightWithoutCapMm": {
+        "min": 43,
+        "max": 43
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 20
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-TRD-BLU-9ML",
+        "GB-TRD-CLR-9ML",
+        "GB-TRD-GRN-9ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Tool",
+      "count": 3,
+      "bottleCollections": [
+        "Tool"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 35,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 50.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 25
+      },
+      "applicators": [],
+      "colors": [
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-FNL-02",
+        "ACC-FNL-GLD",
+        "ACC-FNL-SLV"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Tulip",
+      "count": 60,
+      "bottleCollections": [
+        "Specialty & Decorative",
+        "Tulip"
+      ],
+      "capacitiesMl": [
+        5,
+        6
+      ],
+      "heightWithCapMm": {
+        "min": 47,
+        "max": 73
+      },
+      "heightWithoutCapMm": {
+        "min": 45,
+        "max": 61
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 25.4
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "N/A",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Amber",
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-CYL-AMB-5ML-GLD-T",
+        "GB-CYL-AMB-5ML-MRL-BKDT",
+        "GB-CYL-AMB-5ML-MRL-MCPR",
+        "GB-CYL-AMB-5ML-MRL-MGLD",
+        "GB-CYL-AMB-5ML-MRL-MSLV",
+        "GB-CYL-AMB-5ML-MRL-PKDT",
+        "GB-CYL-AMB-5ML-MRL-SBLK",
+        "GB-CYL-AMB-5ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Unknown",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": null,
+      "heightWithoutCapMm": {
+        "min": 102,
+        "max": 102
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PKG-BOX-BRN-4X4X4"
+      ],
+      "proposedArchetype": "unknown",
+      "visualScaleBand": "blocked-unknown",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "blocked_unknown",
+      "bottleScaleStatus": "blocked",
+      "enhancementStatus": "blocked",
+      "status": "blocked",
+      "statusReason": "Missing or unknown family; requires product-truth review before generation."
+    },
+    {
+      "family": "Vial",
+      "count": 26,
+      "bottleCollections": [
+        "Vial"
+      ],
+      "capacitiesMl": [
+        1,
+        2,
+        3,
+        4,
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 75
+      },
+      "heightWithoutCapMm": {
+        "min": 22,
+        "max": 79.4
+      },
+      "diameterMm": {
+        "min": 8,
+        "max": 22
+      },
+      "applicators": [
+        "Dropper",
+        "Glass Rod"
+      ],
+      "colors": [
+        "Amber",
+        "Blue",
+        "Clear",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "13-425",
+        "18-400",
+        "8-425",
+        "Plug"
+      ],
+      "exampleSkus": [
+        "GB-CYL-CLR-9ML-S-01",
+        "GB-CYL-CLR-9ML-T-01",
+        "GB-GRN-GRN-20ML",
+        "GB-VIA-AMB-1.5ML-WHT-S",
+        "GB-VIA-AMB-1ML-WHT-T",
+        "GB-VIA-BLU-3ML-BLK-S",
+        "GB-VIA-CLR-1ML",
+        "GB-VIA-CLR-1ML-BLK-T"
+      ],
+      "proposedArchetype": "sample-vial",
+      "visualScaleBand": "sample-vial",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 60
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    }
+  ],
+  "collectionRows": [
+    {
+      "family": "Aluminum Bottle",
+      "count": 8,
+      "bottleCollections": [
+        "Aluminum Bottle"
+      ],
+      "capacitiesMl": [
+        65,
+        100,
+        120,
+        250,
+        500
+      ],
+      "heightWithCapMm": {
+        "min": 127,
+        "max": 186
+      },
+      "heightWithoutCapMm": {
+        "min": 94,
+        "max": 178
+      },
+      "diameterMm": {
+        "min": 36,
+        "max": 74
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Lotion Pump"
+      ],
+      "colors": [
+        "Clear",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "20-410"
+      ],
+      "exampleSkus": [
+        "AB-ALU-CLR-100ML-SPR-BLK",
+        "AB-ALU-CLR-120ML-LPM-BLK",
+        "AB-ALU-CLR-120ML-LPM-WHT",
+        "AB-ALU-CLR-250ML-SPR-BLK",
+        "AB-ALU-CLR-500ML",
+        "AB-ALU-CLR-65ML-LPM-BLK",
+        "AB-CYL-WHT-65ML-LPM-WHT",
+        "BB-ALU250SPRYBL"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "aluminum-bottle",
+      "targetFillHeightRangePct": {
+        "min": 88,
+        "max": 92
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Apothecary",
+      "count": 5,
+      "bottleCollections": [
+        "Apothecary"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        118
+      ],
+      "heightWithCapMm": {
+        "min": 77.3,
+        "max": 98
+      },
+      "heightWithoutCapMm": {
+        "min": 52.2,
+        "max": 58
+      },
+      "diameterMm": {
+        "min": 27.4,
+        "max": 37
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-APT-BLU-15ML-BLU-T",
+        "GB-APT-BLU-30ML-BLU-T",
+        "GB-APT-CLR-30ML-T",
+        "GB-APT-GRN-30ML-GRN-T",
+        "GB-DEC-CLR-118ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Atomizer",
+      "count": 25,
+      "bottleCollections": [
+        "Atomizer Collection"
+      ],
+      "capacitiesMl": [
+        5,
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 81,
+        "max": 104
+      },
+      "heightWithoutCapMm": {
+        "min": 76,
+        "max": 92
+      },
+      "diameterMm": {
+        "min": 15,
+        "max": 23
+      },
+      "applicators": [
+        "Atomizer"
+      ],
+      "colors": [
+        "Black",
+        "Clear",
+        "Cobalt Blue",
+        "Green",
+        "Pink"
+      ],
+      "neckThreadSizes": [
+        "10mm",
+        "13-415",
+        "13mm",
+        "17mm"
+      ],
+      "exampleSkus": [
+        "GB-CYL-BLK-10ML-ATM-BLK-01",
+        "GB-CYL-BLK-10ML-ATM-BLK-02",
+        "GB-CYL-BLK-5ML-ATM-BLK",
+        "GB-CYL-BLK-5ML-ATM-BLK-01",
+        "GB-CYL-BLK-5ML-ATM-BLK-02",
+        "GB-CYL-BLU-10ML-ATM-BLU",
+        "GB-CYL-BLU-5ML-ATM-BLU",
+        "GB-CYL-CLR-10ML-ATM-GLD"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "atomizer",
+      "targetFillHeightRangePct": {
+        "min": 76,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Bell",
+      "count": 2,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 66,
+        "max": 66
+      },
+      "heightWithoutCapMm": {
+        "min": 55,
+        "max": 55
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-BLL-CLR-10ML-MRL-BDOT",
+        "GB-BLL-CLR-10ML-RBL-BDOT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Bell",
+      "count": 1,
+      "bottleCollections": [
+        "Bell"
+      ],
+      "capacitiesMl": [
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 20
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 22,
+        "max": 22
+      },
+      "applicators": [
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-BEL-CLR-10ML-SPR-SBLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Bell",
+      "count": 3,
+      "bottleCollections": [
+        "Bell Collection"
+      ],
+      "capacitiesMl": [
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 59,
+        "max": 66
+      },
+      "heightWithoutCapMm": {
+        "min": 55,
+        "max": 55
+      },
+      "diameterMm": {
+        "min": 27,
+        "max": 27
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-BEL-CLR-10ML-MRL-BLDOT",
+        "GB-BEL-CLR-10ML-ROL-BLDOT",
+        "GB-BEL-CLR-10ML-SHT-SBLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Boston Round",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 91,
+        "max": 91
+      },
+      "heightWithoutCapMm": {
+        "min": 68,
+        "max": 68
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-400"
+      ],
+      "exampleSkus": [
+        "GB-BSR-CLR-15ML-DRP-BLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "boston-round",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Boston Round",
+      "count": 122,
+      "bottleCollections": [
+        "Boston Round"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        60
+      ],
+      "heightWithCapMm": {
+        "min": 72,
+        "max": 117
+      },
+      "heightWithoutCapMm": {
+        "min": 60,
+        "max": 94
+      },
+      "diameterMm": {
+        "min": 25,
+        "max": 39
+      },
+      "applicators": [
+        "Dropper",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue"
+      ],
+      "neckThreadSizes": [
+        "18-400",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "GB-BSR-AMB-15ML-BLK-S",
+        "GB-BSR-AMB-15ML-BLK-T-01",
+        "GB-BSR-AMB-15ML-BLK-T-02",
+        "GB-BSR-AMB-15ML-BLK-T-03",
+        "GB-BSR-AMB-15ML-WHT-T-01",
+        "GB-BSR-AMB-15ML-WHT-T-02",
+        "GB-BSR-AMB-15ML-WHT-T-03",
+        "GB-BSR-AMB-30ML-BLK-S"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "boston-round",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Cap/Closure",
+      "count": 19,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0,
+        5,
+        30,
+        40
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 23.7
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "N/A"
+      ],
+      "colors": [
+        "Black",
+        "Blue",
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "13-425",
+        "22-400",
+        "24-400",
+        "Press-Fit",
+        "Specialty"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-13-415",
+        "CMP-CAP-BLK-13-415-01",
+        "CMP-CAP-BLK-13-415-02",
+        "CMP-CAP-PHN-24400-BLK",
+        "CMP-CAP-SGLD-13-415-02",
+        "CMP-CAP-SGLD-13-415-03",
+        "CMP-CAP-SLV-13-415-02",
+        "CMP-CAP-SLV-13-415-03"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Cap/Closure",
+      "count": 20,
+      "bottleCollections": [
+        "Cap/Closure"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 9,
+        "max": 45
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 11,
+        "max": 25
+      },
+      "applicators": [
+        "Cap/Closure"
+      ],
+      "colors": [
+        "Black",
+        "Brown",
+        "Gold",
+        "Ivory",
+        "Pink",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "18-400",
+        "18-415",
+        "20-400",
+        "8-425"
+      ],
+      "exampleSkus": [
+        "CMP-APP-BLK-18-400",
+        "CMP-CAP-BLK-18-400",
+        "CMP-CAP-BLK-18415-LTR",
+        "CMP-CAP-BLK-20-400-1OZ",
+        "CMP-CAP-BLK-20-400-2OZ",
+        "CMP-CAP-BLK-8-425",
+        "CMP-CAP-BLK-8425-T",
+        "CMP-CAP-BRN-18415-LTR"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Cap/Component",
+      "count": 2,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 17,
+        "max": 27
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "17-415"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-BDOT-17-415",
+        "CMP-CAP-SBLK-13-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Circle",
+      "count": 209,
+      "bottleCollections": [
+        "Circle"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 62,
+        "max": 136
+      },
+      "heightWithoutCapMm": {
+        "min": 60,
+        "max": 105
+      },
+      "diameterMm": {
+        "min": 35,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "18-400",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-CIR-BLK-30ML-SPR-BLK",
+        "GB-CIR-CLR-100ML-ASP-BLK",
+        "GB-CIR-CLR-100ML-ASP-GLD",
+        "GB-CIR-CLR-100ML-ASP-IVGD",
+        "GB-CIR-CLR-100ML-ASP-IVSL",
+        "GB-CIR-CLR-100ML-ASP-LVN",
+        "GB-CIR-CLR-100ML-ASP-MSLV",
+        "GB-CIR-CLR-100ML-ASP-PNK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Cream Jar",
+      "count": 19,
+      "bottleCollections": [
+        "Cream Jar"
+      ],
+      "capacitiesMl": [
+        3,
+        5,
+        15,
+        20,
+        30,
+        40,
+        60,
+        63
+      ],
+      "heightWithCapMm": {
+        "min": 18,
+        "max": 57
+      },
+      "heightWithoutCapMm": {
+        "min": 16,
+        "max": 51
+      },
+      "diameterMm": {
+        "min": 25,
+        "max": 59
+      },
+      "applicators": [],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "20mm",
+        "27mm",
+        "37mm",
+        "40mm",
+        "45mm",
+        "48/400",
+        "58mm",
+        "PRESS-FIT"
+      ],
+      "exampleSkus": [
+        "BB-CREAMJARAMB5MLSLCAP",
+        "CJ-JAR-20ML-WHT",
+        "CJ-JAR-60ML-WHT",
+        "CJ-JAR-AMB-30ML-BLK",
+        "CJ-JAR-AMB-30ML-SLV",
+        "CJ-JAR-AMB-40ML-01",
+        "CJ-JAR-AMB-40ML-02",
+        "CJ-JAR-AMB-5ML-BLK"
+      ],
+      "proposedArchetype": "low-wide",
+      "visualScaleBand": "low-wide",
+      "targetFillHeightRangePct": {
+        "min": 45,
+        "max": 68
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Cylinder",
+      "count": 3,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        118,
+        227,
+        454
+      ],
+      "heightWithCapMm": {
+        "min": 124,
+        "max": 194
+      },
+      "heightWithoutCapMm": {
+        "min": 116,
+        "max": 195
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PB-CYL-227ML-WFLP",
+        "PB-CYL-454ML-WFLP",
+        "PB-CYL-CLR-118ML-WFLP"
+      ],
+      "proposedArchetype": "mixed-cylinder",
+      "visualScaleBand": "sample/small/standard/large-cylinder",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Cylinder",
+      "count": 371,
+      "bottleCollections": [
+        "Cylinder"
+      ],
+      "capacitiesMl": [
+        5,
+        9,
+        25,
+        28,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 55,
+        "max": 199
+      },
+      "heightWithoutCapMm": {
+        "min": 53,
+        "max": 154
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 37
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Amber",
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "Swirl",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "16mm",
+        "17-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-CYL-AMB-9ML-MRL-BKDT",
+        "GB-CYL-AMB-9ML-MRL-MCPR",
+        "GB-CYL-AMB-9ML-MRL-MGLD",
+        "GB-CYL-AMB-9ML-MRL-MSLV",
+        "GB-CYL-AMB-9ML-MRL-PKDT",
+        "GB-CYL-AMB-9ML-MRL-SBLK",
+        "GB-CYL-AMB-9ML-MRL-SGLD",
+        "GB-CYL-AMB-9ML-MRL-SLDT"
+      ],
+      "proposedArchetype": "mixed-cylinder",
+      "visualScaleBand": "sample/small/standard/large-cylinder",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Cylinder",
+      "count": 2,
+      "bottleCollections": [
+        "Cylinder Swirl Collection"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 75,
+        "max": 87
+      },
+      "heightWithoutCapMm": {
+        "min": 63,
+        "max": 74
+      },
+      "diameterMm": {
+        "min": 21,
+        "max": 21
+      },
+      "applicators": [
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "17-415"
+      ],
+      "exampleSkus": [
+        "GBCylSwrl9MtlRollWht",
+        "GBCylSwrl9RollWht"
+      ],
+      "proposedArchetype": "mixed-cylinder",
+      "visualScaleBand": "sample/small/standard/large-cylinder",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Cylinder",
+      "count": 6,
+      "bottleCollections": [
+        "Spray Bottle"
+      ],
+      "capacitiesMl": [
+        3,
+        4,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 54,
+        "max": 70.7
+      },
+      "heightWithoutCapMm": {
+        "min": 37,
+        "max": 50.8
+      },
+      "diameterMm": {
+        "min": 14,
+        "max": 42
+      },
+      "applicators": [
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "12mm",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-SPR-CLR-30ML-GLD",
+        "GB-SPR-CLR-30ML-SLV",
+        "GB-SPR-CLR-3ML-BLK",
+        "GB-SPR-CLR-3ML-WHT",
+        "GB-SPR-CLR-4ML-BLK",
+        "GB-SPR-CLR-4ML-WHT"
+      ],
+      "proposedArchetype": "mixed-cylinder",
+      "visualScaleBand": "sample/small/standard/large-cylinder",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Decorative",
+      "count": 12,
+      "bottleCollections": [
+        "Decorative"
+      ],
+      "capacitiesMl": [
+        3,
+        4,
+        5,
+        6,
+        10,
+        32,
+        35,
+        355
+      ],
+      "heightWithCapMm": {
+        "min": 53,
+        "max": 192
+      },
+      "heightWithoutCapMm": {
+        "min": 42,
+        "max": 80
+      },
+      "diameterMm": {
+        "min": 14,
+        "max": 92
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Frosted",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "14.3mm",
+        "17.52mm",
+        "8mm",
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-DEC-CLR-10ML-T",
+        "GB-DEC-CLR-355ML-T",
+        "GB-DEC-CLR-3ML-T",
+        "GB-DEC-CLR-5ML-T",
+        "GB-DEC-CLR-6ML-T",
+        "GB-DEC-FRS-4ML-GST-GLD-T",
+        "GB-DEC-FRS-4ML-GST-RED-T",
+        "GB-ETF-BLU-35ML"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Diamond",
+      "count": 45,
+      "bottleCollections": [
+        "Diamond"
+      ],
+      "capacitiesMl": [
+        60
+      ],
+      "heightWithCapMm": {
+        "min": 92,
+        "max": 115
+      },
+      "heightWithoutCapMm": {
+        "min": 88,
+        "max": 88
+      },
+      "diameterMm": {
+        "min": 39,
+        "max": 39
+      },
+      "applicators": [
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-DMD-CLR-60ML-ASP-BLK",
+        "GB-DMD-CLR-60ML-ASP-GLD",
+        "GB-DMD-CLR-60ML-ASP-IVGD",
+        "GB-DMD-CLR-60ML-ASP-IVSL",
+        "GB-DMD-CLR-60ML-ASP-LVN",
+        "GB-DMD-CLR-60ML-ASP-MSLV",
+        "GB-DMD-CLR-60ML-ASP-PNK",
+        "GB-DMD-CLR-60ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Diva",
+      "count": 225,
+      "bottleCollections": [
+        "Diva"
+      ],
+      "capacitiesMl": [
+        30,
+        46,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 85,
+        "max": 140
+      },
+      "heightWithoutCapMm": {
+        "min": 81,
+        "max": 113
+      },
+      "diameterMm": {
+        "min": 43,
+        "max": 64
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-DVA-CLR-100ML-ASP-BLK",
+        "GB-DVA-CLR-100ML-ASP-GLD",
+        "GB-DVA-CLR-100ML-ASP-IVGD",
+        "GB-DVA-CLR-100ML-ASP-IVSL",
+        "GB-DVA-CLR-100ML-ASP-LVN",
+        "GB-DVA-CLR-100ML-ASP-MSLV",
+        "GB-DVA-CLR-100ML-ASP-PNK",
+        "GB-DVA-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Dropper",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 20
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 22,
+        "max": 22
+      },
+      "applicators": [
+        "Dropper"
+      ],
+      "colors": [],
+      "neckThreadSizes": [
+        "17-415"
+      ],
+      "exampleSkus": [
+        "CMP-DRP-AMB"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Dropper",
+      "count": 21,
+      "bottleCollections": [
+        "Dropper"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 32,
+        "max": 39
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 21,
+        "max": 23
+      },
+      "applicators": [
+        "Dropper"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "18-400",
+        "18-415",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "CMP-DRP-BKGD-18400-66",
+        "CMP-DRP-BKGD-20400-76",
+        "CMP-DRP-BKGD-20400-90",
+        "CMP-DRP-BKSL-18400-66",
+        "CMP-DRP-BKSL-20400-76",
+        "CMP-DRP-BKSL-20400-90",
+        "CMP-DRP-BLK-18400-90MM",
+        "CMP-DRP-BLK-20400-76MM-01"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Elegant",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 66,
+        "max": 66
+      },
+      "heightWithoutCapMm": {
+        "min": 61,
+        "max": 61
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-ELG-FRS-15ML-CAP-SBLK"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 64,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Elegant",
+      "count": 289,
+      "bottleCollections": [
+        "Elegant"
+      ],
+      "capacitiesMl": [
+        15,
+        30,
+        60,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 63,
+        "max": 137
+      },
+      "heightWithoutCapMm": {
+        "min": 61,
+        "max": 109
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 78
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-ELG-BLK-30ML-SPR-BLK",
+        "GB-ELG-CLR-100ML-ASP-BLK",
+        "GB-ELG-CLR-100ML-ASP-GLD",
+        "GB-ELG-CLR-100ML-ASP-IVGD",
+        "GB-ELG-CLR-100ML-ASP-IVSL",
+        "GB-ELG-CLR-100ML-ASP-LVN",
+        "GB-ELG-CLR-100ML-ASP-MSLV",
+        "GB-ELG-CLR-100ML-ASP-PNK"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 64,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Empire",
+      "count": 95,
+      "bottleCollections": [
+        "Empire"
+      ],
+      "capacitiesMl": [
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 93,
+        "max": 139
+      },
+      "heightWithoutCapMm": {
+        "min": 88,
+        "max": 107
+      },
+      "diameterMm": {
+        "min": 37,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-EMP-CLR-100ML-ASP-BLK",
+        "GB-EMP-CLR-100ML-ASP-GLD",
+        "GB-EMP-CLR-100ML-ASP-IVGD",
+        "GB-EMP-CLR-100ML-ASP-IVSL",
+        "GB-EMP-CLR-100ML-ASP-LVN",
+        "GB-EMP-CLR-100ML-ASP-MSLV",
+        "GB-EMP-CLR-100ML-ASP-PNK",
+        "GB-EMP-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "large-bottle",
+      "visualScaleBand": "empire-bottle",
+      "targetFillHeightRangePct": {
+        "min": 80,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Flair",
+      "count": 30,
+      "bottleCollections": [
+        "Flair"
+      ],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 58,
+        "max": 77
+      },
+      "heightWithoutCapMm": {
+        "min": 56,
+        "max": 56
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 30
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-FLR-CLR-15ML-BLK-S",
+        "GB-FLR-CLR-15ML-MRL-BKDT",
+        "GB-FLR-CLR-15ML-MRL-MCPR",
+        "GB-FLR-CLR-15ML-MRL-MGLD",
+        "GB-FLR-CLR-15ML-MRL-MSLV",
+        "GB-FLR-CLR-15ML-MRL-PKDT",
+        "GB-FLR-CLR-15ML-MRL-SBLK",
+        "GB-FLR-CLR-15ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Gift Bag",
+      "count": 21,
+      "bottleCollections": [
+        "Gift Bag"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 197
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 23.7
+      },
+      "applicators": [],
+      "colors": [
+        "Black",
+        "Blue",
+        "Gold",
+        "Green",
+        "Ivory",
+        "Lavender",
+        "Pink",
+        "Purple",
+        "Red",
+        "Silver"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-ORG-BLK-4X6",
+        "ACC-ORG-BLK-5X8",
+        "ACC-ORG-CHGN-4X6",
+        "ACC-ORG-CHGN-5X8",
+        "ACC-ORG-GLD-4X6",
+        "ACC-ORG-GLD-5X8",
+        "ACC-ORG-IVY-4X6",
+        "ACC-ORG-LTPR-5X8"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Gift Box",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": null,
+      "heightWithoutCapMm": {
+        "min": 89,
+        "max": 89
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PKG-BOX-WHT-WINDOW-SM"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Gift Box",
+      "count": 14,
+      "bottleCollections": [
+        "Gift Box"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 50.8,
+        "max": 127
+      },
+      "heightWithoutCapMm": {
+        "min": 89,
+        "max": 150
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 127
+      },
+      "applicators": [],
+      "colors": [
+        "Blue",
+        "Clear",
+        "Green",
+        "Matte",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PKG-BOX-BWIN-BLU",
+        "PKG-BOX-BWIN-ERTH",
+        "PKG-BOX-BWIN-GRN",
+        "PKG-BOX-BWIN-ORNG",
+        "PKG-BOX-CWIN-BLU",
+        "PKG-BOX-CWIN-GNPR",
+        "PKG-BOX-CWIN-GNSH",
+        "PKG-BOX-CWIN-SLV"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Grace",
+      "count": 45,
+      "bottleCollections": [
+        "Grace"
+      ],
+      "capacitiesMl": [
+        55
+      ],
+      "heightWithCapMm": {
+        "min": 115,
+        "max": 141
+      },
+      "heightWithoutCapMm": {
+        "min": 90,
+        "max": 113
+      },
+      "diameterMm": {
+        "min": 55,
+        "max": 55
+      },
+      "applicators": [
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-GRC-CLR-55ML-ASP-BLK",
+        "GB-GRC-CLR-55ML-ASP-GLD",
+        "GB-GRC-CLR-55ML-ASP-IVGD",
+        "GB-GRC-CLR-55ML-ASP-IVSL",
+        "GB-GRC-CLR-55ML-ASP-LVN",
+        "GB-GRC-CLR-55ML-ASP-MSLV",
+        "GB-GRC-CLR-55ML-ASP-PNK",
+        "GB-GRC-CLR-55ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Lotion Bottle",
+      "count": 4,
+      "bottleCollections": [
+        "Lotion Bottle"
+      ],
+      "capacitiesMl": [
+        3,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 124,
+        "max": 124
+      },
+      "heightWithoutCapMm": {
+        "min": 118,
+        "max": 118
+      },
+      "diameterMm": {
+        "min": 33,
+        "max": 33
+      },
+      "applicators": [
+        "Lotion Pump"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18mm",
+        "Snap-On"
+      ],
+      "exampleSkus": [
+        "LB-LTB-CLR-30ML-SGLD-T",
+        "LB-LTB-CLR-30ML-SLV-T",
+        "LB-LTB-CLR-30ML-T",
+        "LB-LTB-CLR-3ML-CLR-T"
+      ],
+      "proposedArchetype": "large-bottle",
+      "visualScaleBand": "treatment-pump",
+      "targetFillHeightRangePct": {
+        "min": 80,
+        "max": 84
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Lotion Pump",
+      "count": 3,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 41,
+        "max": 41
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 23,
+        "max": 23
+      },
+      "applicators": [],
+      "colors": [
+        "Copper",
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-LPM-CPR-18-415",
+        "CMP-LPM-MGLD-18-415",
+        "CMP-LPM-MSLV-18-415-01"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Lotion Pump",
+      "count": 7,
+      "bottleCollections": [
+        "Lotion Pump"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 41,
+        "max": 41
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 23,
+        "max": 23
+      },
+      "applicators": [],
+      "colors": [
+        "Black",
+        "Clear",
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-LPM-MSLV-18-415-02",
+        "CMP-LPM-MTCP-18-415-05",
+        "CMP-LPM-MTGD-18-415-07",
+        "CMP-LPM-MTSL-18-415-06",
+        "CMP-LPM-SBLK-18-415",
+        "CMP-LPM-SGLD-18-415",
+        "CMP-LPM-SSLV-18-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Packaging Supply",
+      "count": 12,
+      "bottleCollections": [
+        "Packaging Supply"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 304.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 76.2
+      },
+      "applicators": [],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-RCB-12X15",
+        "ACC-RCB-2X10",
+        "ACC-RCB-2X12",
+        "ACC-RCB-3X12",
+        "ACC-RCB-3X3-02",
+        "ACC-RCB-3X4",
+        "ACC-RCB-4X12",
+        "ACC-RCB-4X5"
+      ],
+      "proposedArchetype": "packaging",
+      "visualScaleBand": "packaging-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "packaging_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Packaging family; exclude from bottle scale, but keep eligible for packaging enhancement."
+    },
+    {
+      "family": "Pillar",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 70,
+        "max": 70
+      },
+      "heightWithoutCapMm": {
+        "min": 57,
+        "max": 57
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-PIL-CLR-9ML-MRL-BDOT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Mixed decorative and roll-on collection evidence; requires product-truth review before resolver mapping."
+    },
+    {
+      "family": "Pillar",
+      "count": 1,
+      "bottleCollections": [
+        "Pillar"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 20
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 22,
+        "max": 22
+      },
+      "applicators": [
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "17-415"
+      ],
+      "exampleSkus": [
+        "GB-PIL-CLR-9ML-SPR-MBLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Mixed decorative and roll-on collection evidence; requires product-truth review before resolver mapping."
+    },
+    {
+      "family": "Pillar",
+      "count": 1,
+      "bottleCollections": [
+        "Roll-On Collection"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 70,
+        "max": 70
+      },
+      "heightWithoutCapMm": {
+        "min": 57,
+        "max": 57
+      },
+      "diameterMm": {
+        "min": 43.7,
+        "max": 43.7
+      },
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-PIL-CLR-9ML-RBL-BDOT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Mixed decorative and roll-on collection evidence; requires product-truth review before resolver mapping."
+    },
+    {
+      "family": "Pillar",
+      "count": 1,
+      "bottleCollections": [
+        "Specialty & Decorative"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 69,
+        "max": 69
+      },
+      "heightWithoutCapMm": {
+        "min": 57,
+        "max": 57
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 20
+      },
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-PIL-CLR-9ML-CAP-BLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Mixed decorative and roll-on collection evidence; requires product-truth review before resolver mapping."
+    },
+    {
+      "family": "Plastic Bottle",
+      "count": 4,
+      "bottleCollections": [
+        "Plastic Bottle"
+      ],
+      "capacitiesMl": [
+        10,
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 74.8,
+        "max": 85
+      },
+      "heightWithoutCapMm": {
+        "min": 68,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 23.7
+      },
+      "applicators": [
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "CMP-SPR-CLR-10ML",
+        "CMP-SPR-CLR-30ML",
+        "CMP-SPR-SLV-",
+        "OTH-PLS-CLR-30ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "plastic-bottle",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 78
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Rectangle",
+      "count": 63,
+      "bottleCollections": [
+        "Rectangle"
+      ],
+      "capacitiesMl": [
+        9,
+        10
+      ],
+      "heightWithCapMm": {
+        "min": 53,
+        "max": 121
+      },
+      "heightWithoutCapMm": {
+        "min": 47,
+        "max": 101
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 23
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Glass Stopper",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-RCT-CLR-10ML-BLK-S-01",
+        "GB-RCT-CLR-10ML-BLK-S-02",
+        "GB-RCT-CLR-10ML-GLD-T-01",
+        "GB-RCT-CLR-10ML-GLD-T-02",
+        "GB-RCT-CLR-10ML-MRL",
+        "GB-RCT-CLR-10ML-MRL-BKDT-01",
+        "GB-RCT-CLR-10ML-MRL-BKDT-02",
+        "GB-RCT-CLR-10ML-MRL-MCPR-01"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "rectangular-upright",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 80
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Roll-On Cap",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        30
+      ],
+      "heightWithCapMm": {
+        "min": 27.6,
+        "max": 27.6
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 19.2,
+        "max": 19.2
+      },
+      "applicators": [
+        "Plastic Roller Ball"
+      ],
+      "colors": [],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "CMP-ROC-WHT-03"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Roll-On Cap",
+      "count": 34,
+      "bottleCollections": [
+        "Roll-On Cap"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 10,
+        "max": 35
+      },
+      "heightWithoutCapMm": null,
+      "diameterMm": {
+        "min": 17,
+        "max": 23
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Black",
+        "Copper",
+        "Gold",
+        "Pink",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "17-415",
+        "20-400"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-BLK-S-13-415",
+        "CMP-CAP-SGLD-13-415-01",
+        "CMP-CAP-SGLD-15-415",
+        "CMP-CAP-SLV-13-415-01",
+        "CMP-CAP-SSLV-15-415",
+        "CMP-CAP-WHT-S-13-415",
+        "CMP-LPM-BLK-17-415",
+        "CMP-LPM-MSLV-17-415"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Round",
+      "count": 186,
+      "bottleCollections": [
+        "Round"
+      ],
+      "capacitiesMl": [
+        78,
+        128
+      ],
+      "heightWithCapMm": {
+        "min": 77,
+        "max": 135
+      },
+      "heightWithoutCapMm": {
+        "min": 73,
+        "max": 110
+      },
+      "diameterMm": {
+        "min": 59,
+        "max": 85
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear",
+        "Frosted"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-RND-CLR-128ML-ASP-BLK",
+        "GB-RND-CLR-128ML-ASP-GLD",
+        "GB-RND-CLR-128ML-ASP-IVGD",
+        "GB-RND-CLR-128ML-ASP-IVSL",
+        "GB-RND-CLR-128ML-ASP-LVN",
+        "GB-RND-CLR-128ML-ASP-MSLV",
+        "GB-RND-CLR-128ML-ASP-PNK",
+        "GB-RND-CLR-128ML-ASP-RED"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "round-upright",
+      "targetFillHeightRangePct": {
+        "min": 78,
+        "max": 82
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Royal",
+      "count": 30,
+      "bottleCollections": [
+        "Royal"
+      ],
+      "capacitiesMl": [
+        13,
+        14
+      ],
+      "heightWithCapMm": {
+        "min": 58,
+        "max": 92
+      },
+      "heightWithoutCapMm": {
+        "min": 56,
+        "max": 64
+      },
+      "diameterMm": {
+        "min": 16.8,
+        "max": 43.7
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "11mm",
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-RYL-CLR-13ML-BLK-S",
+        "GB-RYL-CLR-13ML-MRL-BKDT",
+        "GB-RYL-CLR-13ML-MRL-MCPR",
+        "GB-RYL-CLR-13ML-MRL-MGLD",
+        "GB-RYL-CLR-13ML-MRL-MSLV",
+        "GB-RYL-CLR-13ML-MRL-PKDT",
+        "GB-RYL-CLR-13ML-MRL-SBLK",
+        "GB-RYL-CLR-13ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Sleek",
+      "count": 192,
+      "bottleCollections": [
+        "Sleek"
+      ],
+      "capacitiesMl": [
+        5,
+        8,
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 47,
+        "max": 199
+      },
+      "heightWithoutCapMm": {
+        "min": 45,
+        "max": 149
+      },
+      "diameterMm": {
+        "min": 18,
+        "max": 78
+      },
+      "applicators": [
+        "Dropper",
+        "Fine Mist Sprayer",
+        "Lotion Pump",
+        "Metal Roller Ball",
+        "Perfume Spray Pump",
+        "Plastic Roller Ball",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-SLK-CLR-100ML-ASP-BLK",
+        "GB-SLK-CLR-100ML-ASP-GLD",
+        "GB-SLK-CLR-100ML-ASP-IVGD",
+        "GB-SLK-CLR-100ML-ASP-IVSL",
+        "GB-SLK-CLR-100ML-ASP-LVN",
+        "GB-SLK-CLR-100ML-ASP-MSLV",
+        "GB-SLK-CLR-100ML-ASP-PNK",
+        "GB-SLK-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "mixed-decorative",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Broad decorative family mixes small and large capacities; needs capacity-aware sub-bands before bulk generation."
+    },
+    {
+      "family": "Slim",
+      "count": 129,
+      "bottleCollections": [
+        "Slim"
+      ],
+      "capacitiesMl": [
+        30,
+        50,
+        100
+      ],
+      "heightWithCapMm": {
+        "min": 91,
+        "max": 197
+      },
+      "heightWithoutCapMm": {
+        "min": 85,
+        "max": 154
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 72
+      },
+      "applicators": [
+        "Dropper",
+        "Lotion Pump",
+        "Perfume Spray Pump",
+        "Reducer",
+        "Vintage Bulb Sprayer",
+        "Vintage Bulb Sprayer with Tassel"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "18-415"
+      ],
+      "exampleSkus": [
+        "GB-SLM-CLR-100ML-ASP-BLK",
+        "GB-SLM-CLR-100ML-ASP-GLD",
+        "GB-SLM-CLR-100ML-ASP-IVGD",
+        "GB-SLM-CLR-100ML-ASP-IVSL",
+        "GB-SLM-CLR-100ML-ASP-LVN",
+        "GB-SLM-CLR-100ML-ASP-MSLV",
+        "GB-SLM-CLR-100ML-ASP-PNK",
+        "GB-SLM-CLR-100ML-ASP-RED"
+      ],
+      "proposedArchetype": "premium-tall",
+      "visualScaleBand": "heavy-perfume-bottle",
+      "targetFillHeightRangePct": {
+        "min": 84,
+        "max": 88
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    },
+    {
+      "family": "Sprayer",
+      "count": 16,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0,
+        5
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 21,
+        "max": 65
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "N/A"
+      ],
+      "colors": [
+        "Black",
+        "Gold",
+        "Pink",
+        "Red",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-SPR-BLK-18-415-02",
+        "CMP-SPR-IVGD-18-415-01",
+        "CMP-SPR-IVGD-18-415-02",
+        "CMP-SPR-IVSL-18-415-01",
+        "CMP-SPR-IVSL-18-415-02",
+        "CMP-SPR-LVN-18-415-01",
+        "CMP-SPR-LVN-18-415-02",
+        "CMP-SPR-LVN-BULB"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Sprayer",
+      "count": 48,
+      "bottleCollections": [
+        "Sprayer"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 19,
+        "max": 41
+      },
+      "heightWithoutCapMm": {
+        "min": 93.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 65
+      },
+      "applicators": [
+        "Cap/Closure",
+        "Fine Mist Sprayer"
+      ],
+      "colors": [
+        "Black",
+        "Gold",
+        "Matte Copper",
+        "Matte Gold",
+        "Matte Silver",
+        "Red",
+        "Shiny",
+        "Shiny Black",
+        "Shiny Gold",
+        "Silver",
+        "White"
+      ],
+      "neckThreadSizes": [
+        "13-415",
+        "15-415",
+        "17-415",
+        "18-415"
+      ],
+      "exampleSkus": [
+        "CMP-CAP-PNK-18-415",
+        "CMP-SPR-BKSL-18-415-02",
+        "CMP-SPR-BKSLWH-18-415-02",
+        "CMP-SPR-BLK-15-415",
+        "CMP-SPR-BLK-17-415-01",
+        "CMP-SPR-CLR-17-415",
+        "CMP-SPR-GDIV-18-415-02",
+        "CMP-SPR-GDIVSLWH-18-415-02"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Square",
+      "count": 29,
+      "bottleCollections": [
+        "Square"
+      ],
+      "capacitiesMl": [
+        15
+      ],
+      "heightWithCapMm": {
+        "min": 55,
+        "max": 73
+      },
+      "heightWithoutCapMm": {
+        "min": 52,
+        "max": 52
+      },
+      "diameterMm": {
+        "min": 30,
+        "max": 30
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-SQR-CLR-15ML-MRL-BKDT",
+        "GB-SQR-CLR-15ML-MRL-MCPR",
+        "GB-SQR-CLR-15ML-MRL-MGLD",
+        "GB-SQR-CLR-15ML-MRL-MSLV",
+        "GB-SQR-CLR-15ML-MRL-PKDT",
+        "GB-SQR-CLR-15ML-MRL-SBLK",
+        "GB-SQR-CLR-15ML-MRL-SGLD",
+        "GB-SQR-CLR-15ML-MRL-SLDT"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Tall Cylinder",
+      "count": 1,
+      "bottleCollections": [
+        "Tall Cylinder Collection"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 109,
+        "max": 109
+      },
+      "heightWithoutCapMm": {
+        "min": 106,
+        "max": 106
+      },
+      "diameterMm": {
+        "min": 18,
+        "max": 18
+      },
+      "applicators": [
+        "Cap/Closure"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GBTallCyl9WhtSht"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "tall-cylinder-review",
+      "targetFillHeightRangePct": {
+        "min": 72,
+        "max": 78
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Single-row tall-cylinder family conflicts with current measured-height resolver behavior; requires explicit resolver test."
+    },
+    {
+      "family": "Teardrop",
+      "count": 3,
+      "bottleCollections": [
+        "Teardrop"
+      ],
+      "capacitiesMl": [
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 68,
+        "max": 68
+      },
+      "heightWithoutCapMm": {
+        "min": 43,
+        "max": 43
+      },
+      "diameterMm": {
+        "min": 20,
+        "max": 20
+      },
+      "applicators": [
+        "Glass Stopper"
+      ],
+      "colors": [
+        "Clear",
+        "Cobalt Blue",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "Ground"
+      ],
+      "exampleSkus": [
+        "GB-TRD-BLU-9ML",
+        "GB-TRD-CLR-9ML",
+        "GB-TRD-GRN-9ML"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Tool",
+      "count": 3,
+      "bottleCollections": [
+        "Tool"
+      ],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": {
+        "min": 35,
+        "max": 74.8
+      },
+      "heightWithoutCapMm": {
+        "min": 50.8,
+        "max": 93.8
+      },
+      "diameterMm": {
+        "min": 23.7,
+        "max": 25
+      },
+      "applicators": [],
+      "colors": [
+        "Gold",
+        "Silver"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "ACC-FNL-02",
+        "ACC-FNL-GLD",
+        "ACC-FNL-SLV"
+      ],
+      "proposedArchetype": "component",
+      "visualScaleBand": "component-enhancement",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "component_enhancement",
+      "bottleScaleStatus": "not_bottle",
+      "enhancementStatus": "needs_review",
+      "status": "not_bottle",
+      "statusReason": "Component family; exclude from bottle scale, but keep eligible for material and geometry enhancement."
+    },
+    {
+      "family": "Tulip",
+      "count": 1,
+      "bottleCollections": [
+        "Specialty & Decorative"
+      ],
+      "capacitiesMl": [
+        6
+      ],
+      "heightWithCapMm": {
+        "min": 47,
+        "max": 47
+      },
+      "heightWithoutCapMm": {
+        "min": 45,
+        "max": 45
+      },
+      "diameterMm": {
+        "min": 25.4,
+        "max": 25.4
+      },
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-TUL-CLR-6ML-CAP-SBLK"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Tulip",
+      "count": 59,
+      "bottleCollections": [
+        "Tulip"
+      ],
+      "capacitiesMl": [
+        5,
+        6
+      ],
+      "heightWithCapMm": {
+        "min": 47,
+        "max": 73
+      },
+      "heightWithoutCapMm": {
+        "min": 45,
+        "max": 61
+      },
+      "diameterMm": {
+        "min": 17,
+        "max": 23
+      },
+      "applicators": [
+        "Fine Mist Sprayer",
+        "Metal Roller Ball",
+        "Plastic Roller Ball"
+      ],
+      "colors": [
+        "Amber",
+        "Clear"
+      ],
+      "neckThreadSizes": [
+        "13-415"
+      ],
+      "exampleSkus": [
+        "GB-CYL-AMB-5ML-GLD-T",
+        "GB-CYL-AMB-5ML-MRL-BKDT",
+        "GB-CYL-AMB-5ML-MRL-MCPR",
+        "GB-CYL-AMB-5ML-MRL-MGLD",
+        "GB-CYL-AMB-5ML-MRL-MSLV",
+        "GB-CYL-AMB-5ML-MRL-PKDT",
+        "GB-CYL-AMB-5ML-MRL-SBLK",
+        "GB-CYL-AMB-5ML-MRL-SGLD"
+      ],
+      "proposedArchetype": "standard-bottle",
+      "visualScaleBand": "small-decorative",
+      "targetFillHeightRangePct": {
+        "min": 68,
+        "max": 76
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "needs_review",
+      "enhancementStatus": "needs_review",
+      "status": "needs_review",
+      "statusReason": "Known Best Bottles family with enough product coverage to map next."
+    },
+    {
+      "family": "Unknown",
+      "count": 1,
+      "bottleCollections": [],
+      "capacitiesMl": [
+        0
+      ],
+      "heightWithCapMm": null,
+      "heightWithoutCapMm": {
+        "min": 102,
+        "max": 102
+      },
+      "diameterMm": null,
+      "applicators": [
+        "N/A"
+      ],
+      "colors": [
+        "Clear"
+      ],
+      "neckThreadSizes": [],
+      "exampleSkus": [
+        "PKG-BOX-BRN-4X4X4"
+      ],
+      "proposedArchetype": "unknown",
+      "visualScaleBand": "blocked-unknown",
+      "targetFillHeightRangePct": null,
+      "renderingLane": "blocked_unknown",
+      "bottleScaleStatus": "blocked",
+      "enhancementStatus": "blocked",
+      "status": "blocked",
+      "statusReason": "Missing or unknown family; requires product-truth review before generation."
+    },
+    {
+      "family": "Vial",
+      "count": 26,
+      "bottleCollections": [
+        "Vial"
+      ],
+      "capacitiesMl": [
+        1,
+        2,
+        3,
+        4,
+        9
+      ],
+      "heightWithCapMm": {
+        "min": 20,
+        "max": 75
+      },
+      "heightWithoutCapMm": {
+        "min": 22,
+        "max": 79.4
+      },
+      "diameterMm": {
+        "min": 8,
+        "max": 22
+      },
+      "applicators": [
+        "Dropper",
+        "Glass Rod"
+      ],
+      "colors": [
+        "Amber",
+        "Blue",
+        "Clear",
+        "Green"
+      ],
+      "neckThreadSizes": [
+        "13-425",
+        "18-400",
+        "8-425",
+        "Plug"
+      ],
+      "exampleSkus": [
+        "GB-CYL-CLR-9ML-S-01",
+        "GB-CYL-CLR-9ML-T-01",
+        "GB-GRN-GRN-20ML",
+        "GB-VIA-AMB-1.5ML-WHT-S",
+        "GB-VIA-AMB-1ML-WHT-T",
+        "GB-VIA-BLU-3ML-BLK-S",
+        "GB-VIA-CLR-1ML",
+        "GB-VIA-CLR-1ML-BLK-T"
+      ],
+      "proposedArchetype": "sample-vial",
+      "visualScaleBand": "sample-vial",
+      "targetFillHeightRangePct": {
+        "min": 55,
+        "max": 60
+      },
+      "renderingLane": "bottle_catalog",
+      "bottleScaleStatus": "mapped",
+      "enhancementStatus": "needs_review",
+      "status": "mapped",
+      "statusReason": "Covered by current Madison family profile resolver."
+    }
+  ]
+}

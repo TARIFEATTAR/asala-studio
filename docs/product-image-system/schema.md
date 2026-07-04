@@ -1,5 +1,12 @@
 # Schema — Product Image System
 
+> **⛔ DEPRECATED (2026-07).** Part of the paper-doll lane, which is not used for Best
+> Bottles catalog images; `src/lib/product-image/promptBuilders.ts` and `prompt-pack.md`
+> have been removed. Authoritative catalog prompt: vendored canon
+> `src/config/bestBottlesCatalogCanon.ts` + per-family framing
+> `src/config/bestBottlesFamilyProfiles.ts` via `buildFinalPrompt()` in
+> `src/lib/bestBottlesPromptPreflight.ts`. Historical reference only.
+
 > **Status: superseded in part.** This doc was written before the pivot to a
 > pipeline-native placement and uses a parallel `BottleFamilySpec` /
 > `ProductImageJob` type system. The current design reads family metadata
@@ -28,9 +35,9 @@ and assemblies.
 
 ```ts
 interface EnvironmentPlate {
-  id: string;                  // e.g. "parchment_cream_v1"
-  name: string;                // e.g. "Parchment Cream"
-  backgroundHex: string;       // e.g. "#EEE6D4"  — locked
+  id: string;                  // e.g. "best_bottles_bone_v1"
+  name: string;                // e.g. "Best Bottles Bone"
+  backgroundHex: string;       // e.g. "#F5F3EF"  — locked
   useAsFinalBackground: boolean; // true for this pilot (Option A)
   texture: "flat" | "paper_grain_subtle" | "linen" | "stone";
   lightingStyle: "soft_overhead" | "soft_side" | "neutral_studio";
@@ -44,7 +51,7 @@ Notes:
   clear bodies on transparency.
 - `texture` is intentionally a small enum; a "subtle paper grain" is the pilot
   value so renders do not look like flat PNG exports.
-- The pilot registers exactly one plate: `parchment_cream_v1`.
+- The pilot registers exactly one plate: `best_bottles_bone_v1`.
 
 ---
 
@@ -84,7 +91,7 @@ interface BottleFamilySpec {
   };
   compatibleFitments: string[]; // fitment ids
   compatibleCaps: string[];     // cap ids
-  defaultEnvironmentPlateId: string; // "parchment_cream_v1"
+  defaultEnvironmentPlateId: string; // "best_bottles_bone_v1"
 }
 ```
 
@@ -171,7 +178,7 @@ interface ProductImageJob {
     centerXLocked: boolean;
     bottomAnchorY: number | null;
   };
-  targetEnvironmentPlate: string;             // "parchment_cream_v1"
+  targetEnvironmentPlate: string;             // "best_bottles_bone_v1"
   outputProfile: {
     format: "png" | "webp";
     dpi: number;                              // 72 for web
@@ -322,7 +329,7 @@ interface AssemblyPreviewSpec {
 ## Invariants enforced across the system
 
 - Every `ProductImageJob` targeting the body lane carries
-  `targetEnvironmentPlate = "parchment_cream_v1"`.
+  `targetEnvironmentPlate = "best_bottles_bone_v1"`.
 - Exactly one `MaterialVariant` in the registry has `isMaster: true`.
 - `BottleFamilySpec.centerXLocked` is `true` for every registered family in
   this pilot lane.

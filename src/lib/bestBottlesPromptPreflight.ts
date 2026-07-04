@@ -7,9 +7,15 @@ import {
 import {
   BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH,
   BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG,
-  buildBestBottlesCatalogCanonPrompt,
+  buildBestBottlesCatalogCanonPromptParts,
 } from "./bestBottlesCatalogCanonPrompt";
-import { parseDimensionMm } from "./product-image/skuInjector";
+import {
+  getBestBottlesCatalogFramingProfile,
+  getBestBottlesCylinderFamilyProfile,
+  getBestBottlesCylinderHeightDiameterRatio,
+  getBestBottlesFamilyProfileForProduct,
+  type BestBottlesFamilyProfile,
+} from "@/config/bestBottlesFamilyProfiles";
 
 type ProductLike = {
   graceSku?: string | null;
@@ -31,6 +37,15 @@ type ProductLike = {
 };
 
 export type BestBottlesPromptPreflightStatus = "ok" | "warn" | "error";
+
+// The family-agnostic QA keys buildPromptForSku() always emits. Used as the QA
+// floor when a family has no module and module validation is skipped.
+const BASE_MODULE_QA_CHECKLIST = [
+  "reference_png_identity_lock",
+  "geometry_preserved",
+  "material_truth_preserved",
+  "framing_consistent",
+];
 
 export interface BestBottlesPromptPreflightInput {
   product: ProductLike;
@@ -136,6 +151,13 @@ export function inferBestBottlesPromptFamily(product: ProductLike): string {
   if (includesAny(haystack, ["reducer", "orifice"])) return "orifice_reducer";
   if (includesAny(haystack, ["splash"])) return "splash_bottle";
   if (includesAny(haystack, ["aluminum", "aluminium"])) return "aluminum_bottle";
+  if (includesAny(haystack, ["apothecary"])) return "apothecary_bottle";
+  // Decorative / "heavy perfume" bucket — map the distinct decorative family names to
+  // the existing decorative_bottle module (cylinder/empire/etc. are matched earlier, so
+  // they win over these). Only affects validation QA seeds, not the shipped canon prompt.
+  if (includesAny(haystack, ["decorative", "diva", "diamond", "elegant", "grace", "sleek", "slim"])) {
+    return "decorative_bottle";
+  }
   if (includesAny(haystack, ["box", "carton"])) return "box";
   if (includesAny(haystack, ["bag", "organza", "velvet"])) return "bag";
 
@@ -218,7 +240,7 @@ export function inferBestBottlesPromptClosure(product: ProductLike): string {
   return "screw_cap";
 }
 
-function inferFrameClass(productFamily: string): string {
+function inferFrameClass(productFamily: string, product: ProductLike): string {
   if (productFamily === "cream_jar") return "low_wide_jar";
   if (productFamily === "box" || productFamily === "bag") return "box_or_bag";
   if (
@@ -235,6 +257,12 @@ function inferFrameClass(productFamily: string): string {
     productFamily === "vial" ||
     productFamily === "fine_mist_sprayer"
   ) {
+    if (
+      productFamily === "cylinder" &&
+      getBestBottlesCylinderFamilyProfile(product).id === "sample-vial"
+    ) {
+      return "medium_upright";
+    }
     return "tall_narrow";
   }
   return "medium_upright";
@@ -340,15 +368,6 @@ function inferDetachedComponents(product: ProductLike, closureType: string): str
     if (includesAny(haystack, ["clear", "translucent", "white"])) return ["clear_or_white_overcap"];
     return ["overcap"];
   }
-  if (closureType === "fine_mist_sprayer" && includesAny(haystack, ["clear cap", "white cap", "over-cap"])) {
-    return ["clear_or_white_overcap"];
-  }
-  if (
-    (closureType === "fine_mist_sprayer" || closureType === "lotion_pump") &&
-    inferBestBottlesPromptFamily(product) === "cylinder"
-  ) {
-    return ["clear_or_white_overcap"];
-  }
   return [];
 }
 
@@ -390,22 +409,6 @@ function selectedCanvasLabel(sku: PromptSku): string {
   return `${sku.output_canvas_width}x${sku.output_canvas_height}`;
 }
 
-function cylinderHeightDiameterRatio(product: ProductLike): number | null {
-  const heightMm = parseDimensionMm(product.heightWithCap) ?? parseDimensionMm(product.heightWithoutCap);
-  const diameterMm = parseDimensionMm(product.diameter);
-  if (
-    typeof heightMm !== "number" ||
-    typeof diameterMm !== "number" ||
-    !Number.isFinite(heightMm) ||
-    !Number.isFinite(diameterMm) ||
-    heightMm <= 0 ||
-    diameterMm <= 0
-  ) {
-    return null;
-  }
-  return heightMm / diameterMm;
-}
-
 function buildCanvasPreflight(product: ProductLike, sku: PromptSku): BestBottlesCanvasPreflight {
   const selectedCanvas = selectedCanvasLabel(sku);
   const qaChecklist = [`canvas_selected:${selectedCanvas}`];
@@ -415,27 +418,61 @@ function buildCanvasPreflight(product: ProductLike, sku: PromptSku): BestBottles
     return { qaChecklist, warnings };
   }
 
-  const ratio = cylinderHeightDiameterRatio(product);
+  const profile = getBestBottlesFamilyProfileForProduct(product) ?? getBestBottlesCylinderFamilyProfile(product);
+  const ratio = getBestBottlesCylinderHeightDiameterRatio(product);
   const ratioText = ratio == null ? "unknown" : ratio.toFixed(2);
-  const selectedIsTallNarrow = selectedCanvas === "1024x1536";
+  const recommendedCanvas = `${profile.canvas.widthPx}x${profile.canvas.heightPx}`;
 
-  if (ratio != null && ratio < 3) {
-    qaChecklist.push("canvas_recommendation:cylinder_compact_review");
+  qaChecklist.push("canvas_recommendation:fixed_studio_2080x2288");
+  qaChecklist.push(`cylinder_family_profile:${profile.id}`);
+  qaChecklist.push(`relative_scale_zone:${profile.relativeScaleZoneId}`);
+  qaChecklist.push("primary_object_centerline:canvas_center");
+  qaChecklist.push("detached_component_sidecar:right_does_not_shift_primary");
+
+  if (selectedCanvas !== recommendedCanvas) {
     warnings.push(
-      `Compact Cylinder measurements suggest this SKU may not need the native 1024 x 1536 tall canvas; review square/round or 10:11 before batch generation. Measured height/diameter ratio is ${ratioText}:1.`,
-    );
-    return { qaChecklist, warnings };
-  }
-
-  qaChecklist.push("canvas_recommendation:tall_narrow_1024x1536");
-
-  if (!selectedIsTallNarrow) {
-    warnings.push(
-      `Tall/slender Cylinder should use the native 1024 x 1536 canvas; selected ${selectedCanvas}. Measured height/diameter ratio is ${ratioText}:1.`,
+      `Cylinder family uses the fixed 2080 x 2288 studio canvas; selected ${selectedCanvas}. Profile ${profile.id} uses relative scale zone ${profile.relativeScaleZoneId} with target height ${profile.targetProductHeightPct}% inside the ${profile.targetProductHeightRangePct.min}-${profile.targetProductHeightRangePct.max}% fill-height range. Primary bottle remains centered. Measured height/diameter ratio is ${ratioText}:1.`,
     );
   }
 
   return { qaChecklist, warnings };
+}
+
+function buildFramingProfilePrompt(profile: BestBottlesFamilyProfile | null): string | null {
+  if (!profile) return null;
+  const label = profile.label.toUpperCase();
+  const baselineLow = profile.baselinePct - 1;
+  const baselineHigh = profile.baselinePct + 1;
+
+  return [
+    `${label} FRAMING PROFILE (CANVAS COMPOSITION AUTHORITY):`,
+    `- Canvas is fixed at ${profile.canvas.widthPx} × ${profile.canvas.heightPx}. Do not change aspect ratio, crop, or canvas size.`,
+    "- The reference image is product truth, not framing truth. Preserve the product identity and proportions, but do not inherit the reference image's tiny source scale, source crop, source padding, or off-center placement.",
+    `- Relative scale zone: ${profile.relativeScaleZoneLabel} (${profile.relativeScaleZoneId}). Use this zone to communicate realistic size differences within the family.`,
+    `- Approved fill-height range: ${profile.targetProductHeightRangePct.min}-${profile.targetProductHeightRangePct.max}% of the canvas height for this family profile.`,
+    `- Render the full assembled product so it fills approximately ${profile.targetProductHeightPct}% of the canvas height and no more than ${profile.fillWidthPct}% of the canvas width.`,
+    `- Seat the visible bottle base on the shared studio baseline at ${baselineLow}-${baselineHigh}% up from the canvas bottom.`,
+    `- Keep the primary bottle centered on the canvas vertical centerline at ${profile.primaryObjectCenterXPct}% width.`,
+    profile.detachedComponentPlacement === "right-sidecar"
+      ? "- If a detached cap or applicator is present, keep it as a right-sidecar component on the same baseline; it must not shift the primary bottle off center."
+      : null,
+    "- Keep all physical proportions locked to the reference; this framing profile only controls placement, scale on canvas, baseline, and centering.",
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join("\n");
+}
+
+function buildFinalPrompt(product: ProductLike, sku: PromptSku): string {
+  const canonParts = buildBestBottlesCatalogCanonPromptParts(sku);
+  // Use the catalog-path resolver so EVERY family ships a real FRAMING PROFILE
+  // block — never a blank one (previous behavior for unprofiled families).
+  return [
+    canonParts.basePrompt,
+    buildFramingProfilePrompt(getBestBottlesCatalogFramingProfile(product)),
+    canonParts.finalStudioDirection,
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join("\n\n");
 }
 
 export function buildBestBottlesPromptSkuFromProduct(input: PromptSkuBuildInput): PromptSku {
@@ -451,7 +488,7 @@ export function buildBestBottlesPromptSkuFromProduct(input: PromptSkuBuildInput)
     sku,
     filename: getFilename(referenceImagePath, sku),
     product_family: productFamily,
-    frame_class: inferFrameClass(productFamily),
+    frame_class: inferFrameClass(productFamily, input.product),
     body_shape: inferBodyShape(input.product, productFamily),
     body_material: bodyMaterial,
     body_color: input.product.color?.trim().toLowerCase() || "unknown",
@@ -525,27 +562,33 @@ export function buildBestBottlesPromptPreflight(
   const sku = buildBestBottlesPromptSkuFromProduct(input);
   const canvasPreflight = buildCanvasPreflight(input.product, sku);
   const warnings = getWarnings(input.product, sku, input.bodyMaterial, canvasPreflight.warnings);
+  // NOTE: buildPromptForSku() (the config/product_families.json + master_pdp_prompt.md
+  // module system) is run ONLY to VALIDATE the SKU and to seed family-specific qa_checklist
+  // entries. Its own `final_prompt` output is intentionally DISCARDED and replaced by
+  // buildFinalPrompt() — the vendored catalog canon (src/config/bestBottlesCatalogCanon.ts)
+  // + the per-family framing profile. The canon+framing string is the ONLY prompt that
+  // actually ships to the image model. Do not "fix" this by using the module final_prompt.
+  //
+  // A missing module (a catalog family we have not added to product_families.json) must NOT
+  // block generation: the shipped canon+framing prompt does not depend on the module system.
+  // So module validation is best-effort — on failure we degrade to canon-only QA + a warning
+  // instead of erroring, and every bottle family still generates.
+  const moduleWarnings: string[] = [];
+  let moduleQaChecklist: string[] = [];
   try {
-    const moduleValidationRecord = buildPromptForSku(sku, input.system);
-    const record: PromptRecord = {
-      ...moduleValidationRecord,
-      final_prompt: buildBestBottlesCatalogCanonPrompt(sku),
-      qa_checklist: Array.from(
-        new Set([
-          ...moduleValidationRecord.qa_checklist,
-          ...canvasPreflight.qaChecklist,
-          BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG,
-          `catalog_canon_source:${BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH}`,
-        ]),
-      ),
-    };
-    return {
-      status: warnings.length > 0 ? "warn" : "ok",
-      issue: null,
-      warnings,
-      sku,
-      record,
-    };
+    moduleQaChecklist = buildPromptForSku(sku, input.system).qa_checklist;
+  } catch (error) {
+    moduleQaChecklist = BASE_MODULE_QA_CHECKLIST;
+    moduleWarnings.push(
+      `Module validation skipped for family "${sku.product_family}" (${
+        error instanceof Error ? error.message : "unknown module"
+      }); shipping the catalog canon + framing prompt without family-specific QA seeds.`,
+    );
+  }
+
+  let finalPrompt: string;
+  try {
+    finalPrompt = buildFinalPrompt(input.product, sku);
   } catch (error) {
     return {
       status: "error",
@@ -555,4 +598,28 @@ export function buildBestBottlesPromptPreflight(
       record: null,
     };
   }
+
+  const record: PromptRecord = {
+    sku: sku.sku,
+    reference_image_path: sku.reference_image_path,
+    product_family: sku.product_family,
+    frame_class: sku.frame_class,
+    final_prompt: finalPrompt,
+    qa_checklist: Array.from(
+      new Set([
+        ...moduleQaChecklist,
+        ...canvasPreflight.qaChecklist,
+        BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG,
+        `catalog_canon_source:${BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH}`,
+      ]),
+    ),
+  };
+  const allWarnings = Array.from(new Set([...warnings, ...moduleWarnings]));
+  return {
+    status: allWarnings.length > 0 ? "warn" : "ok",
+    issue: null,
+    warnings: allWarnings,
+    sku,
+    record,
+  };
 }

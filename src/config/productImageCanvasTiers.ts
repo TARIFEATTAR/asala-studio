@@ -27,14 +27,29 @@ export interface BestBottlesCanvasTier {
   familyKeys: readonly string[];
 }
 
-const TALL_NARROW_FAMILIES = [
-  "cylinder",
-  "tall-cylinder",
-] as const;
+export interface BestBottlesCanvasTierProductInput {
+  family?: string | null;
+  bottleCollection?: string | null;
+  category?: string | null;
+  graceSku?: string | null;
+  websiteSku?: string | null;
+  itemName?: string | null;
+  itemDescription?: string | null;
+  applicator?: string | null;
+  capacity?: string | null;
+  capacityMl?: number | null;
+  heightWithCap?: string | null;
+  heightWithoutCap?: string | null;
+  diameter?: string | null;
+  foregroundAspectHOverW?: number | null;
+}
+
+const TALL_NARROW_FAMILIES = [] as const;
 
 const TALL_PORTRAIT_FAMILIES = [
   "aluminum-bottle",
   "apothecary",
+  "cylinder",
   "diamond",
   "diva",
   "dropper",
@@ -56,6 +71,7 @@ const TALL_PORTRAIT_FAMILIES = [
   "sleek",
   "slim",
   "sprayer",
+  "tall-cylinder",
   "tall-rectangle",
   "teardrop",
   "tola-6ml",
@@ -88,7 +104,7 @@ export const BEST_BOTTLES_TALL_NARROW_CANVAS_TIER: BestBottlesCanvasTier = {
   id: "tall-narrow",
   label: "Tall / Narrow",
   purpose:
-    "Native 2:3 generation canvas for tall, slender Cylinder bottles that need vertical air without being recanvased from a square frame.",
+    "Legacy native 2:3 generation canvas retained for older renders and manual experiments. Production Best Bottles catalog masters should prefer fixed-family 2080 x 2288 studio framing.",
   canvas: {
     widthPx: BEST_BOTTLES_TALL_NARROW_CANVAS_PX.width,
     heightPx: BEST_BOTTLES_TALL_NARROW_CANVAS_PX.height,
@@ -177,6 +193,62 @@ function normalizeBestBottlesFamilyKey(family: string | null | undefined): strin
     .replace(/^-+|-+$/g, "");
 }
 
+function normalizeCanvasTierText(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function parseFirstNumber(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const match = value.match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function getCapacityMl(input: BestBottlesCanvasTierProductInput): number | null {
+  if (typeof input.capacityMl === "number" && Number.isFinite(input.capacityMl) && input.capacityMl > 0) {
+    return input.capacityMl;
+  }
+  return parseFirstNumber(input.capacity);
+}
+
+function isCylinderProduct(input: BestBottlesCanvasTierProductInput): boolean {
+  const explicitFamilyKey = normalizeBestBottlesFamilyKey(input.family ?? input.bottleCollection);
+  if (explicitFamilyKey === "cylinder" || explicitFamilyKey === "tall-cylinder") return true;
+
+  const text = normalizeCanvasTierText(
+    [
+      input.family,
+      input.bottleCollection,
+      input.category,
+      input.graceSku,
+      input.websiteSku,
+      input.itemName,
+      input.itemDescription,
+      input.applicator,
+    ]
+      .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+      .join(" "),
+  );
+
+  return text.includes("cylinder") || /\b(?:gb|lb)-cyl\b/.test(text) || text.includes("-cyl-");
+}
+
+export function isCompactBestBottlesCylinderProduct(input: BestBottlesCanvasTierProductInput): boolean {
+  if (!isCylinderProduct(input)) return false;
+
+  const capacityMl = getCapacityMl(input);
+  if (capacityMl != null && capacityMl <= 4) return true;
+
+  const heightWithCapMm = parseFirstNumber(input.heightWithCap);
+  if (heightWithCapMm != null && heightWithCapMm <= 60) return true;
+
+  const heightWithoutCapMm = parseFirstNumber(input.heightWithoutCap);
+  if (heightWithoutCapMm != null && heightWithoutCapMm <= 40) return true;
+
+  return false;
+}
+
 const familyTierEntries = BEST_BOTTLES_CANVAS_TIERS.flatMap((tier) =>
   tier.familyKeys.map((familyKey) => [familyKey, tier.id] as const),
 );
@@ -214,6 +286,16 @@ export function getBestBottlesCanvasTierForFamily(
   family: string | null | undefined,
 ): BestBottlesCanvasTier {
   return getBestBottlesCanvasTierForKnownFamily(family) ?? BEST_BOTTLES_TALL_PORTRAIT_CANVAS_TIER;
+}
+
+export function getBestBottlesCanvasTierForProduct(
+  input: BestBottlesCanvasTierProductInput | null | undefined,
+): BestBottlesCanvasTier {
+  if (!input) return BEST_BOTTLES_TALL_PORTRAIT_CANVAS_TIER;
+  return resolveBestBottlesCanvasTier({
+    family: input.family ?? input.bottleCollection,
+    foregroundAspectHOverW: input.foregroundAspectHOverW,
+  });
 }
 
 export function resolveBestBottlesCanvasTier(input: {

@@ -28,7 +28,7 @@ import {
 } from "@/lib/product-image/exactOutputCanvas";
 import type { PromptRecord } from "@/lib/bestBottlesPromptCompiler";
 
-const PAPER_DOLL_TARGET_CREAM = "#EEE6D4";
+const BEST_BOTTLES_STUDIO_BONE_BACKGROUND = "#F5F3EF";
 
 export interface AssembledGenerationResult {
   imageUrl: string;
@@ -460,6 +460,18 @@ export function useAssembledPromptGeneration() {
         return null;
       }
 
+      // Under the heartbeat-streaming response (requests that outlive the edge
+      // gateway's idle window), failures arrive as HTTP 200 with an `error`
+      // field in the body instead of a non-2xx status. Surface the real
+      // server-side message rather than a generic "no image URL".
+      const streamedError = (data as { error?: unknown } | null)?.error;
+      if (typeof streamedError === "string" && streamedError.trim()) {
+        console.error("[useAssembledPromptGeneration] streamed body error", data);
+        setError(streamedError);
+        toast({ title: "Generation failed", description: streamedError, variant: "destructive" });
+        return null;
+      }
+
       if (!data?.imageUrl) {
         const message = "Edge function returned no image URL.";
         setError(message);
@@ -472,7 +484,7 @@ export function useAssembledPromptGeneration() {
       const resolvedCanvas =
         resolveExactCanvasForAspectRatio(resolvedAspectRatio) ?? assembled.canvas;
 
-      // Snap the rendered cream background to the exact target hex and apply
+      // Snap the rendered Bone background to the exact target hex and apply
       // the client-side rig baseline pass. The Edge function stays a provider
       // coordinator because 2080x2288 image re-encoding can exhaust worker
       // limits; the browser can safely perform the final Studio acceptance
@@ -490,13 +502,23 @@ export function useAssembledPromptGeneration() {
         try {
           const correctedDataUrl = await colorCorrectToTarget(
             data.imageUrl,
-            PAPER_DOLL_TARGET_CREAM,
+            BEST_BOTTLES_STUDIO_BONE_BACKGROUND,
           );
           const rigged = await normalizeBestBottlesRigBaseline(correctedDataUrl, {
             family: options.productContext?.family,
+            bottleCollection: options.productContext?.collection,
+            graceSku: options.productContext?.sku,
+            websiteSku: options.productContext?.websiteSku,
+            itemName: options.productContext?.name,
+            itemDescription: options.productContext?.itemDescription,
+            applicator: options.productContext?.applicator,
+            capacityMl: options.productContext?.capacityMl,
+            heightWithCap: options.productContext?.heightWithCap,
+            heightWithoutCap: options.productContext?.heightWithoutCap,
+            diameter: options.productContext?.diameter,
             capState: options.productContext?.capState,
             mode: options.productContext?.mode,
-            targetBackgroundHex: PAPER_DOLL_TARGET_CREAM,
+            targetBackgroundHex: BEST_BOTTLES_STUDIO_BONE_BACKGROUND,
             maskReferenceUrl: rawMaskRef || null,
             requireMaskControl: requiresMaskControlledRecanvas,
           });
@@ -508,10 +530,12 @@ export function useAssembledPromptGeneration() {
           }
           console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess", {
             shifted: rigged.shifted,
+            shiftXPx: rigged.shiftXPx,
             shiftYPx: rigged.shiftYPx,
             scale: rigged.scale,
             maskControlled: rigged.maskControlled,
             qaIssues: rigged.qaIssues,
+            framingQa: rigged.framingQa,
             detectedBaselineYPx: rigged.detectedBaselineYPx,
             targetBaselineYPx: rigged.targetBaselineYPx,
             reason: rigPostprocessDecision.reason,

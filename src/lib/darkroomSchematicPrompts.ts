@@ -4,7 +4,7 @@ const BASE_SCHEMATIC_CONTRACT = [
   "Use the uploaded product image as the locked source of truth.",
   "Preserve the exact product identity, silhouette, proportions, material, color, cap/applicator state, and visible components.",
   "Retain the source image canvas, aspect ratio, crop, centerline, and overall product placement.",
-  "Create a refined schematic design on a flat Best Bottles Bone #EEE6D4 background with precise technical linework, restrained luxury editorial polish, subtle soft shadow, and no clutter.",
+  "Create a refined schematic design on a flat Best Bottles Bone #F5F3EF background with precise technical linework, restrained luxury editorial polish, subtle soft shadow, and no clutter.",
   "Use elegant thin callout lines and quiet diagram details only where they clarify the product structure.",
   "Do not invent measurements, SKUs, brand text, labels, logos, serial numbers, or unsupported product facts.",
   "Do not add parts, props, hands, flowers, duplicate products, badges, watermarks, or decorative scene elements.",

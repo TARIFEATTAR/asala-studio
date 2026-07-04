@@ -409,7 +409,7 @@ export function LeftRail({
               </InlineHelp>
             </div>
             <p className="mb-2 text-[10px] leading-relaxed text-[var(--darkroom-text-muted)]">
-              Uses selected aspect ratio; defaults to 16:9. Cycles 8 stone styles on Bone #EEE6D4.
+              Uses selected aspect ratio; defaults to 16:9. Cycles 8 stone styles on Bone #F5F3EF.
             </p>
             <div className="grid grid-cols-3 gap-2">
               <Button

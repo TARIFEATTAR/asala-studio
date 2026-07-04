@@ -26,23 +26,25 @@ describe("computeRigFrameTransform", () => {
     });
 
     assert.ok(result.scale < 0.95);
+    assert.equal(result.shiftXPx, 0);
     assert.ok(result.shiftYPx > 120);
     assert.equal(Math.round(result.detectedBaselineYPx * result.scale + result.shiftYPx), 2082);
     assert.ok(result.transformedTopYPx >= 120);
     assert.ok(result.transformedBottomYPx <= 2276);
   });
 
-  it("leaves an already 72%-rig-sized output essentially unchanged", () => {
+  it("leaves an already 76%-rig-sized output essentially unchanged", () => {
     const rig = FAMILY_RIG.cylinder;
     const result = computeRigFrameTransform({
       width: 2080,
       height: 2288,
       rig,
       detectedBaselineYPx: 2082,
-      strongBounds: { top: 435, bottom: 2082 },
+      strongBounds: { top: 343, bottom: 2082 },
     });
 
     assert.equal(result.scale, 1);
+    assert.equal(result.shiftXPx, 0);
     assert.equal(result.shiftYPx, 0);
   });
 
@@ -59,8 +61,8 @@ describe("computeRigFrameTransform", () => {
     assert.ok(result.scale > 1);
     assert.equal(Math.round(result.detectedBaselineYPx * result.scale + result.shiftYPx), 2082);
     assert.ok(result.transformedTopYPx != null);
-    assert.ok(result.transformedTopYPx >= Math.round(2288 * 0.18));
-    assert.ok(result.transformedTopYPx <= Math.round(2288 * 0.2));
+    assert.ok(result.transformedTopYPx >= 340);
+    assert.ok(result.transformedTopYPx <= 350);
   });
 
   it("normalizes the oversized 3 ml fine-mist sprayer envelope to the Cylinder target", () => {
@@ -77,8 +79,8 @@ describe("computeRigFrameTransform", () => {
     assert.equal(Math.round(result.detectedBaselineYPx * result.scale + result.shiftYPx), 2082);
     assert.ok(result.transformedTopYPx != null);
     assert.ok(result.transformedBottomYPx != null);
-    assert.ok(result.transformedTopYPx >= 430);
-    assert.ok(result.transformedTopYPx <= 440);
+    assert.ok(result.transformedTopYPx >= 340);
+    assert.ok(result.transformedTopYPx <= 350);
     assert.ok(result.transformedBottomYPx >= 2081);
     assert.ok(result.transformedBottomYPx <= 2083);
   });
@@ -476,6 +478,59 @@ describe("getVisibleMatteArtifactQaIssues", () => {
 });
 
 describe("applyRigForegroundMatte", () => {
+  it("removes pale matte pollution inside protected clear-glass bounds while preserving real edges", () => {
+    const width = 28;
+    const height = 32;
+    const bg = { r: 245, g: 243, b: 239 };
+    const darkGlassEdge = { r: 86, g: 88, b: 86 };
+    const paleInterior = { r: 255, g: 255, b: 255 };
+    const subtleInteriorPollution = { r: 250, g: 248, b: 244 };
+    const looseHalo = { r: 255, g: 255, b: 255 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+
+    const write = (x: number, y: number, color: { r: number; g: number; b: number }) => {
+      const i = (y * width + x) * 4;
+      pixels[i] = color.r;
+      pixels[i + 1] = color.g;
+      pixels[i + 2] = color.b;
+      pixels[i + 3] = 255;
+    };
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        write(x, y, bg);
+      }
+    }
+
+    for (let y = 7; y < 27; y += 1) {
+      write(10, y, darkGlassEdge);
+      write(17, y, darkGlassEdge);
+    }
+    for (let y = 12; y < 22; y += 1) {
+      for (let x = 12; x < 16; x += 1) {
+        write(x, y, paleInterior);
+      }
+    }
+    write(14, 16, subtleInteriorPollution);
+    for (let y = 12; y < 22; y += 1) {
+      for (let x = 2; x < 6; x += 1) {
+        write(x, y, looseHalo);
+      }
+    }
+
+    applyRigForegroundMatte(pixels, width, height, bg, {
+      protectedProductBounds: { left: 10, right: 17, top: 7, bottom: 26 },
+    });
+
+    const alphaAt = (x: number, y: number) => pixels[(y * width + x) * 4 + 3];
+
+    assert.equal(alphaAt(10, 16), 255);
+    assert.equal(alphaAt(17, 16), 255);
+    assert.equal(alphaAt(13, 16), 0);
+    assert.equal(alphaAt(14, 16), 0);
+    assert.equal(alphaAt(3, 16), 0);
+  });
+
   it("removes a generated background plate while preserving product pixels and contact shadow", () => {
     const width = 12;
     const height = 10;

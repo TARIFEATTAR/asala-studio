@@ -1,5 +1,11 @@
 # Madison Integration Map — Product Image System (Modular Bottle Paper-Doll)
 
+> **⛔ DEPRECATED (2026-07).** The paper-doll lane is not used for Best Bottles catalog
+> images; `src/lib/product-image/promptBuilders.ts` and `prompt-pack.md` have been removed.
+> Authoritative catalog prompt: vendored canon `src/config/bestBottlesCatalogCanon.ts` +
+> per-family framing `src/config/bestBottlesFamilyProfiles.ts` via `buildFinalPrompt()`
+> in `src/lib/bestBottlesPromptPreflight.ts`. Historical reference only.
+
 > **Status: superseded in part.** This doc describes an earlier pivot where
 > the paper-doll lane was going to live behind a new top-level route
 > (`/product-image-workflow`). After review, we pivoted to placing the lane
@@ -131,7 +137,7 @@ No other existing file is modified in this pilot.
 
 ### Config (`src/config/`)
 - `productImageEnvironment.ts` — registry of environment plates
-  (pilot: `parchment_cream_v1` with `#EEE6D4`).
+  (pilot: `best_bottles_bone_v1` with `#F5F3EF`).
 - `productImageVariants.ts` — material variant registry
   (clear / cobalt / amber / frosted / swirl) + pilot family config for the
   cylindrical 9ml body.
@@ -188,7 +194,7 @@ and should not be bundled into the pilot scaffolding.
 
 ## 8. Assumptions Carried into the Pilot
 
-1. Final rendered bottle bodies in this workflow sit on **`#EEE6D4`** (parchment
+1. Final rendered bottle bodies in this workflow sit on **`#F5F3EF`** (parchment
    cream). No transparency output for clear glass in the body lane.
 2. Clear glass is the canonical master material; cobalt / amber / frosted /
    swirl are **derived** from the clear master.

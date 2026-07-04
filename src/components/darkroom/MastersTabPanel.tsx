@@ -42,7 +42,7 @@ import { LEDIndicator } from "@/components/darkroom/LEDIndicator";
 import {
   DEFAULT_IMAGE_PRESET_ID,
   IMAGE_PRESET_LIST,
-  getBestBottlesCatalogPresetIdForFamily,
+  getBestBottlesCatalogPresetIdForProduct,
 } from "@/config/imagePresets";
 import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import {
@@ -55,6 +55,7 @@ import {
   buildBestBottlesPromptPreflight,
   type BestBottlesPromptPreflight,
 } from "@/lib/bestBottlesPromptPreflight";
+import { inferBestBottlesBodyMaterial } from "@/lib/bestBottlesBodyMaterial";
 
 const SCENE_FLEXIBLE_PRESET_ID = "master-scene-flexible-2000x2200";
 const ANGLE_PRESET_ID = "master-angle-2080x2288";
@@ -455,34 +456,6 @@ function safeStorageFilename(value: string): string {
     .replace(/[^a-z0-9._-]+/gi, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
-}
-
-function inferBestBottlesBodyMaterial(product: Product): string {
-  const haystack = [
-    product.family,
-    product.bottleCollection,
-    product.category,
-    product.itemName,
-    product.graceSku,
-  ]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ")
-    .toLowerCase();
-
-  if (haystack.includes("aluminum") || haystack.includes("aluminium") || haystack.includes("ab-alu")) {
-    return "opaque brushed/satin aluminum";
-  }
-  if (
-    haystack.includes("atomizer") ||
-    haystack.includes("metal atomizer") ||
-    /(?:^|\s)gb-[a-z0-9-]+-(?:5ml|10ml)-atm-/i.test(haystack)
-  ) {
-    return "opaque colored/anodized metal atomizer casing";
-  }
-  if (haystack.includes("plastic")) {
-    return "plastic";
-  }
-  return "glass";
 }
 
 /**
@@ -1062,11 +1035,8 @@ export function MastersTabPanel({
   // presets. Catalog presets stay locked at the preset's canonical ratio.
   const hasFlexibleOverlay = isSceneFlexible || isAngles || isMarketing;
   const routedCatalogPresetId = useMemo(
-    () =>
-      getBestBottlesCatalogPresetIdForFamily(
-        selectedProduct?.family ?? selectedProduct?.bottleCollection ?? familyName,
-      ),
-    [familyName, selectedProduct?.bottleCollection, selectedProduct?.family],
+    () => getBestBottlesCatalogPresetIdForProduct(selectedProduct, familyName),
+    [familyName, selectedProduct],
   );
 
   useEffect(() => {

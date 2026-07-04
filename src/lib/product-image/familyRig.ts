@@ -1,3 +1,8 @@
+import {
+  getBestBottlesFamilyProfileForProduct,
+  type BestBottlesFamilyProfileProductInput,
+} from "@/config/bestBottlesFamilyProfiles";
+
 /**
  * IMPOSED STUDIO RIG — single source of truth (Vite / Node runtime).
  *
@@ -12,28 +17,29 @@
  * FAMILY_RIG numerically identical there.
  *
  * ── What this does (and deliberately does NOT do) ───────────────────────
- * SIZE STRATEGY DECISION (Jordan, 2026-06-18): the generated master is
- * SIZE-AGNOSTIC. It does NOT encode true cross-SKU size. Reasons:
- *   - Source references are framed-to-fill (measured: 5 ml and 9 ml both fill
- *     ~87% of their own frame), so they can't be trusted for scale.
- *   - A single honest mm-driven scale makes most of the catalog (50–120 mm
- *     decant bottles, tallest ~200 mm) render small/sparse in a solo PDP.
- *   - A solo PDP hero wants a clean, full, CONSISTENT frame; true relative
- *     size only matters in variant/category GRIDS.
- * So: the rig gives every SKU one consistent, generous fit-to-box framing on a
- * shared baseline + centerline. TRUE RELATIVE SIZE is applied at the DISPLAY
- * layer by the website, scaling each thumbnail by its real `heightWithCap`
- * (mm lives in Convex). See the website repo's variant/category grid.
+ * SIZE STRATEGY DECISION (updated 2026-06-27): the generated master uses a
+ * fixed studio canvas and a resolved family/profile framing target. Source
+ * references are product truth, not framing truth: they can be tiny, padded,
+ * or cropped differently. The rig normalizes baseline + centerline and may
+ * vary fill height by profile (for example compact vs tall Cylinder).
  *
  * The rig still separates concerns cleanly:
  *   - Reference image  → IDENTITY (shape, color, material, components, cap state)
- *   - This rig         → PLACEMENT + consistent framing (where + how big on canvas)
- *   - Display layer    → TRUE SIZE (mm-driven scaling in grids)
+ *   - This rig         → PLACEMENT + profile framing (where + how big on canvas)
+ *   - Display layer    → optional TRUE SIZE comparison in grids
  */
 
 export interface FamilyRigConfig {
   /** Normalized family key (lowercase). */
   family: string;
+  /** Optional profile id resolved from product truth, e.g. sample-vial or cylinder-standard. */
+  profileId?: string;
+  /** Optional human label for prompt/reporting output. */
+  profileLabel?: string;
+  /** Relative scale zone resolved from capacity/height metadata. */
+  relativeScaleZoneId?: string;
+  /** Human label for the relative scale zone. */
+  relativeScaleZoneLabel?: string;
   /**
    * The whole assembly (bottle + cap/applicator) is fit-to-box: scaled to fit
    * within this % of canvas HEIGHT and `fillWidthPct` of canvas WIDTH,
@@ -41,37 +47,48 @@ export interface FamilyRigConfig {
    * consistent catalog framing regardless of real size.
    */
   fillHeightPct: number;
+  /** Accepted QA fill-height range for this resolved profile. */
+  fillHeightRangePct?: { min: number; max: number };
   /** Width half of the fit-to-box (see fillHeightPct). */
   fillWidthPct: number;
   /** Bottle base seated this far up from the canvas bottom (% of height). */
   baselinePct: number;
+  /** Primary bottle centerline target as % of canvas width. */
+  primaryObjectCenterXPct?: number;
 }
 
 /**
- * Per-family rig configs. The fill/baseline numbers are framing aesthetics,
- * NOT size encodings — every SKU in a family is framed the same. Add a family
- * here only when it needs a shape-specific override. Families without a custom
- * entry use `defaultPdp`, so no Best Bottles PDP master keeps source-size
- * framing just because the family has not been hand-tuned yet.
+ * Per-family rig configs. The fill/baseline numbers are framing aesthetics.
+ * Product-aware callers can resolve a more specific family profile with
+ * `getFamilyRigForProduct`; callers with only family text use these defaults.
+ * Families without a custom entry use `defaultPdp`, so no Best Bottles PDP
+ * master keeps source-size framing just because the family has not been
+ * hand-tuned yet.
  */
 export const FAMILY_RIG: Record<string, FamilyRigConfig> = {
   defaultPdp: {
     family: "universal-pdp",
     fillHeightPct: 67,
+    fillHeightRangePct: { min: 65, max: 69 },
     fillWidthPct: 60,
-    baselinePct: 13,
+    baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
   cylinder: {
     family: "cylinder",
-    fillHeightPct: 72,
+    fillHeightPct: 76,
+    fillHeightRangePct: { min: 72, max: 78 },
     fillWidthPct: 62,
     baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
   circle: {
     family: "circle",
     fillHeightPct: 78,
+    fillHeightRangePct: { min: 76, max: 80 },
     fillWidthPct: 68,
-    baselinePct: 13,
+    baselinePct: 9,
+    primaryObjectCenterXPct: 50,
   },
 };
 
@@ -88,6 +105,32 @@ export function getFamilyRig(family?: string | null): FamilyRigConfig | null {
   const f = normalizeFamily(family);
   if (f === "tall cylinder") return FAMILY_RIG.cylinder;
   return FAMILY_RIG[f] ?? FAMILY_RIG.defaultPdp;
+}
+
+export function getFamilyRigForProduct(
+  input: BestBottlesFamilyProfileProductInput | null | undefined,
+): FamilyRigConfig | null {
+  const profile = getBestBottlesFamilyProfileForProduct(input);
+  if (!profile) return getFamilyRig(input?.family ?? input?.bottleCollection);
+  return {
+    family: profile.family,
+    profileId: profile.id,
+    profileLabel: profile.label,
+    relativeScaleZoneId: profile.relativeScaleZoneId,
+    relativeScaleZoneLabel: profile.relativeScaleZoneLabel,
+    fillHeightPct: profile.targetProductHeightPct,
+    fillHeightRangePct: profile.targetProductHeightRangePct,
+    fillWidthPct: profile.fillWidthPct,
+    baselinePct: profile.baselinePct,
+    primaryObjectCenterXPct: profile.primaryObjectCenterXPct,
+  };
+}
+
+function formatFamilyLabel(cfg: FamilyRigConfig): string {
+  if (cfg.family === "universal-pdp") return "Universal PDP";
+  return (cfg.profileLabel ?? cfg.family)
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function hasFamilyRig(family?: string | null): boolean {
@@ -121,28 +164,30 @@ export type RigCapState = "assembled" | "detached";
  * This block is authoritative for COMPOSITION and explicitly supersedes any
  * earlier "preserve the reference's centerline/baseline/crop/scale" language.
  * It does NOT touch geometry/material/component locks (those stay anchored to
- * the reference), and it deliberately does NOT vary on-canvas size by capacity
- * — every SKU is framed consistently; true size is applied at display time.
+ * the reference).
  */
 export function buildImposedRigBlock(input: {
   family: string;
   capState: RigCapState;
+  rig?: FamilyRigConfig | null;
 }): string | null {
-  const cfg = getFamilyRig(input.family);
+  const cfg = input.rig ?? getFamilyRig(input.family);
   if (!cfg) return null;
 
-  const familyLabel = cfg.family === "universal-pdp"
-    ? "Universal PDP"
-    : cfg.family.replace(/\b\w/g, (c) => c.toUpperCase());
+  const familyLabel = formatFamilyLabel(cfg);
   const baselineLow = cfg.baselinePct - 1;
   const baselineHigh = cfg.baselinePct + 1;
+  const fillRangeLine = cfg.fillHeightRangePct
+    ? ` Keep final QA inside the approved ${cfg.fillHeightRangePct.min}-${cfg.fillHeightRangePct.max}% fill-height range.`
+    : "";
 
   const placementLines =
     input.capState === "detached"
       ? [
-          "- Treat the bottle plus detached cap as ONE two-object assembly, not two independently framed products.",
-          "- Place the bottle BODY slightly left of the canvas vertical centerline so the combined bottle+cap assembly is visually centered on the canvas.",
-          "- Place the DETACHED cap upright to the RIGHT of the body. Seat the cap bottom on the EXACT SAME horizontal baseline as the bottle base; their bottom contact pixels should align within ~6 px.",
+          "- Keep the primary bottle BODY centered on the canvas vertical centerline. The detached component does not shift the primary bottle.",
+          "- Treat the detached cap as a controlled right-sidecar component, not part of a group-centering calculation.",
+          "- If Image 1 intentionally shows a detached pump, applicator, wand, dropper, or closure outside the bottle, treat that external component as the right-sidecar object on the shared baseline. It must not shift the primary bottle and must not be duplicated inside the bottle.",
+          "- Place the DETACHED cap upright in the right sidecar zone. Seat the cap bottom on the EXACT SAME horizontal baseline as the bottle base; their bottom contact pixels should align within ~6 px.",
           "- Keep a clean, even gap of about 6-10% of canvas width between the bottle's widest right edge and the cap's left edge. Do not let the cap drift far away, tuck behind the bottle, or overlap the bottle.",
           "- Keep the cap's vertical axis parallel to the bottle. Scale it as the real matching cap for this bottle: not tiny, not oversized, and with the cap top around the bottle shoulder/lower-neck zone unless the reference product proves otherwise.",
           "- For sprayer / pump cap-off SKUs, the bottle top is the exposed sprayer, pump, actuator/nozzle, collar, and dip tube assembly seated on the bottle. That top assembly is NOT a detached cap and must not become a second loose object.",
@@ -163,10 +208,9 @@ export function buildImposedRigBlock(input: {
     "- Still locked to the reference (do NOT change these): product geometry, silhouette, proportions, height-to-width ratio, colors, component shapes, cap-on vs cap-off state, number of components, and material identity. The reference governs WHAT the product is; this rig governs WHERE and HOW it sits on the canvas.",
     `- Baseline: seat the bottle base's visible bottom contact pixels at ${baselineLow}–${baselineHigh}% up from the canvas bottom. Every ${familyLabel} SKU shares this one horizontal shelf line. Do not lift the bottle base above this shelf line or let it float in the frame.`,
     ...placementLines,
-    `- Render the product at a balanced, inspectable, CONSISTENT PDP catalog size: the whole assembly fills the frame the same way for every ${familyLabel} SKU. Fit it fully within ~${cfg.fillHeightPct}% of the canvas height and ~${cfg.fillWidthPct}% of the width, centered, with comfortable even margins.`,
+    `- Render the product at the resolved ${familyLabel} PDP framing target. Fit the full assembly within ~${cfg.fillHeightPct}% of the canvas height and ~${cfg.fillWidthPct}% of the width, centered, with comfortable even margins.${fillRangeLine}`,
     "- Surface rule: flat Bone background only. No mirror reflection, no glossy floor, no reflective tabletop, no rectangular studio plate, no inner background rectangle, no visible paper edge, no texture patch, and no second background color.",
     "- Do not leave the product tiny with excessive empty margins, and do not crop any part (cap, base, applicator, detached cap, or grounding shadow).",
-    "- Do NOT vary the on-canvas size by ml capacity. A small-capacity and a large-capacity bottle are framed at the SAME generous size here — true relative size is applied later at display time, not in this image.",
     "- FINAL ALIGNMENT QA: before accepting the image, seat the bottle base and any detached cap bottom on the shared rig baseline; no sibling variant may float higher, sink lower, or use a different floor line.",
     "- Same fixed studio rig for the whole family: identical camera distance, lens, optical compression, baseline, and centerline. Only the purchasable component differences change between siblings.",
   ].join("\n");

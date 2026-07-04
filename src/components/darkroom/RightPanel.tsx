@@ -107,13 +107,13 @@ export const BACKGROUND_PRESETS: BackgroundPreset[] = [
     id: "studio-clean",
     label: "Bone Studio",
     icon: "⬜",
-    description: "Flat #EEE6D4 PDP canvas",
+    description: "Flat #F5F3EF PDP canvas",
     useLabel: "PDP base",
     variations: [
-      "flat Best Bottles Bone #EEE6D4 seamless studio background, premium product photography, soft upper-front-left key light, controlled contact shadow, no props",
-      "clean bone #EEE6D4 editorial studio canvas, uncluttered commercial product setup, subtle warm bounce, realistic soft shadow falling back-right",
+      "flat Best Bottles Bone #F5F3EF seamless studio background, premium product photography, soft upper-front-left key light, controlled contact shadow, no props",
+      "clean bone #F5F3EF editorial studio canvas, uncluttered commercial product setup, subtle warm bounce, realistic soft shadow falling back-right",
       "minimal Best Bottles bone backdrop, high-end ecommerce product photography, refined glass highlights, no texture, no vignette, no extra objects",
-      "warm cream #EEE6D4 seamless paper background, luxury studio lighting, clean centered product presentation, no labels, no props, no decorative scene elements",
+      "warm Bone #F5F3EF seamless studio background, luxury studio lighting, clean centered product presentation, no labels, no props, no decorative scene elements",
     ],
   },
   {

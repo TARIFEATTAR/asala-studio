@@ -3,6 +3,17 @@
 > and decisions worked out with the operator (Cowork) on 2026-06-20. Read this
 > before touching anything in the Best Bottles image/library/pipeline surface.
 
+> **⚠️ PROMPT ARCHITECTURE UPDATE (2026-07) — read before the "prompt assembly" claims below.**
+> The single authoritative catalog image prompt is now the **vendored canon** in
+> `src/config/bestBottlesCatalogCanon.ts` (glass-type parametrized) plus a **per-family
+> framing profile** from `src/config/bestBottlesFamilyProfiles.ts` (one profile per
+> bottle family, all 28 catalog families covered), assembled by `buildFinalPrompt()` in
+> `src/lib/bestBottlesPromptPreflight.ts`. This one string is what ships to `gpt-image-2`
+> via `supabase/functions/generate-madison-image`. `src/utils/promptFormula.ts` (cited
+> below) is a *different* feature (Dark Room "Pro Mode" camera/lighting) and does NOT
+> drive catalog images. The `config/product_families.json` module system is validation-only
+> (its prompt text is discarded). Paper-doll builders are deprecated/removed.
+
 ## 0. The one mental model that prevents mistakes
 
 There are **two independent axes** on every product image. They are NOT the same
@@ -91,14 +102,18 @@ absolute counts; rebuild from intake + the live `generated_images` table.
 
 ## 4. The on-brand rubric (for any UI that shows/scores quality)
 
-From `src/config/imagePresets.ts`: background = flat Best Bottles **Bone `#EEE6D4`**
+From `src/config/imagePresets.ts`: background = flat Best Bottles **Bone `#F5F3EF`**
 (never white/transparent/checkerboard); single soft key light upper-front-left;
 contact shadow back-right ~2:00–2:30 (never directly beneath, never left/back-left);
 exactly one product matching the reference identity (geometry, color, cap, applicator,
 cap-state, placement/scale); no label/text/props/secondary-product/hands/mist; no
 chrome-CGI sheen on plastic caps; no other-brand shapes. Generation engine:
-`supabase/functions/generate-madison-image`; prompt assembly in
-`src/utils/promptFormula.ts` + `src/config/imagePresets.ts`.
+`supabase/functions/generate-madison-image`; catalog prompt assembly in
+`src/lib/bestBottlesPromptPreflight.ts` (`buildFinalPrompt` = vendored canon
+`src/config/bestBottlesCatalogCanon.ts` + per-family framing profile
+`src/config/bestBottlesFamilyProfiles.ts`). (Historical note: earlier drafts of this
+brief pointed at `src/utils/promptFormula.ts`, which is actually Dark Room "Pro Mode",
+not the catalog path.)
 
 ## 5. Lane split & single-writer discipline (how the two agents coexist)
 
@@ -132,7 +147,7 @@ upscale — identity references, not final images), horizontally centered, foot 
 - `public/data/best-bottles-madison-generation-batches.json` — bulk generation batches (use; don't rebuild)
 - `supabase/migrations/20260422010000_library_tags_column.sql` — library_tags surface
 - `supabase/functions/generate-madison-image` — generation engine
-- `src/config/imagePresets.ts` — on-brand rubric (#EEE6D4)
+- `src/config/imagePresets.ts` — on-brand rubric (#F5F3EF)
 
 ## 8. Guardrails
 - Don't do a destructive reset of the pipeline. Generation history + the 642 keepers +

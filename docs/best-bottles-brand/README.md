@@ -104,7 +104,7 @@ Addresses the reader as **"you"** in calls-to-action and microcopy; uses **"we" 
 - `--slate #637588` — secondary text, eyebrow copy.
 - `--champagne #D4C5A9` — borders and dividers (usually at `/50` opacity).
 - `--linen #FAF8F5` — light surface (PathChooser, Education band).
-- `--travertine #EEE6D4` — warmer image-placeholder surface.
+- `--travertine #F5F3EF` — warmer image-placeholder surface.
 - `--parchment #ECE5D8` / `--warm-white #FDFBF8` — secondary grid surfaces.
 
 **Portal extensions** — `--ash #9A9590`, `--ink #2C2C2E`, `--gold-dim #8B6F42`.
