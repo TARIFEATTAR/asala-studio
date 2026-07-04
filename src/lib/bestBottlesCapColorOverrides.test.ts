@@ -68,6 +68,46 @@ describe("Best Bottles cap color overrides", () => {
     assert.doesNotMatch(issue, /row color says Clear, but product evidence says Pink/);
   });
 
+  it("does not block clear/cobalt bottles that merely have a pink cap/leather/sprayer", () => {
+    // The 12 Cylinder SKUs that were false-positive blocked (2026-07-04 audit):
+    // "pink" describes the CAP/reducer/sprayer, the glass is clear or cobalt.
+    const cases = [
+      { graceSku: "GB-CYL-CLR-100ML-RDC-PKLT", color: "Clear", capColor: "Pink Leather",
+        itemName: "Cylinder design 100 ml clear glass bottle with reducer and pink faux leather cap." },
+      { graceSku: "GB-CYL-CLR-100ML-ASP-PNK", color: "Clear", capColor: "Pink",
+        itemName: "Cylinder design 100 ml clear glass bottle with pink vintage style bulb sprayer." },
+      { graceSku: "GB-CYL-BLU-5ML-MRL-PKDT", color: "Cobalt Blue", capColor: "Pink with Dots",
+        itemName: "Cylinder design 5ml Blue glass bottle with metal roller ball plug and pink cap with dots." },
+      { graceSku: "GB-CYL-CLR-9ML-MRL-PKDT-02", color: "Clear", capColor: "Pink Dotted",
+        itemName: "Tall cylinder design 9ml Clear glass bottle with metal roller ball plug and pink cap with dots." },
+    ];
+    for (const c of cases) {
+      const identity = buildBestBottlesGenerationIdentity(
+        { ...c, family: "Cylinder", capacityMl: 9, applicator: "Metal Roller Ball" },
+        { bodyMaterial: "glass", sourceReference: "https://example.com/ref.png" },
+      );
+      assert.equal(
+        getBestBottlesGenerationIdentityIssue(identity),
+        null,
+        `${c.graceSku} should not be identity-blocked`,
+      );
+      assert.equal(identity.inferredBodyColor, null, `${c.graceSku} body color must not infer Pink`);
+    }
+  });
+
+  it("still infers Pink for a genuine pink-GLASS bottle", () => {
+    const identity = buildBestBottlesGenerationIdentity(
+      {
+        graceSku: "GB-CYL-PNK-5ML-ATM-PNK", family: "Cylinder", color: "Pink", capColor: "Pink",
+        capacityMl: 5, applicator: "Fine Mist Sprayer",
+        itemName: "Cylinder 5 ml Pink Glass Bottle with Atomizer Pink Cap",
+      },
+      { bodyMaterial: "glass" },
+    );
+    assert.equal(identity.identityStatus, "ready");
+    assert.equal(identity.inferredBodyColor, "Pink");
+  });
+
   it("keeps genuinely pink bottles inferring Pink", () => {
     const identity = buildBestBottlesGenerationIdentity({
       graceSku: "GB-CYL-PNK-5ML-ATM-PNK",

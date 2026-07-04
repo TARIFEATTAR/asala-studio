@@ -128,10 +128,13 @@ function inferBodyColorFromWebsiteSku(product: BestBottlesIdentityProductLike): 
   if (/\bamber\b|\bamb\b/i.test(value)) return "Amber";
   if (/\bcobalt\b|\bcobalt\s*blue\b/i.test(value)) return "Cobalt Blue";
   if (/\bgreen\b|\bgrn\b/i.test(value)) return "Green";
-  // "pink dot"/"PnkDot" is a CAP pattern in this catalog, never a glass color —
-  // without the guard, clear bottles with pink dot caps misattribute the cap's
-  // pink to the body and hit a false body-color-conflict blocker.
-  if (/\bpink\b(?!\s+dot)|\bpnk\b(?!\s*dot)/i.test(value)) return "Pink";
+  // "pink" in a Best Bottles name almost always describes a CAP, leather reducer,
+  // or spray accent ("pink dot cap", "Reducer Pink Leather", "Antique spray Pink")
+  // — NOT the glass body. Pink GLASS is encoded in the graceSku color code (-PNK-)
+  // and the Convex color field, handled elsewhere. So only infer a pink BODY from
+  // explicit body context; otherwise a clear/cobalt bottle with a pink cap would
+  // misattribute the cap's pink to the glass and hit a false body-color conflict.
+  if (/\bpink\s+(?:glass|bottle|cylinder|body)\b/i.test(value)) return "Pink";
   return null;
 }
 
