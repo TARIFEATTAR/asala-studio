@@ -11,7 +11,6 @@ import {
   buildBestBottlesCatalogCanonPromptParts,
 } from "./bestBottlesCatalogCanonPrompt";
 import {
-  BEST_BOTTLES_COMPONENT_MATERIAL_TARGETING_CUE,
   getBestBottlesCatalogFramingProfile,
   getBestBottlesCylinderFamilyProfile,
   getBestBottlesCylinderHeightDiameterRatio,
@@ -469,10 +468,14 @@ function buildFramingProfilePrompt(profile: BestBottlesFamilyProfile | null): st
       ? "- If a detached cap or applicator is present, keep it as a right-sidecar component on the same baseline; it must not shift the primary bottle off center."
       : null,
     BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
-    profile.glassGeometryHint ?? null,
-    // Scoped with the volume cue for now: the cap-strip failure was observed on
-    // the same round-glass, high-key renders the volume cue targets.
-    profile.glassGeometryHint ? BEST_BOTTLES_COMPONENT_MATERIAL_TARGETING_CUE : null,
+    // NOTE (2026-07-04): the round-glass volume cue and the cap material-targeting
+    // cue were intentionally REMOVED. Both were interpretive instructions that
+    // invited the model to reinterpret components the PRESERVE block already locks
+    // to the reference — the observed result was caps drifting / "paint stripped"
+    // and mottled glass interiors. Framing here controls placement + shadow only;
+    // component fidelity is left entirely to the reference image + PRESERVE. The
+    // cue constants remain in bestBottlesFamilyProfiles.ts if a scoped, lighter
+    // reintroduction is ever justified by evidence.
     "- Keep all physical proportions locked to the reference; this framing profile controls only placement, scale on canvas, baseline, centering, and grounding shadow.",
   ]
     .filter((line): line is string => Boolean(line))
