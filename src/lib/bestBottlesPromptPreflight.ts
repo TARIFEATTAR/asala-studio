@@ -1,3 +1,4 @@
+import { applyBestBottlesCapColorOverride } from "./bestBottlesCapColorOverrides";
 import {
   buildPromptForSku,
   type PromptRecord,
@@ -10,6 +11,7 @@ import {
   buildBestBottlesCatalogCanonPromptParts,
 } from "./bestBottlesCatalogCanonPrompt";
 import {
+  BEST_BOTTLES_COMPONENT_MATERIAL_TARGETING_CUE,
   getBestBottlesCatalogFramingProfile,
   getBestBottlesCylinderFamilyProfile,
   getBestBottlesCylinderHeightDiameterRatio,
@@ -438,6 +440,16 @@ function buildCanvasPreflight(product: ProductLike, sku: PromptSku): BestBottles
   return { qaChecklist, warnings };
 }
 
+// Grounding-shadow directive shared by every family's framing block. The catalog
+// canon only asks for a vague "contact-only shadow" with no target, so shadows
+// rendered faint and inconsistent. This quantified directive makes the shadow
+// clearly present and repeatable across families. Tune the opacity/feather here —
+// it is the single knob for catalog shadow strength. (Shadows are still model-
+// drawn, so this tightens the distribution rather than pixel-locking it; the
+// post-generation color-correct preserves whatever the model draws.)
+const BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE =
+  "- Ground the product with a soft but clearly visible contact shadow directly beneath the bottle base, and a matching one beneath the detached cap: darkest right at the contact line at roughly 32-42% opacity, feathering outward and fading within about 15-20% of the bottle's width. One soft key light means one soft-edged shadow — no hard outline, no long dramatic cast, no doubled shadow, no mirror reflection, and no visible floor plane.";
+
 function buildFramingProfilePrompt(profile: BestBottlesFamilyProfile | null): string | null {
   if (!profile) return null;
   const label = profile.label.toUpperCase();
@@ -456,7 +468,12 @@ function buildFramingProfilePrompt(profile: BestBottlesFamilyProfile | null): st
     profile.detachedComponentPlacement === "right-sidecar"
       ? "- If a detached cap or applicator is present, keep it as a right-sidecar component on the same baseline; it must not shift the primary bottle off center."
       : null,
-    "- Keep all physical proportions locked to the reference; this framing profile only controls placement, scale on canvas, baseline, and centering.",
+    BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
+    profile.glassGeometryHint ?? null,
+    // Scoped with the volume cue for now: the cap-strip failure was observed on
+    // the same round-glass, high-key renders the volume cue targets.
+    profile.glassGeometryHint ? BEST_BOTTLES_COMPONENT_MATERIAL_TARGETING_CUE : null,
+    "- Keep all physical proportions locked to the reference; this framing profile controls only placement, scale on canvas, baseline, centering, and grounding shadow.",
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n");
@@ -475,7 +492,10 @@ function buildFinalPrompt(product: ProductLike, sku: PromptSku): string {
     .join("\n\n");
 }
 
-export function buildBestBottlesPromptSkuFromProduct(input: PromptSkuBuildInput): PromptSku {
+export function buildBestBottlesPromptSkuFromProduct(rawInput: PromptSkuBuildInput): PromptSku {
+  // Same catalog color correction the generation-identity layer applies, so the
+  // compiled prompt's cap/closure language matches the real product.
+  const input = { ...rawInput, product: applyBestBottlesCapColorOverride(rawInput.product) };
   const sku = getSku(input.product);
   const productFamily = inferBestBottlesPromptFamily(input.product);
   const bodyMaterial = inferBestBottlesPromptBodyMaterial(input.product, input.bodyMaterial);
@@ -547,8 +567,9 @@ function getWarnings(
 }
 
 export function buildBestBottlesPromptPreflight(
-  input: BestBottlesPromptPreflightInput,
+  rawInput: BestBottlesPromptPreflightInput,
 ): BestBottlesPromptPreflight {
+  const input = { ...rawInput, product: applyBestBottlesCapColorOverride(rawInput.product) };
   if (!input.referenceImagePath?.trim()) {
     return {
       status: "error",

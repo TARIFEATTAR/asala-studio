@@ -1,3 +1,5 @@
+import { applyBestBottlesCapColorOverride } from "./bestBottlesCapColorOverrides";
+
 export type BestBottlesGenerationIdentityStatus = "ready" | "blocked";
 
 export const BEST_BOTTLES_PROMPT_VERSION = "best-bottles-reference-locked-v5.2";
@@ -126,7 +128,10 @@ function inferBodyColorFromWebsiteSku(product: BestBottlesIdentityProductLike): 
   if (/\bamber\b|\bamb\b/i.test(value)) return "Amber";
   if (/\bcobalt\b|\bcobalt\s*blue\b/i.test(value)) return "Cobalt Blue";
   if (/\bgreen\b|\bgrn\b/i.test(value)) return "Green";
-  if (/\bpink\b|\bpnk\b/i.test(value)) return "Pink";
+  // "pink dot"/"PnkDot" is a CAP pattern in this catalog, never a glass color —
+  // without the guard, clear bottles with pink dot caps misattribute the cap's
+  // pink to the body and hit a false body-color-conflict blocker.
+  if (/\bpink\b(?!\s+dot)|\bpnk\b(?!\s*dot)/i.test(value)) return "Pink";
   return null;
 }
 
@@ -263,9 +268,12 @@ function stableHash(parts: Array<string | number | boolean | null | undefined>):
 }
 
 export function buildBestBottlesGenerationIdentity(
-  product: BestBottlesIdentityProductLike,
+  rawProduct: BestBottlesIdentityProductLike,
   options?: { bodyMaterial?: string | null; sourceReference?: string | null },
 ): BestBottlesGenerationIdentity {
+  // Correct known-bad catalog color fields before any inference runs, so both
+  // the blockers and the identity hash see the fixed value.
+  const product = applyBestBottlesCapColorOverride(rawProduct);
   const graceSku = optionalText(product.graceSku);
   const websiteSku = optionalText(product.websiteSku);
   const bodyColor = optionalText(product.color);

@@ -101,6 +101,19 @@ export const NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS: readonly CylinderSmokeTarget
     mode: "cap-off",
     capState: "detached",
   },
+  // GB-CYL-CLR-9ML-T-05's Convex row says capColor="Clear" but the product has a
+  // pink dot cap; the cap-color override registry (src/lib/bestBottlesCapColorOverrides.ts)
+  // corrects it code-side, so it is identity-clean and back in the ready set.
+  // Remove the override entry once Cowork fixes the Convex metadata.
+  {
+    caseId: "9ml-rollon-capoff-metal-pink-dot",
+    capacity: "9ml",
+    sku: "GB-CYL-CLR-9ML-T-05",
+    reference:
+      `${ROOT}/pipeline/aios-shopify-pdp-images/00-input/reference-flattened/cylinder-9ml-clear-17-415-rollon/GB-CYL-CLR-9ML-T-05__GBCyl9MtlRollPnkDot__pdp-main__v001.png`,
+    mode: "cap-off",
+    capState: "detached",
+  },
   {
     caseId: "9ml-rollon-capoff-metal-matte-silver",
     capacity: "9ml",

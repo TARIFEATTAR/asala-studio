@@ -75,8 +75,12 @@ describe("Best Bottles cylinder smoke targets", () => {
     );
   });
 
-  it("defines a reusable nine-SKU 9ml roll-on cap-off consistency group", () => {
-    assert.equal(NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS.length, 9);
+  it("defines a reusable ten-SKU 9ml roll-on cap-off consistency group (pink dot restored via cap-color override)", () => {
+    assert.equal(NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS.length, 10);
+    assert.ok(
+      NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS.some((target) => target.sku === "GB-CYL-CLR-9ML-T-05"),
+      "pink dot cap SKU must be in the ready set",
+    );
     assert.ok(
       NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS.every(
         (target) =>
@@ -92,7 +96,7 @@ describe("Best Bottles cylinder smoke targets", () => {
   it("selects the reusable 9ml roll-on cap-off group by group id", () => {
     const targets = selectCylinderSmokeTargets("9ml-rollons-capoff");
 
-    assert.equal(targets.length, 9);
+    assert.equal(targets.length, 10);
     assert.deepEqual(
       targets.map((target) => target.sku),
       NINE_ML_ROLL_ON_CAP_OFF_SMOKE_TARGETS.map((target) => target.sku),

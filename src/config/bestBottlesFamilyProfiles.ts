@@ -73,7 +73,52 @@ export interface BestBottlesFamilyProfile {
   primaryObjectCenterXPct: number;
   detachedComponentPlacement: BestBottlesDetachedComponentPlacement;
   detachedComponentShiftsPrimary: boolean;
+  /**
+   * Optional one-line material-geometry cue rendered into the framing block.
+   * Round-bodied glass families use this to defeat the "flat cutout" failure
+   * mode (the canon's "quiet mid-body" instruction, unqualified, can make the
+   * model render the transparent body as a flat pane of background). Flat-faced
+   * families (Empire, Square, Rectangle) intentionally omit it.
+   */
+  glassGeometryHint?: string;
 }
+
+/**
+ * Curvature cue for round-bodied CLEAR-GLASS families, calibrated against the
+ * approved reference render (9ml roller, shiny-gold cap, 2026-07-04 smoke): the
+ * quality that makes glass read as curved volume is that the INTERIOR tone sits
+ * about a half-tone deeper than the bare canvas and deepens gradually toward the
+ * walls. v1 of this cue only asked for denser edges, which high-key renders
+ * ignored (interior stayed identical to the background = windowpane). Edge-
+ * focused wording is deliberate: it cannot re-introduce the banned broad central
+ * highlight stripe, and does not contradict the canon's "quiet mid-body" rule.
+ */
+export const BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE =
+  "- Round-glass volume cue: the body is a curved cylinder, not a flat pane. The backdrop seen THROUGH the glass reads about a half-tone deeper than the bare canvas beside the bottle, and that interior tone deepens gradually toward the left and right walls where the glass is optically thickest, with a continuous fine dark glass edge line on both silhouette walls. This interior tone change is purely optical and PERFECTLY SMOOTH — an even, continuous gradient with zero grain, speckle, mottling, smudges, brushy streaks, haze patches, or painted texture inside the glass; the interior stays optically clean. The mid-body stays quiet but must not match the background exactly. Do not add a central highlight stripe.";
+
+/**
+ * Component material-targeting cue. PRODUCT TRUTH (operator-confirmed
+ * 2026-07-04): the roll-on over-caps are PHENOLIC — a molded high-grade plastic
+ * SUBSTRATE — but FINISH is independent of substrate: shiny colorways (shiny
+ * gold / silver / black) are genuinely mirror-bright and chrome-LIKE, matte
+ * colorways are soft satin. The roller BALL is genuinely polished steel.
+ *
+ * The real observed failure mode was NOT "looks too chrome" — it was a blown
+ * highlight stripping the color off one side into a flat white panel (shiny
+ * silver, 2026-07-04). An earlier fix over-corrected by forbidding any
+ * mirror/chrome read, which would dull the legitimately shiny colorways
+ * (including the approved shiny-gold T-07); that wording is removed here.
+ *
+ * Failure modes this prevents:
+ * (1) blown highlight → flat white panel that reads as missing color on one side;
+ * (2) wires crossing between the DETACHED CAP (sidecar), the steel ROLLER BALL
+ *     and its translucent plastic housing (on the neck) — never metallize the
+ *     plastic plug or recolor the steel ball to match the cap.
+ * Scoped with the volume cue to the same round-glass profiles.
+ */
+export const BEST_BOTTLES_COMPONENT_MATERIAL_TARGETING_CUE =
+  "- Component material targeting: the DETACHED CAP beside the bottle and any ROLLER ASSEMBLY on the bottle neck are separate components — never blend their materials or colors. The detached cap is a phenolic (molded high-grade plastic) closure; render its exact reference colorway and finish across its ENTIRE visible surface, never a flat white panel that looks like missing color on one side. Shiny colorways (shiny gold, shiny silver, shiny black) are genuinely mirror-bright — keep them glossy and chrome-like exactly as the reference shows; matte colorways (matte gold, matte silver, matte copper) read as soft satin. White and pale caps keep an even, uniform surface with soft gentle shading — no harsh vertical streaks of gloss and no irregular gray patches that read as worn or rubbed-off paint. The substrate is molded plastic, so avoid literal machined-metal grain or seams, but never dull a shiny cap's mirror reflection. The roller ball on the neck IS polished steel exactly as photographed — do not recolor it to match the cap — and its translucent plastic plug housing stays translucent plastic, never metallized.";
+
 
 interface BestBottlesFamilyProfileTemplate
   extends Omit<BestBottlesFamilyProfile, "targetProductHeightPct"> {
@@ -122,6 +167,7 @@ const SAMPLE_VIAL_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   label: "Cylinder Sample Vial",
   relativeScaleZoneId: "sample-vial",
   relativeScaleZoneLabel: "Sample vials",
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
   canvas: FIXED_STUDIO_CANVAS,
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.sampleVials,
   observedHeightRangeMm: { min: 32, max: 75 },
@@ -139,6 +185,7 @@ const ROLLER_BOTTLE_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   label: "Roller Bottle",
   relativeScaleZoneId: "roller-bottle",
   relativeScaleZoneLabel: "Roller bottles",
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
   canvas: FIXED_STUDIO_CANVAS,
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottles,
   observedHeightRangeMm: { min: 55, max: 118 },
@@ -156,6 +203,7 @@ const CYLINDER_STANDARD_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   label: "Cylinder Standard",
   relativeScaleZoneId: "standard-cylinder",
   relativeScaleZoneLabel: "Standard Cylinder bottles",
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
   canvas: FIXED_STUDIO_CANVAS,
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.cylinders10To30Ml,
   observedHeightRangeMm: { min: 75, max: 142 },
@@ -184,6 +232,7 @@ const CYLINDER_TALL_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   label: "Cylinder Tall",
   relativeScaleZoneId: "large-cylinder",
   relativeScaleZoneLabel: "Large Cylinder bottles",
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
   canvas: FIXED_STUDIO_CANVAS,
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.largeCylinders,
   observedHeightRangeMm: { min: 142, max: 199 },
@@ -201,6 +250,7 @@ const BOSTON_ROUND_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   label: "Boston Round",
   relativeScaleZoneId: "boston-round",
   relativeScaleZoneLabel: "Boston Round bottles",
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
   canvas: FIXED_STUDIO_CANVAS,
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.bostonRounds,
   observedHeightRangeMm: { min: 72, max: 117 },
@@ -278,6 +328,7 @@ function makeFamilyTemplate(config: {
   fallbackTargetProductHeightPct: number;
   fillWidthPct: number;
   observedHeightRangeMm: { min: number; max: number };
+  glassGeometryHint?: string;
 }): BestBottlesFamilyProfileTemplate {
   return {
     id: config.id,
@@ -285,6 +336,7 @@ function makeFamilyTemplate(config: {
     label: config.label,
     relativeScaleZoneId: config.relativeScaleZoneId,
     relativeScaleZoneLabel: config.relativeScaleZoneLabel,
+    glassGeometryHint: config.glassGeometryHint,
     canvas: FIXED_STUDIO_CANVAS,
     targetProductHeightRangePct: config.targetProductHeightRangePct,
     observedHeightRangeMm: config.observedHeightRangeMm,
@@ -302,6 +354,7 @@ const ROUND_BOTTLE_TEMPLATE = makeFamilyTemplate({
   relativeScaleZoneId: "round-bottle", relativeScaleZoneLabel: "Round bottles",
   targetProductHeightRangePct: { min: 76, max: 82 }, fallbackTargetProductHeightPct: 79,
   fillWidthPct: 66, observedHeightRangeMm: { min: 60, max: 150 },
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
 });
 const CIRCLE_BOTTLE_TEMPLATE = makeFamilyTemplate({
   id: "circle-bottle", family: "circle", label: "Circle Bottle",
@@ -332,12 +385,14 @@ const APOTHECARY_TEMPLATE = makeFamilyTemplate({
   relativeScaleZoneId: "tall-decorative", relativeScaleZoneLabel: "Tall decorative bottles",
   targetProductHeightRangePct: { min: 80, max: 86 }, fallbackTargetProductHeightPct: 83,
   fillWidthPct: 56, observedHeightRangeMm: { min: 90, max: 200 },
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
 });
 const PILLAR_TEMPLATE = makeFamilyTemplate({
   id: "pillar-bottle", family: "pillar", label: "Pillar Bottle",
   relativeScaleZoneId: "tall-decorative", relativeScaleZoneLabel: "Tall decorative bottles",
   targetProductHeightRangePct: { min: 80, max: 86 }, fallbackTargetProductHeightPct: 83,
   fillWidthPct: 54, observedHeightRangeMm: { min: 90, max: 200 },
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
 });
 const ATOMIZER_TEMPLATE = makeFamilyTemplate({
   id: "atomizer-bottle", family: "atomizer", label: "Atomizer Bottle",
@@ -386,6 +441,7 @@ const TEARDROP_TEMPLATE = makeFamilyTemplate({
   relativeScaleZoneId: "mini-decorative", relativeScaleZoneLabel: "Miniature decorative bottles",
   targetProductHeightRangePct: { min: 66, max: 74 }, fallbackTargetProductHeightPct: 70,
   fillWidthPct: 60, observedHeightRangeMm: { min: 50, max: 110 },
+  glassGeometryHint: BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE,
 });
 const GENERIC_BOTTLE_TEMPLATE = makeFamilyTemplate({
   id: "generic-bottle", family: "bottle", label: "Bottle",
