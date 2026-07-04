@@ -29,6 +29,7 @@
     "test:local-generation-importer": "tsx --test scripts/import-local-generation-to-madison.test.ts",
     "bestbottles:product-hub:enrich": "tsx scripts/enrich-bestbottles-product-hubs.ts",
     "preview": "vite preview",
+    "bestbottles:generation:run-family": "tsx scripts/best-bottles/generate-family-batch.ts",
     "bestbottles:generation:audit-cylinder": "tsx scripts/audit-bestbottles-cylinder-generation.ts",
     "bestbottles:references:prep-cylinder": "tsx scripts/prepare-bestbottles-cylinder-transparent-references.ts",
     "bestbottles:references:clean-cylinder-lane": "tsx scripts/prepare-bestbottles-clean-cylinder-reference-lane.ts",
