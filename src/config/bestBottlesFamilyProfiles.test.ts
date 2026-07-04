@@ -258,6 +258,54 @@ describe("Best Bottles family profiles", () => {
     assert.deepEqual(aluminum.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.aluminumBottles);
   });
 
+  // LOCKED-IN capacity scale staircase — render-validated 2026-07-04 on the real
+  // production sprayer/roller SKUs (measured fill-heights matched to the tenth:
+  // 3ml→56.0%, 4ml→58.1%, 5ml→62.0%, 9ml→67%). This pins the relative-scale
+  // gradation so smaller capacities always render genuinely smaller on the shared
+  // canvas. Do not change these zone/fill targets without re-validating renders.
+  it("locks the 3/4/5/9ml capacity scale gradation on real production SKUs", () => {
+    const threeMl = getBestBottlesFamilyProfileForProduct({
+      graceSku: "GB-SPR-CLR-3ML-BLK", family: "Cylinder", bottleCollection: "Cylinder",
+      capacityMl: 3, applicator: "Fine Mist Sprayer",
+      heightWithCap: "54 ±1 mm", heightWithoutCap: "37 ±0.5 mm", diameter: "14 ±0.5 mm",
+    });
+    const fourMl = getBestBottlesFamilyProfileForProduct({
+      graceSku: "GB-SPR-CLR-4ML-BLK", family: "Cylinder", bottleCollection: "Cylinder",
+      capacityMl: 4, applicator: "Fine Mist Sprayer",
+      heightWithCap: "67 ±1 mm", heightWithoutCap: "49 ±0.5 mm", diameter: "14 ±0.5 mm",
+    });
+    const fiveMl = getBestBottlesFamilyProfileForProduct({
+      graceSku: "GB-CYL-CLR-5ML-SPR-SBLK", family: "Cylinder", bottleCollection: "Cylinder",
+      capacityMl: 5, applicator: "Fine Mist Sprayer",
+      heightWithCap: "72 ±1 mm", heightWithoutCap: "53 ±1 mm", diameter: "17 ±0.5 mm",
+    });
+    const nineMl = getBestBottlesFamilyProfileForProduct({
+      graceSku: "GB-CYL-CLR-9ML-T-07", family: "Cylinder", bottleCollection: "Cylinder",
+      capacityMl: 9, applicator: "Metal Roller Ball",
+      heightWithCap: "83 ±1 mm", heightWithoutCap: "70 ±1 mm", diameter: "20 ±0.5 mm",
+    });
+
+    for (const p of [threeMl, fourMl, fiveMl, nineMl]) {
+      assert.ok(p);
+      assert.equal(p.canvas.widthPx, 2080);
+      assert.equal(p.canvas.heightPx, 2288);
+      assert.equal(p.baselinePct, 9);
+    }
+    // The staircase: each capacity resolves to its designed zone + fill target.
+    assert.equal(threeMl.relativeScaleZoneId, "sample-vial");
+    assert.equal(threeMl.targetProductHeightPct, 56);
+    assert.equal(fourMl.relativeScaleZoneId, "sample-vial");
+    assert.equal(fourMl.targetProductHeightPct, 58);
+    assert.equal(fiveMl.relativeScaleZoneId, "small-cylinder");
+    assert.equal(fiveMl.targetProductHeightPct, 62);
+    assert.equal(nineMl.relativeScaleZoneId, "roller-bottle");
+    assert.equal(nineMl.targetProductHeightPct, 67);
+    // Strictly monotonic: smaller capacity is always rendered smaller.
+    assert.ok(threeMl.targetProductHeightPct < fourMl.targetProductHeightPct);
+    assert.ok(fourMl.targetProductHeightPct < fiveMl.targetProductHeightPct);
+    assert.ok(fiveMl.targetProductHeightPct < nineMl.targetProductHeightPct);
+  });
+
   it("now resolves a framing profile for the previously-uncovered Circle family", () => {
     const circle = getBestBottlesFamilyProfileForProduct({ family: "Circle" });
     assert.ok(circle, "Circle should resolve to a framing profile");
