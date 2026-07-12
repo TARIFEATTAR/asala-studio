@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH,
   buildBestBottlesCatalogCanonPrompt,
+  buildBestBottlesCatalogCanonPromptParts,
   clearGlassForShadowOwner,
   finalStudioCheckForShadowOwner,
   studioDirectionForShadowOwner,
@@ -52,9 +53,19 @@ describe("Best Bottles catalog canon prompt", () => {
     assert.doesNotMatch(modelGlass, /contact shadow are handled deterministically/i);
     assert.doesNotMatch(modelGlass, /deterministic post-processing responsibilities/i);
     assert.doesNotMatch(modelStudio, /Madison applies both deterministically after generation/i);
+    assert.match(modelGlass, /#F6EFE8/);
     assert.match(
       modelFinal,
       /The resolved model-owned contact-shadow contract is permitted only for this exact smoke SKU/,
+    );
+    assert.throws(
+      () => buildBestBottlesCatalogCanonPromptParts(clearRollerSku, {
+        promptVersion: "best-bottles-reference-locked-v6.1-shadow-smoke",
+        owner: "model",
+        contract: "contact-back-right-v1",
+        smokeSku: "GB-SPR-CLR-3ML-BLK",
+      }),
+      /policy must resolve from the exact SKU allowlist/,
     );
   });
 
@@ -70,8 +81,7 @@ describe("Best Bottles catalog canon prompt", () => {
     assert.match(studioDirection, /fill-height target/i);
     assert.match(studioDirection, /shared baseline/i);
     assert.match(studioDirection, /centerline/i);
-    assert.match(studioDirection, /deterministic post-processing/i);
-    assert.doesNotMatch(studioDirection, /improve.*shadow/i);
+    assert.match(studioDirection, /contact-only/i);
     assert.match(studioDirection, /Do not add props/i);
     assert.doesNotMatch(studioDirection, /negative space/i);
     assert.doesNotMatch(studioDirection, /editorial/i);
@@ -91,7 +101,7 @@ describe("Best Bottles catalog canon prompt", () => {
   it("assembles clear-glass canon as compact material truth with v2 studio direction last", () => {
     const prompt = buildBestBottlesCatalogCanonPrompt(clearRollerSku);
 
-    const materialIndex = prompt.indexOf("CLEAR GLASS:");
+    const materialIndex = prompt.indexOf("PRIMARY GOAL:");
     const studioDirectionIndex = prompt.indexOf("STUDIO DIRECTION:");
     const finalCheckIndex = prompt.indexOf("FINAL V2 STUDIO CHECK:");
 

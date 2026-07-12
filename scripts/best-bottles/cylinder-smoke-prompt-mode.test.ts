@@ -35,6 +35,8 @@ const record: PromptRecord = {
   reference_image_path: sku.reference_image_path,
   product_family: sku.product_family,
   frame_class: sku.frame_class,
+  prompt_version: "best-bottles-reference-locked-v6.0",
+  shadow_owner: "rig",
   final_prompt: [
     "You are enhancing the attached product reference image into a premium photorealistic ecommerce product photograph.",
     "ROLLER BOTTLE FRAMING PROFILE (CANVAS COMPOSITION AUTHORITY):",

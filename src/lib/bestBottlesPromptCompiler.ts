@@ -2,6 +2,7 @@ import {
   getBestBottlesShadowPolicyTags,
   resolveBestBottlesShadowPolicy,
 } from "./bestBottlesShadowPolicy";
+import { buildBestBottlesCatalogCanonPrompt } from "./bestBottlesCatalogCanonPrompt";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -239,6 +240,14 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     .replaceAll("{{OUTPUT_CANVAS_HEIGHT}}", String(sku.output_canvas_height))
     .trim();
   const shadowPolicy = resolveBestBottlesShadowPolicy(sku.sku);
+  // The module compiler is validation-only for ordinary SKUs. For the exact
+  // model-owned smoke SKU, however, its PromptRecord is a public consumer
+  // boundary; emit the same coherent canon-owned experimental prompt instead
+  // of pairing V6.1/model metadata with a generic module prompt that still
+  // describes no model-owned shadow.
+  const resolvedFinalPrompt = shadowPolicy.owner === "model"
+    ? buildBestBottlesCatalogCanonPrompt(sku)
+    : finalPrompt;
 
   return {
     sku: sku.sku,
@@ -247,7 +256,7 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     frame_class: sku.frame_class,
     prompt_version: shadowPolicy.promptVersion,
     shadow_owner: shadowPolicy.owner,
-    final_prompt: finalPrompt,
+    final_prompt: resolvedFinalPrompt,
     qa_checklist: uniq([
       "reference_png_identity_lock",
       "geometry_preserved",

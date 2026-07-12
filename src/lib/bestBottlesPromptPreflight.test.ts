@@ -5,7 +5,9 @@ import {
   buildBestBottlesPromptPreflight,
   buildBestBottlesPromptSkuFromProduct,
 } from "./bestBottlesPromptPreflight";
+import { buildPromptForSku } from "./bestBottlesPromptCompiler";
 import { BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG } from "./bestBottlesCatalogCanonPrompt";
+import { getBestBottlesCatalogFramingProfile } from "@/config/bestBottlesFamilyProfiles";
 import { loadPromptSystem } from "../../scripts/generate-prompts";
 
 const promptSystem = loadPromptSystem(process.cwd());
@@ -66,6 +68,12 @@ describe("Best Bottles prompt preflight", () => {
     assert.doesNotMatch(prompt, /Madison applies both deterministically after generation/i);
     assert.match(prompt, /32–42% opacity/);
     assert.match(prompt, /20–30% of the bottle's width/);
+    const directCompilerRecord = buildPromptForSku(smoke.sku!, promptSystem);
+    assert.equal(directCompilerRecord.prompt_version, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(directCompilerRecord.shadow_owner, "model");
+    assert.equal(directCompilerRecord.final_prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g)?.length, 1);
+    assert.match(directCompilerRecord.final_prompt, /#F6EFE8/);
+    assert.doesNotMatch(directCompilerRecord.final_prompt, /Madison applies both deterministically after generation/i);
     assert.ok(smoke.record?.qa_checklist.includes("prompt-version:best-bottles-reference-locked-v6.1-shadow-smoke"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-owner:model"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-contract:contact-back-right-v1"));
@@ -272,9 +280,9 @@ describe("Best Bottles prompt preflight", () => {
     assert.equal(preflight.sku?.product_family, "circle");
     assert.equal(preflight.sku?.frame_class, "medium_upright");
     assert.match(preflight.record.final_prompt, /^You are enhancing the attached product reference image/);
-    assert.match(preflight.record.final_prompt, /CLEAR GLASS:/i);
-    assert.match(preflight.record.final_prompt, /Reproduce it exactly/i);
-    assert.match(preflight.record.final_prompt, /Do NOT add optical detail/i);
+    assert.match(preflight.record.final_prompt, /PRIMARY GOAL:/i);
+    assert.match(preflight.record.final_prompt, /Make the clear glass look like real luxury product-photography glass/i);
+    assert.match(preflight.record.final_prompt, /GLASS APPEARANCE:/i);
     assert.match(preflight.record.final_prompt, /STUDIO DIRECTION:/i);
     assert.match(preflight.record.final_prompt, /FINAL V2 STUDIO CHECK:/i);
     assert.doesNotMatch(preflight.record.final_prompt, /BACKGROUND AND COMPOSITION:/i);
@@ -284,7 +292,7 @@ describe("Best Bottles prompt preflight", () => {
     assert.doesNotMatch(preflight.record.final_prompt, /vertical highlight band/i);
     assert.doesNotMatch(preflight.record.final_prompt, /softer secondary band/i);
     assert.doesNotMatch(preflight.record.final_prompt, /TEST-ONLY MATERIAL POLISH ADDENDUM/i);
-    assert.doesNotMatch(preflight.record.final_prompt, /rear wall of the bottle should be faintly visible through the front wall/i);
+    assert.match(preflight.record.final_prompt, /rear wall of the bottle should be faintly visible through the front wall/i);
     assert.match(preflight.record.final_prompt, /exact 2080x2288 canvas/i);
     assert.doesNotMatch(preflight.record.final_prompt, /This kills surface haze/i);
     assert.doesNotMatch(preflight.record.final_prompt, /#EEE6D4/i);
@@ -422,9 +430,8 @@ describe("Best Bottles prompt preflight", () => {
     assert.match(compactPreflight.record.final_prompt, /fills approximately 56% of the canvas height/i);
     assert.match(compactPreflight.record.final_prompt, /Relative scale zone: Sample vials \(sample-vial\)/i);
     assert.match(compactPreflight.record.final_prompt, /primary bottle centered on the canvas vertical centerline/i);
-    assert.match(compactPreflight.record.final_prompt, /CLEAR GLASS:/i);
-    assert.match(compactPreflight.record.final_prompt, /Reproduce it exactly/i);
-    assert.match(compactPreflight.record.final_prompt, /Do NOT add optical detail/i);
+    assert.match(compactPreflight.record.final_prompt, /PRIMARY GOAL:/i);
+    assert.match(compactPreflight.record.final_prompt, /The base should show clear curved glass geometry, transparent thickness, and crisp circular base rings/i);
     assert.doesNotMatch(compactPreflight.record.final_prompt, /A subtle internal caustic where the back wall meets the sidewall at the base/i);
     assert.doesNotMatch(compactPreflight.record.final_prompt, /NEGATIVE CONSTRAINTS:/i);
     assert.doesNotMatch(compactPreflight.record.final_prompt, /vertical highlight band/i);
@@ -439,7 +446,7 @@ describe("Best Bottles prompt preflight", () => {
     assert.match(compactPreflight.record.final_prompt, /STUDIO DIRECTION:/i);
     assert.match(compactPreflight.record.final_prompt, /FINAL V2 STUDIO CHECK:/i);
     assert.ok(
-      compactPreflight.record.final_prompt.indexOf("CLEAR GLASS:") <
+      compactPreflight.record.final_prompt.indexOf("PRIMARY GOAL:") <
         compactPreflight.record.final_prompt.indexOf("CYLINDER SAMPLE VIAL FRAMING PROFILE"),
     );
     assert.ok(
@@ -494,8 +501,16 @@ describe("Best Bottles prompt preflight", () => {
     assert.ok(preflight.record);
     assert.equal(preflight.sku?.product_family, "cylinder");
     assert.match(preflight.record.final_prompt, /ROLLER BOTTLE FRAMING PROFILE/i);
-    assert.match(preflight.record.final_prompt, /Approved fill-height range: 75-80%/i);
-    assert.match(preflight.record.final_prompt, /fills approximately 75% of the canvas height/i);
+    const rollerProfile = getBestBottlesCatalogFramingProfile(cylinderRoller);
+    assert.ok(rollerProfile);
+    assert.match(
+      preflight.record.final_prompt,
+      new RegExp(`Approved fill-height range: ${rollerProfile.targetProductHeightRangePct.min}-${rollerProfile.targetProductHeightRangePct.max}%`, "i"),
+    );
+    assert.match(
+      preflight.record.final_prompt,
+      new RegExp(`fills approximately ${rollerProfile.targetProductHeightPct}% of the canvas height`, "i"),
+    );
     assert.ok(preflight.record.qa_checklist.includes("cylinder_family_profile:roller-bottle"));
     assert.equal(preflight.record.qa_checklist.includes("cylinder_family_profile:cylinder-standard"), false);
   });

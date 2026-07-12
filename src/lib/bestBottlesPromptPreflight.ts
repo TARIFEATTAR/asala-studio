@@ -406,13 +406,6 @@ function buildSpecialGeometryNotes(product: ProductLike, family: string, closure
     notes.push("Do not merge the white pump, gold/silver collar, clear/white over-cap, or internal dip tube into the body; each component must stay visually separate.");
     notes.push("Clear or white over-cap must remain visible with rim ellipse, sidewall edge, top lip, inner back edge, and local shadow separation.");
   }
-  if (closureType === "vintage_bulb_sprayer" || closureType === "atomizer_sprayer") {
-    // The siphon/dip tube is the single most-dropped component on these clear-glass
-    // sprayers (silver antique-bulb renders lost it entirely while gold kept it by
-    // luck). Force it as a REQUIRED, visible element — not just "don't merge."
-    notes.push("This is a clear-glass sprayer: the thin siphon / dip tube inside the bottle is REQUIRED and must be clearly visible through the glass, rendered as a slender translucent tube running from under the sprayer collar straight down to near the bottle base. Never omit it, never leave the interior empty, and never let the tube fade out — every color variant (silver, gold, matte, shiny) shows the same visible dip tube.");
-    notes.push("Keep the metal sprayer collar, squeeze bulb, and any tassel as separate components from the glass body and from the dip tube; do not blend their materials or colors, and do not recolor the internal tube to match the collar.");
-  }
   if (product.heightWithoutCap || product.diameter) {
     notes.push(`Measurement hint: body height ${product.heightWithoutCap || "unknown"}, diameter/width ${product.diameter || "unknown"}.`);
   }
@@ -452,11 +445,15 @@ function buildCanvasPreflight(product: ProductLike, sku: PromptSku): BestBottles
   return { qaChecklist, warnings };
 }
 
-// Background and grounding are deterministic post-generation responsibilities.
-// Keep this directive in every framing profile so the image model does not invent
-// either while changing the product's scale and placement.
+// Grounding-shadow directive shared by every family's framing block. The catalog
+// canon only asks for a vague "contact-only shadow" with no target, so shadows
+// rendered faint and inconsistent. This quantified directive makes the shadow
+// clearly present and repeatable across families. Tune the opacity/feather here —
+// it is the single knob for catalog shadow strength. (Shadows are still model-
+// drawn, so this tightens the distribution rather than pixel-locking it; the
+// post-generation color-correct preserves whatever the model draws.)
 const BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE =
-  "- Leave the canvas background and grounding shadow unchanged; Madison applies both deterministically after generation. Do not invent a floor plane, reflection, cast shadow, or shadow beneath any object.";
+  "- Ground the product with a soft but clearly visible contact shadow directly beneath the bottle base, and a matching one beneath the detached cap: darkest right at the contact line at roughly 32-42% opacity, feathering outward and fading within about 15-20% of the bottle's width. One soft key light means one soft-edged shadow — no hard outline, no long dramatic cast, no doubled shadow, no mirror reflection, and no visible floor plane.";
 
 function buildFramingProfilePrompt(
   profile: BestBottlesFamilyProfile | null,
@@ -476,6 +473,9 @@ function buildFramingProfilePrompt(
     `- Render the full assembled product so it fills approximately ${profile.targetProductHeightPct}% of the canvas height and no more than ${profile.fillWidthPct}% of the canvas width.`,
     `- Seat the visible bottle base on the shared studio baseline at ${baselineLow}-${baselineHigh}% up from the canvas bottom.`,
     `- Keep the primary bottle centered on the canvas vertical centerline at ${profile.primaryObjectCenterXPct}% width.`,
+    profile.detachedComponentPlacement === "right-sidecar"
+      ? "- If a detached cap or applicator is present, keep it as a right-sidecar component on the same baseline; it must not shift the primary bottle off center."
+      : null,
     policy.owner === "model" ? MODEL_OWNED_GROUNDING_SHADOW : BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
     // NOTE (2026-07-04): the round-glass volume cue and the cap material-targeting
     // cue were intentionally REMOVED. Both were interpretive instructions that
@@ -485,7 +485,7 @@ function buildFramingProfilePrompt(
     // component fidelity is left entirely to the reference image + PRESERVE. The
     // cue constants remain in bestBottlesFamilyProfiles.ts if a scoped, lighter
     // reintroduction is ever justified by evidence.
-    "- Keep all physical proportions locked to the reference; this framing profile controls only placement, uniform scale on canvas, baseline, and centering.",
+    "- Keep all physical proportions locked to the reference; this framing profile controls only placement, scale on canvas, baseline, centering, and grounding shadow.",
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n");

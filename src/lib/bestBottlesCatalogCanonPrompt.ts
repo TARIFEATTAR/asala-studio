@@ -21,10 +21,12 @@ export const BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH =
 
 export const BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG = "catalog_canon_v3_prompt";
 
-const CLEAR_GLASS_DETERMINISTIC_SHADOW_SENTENCES =
-  "Background canvas color and the contact shadow are handled deterministically after generation. Do not add, redraw, or improve either one.";
-const STUDIO_DETERMINISTIC_SHADOW_SENTENCE =
-  "Do not add or alter a shadow, floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture; background and grounding are deterministic post-processing responsibilities.";
+const MODEL_BONE_CANVAS_CONTRACT =
+  "EXPERIMENTAL BONE CANVAS CONTRACT: Render the experimental output on the Best Bottles Bone canvas #F6EFE8 at 2080 × 2288. Keep this canvas color flat, seamless, and texture-free; this contract applies only to the exact model-owned smoke SKU.";
+const CLEAR_GLASS_SOURCE_ANCHOR =
+  "The background should be visible through the glass with natural refraction and slight optical displacement.";
+const STUDIO_RIG_SHADOW_SENTENCE =
+  "Shadow direction may become slightly more dimensional and premium, but it must remain one realistic contact-only shadow under the bottle base and any detached cap. No floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture.";
 const FINAL_STUDIO_MEASUREMENTS_SENTENCE =
   "Respect the resolved family framing measurements while making the photograph feel like the approved v2 studio direction.";
 const MODEL_FINAL_STUDIO_CHECK_SENTENCE =
@@ -40,20 +42,21 @@ function replaceCanonSourceText(source: string, exactText: string, replacement: 
 
 export function clearGlassForShadowOwner(owner: BestBottlesShadowOwner): string {
   if (owner === "rig") return CLEAR_GLASS;
-  return replaceCanonSourceText(
+  const guardedClearGlass = replaceCanonSourceText(
     CLEAR_GLASS,
-    CLEAR_GLASS_DETERMINISTIC_SHADOW_SENTENCES,
-    "Background canvas color remains a deterministic normalization responsibility. Do not add, redraw, or improve the background.",
-    "clear-glass shadow policy",
+    CLEAR_GLASS_SOURCE_ANCHOR,
+    CLEAR_GLASS_SOURCE_ANCHOR,
+    "clear-glass source",
   );
+  return `${guardedClearGlass}\n\n${MODEL_BONE_CANVAS_CONTRACT}`;
 }
 
 export function studioDirectionForShadowOwner(owner: BestBottlesShadowOwner): string {
   if (owner === "rig") return STUDIO_DIRECTION;
   return replaceCanonSourceText(
     STUDIO_DIRECTION,
-    STUDIO_DETERMINISTIC_SHADOW_SENTENCE,
-    "The declared model-owned contact shadow is allowed only as resolved by the framing profile; do not add or alter any second shadow, floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture. Background color remains a deterministic normalization responsibility.",
+    STUDIO_RIG_SHADOW_SENTENCE,
+    "The declared model-owned contact shadow is the sole grounding shadow; do not add or alter any second shadow, floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture.",
     "studio shadow policy",
   );
 }
@@ -124,10 +127,25 @@ export interface BestBottlesCatalogCanonPromptParts {
   finalStudioDirection: string;
 }
 
+function assertPolicyMatchesSku(sku: PromptSku, policy: BestBottlesShadowPolicy): void {
+  const resolved = resolveBestBottlesShadowPolicy(sku.sku);
+  if (
+    policy.promptVersion !== resolved.promptVersion ||
+    policy.owner !== resolved.owner ||
+    policy.contract !== resolved.contract ||
+    policy.smokeSku !== resolved.smokeSku
+  ) {
+    throw new Error(
+      `Best Bottles shadow policy mismatch for ${sku.sku}: policy must resolve from the exact SKU allowlist.`,
+    );
+  }
+}
+
 export function buildBestBottlesCatalogCanonPromptParts(
   sku: PromptSku,
   policy: BestBottlesShadowPolicy = resolveBestBottlesShadowPolicy(sku.sku),
 ): BestBottlesCatalogCanonPromptParts {
+  assertPolicyMatchesSku(sku, policy);
   const isClearGlass = isBestBottlesCatalogClearGlass(sku);
   return {
     basePrompt: [PRESERVE, isClearGlass ? clearGlassForShadowOwner(policy.owner) : KEEP_MATERIAL].join("\n\n"),

@@ -36,25 +36,29 @@ export const BEST_BOTTLES_CATALOG_CANON_VERSION = "v3.2-2026-06-29";
 // ── PRESERVE  (identity lock) ──────────────────────────────────────────────────
 export const PRESERVE = `You are enhancing the attached product reference image into a premium photorealistic ecommerce product photograph.
 
-The approved reference image is the source of truth for product identity, geometry, material, component count, and required cap/applicator state. Preserve the exact bottle silhouette, proportions, neck, threads, roller ball, sprayer, pump, collar, cap state, and every visible hardware detail exactly as shown. Do not redesign, recolor, duplicate, remove, or add any product component. Reframing may change only the assembled product's uniform scale and position on the output canvas; it must never change physical proportions or relative component placement.
+The reference image is the source of truth for product identity and geometry. Preserve the exact bottle silhouette, proportions, neck, threads, roller ball, sprayer, pump, collar, cap, detached cap, tassel, applicator, and all hardware exactly as shown. Do not redesign, recolor, resize, reposition, duplicate, remove, or add any product component.
 
 This is not a new product design. It is a photographic material-and-lighting enhancement of the existing product.`;
 
-// ── CLEAR_GLASS  (v6: reproduce-only, zero glass enhancement) ────────────────────
-// The reference is already a finished, clean product photo of the glass, so any
-// "enhance the glass" instruction is pure downside — the model invents rails /
-// refraction to "prove" glassiness. v6 removes the last enhancement phrase
-// (v5's "apply the strongest glass clarity and rim definition to the body") so
-// clear glass is PURELY reproduce-the-reference. Background consistency and the
-// contact shadow are the rig's job, not the prompt's. The clear plastic overcap
-// stays explicitly restrained (thin plastic, not glass). (Client brand direction
-// 2026-07-05: small clear sprayers especially need no glass prompting at all.)
-export const CLEAR_GLASS = `CLEAR GLASS:
-The reference already shows this bottle as clean, empty, colorless transparent glass. Reproduce it exactly — a cleaner, higher-resolution photograph of the same bottle. Do NOT add optical detail, internal reflections, refraction, rails, highlight lines, or wall-thickness lines the reference does not already show. Keep the glass exactly as clean and quiet as the reference; the mid-body stays plain and transparent, and the only lines are the natural glass edges already present in the reference. Preserve the roller ball, dip tube, spring, and any internal component exactly as shown. The bottle is empty: no liquid, tint, frosting, haze, cloudy fill, bubbles, dust, or speckles.
+// ── CLEAR_GLASS  (v3 photoreal material target) ─────────────────────────────────
+export const CLEAR_GLASS = `PRIMARY GOAL:
+Make the clear glass look like real luxury product-photography glass: transparent, colorless, optically clean, premium, dimensional, and specular.
 
-CLEAR PLASTIC OVERCAP (where present, e.g. fine-mist sprayers): the overcap is thin clear plastic, NOT glass — keep it smooth, soft, and low-contrast, with only faint edge glints and a delicate top rim. No dark vertical bars, black side rails, heavy outline strokes, or double-wall stripes on the cap. The nozzle inside is softly visible, not sharply outlined.
+The bottle is empty clear glass. There is no liquid, tint, frosting, haze, cloudy white fill, residue, bubbles, dust, speckles, noisy sidewalls, or insert inside the bottle. The background should be visible through the glass with natural refraction and slight optical displacement.
 
-Background canvas color and the contact shadow are handled deterministically after generation. Do not add, redraw, or improve either one. Do not invent studio reflections, card bars, or lighting effects on the glass. Render only the clean product exactly as the reference shows it.`;
+GLASS APPEARANCE:
+Render the glass using believable real-studio optical behavior:
+
+- Crisp transparent outer edges.
+- Visible wall thickness at the sidewalls, shoulder, neck, and base.
+- Clean rim glints on the lip, shoulder, threads, and base rings.
+- Subtle edge density where the glass overlaps itself.
+- Natural refraction through the front and back walls.
+- The rear wall of the bottle should be faintly visible through the front wall.
+- The internal dip tube, if present in the reference, should remain faintly visible through the glass and slightly refracted.
+- The base should show clear curved glass geometry, transparent thickness, and crisp circular base rings.
+
+The glass should be defined by clean studio-card reflections and natural specular behavior, not by drawn lines, artificial parallel rails, painted texture, cloudy fill, or sidewall noise. Keep the mid-body mostly transparent and quiet while preserving crisp rim, shoulder, thread, edge, and base definition.`;
 
 export const MODEL_OWNED_GROUNDING_SHADOW = `GROUNDING SHADOW — MODEL OWNED:
 Render one soft, clearly visible contact shadow attached directly to the bottle base. It must be darkest and most concentrated at the physical contact line, approximately 32–42% opacity at its densest point, then feather softly behind and toward camera-right, fading within approximately 20–30% of the bottle's width. The contact core and extended feather must read as one continuous shadow. One soft key light creates one soft-edged shadow. No detached oval, gap beneath the bottle, hard outline, long dramatic cast, doubled shadow, reflection, floor plane, smear, or horizon.`;
@@ -65,16 +69,16 @@ export const KEEP_MATERIAL = `GLASS: preserve the glass's exact color, tint, fro
 // ── STUDIO_DIRECTION  (approved Kinfolk/Aesop v2 production mood anchor) ────────
 export const STUDIO_DIRECTION = `STUDIO DIRECTION:
 Strict studio-direction refinement for restrained premium ecommerce photography:
-Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, controlled material finish, clean restraint, and refined ecommerce polish.
+Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, controlled material finish, clean restraint, subtle dimensional contact shadow, and refined ecommerce polish.
 This is not lifestyle photography. Do not add props, labels, packaging, typography, scenes, brand marks, retail environments, Aesop-style product design, or any brand-specific asset.
-The catalog contract remains absolute: use the resolved Madison framing profile on the exact 2080x2288 canvas for output scale, fill-height target, shared baseline, centerline, and crop. Use the approved product reference only for identity, physical proportions, color, material, component count, relative component placement, and required cap/applicator state. If the source image's framing conflicts with Madison's framing profile, Madison's profile controls framing only.
-Do not add or alter a shadow, floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture; background and grounding are deterministic post-processing responsibilities.
-The approved product reference remains the source of truth. Improve only restrained product lighting and material clarity without changing product identity or geometry.`;
+The catalog contract remains absolute: preserve the exact 2080x2288 canvas, product fill-height target, shared baseline, centerline, crop, product scale, detached-cap sidecar position, geometry, color, material, and component placement.
+Shadow direction may become slightly more dimensional and premium, but it must remain one realistic contact-only shadow under the bottle base and any detached cap. No floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture.
+The attached product reference remains the source of truth. Improve only light, glass clarity, cap material polish, and contact shadow realism.`;
 
 // ── FINAL_V2_STUDIO_CHECK  (last controlling instruction) ─────────────────────
 export const FINAL_V2_STUDIO_CHECK = `FINAL V2 STUDIO CHECK:
 This v2 studio direction is the final controlling instruction for visual style and finish. Do not apply any older Best Bottles parchment, darkroom, paper-doll, visual-squad, generic ecommerce, or post-generation prompt language after this point.
-Only the approved reference identity/state lock, essential material truth, and resolved Madison framing contract are allowed to constrain it. Priority is: product identity and required cap/applicator state first; physical geometry and materials second; Madison framing third; restrained lighting finish last.
+Only the reference identity lock, essential material truth, and resolved Madison framing contract are allowed to constrain it.
 Respect the resolved family framing measurements while making the photograph feel like the approved v2 studio direction.`;
 
 // ── PRESENTATION  (Change 3 + Change 4 + Change 5 applied) ──────────────────────
@@ -94,13 +98,14 @@ Place the product on a seamless flat Best Bottles Bone background: #F5F3EF.
 The background must be smooth, flat, clean, and premium. No paper texture, canvas texture, plaster texture, grain, mottling, gradients, vignette, tabletop edge, horizon line, props, labels, or text.
 
 Canvas size: 2080 × 2288.
-Keep the full single assembled product visible.
-Center the product on the vertical centerline.
+Keep the full product visible.
+Center the primary bottle on the vertical centerline.
 Seat the base on a shared studio baseline approximately 8-10% above the bottom edge.
 For roller bottles, the assembled product should fill approximately 65-70% of the canvas height.
+If a detached cap or applicator is present beside the bottle, preserve it as a right-sidecar component on the same baseline. Do not let the detached part push the primary bottle off center.
 
 SHADOW:
-Add one realistic contact shadow under the product base only. The shadow should be soft, subtle, and photographic, slightly longer toward camera-right because the key light is from camera-left. Contact shadow only. No reflective floor, no hard cast shadow, no painted smear, and no visible surface plane.
+Add one realistic contact shadow under the bottle base and any detached cap. The shadow should be soft, subtle, and photographic, slightly longer toward camera-right because the key light is from camera-left. Contact shadow only. No reflective floor, no hard cast shadow, no painted smear, and no visible surface plane.
 
 MATERIAL ACCURACY:
 Glass must remain achromatic and transparent. Do not introduce amber, yellow, champagne, honey, gold, gray smoke, blue tint, or green tint into the clear glass. Metal caps should keep their exact reference color and finish: gold remains gold, silver remains silver, black remains black, white remains white. Plastic and fabric parts must also keep their original finish.
