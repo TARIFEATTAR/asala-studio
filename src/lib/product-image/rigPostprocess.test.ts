@@ -13,10 +13,13 @@ import {
   getMaskControlledVisualContinuityQaIssues,
   getVisibleMatteArtifactQaIssues,
   detectStrongBounds,
+  detectModelGeometryBaseline,
   finalizeRigShadow,
   flattenBackgroundLikePixels,
+  maskOutModelShadowGeometry,
   prepareUnmaskedRigRecanvasPixels,
 } from "./rigPostprocess";
+import { analyzeModelOwnedShadow } from "./shadowQa";
 
 describe("shadow ownership", () => {
   const width = 80;
@@ -109,6 +112,96 @@ describe("shadow ownership", () => {
 
     assert.ok(output.deterministicShadowPixels > 0);
     assert.equal(output.shadowQa, null);
+  });
+
+  it("routes a model-owned baseline fallback to review without deterministic paint", () => {
+    const pixels = makePixels();
+    const before = Array.from(pixels);
+    const output = finalizeRigShadow({
+      owner: "model",
+      pixels,
+      width,
+      height,
+      background: bone,
+      objectBounds: productBounds,
+      baselineYPx: null,
+    });
+
+    assert.equal(output.deterministicShadowPixels, 0);
+    assert.equal(output.shadowQa?.status, "review");
+    assert.deepEqual(Array.from(pixels), before);
+  });
+});
+
+describe("model shadow geometry exclusion", () => {
+  it("removes disconnected and overlong shadow candidates from geometry metrics", () => {
+    const width = 120;
+    const height = 160;
+    const background = { r: 245, g: 243, b: 239 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = background.r;
+      pixels[i + 1] = background.g;
+      pixels[i + 2] = background.b;
+      pixels[i + 3] = 255;
+    }
+    for (let y = 30; y <= 100; y += 1) {
+      for (let x = 50; x <= 70; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = 48;
+        pixels[i + 1] = 46;
+        pixels[i + 2] = 44;
+      }
+    }
+    const paintShadow = (left: number, right: number, top: number, bottom: number, delta: number) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const i = (y * width + x) * 4;
+          pixels[i] = background.r - delta;
+          pixels[i + 1] = background.g - delta;
+          pixels[i + 2] = background.b - delta;
+        }
+      }
+    };
+    // Valid contact component, a disconnected component, and an overlong tail.
+    paintShadow(68, 78, 101, 104, 24);
+    paintShadow(49, 52, 102, 104, 20);
+    paintShadow(72, 75, 105, 130, 12);
+
+    const rawBounds = detectStrongBounds(pixels, width, height, background);
+    assert.ok(rawBounds);
+    const rawBaseline = detectModelGeometryBaseline(
+      pixels,
+      width,
+      height,
+      background,
+      rawBounds,
+      130,
+    );
+    assert.equal(rawBaseline, 100);
+
+    const analysis = analyzeModelOwnedShadow({
+      pixels,
+      width,
+      height,
+      background,
+      objectBounds: { ...rawBounds, bottom: rawBaseline },
+      baselineYPx: rawBaseline,
+    });
+    assert.ok(analysis.candidateMask.some((value) => value === 1));
+    assert.ok(analysis.report.measurements.componentCount >= 2);
+
+    const geometryPixels = new Uint8ClampedArray(pixels);
+    const removed = maskOutModelShadowGeometry(
+      geometryPixels,
+      analysis.candidateMask,
+      background,
+    );
+    assert.ok(removed > 0);
+    assert.deepEqual(
+      detectStrongBounds(geometryPixels, width, height, background),
+      { top: 30, bottom: 100, left: 50, right: 70 },
+    );
   });
 });
 

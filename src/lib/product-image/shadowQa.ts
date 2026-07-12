@@ -55,6 +55,9 @@ export interface ShadowQaReport {
 }
 
 export interface ModelShadowAnalysis {
+  /** All model-shadow candidate pixels, including disconnected/invalid components. */
+  candidateMask: Uint8Array;
+  /** The single seeded component retained for output pixel preservation. */
   preservationMask: Uint8Array;
   report: ShadowQaReport;
 }
@@ -119,6 +122,7 @@ export function analyzeModelOwnedShadow(
   const preservationMask = new Uint8Array(
     width > 0 && height > 0 ? width * height : 0,
   );
+  const candidateMask = new Uint8Array(preservationMask.length);
 
   if (
     width <= 0 ||
@@ -131,7 +135,7 @@ export function analyzeModelOwnedShadow(
     const report = emptyReport("review", [
       "No reliable model-owned shadow candidate could be analyzed.",
     ]);
-    return { preservationMask, report };
+    return { candidateMask, preservationMask, report };
   }
 
   const suppliedBounds = input.productBounds ?? input.objectBounds;
@@ -145,7 +149,7 @@ export function analyzeModelOwnedShadow(
     const report = emptyReport("review", [
       "No reliable model-owned shadow candidate could be analyzed.",
     ]);
-    return { preservationMask, report };
+    return { candidateMask, preservationMask, report };
   }
 
   const baselineYPx = clampInt(input.baselineYPx, 0, height - 1);
@@ -177,6 +181,7 @@ export function analyzeModelOwnedShadow(
         y > bounds.bottom || x < bounds.left || x > bounds.right;
       if (outsideProduct && alpha > 8 && lumaDelta >= 4) {
         candidate[y * width + x] = 1;
+        candidateMask[y * width + x] = 1;
       }
     }
   }
@@ -288,7 +293,7 @@ export function analyzeModelOwnedShadow(
     const report = emptyReport("review", [
       "No reliable model-owned shadow candidate could be analyzed.",
     ]);
-    return { preservationMask, report };
+    return { candidateMask, preservationMask, report };
   }
 
   const largest = (items: ShadowComponent[]): ShadowComponent =>
@@ -315,7 +320,14 @@ export function analyzeModelOwnedShadow(
         });
       const outsideProduct =
         y > bounds.bottom || x < bounds.left || x > bounds.right;
-      if (outsideProduct && alpha > 8 && delta >= 4) continuationMaxY = y;
+      if (outsideProduct && alpha > 8 && delta >= 4) {
+        // Keep the full continuation in the geometry exclusion mask. The
+        // retained preservation mask intentionally remains limited to the
+        // largest seeded component, but an overlong tail or floor seam must
+        // never inflate bounds/baseline/fill metrics.
+        candidateMask[y * width + x] = 1;
+        continuationMaxY = y;
+      }
     }
   }
 
@@ -405,5 +417,5 @@ export function analyzeModelOwnedShadow(
     },
     target: TARGET,
   };
-  return { preservationMask, report };
+  return { candidateMask, preservationMask, report };
 }

@@ -134,6 +134,30 @@ export interface RigUnmaskedRigRecanvasResult extends RigForegroundMatteResult {
   preservedShadowPixels: number;
 }
 
+/**
+ * Remove every model-shadow candidate from a geometry-only pixel buffer.
+ * The source/output buffer remains untouched; callers use this only for bounds,
+ * baseline, fill, centerline, and geometry QA measurements.
+ */
+export function maskOutModelShadowGeometry(
+  pixels: Uint8ClampedArray,
+  candidateMask: Uint8Array,
+  background: Rgb,
+): number {
+  const count = Math.min(candidateMask.length, Math.floor(pixels.length / 4));
+  let removedPixels = 0;
+  for (let p = 0; p < count; p += 1) {
+    if (candidateMask[p] !== 1) continue;
+    const i = p * 4;
+    pixels[i] = background.r;
+    pixels[i + 1] = background.g;
+    pixels[i + 2] = background.b;
+    pixels[i + 3] = 255;
+    removedPixels += 1;
+  }
+  return removedPixels;
+}
+
 export interface RigFinalizeShadowInput {
   owner: BestBottlesShadowOwner;
   pixels: Uint8Array | Uint8ClampedArray;
@@ -1228,6 +1252,68 @@ export function detectStrongBounds(
 }
 
 /**
+ * Infer the product baseline without letting a low-density, low-contrast model
+ * shadow tail become the last strong row. This is deliberately conservative:
+ * only a contiguous tail whose signal occupies less than 72% of the raw
+ * envelope and remains close to the background is removed from the baseline.
+ */
+export function detectModelGeometryBaseline(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  rawBounds: RigStrongBounds | null,
+  rawBaselineYPx: number,
+): number {
+  if (
+    !rawBounds ||
+    typeof rawBounds.left !== "number" ||
+    typeof rawBounds.right !== "number" ||
+    rawBounds.right <= rawBounds.left ||
+    !Number.isFinite(rawBaselineYPx)
+  ) {
+    return rawBaselineYPx;
+  }
+
+  const left = Math.max(0, Math.floor(rawBounds.left));
+  const right = Math.min(width - 1, Math.ceil(rawBounds.right));
+  const envelopeWidth = Math.max(1, right - left + 1);
+  const strongThreshold = 52;
+  const maxShadowLumaDelta = 80;
+  let baseline = Math.min(height - 1, Math.max(0, Math.round(rawBaselineYPx)));
+  let tailRows = 0;
+
+  for (let y = baseline; y >= Math.round(height * 0.42); y -= 1) {
+    let signalPixels = 0;
+    let strongPixels = 0;
+    let shadowLikePixels = 0;
+    for (let x = left; x <= right; x += 1) {
+      const i = (y * width + x) * 4;
+      const distance = colorDistance(pixels, i, bg);
+      if (distance < 16) continue;
+      signalPixels += 1;
+      const pixelLuma = luma({ r: pixels[i], g: pixels[i + 1], b: pixels[i + 2] });
+      const lumaDelta = luma(bg) - pixelLuma;
+      if (distance >= strongThreshold && lumaDelta > maxShadowLumaDelta) strongPixels += 1;
+      if (lumaDelta >= 4 && lumaDelta <= maxShadowLumaDelta) {
+        shadowLikePixels += 1;
+      }
+    }
+
+    const lowDensity = signalPixels > 0 && signalPixels / envelopeWidth < 0.72;
+    const mostlyShadowLike = shadowLikePixels >= Math.max(2, signalPixels * 0.7);
+    if (lowDensity && mostlyShadowLike && strongPixels < signalPixels * 0.35) {
+      tailRows += 1;
+      baseline = y - 1;
+      continue;
+    }
+    break;
+  }
+
+  return tailRows > 0 ? Math.max(0, baseline) : Math.min(height - 1, Math.max(0, Math.round(rawBaselineYPx)));
+}
+
+/**
  * Re-measure a transformed product inside its known source-derived envelope.
  * Warm background normalization can reduce the RGB distance of translucent
  * gray cap edges even when those pixels remain visibly intact. The relaxed
@@ -1469,20 +1555,6 @@ export async function normalizeBestBottlesRigBaseline(
   }
 
   if (maskImageData && maskBounds) {
-    const generatedBounds = detectStrongBounds(analysisImageData.data, width, height, analysisBg);
-    const qaIssues = [
-      ...getMaskControlledBoundsQaIssues({
-        generatedBounds,
-        controlBounds: maskBounds,
-      }),
-      ...getMaskControlledVisualContinuityQaIssues({
-        pixels: analysisImageData.data,
-        width,
-        height,
-        bg: analysisBg,
-        controlBounds: maskBounds,
-      }),
-    ];
     const detectedBaseline = maskBounds.bottom;
     const modelShadowAnalysis = shadowOwner === "model"
       ? analyzeModelOwnedShadow({
@@ -1490,10 +1562,34 @@ export async function normalizeBestBottlesRigBaseline(
           width,
           height,
           background: analysisBg,
-          objectBounds: generatedBounds ?? maskBounds,
+          objectBounds: maskBounds,
           baselineYPx: detectedBaseline,
         })
       : null;
+    const geometryAnalysisPixels = modelShadowAnalysis
+      ? new Uint8ClampedArray(analysisImageData.data)
+      : analysisImageData.data;
+    if (modelShadowAnalysis) {
+      maskOutModelShadowGeometry(
+        geometryAnalysisPixels,
+        modelShadowAnalysis.candidateMask,
+        analysisBg,
+      );
+    }
+    const generatedBounds = detectStrongBounds(geometryAnalysisPixels, width, height, analysisBg);
+    const qaIssues = [
+      ...getMaskControlledBoundsQaIssues({
+        generatedBounds,
+        controlBounds: maskBounds,
+      }),
+      ...getMaskControlledVisualContinuityQaIssues({
+        pixels: geometryAnalysisPixels,
+        width,
+        height,
+        bg: analysisBg,
+        controlBounds: maskBounds,
+      }),
+    ];
     const sourceImageData = modelShadowAnalysis
       ? new Uint8ClampedArray(imageData.data)
       : null;
@@ -1628,7 +1724,12 @@ export async function normalizeBestBottlesRigBaseline(
   const targetBaseline = Math.round(height * (1 - rig.baselinePct / 100));
 
   if (rawDetectedBaseline === null) {
-    applyRigForegroundMatte(imageData.data, width, height, bg);
+    // A model-owned candidate must never enter the deterministic matte path.
+    // Keep the source pixels for review and report an unanalyzable shadow rather
+    // than silently painting a rig-owned replacement over the candidate.
+    if (shadowOwner === "rig") {
+      applyRigForegroundMatte(imageData.data, width, height, bg);
+    }
     ctx.putImageData(imageData, 0, 0);
     const fallbackOut = document.createElement("canvas");
     fallbackOut.width = width;
@@ -1652,6 +1753,18 @@ export async function normalizeBestBottlesRigBaseline(
       baselineYPx: null,
       capState,
     });
+    // Route every ownership branch through the same final-shadow authority.
+    // With no baseline the helper paints zero pixels and returns a review
+    // report for model ownership; rig ownership remains a valid null-QA path.
+    const fallbackShadow = finalizeRigShadow({
+      owner: shadowOwner,
+      pixels: imageData.data,
+      width,
+      height,
+      background: bg,
+      objectBounds: fallbackBounds,
+      baselineYPx: null,
+    });
 
     return {
       dataUrl: fallbackOut.toDataURL("image/png"),
@@ -1670,7 +1783,7 @@ export async function normalizeBestBottlesRigBaseline(
       transformControlBounds: fallbackBounds,
       objectBounds: fallbackBounds,
       shadowOwner,
-      shadowQa: null,
+      shadowQa: fallbackShadow.shadowQa,
     };
   }
 
@@ -1680,35 +1793,48 @@ export async function normalizeBestBottlesRigBaseline(
     height,
     analysisBg,
   );
+  const geometryBaseline = shadowOwner === "model"
+    ? detectModelGeometryBaseline(
+        imageData.data,
+        width,
+        height,
+        analysisBg,
+        rawStrongBounds,
+        rawDetectedBaseline,
+      )
+    : rawDetectedBaseline;
+
   const modelShadowAnalysis = shadowOwner === "model"
     ? analyzeModelOwnedShadow({
         pixels: imageData.data,
         width,
         height,
         background: analysisBg,
-        objectBounds: rawStrongBounds,
-        baselineYPx: rawDetectedBaseline,
+        // The product's geometry ends at the detected baseline. Treat pixels
+        // below it as shadow candidates even when an extra component was wide
+        // or dark enough to contaminate the raw strong bounds.
+        objectBounds: rawStrongBounds
+          ? { ...rawStrongBounds, bottom: geometryBaseline }
+          : rawStrongBounds,
+        baselineYPx: geometryBaseline,
       })
     : null;
   const geometryAnalysisPixels = modelShadowAnalysis
     ? new Uint8ClampedArray(analysisImageData.data)
     : analysisImageData.data;
   if (modelShadowAnalysis) {
-    for (let p = 0; p < modelShadowAnalysis.preservationMask.length; p += 1) {
-      if (modelShadowAnalysis.preservationMask[p] !== 1) continue;
-      const i = p * 4;
-      geometryAnalysisPixels[i] = analysisBg.r;
-      geometryAnalysisPixels[i + 1] = analysisBg.g;
-      geometryAnalysisPixels[i + 2] = analysisBg.b;
-      geometryAnalysisPixels[i + 3] = 255;
-    }
+    maskOutModelShadowGeometry(
+      geometryAnalysisPixels,
+      modelShadowAnalysis.candidateMask,
+      analysisBg,
+    );
   }
   const strongBounds = modelShadowAnalysis
     ? detectStrongBounds(geometryAnalysisPixels, width, height, analysisBg)
     : rawStrongBounds;
   const detectedBaseline = modelShadowAnalysis
-    ? detectStrongBottomY(geometryAnalysisPixels, width, height, analysisBg, capState) ?? rawDetectedBaseline
-    : rawDetectedBaseline;
+    ? detectStrongBottomY(geometryAnalysisPixels, width, height, analysisBg, capState) ?? geometryBaseline
+    : geometryBaseline;
   const transform = computeRigFrameTransform({
     width,
     height,

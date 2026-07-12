@@ -350,11 +350,10 @@ export function useAssembledPromptGeneration() {
       ? getBestBottlesVisualTargetTags(options.productContext?.bodyMaterial)
       : [];
     const shadowPolicy = resolveBestBottlesShadowPolicy(options.productContext?.sku);
-    const resolvedShadowPolicy: BestBottlesShadowPolicy = {
-      ...shadowPolicy,
-      owner: options.productContext?.shadowOwner === "model" ? "model" : "rig",
-      contract: options.productContext?.shadowContract ?? shadowPolicy.contract,
-    };
+    // Shadow ownership is an exact SKU policy. Caller-supplied context fields
+    // remain metadata only and may not opt a non-smoke SKU into the model/V6.1
+    // contract (or force the smoke SKU back to rig/V6.0).
+    const resolvedShadowPolicy: BestBottlesShadowPolicy = shadowPolicy;
     const shadowPolicyTags = isBestBottlesStudioMasterRequest
       ? getBestBottlesShadowPolicyTags(resolvedShadowPolicy)
       : [];
@@ -442,7 +441,13 @@ export function useAssembledPromptGeneration() {
             backgroundPresetId: options.sceneOverlay?.backgroundPresetId ?? undefined,
             backgroundPrompt: options.sceneOverlay?.backgroundPrompt ?? undefined,
             extraLibraryTags,
-            productContext: options.productContext,
+            productContext: options.productContext
+              ? {
+                  ...options.productContext,
+                  shadowOwner: resolvedShadowPolicy.owner,
+                  shadowContract: resolvedShadowPolicy.contract,
+                }
+              : options.productContext,
             precompiledPromptRecord: calibratedPromptRecord ?? undefined,
           },
         },
@@ -657,7 +662,7 @@ export function useAssembledPromptGeneration() {
             capState: options.productContext?.capState,
             mode: options.productContext?.mode,
             targetBackgroundHex: BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
-            shadowOwner: options.productContext?.shadowOwner === "model" ? "model" : "rig",
+            shadowOwner: resolvedShadowPolicy.owner,
             maskReferenceUrl: null,
             requireMaskControl: false,
           });
