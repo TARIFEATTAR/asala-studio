@@ -1,12 +1,21 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   getBestBottlesImageAssetRoleForPreset,
   requiresBestBottlesPipelineReconciliation,
 } from "./bestBottlesImageReconciliationRules";
-import { buildBestBottlesRigReconciliationPayload } from "./bestBottlesImageReconciliation";
+import {
+  approveBestBottlesReconciledImage,
+  buildBestBottlesRigReconciliationPayload,
+} from "./bestBottlesImageReconciliation";
 import { approveBestBottlesGeneratedMaster } from "./bestBottlesMasterApproval";
 import type { ShadowQaReport } from "./product-image/shadowQa";
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const studioSource = readFileSync(resolve(currentDir, "../pages/BestBottlesStudio.tsx"), "utf8");
 
 function shadowQa(status: "pass" | "review"): ShadowQaReport {
   return {
@@ -65,6 +74,15 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
+  it("keeps the Studio approval callback behind the single approval helper", () => {
+    assert.match(studioSource, /await approveBestBottlesGeneratedMaster\(/);
+    assert.doesNotMatch(
+      studioSource,
+      /import\s*\{[^}]*approveBestBottlesReconciledImage[^}]*\}\s*from\s*["']@\/lib\/bestBottlesImageReconciliation["']/s,
+    );
+    assert.doesNotMatch(studioSource, /markBestBottlesImageApprovedKeep/);
+  });
+
   it("links the generated image before invoking the strict approval gate", async () => {
     const calls: string[] = [];
     const input = {
@@ -85,6 +103,33 @@ describe("Best Bottles generated master approval", () => {
     });
 
     assert.deepEqual(calls, ["link", "approve"]);
+  });
+
+  it("invokes the strict approval RPC with the linked image identifiers", async () => {
+    const input = {
+      organizationId: "org-1",
+      pipelineSkuJobId: "job-1",
+      imageId: "image-1",
+    };
+    const rpcCalls: Array<{ name: string; args: Record<string, string> }> = [];
+
+    await approveBestBottlesReconciledImage(input, {
+      rpc: async (name, args) => {
+        rpcCalls.push({ name, args });
+        return { error: null };
+      },
+    });
+
+    assert.deepEqual(rpcCalls, [
+      {
+        name: "approve_best_bottles_reconciled_image",
+        args: {
+          p_organization_id: "org-1",
+          p_pipeline_sku_job_id: "job-1",
+          p_image_id: "image-1",
+        },
+      },
+    ]);
   });
 
   it("persists model-owned shadow evidence in the rig reconciliation payload", () => {

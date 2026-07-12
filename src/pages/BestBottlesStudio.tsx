@@ -41,6 +41,7 @@ import {
   type ApplicatorBucket,
   type Product,
 } from "@/integrations/convex/bestBottles";
+import { getBestBottlesCatalogPresetIdForProduct } from "@/config/imagePresets";
 import {
   findPipelineSkuJobForProductIdentity,
   findPipelineGroupByConvexSlug,
@@ -49,7 +50,11 @@ import {
   updatePipelineSkuJob,
   updatePipelineGroupStatus,
 } from "@/lib/bestBottlesPipeline";
-import { markBestBottlesImageApprovedKeep } from "@/lib/imageLibraryTags";
+import {
+  BEST_BOTTLES_RECONCILIATION_QUERY_KEY,
+  recordBestBottlesGeneratedImageForSkuJob,
+} from "@/lib/bestBottlesImageReconciliation";
+import { approveBestBottlesGeneratedMaster } from "@/lib/bestBottlesMasterApproval";
 import {
   applyBestBottlesMeasurementOverrides,
   type BestBottlesMeasurementOverridesPayload,
@@ -160,6 +165,10 @@ export default function BestBottlesStudio() {
           {
             url: job.best_reference_candidate_path!,
             name: job.expected_canonical_filename ?? job.grace_sku,
+            referenceSource: job.reference_source,
+            referenceSourcePath: job.reference_source_path,
+            referenceSourceUrl: job.reference_source_url,
+            referenceIssue: job.reference_issue,
           },
         ]),
     );
@@ -447,6 +456,13 @@ export default function BestBottlesStudio() {
                       if (!currentOrganizationId || !result.savedImageId || !result.imageUrl) {
                         return;
                       }
+                      const canonicalPresetId = getBestBottlesCatalogPresetIdForProduct(
+                        product,
+                        product.family,
+                      );
+                      if (result.presetId !== canonicalPresetId) {
+                        return;
+                      }
                       const skuJob = findPipelineSkuJobForProductIdentity(persistedSkuJobs, product);
                       if (!skuJob) {
                         toast({
@@ -459,14 +475,16 @@ export default function BestBottlesStudio() {
                       if (!shouldRecordGeneratedImageForSkuJob(skuJob)) {
                         return;
                       }
-                      await updatePipelineSkuJob(skuJob.id, {
-                        status: "generated",
-                        generated_image_id: result.savedImageId,
-                        generated_image_url: result.imageUrl,
-                        last_error: null,
+                      await recordBestBottlesGeneratedImageForSkuJob({
+                        organizationId: currentOrganizationId,
+                        pipelineSkuJobId: skuJob.id,
+                        imageId: result.savedImageId,
                       });
                       await queryClient.invalidateQueries({
                         queryKey: ["best-bottles-pipeline-sku-jobs"],
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY],
                       });
                       await queryClient.invalidateQueries({
                         queryKey: ["best-bottles-studio-sku-job-references"],
@@ -493,23 +511,51 @@ export default function BestBottlesStudio() {
                       });
                     }}
                     onApproveMaster={async (result, product) => {
-                      if (!currentOrganizationId || !groupSlug) {
+                      if (!currentOrganizationId || !groupSlug || !result.savedImageId || !result.imageUrl) {
                         toast({
                           title: "Cannot record approval",
-                          description: "Missing organization or group context.",
+                          description: "Missing organization, image, or group context.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const canonicalPresetId = getBestBottlesCatalogPresetIdForProduct(
+                        product,
+                        product.family,
+                      );
+                      if (result.presetId !== canonicalPresetId) {
+                        toast({
+                          title: "Library asset saved",
+                          description: "Only the canonical PDP preset can advance the SKU approval ledger.",
+                        });
+                        return;
+                      }
+                      const skuJob = findPipelineSkuJobForProductIdentity(persistedSkuJobs, product);
+                      if (!skuJob) {
+                        toast({
+                          title: "Cannot record approval",
+                          description: `${product.graceSku} has no matching SKU queue row.`,
                           variant: "destructive",
                         });
                         return;
                       }
                       try {
+                        await approveBestBottlesGeneratedMaster(
+                          {
+                            organizationId: currentOrganizationId,
+                            pipelineSkuJobId: skuJob.id,
+                            imageId: result.savedImageId,
+                          },
+                        );
                         const pipelineRow = await findPipelineGroupByConvexSlug(
                           currentOrganizationId,
                           groupSlug,
                         );
                         if (!pipelineRow) {
                           toast({
-                            title: "Saved to Library — Pipeline row not found",
-                            description: `No Pipeline row with convex_slug "${groupSlug}". Image is tagged in Library but status won't propagate to the tracker.`,
+                            title: "SKU approved — group rollup not found",
+                            description: `The measured image and SKU job are approved, but no group row matched convex_slug "${groupSlug}".`,
+                            variant: "destructive",
                           });
                           return;
                         }
@@ -519,9 +565,12 @@ export default function BestBottlesStudio() {
                           madison_approved_at: new Date().toISOString(),
                           madison_approved_by: user?.id ?? null,
                         });
-                        // Write the approved-keep verdict through to the image so
-                        // the completeness metric + clean library read the approval.
-                        await markBestBottlesImageApprovedKeep(result.savedImageId);
+                        await queryClient.invalidateQueries({
+                          queryKey: ["best-bottles-pipeline-sku-jobs"],
+                        });
+                        await queryClient.invalidateQueries({
+                          queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY],
+                        });
                         await queryClient.invalidateQueries({
                           queryKey: ["best-bottles-pipeline-groups"],
                         });

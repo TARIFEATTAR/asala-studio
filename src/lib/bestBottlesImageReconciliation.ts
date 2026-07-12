@@ -330,12 +330,20 @@ export async function recordBestBottlesGeneratedImageForSkuJob(input: {
   }
 }
 
+interface BestBottlesApprovalRpcClient {
+  rpc: (
+    functionName: string,
+    args: Record<string, string>,
+  ) => PromiseLike<{ error: { message: string } | null }>;
+}
+
 export async function approveBestBottlesReconciledImage(input: {
   organizationId: string;
   pipelineSkuJobId: string;
   imageId: string;
-}): Promise<void> {
-  const { error } = await (await db()).rpc("approve_best_bottles_reconciled_image", {
+}, client?: BestBottlesApprovalRpcClient): Promise<void> {
+  const database = client ?? ((await db()) as unknown as BestBottlesApprovalRpcClient);
+  const { error } = await database.rpc("approve_best_bottles_reconciled_image", {
     p_organization_id: input.organizationId,
     p_pipeline_sku_job_id: input.pipelineSkuJobId,
     p_image_id: input.imageId,
