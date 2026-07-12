@@ -73,13 +73,16 @@ function distinctRows(rows: readonly CanonicalTruthRow[]): CanonicalTruthRow[] {
 function resolveExact(
   index: Map<string, CanonicalTruthRow[]>,
   token: string,
-): { kind: "unmatched" } | { kind: "unique"; row: CanonicalTruthRow } | { kind: "ambiguous" } {
+):
+  | { kind: "unmatched" }
+  | { kind: "unique"; row: CanonicalTruthRow }
+  | { kind: "ambiguous"; rows: CanonicalTruthRow[] } {
   const matches = distinctRows(index.get(normalizeIdentityKey(token)) ?? []);
   if (matches.length === 0) {
     return { kind: "unmatched" };
   }
   if (matches.length > 1) {
-    return { kind: "ambiguous" };
+    return { kind: "ambiguous", rows: matches };
   }
   return { kind: "unique", row: matches[0] };
 }
@@ -93,13 +96,16 @@ function rowsAreEquivalent(left: CanonicalTruthRow, right: CanonicalTruthRow): b
 }
 
 function aliasHasCompleteProvenance(alias: ReviewedPsdAlias): boolean {
-  return [
-    alias.sourceToken,
-    alias.websiteSku,
-    alias.graceSku,
-    alias.reviewedBy,
-    alias.reviewedAt,
-  ].every((value) => typeof value === "string" && value.trim() !== "");
+  return normalizeIdentityKey(alias.sourceToken) !== ""
+    && normalizeIdentityKey(alias.websiteSku) !== ""
+    && normalizeIdentityKey(alias.graceSku) !== ""
+    && [
+      alias.sourceToken,
+      alias.websiteSku,
+      alias.graceSku,
+      alias.reviewedBy,
+      alias.reviewedAt,
+    ].every((value) => typeof value === "string" && value.trim() !== "");
 }
 
 function joinReviewedAlias(input: {
@@ -109,16 +115,24 @@ function joinReviewedAlias(input: {
   reasons: string[];
 }): PsdIdentityJoinResult {
   const normalizedSourceToken = normalizeIdentityKey(input.sourceToken);
+  if (normalizedSourceToken === "") {
+    input.reasons.push("Empty normalized identity key for source token was rejected; reviewed alias evidence is unmatched.");
+    return { status: "unmatched", row: null, reasons: input.reasons };
+  }
+
   const tokenAliases = input.aliases.filter(
-    (alias) => normalizeIdentityKey(alias.sourceToken) === normalizedSourceToken,
+    (alias) => {
+      const normalizedAliasToken = normalizeIdentityKey(alias.sourceToken);
+      return normalizedAliasToken !== "" && normalizedAliasToken === normalizedSourceToken;
+    },
   );
   const completeAliases = tokenAliases.filter(aliasHasCompleteProvenance);
 
   if (completeAliases.length === 0) {
     if (tokenAliases.length > 0) {
-      input.reasons.push("A matching alias was ignored because it has incomplete provenance.");
+      input.reasons.push("A matching reviewed alias has invalid or incomplete provenance.");
     } else {
-      input.reasons.push(`Source token ${normalizedSourceToken} did not match a reviewed alias.`);
+      input.reasons.push(`Reviewed alias evidence is unmatched for source token ${normalizedSourceToken}.`);
     }
     return { status: "unmatched", row: null, reasons: input.reasons };
   }
@@ -129,11 +143,11 @@ function joinReviewedAlias(input: {
     const graceMatch = resolveExact(input.index.byGraceSku, alias.graceSku);
 
     if (websiteMatch.kind === "ambiguous" || graceMatch.kind === "ambiguous") {
-      input.reasons.push("A reviewed alias target maps to duplicate canonical SKU rows.");
+      input.reasons.push("Reviewed alias evidence is ambiguous because a target maps to duplicate canonical SKU rows.");
       return { status: "ambiguous", row: null, reasons: input.reasons };
     }
     if (websiteMatch.kind === "unmatched" || graceMatch.kind === "unmatched") {
-      input.reasons.push("A reviewed alias target did not resolve both canonical SKUs.");
+      input.reasons.push("Reviewed alias evidence is unmatched because a target did not resolve both canonical SKUs.");
       return { status: "unmatched", row: null, reasons: input.reasons };
     }
     if (!rowsAreEquivalent(websiteMatch.row, graceMatch.row)) {
@@ -153,6 +167,67 @@ function joinReviewedAlias(input: {
   return { status: "reviewed-alias", row: distinctAliasRows[0], reasons: input.reasons };
 }
 
+function appendGraceDiagnostic(input: {
+  graceSku: string | null;
+  index: CanonicalIdentityIndex;
+  higherPriorityLabel: string;
+  higherPriorityRows: readonly CanonicalTruthRow[];
+  reasons: string[];
+}): void {
+  if (!hasToken(input.graceSku)) {
+    return;
+  }
+
+  const normalizedGraceSku = normalizeIdentityKey(input.graceSku);
+  const graceMatch = resolveExact(input.index.byGraceSku, input.graceSku);
+  if (graceMatch.kind === "unique") {
+    const agrees = input.higherPriorityRows.some((row) => rowsAreEquivalent(row, graceMatch.row));
+    if (agrees) {
+      input.reasons.push(`Supplied Grace SKU ${normalizedGraceSku} agrees with ${input.higherPriorityLabel} evidence; higher-priority precedence was retained.`);
+    } else {
+      input.reasons.push(`Supplied Grace SKU ${normalizedGraceSku} conflicts with ${input.higherPriorityLabel} evidence by identifying a different canonical row; higher-priority precedence was retained.`);
+    }
+    return;
+  }
+  if (graceMatch.kind === "ambiguous") {
+    input.reasons.push(`Supplied Grace SKU ${normalizedGraceSku} is ambiguous and did not override ${input.higherPriorityLabel} evidence.`);
+    return;
+  }
+  input.reasons.push(`Supplied Grace SKU ${normalizedGraceSku} is unmatched and did not override ${input.higherPriorityLabel} evidence.`);
+}
+
+function appendReviewedAliasDiagnostic(input: {
+  sourceToken: string | null | undefined;
+  index: CanonicalIdentityIndex;
+  aliases: readonly ReviewedPsdAlias[];
+  higherPriorityLabel: string;
+  higherPriorityRows: readonly CanonicalTruthRow[];
+  reasons: string[];
+}): void {
+  if (!hasToken(input.sourceToken)) {
+    return;
+  }
+
+  const aliasResult = joinReviewedAlias({
+    sourceToken: input.sourceToken,
+    index: input.index,
+    aliases: input.aliases,
+    reasons: input.reasons,
+  });
+  if (aliasResult.status === "reviewed-alias" && aliasResult.row) {
+    const aliasRow = aliasResult.row;
+    const agrees = input.higherPriorityRows.some((row) => rowsAreEquivalent(row, aliasRow));
+    if (agrees) {
+      input.reasons.push(`Reviewed alias evidence agrees with ${input.higherPriorityLabel} evidence; higher-priority precedence was retained.`);
+    } else {
+      input.reasons.push(`Reviewed alias evidence conflicts with ${input.higherPriorityLabel} evidence; higher-priority precedence was retained.`);
+    }
+    return;
+  }
+
+  input.reasons.push(`Reviewed alias ${aliasResult.status} evidence did not override ${input.higherPriorityLabel} evidence.`);
+}
+
 export function joinPsdSourceIdentity(input: {
   websiteSku: string | null;
   graceSku: string | null;
@@ -167,6 +242,21 @@ export function joinPsdSourceIdentity(input: {
     const websiteMatch = resolveExact(input.index.byWebsiteSku, input.websiteSku);
     if (websiteMatch.kind === "ambiguous") {
       reasons.push(`Duplicate website SKU ${normalizedWebsiteSku} maps to non-equivalent canonical rows.`);
+      appendGraceDiagnostic({
+        graceSku: input.graceSku,
+        index: input.index,
+        higherPriorityLabel: "ambiguous website SKU",
+        higherPriorityRows: websiteMatch.rows,
+        reasons,
+      });
+      appendReviewedAliasDiagnostic({
+        sourceToken: input.sourceToken,
+        index: input.index,
+        aliases: input.aliases,
+        higherPriorityLabel: "ambiguous website SKU",
+        higherPriorityRows: websiteMatch.rows,
+        reasons,
+      });
       return { status: "ambiguous", row: null, reasons };
     }
     if (websiteMatch.kind === "unmatched") {
@@ -185,17 +275,21 @@ export function joinPsdSourceIdentity(input: {
     }
 
     reasons.push(`Matched exact normalized website SKU ${normalizedWebsiteSku}.`);
-    if (hasToken(input.graceSku)) {
-      const normalizedGraceSku = normalizeIdentityKey(input.graceSku);
-      const graceMatch = resolveExact(input.index.byGraceSku, input.graceSku);
-      if (graceMatch.kind === "unique" && !rowsAreEquivalent(websiteMatch.row, graceMatch.row)) {
-        reasons.push(`Supplied Grace SKU ${normalizedGraceSku} identifies a different canonical row; website SKU precedence was applied.`);
-      } else if (graceMatch.kind === "ambiguous") {
-        reasons.push(`Supplied Grace SKU ${normalizedGraceSku} is ambiguous; website SKU precedence was applied.`);
-      } else if (graceMatch.kind === "unmatched") {
-        reasons.push(`Supplied Grace SKU ${normalizedGraceSku} did not match; website SKU precedence was applied.`);
-      }
-    }
+    appendGraceDiagnostic({
+      graceSku: input.graceSku,
+      index: input.index,
+      higherPriorityLabel: "website SKU",
+      higherPriorityRows: [websiteMatch.row],
+      reasons,
+    });
+    appendReviewedAliasDiagnostic({
+      sourceToken: input.sourceToken,
+      index: input.index,
+      aliases: input.aliases,
+      higherPriorityLabel: "website SKU",
+      higherPriorityRows: [websiteMatch.row],
+      reasons,
+    });
     return { status: "exact-website-sku", row: websiteMatch.row, reasons };
   }
 
@@ -204,10 +298,26 @@ export function joinPsdSourceIdentity(input: {
     const graceMatch = resolveExact(input.index.byGraceSku, input.graceSku);
     if (graceMatch.kind === "ambiguous") {
       reasons.push(`Duplicate Grace SKU ${normalizedGraceSku} maps to non-equivalent canonical rows.`);
+      appendReviewedAliasDiagnostic({
+        sourceToken: input.sourceToken,
+        index: input.index,
+        aliases: input.aliases,
+        higherPriorityLabel: "ambiguous Grace SKU",
+        higherPriorityRows: graceMatch.rows,
+        reasons,
+      });
       return { status: "ambiguous", row: null, reasons };
     }
     if (graceMatch.kind === "unique") {
       reasons.push(`Matched exact normalized Grace SKU ${normalizedGraceSku}.`);
+      appendReviewedAliasDiagnostic({
+        sourceToken: input.sourceToken,
+        index: input.index,
+        aliases: input.aliases,
+        higherPriorityLabel: "Grace SKU",
+        higherPriorityRows: [graceMatch.row],
+        reasons,
+      });
       return { status: "exact-grace-sku", row: graceMatch.row, reasons };
     }
     reasons.push(`Supplied Grace SKU ${normalizedGraceSku} did not match a canonical row.`);
