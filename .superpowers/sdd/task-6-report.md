@@ -69,3 +69,9 @@ No remote migration, deployment, provider call, paid generation, or external syn
 ### Local SQL limitation
 
 The foundational migration SQL test could not run: the Docker CLI is installed but its daemon socket is unavailable, and `psql` is not installed. No remote migration, deployment, provider call, paid generation, Shopify/Convex synchronization, or other external mutation was attempted.
+
+## Final dependency follow-up — 2026-07-11
+
+- Added the existing `20260711000200_best_bottles_reconciliation_privilege_hardening.sql` migration required by the reconciliation SQL assertions.
+- Static verification confirms it revokes anonymous access to the reconciliation tables/view, restores only the intended authenticated table privileges, and revokes `PUBLIC`, `anon`, and `authenticated` execute access from all four internal trigger functions.
+- Local SQL execution remains unavailable because the Docker daemon is not running and `psql` is absent. No remote migration or external mutation was attempted.
