@@ -1850,6 +1850,15 @@ export async function normalizeBestBottlesRigBaseline(
         rawDetectedBaseline,
       )
     : rawDetectedBaseline;
+  const modelProductControlBounds = shadowOwner === "model"
+    ? detectStrongBounds(
+        analysisImageData.data,
+        width,
+        height,
+        analysisBg,
+        geometryBaseline,
+      )
+    : null;
 
   const modelShadowAnalysis = shadowOwner === "model"
     ? analyzeModelOwnedShadow({
@@ -1860,9 +1869,11 @@ export async function normalizeBestBottlesRigBaseline(
         // The product's geometry ends at the detected baseline. Treat pixels
         // below it as shadow candidates even when an extra component was wide
         // or dark enough to contaminate the raw strong bounds.
-        objectBounds: rawStrongBounds
-          ? { ...rawStrongBounds, bottom: geometryBaseline }
-          : rawStrongBounds,
+        objectBounds: modelProductControlBounds
+          ? { ...modelProductControlBounds, bottom: geometryBaseline }
+          : rawStrongBounds
+            ? { ...rawStrongBounds, bottom: geometryBaseline }
+            : rawStrongBounds,
         baselineYPx: geometryBaseline,
       })
     : null;
@@ -1875,19 +1886,12 @@ export async function normalizeBestBottlesRigBaseline(
       modelShadowAnalysis.candidateMask,
       analysisBg,
     );
-    const productControlBounds = detectStrongBounds(
-      analysisImageData.data,
-      width,
-      height,
-      analysisBg,
-      geometryBaseline,
-    );
     clampModelShadowGeometryToControlEnvelope(
       geometryAnalysisPixels,
       width,
       height,
       analysisBg,
-      productControlBounds,
+      modelProductControlBounds,
       geometryBaseline,
     );
   }
