@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Sparkles, Check, AlertCircle, Download, RotateCcw, ImageIcon, Wand2, FolderUp, X, UploadCloud } from "lucide-react";
+import { Loader2, Sparkles, Check, AlertCircle, Download, RotateCcw, ImageIcon, Wand2, FolderUp, X, UploadCloud, ExternalLink, ShieldAlert } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,6 +56,17 @@ import {
   type BestBottlesPromptPreflight,
 } from "@/lib/bestBottlesPromptPreflight";
 import { inferBestBottlesBodyMaterial } from "@/lib/bestBottlesBodyMaterial";
+import {
+  getEffectiveBestBottlesWebsiteTruthStatus,
+  getBestBottlesWebsiteTruthBlocker,
+  getBestBottlesWebsiteTruthRow,
+} from "@/lib/bestBottlesWebsiteTruth";
+import {
+  buildBestBottlesLiveTruthRecovery,
+  isCatalogRelatedMadisonFailure,
+  type BestBottlesLiveTruthRecovery,
+  type BestBottlesLiveTruthTrigger,
+} from "@/lib/bestBottlesLiveTruthRecovery";
 
 const SCENE_FLEXIBLE_PRESET_ID = "master-scene-flexible-2000x2200";
 const ANGLE_PRESET_ID = "master-angle-2080x2288";
@@ -255,9 +266,11 @@ import {
   type AssembledGenerationResult,
 } from "@/hooks/useAssembledPromptGeneration";
 import {
+  getBestBottlesCanonicalReferenceIssue,
   getBestBottlesReferenceUrlIssue,
   isBestBottlesReferenceUrlUsable,
 } from "@/lib/bestBottlesReferenceValidation";
+import { readImageCanvasSize } from "@/lib/imageCanvasMetadata";
 import {
   getBestBottlesCylinderProductTruthReferenceIssue,
   getRetiredTransparentBestBottlesReferenceIssue,
@@ -276,15 +289,29 @@ import {
   getBestBottlesGenerationIdentityIssue,
 } from "@/lib/bestBottlesGenerationIdentity";
 import { updatePipelineSkuJobReference } from "@/lib/bestBottlesPipeline";
+import { resolveBestBottlesShadowPolicy } from "@/lib/bestBottlesShadowPolicy";
+import { RigReviewPanel } from "@/components/bestbottles/RigReviewPanel";
+import {
+  EMPTY_RIG_MANUAL_CHECKS,
+  isRigApprovalReady,
+  type RigManualChecks,
+} from "@/lib/product-image/rigReview";
 
 interface FolderReferenceEntry {
   url: string;
   name: string;
+  referenceSource?: string | null;
   /** Map key = Grace SKU (uppercase), or `${graceSku}--${modifier}` for variants. */
   matchKey: string;
 }
 
-type UploadedReferenceImage = { url: string; file?: File; name?: string; libraryTags?: string[] };
+type UploadedReferenceImage = {
+  url: string;
+  file?: File;
+  name?: string;
+  libraryTags?: string[];
+  referenceSource?: string | null;
+};
 
 type ParsedReferenceFilename = { graceSku: string; modifier?: string };
 type ParsedReferenceFilenameToken = { raw: string; key: string; modifier?: string };
@@ -1018,6 +1045,9 @@ export function MastersTabPanel({
   );
   const [showAssembledPrompt, setShowAssembledPrompt] = useState(false);
   const [assembledCache, setAssembledCache] = useState<AssembledPrompt | null>(null);
+  const [rigManualChecks, setRigManualChecks] = useState<RigManualChecks>(EMPTY_RIG_MANUAL_CHECKS);
+  const [liveTruthRecovery, setLiveTruthRecovery] =
+    useState<BestBottlesLiveTruthRecovery | null>(null);
 
   // Scene overlay — only used when the Master · Scene-Flexible preset is
   // selected. The chip picker pre-fills the textarea with one of the
@@ -1147,6 +1177,31 @@ export function MastersTabPanel({
   const { currentOrganizationId } = useOnboarding();
   const queryClient = useQueryClient();
   const { generate, isGenerating, error, result, reset } = useAssembledPromptGeneration();
+
+  const requireLiveTruthVerification = async (
+    product: Product,
+    trigger: BestBottlesLiveTruthTrigger,
+    failure: string,
+    knownTruthRow?: Awaited<ReturnType<typeof getBestBottlesWebsiteTruthRow>>,
+  ) => {
+    const truthRow = knownTruthRow ?? (await getBestBottlesWebsiteTruthRow(product.graceSku));
+    setLiveTruthRecovery(buildBestBottlesLiveTruthRecovery(product, trigger, failure, truthRow));
+  };
+
+  useEffect(() => {
+    setLiveTruthRecovery(null);
+  }, [selectedProductKey]);
+
+  useEffect(() => {
+    if (!error || !selectedProduct || !isCatalogRelatedMadisonFailure(error)) return;
+    void requireLiveTruthVerification(selectedProduct, "generation_failure", error);
+    // The recovery helper is intentionally driven by the latest hook error.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, selectedProductKey]);
+
+  useEffect(() => {
+    setRigManualChecks(EMPTY_RIG_MANUAL_CHECKS);
+  }, [result?.savedImageId, result?.imageUrl]);
 
   /**
    * Look up a folder entry for the given SKU + preset. If the preset has a
@@ -1630,6 +1685,7 @@ export function MastersTabPanel({
             url: urlData.publicUrl,
             name: file.name,
             matchKey: key,
+            referenceSource: "reviewed-local-canonical",
           });
           stored++;
         } catch (e: unknown) {
@@ -2092,7 +2148,12 @@ export function MastersTabPanel({
       .from("generated-images")
       .getPublicUrl(path);
     if (!urlData?.publicUrl) throw new Error("No public URL returned");
-    return { url: urlData.publicUrl, name: img.file.name };
+    return {
+      url: urlData.publicUrl,
+      name: img.file.name,
+      referenceSource:
+        storageDir === "studio-references" ? "reviewed-local-canonical" : img.referenceSource,
+    };
   };
 
   const handleConfirmReferenceImport = async () => {
@@ -2225,6 +2286,7 @@ export function MastersTabPanel({
               url: urlData.publicUrl,
               name: entry.name,
               matchKey: entry.key,
+              referenceSource: "reviewed-local-canonical",
             });
           }
           uploaded += 1;
@@ -2235,6 +2297,7 @@ export function MastersTabPanel({
               graceSku: entry.graceSku,
               referenceUrl: urlData.publicUrl,
               referenceName: entry.name,
+              referenceSource: "flattened-product-truth",
             });
             persistedCanonical += 1;
           }
@@ -2669,18 +2732,34 @@ export function MastersTabPanel({
     const cylinderMaskQcResult = usesCylinderMaskControl
       ? maskControl?.qcResult ?? (isSelectedSku ? maskQcResult : null)
       : null;
-    const secondaryReferenceForGeneration = isCylinderSku
-      ? null
-      : glassSpecularityReference?.url ?? null;
+    // A custom operator-selected style reference may override the approved
+    // visual target. Otherwise the generation hook supplies the material-
+    // matched Best Bottles PDP v1 calibration reference for every master,
+    // including Cylinder. This is style-only and never replaces product truth.
+    const secondaryReferenceForGeneration = glassSpecularityReference?.url ?? null;
     const skuSpecularityTag = skuBodyMaterial.includes("aluminum") || skuBodyMaterial.includes("metal atomizer")
       ? "metal-specularity-ref"
       : "glass-specularity-ref";
+    const websiteTruth = await getBestBottlesWebsiteTruthRow(sku.graceSku);
+    const effectiveWebsiteTruthStatus = getEffectiveBestBottlesWebsiteTruthStatus(websiteTruth);
+    const websiteTruthBlocker = getBestBottlesWebsiteTruthBlocker(websiteTruth);
+    if (websiteTruthBlocker) {
+      await requireLiveTruthVerification(sku, "website_truth", websiteTruthBlocker, websiteTruth);
+      toast({
+        title: "Website truth blocked",
+        description: `${sku.graceSku}: ${websiteTruthBlocker}`,
+        variant: "destructive",
+      });
+      return null;
+    }
     const generationIdentity = buildBestBottlesGenerationIdentity(sku, {
       bodyMaterial: skuBodyMaterial,
       sourceReference: referenceUrl ?? sku.imageUrl ?? null,
     });
+    const shadowPolicy = resolveBestBottlesShadowPolicy(sku.graceSku);
     const identityIssue = getBestBottlesGenerationIdentityIssue(generationIdentity);
     if (identityIssue) {
+      await requireLiveTruthVerification(sku, "sku_identity", identityIssue, websiteTruth);
       toast({
         title: "SKU identity blocked",
         description: `${sku.graceSku}: ${identityIssue}`,
@@ -2690,6 +2769,12 @@ export function MastersTabPanel({
     }
     const promptPreflight = buildPromptPreflightForSku(sku, referenceUrl ?? null);
     if (promptPreflight.status === "error" || !promptPreflight.record || !promptPreflight.sku) {
+      await requireLiveTruthVerification(
+        sku,
+        "prompt_preflight",
+        promptPreflight.issue ?? "Compiled prompt is missing.",
+        websiteTruth,
+      );
       toast({
         title: "Prompt preflight blocked",
         description: `${sku.graceSku}: ${promptPreflight.issue ?? "Compiled prompt is missing."}`,
@@ -2722,6 +2807,16 @@ export function MastersTabPanel({
         heightWithoutCap: sku.heightWithoutCap,
         heightWithCap: sku.heightWithCap,
         diameter: sku.diameter,
+        neckThreadSize: sku.neckThreadSize,
+        measurementSource: "best-bottles-convex-catalog",
+        measurementSourceUrl: websiteTruth?.liveFinalUrl || websiteTruth?.liveSourceUrl || null,
+        measurementSourceNote:
+          "Generation-time snapshot of the Best Bottles catalog fields; tolerances remain embedded in the source strings.",
+        sourcePageUrl: websiteTruth?.liveFinalUrl || websiteTruth?.liveSourceUrl || null,
+        websiteTruthStatus: effectiveWebsiteTruthStatus,
+        websiteTruthIssues: websiteTruth?.issueTypes
+          ? websiteTruth.issueTypes.split(";").map((issue) => issue.trim()).filter(Boolean)
+          : [],
         capColor: generationIdentity.capColor,
         trimColor: sku.trimColor ?? null,
         applicator: sku.applicator ?? null,
@@ -2748,6 +2843,8 @@ export function MastersTabPanel({
         identityBlockers: generationIdentity.identityBlockers,
         identityHash: generationIdentity.identityHash,
         promptVersion: generationIdentity.promptVersion,
+        shadowOwner: shadowPolicy.owner,
+        shadowContract: shadowPolicy.contract,
         rigVersion: generationIdentity.rigVersion,
         qaStatus: generationIdentity.qaStatus,
         canvas: generationIdentity.canvas,
@@ -2771,8 +2868,8 @@ export function MastersTabPanel({
         isCylinderSku ? "truth-ref:flattened-png" : null,
         usesCylinderMaskControl && cylinderMaskReference?.url ? "mask-ref:transparent-png" : null,
         usesCylinderMaskControl && cylinderMaskQcResult?.passed ? "mask-qc:passed" : null,
-        !isCylinderSku && glassSpecularityReference?.url ? "material-specularity-ref" : null,
-        !isCylinderSku && glassSpecularityReference?.url ? skuSpecularityTag : null,
+        glassSpecularityReference?.url ? "material-specularity-ref:operator-override" : null,
+        glassSpecularityReference?.url ? skuSpecularityTag : null,
         `model:${masterAiProvider}`,
         `prompt:${generationIdentity.promptVersion}`,
         `rig:${generationIdentity.rigVersion}`,
@@ -2786,8 +2883,10 @@ export function MastersTabPanel({
 
   const handleGenerate = async () => {
     if (!selectedProduct) return;
+    setLiveTruthRecovery(null);
     const measurementIssue = getMeasurementIssue(selectedProduct);
     if (measurementIssue) {
+      await requireLiveTruthVerification(selectedProduct, "measurement", measurementIssue);
       toast({
         title: "Missing measurements",
         description: `${selectedProduct.graceSku}: ${measurementIssue} Add or measure dimensions before generating.`,
@@ -2801,6 +2900,7 @@ export function MastersTabPanel({
     });
     const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
     if (identityIssue) {
+      await requireLiveTruthVerification(selectedProduct, "sku_identity", identityIssue);
       toast({
         title: "SKU identity blocked",
         description: `${selectedProduct.graceSku}: ${identityIssue}`,
@@ -2809,6 +2909,11 @@ export function MastersTabPanel({
       return;
     }
     if (!customReference?.url) {
+      await requireLiveTruthVerification(
+        selectedProduct,
+        "reference",
+        "Best Bottles PDP masters must use an uploaded product reference image.",
+      );
       toast({
         title: "Reference required",
         description: "Best Bottles PDP masters must use an uploaded product reference image.",
@@ -2818,6 +2923,7 @@ export function MastersTabPanel({
     }
     const referenceIssue = getBestBottlesReferenceUrlIssue(customReference.url);
     if (referenceIssue) {
+      await requireLiveTruthVerification(selectedProduct, "reference", referenceIssue);
       toast({
         title: "Usable reference required",
         description: `${referenceIssue} Replace it with an uploaded PNG/JPG/WebP before generating.`,
@@ -2825,7 +2931,26 @@ export function MastersTabPanel({
       });
       return;
     }
+    const referenceCanvas = await readImageCanvasSize(customReference.url);
+        const canonicalReferenceIssue = getBestBottlesCanonicalReferenceIssue(
+          customReference.url,
+          referenceCanvas,
+          {
+            referenceSource: customReference.referenceSource,
+            referenceName: customReference.name,
+          },
+        );
+    if (canonicalReferenceIssue) {
+      await requireLiveTruthVerification(selectedProduct, "reference", canonicalReferenceIssue);
+      toast({
+        title: "Canonical PSD reference required",
+        description: canonicalReferenceIssue,
+        variant: "destructive",
+      });
+      return;
+    }
     if (productTruthReferenceIssue) {
+      await requireLiveTruthVerification(selectedProduct, "reference", productTruthReferenceIssue);
       toast({
         title: "Flattened product truth required",
         description: productTruthReferenceIssue,
@@ -2834,6 +2959,11 @@ export function MastersTabPanel({
       return;
     }
     if (selectedPromptPreflight?.status === "error") {
+      await requireLiveTruthVerification(
+        selectedProduct,
+        "prompt_preflight",
+        selectedPromptPreflight.issue ?? "Compiled prompt is missing.",
+      );
       toast({
         title: "Prompt preflight blocked",
         description: `${selectedProduct.graceSku}: ${selectedPromptPreflight.issue ?? "Compiled prompt is missing."}`,
@@ -3164,6 +3294,19 @@ export function MastersTabPanel({
           await recordFailure(sku, referenceIssue ?? "No usable reference is attached.");
           continue;
         }
+        const referenceCanvas = await readImageCanvasSize(ref.url);
+        const canonicalReferenceIssue = getBestBottlesCanonicalReferenceIssue(
+          ref.url,
+          referenceCanvas,
+          {
+            referenceSource: ref.referenceSource,
+            referenceName: ref.name,
+          },
+        );
+        if (canonicalReferenceIssue) {
+          await recordFailure(sku, canonicalReferenceIssue);
+          continue;
+        }
         const maskIssue = getBestBottlesMaskControlReadiness({
           isCylinderTwoSourcePilot:
             CYLINDER_MASK_CONTROL_ENABLED && isCylinderFamilyName(sku.family),
@@ -3234,7 +3377,7 @@ export function MastersTabPanel({
   };
 
   const handleApprove = () => {
-    if (!result || !selectedProduct || !onApproveMaster) return;
+    if (!result || !selectedProduct || !onApproveMaster || !isRigApprovalReady(result.rigReview, rigManualChecks)) return;
     onApproveMaster(result, selectedProduct);
   };
 
@@ -4965,6 +5108,73 @@ export function MastersTabPanel({
         </div>
       )}
 
+      {liveTruthRecovery && (
+        <div className="space-y-3 rounded border border-amber-500/30 bg-amber-500/[0.06] p-3 text-xs text-amber-100">
+          <div className="flex items-start gap-2">
+            <ShieldAlert className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" />
+            <div className="min-w-0 space-y-1">
+              <div className="font-semibold text-amber-200">Live BestBottles verification required</div>
+              <div className="leading-relaxed text-amber-100/70">
+                Madison detected a catalog-related failure and resolved the exact website SKU and live-site evidence routes. Generation stays blocked until the live PDP and reference agree.
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded border border-amber-500/20 bg-black/20 p-2">
+              <div className="text-[9px] uppercase tracking-wider text-amber-100/45">Identity</div>
+              <div className="mt-1 font-mono text-[11px]">Grace: {liveTruthRecovery.graceSku}</div>
+              <div className="font-mono text-[11px]">Website: {liveTruthRecovery.websiteSku || "unresolved"}</div>
+              {liveTruthRecovery.productGroupSlug && (
+                <div className="mt-1 break-all text-[10px] text-amber-100/55">{liveTruthRecovery.productGroupSlug}</div>
+              )}
+            </div>
+            <div className="rounded border border-amber-500/20 bg-black/20 p-2">
+              <div className="text-[9px] uppercase tracking-wider text-amber-100/45">Verification state</div>
+              <div className="mt-1 text-[11px] font-medium">
+                {liveTruthRecovery.liveEvidenceStatus === "verified"
+                  ? "Prior live PDP evidence found — recheck current page"
+                  : "Current live PDP verification required"}
+              </div>
+              <div className="mt-1 text-[10px] text-rose-300">Generation blocked · no automatic override</div>
+            </div>
+          </div>
+          {(liveTruthRecovery.liveFamily || liveTruthRecovery.liveConfiguration) && (
+            <div className="rounded border border-white/10 bg-black/20 p-2 leading-relaxed text-amber-100/65">
+              {liveTruthRecovery.liveFamily && <div>Live family: {liveTruthRecovery.liveFamily}</div>}
+              {liveTruthRecovery.liveConfiguration && <div>Live configuration: {liveTruthRecovery.liveConfiguration}</div>}
+            </div>
+          )}
+          <div className="rounded border border-rose-500/20 bg-rose-500/[0.04] p-2 text-[11px] leading-relaxed text-rose-200/80">
+            Failure: {liveTruthRecovery.failure}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {liveTruthRecovery.pdpUrl && (
+              <Button asChild size="sm" className="bg-amber-300 text-black hover:bg-amber-200">
+                <a href={liveTruthRecovery.pdpUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                  Open exact live PDP
+                </a>
+              </Button>
+            )}
+            <Button asChild size="sm" variant="outline" className="border-amber-500/30 bg-black/10 text-amber-100 hover:bg-amber-500/10 hover:text-white">
+              <a href={liveTruthRecovery.searchUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                Search website SKU
+              </a>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="border-white/15 bg-black/10 text-white/75 hover:bg-white/10 hover:text-white">
+              <a href={liveTruthRecovery.primaryImageUrl} target="_blank" rel="noreferrer">Primary live image</a>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="border-white/15 bg-black/10 text-white/75 hover:bg-white/10 hover:text-white">
+              <a href={liveTruthRecovery.cappedImageUrl} target="_blank" rel="noreferrer">Alternate live image</a>
+            </Button>
+          </div>
+          <div className="text-[10px] leading-relaxed text-amber-100/55">
+            Compare exact SKU, geometry, material/finish, capacity, applicator, cap state, dimensions, and live imagery. Record the resolution before retrying.
+          </div>
+        </div>
+      )}
+
       {result && (
         <div className="space-y-3 pt-1 border-t" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
           <div className="flex items-center gap-2 pt-3">
@@ -4973,9 +5183,15 @@ export function MastersTabPanel({
               Generated master
             </span>
           </div>
-          <div className="relative rounded border overflow-hidden" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-            <img src={result.imageUrl} alt={selectedProduct.itemName} className="w-full" />
-          </div>
+          <RigReviewPanel
+            imageUrl={result.imageUrl}
+            imageAlt={selectedProduct.itemName}
+            canvas={result.canvas}
+            product={selectedProduct}
+            review={result.rigReview}
+            manualChecks={rigManualChecks}
+            onManualChecksChange={setRigManualChecks}
+          />
           <div className="text-[11px] space-y-0.5" style={{ color: "var(--darkroom-text-dim)" }}>
             <div>
               Preset: <span className="font-mono">{result.presetId}</span>
@@ -4992,10 +5208,14 @@ export function MastersTabPanel({
           <div className="flex gap-2 flex-wrap">
             <Button
               onClick={handleApprove}
-              disabled={!onApproveMaster}
+              disabled={!onApproveMaster || !isRigApprovalReady(result.rigReview, rigManualChecks)}
               className="bg-emerald-600 text-white hover:bg-emerald-500"
               size="sm"
-              title="Marks the Pipeline row for this SKU's APPLICATOR GROUP as approved — not just this specific cap colorway."
+              title={
+                isRigApprovalReady(result.rigReview, rigManualChecks)
+                  ? "Marks the Pipeline row for this SKU's APPLICATOR GROUP as approved — not just this specific cap colorway."
+                  : "Approval is blocked until rig measurements pass and visual confirmations are checked."
+              }
             >
               <Check className="w-3.5 h-3.5 mr-1.5" />
               Approve master

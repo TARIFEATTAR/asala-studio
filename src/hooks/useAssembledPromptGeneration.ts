@@ -19,16 +19,38 @@ import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import type { AssembledPrompt } from "@/lib/product-image/promptAssembler";
 import { getBestBottlesReferenceUrlIssue } from "@/lib/bestBottlesReferenceValidation";
 import { getRetiredTransparentBestBottlesReferenceIssue } from "@/lib/bestBottlesReferenceFilters";
-import { colorCorrectToTarget, dataUrlToBlob } from "@/lib/product-image/colorCorrect";
-import { normalizeBestBottlesRigBaseline } from "@/lib/product-image/rigPostprocess";
+import { dataUrlToBlob } from "@/lib/product-image/colorCorrect";
+import {
+  normalizeBestBottlesRigBaseline,
+  type RigBaselineNormalizeResult,
+} from "@/lib/product-image/rigPostprocess";
+import {
+  getBestBottlesImageAssetRoleForPreset,
+  recordBestBottlesRawImage,
+  recordBestBottlesRigResult,
+  requiresBestBottlesPipelineReconciliation,
+  type RecordBestBottlesRawImageInput,
+} from "@/lib/bestBottlesImageReconciliation";
 import { shouldRunBestBottlesRigPostprocess } from "@/lib/product-image/bestBottlesRigPostprocessPolicy";
 import {
   getExactOutputCanvasConstraints,
   resolveExactCanvasForAspectRatio,
 } from "@/lib/product-image/exactOutputCanvas";
 import type { PromptRecord } from "@/lib/bestBottlesPromptCompiler";
+import {
+  getBestBottlesShadowPolicyTags,
+  resolveBestBottlesShadowPolicy,
+  type BestBottlesShadowOwner,
+  type BestBottlesShadowPolicy,
+} from "@/lib/bestBottlesShadowPolicy";
+import {
+  applyBestBottlesVisualTargetPrompt,
+  BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
+  getBestBottlesVisualTargetReference,
+  getBestBottlesVisualTargetTags,
+} from "@/config/bestBottlesVisualTarget";
+import type { RigReviewEvidence } from "@/lib/product-image/rigReview";
 
-const BEST_BOTTLES_STUDIO_BONE_BACKGROUND = "#F5F3EF";
 
 export interface AssembledGenerationResult {
   imageUrl: string;
@@ -38,6 +60,7 @@ export interface AssembledGenerationResult {
   canvas: { widthPx: number; heightPx: number };
   presetId: string;
   sessionId: string;
+  rigReview: RigReviewEvidence | null;
 }
 
 export interface AssembledGenerateOptions {
@@ -54,6 +77,8 @@ export interface AssembledGenerateOptions {
   productContext?: {
     name?: string;
     websiteSku?: string | null;
+    eligibleGraceSkus?: string[];
+    eligibleWebsiteSkus?: string[];
     itemDescription?: string | null;
     collection?: string;
     family?: string | null;
@@ -69,6 +94,13 @@ export interface AssembledGenerateOptions {
     heightWithoutCap?: string | null;
     heightWithCap?: string | null;
     diameter?: string | null;
+    neckThreadSize?: string | null;
+    measurementSource?: string | null;
+    measurementSourceUrl?: string | null;
+    measurementSourceNote?: string | null;
+    sourcePageUrl?: string | null;
+    websiteTruthStatus?: string | null;
+    websiteTruthIssues?: string[];
     capColor?: string | null;
     trimColor?: string | null;
     applicator?: string | null;
@@ -88,6 +120,8 @@ export interface AssembledGenerateOptions {
     identityHash?: string;
     promptVersion?: string;
     rigVersion?: string;
+    shadowOwner?: BestBottlesShadowOwner;
+    shadowContract?: BestBottlesShadowPolicy["contract"];
     qaStatus?: "pending" | string;
     canvas?: "2080x2288" | string;
   };
@@ -191,25 +225,36 @@ export function useAssembledPromptGeneration() {
     // downstream (`processReferenceImage(undefined)`), so the model never
     // actually sees the reference. Always pass objects.
     const rawRef = options.referenceImageUrl?.trim() || "";
-    const rawGlassRef = options.glassSpecularityReferenceImageUrl?.trim() || "";
-    const rawMaskRef = options.productContext?.maskReference?.trim() || "";
     const isBestBottlesStudioMasterRequest =
       Boolean(options.extraLibraryTags?.includes("brand:best-bottles")) &&
       Boolean(options.extraLibraryTags?.includes("studio-master"));
+    const visualTargetReference = getBestBottlesVisualTargetReference(
+      options.productContext?.bodyMaterial,
+    );
+    const rawGlassRef =
+      options.glassSpecularityReferenceImageUrl?.trim() ||
+      (isBestBottlesStudioMasterRequest ? visualTargetReference.imageUrl : "");
+    const rawMaskRef = options.productContext?.maskReference?.trim() || "";
     const isCylinderBestBottlesMasterRequest =
       isBestBottlesStudioMasterRequest &&
       isCylinderBestBottlesContext(options.productContext);
-    const requiresMaskControlledRecanvas =
-      isBestBottlesStudioMasterRequest &&
-      options.productContext?.referenceWorkflow === "two-source-flattened-truth-transparent-mask";
     const productReferenceIssue = getBestBottlesReferenceUrlIssue(rawRef);
     const retiredReferenceIssue =
-      isCylinderBestBottlesMasterRequest
+      isBestBottlesStudioMasterRequest
         ? getRetiredTransparentBestBottlesReferenceIssue([
             {
               url: rawRef,
               sourceReference: options.productContext?.sourceReference,
               referenceWorkflow: options.productContext?.referenceWorkflow,
+              role: "product-reference",
+            },
+            {
+              url: rawGlassRef,
+              role: "style-reference",
+            },
+            {
+              url: rawMaskRef,
+              role: "mask-reference",
             },
           ])
         : null;
@@ -219,18 +264,6 @@ export function useAssembledPromptGeneration() {
       setIsGenerating(false);
       toast({
         title: "Flattened product truth required",
-        description: message,
-        variant: "destructive",
-      });
-      return null;
-    }
-    if (isCylinderBestBottlesMasterRequest && rawMaskRef) {
-      const message =
-        "Cylinder master generation no longer accepts a mask/control reference. Use one flattened product-truth reference only.";
-      setError(message);
-      setIsGenerating(false);
-      toast({
-        title: "Mask/control retired",
         description: message,
         variant: "destructive",
       });
@@ -247,14 +280,13 @@ export function useAssembledPromptGeneration() {
       });
       return null;
     }
-    if (requiresMaskControlledRecanvas && (!rawMaskRef || options.productContext?.maskQcStatus !== "passed")) {
-      const message = rawMaskRef
-        ? "Transparent mask/control PNG has not passed Alpha QC."
-        : "Transparent mask/control PNG is required for Cylinder two-source generation.";
+    if (isBestBottlesStudioMasterRequest && rawMaskRef) {
+      const message =
+        "Best Bottles generation does not accept mask/control references. Use one approved opaque flattened-white product reference and, only when approved, one opaque style-only reference.";
       setError(message);
       setIsGenerating(false);
       toast({
-        title: "Mask/control required",
+        title: "Mask/control reference prohibited",
         description: message,
         variant: "destructive",
       });
@@ -314,21 +346,60 @@ export function useAssembledPromptGeneration() {
       `preset:${assembled.preset.id}`,
       `canvas:${assembled.canvas.widthPx}x${assembled.canvas.heightPx}`,
     ];
+    const visualTargetTags = isBestBottlesStudioMasterRequest
+      ? getBestBottlesVisualTargetTags(options.productContext?.bodyMaterial)
+      : [];
+    const shadowPolicy = resolveBestBottlesShadowPolicy(options.productContext?.sku);
+    const resolvedShadowPolicy: BestBottlesShadowPolicy = {
+      ...shadowPolicy,
+      owner: options.productContext?.shadowOwner === "model" ? "model" : "rig",
+      contract: options.productContext?.shadowContract ?? shadowPolicy.contract,
+    };
+    const shadowPolicyTags = isBestBottlesStudioMasterRequest
+      ? getBestBottlesShadowPolicyTags(resolvedShadowPolicy)
+      : [];
     const extraLibraryTags = options.extraLibraryTags
-      ? Array.from(new Set([...baseTags, ...options.extraLibraryTags]))
-      : baseTags;
+      ? Array.from(new Set([
+          ...baseTags,
+          ...options.extraLibraryTags,
+          ...visualTargetTags,
+          ...shadowPolicyTags,
+        ]))
+      : Array.from(new Set([...baseTags, ...visualTargetTags, ...shadowPolicyTags]));
     const isBestBottlesStudioMaster =
       hasProductReference &&
       extraLibraryTags.includes("brand:best-bottles") &&
       extraLibraryTags.includes("studio-master");
     const precompiledPrompt = options.precompiledPromptRecord?.final_prompt?.trim() || null;
-    const requestPrompt = isBestBottlesStudioMaster
+    const uncalibratedRequestPrompt = isBestBottlesStudioMaster
       ? precompiledPrompt ?? [
           "REFERENCE-LOCKED BEST BOTTLES LUXURY PRODUCT PHOTOGRAPHY V5.1.",
           "Use the uploaded product reference as the source of truth.",
           "Server will build the full locked prompt from productContext, measurements, and reference metadata.",
         ].join("\n")
       : assembled.prompt;
+    const requestPrompt = isBestBottlesStudioMaster
+      ? applyBestBottlesVisualTargetPrompt(
+          uncalibratedRequestPrompt,
+          options.productContext?.bodyMaterial,
+        )
+      : uncalibratedRequestPrompt;
+    const calibratedPromptRecord =
+      isBestBottlesStudioMaster && options.precompiledPromptRecord
+        ? {
+            ...options.precompiledPromptRecord,
+            final_prompt: applyBestBottlesVisualTargetPrompt(
+              options.precompiledPromptRecord.final_prompt,
+              options.productContext?.bodyMaterial,
+            ),
+            qa_checklist: Array.from(
+              new Set([
+                ...options.precompiledPromptRecord.qa_checklist,
+                ...visualTargetTags,
+              ]),
+            ),
+          }
+        : options.precompiledPromptRecord;
 
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
@@ -372,7 +443,7 @@ export function useAssembledPromptGeneration() {
             backgroundPrompt: options.sceneOverlay?.backgroundPrompt ?? undefined,
             extraLibraryTags,
             productContext: options.productContext,
-            precompiledPromptRecord: options.precompiledPromptRecord ?? undefined,
+            precompiledPromptRecord: calibratedPromptRecord ?? undefined,
           },
         },
       );
@@ -490,6 +561,9 @@ export function useAssembledPromptGeneration() {
       // limits; the browser can safely perform the final Studio acceptance
       // pass before the Library URL is patched.
       const savedImageId = data.savedImageId ?? null;
+      if (isBestBottlesStudioMaster && !savedImageId) {
+        throw new Error("Best Bottles generation returned no durable Image Library row.");
+      }
       const rigPostprocessDecision = shouldRunBestBottlesRigPostprocess({
         libraryTags: extraLibraryTags,
         family: options.productContext?.family,
@@ -497,14 +571,78 @@ export function useAssembledPromptGeneration() {
         canvas: resolvedCanvas,
         sceneOverlay: options.sceneOverlay,
       });
+      const reconciliationAssetRole = getBestBottlesImageAssetRoleForPreset(
+        assembled.preset.id,
+      );
+      const requiresPipelineReconciliation =
+        requiresBestBottlesPipelineReconciliation(reconciliationAssetRole);
+      const reconciliationBase: RecordBestBottlesRawImageInput | null =
+        isBestBottlesStudioMaster && savedImageId && currentOrganizationId
+          ? {
+              imageId: savedImageId,
+              organizationId: currentOrganizationId,
+              graceSku: options.productContext?.sku,
+              websiteSku: options.productContext?.websiteSku,
+              family: options.productContext?.family,
+              sourceReferenceUrl: options.productContext?.sourceReference ?? rawRef,
+              prompt:
+                typeof data.finalPrompt === "string" && data.finalPrompt.trim()
+                  ? data.finalPrompt
+                  : requestPrompt,
+              promptVersion: options.productContext?.promptVersion,
+              rigVersion: options.productContext?.rigVersion,
+              providerModel: options.aiProvider ?? DEFAULT_IMAGE_AI_PROVIDER,
+              catalogTruth: {
+                name: options.productContext?.name ?? null,
+                graceSku: options.productContext?.sku ?? null,
+                websiteSku: options.productContext?.websiteSku ?? null,
+                eligibleGraceSkus:
+                  options.productContext?.eligibleGraceSkus ??
+                  (options.productContext?.sku ? [options.productContext.sku] : []),
+                eligibleWebsiteSkus:
+                  options.productContext?.eligibleWebsiteSkus ??
+                  (options.productContext?.websiteSku ? [options.productContext.websiteSku] : []),
+                family: options.productContext?.family ?? null,
+                category: options.productContext?.category ?? null,
+                capacityMl: options.productContext?.capacityMl ?? null,
+                heightWithoutCap: options.productContext?.heightWithoutCap ?? null,
+                heightWithCap: options.productContext?.heightWithCap ?? null,
+                diameter: options.productContext?.diameter ?? null,
+                neckThreadSize: options.productContext?.neckThreadSize ?? null,
+                applicator: options.productContext?.applicator ?? null,
+                capState: options.productContext?.capState ?? null,
+                capColor: options.productContext?.capColor ?? null,
+                trimColor: options.productContext?.trimColor ?? null,
+                bodyMaterial: options.productContext?.bodyMaterial ?? null,
+                color: options.productContext?.color ?? null,
+                identityStatus: options.productContext?.identityStatus ?? null,
+                identityBlockers: options.productContext?.identityBlockers ?? [],
+                identityHash: options.productContext?.identityHash ?? null,
+                sourceReferenceUrl: options.productContext?.sourceReference || rawRef || null,
+                sourcePageUrl: options.productContext?.sourcePageUrl ?? null,
+                measurementSource: options.productContext?.measurementSource ?? null,
+                measurementSourceUrl: options.productContext?.measurementSourceUrl ?? null,
+                measurementSourceNote: options.productContext?.measurementSourceNote ?? null,
+                websiteTruthStatus: options.productContext?.websiteTruthStatus ?? null,
+                websiteTruthIssues: options.productContext?.websiteTruthIssues ?? [],
+              },
+              assetRole: reconciliationAssetRole,
+              requiresPipelineReconciliation,
+              rawImageUrl: data.imageUrl,
+              canvasWidthPx: resolvedCanvas.widthPx,
+              canvasHeightPx: resolvedCanvas.heightPx,
+            }
+          : null;
+      if (reconciliationBase) {
+        await recordBestBottlesRawImage(reconciliationBase);
+      }
       let finalImageUrl = data.imageUrl;
+      let riggedSnapshot: RigBaselineNormalizeResult | null = null;
       if (rigPostprocessDecision.run && currentOrganizationId) {
         try {
-          const correctedDataUrl = await colorCorrectToTarget(
-            data.imageUrl,
-            BEST_BOTTLES_STUDIO_BONE_BACKGROUND,
-          );
-          const rigged = await normalizeBestBottlesRigBaseline(correctedDataUrl, {
+          // Geometry-only rig. Global paint-after color correction is intentionally
+          // retired because it shifts the product material and washes out clear glass.
+          const rigged = await normalizeBestBottlesRigBaseline(data.imageUrl, {
             family: options.productContext?.family,
             bottleCollection: options.productContext?.collection,
             graceSku: options.productContext?.sku,
@@ -518,16 +656,33 @@ export function useAssembledPromptGeneration() {
             diameter: options.productContext?.diameter,
             capState: options.productContext?.capState,
             mode: options.productContext?.mode,
-            targetBackgroundHex: BEST_BOTTLES_STUDIO_BONE_BACKGROUND,
-            maskReferenceUrl: rawMaskRef || null,
-            requireMaskControl: requiresMaskControlledRecanvas,
+            targetBackgroundHex: BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
+            shadowOwner: options.productContext?.shadowOwner === "model" ? "model" : "rig",
+            maskReferenceUrl: null,
+            requireMaskControl: false,
           });
-          if (rigged.detectedBaselineYPx === null || rigged.targetBaselineYPx === null) {
-            throw new Error("Rig baseline was not detectable in the generated image.");
+          riggedSnapshot = rigged;
+          const finalMeasurements = rigged.framingQa?.measurements ?? null;
+          if (
+            !finalMeasurements ||
+            finalMeasurements.baselineYPx === null ||
+            !Number.isFinite(finalMeasurements.targetBaselineYPx)
+          ) {
+            throw new Error("Rig baseline was not detectable in the final rendered image.");
           }
           if (rigged.qaIssues.length > 0) {
             throw new Error(`Rig QA failed: ${rigged.qaIssues.join(" ")}`);
           }
+          const shadowQaIssues =
+            rigged.shadowOwner === "model" && rigged.shadowQa?.status !== "pass"
+              ? [
+                  `Model-owned shadow ${rigged.shadowQa?.status ?? "review"}: ${[
+                    ...(rigged.shadowQa?.failures ?? []),
+                    ...(rigged.shadowQa?.warnings ?? []),
+                  ].join(" ") || "candidate requires review."}`,
+                ]
+              : [];
+          const reviewQaIssues = [...rigged.qaIssues, ...shadowQaIssues];
           console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess", {
             shifted: rigged.shifted,
             shiftXPx: rigged.shiftXPx,
@@ -573,6 +728,36 @@ export function useAssembledPromptGeneration() {
                 throw new Error(`Library row rig patch failed: ${updateError.message}`);
               }
             }
+            if (reconciliationBase) {
+              await recordBestBottlesRigResult({
+                ...reconciliationBase,
+                finalImageUrl,
+                preTransformBaselineYPx: rigged.preTransformBaselineYPx,
+                detectedBaselineYPx: finalMeasurements.baselineYPx,
+                targetBaselineYPx: finalMeasurements.targetBaselineYPx,
+                fillHeightPct: finalMeasurements.fillHeightPct,
+                centerXPct: finalMeasurements.centerXPct,
+                targetCenterXPct: finalMeasurements.targetCenterXPct,
+                centerDeltaPct: finalMeasurements.centerDeltaPct,
+                shiftXPx: rigged.shiftXPx,
+                shiftYPx: rigged.shiftYPx,
+                scaleFactor: rigged.scale,
+                maskControlled: rigged.maskControlled,
+                preTransformObjectBounds: rigged.preTransformObjectBounds,
+                transformControlBounds: rigged.transformControlBounds,
+                objectBounds: rigged.objectBounds,
+                framingQa: rigged.framingQa,
+                qaIssues: reviewQaIssues,
+                framingDecision: rigged.framingDecision,
+                lifecycleState:
+                  rigged.shadowOwner !== "model" || rigged.shadowQa?.status === "pass"
+                    ? "qa-passed"
+                    : rigged.shadowQa?.status === "fail"
+                      ? "qa-failed"
+                      : "review-pending",
+                lastError: null,
+              });
+            }
           }
         } catch (e) {
           const message = e instanceof Error ? e.message : "Best Bottles rig postprocess failed.";
@@ -582,11 +767,53 @@ export function useAssembledPromptGeneration() {
             rawImageUrl: data.imageUrl,
             family: options.productContext?.family,
           });
+          if (reconciliationBase) {
+            try {
+              const failedMeasurements = riggedSnapshot?.framingQa?.measurements ?? null;
+              await recordBestBottlesRigResult({
+                ...reconciliationBase,
+                finalImageUrl: null,
+                preTransformBaselineYPx: riggedSnapshot?.preTransformBaselineYPx ?? null,
+                detectedBaselineYPx: failedMeasurements?.baselineYPx ?? null,
+                targetBaselineYPx: failedMeasurements?.targetBaselineYPx ?? null,
+                fillHeightPct: failedMeasurements?.fillHeightPct ?? null,
+                centerXPct: failedMeasurements?.centerXPct ?? null,
+                targetCenterXPct: failedMeasurements?.targetCenterXPct ?? null,
+                centerDeltaPct: failedMeasurements?.centerDeltaPct ?? null,
+                shiftXPx: riggedSnapshot?.shiftXPx ?? null,
+                shiftYPx: riggedSnapshot?.shiftYPx ?? null,
+                scaleFactor: riggedSnapshot?.scale ?? null,
+                maskControlled: riggedSnapshot?.maskControlled ?? false,
+                preTransformObjectBounds: riggedSnapshot?.preTransformObjectBounds ?? null,
+                transformControlBounds: riggedSnapshot?.transformControlBounds ?? null,
+                objectBounds: riggedSnapshot?.objectBounds ?? null,
+                framingQa: riggedSnapshot?.framingQa ?? null,
+                qaIssues: riggedSnapshot?.qaIssues ?? [message],
+                framingDecision: riggedSnapshot?.framingDecision ?? null,
+                lifecycleState: "qa-failed",
+                lastError: message,
+              });
+            } catch (reconciliationError) {
+              console.error(
+                "[useAssembledPromptGeneration] Failed to persist rig failure state",
+                reconciliationError,
+              );
+            }
+          }
           setError(message);
           toast({ title: "Rig post-process failed", description: message, variant: "destructive" });
           return null;
         }
       } else if (extraLibraryTags.includes("brand:best-bottles") && extraLibraryTags.includes("studio-master")) {
+        if (reconciliationBase) {
+          await recordBestBottlesRigResult({
+            ...reconciliationBase,
+            finalImageUrl,
+            qaIssues: [`Rig bypassed: ${rigPostprocessDecision.reason}`],
+            lifecycleState: "review-pending",
+            lastError: null,
+          });
+        }
         console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess not required", {
           reason: rigPostprocessDecision.reason,
           family: options.productContext?.family,
@@ -606,6 +833,26 @@ export function useAssembledPromptGeneration() {
         canvas: resolvedCanvas,
         presetId: assembled.preset.id,
         sessionId,
+        rigReview: {
+          required: rigPostprocessDecision.run,
+          applied: riggedSnapshot !== null,
+          reason: rigPostprocessDecision.reason,
+          framingDecision: riggedSnapshot?.framingDecision ?? null,
+          framingQa: riggedSnapshot?.framingQa ?? null,
+          qaIssues:
+            riggedSnapshot?.shadowOwner === "model" && riggedSnapshot.shadowQa?.status !== "pass"
+              ? [
+                  ...(riggedSnapshot.qaIssues ?? []),
+                  `Model-owned shadow ${riggedSnapshot.shadowQa?.status ?? "review"} requires review.`,
+                ]
+              : riggedSnapshot?.qaIssues ?? [],
+          objectBounds: riggedSnapshot?.objectBounds ?? null,
+          preTransformObjectBounds: riggedSnapshot?.preTransformObjectBounds ?? null,
+          shiftXPx: riggedSnapshot?.shiftXPx ?? null,
+          shiftYPx: riggedSnapshot?.shiftYPx ?? null,
+          scaleFactor: riggedSnapshot?.scale ?? null,
+          maskControlled: riggedSnapshot?.maskControlled ?? false,
+        },
       };
       setResult(generated);
       toast({

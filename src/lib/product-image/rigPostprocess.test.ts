@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { FAMILY_RIG } from "./familyRig";
+import { FAMILY_RIG, getFamilyRigForProduct } from "./familyRig";
+import * as rigPostprocess from "./rigPostprocess";
 import {
+  addDeterministicContactShadow,
   applyMaskControlledForegroundMatte,
   applyRigForegroundMatte,
   computeRigFrameTransform,
@@ -11,10 +13,217 @@ import {
   getMaskControlledVisualContinuityQaIssues,
   getVisibleMatteArtifactQaIssues,
   detectStrongBounds,
+  finalizeRigShadow,
   flattenBackgroundLikePixels,
+  prepareUnmaskedRigRecanvasPixels,
 } from "./rigPostprocess";
 
+describe("shadow ownership", () => {
+  const width = 80;
+  const height = 100;
+  const bone = { r: 245, g: 243, b: 239 };
+  const productBounds = { top: 20, bottom: 60, left: 32, right: 41 };
+  const baseline = 60;
+
+  const makePixels = () => {
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let p = 0; p < width * height; p += 1) {
+      const i = p * 4;
+      pixels[i] = bone.r;
+      pixels[i + 1] = bone.g;
+      pixels[i + 2] = bone.b;
+      pixels[i + 3] = 255;
+    }
+    for (let y = productBounds.top; y <= productBounds.bottom; y += 1) {
+      for (let x = productBounds.left; x <= productBounds.right; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = 60;
+        pixels[i + 1] = 58;
+        pixels[i + 2] = 54;
+      }
+    }
+    // A small model-owned contact lane immediately below the product.
+    for (let y = baseline + 1; y <= baseline + 1; y += 1) {
+      for (let x = productBounds.left; x <= productBounds.right + 2; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = 190;
+        pixels[i + 1] = 188;
+        pixels[i + 2] = 184;
+      }
+    }
+    return pixels;
+  };
+
+  it("preserves a model-owned shadow mask during Bone recanvas", () => {
+    const pixels = makePixels();
+    const shadowMask = new Uint8Array(width * height);
+    const shadowX = productBounds.right + 1;
+    const shadowY = baseline + 1;
+    shadowMask[shadowY * width + shadowX] = 1;
+    const originalShadowPixel = Array.from(pixels.slice((shadowY * width + shadowX) * 4, (shadowY * width + shadowX) * 4 + 4));
+
+    const result = prepareUnmaskedRigRecanvasPixels(
+      pixels,
+      width,
+      height,
+      bone,
+      productBounds,
+      { preserveMask: shadowMask },
+    );
+
+    assert.deepEqual(
+      Array.from(pixels.slice((shadowY * width + shadowX) * 4, (shadowY * width + shadowX) * 4 + 4)),
+      originalShadowPixel,
+    );
+    assert.deepEqual(Array.from(pixels.slice(0, 4)), [bone.r, bone.g, bone.b, 255]);
+    assert.ok(result.preservedShadowPixels > 0);
+  });
+
+  it("skips deterministic paint when the model owns the shadow", () => {
+    const pixels = makePixels();
+    const output = finalizeRigShadow({
+      owner: "model",
+      pixels,
+      width,
+      height,
+      background: bone,
+      objectBounds: productBounds,
+      baselineYPx: baseline,
+    });
+
+    assert.equal(output.deterministicShadowPixels, 0);
+    assert.equal(output.shadowQa?.status, "pass");
+  });
+
+  it("retains deterministic paint for rig ownership", () => {
+    const pixels = makePixels();
+    const output = finalizeRigShadow({
+      owner: "rig",
+      pixels,
+      width,
+      height,
+      background: bone,
+      objectBounds: productBounds,
+      baselineYPx: baseline,
+    });
+
+    assert.ok(output.deterministicShadowPixels > 0);
+    assert.equal(output.shadowQa, null);
+  });
+});
+
+describe("addDeterministicContactShadow", () => {
+  it("adds a soft back-right grounding shadow without repainting product pixels", () => {
+    const width = 80;
+    const height = 80;
+    const bg = { r: 245, g: 243, b: 239 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = bg.r;
+      pixels[i + 1] = bg.g;
+      pixels[i + 2] = bg.b;
+      pixels[i + 3] = 255;
+    }
+    const write = (x: number, y: number, color: { r: number; g: number; b: number }) => {
+      const i = (y * width + x) * 4;
+      pixels[i] = color.r;
+      pixels[i + 1] = color.g;
+      pixels[i + 2] = color.b;
+    };
+    const read = (x: number, y: number) => {
+      const i = (y * width + x) * 4;
+      return Array.from(pixels.slice(i, i + 4));
+    };
+
+    const productPixel = { r: 70, g: 68, b: 64 };
+    write(40, 60, productPixel);
+
+    const result = addDeterministicContactShadow(pixels, width, height, bg, {
+      objectBounds: { top: 18, bottom: 60, left: 34, right: 46 },
+      baselineYPx: 60,
+    });
+
+    assert.ok(result.shadowPixels > 0);
+    assert.deepEqual(read(40, 60), [productPixel.r, productPixel.g, productPixel.b, 255]);
+    assert.deepEqual(read(4, 4), [bg.r, bg.g, bg.b, 255]);
+    assert.ok(read(45, 62)[0] < bg.r, "expected visible shadow immediately back-right of the base");
+    assert.ok(
+      read(50, 62)[0] < read(30, 62)[0],
+      "expected the camera-right shadow extension to be stronger than camera-left",
+    );
+  });
+
+  it("keeps the visible shadow attached to the baseline instead of forming a floating oval", () => {
+    const width = 400;
+    const height = 1000;
+    const baseline = 800;
+    const bg = { r: 246, g: 239, b: 232 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = bg.r;
+      pixels[i + 1] = bg.g;
+      pixels[i + 2] = bg.b;
+      pixels[i + 3] = 255;
+    }
+    const read = (x: number, y: number) => {
+      const i = (y * width + x) * 4;
+      return Array.from(pixels.slice(i, i + 4));
+    };
+    const productPixelIndex = (baseline * width + width / 2) * 4;
+    pixels[productPixelIndex] = 70;
+    pixels[productPixelIndex + 1] = 68;
+    pixels[productPixelIndex + 2] = 64;
+
+    addDeterministicContactShadow(pixels, width, height, bg, {
+      objectBounds: { top: 220, bottom: baseline, left: 150, right: 250 },
+      baselineYPx: baseline,
+    });
+
+    assert.ok(
+      read(width / 2, baseline + 1)[0] <= bg.r - 25,
+      "expected a visible contact core on the first row below the bottle base",
+    );
+    assert.deepEqual(
+      read(width / 2, baseline + 15),
+      [bg.r, bg.g, bg.b, 255],
+      "expected the grounding shadow to feather out before it can read as a detached oval",
+    );
+  });
+});
+
 describe("computeRigFrameTransform", () => {
+  it("keeps a wide 9ml roll-on assembly inside its minimum fill-height gate", () => {
+    const rig = getFamilyRigForProduct({
+      graceSku: "GB-CYL-BLU-9ML-MRL-MCPR",
+      family: "Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      applicator: "Metal Roller Ball",
+      heightWithCap: "83 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+    });
+    assert.ok(rig);
+
+    // Reproduces the geometry behind the worst manifest failure: a bottle plus
+    // right-side cap produces a 1,287px-wide assembly whose old 58% width cap
+    // shrinks a 1,001px-tall bottle envelope to roughly 41% of the canvas.
+    const result = computeRigFrameTransform({
+      width: 2080,
+      height: 2288,
+      rig,
+      detectedBaselineYPx: 1800,
+      strongBounds: { top: 800, bottom: 1800, left: 396, right: 1682 },
+    });
+    const transformedFillHeightPct =
+      ((result.transformedBottomYPx! - result.transformedTopYPx! + 1) / 2288) * 100;
+
+    assert.ok(
+      transformedFillHeightPct >= rig.fillHeightRangePct!.min,
+      `expected at least ${rig.fillHeightRangePct!.min}% fill, got ${transformedFillHeightPct.toFixed(1)}%`,
+    );
+  });
+
   it("scales down a too-tall output while keeping the rig baseline fixed", () => {
     const rig = FAMILY_RIG.cylinder;
     const result = computeRigFrameTransform({
@@ -87,6 +296,57 @@ describe("computeRigFrameTransform", () => {
 });
 
 describe("detectStrongBounds", () => {
+  it("samples a near-white generated canvas before measuring product bounds", () => {
+    const prepareAnalysis = (
+      rigPostprocess as unknown as Record<string, unknown>
+    ).prepareRigAnalysisPixels;
+    assert.equal(typeof prepareAnalysis, "function");
+    if (typeof prepareAnalysis !== "function") return;
+
+    const width = 120;
+    const height = 140;
+    const targetBone = { r: 246, g: 239, b: 232 };
+    const sourceCanvas = { r: 254, g: 254, b: 254 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    const write = (x: number, y: number, color: { r: number; g: number; b: number }) => {
+      const i = (y * width + x) * 4;
+      pixels[i] = color.r;
+      pixels[i + 1] = color.g;
+      pixels[i + 2] = color.b;
+      pixels[i + 3] = 255;
+    };
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) write(x, y, sourceCanvas);
+    }
+    for (let y = 30; y <= 120; y += 1) {
+      for (let x = 54; x <= 66; x += 1) write(x, y, { r: 24, g: 24, b: 24 });
+    }
+
+    assert.deepEqual(detectStrongBounds(pixels, width, height, targetBone), {
+      top: 0,
+      bottom: 138,
+      left: 0,
+      right: 118,
+    });
+
+    const analysisPixels = new Uint8ClampedArray(pixels);
+    const prepared = prepareAnalysis(
+      analysisPixels,
+      width,
+      height,
+      targetBone,
+    ) as { background: { r: number; g: number; b: number } };
+
+    assert.deepEqual(prepared.background, sourceCanvas);
+    assert.deepEqual(detectStrongBounds(analysisPixels, width, height, prepared.background), {
+      top: 30,
+      bottom: 120,
+      left: 54,
+      right: 66,
+    });
+  });
+
   it("counts low-contrast pale caps as foreground against the Bone background", () => {
     const width = 200;
     const height = 260;
@@ -478,13 +738,159 @@ describe("getVisibleMatteArtifactQaIssues", () => {
 });
 
 describe("applyRigForegroundMatte", () => {
-  it("removes pale matte pollution inside protected clear-glass bounds while preserving real edges", () => {
+  it("retains coherent gray cap edges after a cool plate is converted to warm Bone", () => {
+    const detectControlled = (
+      rigPostprocess as unknown as Record<string, unknown>
+    ).detectControlledRigBounds;
+    assert.equal(typeof detectControlled, "function");
+    if (typeof detectControlled !== "function") return;
+
+    const width = 100;
+    const height = 140;
+    const targetBone = { r: 246, g: 239, b: 232 };
+    const sourceBackground = { r: 248, g: 248, b: 248 };
+    const translucentGrayCap = { r: 230, g: 230, b: 230 };
+    const darkBottle = { r: 38, g: 36, b: 34 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    const paint = (
+      left: number,
+      top: number,
+      right: number,
+      bottom: number,
+      color: { r: number; g: number; b: number },
+    ) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const i = (y * width + x) * 4;
+          pixels[i] = color.r;
+          pixels[i + 1] = color.g;
+          pixels[i + 2] = color.b;
+          pixels[i + 3] = 255;
+        }
+      }
+    };
+
+    paint(0, 0, width - 1, height - 1, sourceBackground);
+    paint(44, 30, 56, 59, translucentGrayCap);
+    paint(42, 60, 58, 120, darkBottle);
+    const sourceBounds = detectStrongBounds(pixels, width, height, sourceBackground);
+    assert.deepEqual(sourceBounds, { top: 30, bottom: 120, left: 42, right: 58 });
+
+    prepareUnmaskedRigRecanvasPixels(pixels, width, height, targetBone, sourceBounds);
+    assert.deepEqual(
+      detectStrongBounds(pixels, width, height, targetBone),
+      { top: 60, bottom: 120, left: 42, right: 58 },
+      "the global detector reproduces the warm-background undercount",
+    );
+    assert.deepEqual(
+      detectControlled(pixels, width, height, targetBone, sourceBounds),
+      sourceBounds,
+      "the product-envelope detector should recover coherent translucent cap edges",
+    );
+  });
+
+  it("preserves a pale clear-cap envelope while converting the source plate to Bone", () => {
+    const width = 100;
+    const height = 140;
+    const targetBone = { r: 246, g: 239, b: 232 };
+    const sourceBackground = { r: 245, g: 245, b: 245 };
+    const paleClearCap = { r: 251, g: 251, b: 251 };
+    const darkBottle = { r: 38, g: 36, b: 34 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    const paintRect = (
+      left: number,
+      top: number,
+      right: number,
+      bottom: number,
+      color: { r: number; g: number; b: number },
+    ) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const i = (y * width + x) * 4;
+          pixels[i] = color.r;
+          pixels[i + 1] = color.g;
+          pixels[i + 2] = color.b;
+          pixels[i + 3] = 255;
+        }
+      }
+    };
+
+    paintRect(0, 0, width - 1, height - 1, sourceBackground);
+    paintRect(44, 30, 56, 59, paleClearCap);
+    paintRect(42, 60, 58, 120, darkBottle);
+
+    const initialBounds = detectStrongBounds(pixels, width, height, sourceBackground);
+    assert.deepEqual(initialBounds, { top: 30, bottom: 120, left: 42, right: 58 });
+
+    prepareUnmaskedRigRecanvasPixels(
+      pixels,
+      width,
+      height,
+      targetBone,
+      initialBounds,
+    );
+
+    assert.deepEqual(
+      detectStrongBounds(pixels, width, height, targetBone),
+      initialBounds,
+      "expected the final QA detector to retain the full pale cap measured before recanvas",
+    );
+  });
+
+  it("normalizes an unmasked source plate before translation without erasing clear detail", () => {
+    const prepare = (
+      rigPostprocess as unknown as Record<string, unknown>
+    ).prepareUnmaskedRigRecanvasPixels;
+    assert.equal(typeof prepare, "function");
+    if (typeof prepare !== "function") return;
+
+    const width = 16;
+    const height = 12;
+    const bg = { r: 246, g: 239, b: 232 };
+    const sourceBackground = { r: 248, g: 248, b: 248 };
+    const product = { r: 28, g: 26, b: 24 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    const write = (x: number, y: number, color: { r: number; g: number; b: number }) => {
+      const i = (y * width + x) * 4;
+      pixels[i] = color.r;
+      pixels[i + 1] = color.g;
+      pixels[i + 2] = color.b;
+      pixels[i + 3] = 255;
+    };
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) write(x, y, sourceBackground);
+    }
+    for (let y = 3; y <= 10; y += 1) {
+      write(6, y, product);
+      write(9, y, product);
+    }
+    write(7, 6, { r: 250, g: 248, b: 244 });
+
+    prepare(pixels, width, height, bg, { left: 6, right: 9, top: 3, bottom: 10 });
+
+    const rgbaAt = (x: number, y: number) => {
+      const i = (y * width + x) * 4;
+      return Array.from(pixels.slice(i, i + 4));
+    };
+    assert.deepEqual(rgbaAt(0, 0), [bg.r, bg.g, bg.b, 255]);
+    assert.deepEqual(rgbaAt(15, 11), [bg.r, bg.g, bg.b, 255]);
+    assert.deepEqual(rgbaAt(6, 6), [product.r, product.g, product.b, 255]);
+    assert.notDeepEqual(rgbaAt(7, 6), [bg.r, bg.g, bg.b, 255]);
+    assert.deepEqual(rgbaAt(8, 6), [bg.r, bg.g, bg.b, 255]);
+  });
+
+  it("removes pale matte pollution inside protected clear-glass bounds while preserving real edges and faint material", () => {
     const width = 28;
     const height = 32;
     const bg = { r: 245, g: 243, b: 239 };
     const darkGlassEdge = { r: 86, g: 88, b: 86 };
     const paleInterior = { r: 255, g: 255, b: 255 };
-    const subtleInteriorPollution = { r: 250, g: 248, b: 244 };
+    // Only ~5 units above bg on every channel — reads as background-like by NO
+    // established threshold in this file (isPaleBackgroundLike needs +6/+10/+14).
+    // This is what a genuinely faint, correctly-rendered pale component (e.g. a
+    // clear plastic overcap) looks like, and must be preserved, not erased.
+    const faintRealMaterial = { r: 250, g: 248, b: 244 };
     const looseHalo = { r: 255, g: 255, b: 255 };
     const pixels = new Uint8ClampedArray(width * height * 4);
 
@@ -511,7 +917,7 @@ describe("applyRigForegroundMatte", () => {
         write(x, y, paleInterior);
       }
     }
-    write(14, 16, subtleInteriorPollution);
+    write(14, 16, faintRealMaterial);
     for (let y = 12; y < 22; y += 1) {
       for (let x = 2; x < 6; x += 1) {
         write(x, y, looseHalo);
@@ -527,7 +933,8 @@ describe("applyRigForegroundMatte", () => {
     assert.equal(alphaAt(10, 16), 255);
     assert.equal(alphaAt(17, 16), 255);
     assert.equal(alphaAt(13, 16), 0);
-    assert.equal(alphaAt(14, 16), 0);
+    // Faint real material (only ~5 units above bg) is preserved, not erased.
+    assert.equal(alphaAt(14, 16), 255);
     assert.equal(alphaAt(3, 16), 0);
   });
 
