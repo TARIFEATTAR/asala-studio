@@ -1,5 +1,14 @@
 # Madison app — agent notes
 
+## Best Bottles measurements & geometry — READ FIRST
+Before touching anything measurement- or geometry-related for Best Bottles, read
+**`docs/best-bottles-canonical-truth/BEST-BOTTLES-CANONICAL-TRUTH.md`** (canonical
+reconciliation of live site / live Convex / master catalog / catalog PDF, 2026-07-12)
+and follow **`docs/best-bottles-canonical-truth/AGENT-HANDOFF.md`**. Consume only the
+`canon_*` columns of `best-bottles-master-truth.csv`; never raw `diameter` for flat
+families; never Convex `widthMm`/`depthMm` (diameter copies). Madison never writes to
+Convex — the 839-SKU measurement sync-back belongs to the Best-Bottles-Website repo lane.
+
 ## Best Bottles image pipeline — READ FIRST
 Before touching the Best Bottles image / library / pipeline / coverage surface, read
 **`docs/BEST-BOTTLES-IMAGE-PIPELINE-BRIEF.md`**. It defines the two-axis model
