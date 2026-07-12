@@ -449,8 +449,13 @@ export function useAssembledPromptGeneration() {
             productContext: options.productContext
               ? {
                   ...options.productContext,
-                  shadowOwner: resolvedShadowPolicy.owner,
-                  shadowContract: resolvedShadowPolicy.contract,
+                  ...(isBestBottlesStudioMasterRequest
+                    ? {
+                        promptVersion: resolvedShadowPolicy.promptVersion,
+                        shadowOwner: resolvedShadowPolicy.owner,
+                        shadowContract: resolvedShadowPolicy.contract,
+                      }
+                    : {}),
                 }
               : options.productContext,
             precompiledPromptRecord: calibratedPromptRecord ?? undefined,
