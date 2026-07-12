@@ -55,7 +55,10 @@ export function buildRigReviewRequirements(review: RigReviewEvidence): RigReview
     fill != null && fillRange != null && fill >= fillRange.min && fill <= fillRange.max;
   const baselinePass = baselineDelta != null && Math.abs(baselineDelta) <= 8;
   const centerPass = centerDelta != null && Math.abs(centerDelta) <= 2.5;
-  const shadowPass = review.shadowOwner === "rig" || review.shadowQa?.status === "pass";
+  const shadowPass =
+    review.shadowOwner === "rig" ||
+    (review.shadowQa?.status === "pass" &&
+      review.shadowQa.target.contract === "contact-back-right-v1");
 
   return [
     {
@@ -137,7 +140,6 @@ export function isRigApprovalReady(
   manualChecks?: RigManualChecks,
 ): boolean {
   if (!review) return false;
-  if (!review.required) return true;
   const machineReady = buildRigReviewRequirements(review).every(
     (requirement) => requirement.status === "pass",
   );

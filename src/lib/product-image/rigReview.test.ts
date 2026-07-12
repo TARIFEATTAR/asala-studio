@@ -103,13 +103,16 @@ describe("rig review approval gate", () => {
     );
   });
 
-  it("permits non-rig assets without manufacturing rig evidence", () => {
+  it("treats required as a display hint without bypassing machine or human checks", () => {
     assert.equal(
       isRigApprovalReady(
         passingReview({ required: false, applied: false, framingQa: null, objectBounds: null }),
+        confirmed,
       ),
-      true,
+      false,
     );
+    assert.equal(isRigApprovalReady(passingReview({ required: false })), false);
+    assert.equal(isRigApprovalReady(passingReview({ required: false }), confirmed), true);
   });
 
   it("blocks model-owned approval until the shadow report passes", () => {
@@ -126,6 +129,27 @@ describe("rig review approval gate", () => {
         confirmed,
       ),
       true,
+    );
+  });
+
+  it("blocks model-owned approval when a passing report uses the wrong shadow contract", () => {
+    const invalidContractReport = {
+      ...shadowQa("pass"),
+      target: {
+        ...shadowQa("pass").target,
+        contract: "legacy-shadow-v0",
+      },
+    } as unknown as ShadowQaReport;
+
+    const review = passingReview({
+      shadowOwner: "model",
+      shadowQa: invalidContractReport,
+    });
+
+    assert.equal(isRigApprovalReady(review, confirmed), false);
+    assert.equal(
+      buildRigReviewRequirements(review).find((row) => row.id === "shadow")?.status,
+      "fail",
     );
   });
 });

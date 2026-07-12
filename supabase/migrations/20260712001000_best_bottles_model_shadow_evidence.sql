@@ -286,4 +286,7 @@ FROM public.best_bottles_image_reconciliations r
 JOIN public.generated_images g ON g.id = r.image_id AND g.organization_id = r.organization_id
 LEFT JOIN assignment_rollup ar ON ar.image_id = r.image_id;
 
-GRANT SELECT ON public.best_bottles_image_reconciliation_status TO authenticated;
+REVOKE ALL ON TABLE public.best_bottles_image_reconciliation_status FROM anon, authenticated;
+GRANT SELECT
+  ON TABLE public.best_bottles_image_reconciliation_status
+  TO authenticated;
