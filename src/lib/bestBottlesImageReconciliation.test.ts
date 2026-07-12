@@ -17,6 +17,10 @@ import type { ShadowQaReport } from "./product-image/shadowQa";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const studioSource = readFileSync(resolve(currentDir, "../pages/BestBottlesStudio.tsx"), "utf8");
+const pipelineSource = readFileSync(
+  resolve(currentDir, "../pages/BestBottlesPipeline.tsx"),
+  "utf8",
+);
 const foundationMigrationSource = readFileSync(
   resolve(
     currentDir,
@@ -93,6 +97,47 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
+  it("guards the strict approval RPC before any mutation", () => {
+    const approveFunction = modelShadowMigrationSource.match(
+      /CREATE OR REPLACE FUNCTION public\.approve_best_bottles_reconciled_image[\s\S]*?\$\$;/,
+    )?.[0];
+
+    assert.ok(approveFunction);
+    assert.match(approveFunction, /FOR UPDATE/);
+    assert.match(approveFunction, /status\s+IN\s+\('approved', 'shopify-pushed', 'synced'\)/);
+    assert.match(approveFunction, /approved_image_id\s+IS NOT NULL/);
+    assert.match(approveFunction, /generated_image_id\s+IS DISTINCT FROM p_image_id/);
+    assert.ok(approveFunction.indexOf("FOR UPDATE") < approveFunction.indexOf("UPDATE public"));
+    assert.match(reconciliationSqlTestSource, /direct-terminal-approval-preserves-state/);
+    assert.match(reconciliationSqlTestSource, /approval-candidate-mismatch-preserves-state/);
+  });
+
+  it("keeps the Pipeline approval callback behind the strict helper", () => {
+    const pipelineApprovalCallback = pipelineSource.match(
+      /const handleUpdateSkuJobStatus[\s\S]*?\n\s{2}const handlePushApprovedSkuJobs/,
+    )?.[0];
+
+    assert.ok(pipelineApprovalCallback);
+    assert.match(pipelineApprovalCallback, /await approveBestBottlesGeneratedMaster\(/);
+    assert.doesNotMatch(pipelineApprovalCallback, /approved_image_id\s*:/);
+    assert.doesNotMatch(pipelineApprovalCallback, /approved_image_url\s*:/);
+    assert.doesNotMatch(pipelineApprovalCallback, /approved_at\s*:/);
+    assert.doesNotMatch(pipelineSource, /markBestBottlesImageApprovedKeep/);
+    assert.doesNotMatch(pipelineSource, /approveBestBottlesReconciledImage/);
+  });
+
+  it("protects approval columns from direct authenticated row updates", () => {
+    const guardFunction = foundationMigrationSource.match(
+      /CREATE OR REPLACE FUNCTION public\.protect_best_bottles_sku_job_approval_fields[\s\S]*?\$\$;/,
+    )?.[0];
+
+    assert.ok(guardFunction);
+    assert.match(guardFunction, /approved_image_id\s+IS DISTINCT FROM OLD\.approved_image_id/);
+    assert.match(guardFunction, /status\s+IN\s+\('approved', 'shopify-pushed', 'synced'\)/);
+    assert.match(guardFunction, /current_setting\('app\.best_bottles_approval_rpc', true\)/);
+    assert.match(reconciliationSqlTestSource, /direct-approval-columns-rejected/);
+  });
+
   it("guards terminal SKU jobs before the link RPC mutates assignments or state", () => {
     const linkFunction = foundationMigrationSource.match(
       /CREATE OR REPLACE FUNCTION public\.link_best_bottles_generated_image[\s\S]*?\$\$;/,

@@ -18,6 +18,8 @@ GRANT SELECT
 
 REVOKE ALL ON FUNCTION public.best_bottles_reconciliation_touch_updated_at()
   FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.protect_best_bottles_sku_job_approval_fields()
+  FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.validate_best_bottles_image_reconciliation_org()
   FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.validate_best_bottles_sku_image_assignment_org()

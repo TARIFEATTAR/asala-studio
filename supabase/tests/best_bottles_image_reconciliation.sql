@@ -526,6 +526,86 @@ BEGIN
 END;
 $$;
 
+CREATE TEMP TABLE candidate_mismatch_job_snapshot ON COMMIT DROP AS
+SELECT to_jsonb(j) AS row_value
+FROM public.best_bottles_pipeline_sku_jobs j
+WHERE j.id = '00000000-0000-4000-8000-000000000301';
+
+CREATE TEMP TABLE candidate_mismatch_assignment_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY a.id), '[]'::jsonb) AS row_value
+FROM public.best_bottles_pipeline_sku_images a
+WHERE a.sku_job_id = '00000000-0000-4000-8000-000000000301';
+
+CREATE TEMP TABLE candidate_mismatch_image_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(i) ORDER BY i.id), '[]'::jsonb) AS row_value
+FROM public.generated_images i
+WHERE i.id IN (
+  '00000000-0000-4000-8000-000000000201',
+  '00000000-0000-4000-8000-000000000202'
+);
+
+CREATE TEMP TABLE candidate_mismatch_reconciliation_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY r.image_id), '[]'::jsonb) AS row_value
+FROM public.best_bottles_image_reconciliations r
+WHERE r.image_id IN (
+  '00000000-0000-4000-8000-000000000201',
+  '00000000-0000-4000-8000-000000000202'
+);
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    PERFORM public.approve_best_bottles_reconciled_image(
+      '00000000-0000-4000-8000-000000000101',
+      '00000000-0000-4000-8000-000000000301',
+      '00000000-0000-4000-8000-000000000201'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: approval-candidate-mismatch-preserves-state did not reject';
+  END IF;
+END;
+$$;
+
+SELECT pg_temp.assert_true(
+  (SELECT to_jsonb(j) = snapshot.row_value
+   FROM public.best_bottles_pipeline_sku_jobs j
+   CROSS JOIN candidate_mismatch_job_snapshot snapshot
+   WHERE j.id = '00000000-0000-4000-8000-000000000301')
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY a.id), '[]'::jsonb) = snapshot.row_value
+       FROM public.best_bottles_pipeline_sku_images a
+       CROSS JOIN candidate_mismatch_assignment_snapshot snapshot
+       WHERE a.sku_job_id = '00000000-0000-4000-8000-000000000301'
+       GROUP BY snapshot.row_value)
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(i) ORDER BY i.id), '[]'::jsonb) = snapshot.row_value
+       FROM public.generated_images i
+       CROSS JOIN candidate_mismatch_image_snapshot snapshot
+       WHERE i.id IN (
+         '00000000-0000-4000-8000-000000000201',
+         '00000000-0000-4000-8000-000000000202'
+       )
+       GROUP BY snapshot.row_value)
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY r.image_id), '[]'::jsonb) = snapshot.row_value
+       FROM public.best_bottles_image_reconciliations r
+       CROSS JOIN candidate_mismatch_reconciliation_snapshot snapshot
+       WHERE r.image_id IN (
+         '00000000-0000-4000-8000-000000000201',
+         '00000000-0000-4000-8000-000000000202'
+       )
+       GROUP BY snapshot.row_value),
+  'approval-candidate-mismatch-preserves-state: rejected approval mutated job, assignment, image, or reconciliation state'
+);
+
+SELECT public.link_best_bottles_generated_image(
+  '00000000-0000-4000-8000-000000000101',
+  '00000000-0000-4000-8000-000000000301',
+  '00000000-0000-4000-8000-000000000201'
+);
+
 SELECT public.approve_best_bottles_reconciled_image(
   '00000000-0000-4000-8000-000000000101',
   '00000000-0000-4000-8000-000000000301',
@@ -595,6 +675,80 @@ SELECT pg_temp.assert_true(
   'terminal-link-preserves-approved-job: rejected link mutated job, assignment, or reconciliation state'
 );
 
+CREATE TEMP TABLE terminal_approval_job_snapshot ON COMMIT DROP AS
+SELECT to_jsonb(j) AS row_value
+FROM public.best_bottles_pipeline_sku_jobs j
+WHERE j.id = '00000000-0000-4000-8000-000000000301';
+
+CREATE TEMP TABLE terminal_approval_assignment_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY a.id), '[]'::jsonb) AS row_value
+FROM public.best_bottles_pipeline_sku_images a
+WHERE a.sku_job_id = '00000000-0000-4000-8000-000000000301';
+
+CREATE TEMP TABLE terminal_approval_image_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(i) ORDER BY i.id), '[]'::jsonb) AS row_value
+FROM public.generated_images i
+WHERE i.id IN (
+  '00000000-0000-4000-8000-000000000201',
+  '00000000-0000-4000-8000-000000000202'
+);
+
+CREATE TEMP TABLE terminal_approval_reconciliation_snapshot ON COMMIT DROP AS
+SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY r.image_id), '[]'::jsonb) AS row_value
+FROM public.best_bottles_image_reconciliations r
+WHERE r.image_id IN (
+  '00000000-0000-4000-8000-000000000201',
+  '00000000-0000-4000-8000-000000000202'
+);
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    PERFORM public.approve_best_bottles_reconciled_image(
+      '00000000-0000-4000-8000-000000000101',
+      '00000000-0000-4000-8000-000000000301',
+      '00000000-0000-4000-8000-000000000202'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: direct-terminal-approval-preserves-state did not reject';
+  END IF;
+END;
+$$;
+
+SELECT pg_temp.assert_true(
+  (SELECT to_jsonb(j) = snapshot.row_value
+   FROM public.best_bottles_pipeline_sku_jobs j
+   CROSS JOIN terminal_approval_job_snapshot snapshot
+   WHERE j.id = '00000000-0000-4000-8000-000000000301')
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY a.id), '[]'::jsonb) = snapshot.row_value
+       FROM public.best_bottles_pipeline_sku_images a
+       CROSS JOIN terminal_approval_assignment_snapshot snapshot
+       WHERE a.sku_job_id = '00000000-0000-4000-8000-000000000301'
+       GROUP BY snapshot.row_value)
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(i) ORDER BY i.id), '[]'::jsonb) = snapshot.row_value
+       FROM public.generated_images i
+       CROSS JOIN terminal_approval_image_snapshot snapshot
+       WHERE i.id IN (
+         '00000000-0000-4000-8000-000000000201',
+         '00000000-0000-4000-8000-000000000202'
+       )
+       GROUP BY snapshot.row_value)
+  AND (SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY r.image_id), '[]'::jsonb) = snapshot.row_value
+       FROM public.best_bottles_image_reconciliations r
+       CROSS JOIN terminal_approval_reconciliation_snapshot snapshot
+       WHERE r.image_id IN (
+         '00000000-0000-4000-8000-000000000201',
+         '00000000-0000-4000-8000-000000000202'
+       )
+       GROUP BY snapshot.row_value),
+  'direct-terminal-approval-preserves-state: rejected approval mutated job, assignment, image, or reconciliation state'
+);
+
 SELECT pg_temp.assert_true(
   (SELECT reconciliation_status = 'shopify-verification-pending' AND NOT is_reconciled
    FROM public.best_bottles_image_reconciliation_status
@@ -635,6 +789,8 @@ SELECT pg_temp.assert_true(
 SELECT pg_temp.assert_true(
   NOT has_function_privilege('anon', 'public.best_bottles_reconciliation_touch_updated_at()', 'EXECUTE')
   AND NOT has_function_privilege('authenticated', 'public.best_bottles_reconciliation_touch_updated_at()', 'EXECUTE')
+  AND NOT has_function_privilege('anon', 'public.protect_best_bottles_sku_job_approval_fields()', 'EXECUTE')
+  AND NOT has_function_privilege('authenticated', 'public.protect_best_bottles_sku_job_approval_fields()', 'EXECUTE')
   AND NOT has_function_privilege('anon', 'public.validate_best_bottles_image_reconciliation_org()', 'EXECUTE')
   AND NOT has_function_privilege('authenticated', 'public.validate_best_bottles_image_reconciliation_org()', 'EXECUTE')
   AND NOT has_function_privilege('anon', 'public.validate_best_bottles_sku_image_assignment_org()', 'EXECUTE')
@@ -642,6 +798,46 @@ SELECT pg_temp.assert_true(
   AND NOT has_function_privilege('anon', 'public.sync_best_bottles_image_assignment_from_sku_job()', 'EXECUTE')
   AND NOT has_function_privilege('authenticated', 'public.sync_best_bottles_image_assignment_from_sku_job()', 'EXECUTE'),
   'API roles retained execute access to internal reconciliation functions'
+);
+
+CREATE TEMP TABLE direct_approval_job_snapshot ON COMMIT DROP AS
+SELECT to_jsonb(j) AS row_value
+FROM public.best_bottles_pipeline_sku_jobs j
+WHERE j.id = '00000000-0000-4000-8000-000000000303';
+
+SELECT set_config('request.jwt.claim.role', 'authenticated', true);
+SELECT set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-4000-8000-000000000901"}', true);
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    UPDATE public.best_bottles_pipeline_sku_jobs
+    SET status = 'approved',
+        approved_image_id = '00000000-0000-4000-8000-000000000205',
+        approved_image_url = 'https://example.invalid/terminal-candidate.png',
+        approved_at = now(),
+        approved_by = '00000000-0000-4000-8000-000000000901'
+    WHERE id = '00000000-0000-4000-8000-000000000303';
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: direct-approval-columns-rejected did not reject';
+  END IF;
+END;
+$$;
+
+SELECT set_config('request.jwt.claim.role', 'service_role', true);
+SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
+
+SELECT pg_temp.assert_true(
+  (SELECT to_jsonb(j) = snapshot.row_value
+   FROM public.best_bottles_pipeline_sku_jobs j
+   CROSS JOIN direct_approval_job_snapshot snapshot
+   WHERE j.id = '00000000-0000-4000-8000-000000000303'),
+  'direct-approval-columns-rejected: rejected direct update mutated SKU job state'
 );
 
 SELECT public.record_best_bottles_destination_verification(
@@ -731,50 +927,6 @@ UPDATE public.best_bottles_image_reconciliations
 SET shadow_owner = 'rig',
     shadow_qa = NULL
 WHERE image_id = '00000000-0000-4000-8000-000000000201';
-
-UPDATE public.best_bottles_image_reconciliations
-SET catalog_truth = '{
-      "graceSku":"SKU-A",
-      "websiteSku":"WEB-A",
-      "eligibleGraceSkus":["SKU-A"],
-      "eligibleWebsiteSkus":["WEB-A"],
-      "identityStatus":"ready",
-      "identityBlockers":[],
-      "websiteTruthStatus":"ready",
-      "heightWithoutCap":"70 mm",
-      "diameter":"20 mm"
-    }'::jsonb,
-    detected_baseline_y_px = 2105,
-    target_baseline_y_px = 2105,
-    lifecycle_state = 'review-pending'
-WHERE image_id = '00000000-0000-4000-8000-000000000202';
-
-SELECT public.approve_best_bottles_reconciled_image(
-  '00000000-0000-4000-8000-000000000101',
-  '00000000-0000-4000-8000-000000000301',
-  '00000000-0000-4000-8000-000000000202'
-);
-
-SELECT pg_temp.assert_true(
-  (SELECT approved_image_id = '00000000-0000-4000-8000-000000000202'
-   FROM public.best_bottles_pipeline_sku_jobs
-   WHERE id = '00000000-0000-4000-8000-000000000301'),
-  'replacement image was not recorded on the SKU job'
-);
-SELECT pg_temp.assert_true(
-  (SELECT decision = 'superseded'
-   FROM public.best_bottles_pipeline_sku_images
-   WHERE sku_job_id = '00000000-0000-4000-8000-000000000301'
-     AND image_id = '00000000-0000-4000-8000-000000000201'),
-  'old approved assignment was not superseded'
-);
-SELECT pg_temp.assert_true(
-  (SELECT count(*) = 1
-   FROM public.best_bottles_pipeline_sku_images
-   WHERE sku_job_id = '00000000-0000-4000-8000-000000000301'
-     AND decision = 'approved-keep'),
-  'SKU job has more than one active approved image'
-);
 
 ROLLBACK;
 

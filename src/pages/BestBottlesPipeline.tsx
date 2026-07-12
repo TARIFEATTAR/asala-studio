@@ -73,8 +73,9 @@ import {
   type PipelineStatus,
   type ShapeGroup,
 } from "@/lib/bestBottlesPipeline";
-import { markBestBottlesImageApprovedKeep } from "@/lib/imageLibraryTags";
 import { writePipelinePrefill } from "@/lib/bestBottlesPipelineBridge";
+import { approveBestBottlesGeneratedMaster } from "@/lib/bestBottlesMasterApproval";
+import { BEST_BOTTLES_RECONCILIATION_QUERY_KEY } from "@/lib/bestBottlesImageReconciliation";
 import {
   APPLICATOR_TO_FITMENT,
   GLASS_COLOR_TO_OPTION,
@@ -2499,19 +2500,25 @@ export default function BestBottlesPipeline() {
     status: "approved" | "rejected",
   ) => {
     try {
-      const approvedImageId = job.approved_image_id ?? job.generated_image_id;
-      await updatePipelineSkuJob(job.id, {
-        status,
-        approved_at: status === "approved" ? new Date().toISOString() : job.approved_at,
-        approved_image_id: approvedImageId,
-        approved_image_url: job.approved_image_url ?? job.generated_image_url,
-        last_error: status === "approved" ? null : job.last_error,
-      });
-      // Write the approved-keep verdict through to the image so the COMPLETE /
-      // PDP-live metric (and the clean-library read) reflect the approval.
       if (status === "approved") {
-        await markBestBottlesImageApprovedKeep(approvedImageId);
+        if (!organizationId) {
+          throw new Error("An organization is required to approve a SKU image.");
+        }
+        if (!job.generated_image_id) {
+          throw new Error(`${job.grace_sku} has no generated image candidate to approve.`);
+        }
+        await approveBestBottlesGeneratedMaster({
+          organizationId,
+          pipelineSkuJobId: job.id,
+          imageId: job.generated_image_id,
+        });
         queryClient.invalidateQueries({ queryKey: ["best-bottles-approval-status"] });
+        queryClient.invalidateQueries({ queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY] });
+      } else {
+        await updatePipelineSkuJob(job.id, {
+          status,
+          last_error: job.last_error,
+        });
       }
       toast.success(status === "approved" ? "SKU approved" : "SKU rejected", {
         description: `${job.grace_sku} · ${job.website_sku}`,

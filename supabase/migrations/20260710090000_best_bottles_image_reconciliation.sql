@@ -252,6 +252,43 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.protect_best_bottles_sku_job_approval_fields()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.role() = 'service_role'
+    OR current_setting('app.best_bottles_approval_rpc', true) = 'on' THEN
+    RETURN NEW;
+  END IF;
+
+  IF NEW.approved_image_id IS DISTINCT FROM OLD.approved_image_id
+    OR NEW.approved_image_url IS DISTINCT FROM OLD.approved_image_url
+    OR NEW.approved_at IS DISTINCT FROM OLD.approved_at
+    OR NEW.approved_by IS DISTINCT FROM OLD.approved_by
+    OR (
+      NEW.status IS DISTINCT FROM OLD.status
+      AND (
+        NEW.status IN ('approved', 'shopify-pushed', 'synced')
+        OR OLD.status IN ('approved', 'shopify-pushed', 'synced')
+      )
+    ) THEN
+    RAISE EXCEPTION 'Approval state for SKU job % must be changed through the approval RPC', OLD.id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS protect_best_bottles_sku_job_approval_fields
+  ON public.best_bottles_pipeline_sku_jobs;
+CREATE TRIGGER protect_best_bottles_sku_job_approval_fields
+  BEFORE UPDATE ON public.best_bottles_pipeline_sku_jobs
+  FOR EACH ROW
+  EXECUTE FUNCTION public.protect_best_bottles_sku_job_approval_fields();
+
 CREATE OR REPLACE FUNCTION public.link_best_bottles_generated_image(
   p_organization_id UUID,
   p_pipeline_sku_job_id UUID,
@@ -376,8 +413,34 @@ SET search_path = public
 AS $$
 DECLARE
   v_final_image_url TEXT;
+  v_job_status TEXT;
+  v_job_generated_image_id UUID;
+  v_job_approved_image_id UUID;
 BEGIN
   PERFORM public.best_bottles_assert_org_member(p_organization_id);
+
+  SELECT j.status, j.generated_image_id, j.approved_image_id
+  INTO v_job_status, v_job_generated_image_id, v_job_approved_image_id
+  FROM public.best_bottles_pipeline_sku_jobs j
+  WHERE j.id = p_pipeline_sku_job_id
+    AND j.organization_id = p_organization_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'SKU job % was not found in organization %',
+      p_pipeline_sku_job_id, p_organization_id;
+  END IF;
+
+  IF v_job_status IN ('approved', 'shopify-pushed', 'synced')
+    OR v_job_approved_image_id IS NOT NULL THEN
+    RAISE EXCEPTION 'Terminal SKU job % cannot be approved from status % or approved image %',
+      p_pipeline_sku_job_id, v_job_status, v_job_approved_image_id;
+  END IF;
+
+  IF v_job_generated_image_id IS DISTINCT FROM p_image_id THEN
+    RAISE EXCEPTION 'Image % is not the current generated candidate for SKU job %',
+      p_image_id, p_pipeline_sku_job_id;
+  END IF;
 
   SELECT r.final_image_url INTO v_final_image_url
   FROM public.best_bottles_image_reconciliations r
@@ -464,6 +527,8 @@ BEGIN
     RAISE EXCEPTION 'Image Library row % was not found in organization %', p_image_id, p_organization_id;
   END IF;
 
+  PERFORM set_config('app.best_bottles_approval_rpc', 'on', true);
+
   UPDATE public.best_bottles_pipeline_sku_jobs
   SET status = 'approved',
       approved_image_id = p_image_id,
@@ -483,6 +548,8 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'SKU job % was not found in organization %', p_pipeline_sku_job_id, p_organization_id;
   END IF;
+
+  PERFORM set_config('app.best_bottles_approval_rpc', 'off', true);
 
   UPDATE public.best_bottles_image_reconciliations
   SET lifecycle_state = 'approved', updated_at = now()
@@ -645,6 +712,7 @@ $$;
 -- The remote schema grants newly-created functions to anon/authenticated through
 -- ALTER DEFAULT PRIVILEGES, so revoking only PUBLIC is insufficient here.
 REVOKE ALL ON FUNCTION public.best_bottles_assert_org_member(UUID) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.protect_best_bottles_sku_job_approval_fields() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.link_best_bottles_generated_image(UUID, UUID, UUID) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.approve_best_bottles_reconciled_image(UUID, UUID, UUID) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.record_best_bottles_destination_verification(UUID, UUID, UUID, TEXT, TEXT, TEXT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
