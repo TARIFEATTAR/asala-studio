@@ -112,8 +112,8 @@ interface PixelAnalysis {
 }
 
 interface PartialBlockedEvidence {
-  sourceSha256: string;
-  sourceBytes: number;
+  sourceSha256: string | null;
+  sourceBytes: number | null;
   sourceMtimeBefore: number;
   sourceMtimeAfter: number | null;
   sourceSizeBefore: number;
@@ -363,6 +363,23 @@ function buildRoutingHints(
   return hints;
 }
 
+const PATH_DERIVED_ROUTING_HINTS = new Set([
+  "folder_hint:capped",
+  "folder_hint:uncapped",
+  "component_path_hint",
+]);
+
+function rebindRoutingHints(
+  cachedHints: readonly string[],
+  sourceRelativePath: string,
+): string[] {
+  const currentPathHints = buildRoutingHints(sourceRelativePath, 0);
+  const folderHints = currentPathHints.filter((hint) => hint.startsWith("folder_hint:"));
+  const componentHints = currentPathHints.filter((hint) => hint === "component_path_hint");
+  const pixelHints = cachedHints.filter((hint) => !PATH_DERIVED_ROUTING_HINTS.has(hint));
+  return [...new Set([...folderHints, ...pixelHints, ...componentHints])];
+}
+
 function assertSourceUnchanged(
   sourcePath: string,
   before: PsdSourceStat,
@@ -373,8 +390,45 @@ function assertSourceUnchanged(
   }
 }
 
-export async function inspectPsdEvidence(
+function rebindReadyEvidence(input: {
+  evidence: PsdReadySourceEvidence;
+  source: PsdSourceInput;
+  sourceSha256: string;
+  sourceBytes: number;
+  sourceStatBefore: PsdSourceStat;
+  sourceStatAfter: PsdSourceStat;
+  previewPath: string;
+  evidencePath: string;
+}): PsdReadySourceEvidence {
+  return {
+    ...input.evidence,
+    cacheStatus: "reused",
+    sourcePath: input.source.sourcePath,
+    sourceRelativePath: input.source.sourceRelativePath,
+    sourceSha256: input.sourceSha256,
+    sourceBytes: input.sourceBytes,
+    sourceMtimeBefore: input.sourceStatBefore.mtimeMs,
+    sourceMtimeAfter: input.sourceStatAfter.mtimeMs,
+    sourceSizeBefore: input.sourceStatBefore.size,
+    sourceSizeAfter: input.sourceStatAfter.size,
+    previewPath: input.previewPath,
+    evidencePath: input.evidencePath,
+    composite: {
+      ...input.evidence.composite,
+      previewPath: input.previewPath,
+    },
+    proposedClassification: PROPOSED_CLASSIFICATION,
+    routingHints: rebindRoutingHints(
+      input.evidence.routingHints ?? [],
+      input.source.sourceRelativePath,
+    ),
+    error: null,
+  };
+}
+
+async function inspectPsdEvidenceInternal(
   input: InspectPsdEvidenceInput,
+  singleFlight?: Map<string, Promise<PsdReadySourceEvidence>>,
 ): Promise<PsdReadySourceEvidence> {
   const readSource = input.readSource ?? defaultReadSource;
   const statSource = input.statSource ?? defaultStatSource;
@@ -383,7 +437,27 @@ export async function inspectPsdEvidence(
   const readCachedEvidence = input.readCachedEvidence ?? defaultReadCachedEvidence;
 
   const sourceStatBefore = await statSource(input.sourcePath);
-  const sourceBytes = await readSource(input.sourcePath);
+  let sourceBytes: Buffer;
+  try {
+    sourceBytes = await readSource(input.sourcePath);
+  } catch (error) {
+    let sourceStatAfter: PsdSourceStat | null = null;
+    let failure = error;
+    try {
+      sourceStatAfter = await statSource(input.sourcePath);
+      assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
+    } catch (afterError) {
+      failure = afterError;
+    }
+    throw new PsdEvidenceInspectionError(exactError(failure), {
+      sourceSha256: null,
+      sourceBytes: null,
+      sourceMtimeBefore: sourceStatBefore.mtimeMs,
+      sourceMtimeAfter: sourceStatAfter?.mtimeMs ?? null,
+      sourceSizeBefore: sourceStatBefore.size,
+      sourceSizeAfter: sourceStatAfter?.size ?? null,
+    });
+  }
   const sourceSha256 = createHash("sha256").update(sourceBytes).digest("hex");
   const previewPath = join(input.outputRoot, "previews", `${sourceSha256}.png`);
   const evidencePath = join(input.outputRoot, "evidence", `${sourceSha256}.json`);
@@ -397,11 +471,76 @@ export async function inspectPsdEvidence(
     ) {
       sourceStatAfter = await statSource(input.sourcePath);
       assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
-      return {
-        ...cached,
+      return rebindReadyEvidence({
+        evidence: cached as PsdReadySourceEvidence,
+        source: input,
+        sourceSha256,
+        sourceBytes: sourceBytes.length,
+        sourceStatBefore,
+        sourceStatAfter,
+        previewPath,
+        evidencePath,
+      });
+    }
+
+    const existingFlight = singleFlight?.get(evidencePath);
+    if (existingFlight !== undefined) {
+      const sharedEvidence = await existingFlight;
+      sourceStatAfter = await statSource(input.sourcePath);
+      assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
+      return rebindReadyEvidence({
+        evidence: sharedEvidence,
+        source: input,
+        sourceSha256,
+        sourceBytes: sourceBytes.length,
+        sourceStatBefore,
+        sourceStatAfter,
+        previewPath,
+        evidencePath,
+      });
+    }
+
+    const generation = (async (): Promise<PsdReadySourceEvidence> => {
+      const scenePath = `${input.sourcePath}[0]`;
+      const metadataOutput = await runMagick([
+        "identify",
+        "-format",
+        '{"width":%w,"height":%h,"opaque":"%[opaque]","sceneCount":%n}',
+        scenePath,
+      ]);
+      const metadata = parseSceneMetadata(metadataOutput);
+      const preview = await runMagick([
+        scenePath,
+        "-background", "white",
+        "-alpha", "remove",
+        "-alpha", "off",
+        "-colorspace", "sRGB",
+        "-resize", "900x1200>",
+        "png:-",
+      ]);
+      const pixelAnalysis = await analyzePreview(preview);
+      sourceStatAfter = await statSource(input.sourcePath);
+      assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
+
+      const composite: PsdPixelCompositeEvidence = {
+        width: metadata.width,
+        height: metadata.height,
+        opaque: metadata.opaque,
+        sceneCount: metadata.sceneCount,
+        foregroundBounds: pixelAnalysis.foregroundBounds,
+        largeForegroundComponentCount: pixelAnalysis.largeForegroundComponentCount,
+        whiteCornerCount: pixelAnalysis.whiteCornerCount,
+        minimumSafeMarginPct: pixelAnalysis.minimumSafeMarginPct,
+        previewPath,
+        evidenceSha256: createHash("sha256").update(preview).digest("hex"),
+        previewWidth: pixelAnalysis.previewWidth,
+        previewHeight: pixelAnalysis.previewHeight,
+        cornerSamples: pixelAnalysis.cornerSamples,
+      };
+      const evidence: PsdReadySourceEvidence = {
         extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
         status: "ok",
-        cacheStatus: "reused",
+        cacheStatus: "generated",
         sourcePath: input.sourcePath,
         sourceRelativePath: input.sourceRelativePath,
         sourceSha256,
@@ -412,73 +551,21 @@ export async function inspectPsdEvidence(
         sourceSizeAfter: sourceStatAfter.size,
         previewPath,
         evidencePath,
+        composite,
         proposedClassification: PROPOSED_CLASSIFICATION,
+        routingHints: buildRoutingHints(
+          input.sourceRelativePath,
+          composite.largeForegroundComponentCount,
+        ),
         error: null,
-      } as PsdReadySourceEvidence;
-    }
+      };
 
-    const scenePath = `${input.sourcePath}[0]`;
-    const metadataOutput = await runMagick([
-      "identify",
-      "-format",
-      '{"width":%w,"height":%h,"opaque":"%[opaque]","sceneCount":%n}',
-      scenePath,
-    ]);
-    const metadata = parseSceneMetadata(metadataOutput);
-    const preview = await runMagick([
-      scenePath,
-      "-background", "white",
-      "-alpha", "remove",
-      "-alpha", "off",
-      "-colorspace", "sRGB",
-      "-resize", "900x1200>",
-      "png:-",
-    ]);
-    const pixelAnalysis = await analyzePreview(preview);
-    sourceStatAfter = await statSource(input.sourcePath);
-    assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
-
-    const composite: PsdPixelCompositeEvidence = {
-      width: metadata.width,
-      height: metadata.height,
-      opaque: metadata.opaque,
-      sceneCount: metadata.sceneCount,
-      foregroundBounds: pixelAnalysis.foregroundBounds,
-      largeForegroundComponentCount: pixelAnalysis.largeForegroundComponentCount,
-      whiteCornerCount: pixelAnalysis.whiteCornerCount,
-      minimumSafeMarginPct: pixelAnalysis.minimumSafeMarginPct,
-      previewPath,
-      evidenceSha256: createHash("sha256").update(preview).digest("hex"),
-      previewWidth: pixelAnalysis.previewWidth,
-      previewHeight: pixelAnalysis.previewHeight,
-      cornerSamples: pixelAnalysis.cornerSamples,
-    };
-    const evidence: PsdReadySourceEvidence = {
-      extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
-      status: "ok",
-      cacheStatus: "generated",
-      sourcePath: input.sourcePath,
-      sourceRelativePath: input.sourceRelativePath,
-      sourceSha256,
-      sourceBytes: sourceBytes.length,
-      sourceMtimeBefore: sourceStatBefore.mtimeMs,
-      sourceMtimeAfter: sourceStatAfter.mtimeMs,
-      sourceSizeBefore: sourceStatBefore.size,
-      sourceSizeAfter: sourceStatAfter.size,
-      previewPath,
-      evidencePath,
-      composite,
-      proposedClassification: PROPOSED_CLASSIFICATION,
-      routingHints: buildRoutingHints(
-        input.sourceRelativePath,
-        composite.largeForegroundComponentCount,
-      ),
-      error: null,
-    };
-
-    await writeArtifact(previewPath, preview);
-    await writeArtifact(evidencePath, Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`));
-    return evidence;
+      await writeArtifact(previewPath, preview);
+      await writeArtifact(evidencePath, Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`));
+      return evidence;
+    })();
+    singleFlight?.set(evidencePath, generation);
+    return await generation;
   } catch (error) {
     let failure = error;
     if (sourceStatAfter === null) {
@@ -506,6 +593,12 @@ export async function inspectPsdEvidence(
       sourceSizeAfter: sourceStatAfter?.size ?? null,
     });
   }
+}
+
+export async function inspectPsdEvidence(
+  input: InspectPsdEvidenceInput,
+): Promise<PsdReadySourceEvidence> {
+  return inspectPsdEvidenceInternal(input);
 }
 
 export interface RunEvidencePoolInput {
@@ -536,7 +629,9 @@ export async function runEvidencePool(
   }
 
   const results = new Array<PsdSourceEvidence>(input.sources.length);
-  const inspectEvidence = input.inspectEvidence ?? inspectPsdEvidence;
+  const singleFlight = new Map<string, Promise<PsdReadySourceEvidence>>();
+  const inspectEvidence = input.inspectEvidence
+    ?? ((inspectInput: InspectPsdEvidenceInput) => inspectPsdEvidenceInternal(inspectInput, singleFlight));
   let nextIndex = 0;
   const workerCount = Math.min(requestedConcurrency, input.sources.length);
   const workers = Array.from({ length: workerCount }, async () => {

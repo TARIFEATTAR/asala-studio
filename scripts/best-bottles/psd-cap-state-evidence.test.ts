@@ -232,6 +232,52 @@ describe("immutable PSD evidence extraction", () => {
     assert.equal(writeCalls, 0);
   });
 
+  it("recomputes cached path hints while preserving pixel-derived hints", async () => {
+    const cached = {
+      extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
+      status: "ok",
+      cacheStatus: "generated",
+      sourcePath: "/archive/Capped Components/WebA.psd",
+      sourceRelativePath: "Capped Components/WebA.psd",
+      sourceSha256: sourceSha(),
+      sourceBytes: 13,
+      sourceMtimeBefore: 900,
+      sourceMtimeAfter: 900,
+      sourceSizeBefore: 13,
+      sourceSizeAfter: 13,
+      previewPath: `/audit/previews/${sourceSha()}.png`,
+      evidencePath: `/audit/evidence/${sourceSha()}.json`,
+      composite: { largeForegroundComponentCount: 2 },
+      proposedClassification: "ambiguous-manual-review",
+      routingHints: [
+        "folder_hint:capped",
+        "multiple_large_components",
+        "component_path_hint",
+      ],
+      error: null,
+    } as PsdSourceEvidence;
+
+    const result = await inspectPsdEvidence({
+      sourcePath: "/archive/Uncapped/WebA.psd",
+      sourceRelativePath: "Uncapped/WebA.psd",
+      outputRoot: "/audit",
+      readSource: async () => Buffer.from("immutable-psd"),
+      statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+      runMagick: async () => {
+        throw new Error("cache should avoid ImageMagick");
+      },
+      writeArtifact: async () => {
+        throw new Error("cache should avoid writes");
+      },
+      readCachedEvidence: async () => cached,
+    });
+
+    assert.deepEqual(result.routingHints, [
+      "folder_hint:uncapped",
+      "multiple_large_components",
+    ]);
+  });
+
   it("ignores a cache entry when either extractor version or source hash differs", async () => {
     const preview = await makePreview();
     for (const cached of [
@@ -288,6 +334,43 @@ describe("immutable PSD evidence extraction", () => {
 });
 
 describe("PSD evidence pool", () => {
+  it("attempts the after stat and retains known stat evidence when source reading fails", async () => {
+    let statCalls = 0;
+    const [result] = await runEvidencePool({
+      sources: [{
+        sourcePath: "/archive/WebA.psd",
+        sourceRelativePath: "Cylinder/WebA.psd",
+      }],
+      outputRoot: "/audit",
+      readSource: async () => {
+        throw new Error("source read failed exactly");
+      },
+      statSource: async () => {
+        statCalls += 1;
+        return { size: 13, mtimeMs: 1000 };
+      },
+      runMagick: async () => {
+        throw new Error("ImageMagick must not run");
+      },
+      writeArtifact: async () => {
+        throw new Error("artifacts must not be written");
+      },
+      readCachedEvidence: async () => {
+        throw new Error("cache must not be read");
+      },
+    });
+
+    assert.equal(result.status, "blocked");
+    assert.equal(result.error, "source read failed exactly");
+    assert.equal(result.sourceSha256, null);
+    assert.equal(result.sourceBytes, null);
+    assert.equal(result.sourceMtimeBefore, 1000);
+    assert.equal(result.sourceMtimeAfter, 1000);
+    assert.equal(result.sourceSizeBefore, 13);
+    assert.equal(result.sourceSizeAfter, 13);
+    assert.equal(statCalls, 2);
+  });
+
   it("retains hashed source evidence and verifies immutability when ImageMagick fails", async () => {
     let statCalls = 0;
     const [result] = await runEvidencePool({
@@ -315,6 +398,69 @@ describe("PSD evidence pool", () => {
     assert.equal(result.sourceMtimeBefore, 1000);
     assert.equal(result.sourceMtimeAfter, 1000);
     assert.equal(statCalls, 2);
+  });
+
+  it("single-flights concurrent duplicate bytes and rebinds each source record", async () => {
+    const preview = await makePreview({
+      rectangles: [
+        { left: 10, top: 10, width: 20, height: 30 },
+        { left: 65, top: 55, width: 20, height: 30 },
+      ],
+    });
+    let magickCalls = 0;
+    const writes: string[] = [];
+
+    const results = await runEvidencePool({
+      sources: [
+        {
+          sourcePath: "/archive/Capped Components/WebA.psd",
+          sourceRelativePath: "Capped Components/WebA.psd",
+        },
+        {
+          sourcePath: "/archive/Uncapped/WebA-copy.psd",
+          sourceRelativePath: "Uncapped/WebA-copy.psd",
+        },
+      ],
+      outputRoot: "/audit",
+      readSource: async () => Buffer.from("immutable-psd"),
+      statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+      runMagick: async (args) => {
+        magickCalls += 1;
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return args[0] === "identify"
+          ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
+          : preview;
+      },
+      writeArtifact: async (target) => {
+        writes.push(target);
+      },
+      readCachedEvidence: async () => null,
+    });
+
+    assert.equal(magickCalls, 2);
+    assert.deepEqual(writes, [
+      `/audit/previews/${sourceSha()}.png`,
+      `/audit/evidence/${sourceSha()}.json`,
+    ]);
+    assert.deepEqual(results.map(({ sourceRelativePath }) => sourceRelativePath), [
+      "Capped Components/WebA.psd",
+      "Uncapped/WebA-copy.psd",
+    ]);
+    assert.equal(results[0].status, "ok");
+    assert.equal(results[1].status, "ok");
+    if (results[0].status === "ok" && results[1].status === "ok") {
+      assert.deepEqual(results[0].routingHints, [
+        "folder_hint:capped",
+        "multiple_large_components",
+        "component_path_hint",
+      ]);
+      assert.deepEqual(results[1].routingHints, [
+        "folder_hint:uncapped",
+        "multiple_large_components",
+      ]);
+      assert.equal(results[0].cacheStatus, "generated");
+      assert.equal(results[1].cacheStatus, "reused");
+    }
   });
 
   it("defaults to four concurrent rows and preserves row-scoped failures", async () => {
