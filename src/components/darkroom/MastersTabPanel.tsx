@@ -291,6 +291,8 @@ import {
 import { updatePipelineSkuJobReference } from "@/lib/bestBottlesPipeline";
 import { resolveBestBottlesShadowPolicy } from "@/lib/bestBottlesShadowPolicy";
 import { RigReviewPanel } from "@/components/bestbottles/RigReviewPanel";
+import { ShadowSmokeComparisonPanel } from "@/components/bestbottles/ShadowSmokeComparisonPanel";
+import { useBestBottlesApprovedComparison } from "@/hooks/useBestBottlesApprovedComparison";
 import {
   EMPTY_RIG_MANUAL_CHECKS,
   isRigApprovalReady,
@@ -1177,6 +1179,10 @@ export function MastersTabPanel({
   const { currentOrganizationId } = useOnboarding();
   const queryClient = useQueryClient();
   const { generate, isGenerating, error, result, reset } = useAssembledPromptGeneration();
+  const { data: approvedComparisonUrl } = useBestBottlesApprovedComparison(
+    currentOrganizationId,
+    selectedProduct?.graceSku ?? null,
+  );
 
   const requireLiveTruthVerification = async (
     product: Product,
@@ -5183,6 +5189,12 @@ export function MastersTabPanel({
               Generated master
             </span>
           </div>
+          {result.rigReview?.shadowOwner === "model" && approvedComparisonUrl && (
+            <ShadowSmokeComparisonPanel
+              approvedImageUrl={approvedComparisonUrl}
+              candidateImageUrl={result.imageUrl}
+            />
+          )}
           <RigReviewPanel
             imageUrl={result.imageUrl}
             imageAlt={selectedProduct.itemName}

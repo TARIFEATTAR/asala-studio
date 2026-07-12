@@ -617,6 +617,8 @@ export function useAssembledPromptGeneration() {
               ),
               rigVersion: options.productContext?.rigVersion,
               providerModel: options.aiProvider ?? DEFAULT_IMAGE_AI_PROVIDER,
+              shadowOwner: resolvedShadowPolicy.owner,
+              shadowQa: null,
               catalogTruth: {
                 name: options.productContext?.name ?? null,
                 graceSku: options.productContext?.sku ?? null,
@@ -772,6 +774,8 @@ export function useAssembledPromptGeneration() {
                 transformControlBounds: rigged.transformControlBounds,
                 objectBounds: rigged.objectBounds,
                 framingQa: rigged.framingQa,
+                shadowOwner: rigged.shadowOwner,
+                shadowQa: rigged.shadowQa,
                 qaIssues: reviewQaIssues,
                 framingDecision: rigged.framingDecision,
                 lifecycleState:
@@ -813,6 +817,8 @@ export function useAssembledPromptGeneration() {
                 transformControlBounds: riggedSnapshot?.transformControlBounds ?? null,
                 objectBounds: riggedSnapshot?.objectBounds ?? null,
                 framingQa: riggedSnapshot?.framingQa ?? null,
+                shadowOwner: riggedSnapshot?.shadowOwner ?? resolvedShadowPolicy.owner,
+                shadowQa: riggedSnapshot?.shadowQa ?? null,
                 qaIssues: riggedSnapshot?.qaIssues ?? [message],
                 framingDecision: riggedSnapshot?.framingDecision ?? null,
                 lifecycleState: "qa-failed",
@@ -834,6 +840,8 @@ export function useAssembledPromptGeneration() {
           await recordBestBottlesRigResult({
             ...reconciliationBase,
             finalImageUrl,
+            shadowOwner: resolvedShadowPolicy.owner,
+            shadowQa: null,
             qaIssues: [`Rig bypassed: ${rigPostprocessDecision.reason}`],
             lifecycleState: "review-pending",
             lastError: null,
@@ -877,6 +885,8 @@ export function useAssembledPromptGeneration() {
           shiftYPx: riggedSnapshot?.shiftYPx ?? null,
           scaleFactor: riggedSnapshot?.scale ?? null,
           maskControlled: riggedSnapshot?.maskControlled ?? false,
+          shadowOwner: riggedSnapshot?.shadowOwner ?? resolvedShadowPolicy.owner,
+          shadowQa: riggedSnapshot?.shadowQa ?? null,
         },
       };
       setResult(generated);
