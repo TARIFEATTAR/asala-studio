@@ -44,6 +44,27 @@ describe("PSD canonical identity join", () => {
     assert.match(result.reasons.join(" "), /grace sku.*lower-priority/i);
   });
 
+  it("retains conflicting alias evidence beneath an unmatched website and lower-priority Grace match", () => {
+    const index = buildCanonicalIdentityIndex(rows);
+    const result = joinPsdSourceIdentity({
+      websiteSku: "Missing",
+      graceSku: "GB-B",
+      sourceToken: "Legacy A",
+      index,
+      aliases: [{
+        sourceToken: "Legacy A",
+        websiteSku: "WebA",
+        graceSku: "GB-A",
+        reviewedBy: "Jordan Richter",
+        reviewedAt: "2026-07-12T00:00:00.000Z",
+      }],
+    });
+    assert.equal(result.status, "unmatched");
+    assert.equal(result.row, null);
+    assert.match(result.reasons.join(" "), /grace sku.*lower-priority/i);
+    assert.match(result.reasons.join(" "), /reviewed alias.*conflicts.*retained lower-priority grace sku/i);
+  });
+
   it("applies an exact reviewed alias with complete provenance", () => {
     const index = buildCanonicalIdentityIndex(rows);
     const result = joinPsdSourceIdentity({

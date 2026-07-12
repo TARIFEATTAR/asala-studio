@@ -215,6 +215,10 @@ function appendReviewedAliasDiagnostic(input: {
     reasons: input.reasons,
   });
   if (aliasResult.status === "reviewed-alias" && aliasResult.row) {
+    if (input.higherPriorityRows.length === 0) {
+      input.reasons.push(`Reviewed alias evidence resolved to a canonical row but did not override ${input.higherPriorityLabel} evidence.`);
+      return;
+    }
     const aliasRow = aliasResult.row;
     const agrees = input.higherPriorityRows.some((row) => rowsAreEquivalent(row, aliasRow));
     if (agrees) {
@@ -261,16 +265,31 @@ export function joinPsdSourceIdentity(input: {
     }
     if (websiteMatch.kind === "unmatched") {
       reasons.push(`Supplied website SKU ${normalizedWebsiteSku} did not match a canonical row.`);
+      let retainedGraceRows: readonly CanonicalTruthRow[] = [];
+      let retainedEvidenceLabel = "unmatched website SKU";
       if (hasToken(input.graceSku)) {
         const graceMatch = resolveExact(input.index.byGraceSku, input.graceSku);
         if (graceMatch.kind === "unique") {
           reasons.push("An exact Grace SKU match was retained as lower-priority evidence but not used.");
+          retainedGraceRows = [graceMatch.row];
+          retainedEvidenceLabel = "retained lower-priority Grace SKU";
         } else if (graceMatch.kind === "ambiguous") {
           reasons.push("The supplied lower-priority Grace SKU maps to duplicate canonical rows.");
+          retainedGraceRows = graceMatch.rows;
+          retainedEvidenceLabel = "retained ambiguous lower-priority Grace SKU";
         } else {
           reasons.push("The supplied lower-priority Grace SKU did not match a canonical row.");
+          retainedEvidenceLabel = "unmatched website and lower-priority Grace SKU";
         }
       }
+      appendReviewedAliasDiagnostic({
+        sourceToken: input.sourceToken,
+        index: input.index,
+        aliases: input.aliases,
+        higherPriorityLabel: retainedEvidenceLabel,
+        higherPriorityRows: retainedGraceRows,
+        reasons,
+      });
       return { status: "unmatched", row: null, reasons };
     }
 
