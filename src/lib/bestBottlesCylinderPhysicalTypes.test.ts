@@ -61,7 +61,7 @@ describe("Cylinder physical types", () => {
   });
 
   it("prefers reconciled measurements", () => {
-    const selected = selectRepresentative([
+    const unreconciledSelected = selectRepresentative([
       representativeRow({
         websiteSku: "AlphaUnreconciled",
         measurementReconciliationStatus: "unreconciled",
@@ -71,8 +71,19 @@ describe("Cylinder physical types", () => {
         measurementReconciliationStatus: "verified",
       }),
     ]);
+    const negatedSelected = selectRepresentative([
+      representativeRow({
+        websiteSku: "AlphaNotReconciled",
+        measurementStatus: "not reconciled",
+      }),
+      representativeRow({
+        websiteSku: "ZuluVerified",
+        measurementStatus: "verified",
+      }),
+    ]);
 
-    assert.equal(selected.websiteSku, "ZuluVerified");
+    assert.equal(unreconciledSelected.websiteSku, "ZuluVerified");
+    assert.equal(negatedSelected.websiteSku, "ZuluVerified");
   });
 
   it("accepts the exact reference convention and rejects stale suffixes", () => {
@@ -95,6 +106,34 @@ describe("Cylinder physical types", () => {
 
     assert.equal(exactSelected.websiteSku, "ZuluExact");
     assert.equal(staleSelected.websiteSku, "AlphaPlain");
+  });
+
+  it("accepts exact indexed PSD and PSB basenames but rejects added suffixes", () => {
+    const exactPsdSelected = selectRepresentative([
+      representativeRow({ websiteSku: "AlphaPlain" }),
+      representativeRow({
+        websiteSku: "GBCyl9RollWht",
+        psdPath: "/archive/17-415/20. GBCyl9RollWht.psd",
+      }),
+    ]);
+    const exactPsbSelected = selectRepresentative([
+      representativeRow({ websiteSku: "AlphaPlain" }),
+      representativeRow({
+        websiteSku: "GBCyl9RollWht",
+        psdFilename: "7. GB-CYL-CLR-9ML-T-02...PSB",
+      }),
+    ]);
+    const copySelected = selectRepresentative([
+      representativeRow({
+        websiteSku: "GBCyl9RollWht",
+        psdPath: "/archive/20. GBCyl9RollWht copy.psd",
+      }),
+      representativeRow({ websiteSku: "AlphaPlain" }),
+    ]);
+
+    assert.equal(exactPsdSelected.websiteSku, "GBCyl9RollWht");
+    assert.equal(exactPsbSelected.websiteSku, "GBCyl9RollWht");
+    assert.equal(copySelected.websiteSku, "AlphaPlain");
   });
 
   it("ranks an explicitly confirmed simple cap state above a missing state", () => {

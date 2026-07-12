@@ -101,7 +101,21 @@ function referenceBasename(value: unknown): string {
   }
 }
 
-function hasExactPsdMatch(row: CylinderCatalogRow): boolean {
+function hasExactArchivePsdMatch(row: CylinderCatalogRow): boolean {
+  const expectedStems = [normalizedText(row.websiteSku), normalizedText(row.graceSku)]
+    .filter(Boolean);
+  return [row.psdFilename, row.psdPath].some((path) => {
+    const basename = referenceBasename(path);
+    const match = basename.match(/^(.*)\.(psd|psb)$/);
+    if (!match) return false;
+    const stem = match[1]
+      .replace(/^\d+\.\s+/, "")
+      .replace(/\.+$/, "");
+    return expectedStems.includes(stem);
+  });
+}
+
+function hasExactCanonicalPngMatch(row: CylinderCatalogRow): boolean {
   const graceSku = normalizedText(row.graceSku);
   const websiteSku = normalizedText(row.websiteSku);
   if (!graceSku) return false;
@@ -110,8 +124,6 @@ function hasExactPsdMatch(row: CylinderCatalogRow): boolean {
     ? `${graceSku}__${websiteSku}__pdp-main__v001.png`
     : `${graceSku}__pdp-main__v001.png`;
   const paths = [
-    row.psdFilename,
-    row.psdPath,
     row.sourceReference,
     row.referencePath,
     row.sourceAssetPath,
@@ -121,14 +133,25 @@ function hasExactPsdMatch(row: CylinderCatalogRow): boolean {
   return paths.some((path) => referenceBasename(path) === expectedFilename);
 }
 
+function hasExactPsdMatch(row: CylinderCatalogRow): boolean {
+  return hasExactArchivePsdMatch(row) || hasExactCanonicalPngMatch(row);
+}
+
 function hasReconciledMeasurements(row: CylinderCatalogRow): boolean {
+  const statuses = [
+    row.measurementReconciliationStatus,
+    row.measurementStatus,
+    row.reconciliationStatus,
+  ].map(normalizedText).filter(Boolean);
+  if (statuses.some((status) =>
+    /\b(?:not|never)\s+(?:reconciled|resolved|verified|approved)\b/.test(status)
+  )) return false;
   if (row.measurementReconciled === true) return true;
-  const status = normalizedText(
-    row.measurementReconciliationStatus ?? row.measurementStatus ?? row.reconciliationStatus,
+  return statuses.some((status) =>
+    status
+      .split(/[^a-z0-9]+/)
+      .some((token) => ["reconciled", "resolved", "verified", "approved"].includes(token))
   );
-  return status
-    .split(/[^a-z0-9]+/)
-    .some((token) => ["reconciled", "resolved", "verified", "approved"].includes(token));
 }
 
 function hasSimpleCapState(row: CylinderCatalogRow): boolean {
