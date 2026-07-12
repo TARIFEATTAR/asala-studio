@@ -56,7 +56,8 @@ console.log(
   JSON.stringify(
     {
       version: ledger.version,
-      canonicalSkus: ledger.rows.length,
+      sourceRows: ledger.rows.length,
+      publicationTargets: ledger.publicationTargets.length,
       aliases: Object.keys(ledger.aliases).length,
       ledgerSha256: ledger.sha256,
       blockers: blockers.length,

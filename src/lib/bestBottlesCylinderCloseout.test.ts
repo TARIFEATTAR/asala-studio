@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS,
   CYLINDER_CLOSEOUT_EXPECTED_SKUS,
   buildCylinderCloseoutLedger,
   getCylinderCloseoutBlockers,
@@ -25,6 +26,37 @@ function row(
 }
 
 describe("buildCylinderCloseoutLedger", () => {
+  it("preserves source rows while collapsing approved website-SKU alias pairs into one publication target", async () => {
+    const ledger = await buildCylinderCloseoutLedger({
+      readinessRows: [
+        row("GB-CYL-CLR-50ML-RDC-MSLV", "GBCyl50RdcrMtSl"),
+        row("GB-CYL-CLR-50ML-RDC-MSLV-01", "GBCyl50RdcrMtSl"),
+      ],
+      generatedAt: "2026-07-12T00:00:00.000Z",
+    });
+
+    assert.equal(ledger.rows.length, 2);
+    assert.equal(ledger.publicationTargets.length, 1);
+    assert.equal(
+      ledger.publicationTargets[0].graceSku,
+      "GB-CYL-CLR-50ML-RDC-MSLV",
+    );
+    assert.deepEqual(ledger.publicationTargets[0].sourceGraceSkus, [
+      "GB-CYL-CLR-50ML-RDC-MSLV",
+      "GB-CYL-CLR-50ML-RDC-MSLV-01",
+    ]);
+    assert.equal(
+      ledger.aliases["GB-CYL-CLR-50ML-RDC-MSLV-01"],
+      "GB-CYL-CLR-50ML-RDC-MSLV",
+    );
+    assert.equal(
+      getCylinderCloseoutBlockers(ledger).some(
+        (blocker) => blocker.code === "duplicate-website-sku",
+      ),
+      false,
+    );
+  });
+
   it("collapses the Tall Cylinder alias into its canonical Cylinder row", async () => {
     const ledger = await buildCylinderCloseoutLedger({
       readinessRows: [
@@ -97,5 +129,21 @@ describe("getCylinderCloseoutBlockers", () => {
     assert.ok(codes.has("missing-catalog-join"));
     assert.ok(codes.has("measurement-override-pending"));
     assert.ok(codes.has("duplicate-website-sku"));
+  });
+
+  it("requires 377 unique publication targets independently of the 384 source rows", async () => {
+    const ledger = await buildCylinderCloseoutLedger({
+      readinessRows: [row("GB-CYL-A", "WEB-A")],
+      generatedAt: "2026-07-12T00:00:00.000Z",
+    });
+    const blocker = getCylinderCloseoutBlockers(ledger).find(
+      (item) => item.code === "unexpected-publication-target-count",
+    );
+
+    assert.ok(blocker);
+    assert.match(
+      blocker.message,
+      new RegExp(String(CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS)),
+    );
   });
 });

@@ -8,13 +8,14 @@ Scope: Canonical Best Bottles Cylinder catalog only
 
 Close the complete canonical Cylinder catalog with one strict V6.1 generation contract, reviewed product-truth references, model-owned contact shadows, deterministic geometry normalization, durable QA evidence, and verified PDP publication.
 
-The closeout target is a deduplicated 384-SKU Cylinder ledger. The duplicate `Tall Cylinder` alias for `GBTallCyl9WhtSht` must reconcile to its canonical Cylinder SKU rather than become a 385th product.
+The closeout target is an auditable 384-row Cylinder source ledger resolving to 377 unique website/Shopify publication targets. Seven duplicate website-SKU pairs and the additional `Tall Cylinder` alias must reconcile to canonical Grace SKUs; aliases retain lineage but never generate or publish a competing image.
 
-All 384 final images must be regenerated with the final V6.1 contract. Existing V6.0 renders are evidence and rollback material, not final-family completion assets.
+All 377 final publication images must be regenerated with the final V6.1 contract. Existing V6.0 renders are evidence and rollback material, not final-family completion assets.
 
 ## Current Baseline
 
-- Canonical Cylinder SKU jobs: 384
+- Auditable Cylinder source rows: 384
+- Unique website/Shopify publication targets: 377
 - Generation-ready rows: 272
 - Rows missing approved references: 112
 - Local flattened reference candidates: 274
@@ -37,7 +38,7 @@ These counts are planning inputs. The implementation must regenerate a fresh rea
 
 ## Canonical Product Ledger
 
-The pipeline must build one immutable closeout ledger keyed by canonical Grace SKU, with website SKU as the strongest cross-system alias. Each row must include:
+The pipeline must build one immutable closeout ledger retaining all 384 source rows and a derived set of 377 publication targets keyed by canonical Grace SKU, with website SKU as the strongest cross-system alias. Each publication target must include:
 
 - canonical Grace SKU
 - website SKU
@@ -51,7 +52,7 @@ The pipeline must build one immutable closeout ledger keyed by canonical Grace S
 - resolved V6.1 prompt/shadow policy
 - generation, QA, approval, Shopify, and Convex lifecycle state
 
-Duplicate aliases must be reported and reconciled before generation. A ledger row cannot proceed when product identity, catalog join, measurements, or publication target is ambiguous.
+Only the eight reviewed alias mappings may collapse identity: seven duplicate website-SKU pairs plus `GBTallCyl9WhtSht`. Any additional duplicate remains a blocker. A publication target cannot proceed when product identity, catalog join, measurements, or destination is ambiguous.
 
 ## Reference and PSD Contract
 
@@ -176,8 +177,8 @@ Approval remains fail-closed. A passing report must use the exact production sha
 
 ### Gate 1: Ledger and catalog truth
 
-- freeze and hash the 384-SKU canonical ledger
-- reconcile the Tall Cylinder alias
+- freeze and hash the 384-row source ledger and its 377 publication targets
+- reconcile the seven website-SKU pairs and the Tall Cylinder alias
 - resolve 10 measurement overrides and 7 missing catalog joins
 - prove exact Shopify/Convex targets without writing images
 
@@ -186,7 +187,7 @@ Approval remains fail-closed. A passing report must use the exact production sha
 - validate all existing flattened candidates
 - recover or create the 112 missing approved references
 - produce a per-SKU reference manifest with provenance and hashes
-- require 384/384 eligible references before the full paid batch
+- require 377/377 eligible publication-target references before the full paid batch
 
 ### Gate 3: V6.1 archetype qualification
 
@@ -201,7 +202,7 @@ Every archetype must pass identity, framing, material, and topology-aware shadow
 
 ### Gate 4: Full regeneration
 
-- generate all 384 SKUs with the locked V6.1 compiler and deployed Edge runtime
+- generate all 377 publication targets with the locked V6.1 compiler and deployed Edge runtime
 - use a resumable manifest with immutable prompt, reference, and policy hashes
 - never skip an older V6.0 render as complete
 - stop the affected cohort on systemic QA failure rather than consuming the whole budget
@@ -218,7 +219,7 @@ Every archetype must pass identity, framing, material, and topology-aware shadow
 - let the authorized operator perform the go-live action
 - record Shopify CDN URL even when downstream Convex sync needs retry
 - verify Shopify media, Convex `products.imageUrl`, storefront PDP output, and reconciliation state
-- require 384/384 final verdicts with no stale V6.0 image, unresolved alias, or approved-not-pushed row
+- require 377/377 publication verdicts and 384/384 source-row resolutions with no stale V6.0 image, unresolved alias, or approved-not-pushed target
 
 ## Error Handling and Resumability
 
@@ -234,7 +235,7 @@ Every archetype must pass identity, framing, material, and topology-aware shadow
 
 Required automated verification includes:
 
-- Cylinder policy resolver tests proving 384/384 use V6.1/model ownership
+- Cylinder policy resolver tests proving all 384 source rows resolve to V6.1/model ownership and exactly 377 generation identities
 - non-Cylinder regression tests proving no unintended policy expansion
 - browser/Edge exact prompt parity tests
 - rejection tests for V6.0 and mixed shadow authority on Cylinder
@@ -252,9 +253,9 @@ Before production activation, apply and verify the shadow-evidence migration, de
 
 Cylinder is closed only when:
 
-- the canonical ledger contains exactly 384 deduplicated SKUs
+- the canonical ledger contains exactly 384 source rows resolving to exactly 377 publication targets
 - all catalog joins and measurements are resolved
-- 384 approved reference manifests pass validation
+- 377 approved publication-target reference manifests pass validation
 - every final output was generated with canonical V6.1 and model shadow ownership
 - every output passes geometry and topology-aware shadow QA
 - every output receives explicit human approval through the strict reconciliation gate

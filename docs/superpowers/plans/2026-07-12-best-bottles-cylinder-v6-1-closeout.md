@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Close the deduplicated 384-SKU Cylinder catalog with approved references, strict V6.1 model-owned shadows, topology-aware QA, full regeneration, approval, publication, and live PDP verification.
+**Goal:** Close 384 auditable Cylinder source rows through 377 unique publication targets with approved references, strict V6.1 model-owned shadows, topology-aware QA, full regeneration, approval, publication, and live PDP verification.
 
 **Architecture:** Build an immutable Cylinder closeout ledger first, then make reference qualification, prompt policy, shadow topology, rig preservation, reconciliation, and batch execution consume that ledger. Every paid or external step fails closed on ledger, prompt, reference, and policy hashes; the rig owns geometry while the model exclusively owns V6.1 Cylinder shadows.
 
@@ -10,14 +10,14 @@
 
 ## Global Constraints
 
-- The canonical closeout universe is exactly 384 deduplicated Cylinder SKUs.
+- The canonical closeout universe is exactly 384 source rows resolving through eight approved aliases to 377 unique website/Shopify publication targets.
 - `GBTallCyl9WhtSht` must resolve to canonical Grace SKU `GB-CYL-WHT-9ML-WHT-S`, not a second product.
 - Every new Cylinder generation uses `best-bottles-reference-locked-v6.1`, `shadow-owner:model`, and `contact-back-right-v1`.
 - V6.0 and `best-bottles-reference-locked-v6.1-shadow-smoke` are historical lineage only for new Cylinder output.
 - The model owns the shadow; the rig may preserve and transform it but must never synthesize a Cylinder V6.1 shadow.
 - Runtime generation accepts one reviewed opaque flattened PNG per SKU. PSD files are recovery/provenance sources only.
 - Transparent, mask, paper-doll, background-removed, and retired clean-lane references are prohibited.
-- Existing V6.0 renders do not satisfy final closeout; all 384 SKUs must be regenerated.
+- Existing V6.0 renders do not satisfy final closeout; all 377 publication targets must be regenerated and all 384 source rows must resolve to them.
 - Remote migration, deployment, paid generation, approval writes, Shopify publication, Convex mutation, push, and merge are explicit announced checkpoints.
 - Preserve unrelated dirty-worktree changes and stage only task-scoped files.
 
@@ -60,6 +60,7 @@ Expected: FAIL because `bestBottlesCylinderCloseout.ts` does not exist.
 
 ```ts
 export const CYLINDER_CLOSEOUT_EXPECTED_SKUS = 384;
+export const CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS = 377;
 
 export interface CylinderCloseoutRow {
   graceSku: string;
@@ -74,11 +75,12 @@ export interface CylinderCloseoutLedger {
   version: "cylinder-v6.1-closeout-v1";
   generatedAt: string;
   rows: CylinderCloseoutRow[];
+  publicationTargets: CylinderPublicationTarget[];
   sha256: string;
 }
 ```
 
-Normalize Grace/website aliases, prefer catalog-backed Grace SKU, collapse the one Tall Cylinder duplicate, sort by Grace SKU, hash stable JSON, and report duplicate, missing-join, missing-measurement, or count drift blockers.
+Normalize Grace/website aliases, preserve 384 source rows, collapse only the seven approved website-SKU pairs plus the Tall Cylinder alias into 377 publication targets, sort by Grace SKU, hash stable JSON, and report unapproved duplicates, missing joins, missing measurements, or either count drift.
 
 - [ ] **Step 4: Add the read-only CLI**
 
@@ -93,7 +95,7 @@ npx tsx --test src/lib/bestBottlesCylinderCloseout.test.ts
 npm run bestbottles:cylinder:closeout-ledger
 ```
 
-Expected: tests pass; CLI reports exactly 384 canonical rows and explicitly lists unresolved catalog blockers until they are repaired.
+Expected: tests pass; CLI reports exactly 384 source rows and 377 publication targets, and explicitly lists unresolved catalog blockers until they are repaired.
 
 - [ ] **Step 6: Commit**
 
@@ -168,7 +170,7 @@ Require exact SKU filename tokens, supported raster format, at least one megapix
 
 - [ ] **Step 4: Implement the recovery CLI**
 
-The read-only script joins all 384 ledger rows to local flattened PNGs and the existing PSD inventory, then writes:
+The read-only script joins all 377 publication targets to local flattened PNGs and the existing PSD inventory, while retaining resolution evidence for all 384 source rows, then writes:
 
 - `tmp/bestbottles-generation/cylinder-v6.1-reference-manifest.json`
 - `tmp/bestbottles-generation/cylinder-v6.1-reference-recovery.csv`
@@ -185,7 +187,7 @@ npx tsx --test src/lib/bestBottlesCylinderReferenceReadiness.test.ts src/lib/bes
 npm run bestbottles:cylinder:reference-recovery
 ```
 
-Expected: tests pass and the report accounts for all 384 rows with no duplicate decision.
+Expected: tests pass and the report accounts for all 377 publication targets and all 384 source-row resolutions with no duplicate generation decision.
 
 - [ ] **Step 6: Commit**
 
@@ -485,7 +487,7 @@ Expected: FAIL because current resume logic skips on `status === "rendered"` alo
 
 Each manifest entry records `ledgerHash`, `referenceHash`, `promptHash`, `promptVersion`, `shadowOwner`, `shadowContract`, `shadowTopology`, `rawImageUrl`, `finalImageUrl`, geometry QA, shadow QA, attempt history, and lifecycle state.
 
-Require 384 eligible references for the unrestricted full run. Permit explicit archetype-smoke allowlists before that gate. Stop a cohort after a configurable systemic QA-failure threshold.
+Require 377 eligible publication-target references for the unrestricted full run. Permit explicit archetype-smoke allowlists before that gate. Stop a cohort after a configurable systemic QA-failure threshold.
 
 - [ ] **Step 4: Verify GREEN**
 
@@ -587,13 +589,13 @@ After explicit confirmation, apply the shadow-evidence migration and deploy only
 
 After explicit confirmation and billing readiness, generate only the smoke allowlist. Review every archetype; any systemic failure returns to the responsible task before full generation.
 
-- [ ] **Step 5: External checkpoint — full 384 regeneration**
+- [ ] **Step 5: External checkpoint — full 377-target regeneration**
 
-Run the hash-safe manifest until 384 final candidates pass machine QA. Build the review gallery and require explicit human approvals.
+Run the hash-safe manifest until 377 final publication candidates pass machine QA and all 384 source rows resolve to them. Build the review gallery and require explicit human approvals.
 
 - [ ] **Step 6: External checkpoint — publication**
 
-Run Shopify preflight, let the authorized operator trigger publication, retry Convex separately when needed, and verify 384/384 Shopify, Convex, and storefront verdicts.
+Run Shopify preflight, let the authorized operator trigger publication, retry Convex separately when needed, and verify 377/377 Shopify, Convex, and storefront verdicts plus 384/384 source-row resolutions.
 
 - [ ] **Step 7: Commit documentation**
 

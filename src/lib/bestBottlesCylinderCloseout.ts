@@ -1,8 +1,21 @@
 export const CYLINDER_CLOSEOUT_EXPECTED_SKUS = 384;
-export const CYLINDER_CLOSEOUT_VERSION = "cylinder-v6.1-closeout-v1" as const;
+export const CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS = 377;
+export const CYLINDER_CLOSEOUT_VERSION = "cylinder-v6.1-closeout-v2" as const;
 
 const TALL_CYLINDER_WEBSITE_SKU = "GBTallCyl9WhtSht";
 const TALL_CYLINDER_CANONICAL_GRACE_SKU = "GB-CYL-WHT-9ML-WHT-S";
+
+export const CYLINDER_APPROVED_GRACE_SKU_ALIASES: Readonly<Record<string, string>> =
+  Object.freeze({
+    "GB-CYL-CLR-100ML-RDC-MSLV-01": "GB-CYL-CLR-100ML-RDC-MSLV",
+    "GB-CYL-CLR-100ML-RDC-SBLK-01": "GB-CYL-CLR-100ML-RDC-SBLK",
+    "GB-CYL-CLR-50ML-RDC-MSLV-01": "GB-CYL-CLR-50ML-RDC-MSLV",
+    "GB-CYL-CLR-50ML-RDC-SBLK-01": "GB-CYL-CLR-50ML-RDC-SBLK",
+    GBCyl5WhtSht: "GB-CYL-WHT-5ML-WHT-S",
+    GBCylSwrl9MtlRollWht: "GB-CYL-WHT-9ML-MRL-WHT",
+    GBCylSwrl9RollWht: "GB-CYL-WHT-9ML-ROL-WHT",
+    [TALL_CYLINDER_WEBSITE_SKU]: TALL_CYLINDER_CANONICAL_GRACE_SKU,
+  });
 
 export interface CylinderCloseoutSourceRow {
   graceSku?: string | null;
@@ -22,16 +35,22 @@ export interface CylinderCloseoutRow {
   issues: string[];
 }
 
+export interface CylinderPublicationTarget extends CylinderCloseoutRow {
+  sourceGraceSkus: string[];
+}
+
 export interface CylinderCloseoutLedger {
   version: typeof CYLINDER_CLOSEOUT_VERSION;
   generatedAt: string;
   rows: CylinderCloseoutRow[];
+  publicationTargets: CylinderPublicationTarget[];
   aliases: Record<string, string>;
   sha256: string;
 }
 
 export type CylinderCloseoutBlockerCode =
   | "unexpected-sku-count"
+  | "unexpected-publication-target-count"
   | "missing-grace-sku"
   | "missing-website-sku"
   | "duplicate-grace-sku"
@@ -98,7 +117,14 @@ export async function buildCylinderCloseoutLedger(
   input: BuildCylinderCloseoutLedgerInput,
 ): Promise<CylinderCloseoutLedger> {
   const sourceRows = input.readinessRows.filter(isCylinderRow);
-  const aliases: Record<string, string> = {};
+  const sourceGraceSkus = new Set(
+    sourceRows.map((row) => normalize(row.graceSku)).filter(Boolean),
+  );
+  const aliases: Record<string, string> = Object.fromEntries(
+    Object.entries(CYLINDER_APPROVED_GRACE_SKU_ALIASES).filter(([alias]) =>
+      sourceGraceSkus.has(alias),
+    ),
+  );
   const tallAliases = sourceRows.filter(
     (row) => normalize(row.family).toLowerCase() === "tall cylinder",
   );
@@ -145,9 +171,54 @@ export async function buildCylinderCloseoutLedger(
       left.websiteSku.localeCompare(right.websiteSku),
     );
 
+  const rowsByWebsiteSku = new Map<string, CylinderCloseoutRow[]>();
+  for (const row of rows) {
+    if (!row.websiteSku) continue;
+    rowsByWebsiteSku.set(row.websiteSku, [
+      ...(rowsByWebsiteSku.get(row.websiteSku) ?? []),
+      row,
+    ]);
+  }
+
+  const publicationTargets = [...rowsByWebsiteSku.entries()]
+    .map<CylinderPublicationTarget>(([websiteSku, sourceTargetRows]) => {
+      const sourceGraceSkus = sourceTargetRows
+        .map((row) => row.graceSku)
+        .filter(Boolean)
+        .sort();
+      const resolvedGraceSkus = sourceGraceSkus.map(
+        (graceSku) => aliases[graceSku] ?? graceSku,
+      );
+      const canonicalGraceSku = [...new Set(resolvedGraceSkus)].sort()[0] ?? "";
+      const canonicalRow =
+        sourceTargetRows.find((row) => row.graceSku === canonicalGraceSku) ??
+        [...sourceTargetRows].sort((left, right) =>
+          left.graceSku.localeCompare(right.graceSku),
+        )[0];
+      const targetAliases = sourceGraceSkus.filter(
+        (graceSku) => graceSku !== canonicalGraceSku,
+      );
+
+      return {
+        ...canonicalRow,
+        graceSku: canonicalGraceSku,
+        websiteSku,
+        aliases: Array.from(
+          new Set([...canonicalRow.aliases, ...targetAliases]),
+        ).sort(),
+        sourceGraceSkus,
+      };
+    })
+    .sort(
+      (left, right) =>
+        left.graceSku.localeCompare(right.graceSku) ||
+        left.websiteSku.localeCompare(right.websiteSku),
+    );
+
   const hashPayload = {
     version: CYLINDER_CLOSEOUT_VERSION,
     rows,
+    publicationTargets,
     aliases: Object.fromEntries(
       Object.entries(aliases).sort(([left], [right]) => left.localeCompare(right)),
     ),
@@ -174,7 +245,7 @@ function duplicatesBy(
 }
 
 export function getCylinderCloseoutBlockers(
-  ledger: Pick<CylinderCloseoutLedger, "rows">,
+  ledger: Pick<CylinderCloseoutLedger, "rows" | "publicationTargets" | "aliases">,
 ): CylinderCloseoutBlocker[] {
   const blockers: CylinderCloseoutBlocker[] = [];
   if (ledger.rows.length !== CYLINDER_CLOSEOUT_EXPECTED_SKUS) {
@@ -183,6 +254,21 @@ export function getCylinderCloseoutBlockers(
       message: `Cylinder closeout requires exactly ${CYLINDER_CLOSEOUT_EXPECTED_SKUS} canonical SKUs; found ${ledger.rows.length}.`,
       graceSkus: ledger.rows.map((row) => row.graceSku).filter(Boolean),
       websiteSkus: ledger.rows.map((row) => row.websiteSku).filter(Boolean),
+    });
+  }
+  if (
+    ledger.publicationTargets.length !==
+    CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS
+  ) {
+    blockers.push({
+      code: "unexpected-publication-target-count",
+      message: `Cylinder closeout requires exactly ${CYLINDER_CLOSEOUT_EXPECTED_PUBLICATION_TARGETS} unique publication targets from ${CYLINDER_CLOSEOUT_EXPECTED_SKUS} source rows; found ${ledger.publicationTargets.length}.`,
+      graceSkus: ledger.publicationTargets
+        .map((row) => row.graceSku)
+        .filter(Boolean),
+      websiteSkus: ledger.publicationTargets
+        .map((row) => row.websiteSku)
+        .filter(Boolean),
     });
   }
 
@@ -230,6 +316,10 @@ export function getCylinderCloseoutBlockers(
     });
   }
   for (const [websiteSku, rows] of duplicatesBy(ledger.rows, (row) => row.websiteSku)) {
+    const canonicalGraceSkus = new Set(
+      rows.map((row) => ledger.aliases[row.graceSku] ?? row.graceSku),
+    );
+    if (canonicalGraceSkus.size === 1) continue;
     blockers.push({
       code: "duplicate-website-sku",
       message: `Website SKU ${websiteSku} maps to ${rows.length} Cylinder rows.`,
