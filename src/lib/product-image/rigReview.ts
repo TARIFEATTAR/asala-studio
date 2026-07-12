@@ -2,6 +2,7 @@ import type { FramingDecision, FramingQaReport } from "./framingQa";
 import type { RigStrongBounds } from "./rigPostprocess";
 import type { BestBottlesShadowOwner } from "@/lib/bestBottlesShadowPolicy";
 import type { ShadowQaReport } from "./shadowQa";
+import type { BestBottlesShadowTopology } from "@/lib/bestBottlesShadowTopology";
 
 export interface RigReviewEvidence {
   required: boolean;
@@ -18,6 +19,9 @@ export interface RigReviewEvidence {
   maskControlled: boolean;
   shadowOwner: BestBottlesShadowOwner;
   shadowQa: ShadowQaReport | null;
+  shadowTopology?: BestBottlesShadowTopology | null;
+  promptVersion?: string | null;
+  sourceReferenceHash?: string | null;
 }
 
 export interface RigReviewRequirement {

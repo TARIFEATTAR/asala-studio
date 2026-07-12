@@ -10,6 +10,7 @@ import {
 import {
   approveBestBottlesReconciledImage,
   buildBestBottlesRigReconciliationPayload,
+  isBestBottlesCylinderApprovalEvidenceReady,
 } from "./bestBottlesImageReconciliation";
 import { approveBestBottlesGeneratedMaster } from "./bestBottlesMasterApproval";
 import type { BestBottlesCatalogTruthSnapshot } from "./bestBottlesImageReconciliationRules";
@@ -45,6 +46,25 @@ function shadowQa(status: "pass" | "review"): ShadowQaReport {
     status,
     failures: [],
     warnings: [],
+    contacts: [
+      {
+        contact: "bottle",
+        status,
+        bounds: { left: 10, right: 50, top: 10, bottom: 100 },
+        measurements: {
+          contactGapPx: 0,
+          contactCoreDensity: 0.36,
+          rightExtensionPx: 18,
+          rightExtensionRatio: 0.28,
+          leftExtensionPx: 2,
+          verticalDepthPx: 8,
+          componentCount: 1,
+          shadowPixelCount: 120,
+        },
+        failures: [],
+        warnings: [],
+      },
+    ],
     measurements: {
       contactGapPx: 0,
       contactCoreDensity: 0.36,
@@ -97,6 +117,57 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
+  it("requires complete canonical V6.1 evidence for Cylinder approval", () => {
+    const complete = {
+      family: "Cylinder",
+      promptVersion: "best-bottles-reference-locked-v6.1",
+      shadowOwner: "model" as const,
+      shadowTopology: {
+        kind: "assembled" as const,
+        expectedContacts: ["bottle" as const],
+        source: "reviewed-reference" as const,
+      },
+      shadowQa: shadowQa("pass"),
+    };
+
+    assert.equal(isBestBottlesCylinderApprovalEvidenceReady(complete), true);
+    assert.equal(
+      isBestBottlesCylinderApprovalEvidenceReady({
+        ...complete,
+        promptVersion: "best-bottles-reference-locked-v6.0",
+      }),
+      false,
+    );
+    assert.equal(
+      isBestBottlesCylinderApprovalEvidenceReady({
+        ...complete,
+        shadowOwner: "rig",
+      }),
+      false,
+    );
+    assert.equal(
+      isBestBottlesCylinderApprovalEvidenceReady({
+        ...complete,
+        shadowTopology: null,
+      }),
+      false,
+    );
+    const failedSidecar = shadowQa("pass");
+    failedSidecar.contacts!.push({
+      ...failedSidecar.contacts![0],
+      contact: "sidecar",
+      status: "fail",
+      failures: ["missing"],
+    });
+    assert.equal(
+      isBestBottlesCylinderApprovalEvidenceReady({
+        ...complete,
+        shadowQa: failedSidecar,
+      }),
+      false,
+    );
+  });
+
   it("guards the strict approval RPC before any mutation", () => {
     const approveFunction = modelShadowMigrationSource.match(
       /CREATE OR REPLACE FUNCTION public\.approve_best_bottles_reconciled_image[\s\S]*?\$\$;/,
@@ -159,27 +230,39 @@ describe("Best Bottles generated master approval", () => {
     assert.ok(isReconciledExpression);
     assert.match(
       isReconciledExpression,
-      /AND COALESCE\(\s*r\.shadow_owner = 'rig'[\s\S]*?r\.shadow_qa->'target'->>'contract'[\s\S]*?,\s*FALSE\s*\)/,
+      /best_bottles_shadow_evidence_passes\([\s\S]*?r\.shadow_topology[\s\S]*?r\.shadow_qa/,
     );
     assert.match(reconciliationSqlTestSource, /model-shadow-null-is-reconciled-false/);
   });
 
   it("keeps model-shadow status pending until status and contract both pass", () => {
-    const reconciliationStatusCase = modelShadowMigrationSource.match(
-      /CASE[\s\S]*?END AS reconciliation_status/,
-    )?.[0];
-
-    assert.ok(reconciliationStatusCase);
     assert.match(
-      reconciliationStatusCase,
-      /r\.shadow_qa->>'status'\s*=\s*'pass'/,
+      modelShadowMigrationSource,
+      /p_shadow_qa->>'status'\s*=\s*'pass'/,
     );
     assert.match(
-      reconciliationStatusCase,
-      /r\.shadow_qa->'target'->>'contract'\s*=\s*'contact-back-right-v1'/,
+      modelShadowMigrationSource,
+      /p_shadow_qa->'target'->>'contract'\s*=\s*'contact-back-right-v1'/,
     );
     assert.match(reconciliationSqlTestSource, /model-shadow-pass-invalid-contract/);
     assert.match(reconciliationSqlTestSource, /model-shadow-pass-missing-contract/);
+  });
+
+  it("gates Cylinder SQL approval on V6.1 topology and per-contact evidence", () => {
+    assert.match(
+      modelShadowMigrationSource,
+      /prompt_version\s*=\s*'best-bottles-reference-locked-v6\.1'/,
+    );
+    assert.match(modelShadowMigrationSource, /shadow_topology\s+IS NOT NULL/);
+    assert.match(
+      modelShadowMigrationSource,
+      /jsonb_array_length\(COALESCE\(p_shadow_qa->'contacts'/,
+    );
+    assert.match(
+      modelShadowMigrationSource,
+      /jsonb_array_length\(COALESCE\(p_shadow_topology->'expectedContacts'/,
+    );
+    assert.match(reconciliationSqlTestSource, /model-shadow-failing-sidecar/);
   });
 
   it("types explicit Grace and website SKU eligibility in catalog truth", () => {
@@ -285,11 +368,22 @@ describe("Best Bottles generated master approval", () => {
       organizationId: "org-1",
       rawImageUrl: "https://example.invalid/raw.png",
       shadowOwner: "model",
+      promptVersion: "best-bottles-reference-locked-v6.1",
+      shadowTopology: {
+        kind: "assembled",
+        expectedContacts: ["bottle"],
+        source: "reviewed-reference",
+      },
       shadowQa: shadowQa("pass"),
       lifecycleState: "qa-passed",
     });
 
     assert.equal(payload.shadow_owner, "model");
     assert.deepEqual(payload.shadow_qa, shadowQa("pass"));
+    assert.deepEqual(payload.shadow_topology, {
+      kind: "assembled",
+      expectedContacts: ["bottle"],
+      source: "reviewed-reference",
+    });
   });
 });

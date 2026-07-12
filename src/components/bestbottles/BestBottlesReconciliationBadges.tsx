@@ -103,7 +103,10 @@ function reconciliationTitle(row: BestBottlesImageReconciliationStatusRow): stri
     `Shopify: ${row.all_shopify_writes_recorded ? "all writes recorded" : "writes incomplete"} · ${row.all_shopify_verified ? "all verified" : "verification incomplete"}`,
     `Convex: ${row.all_convex_writes_recorded ? "all writes recorded" : "writes incomplete"} · ${row.all_convex_verified ? "all verified" : "verification incomplete"}`,
     `Rig: ${row.rig_version ?? qa?.target.profileId ?? "unversioned"}`,
+    `Prompt: ${row.prompt_version ?? "missing"}`,
+    `Reference hash: ${row.source_reference_hash ?? "missing"}`,
     `Shadow owner: ${row.shadow_owner}`,
+    `Shadow topology: ${row.shadow_topology?.kind ?? "missing"} · contacts ${row.shadow_topology?.expectedContacts.join("+") ?? "missing"}`,
     `Shadow status: ${row.shadow_qa?.status ?? (row.shadow_owner === "rig" ? "deterministic" : "missing")}`,
     `Shadow gap: ${row.shadow_qa?.measurements.contactGapPx ?? "missing"}px`,
     `Shadow right extension: ${row.shadow_qa?.measurements.rightExtensionRatio ?? "missing"}× width`,
@@ -111,6 +114,11 @@ function reconciliationTitle(row: BestBottlesImageReconciliationStatusRow): stri
   ];
   if (row.shadow_qa?.failures.length) pieces.push(`Shadow failures: ${row.shadow_qa.failures.join(" · ")}`);
   if (row.shadow_qa?.warnings.length) pieces.push(`Shadow warnings: ${row.shadow_qa.warnings.join(" · ")}`);
+  for (const contact of row.shadow_qa?.contacts ?? []) {
+    pieces.push(
+      `Shadow contact ${contact.contact}: ${contact.status} · gap ${contact.measurements.contactGapPx ?? "missing"}px · spread ${contact.measurements.rightExtensionRatio ?? "missing"}×`,
+    );
+  }
   if (row.qa_issues.length > 0) pieces.push(`QA: ${row.qa_issues.join(" · ")}`);
   if (row.last_error) pieces.push(`Error: ${row.last_error}`);
   return pieces.join("\n");

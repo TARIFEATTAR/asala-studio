@@ -3,6 +3,7 @@ import type { FramingDecision, FramingQaReport } from "@/lib/product-image/frami
 import type { RigStrongBounds } from "@/lib/product-image/rigPostprocess";
 import type { ShadowQaReport } from "@/lib/product-image/shadowQa";
 import type { BestBottlesShadowOwner } from "@/lib/bestBottlesShadowPolicy";
+import type { BestBottlesShadowTopology } from "@/lib/bestBottlesShadowTopology";
 import type {
   BestBottlesCatalogTruthSnapshot,
   BestBottlesImageAssetRole,
@@ -87,6 +88,7 @@ export interface BestBottlesImageReconciliationStatusRow {
   provider_model: string | null;
   shadow_owner: BestBottlesShadowOwner;
   shadow_qa: ShadowQaReport | null;
+  shadow_topology: BestBottlesShadowTopology | null;
   asset_role: BestBottlesImageAssetRole;
   requires_pipeline_reconciliation: boolean;
   raw_image_url: string;
@@ -148,6 +150,7 @@ export interface RecordBestBottlesRawImageInput {
   providerModel?: string | null;
   shadowOwner?: BestBottlesShadowOwner;
   shadowQa?: ShadowQaReport | null;
+  shadowTopology?: BestBottlesShadowTopology | null;
   catalogTruth?: BestBottlesCatalogTruthSnapshot | null;
   assetRole?: BestBottlesImageAssetRole;
   requiresPipelineReconciliation?: boolean;
@@ -181,6 +184,37 @@ export interface RecordBestBottlesRigResultInput extends RecordBestBottlesRawIma
 
 type ReconciliationWrite = Record<string, unknown>;
 
+export interface BestBottlesApprovalEvidence {
+  family?: string | null;
+  promptVersion?: string | null;
+  shadowOwner?: BestBottlesShadowOwner | null;
+  shadowTopology?: BestBottlesShadowTopology | null;
+  shadowQa?: ShadowQaReport | null;
+}
+
+export function isBestBottlesCylinderApprovalEvidenceReady(
+  evidence: BestBottlesApprovalEvidence,
+): boolean {
+  const family = String(evidence.family ?? "").trim().toLowerCase();
+  if (family !== "cylinder" && family !== "tall cylinder") return true;
+  if (
+    evidence.promptVersion !== "best-bottles-reference-locked-v6.1" ||
+    evidence.shadowOwner !== "model" ||
+    !evidence.shadowTopology ||
+    evidence.shadowQa?.status !== "pass" ||
+    evidence.shadowQa.target.contract !== "contact-back-right-v1"
+  ) {
+    return false;
+  }
+  const contacts = evidence.shadowQa.contacts ?? [];
+  if (contacts.length === 0 || contacts.some((contact) => contact.status !== "pass")) {
+    return false;
+  }
+  return evidence.shadowTopology.expectedContacts.every((expected) =>
+    contacts.some((contact) => contact.contact === expected && contact.status === "pass"),
+  );
+}
+
 /**
  * Build the durable rig evidence payload shared by successful and failed
  * rig writes. Hash fields are added by the async recorder after this
@@ -202,6 +236,7 @@ export function buildBestBottlesRigReconciliationPayload(
     provider_model: cleanNullable(input.providerModel),
     shadow_owner: input.shadowOwner ?? "rig",
     shadow_qa: input.shadowQa ?? null,
+    shadow_topology: input.shadowTopology ?? null,
     catalog_truth: input.catalogTruth ?? null,
     asset_role: input.assetRole ?? "pdp-primary",
     requires_pipeline_reconciliation: input.requiresPipelineReconciliation ?? true,
@@ -273,6 +308,7 @@ export async function recordBestBottlesRawImage(
     provider_model: cleanNullable(input.providerModel),
     shadow_owner: input.shadowOwner ?? "rig",
     shadow_qa: input.shadowQa ?? null,
+    shadow_topology: input.shadowTopology ?? null,
     catalog_truth: input.catalogTruth ?? null,
     catalog_truth_hash: await sha256(input.catalogTruth ? JSON.stringify(input.catalogTruth) : null),
     asset_role: input.assetRole ?? "pdp-primary",

@@ -138,6 +138,16 @@ export function RigReviewPanel({
               measured={valueOrDash(review?.shadowQa?.measurements.rightExtensionRatio, "× width")}
               target={review?.shadowQa ? `${review.shadowQa.target.rightExtensionRatio.min}–${review.shadowQa.target.rightExtensionRatio.max}×` : "—"}
             />
+            <Metric
+              label="Prompt version"
+              measured={review?.promptVersion ?? "—"}
+              target="best-bottles-reference-locked-v6.1"
+            />
+            <Metric
+              label="Shadow topology"
+              measured={review?.shadowTopology?.kind ?? "—"}
+              target={review?.shadowTopology?.expectedContacts.join(" + ") ?? "—"}
+            />
           </div>
 
           <div className="border-b border-white/10 p-4">
@@ -188,6 +198,21 @@ export function RigReviewPanel({
                     {review.shadowQa.warnings.join(" · ")}
                   </div>
                 )}
+              </div>
+            )}
+            {(review?.shadowQa?.contacts?.length ?? 0) > 0 && (
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <div className="mb-3 text-[10px] uppercase tracking-[0.18em] text-white/45">
+                  Shadow contacts · reference {review?.sourceReferenceHash ?? "hash pending"}
+                </div>
+                <ul className="space-y-2">
+                  {review!.shadowQa!.contacts!.map((contact) => (
+                    <li key={contact.contact} className="rounded border border-white/10 p-2 font-mono text-[9px] text-white/55">
+                      {contact.contact} · {contact.status} · gap {contact.measurements.contactGapPx ?? "—"}px · spread {contact.measurements.rightExtensionRatio ?? "—"}×
+                      {contact.failures.length > 0 ? ` · ${contact.failures.join(" · ")}` : ""}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             <div className="mt-4 border-t border-white/10 pt-4">

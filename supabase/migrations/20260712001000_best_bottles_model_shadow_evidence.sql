@@ -1,17 +1,75 @@
--- Persist shadow ownership and model-shadow QA evidence for the V6.1 smoke SKU.
+-- Persist strict V6.1 model-shadow topology and per-contact QA evidence.
 -- The view uses r.*; drop it first so the two appended table columns do not
 -- shift existing view column positions during CREATE OR REPLACE.
 DROP VIEW IF EXISTS public.best_bottles_image_reconciliation_status;
 
 ALTER TABLE public.best_bottles_image_reconciliations
+  ADD COLUMN IF NOT EXISTS prompt_version TEXT,
   ADD COLUMN IF NOT EXISTS shadow_owner TEXT NOT NULL DEFAULT 'rig'
     CHECK (shadow_owner IN ('rig', 'model')),
-  ADD COLUMN IF NOT EXISTS shadow_qa JSONB;
+  ADD COLUMN IF NOT EXISTS shadow_qa JSONB,
+  ADD COLUMN IF NOT EXISTS shadow_topology JSONB;
 
 COMMENT ON COLUMN public.best_bottles_image_reconciliations.shadow_owner IS
   'Single shadow authority for this image: deterministic rig or image model.';
 COMMENT ON COLUMN public.best_bottles_image_reconciliations.shadow_qa IS
   'Versioned model-shadow measurements and pass/review/fail decision.';
+COMMENT ON COLUMN public.best_bottles_image_reconciliations.shadow_topology IS
+  'Resolved assembled, detached-sidecar, or complex-contact topology and expected contacts.';
+
+CREATE OR REPLACE FUNCTION public.best_bottles_shadow_evidence_passes(
+  p_family TEXT,
+  p_prompt_version TEXT,
+  p_shadow_owner TEXT,
+  p_shadow_topology JSONB,
+  p_shadow_qa JSONB
+)
+RETURNS BOOLEAN
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT CASE
+    WHEN lower(COALESCE(p_family, '')) IN ('cylinder', 'tall cylinder') THEN
+      COALESCE(p_prompt_version = 'best-bottles-reference-locked-v6.1', FALSE)
+      AND COALESCE(p_shadow_owner = 'model', FALSE)
+      AND p_shadow_topology IS NOT NULL
+      AND COALESCE(p_shadow_qa->>'status' = 'pass', FALSE)
+      AND COALESCE(
+        p_shadow_qa->'target'->>'contract' = 'contact-back-right-v1',
+        FALSE
+      )
+      AND jsonb_array_length(COALESCE(p_shadow_topology->'expectedContacts', '[]'::JSONB)) > 0
+      AND jsonb_array_length(COALESCE(p_shadow_qa->'contacts', '[]'::JSONB)) > 0
+      AND NOT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(COALESCE(p_shadow_qa->'contacts', '[]'::JSONB)) contact
+        WHERE contact->>'status' IS DISTINCT FROM 'pass'
+      )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements_text(
+          COALESCE(p_shadow_topology->'expectedContacts', '[]'::JSONB)
+        ) expected(contact_name)
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(COALESCE(p_shadow_qa->'contacts', '[]'::JSONB)) contact
+          WHERE contact->>'contact' = expected.contact_name
+            AND contact->>'status' = 'pass'
+        )
+      )
+    ELSE
+      COALESCE(
+        p_shadow_owner = 'rig'
+        OR (
+          p_shadow_owner = 'model'
+          AND p_shadow_qa->>'status' = 'pass'
+          AND p_shadow_qa->'target'->>'contract' = 'contact-back-right-v1'
+        ),
+        FALSE
+      )
+  END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.approve_best_bottles_reconciled_image(
   p_organization_id UUID,
@@ -85,13 +143,12 @@ BEGIN
         WHERE upper(eligible.grace_sku) = upper(j.grace_sku)
       )
     )
-    AND (
-      r.shadow_owner = 'rig'
-      OR (
-        r.shadow_owner = 'model'
-        AND r.shadow_qa->>'status' = 'pass'
-        AND r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1'
-      )
+    AND public.best_bottles_shadow_evidence_passes(
+      r.family,
+      r.prompt_version,
+      r.shadow_owner,
+      r.shadow_topology,
+      r.shadow_qa
     );
 
   IF v_final_image_url IS NULL THEN
@@ -280,14 +337,13 @@ SELECT
       OR COALESCE(jsonb_array_length(r.catalog_truth->'identityBlockers'), 0) > 0 THEN 'truth-conflict'
     WHEN r.detected_baseline_y_px IS NULL OR r.target_baseline_y_px IS NULL THEN 'measurement-missing'
     WHEN r.lifecycle_state IN ('raw-generated', 'rigging') THEN 'rig-pending'
-    WHEN r.shadow_owner = 'model'
-      AND NOT (
-        COALESCE(r.shadow_qa->>'status' = 'pass', FALSE)
-        AND COALESCE(
-          r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1',
-          FALSE
-        )
-      ) THEN 'review-pending'
+    WHEN NOT public.best_bottles_shadow_evidence_passes(
+      r.family,
+      r.prompt_version,
+      r.shadow_owner,
+      r.shadow_topology,
+      r.shadow_qa
+    ) THEN 'review-pending'
     WHEN COALESCE(ar.assignment_count, 0) = 0 THEN 'unlinked'
     WHEN NOT COALESCE(ar.all_pipeline_images_match, FALSE) THEN 'pipeline-image-mismatch'
     WHEN COALESCE(ar.any_assignment_approved, FALSE)
@@ -309,14 +365,12 @@ SELECT
     AND r.catalog_truth->>'identityStatus' = 'ready'
     AND r.catalog_truth->>'websiteTruthStatus' IN ('ready', 'alias_exception')
     AND COALESCE(jsonb_array_length(r.catalog_truth->'identityBlockers'), 0) = 0
-    AND COALESCE(
-      r.shadow_owner = 'rig'
-      OR (
-        r.shadow_owner = 'model'
-        AND r.shadow_qa->>'status' = 'pass'
-        AND r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1'
-      ),
-      FALSE
+    AND public.best_bottles_shadow_evidence_passes(
+      r.family,
+      r.prompt_version,
+      r.shadow_owner,
+      r.shadow_topology,
+      r.shadow_qa
     )
     AND COALESCE(ar.assignment_count, 0) > 0
     AND COALESCE(ar.all_pipeline_images_match, FALSE)

@@ -649,6 +649,7 @@ export function useAssembledPromptGeneration() {
               providerModel: options.aiProvider ?? DEFAULT_IMAGE_AI_PROVIDER,
               shadowOwner: resolvedShadowPolicy.owner,
               shadowQa: null,
+              shadowTopology,
               catalogTruth: {
                 name: options.productContext?.name ?? null,
                 graceSku: options.productContext?.sku ?? null,
@@ -918,6 +919,9 @@ export function useAssembledPromptGeneration() {
           maskControlled: riggedSnapshot?.maskControlled ?? false,
           shadowOwner: riggedSnapshot?.shadowOwner ?? resolvedShadowPolicy.owner,
           shadowQa: riggedSnapshot?.shadowQa ?? null,
+          shadowTopology,
+          promptVersion: resolvedShadowPolicy.promptVersion,
+          sourceReferenceHash: null,
         },
       };
       setResult(generated);

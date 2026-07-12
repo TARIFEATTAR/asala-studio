@@ -150,8 +150,10 @@ INSERT INTO public.best_bottles_image_reconciliations (
   framing_decision,
   qa_issues,
   lifecycle_state,
+  prompt_version,
   shadow_owner,
-  shadow_qa
+  shadow_qa,
+  shadow_topology
 )
 VALUES
   (
@@ -184,7 +186,9 @@ VALUES
     'pass',
     '{}'::text[],
     'qa-passed',
+    NULL,
     'rig',
+    NULL,
     NULL
   ),
   (
@@ -207,7 +211,9 @@ VALUES
     'pass',
     '{}'::text[],
     'qa-passed',
+    NULL,
     'rig',
+    NULL,
     NULL
   ),
   (
@@ -238,7 +244,9 @@ VALUES
     'pass',
     '{}'::text[],
     'qa-passed',
+    NULL,
     'rig',
+    NULL,
     NULL
   ),
   (
@@ -246,7 +254,7 @@ VALUES
     '00000000-0000-4000-8000-000000000101',
     'SKU-D',
     'WEB-D',
-    'Fixture Family',
+    'Cylinder',
     '{
       "graceSku":"SKU-D",
       "websiteSku":"WEB-D",
@@ -270,14 +278,17 @@ VALUES
     'pass',
     '{}'::text[],
     'qa-passed',
+    'best-bottles-reference-locked-v6.1',
     'model',
     '{
       "status":"review",
       "failures":[],
       "warnings":[],
+      "contacts":[{"contact":"bottle","status":"pass","bounds":{"left":700,"right":1380,"top":550,"bottom":2105},"measurements":{"contactGapPx":0,"contactCoreDensity":0.36,"rightExtensionPx":18,"rightExtensionRatio":0.28,"leftExtensionPx":2,"verticalDepthPx":8,"componentCount":1,"shadowPixelCount":120},"failures":[],"warnings":[]}],
       "measurements":{"contactGapPx":0,"contactCoreDensity":0.36,"rightExtensionPx":18,"rightExtensionRatio":0.28,"leftExtensionPx":2,"verticalDepthPx":8,"componentCount":1,"shadowPixelCount":120},
       "target":{"maxContactGapPx":2,"rightExtensionRatio":{"min":0.2,"max":0.3},"contract":"contact-back-right-v1"}
-    }'::jsonb
+    }'::jsonb,
+    '{"kind":"assembled","expectedContacts":["bottle"],"source":"reviewed-reference"}'::jsonb
   ),
   (
     '00000000-0000-4000-8000-000000000205',
@@ -309,7 +320,9 @@ VALUES
     'pass',
     '{}'::text[],
     'qa-passed',
+    NULL,
     'rig',
+    NULL,
     NULL
   );
 
@@ -375,6 +388,30 @@ BEGIN
   END IF;
 END;
 $$;
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_qa = jsonb_set(
+      jsonb_set(shadow_qa, '{status}', '"pass"'::jsonb),
+      '{contacts}',
+      (shadow_qa->'contacts') ||
+        '[{"contact":"sidecar","status":"fail","bounds":null,"measurements":{"contactGapPx":null,"contactCoreDensity":null,"rightExtensionPx":null,"rightExtensionRatio":null,"leftExtensionPx":null,"verticalDepthPx":null,"componentCount":0,"shadowPixelCount":0},"failures":["missing"],"warnings":[]}]'::jsonb
+    ),
+    shadow_topology =
+      '{"kind":"detached-sidecar","expectedContacts":["bottle","sidecar"],"source":"reviewed-reference"}'::jsonb
+WHERE image_id = '00000000-0000-4000-8000-000000000204';
+
+SELECT pg_temp.assert_true(
+  (SELECT reconciliation_status = 'review-pending' AND NOT is_reconciled
+   FROM public.best_bottles_image_reconciliation_status
+   WHERE image_id = '00000000-0000-4000-8000-000000000204'),
+  'model-shadow-failing-sidecar: failed contact escaped review'
+);
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_qa = jsonb_set(shadow_qa, '{contacts}', jsonb_build_array(shadow_qa->'contacts'->0)),
+    shadow_topology =
+      '{"kind":"assembled","expectedContacts":["bottle"],"source":"reviewed-reference"}'::jsonb
+WHERE image_id = '00000000-0000-4000-8000-000000000204';
 
 UPDATE public.best_bottles_image_reconciliations
 SET shadow_qa = jsonb_set(
