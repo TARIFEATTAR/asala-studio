@@ -463,6 +463,44 @@ describe("PSD evidence pool", () => {
     }
   });
 
+  it("evicts a failed flight so a same-hash follower can retry from its own path", async () => {
+    const preview = await makePreview();
+    let usableMagickCalls = 0;
+
+    const results = await runEvidencePool({
+      sources: [
+        {
+          sourcePath: "/archive/broken/WebA.psd",
+          sourceRelativePath: "broken/WebA.psd",
+        },
+        {
+          sourcePath: "/archive/usable/WebA-copy.psd",
+          sourceRelativePath: "usable/WebA-copy.psd",
+        },
+      ],
+      outputRoot: "/audit",
+      readSource: async () => Buffer.from("immutable-psd"),
+      statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+      runMagick: async (args) => {
+        const sourceArgument = args.find((arg) => arg.startsWith("/archive/"));
+        if (sourceArgument?.startsWith("/archive/broken/")) {
+          throw new Error("broken source path exactly");
+        }
+        usableMagickCalls += 1;
+        return args[0] === "identify"
+          ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
+          : preview;
+      },
+      writeArtifact: async () => undefined,
+      readCachedEvidence: async () => null,
+    });
+
+    assert.equal(results[0].status, "blocked");
+    assert.equal(results[0].error, "broken source path exactly");
+    assert.equal(results[1].status, "ok");
+    assert.equal(usableMagickCalls, 2);
+  });
+
   it("defaults to four concurrent rows and preserves row-scoped failures", async () => {
     const sources = Array.from({ length: 9 }, (_, index) => ({
       sourcePath: `/archive/${index}.psd`,

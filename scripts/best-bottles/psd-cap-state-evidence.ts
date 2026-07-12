@@ -485,7 +485,15 @@ async function inspectPsdEvidenceInternal(
 
     const existingFlight = singleFlight?.get(evidencePath);
     if (existingFlight !== undefined) {
-      const sharedEvidence = await existingFlight;
+      let sharedEvidence: PsdReadySourceEvidence;
+      try {
+        sharedEvidence = await existingFlight;
+      } catch {
+        if (singleFlight?.get(evidencePath) === existingFlight) {
+          singleFlight.delete(evidencePath);
+        }
+        return await inspectPsdEvidenceInternal(input, singleFlight);
+      }
       sourceStatAfter = await statSource(input.sourcePath);
       assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
       return rebindReadyEvidence({
@@ -564,8 +572,14 @@ async function inspectPsdEvidenceInternal(
       await writeArtifact(evidencePath, Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`));
       return evidence;
     })();
-    singleFlight?.set(evidencePath, generation);
-    return await generation;
+    const publishedFlight = generation.catch((error: unknown) => {
+      if (singleFlight?.get(evidencePath) === publishedFlight) {
+        singleFlight.delete(evidencePath);
+      }
+      throw error;
+    });
+    singleFlight?.set(evidencePath, publishedFlight);
+    return await publishedFlight;
   } catch (error) {
     let failure = error;
     if (sourceStatAfter === null) {
