@@ -15,6 +15,7 @@
     "bestbottles:generation:readiness": "tsx scripts/build-bestbottles-generation-readiness.ts",
     "bestbottles:cylinder:closeout-ledger": "tsx scripts/best-bottles/build-cylinder-closeout-ledger.ts",
     "bestbottles:cylinder:reference-recovery": "tsx scripts/best-bottles/build-cylinder-reference-recovery.ts",
+    "bestbottles:cylinder:75-manifest": "tsx scripts/best-bottles/build-cylinder-75-type-manifest.ts",
     "bestbottles:cylinder:smoke-matrix": "tsx scripts/best-bottles/build-cylinder-v6.1-smoke-matrix.ts",
     "bestbottles:image-ops:diagnose": "tsx scripts/bestBottlesImageOpsDiagnostic.ts",
     "bestbottles:image-ops:repair": "tsx scripts/bestBottlesImageOpsRepair.ts",
