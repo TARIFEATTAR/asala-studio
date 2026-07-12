@@ -18,6 +18,7 @@ const base: PsdAuditRecord = {
   family: "Cylinder",
   identityStatus: "exact-website-sku",
   identityReasons: [],
+  aliasProvenance: null,
   composite: null,
   machineTriage: {
     proposedClassification: "ambiguous-manual-review",
@@ -25,6 +26,8 @@ const base: PsdAuditRecord = {
     reasons: ["visual_review_required"],
   },
   reviewStatus: "pending-human-review",
+  reviewer: null,
+  reviewedAt: null,
 };
 
 describe("Best Bottles PSD cap-state audit domain", () => {
@@ -50,6 +53,46 @@ describe("Best Bottles PSD cap-state audit domain", () => {
     assert.equal(groups.find((group) => group.websiteSku === "WebA")?.sources.length, 2);
   });
 
+  it("keeps unresolved identities in source-specific review units", () => {
+    const groups = groupPsdAuditRecords([
+      {
+        ...base,
+        sourcePath: "/archive/Unmatched.psd",
+        sourceRelativePath: "Cylinder/Unmatched.psd",
+        websiteSku: null,
+        graceSku: null,
+        identityStatus: "unmatched",
+      },
+      {
+        ...base,
+        sourcePath: "/archive/Ambiguous.psd",
+        sourceRelativePath: "Cylinder/Ambiguous.psd",
+        websiteSku: null,
+        graceSku: null,
+        identityStatus: "ambiguous",
+      },
+      {
+        ...base,
+        sourcePath: "/archive/Conflict.psd",
+        sourceRelativePath: "Cylinder/Conflict.psd",
+        websiteSku: null,
+        graceSku: null,
+        identityStatus: "conflict",
+      },
+      {
+        ...base,
+        sourcePath: "/second-archive/Unmatched.psd",
+        sourceRelativePath: "Cylinder/Unmatched.psd",
+        websiteSku: null,
+        graceSku: null,
+        identityStatus: "unmatched",
+      },
+    ]);
+
+    assert.equal(groups.length, 4);
+    assert.deepEqual(groups.map((group) => group.sources.length), [1, 1, 1, 1]);
+  });
+
   it("builds a stable hash plus identity review key", () => {
     assert.equal(
       buildPsdReviewUnitKey(base),
@@ -57,10 +100,70 @@ describe("Best Bottles PSD cap-state audit domain", () => {
     );
   });
 
-  it("rejects a machine-authored approval", () => {
+  it("rejects empty and non-human approval reviewers", () => {
     assert.throws(() => assertMachineCannotApprove({
       reviewStatus: "approved",
-      reviewer: "machine",
+      reviewer: { kind: "human", identity: " " },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
     }), /human reviewer/i);
+    assert.throws(() => assertMachineCannotApprove({
+      reviewStatus: "approved",
+      reviewer: { kind: "machine", identity: "triage-v1" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    }), /human reviewer/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      reviewStatus: "approved",
+      reviewer: { kind: "machine", identity: "triage-v1" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    } as unknown as PsdAuditRecord]), /human reviewer/i);
+  });
+
+  it("requires a valid reviewed-at timestamp for human approval", () => {
+    assert.throws(() => assertMachineCannotApprove({
+      reviewStatus: "approved",
+      reviewer: { kind: "human", identity: "Jordan Richter" },
+      reviewedAt: "not-a-timestamp",
+    }), /reviewed-at timestamp/i);
+    assert.doesNotThrow(() => assertMachineCannotApprove({
+      reviewStatus: "approved",
+      reviewer: { kind: "human", identity: "Jordan Richter" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    }));
+  });
+
+  it("requires structured provenance for every reviewed alias", () => {
+    const aliasProvenance = {
+      observedAliasToken: "web-a-legacy",
+      canonicalWebsiteSku: "WebA",
+      canonicalGraceSku: "GB-A",
+      reviewer: { kind: "human" as const, identity: "Jordan Richter" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    };
+    const reviewedAlias = {
+      ...base,
+      websiteSku: "WebA",
+      graceSku: "GB-A",
+      identityStatus: "reviewed-alias" as const,
+      aliasProvenance,
+    } satisfies PsdAuditRecord;
+
+    assert.equal(groupPsdAuditRecords([reviewedAlias]).length, 1);
+    assert.deepEqual(reviewedAlias.aliasProvenance, aliasProvenance);
+
+    for (const field of [
+      "observedAliasToken",
+      "canonicalWebsiteSku",
+      "canonicalGraceSku",
+      "reviewer",
+      "reviewedAt",
+    ] as const) {
+      const incompleteProvenance: Record<string, unknown> = { ...aliasProvenance };
+      delete incompleteProvenance[field];
+      assert.throws(() => groupPsdAuditRecords([{
+        ...reviewedAlias,
+        aliasProvenance: incompleteProvenance,
+      } as unknown as PsdAuditRecord]), /reviewed alias requires structured provenance/i);
+    }
   });
 });

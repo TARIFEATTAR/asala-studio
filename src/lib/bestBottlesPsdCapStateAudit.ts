@@ -31,15 +31,56 @@ export interface PsdCompositeEvidence {
   evidenceSha256: string;
 }
 
-export interface PsdAuditRecord {
+export interface PsdHumanReviewer {
+  kind: "human";
+  identity: string;
+}
+
+export interface PsdReviewedAliasProvenance {
+  observedAliasToken: string;
+  canonicalWebsiteSku: string;
+  canonicalGraceSku: string;
+  reviewer: PsdHumanReviewer;
+  reviewedAt: string;
+}
+
+export type PsdIdentityState =
+  | {
+      identityStatus: "reviewed-alias";
+      websiteSku: string;
+      graceSku: string;
+      aliasProvenance: PsdReviewedAliasProvenance;
+    }
+  | {
+      identityStatus: Exclude<PsdIdentityStatus, "reviewed-alias">;
+      websiteSku: string | null;
+      graceSku: string | null;
+      aliasProvenance: null;
+    };
+
+export type PsdReviewState =
+  | {
+      reviewStatus: "pending-human-review";
+      reviewer: null;
+      reviewedAt: null;
+    }
+  | {
+      reviewStatus: "blocked";
+      reviewer: PsdHumanReviewer | null;
+      reviewedAt: string | null;
+    }
+  | {
+      reviewStatus: "approved";
+      reviewer: PsdHumanReviewer;
+      reviewedAt: string;
+    };
+
+export interface PsdAuditRecordFields {
   sourcePath: string;
   sourceRelativePath: string;
   sourceSha256: string;
   sourceBytes: number;
-  websiteSku: string | null;
-  graceSku: string | null;
   family: string | null;
-  identityStatus: PsdIdentityStatus;
   identityReasons: string[];
   composite: PsdCompositeEvidence | null;
   machineTriage: {
@@ -47,8 +88,9 @@ export interface PsdAuditRecord {
     confidence: "low" | "medium" | "high";
     reasons: string[];
   };
-  reviewStatus: "pending-human-review" | "approved" | "blocked";
 }
+
+export type PsdAuditRecord = PsdAuditRecordFields & PsdIdentityState & PsdReviewState;
 
 export interface PsdReviewUnit {
   reviewUnitKey: string;
@@ -65,12 +107,26 @@ function identityToken(value: string | null): string {
 }
 
 export function buildPsdReviewUnitKey(record: PsdAuditRecord): string {
-  return [record.sourceSha256, identityToken(record.websiteSku), identityToken(record.graceSku)].join("|");
+  const canonicalIdentityKey = [
+    record.sourceSha256,
+    identityToken(record.websiteSku),
+    identityToken(record.graceSku),
+  ].join("|");
+
+  if (["unmatched", "ambiguous", "conflict"].includes(record.identityStatus)) {
+    const sourceIdentity = [record.sourceRelativePath, record.sourcePath]
+      .map((value) => encodeURIComponent(value))
+      .join("|");
+    return `${canonicalIdentityKey}|SOURCE:${sourceIdentity}`;
+  }
+
+  return canonicalIdentityKey;
 }
 
 export function groupPsdAuditRecords(records: readonly PsdAuditRecord[]): PsdReviewUnit[] {
   const groups = new Map<string, PsdAuditRecord[]>();
   for (const record of records) {
+    assertPsdAuditRecordInvariants(record);
     const key = buildPsdReviewUnitKey(record);
     groups.set(key, [...(groups.get(key) ?? []), record]);
   }
@@ -87,11 +143,67 @@ export function groupPsdAuditRecords(records: readonly PsdAuditRecord[]): PsdRev
   })).sort((a, b) => a.reviewUnitKey.localeCompare(b.reviewUnitKey));
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isNamedHumanReviewer(value: unknown): value is PsdHumanReviewer {
+  return isRecord(value)
+    && value.kind === "human"
+    && typeof value.identity === "string"
+    && value.identity.trim() !== ""
+    && value.identity.trim().toLowerCase() !== "machine";
+}
+
+function isValidReviewedAt(value: unknown): value is string {
+  return typeof value === "string"
+    && value !== ""
+    && !Number.isNaN(Date.parse(value))
+    && new Date(value).toISOString() === value;
+}
+
+function assertReviewedAliasHasProvenance(record: PsdAuditRecord): void {
+  if (record.identityStatus !== "reviewed-alias") {
+    return;
+  }
+
+  const provenance: unknown = record.aliasProvenance;
+  if (
+    !isRecord(provenance)
+    || typeof provenance.observedAliasToken !== "string"
+    || provenance.observedAliasToken.trim() === ""
+    || typeof provenance.canonicalWebsiteSku !== "string"
+    || provenance.canonicalWebsiteSku.trim() === ""
+    || typeof provenance.canonicalGraceSku !== "string"
+    || provenance.canonicalGraceSku.trim() === ""
+    || !isNamedHumanReviewer(provenance.reviewer)
+    || !isValidReviewedAt(provenance.reviewedAt)
+    || provenance.canonicalWebsiteSku !== record.websiteSku
+    || provenance.canonicalGraceSku !== record.graceSku
+  ) {
+    throw new Error("A reviewed alias requires structured provenance with canonical identities and human review.");
+  }
+}
+
+function assertPsdAuditRecordInvariants(record: PsdAuditRecord): void {
+  assertMachineCannotApprove(record);
+  assertReviewedAliasHasProvenance(record);
+}
+
 export function assertMachineCannotApprove(input: {
   reviewStatus: PsdAuditRecord["reviewStatus"];
-  reviewer: string;
+  reviewer: { kind: string; identity?: unknown } | string | null;
+  reviewedAt?: unknown;
 }): void {
-  if (input.reviewStatus === "approved" && input.reviewer.trim().toLowerCase() === "machine") {
+  if (input.reviewStatus !== "approved") {
+    return;
+  }
+
+  if (!isNamedHumanReviewer(input.reviewer)) {
     throw new Error("Cap-state approval requires a named human reviewer.");
+  }
+
+  if (!isValidReviewedAt(input.reviewedAt)) {
+    throw new Error("Cap-state approval requires a valid reviewed-at timestamp.");
   }
 }
