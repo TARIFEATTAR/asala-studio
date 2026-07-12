@@ -289,6 +289,29 @@ export function analyzeModelOwnedShadow(
     }
   }
 
+  // Even when the main lane has no connected component, continue scanning the
+  // lower continuation. A detached/overlong candidate must still be removed
+  // from geometry analysis; only the preservation mask remains empty/review.
+  let continuationCandidateMaxY = -1;
+  for (let y = laneBottom + 1; y < height; y += 1) {
+    for (let x = laneLeft; x <= laneRight; x += 1) {
+      const pixelIndex = (y * width + x) * 4;
+      const alpha = input.pixels[pixelIndex + 3] ?? 0;
+      const delta = backgroundLuma -
+        luma({
+          r: input.pixels[pixelIndex] ?? 0,
+          g: input.pixels[pixelIndex + 1] ?? 0,
+          b: input.pixels[pixelIndex + 2] ?? 0,
+        });
+      const outsideProduct =
+        y > bounds.bottom || x < bounds.left || x > bounds.right;
+      if (outsideProduct && alpha > 8 && delta >= 4) {
+        candidateMask[y * width + x] = 1;
+        continuationCandidateMaxY = y;
+      }
+    }
+  }
+
   if (components.length === 0) {
     const report = emptyReport("review", [
       "No reliable model-owned shadow candidate could be analyzed.",
@@ -307,29 +330,10 @@ export function analyzeModelOwnedShadow(
 
   // The candidate lane is bounded by design. Inspect its immediate continuation
   // to ensure a shadow that continues well past the depth contract is rejected.
-  let continuationMaxY = representative.maxY;
-  for (let y = laneBottom + 1; y < height; y += 1) {
-    for (let x = laneLeft; x <= laneRight; x += 1) {
-      const pixelIndex = (y * width + x) * 4;
-      const alpha = input.pixels[pixelIndex + 3] ?? 0;
-      const delta = backgroundLuma -
-        luma({
-          r: input.pixels[pixelIndex] ?? 0,
-          g: input.pixels[pixelIndex + 1] ?? 0,
-          b: input.pixels[pixelIndex + 2] ?? 0,
-        });
-      const outsideProduct =
-        y > bounds.bottom || x < bounds.left || x > bounds.right;
-      if (outsideProduct && alpha > 8 && delta >= 4) {
-        // Keep the full continuation in the geometry exclusion mask. The
-        // retained preservation mask intentionally remains limited to the
-        // largest seeded component, but an overlong tail or floor seam must
-        // never inflate bounds/baseline/fill metrics.
-        candidateMask[y * width + x] = 1;
-        continuationMaxY = y;
-      }
-    }
-  }
+  // The retained preservation mask intentionally remains limited to the
+  // largest seeded component, but an overlong tail or floor seam is already
+  // represented in candidateMask and must never inflate geometry metrics.
+  const continuationMaxY = Math.max(representative.maxY, continuationCandidateMaxY);
 
   const contactGapPx = Math.max(0, representative.minY - baselineYPx - 1);
   const contactCoreDensity =

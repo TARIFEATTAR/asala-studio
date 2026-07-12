@@ -39,6 +39,7 @@ import {
 import type { PromptRecord } from "@/lib/bestBottlesPromptCompiler";
 import {
   getBestBottlesShadowPolicyTags,
+  resolveBestBottlesReconciliationPromptVersion,
   resolveBestBottlesShadowPolicy,
   type BestBottlesShadowOwner,
   type BestBottlesShadowPolicy,
@@ -392,14 +393,19 @@ export function useAssembledPromptGeneration() {
       isBestBottlesStudioMaster && options.precompiledPromptRecord
         ? {
             ...options.precompiledPromptRecord,
+            prompt_version: resolvedShadowPolicy.promptVersion,
+            shadow_owner: resolvedShadowPolicy.owner,
             final_prompt: applyBestBottlesVisualTargetPrompt(
               options.precompiledPromptRecord.final_prompt,
               options.productContext?.bodyMaterial,
             ),
             qa_checklist: Array.from(
               new Set([
-                ...options.precompiledPromptRecord.qa_checklist,
+                ...options.precompiledPromptRecord.qa_checklist.filter(
+                  (tag) => !/^(?:prompt-version|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+                ),
                 ...visualTargetTags,
+                ...shadowPolicyTags,
               ]),
             ),
           }
@@ -604,7 +610,11 @@ export function useAssembledPromptGeneration() {
                 typeof data.finalPrompt === "string" && data.finalPrompt.trim()
                   ? data.finalPrompt
                   : requestPrompt,
-              promptVersion: options.productContext?.promptVersion,
+              promptVersion: resolveBestBottlesReconciliationPromptVersion(
+                options.productContext?.sku,
+                isBestBottlesStudioMasterRequest,
+                options.productContext?.promptVersion,
+              ),
               rigVersion: options.productContext?.rigVersion,
               providerModel: options.aiProvider ?? DEFAULT_IMAGE_AI_PROVIDER,
               catalogTruth: {

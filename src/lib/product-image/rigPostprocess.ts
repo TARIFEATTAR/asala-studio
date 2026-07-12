@@ -1278,14 +1278,12 @@ export function detectModelGeometryBaseline(
   const left = Math.max(0, Math.floor(rawBounds.left));
   const right = Math.min(width - 1, Math.ceil(rawBounds.right));
   const envelopeWidth = Math.max(1, right - left + 1);
-  const strongThreshold = 52;
   const maxShadowLumaDelta = 80;
   let baseline = Math.min(height - 1, Math.max(0, Math.round(rawBaselineYPx)));
   let tailRows = 0;
 
   for (let y = baseline; y >= Math.round(height * 0.42); y -= 1) {
     let signalPixels = 0;
-    let strongPixels = 0;
     let shadowLikePixels = 0;
     for (let x = left; x <= right; x += 1) {
       const i = (y * width + x) * 4;
@@ -1294,7 +1292,6 @@ export function detectModelGeometryBaseline(
       signalPixels += 1;
       const pixelLuma = luma({ r: pixels[i], g: pixels[i + 1], b: pixels[i + 2] });
       const lumaDelta = luma(bg) - pixelLuma;
-      if (distance >= strongThreshold && lumaDelta > maxShadowLumaDelta) strongPixels += 1;
       if (lumaDelta >= 4 && lumaDelta <= maxShadowLumaDelta) {
         shadowLikePixels += 1;
       }
@@ -1302,7 +1299,8 @@ export function detectModelGeometryBaseline(
 
     const lowDensity = signalPixels > 0 && signalPixels / envelopeWidth < 0.72;
     const mostlyShadowLike = shadowLikePixels >= Math.max(2, signalPixels * 0.7);
-    if (lowDensity && mostlyShadowLike && strongPixels < signalPixels * 0.35) {
+    const stronglyDarkNarrowTail = signalPixels > 0 && signalPixels / envelopeWidth < 0.55;
+    if (lowDensity && (mostlyShadowLike || stronglyDarkNarrowTail)) {
       tailRows += 1;
       baseline = y - 1;
       continue;

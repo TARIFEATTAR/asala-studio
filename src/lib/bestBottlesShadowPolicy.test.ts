@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { resolveBestBottlesShadowPolicy } from "./bestBottlesShadowPolicy";
+import {
+  resolveBestBottlesReconciliationPromptVersion,
+  resolveBestBottlesShadowPolicy,
+} from "./bestBottlesShadowPolicy";
 
 describe("resolveBestBottlesShadowPolicy", () => {
   it("selects model ownership only for the black 3 ml smoke SKU", () => {
@@ -22,5 +25,28 @@ describe("resolveBestBottlesShadowPolicy", () => {
         smokeSku: null,
       });
     }
+  });
+
+  it("canonicalizes persisted reconciliation prompt lineage from SKU policy", () => {
+    assert.equal(
+      resolveBestBottlesReconciliationPromptVersion(
+        "GB-SPR-CLR-3ML-WHT",
+        true,
+        "best-bottles-reference-locked-v6.1-shadow-smoke",
+      ),
+      "best-bottles-reference-locked-v6.0",
+    );
+    assert.equal(
+      resolveBestBottlesReconciliationPromptVersion(
+        "GB-SPR-CLR-3ML-BLK",
+        true,
+        null,
+      ),
+      "best-bottles-reference-locked-v6.1-shadow-smoke",
+    );
+    assert.equal(
+      resolveBestBottlesReconciliationPromptVersion("OTHER", false, "caller-v1"),
+      "caller-v1",
+    );
   });
 });

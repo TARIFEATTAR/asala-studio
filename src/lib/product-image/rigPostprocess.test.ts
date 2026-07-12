@@ -164,7 +164,9 @@ describe("model shadow geometry exclusion", () => {
       }
     };
     // Valid contact component, a disconnected component, and an overlong tail.
-    paintShadow(68, 78, 101, 104, 24);
+    // Include a dark contact component: baseline derivation must not mistake
+    // a high-contrast, narrow model shadow for the product's final row.
+    paintShadow(68, 78, 101, 104, 100);
     paintShadow(49, 52, 102, 104, 20);
     paintShadow(72, 75, 105, 130, 12);
 

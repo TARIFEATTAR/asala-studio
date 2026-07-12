@@ -32,3 +32,19 @@ export function getBestBottlesShadowPolicyTags(policy: BestBottlesShadowPolicy):
     ...(policy.smokeSku ? [`shadow-smoke-sku:${policy.smokeSku}`] : []),
   ];
 }
+
+/**
+ * Canonical prompt-version metadata written to reconciliation records. General
+ * Dark Room requests retain their caller value; Best Bottles studio masters
+ * always use the exact SKU policy so persisted lineage cannot drift from the
+ * generation contract.
+ */
+export function resolveBestBottlesReconciliationPromptVersion(
+  graceSku: string | null | undefined,
+  isBestBottlesStudioMaster: boolean,
+  callerPromptVersion?: string | null,
+): string | null | undefined {
+  return isBestBottlesStudioMaster
+    ? resolveBestBottlesShadowPolicy(graceSku).promptVersion
+    : callerPromptVersion;
+}

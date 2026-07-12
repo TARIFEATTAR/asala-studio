@@ -99,6 +99,24 @@ describe("analyzeModelOwnedShadow", () => {
     assert.match(report.warnings.join(" "), /connected shadow|shadow/i);
   });
 
+  it("masks a detached continuation even when the primary lane is empty", () => {
+    const fixture = makeShadowFixture("absent");
+    for (let y = 380; y <= 392; y += 1) {
+      for (let x = 214; x <= 230; x += 1) {
+        const i = (y * fixture.width + x) * 4;
+        fixture.pixels[i] = fixture.background.r - 18;
+        fixture.pixels[i + 1] = fixture.background.g - 18;
+        fixture.pixels[i + 2] = fixture.background.b - 18;
+      }
+    }
+
+    const analysis = analyzeModelOwnedShadow(fixture);
+
+    assert.equal(analysis.report.status, "review");
+    assert.ok(analysis.candidateMask.some((value) => value === 1));
+    assert.equal(analysis.preservationMask.some((value) => value === 1), false);
+  });
+
   it("fails an overlong feather and a dark floor seam", () => {
     const overlong = analyzeModelOwnedShadow(makeShadowFixture("overlong")).report;
     const floorSeam = analyzeModelOwnedShadow(makeShadowFixture("floor-seam")).report;
