@@ -51,8 +51,9 @@ describe("Cylinder measurement-driven display curve", () => {
     const nine = resolveCylinderDisplayScale({
       canvasHeightPx: 2288, heightWithCapMm: 75, heightWithoutCapMm: 63, diameterMm: 21,
     });
-    assert.ok(nine.bodyTargetPx > five.bodyTargetPx);
-    assert.ok(nine.assembledTargetPct - five.assembledTargetPct >= 7);
+    assert.ok(nine.bodyTargetPx >= five.bodyTargetPx * 1.06);
+    assert.equal(five.assembledTargetPct, 58);
+    assert.equal(nine.assembledTargetPct, 71);
   });
 
   it("keeps the 100 ml body taller than the 50 ml body", () => {
@@ -62,8 +63,9 @@ describe("Cylinder measurement-driven display curve", () => {
     const hundred = resolveCylinderDisplayScale({
       canvasHeightPx: 2288, heightWithCapMm: 180, heightWithoutCapMm: 154, diameterMm: 35,
     });
-    assert.ok(hundred.bodyTargetPx > fifty.bodyTargetPx);
-    assert.ok(hundred.assembledTargetPct - fifty.assembledTargetPct >= 6);
+    assert.ok(hundred.bodyTargetPx >= fifty.bodyTargetPx * 1.04);
+    assert.equal(fifty.assembledTargetPct, 79);
+    assert.equal(hundred.assembledTargetPct, 88);
   });
 
   it("rejects a body-order reversal", () => {
@@ -100,11 +102,31 @@ export interface CylinderDisplayScale {
   expectedWidthPx: number;
 }
 
+const HEIGHT_KNOTS = [
+  { heightMm: 35, targetPct: 52 },
+  { heightMm: 47, targetPct: 55 },
+  { heightMm: 54, targetPct: 57.5 },
+  { heightMm: 55, targetPct: 58 },
+  { heightMm: 75, targetPct: 71 },
+  { heightMm: 100, targetPct: 76 },
+  { heightMm: 128, targetPct: 79 },
+  { heightMm: 159, targetPct: 84 },
+  { heightMm: 180, targetPct: 88 },
+  { heightMm: 186, targetPct: 90 },
+  { heightMm: 250, targetPct: 92 },
+] as const;
+
 function targetPct(heightMm: number): number {
-  const raw = heightMm <= 100
-    ? 60 * Math.pow(heightMm / 55, 0.45)
-    : 78.6 * Math.pow(heightMm / 100, 0.25);
-  return Math.min(92, Math.max(52, raw));
+  if (heightMm <= HEIGHT_KNOTS[0].heightMm) return HEIGHT_KNOTS[0].targetPct;
+  for (let index = 1; index < HEIGHT_KNOTS.length; index += 1) {
+    const upper = HEIGHT_KNOTS[index];
+    if (heightMm <= upper.heightMm) {
+      const lower = HEIGHT_KNOTS[index - 1];
+      const progress = (heightMm - lower.heightMm) / (upper.heightMm - lower.heightMm);
+      return lower.targetPct + progress * (upper.targetPct - lower.targetPct);
+    }
+  }
+  return HEIGHT_KNOTS.at(-1)!.targetPct;
 }
 
 export function resolveCylinderDisplayScale(input: CylinderDisplayScaleInput): CylinderDisplayScale {

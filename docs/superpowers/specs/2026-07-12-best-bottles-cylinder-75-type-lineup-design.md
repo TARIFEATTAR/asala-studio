@@ -62,25 +62,26 @@ Plate 9 produces two files from the same placement manifest:
 
 Capacity alone cannot determine display height. Verified assembled height is the primary vertical-scale input; verified body height preserves cap-on/cap-off body consistency; diameter validates the resulting width and perceived mass.
 
-The first calibration draft uses a continuous, piecewise compressed height transform:
+The first calibration draft uses monotonic, piecewise-linear measured-height knots:
 
 ```text
-for assembled height h <= 100 mm:
-  targetPct = clamp(52, 78.6, 60 * (h / 55)^0.45)
-
-for assembled height h > 100 mm:
-  targetPct = clamp(78.6, 92, 78.6 * (h / 100)^0.25)
+assembled height (mm): 35, 47, 54, 55, 75, 100, 128, 159, 180, 186, 250
+display height (%):    52, 55, 57.5, 58, 71, 76, 79, 84, 88, 90, 92
 ```
+
+Values between knots use monotonic linear interpolation. Values below 35 mm clamp to 52%; values above 250 mm clamp to 92%.
 
 This draft intentionally produces visible but compressed transitions. For the reviewed anchors it yields approximately:
 
-- 5 ml, 55 mm: 60%;
-- 9 ml, 75 mm: 69%;
-- 28 ml, 100 mm: 78.6%;
-- 50 ml, 128 mm: 84%;
-- 100 ml, 180 mm: 91%;
-- 227 ml plastic, 159 mm: 88%;
-- 500 ml aluminum, 186 mm: 92%, with its 74 mm diameter preserving greater visual mass.
+- 5 ml, 55 mm: 58%;
+- 9 ml, 75 mm: 71%;
+- 28 ml, 100 mm: 76%;
+- 50 ml, 128 mm: 79%;
+- 100 ml, 180 mm: 88%;
+- 227 ml plastic, 159 mm: 84%;
+- 500 ml aluminum, 186 mm: 90%, with its 74 mm diameter preserving greater visual mass.
+
+After closure contribution is removed, these knots keep the 9 ml body approximately 6.8% taller than the 5 ml body and the 100 ml body approximately 4.3% taller than the 50 ml body.
 
 The transform is a calibration proposal, not storefront approval. The annotated master must expose the measurements and resolved percentages for stakeholder review before the curve version is locked.
 
