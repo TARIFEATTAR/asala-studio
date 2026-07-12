@@ -158,6 +158,45 @@ export function maskOutModelShadowGeometry(
   return removedPixels;
 }
 
+/**
+ * Clamp the geometry-only buffer to the product control envelope below the
+ * baseline. This catches dark shadow pixels that sit outside the analyzer's
+ * local lane; source/output pixels are never changed by this helper.
+ */
+export function clampModelShadowGeometryToControlEnvelope(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  background: Rgb,
+  controlBounds: RigStrongBounds | null,
+  baselineYPx: number,
+): number {
+  if (
+    !controlBounds ||
+    typeof controlBounds.left !== "number" ||
+    typeof controlBounds.right !== "number" ||
+    !Number.isFinite(baselineYPx)
+  ) {
+    return 0;
+  }
+  const baseline = Math.max(0, Math.min(height - 1, Math.round(baselineYPx)));
+  const left = Math.max(0, Math.floor(controlBounds.left));
+  const right = Math.min(width - 1, Math.ceil(controlBounds.right));
+  let removedPixels = 0;
+  for (let y = baseline + 1; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (x >= left && x <= right) continue;
+      const i = (y * width + x) * 4;
+      pixels[i] = background.r;
+      pixels[i + 1] = background.g;
+      pixels[i + 2] = background.b;
+      pixels[i + 3] = 255;
+      removedPixels += 1;
+    }
+  }
+  return removedPixels;
+}
+
 export interface RigFinalizeShadowInput {
   owner: BestBottlesShadowOwner;
   pixels: Uint8Array | Uint8ClampedArray;
@@ -1211,6 +1250,7 @@ export function detectStrongBounds(
   width: number,
   height: number,
   bg: Rgb,
+  maxBottomYPx?: number,
 ): RigStrongBounds | null {
   const strongThreshold = 52;
   const paleForegroundThreshold = 16;
@@ -1221,7 +1261,8 @@ export function detectStrongBounds(
   let left = width;
   let right = -1;
 
-  for (let y = 0; y < height; y += 2) {
+  const maxY = Math.min(height - 1, maxBottomYPx == null ? height - 1 : Math.round(maxBottomYPx));
+  for (let y = 0; y <= maxY; y += 2) {
     const row = y * width * 4;
     let rowHits = 0;
     let rowLeft = width;
@@ -1573,6 +1614,14 @@ export async function normalizeBestBottlesRigBaseline(
         modelShadowAnalysis.candidateMask,
         analysisBg,
       );
+      clampModelShadowGeometryToControlEnvelope(
+        geometryAnalysisPixels,
+        width,
+        height,
+        analysisBg,
+        maskBounds,
+        detectedBaseline,
+      );
     }
     const generatedBounds = detectStrongBounds(geometryAnalysisPixels, width, height, analysisBg);
     const qaIssues = [
@@ -1825,6 +1874,21 @@ export async function normalizeBestBottlesRigBaseline(
       geometryAnalysisPixels,
       modelShadowAnalysis.candidateMask,
       analysisBg,
+    );
+    const productControlBounds = detectStrongBounds(
+      analysisImageData.data,
+      width,
+      height,
+      analysisBg,
+      geometryBaseline,
+    );
+    clampModelShadowGeometryToControlEnvelope(
+      geometryAnalysisPixels,
+      width,
+      height,
+      analysisBg,
+      productControlBounds,
+      geometryBaseline,
     );
   }
   const strongBounds = modelShadowAnalysis

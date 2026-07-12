@@ -16,6 +16,7 @@ import {
   detectModelGeometryBaseline,
   finalizeRigShadow,
   flattenBackgroundLikePixels,
+  clampModelShadowGeometryToControlEnvelope,
   maskOutModelShadowGeometry,
   prepareUnmaskedRigRecanvasPixels,
 } from "./rigPostprocess";
@@ -169,6 +170,9 @@ describe("model shadow geometry exclusion", () => {
     paintShadow(68, 78, 101, 104, 100);
     paintShadow(49, 52, 102, 104, 20);
     paintShadow(72, 75, 105, 130, 12);
+    // Low-contrast out-of-lane noise is intentionally below the strong-bounds
+    // detector; the control-envelope clamp still removes it from geometry.
+    paintShadow(0, 18, 102, 105, 10);
 
     const rawBounds = detectStrongBounds(pixels, width, height, background);
     assert.ok(rawBounds);
@@ -199,7 +203,16 @@ describe("model shadow geometry exclusion", () => {
       analysis.candidateMask,
       background,
     );
+    const clamped = clampModelShadowGeometryToControlEnvelope(
+      geometryPixels,
+      width,
+      height,
+      background,
+      { top: 30, bottom: rawBaseline, left: 50, right: 70 },
+      rawBaseline,
+    );
     assert.ok(removed > 0);
+    assert.ok(clamped > 0);
     assert.deepEqual(
       detectStrongBounds(geometryPixels, width, height, background),
       { top: 30, bottom: 100, left: 50, right: 70 },
