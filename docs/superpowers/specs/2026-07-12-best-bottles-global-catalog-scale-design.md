@@ -123,6 +123,19 @@ Every tile uses:
 
 After the Cylinder pilot passes, the board expands to one representative for every registry row across all catalog families. Mass generation remains gated until the applicable registry row and visual calibration evidence are approved.
 
+## Catalog-wide lineup assets
+
+After the global curve is calibrated, the system produces two catalog-wide lineup assets from the same approved canonical selection and the same versioned scale resolver:
+
+1. **Technical calibration lineup:** one measurement-reconciled, cap-on-confirmed product from every catalog family, labeled with family, capacity, canonical SKU, verified measurements, global target, family correction, and final target.
+2. **Clean catalog hero lineup:** the same actual catalog products on one v6.1 canvas and shelf line without technical labels or overlays. This asset is a hero-image candidate and a visual regression fixture; publication requires separate operator approval.
+
+Both lineups use actual approved PSD-derived product references. They must not contain generated stand-ins, inferred geometry, disputed identities, unconfirmed cap states, or products without reconciled measurements. Every product receives the shared v6.1 canvas, baseline, and shadow treatment while retaining its material-specific rendering profile.
+
+The two outputs must share a machine-readable selection manifest containing the canonical SKU, reference identifier, registry row, scale-contract version, v6.1 contract version, resolved scale, and lineup position. Rebuilding either output from the same manifest must preserve product selection, order, and scale.
+
+The technical lineup validates cross-family hierarchy, material rendering, baseline, shadow consistency, safe spacing, and family-correction behavior. The clean hero lineup validates the final visual rhythm without diagnostic labels. Neither asset changes Shopify or Convex media state during calibration.
+
 ## Validation rules
 
 Automated tests must prove:
@@ -137,6 +150,8 @@ Automated tests must prove:
 8. multi-component generation is rejected without confirmed topology;
 9. disputed measurements cannot become approved calibration anchors;
 10. every generated product carries the scale-contract and v6.1 lineage versions.
+11. technical and clean lineup outputs resolve from the same canonical selection manifest;
+12. every lineup product has reconciled measurements and an approved cap-on PSD reference.
 
 Pixel QA must measure the primary bottle independently from detached components. It verifies baseline, body height, width, safe margins, shadow grounding, and cap-state pair consistency.
 
@@ -148,7 +163,8 @@ Pixel QA must measure the primary bottle independently from detached components.
 4. Review and freeze the Cylinder curve evidence.
 5. Populate remaining family registry rows from reconciled catalog data and PSD inventory.
 6. Generate the catalog-wide calibration board.
-7. Approve the versioned global contract.
-8. Resume family generation, QA, approval, and publishing under that contract.
+7. Generate the technical catalog-family lineup and matching clean hero lineup from one manifest.
+8. Approve the versioned global contract and lineup evidence.
+9. Resume family generation, QA, approval, and publishing under that contract.
 
 No Shopify or Convex media publication is part of calibration. Publishing remains a separate operator-approved step after generated assets pass the applicable scale, identity, topology, and v6.1 visual gates.
