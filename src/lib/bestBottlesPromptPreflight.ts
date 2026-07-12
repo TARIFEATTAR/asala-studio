@@ -9,13 +9,17 @@ import {
   BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH,
   BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG,
   buildBestBottlesCatalogCanonPromptParts,
-  MODEL_OWNED_GROUNDING_SHADOW,
 } from "./bestBottlesCatalogCanonPrompt";
 import {
   getBestBottlesShadowPolicyTags,
   resolveBestBottlesShadowPolicy,
   type BestBottlesShadowPolicy,
 } from "./bestBottlesShadowPolicy";
+import {
+  buildModelOwnedShadowPrompt,
+  resolveBestBottlesShadowTopology,
+  type BestBottlesShadowTopology,
+} from "./bestBottlesShadowTopology";
 import {
   getBestBottlesCatalogFramingProfile,
   getBestBottlesCylinderFamilyProfile,
@@ -38,6 +42,9 @@ type ProductLike = {
   capColor?: string | null;
   trimColor?: string | null;
   capStyle?: string | null;
+  capState?: string | null;
+  mode?: string | null;
+  accessoryCode?: string | null;
   heightWithoutCap?: string | null;
   heightWithCap?: string | null;
   diameter?: string | null;
@@ -458,6 +465,7 @@ const BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE =
 function buildFramingProfilePrompt(
   profile: BestBottlesFamilyProfile | null,
   policy: BestBottlesShadowPolicy,
+  topology: BestBottlesShadowTopology,
 ): string | null {
   if (!profile) return null;
   const label = profile.label.toUpperCase();
@@ -476,7 +484,9 @@ function buildFramingProfilePrompt(
     profile.detachedComponentPlacement === "right-sidecar"
       ? "- If a detached cap or applicator is present, keep it as a right-sidecar component on the same baseline; it must not shift the primary bottle off center."
       : null,
-    policy.owner === "model" ? MODEL_OWNED_GROUNDING_SHADOW : BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
+    policy.owner === "model"
+      ? buildModelOwnedShadowPrompt(topology)
+      : BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
     // NOTE (2026-07-04): the round-glass volume cue and the cap material-targeting
     // cue were intentionally REMOVED. Both were interpretive instructions that
     // invited the model to reinterpret components the PRESERVE block already locks
@@ -499,11 +509,16 @@ function buildFinalPrompt(product: ProductLike, sku: PromptSku): string {
     bottleCollection: product.bottleCollection,
   });
   const canonParts = buildBestBottlesCatalogCanonPromptParts(sku, policy);
+  const topology = resolveBestBottlesShadowTopology(product, sku);
   // Use the catalog-path resolver so EVERY family ships a real FRAMING PROFILE
   // block — never a blank one (previous behavior for unprofiled families).
   return [
     canonParts.basePrompt,
-    buildFramingProfilePrompt(getBestBottlesCatalogFramingProfile(product), policy),
+    buildFramingProfilePrompt(
+      getBestBottlesCatalogFramingProfile(product),
+      policy,
+      topology,
+    ),
     canonParts.finalStudioDirection,
   ]
     .filter((line): line is string => Boolean(line))
@@ -605,6 +620,7 @@ export function buildBestBottlesPromptPreflight(
     family: input.product.family ?? sku.product_family,
     bottleCollection: input.product.bottleCollection,
   });
+  const shadowTopology = resolveBestBottlesShadowTopology(input.product, sku);
   const canvasPreflight = buildCanvasPreflight(input.product, sku);
   const warnings = getWarnings(input.product, sku, input.bodyMaterial, canvasPreflight.warnings);
   // NOTE: buildPromptForSku() (the config/product_families.json + master_pdp_prompt.md
@@ -657,6 +673,10 @@ export function buildBestBottlesPromptPreflight(
         ...moduleQaChecklist,
         ...canvasPreflight.qaChecklist,
         ...getBestBottlesShadowPolicyTags(policy),
+        `shadow-topology:${shadowTopology.kind}`,
+        ...shadowTopology.expectedContacts.map(
+          (contact) => `shadow-contact:${contact}`,
+        ),
         BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG,
         `catalog_canon_source:${BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH}`,
       ]),

@@ -3,14 +3,19 @@ import { describe, it } from "node:test";
 
 import {
   BEST_BOTTLES_STUDIO_DIRECTION_V2,
+  BEST_BOTTLES_FINAL_V2_STUDIO_CHECK,
   ensureBestBottlesStudioDirection,
   resolveBestBottlesPrecompiledPrompt,
 } from "./bestBottlesPrecompiledPrompt";
+import {
+  FINAL_V2_STUDIO_CHECK,
+  STUDIO_DIRECTION,
+} from "../../../src/config/bestBottlesCatalogCanon";
 
 const validRecord = {
-  sku: "GB-CYL-CLR-9ML-SPR-GLD",
-  reference_image_path: "https://example.com/GB-CYL-CLR-9ML-SPR-GLD.png",
-  product_family: "cylinder",
+  sku: "GB-CIR-CLR-9ML-SPR-GLD",
+  reference_image_path: "https://example.com/GB-CIR-CLR-9ML-SPR-GLD.png",
+  product_family: "circle",
   frame_class: "tall_narrow",
   final_prompt: [
     "REFERENCE-LOCKED BEST BOTTLES PDP MASTER",
@@ -97,24 +102,25 @@ const canonV3Record = {
   ],
 };
 
-const smokeRecord = {
+const cylinderV61Record = {
   ...validRecord,
-  sku: "GB-SPR-CLR-3ML-BLK",
-  reference_image_path: "approved/GBSpry3mlClBlk.png",
-  prompt_version: "best-bottles-reference-locked-v6.1-shadow-smoke",
+  sku: "GB-CYL-CLR-9ML-SPR-GLD",
+  product_family: "cylinder",
+  reference_image_path: "approved/GBCyl9SpryGold.png",
+  prompt_version: "best-bottles-reference-locked-v6.1",
   shadow_owner: "model",
   final_prompt: [
     "REFERENCE-LOCKED BEST BOTTLES PDP MASTER",
     "",
     "Task: transform the uploaded real product reference PNG into a premium photorealistic editorial ecommerce product image.",
     "SKU LOCK:",
-    "- SKU: GB-SPR-CLR-3ML-BLK",
+    "- SKU: GB-CYL-CLR-9ML-SPR-GLD",
     "PRODUCT IDENTITY:",
     "- Preserve the exact 3ml clear glass sprayer geometry, black cap/applicator state, material, and component placement from the approved reference.",
     "FRAME MODULE:",
     "- Use the exact Madison 2080 x 2288 canvas and resolved family framing profile.",
     "GROUNDING SHADOW — MODEL OWNED:",
-    "Render one soft, clearly visible contact shadow attached directly to the bottle base. It must be darkest and most concentrated at the physical contact line, approximately 32–42% opacity at its densest point, then feather softly behind and toward camera-right, fading within approximately 20–30% of the bottle's width. The contact core and extended feather must read as one continuous shadow. One soft key light creates one soft-edged shadow. No detached oval, gap beneath the bottle, hard outline, long dramatic cast, doubled shadow, reflection, floor plane, smear, or horizon.",
+    "Render one continuous soft contact shadow attached directly to the bottle base. Each contact core must be darkest and most concentrated at the physical contact line, approximately 32–42% opacity at its densest point, then feather softly behind and toward camera-right, fading within approximately 20–30% of the primary bottle's width. No detached oval, gap beneath the bottle, hard outline, long dramatic cast, doubled shadow, reflection, floor plane, smear, or horizon.",
     "FINAL CHECK:",
     "Keep the approved reference as the source of truth for identity, geometry, material, canvas, and framing authority.",
   ].join("\n").padEnd(501, " "),
@@ -122,35 +128,60 @@ const smokeRecord = {
     "reference_png_identity_lock",
     "shadow-owner:model",
     "shadow-contract:contact-back-right-v1",
-    "prompt-version:best-bottles-reference-locked-v6.1-shadow-smoke",
+    "prompt-version:best-bottles-reference-locked-v6.1",
+    "shadow-rollout:cylinder-family",
+    "shadow-topology:assembled",
+    "shadow-contact:bottle",
   ],
 };
 
 describe("resolveBestBottlesPrecompiledPrompt", () => {
-  it("accepts the exact model-owned V6.1 shadow smoke record", () => {
-    const accepted = resolveBestBottlesPrecompiledPrompt(smokeRecord, {
+  it("accepts a canonical Cylinder V6.1 model-owned shadow record", () => {
+    const accepted = resolveBestBottlesPrecompiledPrompt(cylinderV61Record, {
       isBestBottlesStudioMasterRequest: true,
     });
 
     assert.equal(accepted.error, null);
-    assert.equal(accepted.promptVersion, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(accepted.promptVersion, "best-bottles-reference-locked-v6.1");
     assert.equal(accepted.shadowOwner, "model");
   });
 
-  it("rejects model-owned shadow records outside the exact smoke SKU allowlist", () => {
+  it("rejects model-owned shadow records outside reviewed Cylinder context", () => {
     const wrongSku = resolveBestBottlesPrecompiledPrompt(
-      { ...smokeRecord, sku: "GB-SPR-CLR-3ML-WHT" },
+      { ...cylinderV61Record, product_family: "circle" },
       { isBestBottlesStudioMasterRequest: true },
     );
 
-    assert.match(wrongSku.error ?? "", /not allowlisted/i);
+    assert.match(wrongSku.error ?? "", /only valid for Cylinder/i);
+  });
+
+  it("rejects Cylinder V6.0 and missing topology lineage", () => {
+    const v60 = resolveBestBottlesPrecompiledPrompt(
+      {
+        ...cylinderV61Record,
+        prompt_version: "best-bottles-reference-locked-v6.0",
+      },
+      { isBestBottlesStudioMasterRequest: true },
+    );
+    const missingTopology = resolveBestBottlesPrecompiledPrompt(
+      {
+        ...cylinderV61Record,
+        qa_checklist: cylinderV61Record.qa_checklist.filter(
+          (tag) => !tag.startsWith("shadow-topology:"),
+        ),
+      },
+      { isBestBottlesStudioMasterRequest: true },
+    );
+
+    assert.match(v60.error ?? "", /requires canonical V6\.1/i);
+    assert.match(missingTopology.error ?? "", /topology lineage/i);
   });
 
   it("rejects model-owned records that mix deterministic shadow authority", () => {
     const mixed = resolveBestBottlesPrecompiledPrompt(
       {
-        ...smokeRecord,
-        final_prompt: `${smokeRecord.final_prompt}\nMadison applies both deterministically after generation.`,
+        ...cylinderV61Record,
+        final_prompt: `${cylinderV61Record.final_prompt}\nMadison applies both deterministically after generation.`,
       },
       { isBestBottlesStudioMasterRequest: true },
     );
@@ -240,6 +271,16 @@ describe("resolveBestBottlesPrecompiledPrompt", () => {
 });
 
 describe("ensureBestBottlesStudioDirection", () => {
+  it("keeps the Edge runtime studio direction exactly synchronized with the browser canon", () => {
+    assert.equal(BEST_BOTTLES_STUDIO_DIRECTION_V2, STUDIO_DIRECTION);
+    assert.equal(BEST_BOTTLES_FINAL_V2_STUDIO_CHECK, FINAL_V2_STUDIO_CHECK);
+    assert.match(BEST_BOTTLES_STUDIO_DIRECTION_V2, /contact-only/i);
+    assert.doesNotMatch(
+      BEST_BOTTLES_STUDIO_DIRECTION_V2,
+      /deterministic post-processing responsibilities/i,
+    );
+  });
+
   it("removes old presentation blocks and makes the approved Kinfolk/Aesop v2 studio direction final", () => {
     const normalized = ensureBestBottlesStudioDirection(canonV3Record.final_prompt);
 
@@ -248,7 +289,7 @@ describe("ensureBestBottlesStudioDirection", () => {
     assert.match(normalized, /Kinfolk/);
     assert.match(normalized, /Aesop/);
     assert.match(normalized, /fill-height target/);
-    assert.match(normalized, /contact-only/);
+    assert.match(normalized, /contact-only/i);
     assert.doesNotMatch(normalized, /BACKGROUND AND COMPOSITION:/);
     assert.doesNotMatch(normalized, /NEGATIVE CONSTRAINTS:/);
     assert.doesNotMatch(normalized, /FINAL CHECK BEFORE OUTPUT:/);

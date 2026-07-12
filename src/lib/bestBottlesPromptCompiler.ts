@@ -3,6 +3,7 @@ import {
   resolveBestBottlesShadowPolicy,
 } from "./bestBottlesShadowPolicy";
 import { buildBestBottlesCatalogCanonPrompt } from "./bestBottlesCatalogCanonPrompt";
+import { resolveBestBottlesShadowTopology } from "./bestBottlesShadowTopology";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -243,6 +244,7 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     graceSku: sku.sku,
     family: sku.product_family,
   });
+  const shadowTopology = resolveBestBottlesShadowTopology({}, sku);
   // The module compiler is validation-only for ordinary SKUs. For reviewed
   // Cylinder V6.1 context, however, its PromptRecord is a public consumer
   // boundary; emit the same coherent canon-owned model-shadow prompt instead
@@ -270,6 +272,8 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
       ...closure.qa,
       ...system.negativeRules.map((rule) => rule.qa_key),
       ...getBestBottlesShadowPolicyTags(shadowPolicy),
+      `shadow-topology:${shadowTopology.kind}`,
+      ...shadowTopology.expectedContacts.map((contact) => `shadow-contact:${contact}`),
     ]),
   };
 }

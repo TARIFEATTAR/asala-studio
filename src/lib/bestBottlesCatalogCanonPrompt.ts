@@ -15,6 +15,10 @@ import {
 import type { PromptSku } from "./bestBottlesPromptCompiler";
 import type { BestBottlesShadowOwner, BestBottlesShadowPolicy } from "./bestBottlesShadowPolicy";
 import { resolveBestBottlesShadowPolicy } from "./bestBottlesShadowPolicy";
+import {
+  buildModelOwnedShadowPrompt,
+  resolveBestBottlesShadowTopology,
+} from "./bestBottlesShadowTopology";
 
 export const BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH =
   `src/config/bestBottlesCatalogCanon.ts@${BEST_BOTTLES_CATALOG_CANON_VERSION}`;
@@ -119,7 +123,7 @@ export function buildBestBottlesCatalogCanonPrompt(sku: PromptSku): string {
   return [
     PRESERVE,
     isClearGlass ? clearGlassForShadowOwner(policy.owner) : KEEP_MATERIAL,
-    MODEL_OWNED_GROUNDING_SHADOW,
+    buildModelOwnedShadowPrompt(resolveBestBottlesShadowTopology({}, sku)),
     studioDirectionForShadowOwner(policy.owner),
     finalStudioCheckForShadowOwner(policy.owner),
   ].join("\n\n");

@@ -1,5 +1,7 @@
 export interface BestBottlesPrecompiledPromptResolutionOptions {
   isBestBottlesStudioMasterRequest: boolean;
+  family?: string | null;
+  bottleCollection?: string | null;
 }
 
 export interface BestBottlesPrecompiledPromptResolution {
@@ -10,6 +12,8 @@ export interface BestBottlesPrecompiledPromptResolution {
   qaChecklist: string[];
   promptVersion: string | null;
   shadowOwner: string | null;
+  shadowContract: string | null;
+  shadowTopology: string | null;
 }
 
 function readString(record: Record<string, unknown>, key: string): string {
@@ -32,6 +36,8 @@ function errorResult(message: string): BestBottlesPrecompiledPromptResolution {
     qaChecklist: [],
     promptVersion: null,
     shadowOwner: null,
+    shadowContract: null,
+    shadowTopology: null,
   };
 }
 
@@ -149,6 +155,8 @@ export function resolveBestBottlesPrecompiledPrompt(
       qaChecklist: [],
       promptVersion: null,
       shadowOwner: null,
+      shadowContract: null,
+      shadowTopology: null,
     };
   }
   if (!options.isBestBottlesStudioMasterRequest) {
@@ -165,6 +173,18 @@ export function resolveBestBottlesPrecompiledPrompt(
   const qaChecklist = readStringArray(record, "qa_checklist");
   const promptVersion = readString(record, "prompt_version") || null;
   const shadowOwner = readString(record, "shadow_owner") || null;
+  const productFamily = readString(record, "product_family");
+  const normalizedFamily = String(
+    options.family || options.bottleCollection || productFamily,
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ");
+  const isCylinder = normalizedFamily === "cylinder" || normalizedFamily === "tall cylinder";
+  const shadowContractTag = qaChecklist.find((tag) => tag.startsWith("shadow-contract:"));
+  const shadowContract = shadowContractTag?.slice("shadow-contract:".length) || null;
+  const topologyTags = qaChecklist.filter((tag) => tag.startsWith("shadow-topology:"));
+  const shadowTopology = topologyTags[0]?.slice("shadow-topology:".length) || null;
 
   if (!sku) return errorResult("Precompiled prompt record is missing sku.");
   if (!referenceImagePath) return errorResult(`Precompiled prompt record for ${sku} is missing reference_image_path.`);
@@ -177,24 +197,40 @@ export function resolveBestBottlesPrecompiledPrompt(
     return errorResult(`Precompiled prompt record for ${sku} is too short to be the compiled PDP prompt.`);
   }
 
-  if (shadowOwner === "model") {
-    if (sku.toUpperCase() !== "GB-SPR-CLR-3ML-BLK") {
-      return errorResult(`Model-owned shadow is not allowlisted for ${sku}.`);
+  if (promptVersion === "best-bottles-reference-locked-v6.1-shadow-smoke") {
+    return errorResult(`Historical V6.1 smoke lineage is not valid for new generation (${sku}).`);
+  }
+
+  if (isCylinder) {
+    if (promptVersion !== "best-bottles-reference-locked-v6.1") {
+      return errorResult(`Cylinder ${sku} requires canonical V6.1 prompt lineage.`);
     }
-    if (promptVersion !== "best-bottles-reference-locked-v6.1-shadow-smoke") {
-      return errorResult(`Model-owned shadow for ${sku} requires the V6.1 smoke prompt version.`);
+    if (shadowOwner !== "model") {
+      return errorResult(`Cylinder ${sku} requires model-owned shadow authority.`);
     }
     if (
+      !qaChecklist.includes("prompt-version:best-bottles-reference-locked-v6.1") ||
       !qaChecklist.includes("shadow-owner:model") ||
-      !qaChecklist.includes("shadow-contract:contact-back-right-v1")
+      !qaChecklist.includes("shadow-contract:contact-back-right-v1") ||
+      !qaChecklist.includes("shadow-rollout:cylinder-family")
     ) {
       return errorResult(`Model-owned shadow for ${sku} is missing policy QA lineage.`);
+    }
+    if (
+      topologyTags.length !== 1 ||
+      !["assembled", "detached-sidecar", "complex-contact"].includes(
+        shadowTopology ?? "",
+      )
+    ) {
+      return errorResult(`Cylinder ${sku} is missing valid shadow topology lineage.`);
     }
     const blockCount = (prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g) ?? []).length;
     const mixedAuthority = /deterministic post-processing responsibilities|Madison applies both deterministically after generation/i.test(prompt);
     if (blockCount !== 1 || mixedAuthority) {
       return errorResult(`Model-owned shadow for ${sku} has conflicting shadow ownership.`);
     }
+  } else if (shadowOwner === "model") {
+    return errorResult(`Model-owned shadow is only valid for Cylinder family context (${sku}).`);
   }
 
   const resolvedPrompt = shadowOwner === "model"
@@ -202,6 +238,16 @@ export function resolveBestBottlesPrecompiledPrompt(
     : qaChecklist.includes("catalog_canon_v3_prompt")
       ? ensureBestBottlesStudioDirection(prompt)
       : prompt;
+
+  if (isCylinder) {
+    console.info("[best-bottles-precompiled-prompt] Cylinder V6.1 policy", {
+      sku,
+      promptVersion,
+      shadowOwner,
+      shadowContract,
+      shadowTopology,
+    });
+  }
 
   return {
     prompt: resolvedPrompt,
@@ -211,5 +257,7 @@ export function resolveBestBottlesPrecompiledPrompt(
     qaChecklist,
     promptVersion,
     shadowOwner,
+    shadowContract,
+    shadowTopology,
   };
 }

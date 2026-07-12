@@ -58,6 +58,18 @@ function buildThreeMlPreflight(
 }
 
 describe("Best Bottles prompt preflight", () => {
+  it("compiles detached-sidecar contact instructions into the shipped prompt", () => {
+    const preflight = buildBestBottlesPromptPreflight({
+      product: baseProduct,
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-SPR-GLD.png",
+      bodyMaterial: "swirl glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+
+    assert.match(preflight.record?.final_prompt ?? "", /bottle base and detached cap/i);
+  });
+
   it("compiles canonical model-owned V6.1 policy for Cylinder siblings", () => {
     const smoke = buildThreeMlPreflight("GB-SPR-CLR-3ML-BLK", "GBSpry3mlClBlk", "Black");
     const prompt = smoke.record?.final_prompt ?? "";
@@ -67,7 +79,7 @@ describe("Best Bottles prompt preflight", () => {
     assert.doesNotMatch(prompt, /deterministic post-processing responsibilities/i);
     assert.doesNotMatch(prompt, /Madison applies both deterministically after generation/i);
     assert.match(prompt, /32–42% opacity/);
-    assert.match(prompt, /20–30% of the bottle's width/);
+    assert.match(prompt, /20–30% of the primary bottle's width/);
     const directCompilerRecord = buildPromptForSku(smoke.sku!, promptSystem);
     assert.equal(directCompilerRecord.prompt_version, "best-bottles-reference-locked-v6.1");
     assert.equal(directCompilerRecord.shadow_owner, "model");
