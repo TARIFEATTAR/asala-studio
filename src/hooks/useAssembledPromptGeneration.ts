@@ -357,10 +357,13 @@ export function useAssembledPromptGeneration() {
     const shadowPolicyTags = isBestBottlesStudioMasterRequest
       ? getBestBottlesShadowPolicyTags(resolvedShadowPolicy)
       : [];
+    const callerLibraryTags = (options.extraLibraryTags ?? []).filter(
+      (tag) => !/^(?:prompt-version|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+    );
     const extraLibraryTags = options.extraLibraryTags
       ? Array.from(new Set([
           ...baseTags,
-          ...options.extraLibraryTags,
+          ...callerLibraryTags,
           ...visualTargetTags,
           ...shadowPolicyTags,
         ]))
