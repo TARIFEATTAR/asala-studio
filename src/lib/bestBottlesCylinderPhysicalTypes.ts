@@ -90,23 +90,35 @@ function hasValue(value: unknown): boolean {
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
 
-function normalizedFilename(value: unknown): string {
+function referenceBasename(value: unknown): string {
   if (typeof value !== "string") return "";
-  const filename = value.split(/[\\/]/).pop()?.replace(/\.[^.]+$/, "") ?? "";
-  return filename.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const withoutQuery = value.split(/[?#]/, 1)[0];
+  const basename = withoutQuery.split(/[\\/]/).pop() ?? "";
+  try {
+    return decodeURIComponent(basename).normalize("NFKC").toLowerCase();
+  } catch {
+    return basename.normalize("NFKC").toLowerCase();
+  }
 }
 
 function hasExactPsdMatch(row: CylinderCatalogRow): boolean {
-  if (row.exactPsdFilenameMatch === true) return true;
-  const skuNames = [row.graceSku, row.websiteSku]
-    .map((value) => normalizedFilename(value))
-    .filter(Boolean);
-  const paths = [row.psdFilename, row.psdPath, row.sourceReference, row.referencePath, row.sourceAssetPath];
-  return paths.some((path) => {
-    if (typeof path !== "string" || !/\.psd(?:$|[?#])/i.test(path)) return false;
-    const filename = normalizedFilename(path);
-    return skuNames.some((sku) => filename === sku || filename.startsWith(`${sku}pdp`));
-  });
+  const graceSku = normalizedText(row.graceSku);
+  const websiteSku = normalizedText(row.websiteSku);
+  if (!graceSku) return false;
+
+  const expectedFilename = websiteSku
+    ? `${graceSku}__${websiteSku}__pdp-main__v001.png`
+    : `${graceSku}__pdp-main__v001.png`;
+  const paths = [
+    row.psdFilename,
+    row.psdPath,
+    row.sourceReference,
+    row.referencePath,
+    row.sourceAssetPath,
+    row.referenceName,
+    row.imageUrl,
+  ];
+  return paths.some((path) => referenceBasename(path) === expectedFilename);
 }
 
 function hasReconciledMeasurements(row: CylinderCatalogRow): boolean {
@@ -114,16 +126,17 @@ function hasReconciledMeasurements(row: CylinderCatalogRow): boolean {
   const status = normalizedText(
     row.measurementReconciliationStatus ?? row.measurementStatus ?? row.reconciliationStatus,
   );
-  return /reconciled|resolved|verified|approved/.test(status);
+  return status
+    .split(/[^a-z0-9]+/)
+    .some((token) => ["reconciled", "resolved", "verified", "approved"].includes(token));
 }
 
 function hasSimpleCapState(row: CylinderCatalogRow): boolean {
   const capState = normalizedText(row.capState);
-  if (capState === "") return true;
   return /^(cap on|cap-on|attached|closed|simple)$/.test(capState);
 }
 
-function representativeRank(row: CylinderCatalogRow): readonly [number, number, number, number, number, string] {
+function representativeRank(row: CylinderCatalogRow): readonly [number, number, number, number, number] {
   const measurementCount = [row.heightWithCap, row.heightWithoutCap, row.diameter]
     .filter(hasValue).length;
   return [
@@ -132,19 +145,45 @@ function representativeRank(row: CylinderCatalogRow): readonly [number, number, 
     hasExactPsdMatch(row) ? 1 : 0,
     hasSimpleCapState(row) ? 1 : 0,
     measurementCount,
-    normalizedText(row.graceSku) || normalizedText(row.websiteSku),
+  ];
+}
+
+function stableRowKey(row: CylinderCatalogRow): string {
+  return Object.keys(row)
+    .sort()
+    .map((key) => `${key}:${JSON.stringify(row[key]) ?? String(row[key])}`)
+    .join("|");
+}
+
+function representativeIdentity(row: CylinderCatalogRow): readonly string[] {
+  return [
+    normalizedText(row.graceSku),
+    normalizedText(row.websiteSku),
+    normalizedText(row._id),
+    normalizedText(row.productId),
+    normalizedText(row.productGroupId),
+    normalizedText(row.imageUrl),
+    stableRowKey(row),
   ];
 }
 
 function preferRepresentative(candidate: CylinderCatalogRow, current: CylinderCatalogRow): boolean {
   const candidateRank = representativeRank(candidate);
   const currentRank = representativeRank(current);
-  for (let index = 0; index < candidateRank.length - 1; index += 1) {
+  for (let index = 0; index < candidateRank.length; index += 1) {
     if (candidateRank[index] !== currentRank[index]) {
       return candidateRank[index] > currentRank[index];
     }
   }
-  return candidateRank[5] < currentRank[5];
+
+  const candidateIdentity = representativeIdentity(candidate);
+  const currentIdentity = representativeIdentity(current);
+  for (let index = 0; index < candidateIdentity.length; index += 1) {
+    if (candidateIdentity[index] !== currentIdentity[index]) {
+      return candidateIdentity[index] < currentIdentity[index];
+    }
+  }
+  return false;
 }
 
 export function buildCylinderPhysicalTypes(products: readonly CylinderCatalogRow[]): CylinderPhysicalType[] {
