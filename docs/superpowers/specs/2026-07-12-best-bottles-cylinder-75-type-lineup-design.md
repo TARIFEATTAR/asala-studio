@@ -51,7 +51,7 @@ Every one of the 75 rows appears on exactly one detailed plate. No detailed plat
 6. **Lotion pumps:** 9 types.
 7. **Reducers, decorative caps, and glass-rod special:** 7 types.
 8. **Vintage bulb sprayers, with and without tassels:** 8 types.
-9. **Panoramic master:** all 75 detailed-plate products in one continuous measured row.
+9. **Panoramic master:** all 75 detailed-plate products in one continuous measured row, followed by the supplemental 500 ml aluminum scale endpoint. The master therefore displays 76 objects: 75 Cylinder physical types plus one clearly identified cross-family endpoint.
 
 Plate 9 produces two files from the same placement manifest:
 
@@ -126,7 +126,7 @@ GPT Image 2 may not add, remove, merge, duplicate, resize, reorder, relabel, rec
 
 Generating all 75 products in one model call is prohibited because identity retention becomes unreliable. Each detailed plate is polished independently from its locked composition. Deterministic code then assembles the approved product layers into the panoramic master using the global manifest.
 
-The master is an ultra-wide native-resolution artifact intended for zooming, horizontal scrolling, and large-format stakeholder display. A presentation-sized derivative may be produced, but it cannot replace the native master or become scale evidence.
+The master is an ultra-wide native-resolution artifact intended for zooming, horizontal scrolling, and large-format stakeholder display. It is assembled from the approved identity-locked product layers with deterministic v6.1 grounding; it does not extract products back out of GPT-polished plate backgrounds. A presentation-sized derivative may be produced, but it cannot replace the native master or become scale evidence.
 
 ## Review gates
 
