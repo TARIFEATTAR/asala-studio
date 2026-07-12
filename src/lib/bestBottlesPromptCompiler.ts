@@ -1,3 +1,8 @@
+import {
+  getBestBottlesShadowPolicyTags,
+  resolveBestBottlesShadowPolicy,
+} from "./bestBottlesShadowPolicy";
+
 export type JsonRecord = Record<string, unknown>;
 
 export interface PromptSku {
@@ -87,6 +92,8 @@ export interface PromptRecord {
   reference_image_path: string;
   product_family: string;
   frame_class: string;
+  prompt_version: string;
+  shadow_owner: "rig" | "model";
   final_prompt: string;
   qa_checklist: string[];
 }
@@ -231,12 +238,15 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     .replaceAll("{{OUTPUT_CANVAS_WIDTH}}", String(sku.output_canvas_width))
     .replaceAll("{{OUTPUT_CANVAS_HEIGHT}}", String(sku.output_canvas_height))
     .trim();
+  const shadowPolicy = resolveBestBottlesShadowPolicy(sku.sku);
 
   return {
     sku: sku.sku,
     reference_image_path: sku.reference_image_path,
     product_family: sku.product_family,
     frame_class: sku.frame_class,
+    prompt_version: shadowPolicy.promptVersion,
+    shadow_owner: shadowPolicy.owner,
     final_prompt: finalPrompt,
     qa_checklist: uniq([
       "reference_png_identity_lock",
@@ -247,6 +257,7 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
       ...material.qa,
       ...closure.qa,
       ...system.negativeRules.map((rule) => rule.qa_key),
+      ...getBestBottlesShadowPolicyTags(shadowPolicy),
     ]),
   };
 }

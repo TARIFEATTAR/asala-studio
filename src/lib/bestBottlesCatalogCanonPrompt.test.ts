@@ -4,6 +4,9 @@ import { describe, it } from "node:test";
 import {
   BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH,
   buildBestBottlesCatalogCanonPrompt,
+  clearGlassForShadowOwner,
+  finalStudioCheckForShadowOwner,
+  studioDirectionForShadowOwner,
 } from "./bestBottlesCatalogCanonPrompt";
 import {
   CLEAR_GLASS,
@@ -38,6 +41,23 @@ const clearRollerSku: PromptSku = {
 };
 
 describe("Best Bottles catalog canon prompt", () => {
+  it("keeps rig canon strings byte-for-byte while exposing model-owned variants", () => {
+    assert.equal(clearGlassForShadowOwner("rig"), CLEAR_GLASS);
+    assert.equal(studioDirectionForShadowOwner("rig"), STUDIO_DIRECTION);
+    assert.equal(finalStudioCheckForShadowOwner("rig"), FINAL_V2_STUDIO_CHECK);
+
+    const modelGlass = clearGlassForShadowOwner("model");
+    const modelStudio = studioDirectionForShadowOwner("model");
+    const modelFinal = finalStudioCheckForShadowOwner("model");
+    assert.doesNotMatch(modelGlass, /contact shadow are handled deterministically/i);
+    assert.doesNotMatch(modelGlass, /deterministic post-processing responsibilities/i);
+    assert.doesNotMatch(modelStudio, /Madison applies both deterministically after generation/i);
+    assert.match(
+      modelFinal,
+      /The resolved model-owned contact-shadow contract is permitted only for this exact smoke SKU/,
+    );
+  });
+
   it("exports the approved Kinfolk/Aesop v2 studio direction as a modular canon block", () => {
     const studioDirection = STUDIO_DIRECTION;
 
@@ -50,7 +70,8 @@ describe("Best Bottles catalog canon prompt", () => {
     assert.match(studioDirection, /fill-height target/i);
     assert.match(studioDirection, /shared baseline/i);
     assert.match(studioDirection, /centerline/i);
-    assert.match(studioDirection, /contact-only/i);
+    assert.match(studioDirection, /deterministic post-processing/i);
+    assert.doesNotMatch(studioDirection, /improve.*shadow/i);
     assert.match(studioDirection, /Do not add props/i);
     assert.doesNotMatch(studioDirection, /negative space/i);
     assert.doesNotMatch(studioDirection, /editorial/i);
@@ -70,7 +91,7 @@ describe("Best Bottles catalog canon prompt", () => {
   it("assembles clear-glass canon as compact material truth with v2 studio direction last", () => {
     const prompt = buildBestBottlesCatalogCanonPrompt(clearRollerSku);
 
-    const materialIndex = prompt.indexOf("PRIMARY GOAL:");
+    const materialIndex = prompt.indexOf("CLEAR GLASS:");
     const studioDirectionIndex = prompt.indexOf("STUDIO DIRECTION:");
     const finalCheckIndex = prompt.indexOf("FINAL V2 STUDIO CHECK:");
 
