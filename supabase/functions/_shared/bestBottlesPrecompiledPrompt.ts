@@ -8,6 +8,8 @@ export interface BestBottlesPrecompiledPromptResolution {
   sku: string | null;
   referenceImagePath: string | null;
   qaChecklist: string[];
+  promptVersion: string | null;
+  shadowOwner: string | null;
 }
 
 function readString(record: Record<string, unknown>, key: string): string {
@@ -28,6 +30,8 @@ function errorResult(message: string): BestBottlesPrecompiledPromptResolution {
     sku: null,
     referenceImagePath: null,
     qaChecklist: [],
+    promptVersion: null,
+    shadowOwner: null,
   };
 }
 
@@ -143,6 +147,8 @@ export function resolveBestBottlesPrecompiledPrompt(
       sku: null,
       referenceImagePath: null,
       qaChecklist: [],
+      promptVersion: null,
+      shadowOwner: null,
     };
   }
   if (!options.isBestBottlesStudioMasterRequest) {
@@ -157,6 +163,8 @@ export function resolveBestBottlesPrecompiledPrompt(
   const sku = readString(record, "sku");
   const referenceImagePath = readString(record, "reference_image_path");
   const qaChecklist = readStringArray(record, "qa_checklist");
+  const promptVersion = readString(record, "prompt_version") || null;
+  const shadowOwner = readString(record, "shadow_owner") || null;
 
   if (!sku) return errorResult("Precompiled prompt record is missing sku.");
   if (!referenceImagePath) return errorResult(`Precompiled prompt record for ${sku} is missing reference_image_path.`);
@@ -169,9 +177,31 @@ export function resolveBestBottlesPrecompiledPrompt(
     return errorResult(`Precompiled prompt record for ${sku} is too short to be the compiled PDP prompt.`);
   }
 
-  const resolvedPrompt = qaChecklist.includes("catalog_canon_v3_prompt")
-    ? ensureBestBottlesStudioDirection(prompt)
-    : prompt;
+  if (shadowOwner === "model") {
+    if (sku.toUpperCase() !== "GB-SPR-CLR-3ML-BLK") {
+      return errorResult(`Model-owned shadow is not allowlisted for ${sku}.`);
+    }
+    if (promptVersion !== "best-bottles-reference-locked-v6.1-shadow-smoke") {
+      return errorResult(`Model-owned shadow for ${sku} requires the V6.1 smoke prompt version.`);
+    }
+    if (
+      !qaChecklist.includes("shadow-owner:model") ||
+      !qaChecklist.includes("shadow-contract:contact-back-right-v1")
+    ) {
+      return errorResult(`Model-owned shadow for ${sku} is missing policy QA lineage.`);
+    }
+    const blockCount = (prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g) ?? []).length;
+    const mixedAuthority = /deterministic post-processing responsibilities|Madison applies both deterministically after generation/i.test(prompt);
+    if (blockCount !== 1 || mixedAuthority) {
+      return errorResult(`Model-owned shadow for ${sku} has conflicting shadow ownership.`);
+    }
+  }
+
+  const resolvedPrompt = shadowOwner === "model"
+    ? prompt
+    : qaChecklist.includes("catalog_canon_v3_prompt")
+      ? ensureBestBottlesStudioDirection(prompt)
+      : prompt;
 
   return {
     prompt: resolvedPrompt,
@@ -179,5 +209,7 @@ export function resolveBestBottlesPrecompiledPrompt(
     sku,
     referenceImagePath,
     qaChecklist,
+    promptVersion,
+    shadowOwner,
   };
 }

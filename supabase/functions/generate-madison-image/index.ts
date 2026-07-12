@@ -2047,10 +2047,11 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
 
     if (!isRefinement && isBestBottlesStudioMasterRequest && precompiledPromptResolution.prompt) {
       enhancedPrompt = precompiledPromptResolution.prompt;
-      console.log("🧾 Best Bottles precompiled prompt accepted", {
+      console.log("[generate-madison-image] Using precompiled Best Bottles prompt", {
         sku: precompiledPromptResolution.sku,
+        promptVersion: precompiledPromptResolution.promptVersion,
+        shadowOwner: precompiledPromptResolution.shadowOwner,
         qaCount: precompiledPromptResolution.qaChecklist.length,
-        promptLength: enhancedPrompt.length,
       });
     } else if (isBestBottlesReferenceLocked) {
       // Best Bottles PDP masters and their Image Editor refinements are
