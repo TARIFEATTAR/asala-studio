@@ -12,10 +12,22 @@ import {
   buildBestBottlesRigReconciliationPayload,
 } from "./bestBottlesImageReconciliation";
 import { approveBestBottlesGeneratedMaster } from "./bestBottlesMasterApproval";
+import type { BestBottlesCatalogTruthSnapshot } from "./bestBottlesImageReconciliationRules";
 import type { ShadowQaReport } from "./product-image/shadowQa";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const studioSource = readFileSync(resolve(currentDir, "../pages/BestBottlesStudio.tsx"), "utf8");
+const modelShadowMigrationSource = readFileSync(
+  resolve(
+    currentDir,
+    "../../supabase/migrations/20260712001000_best_bottles_model_shadow_evidence.sql",
+  ),
+  "utf8",
+);
+const reconciliationSqlTestSource = readFileSync(
+  resolve(currentDir, "../../supabase/tests/best_bottles_image_reconciliation.sql"),
+  "utf8",
+);
 
 function shadowQa(status: "pass" | "review"): ShadowQaReport {
   return {
@@ -74,6 +86,37 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
+  it("keeps model-shadow status pending until status and contract both pass", () => {
+    const reconciliationStatusCase = modelShadowMigrationSource.match(
+      /CASE[\s\S]*?END AS reconciliation_status/,
+    )?.[0];
+
+    assert.ok(reconciliationStatusCase);
+    assert.match(
+      reconciliationStatusCase,
+      /r\.shadow_qa->>'status'\s*=\s*'pass'/,
+    );
+    assert.match(
+      reconciliationStatusCase,
+      /r\.shadow_qa->'target'->>'contract'\s*=\s*'contact-back-right-v1'/,
+    );
+    assert.match(reconciliationSqlTestSource, /model-shadow-pass-invalid-contract/);
+    assert.match(reconciliationSqlTestSource, /model-shadow-pass-missing-contract/);
+  });
+
+  it("types explicit Grace and website SKU eligibility in catalog truth", () => {
+    const eligibility: Pick<
+      BestBottlesCatalogTruthSnapshot,
+      "eligibleGraceSkus" | "eligibleWebsiteSkus"
+    > = {
+      eligibleGraceSkus: ["SKU-A", "SKU-B"],
+      eligibleWebsiteSkus: ["WEB-A", "WEB-B"],
+    };
+
+    assert.deepEqual(eligibility.eligibleGraceSkus, ["SKU-A", "SKU-B"]);
+    assert.deepEqual(eligibility.eligibleWebsiteSkus, ["WEB-A", "WEB-B"]);
+  });
+
   it("keeps the Studio approval callback behind the single approval helper", () => {
     assert.match(studioSource, /await approveBestBottlesGeneratedMaster\(/);
     assert.doesNotMatch(

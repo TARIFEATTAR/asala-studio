@@ -28,6 +28,8 @@ export interface BestBottlesCatalogTruthSnapshot {
   name: string | null;
   graceSku: string | null;
   websiteSku: string | null;
+  eligibleGraceSkus: string[];
+  eligibleWebsiteSkus: string[];
   family: string | null;
   category: string | null;
   capacityMl: number | null;

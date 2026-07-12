@@ -334,7 +334,76 @@ END;
 $$;
 
 UPDATE public.best_bottles_image_reconciliations
-SET shadow_qa = jsonb_set(shadow_qa, '{status}', '"pass"'::jsonb)
+SET shadow_qa = jsonb_set(
+  jsonb_set(shadow_qa, '{status}', '"pass"'::jsonb),
+  '{target,contract}',
+  '"contact-front-left-v0"'::jsonb
+)
+WHERE image_id = '00000000-0000-4000-8000-000000000204';
+
+SELECT pg_temp.assert_true(
+  (SELECT reconciliation_status = 'review-pending' AND NOT is_reconciled
+   FROM public.best_bottles_image_reconciliation_status
+   WHERE image_id = '00000000-0000-4000-8000-000000000204'),
+  'model-shadow-pass-invalid-contract: passing status with invalid contract escaped review'
+);
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    PERFORM public.approve_best_bottles_reconciled_image(
+      '00000000-0000-4000-8000-000000000101',
+      '00000000-0000-4000-8000-000000000304',
+      '00000000-0000-4000-8000-000000000204'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: model-shadow-pass-invalid-contract was approved';
+  END IF;
+END;
+$$;
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_qa = shadow_qa #- '{target,contract}'
+WHERE image_id = '00000000-0000-4000-8000-000000000204';
+
+SELECT pg_temp.assert_true(
+  (SELECT reconciliation_status = 'review-pending' AND NOT is_reconciled
+   FROM public.best_bottles_image_reconciliation_status
+   WHERE image_id = '00000000-0000-4000-8000-000000000204'),
+  'model-shadow-pass-missing-contract: passing status with missing contract escaped review'
+);
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    PERFORM public.approve_best_bottles_reconciled_image(
+      '00000000-0000-4000-8000-000000000101',
+      '00000000-0000-4000-8000-000000000304',
+      '00000000-0000-4000-8000-000000000204'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: model-shadow-pass-missing-contract was approved';
+  END IF;
+END;
+$$;
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_qa = jsonb_set(
+  shadow_qa,
+  '{target,contract}',
+  '"contact-back-right-v1"'::jsonb,
+  true
+)
 WHERE image_id = '00000000-0000-4000-8000-000000000204';
 
 SELECT public.approve_best_bottles_reconciled_image(

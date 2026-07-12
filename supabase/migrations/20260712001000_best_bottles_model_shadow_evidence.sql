@@ -250,7 +250,14 @@ SELECT
       OR COALESCE(jsonb_array_length(r.catalog_truth->'identityBlockers'), 0) > 0 THEN 'truth-conflict'
     WHEN r.detected_baseline_y_px IS NULL OR r.target_baseline_y_px IS NULL THEN 'measurement-missing'
     WHEN r.lifecycle_state IN ('raw-generated', 'rigging') THEN 'rig-pending'
-    WHEN r.shadow_owner = 'model' AND COALESCE(r.shadow_qa->>'status', 'review') <> 'pass' THEN 'review-pending'
+    WHEN r.shadow_owner = 'model'
+      AND NOT (
+        COALESCE(r.shadow_qa->>'status' = 'pass', FALSE)
+        AND COALESCE(
+          r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1',
+          FALSE
+        )
+      ) THEN 'review-pending'
     WHEN COALESCE(ar.assignment_count, 0) = 0 THEN 'unlinked'
     WHEN NOT COALESCE(ar.all_pipeline_images_match, FALSE) THEN 'pipeline-image-mismatch'
     WHEN COALESCE(ar.any_assignment_approved, FALSE)
