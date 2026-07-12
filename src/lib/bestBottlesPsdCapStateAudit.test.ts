@@ -53,6 +53,15 @@ describe("Best Bottles PSD cap-state audit domain", () => {
     assert.equal(groups.find((group) => group.websiteSku === "WebA")?.sources.length, 2);
   });
 
+  it("uses source path to break representative relative-path ties", () => {
+    const [group] = groupPsdAuditRecords([
+      { ...base, sourcePath: "/archive/Z.psd" },
+      { ...base, sourcePath: "/archive/A.psd" },
+    ]);
+
+    assert.equal(group.representative.sourcePath, "/archive/A.psd");
+  });
+
   it("keeps unresolved identities in source-specific review units", () => {
     const groups = groupPsdAuditRecords([
       {
@@ -93,6 +102,36 @@ describe("Best Bottles PSD cap-state audit domain", () => {
     assert.deepEqual(groups.map((group) => group.sources.length), [1, 1, 1, 1]);
   });
 
+  it("requires the matching canonical SKU for exact identity states", () => {
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      identityStatus: "exact-website-sku",
+      websiteSku: null,
+    } as unknown as PsdAuditRecord]), /exact website identity requires a valid website SKU/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      identityStatus: "exact-website-sku",
+      websiteSku: "---",
+    } as unknown as PsdAuditRecord]), /exact website identity requires a valid website SKU/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      identityStatus: "exact-grace-sku",
+      graceSku: null,
+    } as unknown as PsdAuditRecord]), /exact Grace identity requires a valid Grace SKU/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      identityStatus: "exact-grace-sku",
+      graceSku: "---",
+    } as unknown as PsdAuditRecord]), /exact Grace identity requires a valid Grace SKU/i);
+
+    assert.equal(groupPsdAuditRecords([{
+      ...base,
+      identityStatus: "exact-grace-sku",
+      websiteSku: null,
+      graceSku: "GB-A",
+    }]).length, 1);
+  });
+
   it("builds a stable hash plus identity review key", () => {
     assert.equal(
       buildPsdReviewUnitKey(base),
@@ -129,6 +168,39 @@ describe("Best Bottles PSD cap-state audit domain", () => {
       reviewStatus: "approved",
       reviewer: { kind: "human", identity: "Jordan Richter" },
       reviewedAt: "2026-07-12T18:00:00.000Z",
+    }));
+  });
+
+  it("requires human provenance for blocked decisions", () => {
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      reviewStatus: "blocked",
+      reviewer: null,
+      reviewedAt: null,
+    } as unknown as PsdAuditRecord]), /blocked.*named human reviewer/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      reviewStatus: "blocked",
+      reviewer: { kind: "machine", identity: "triage-v1" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    } as unknown as PsdAuditRecord]), /blocked.*named human reviewer/i);
+    assert.throws(() => groupPsdAuditRecords([{
+      ...base,
+      reviewStatus: "blocked",
+      reviewer: { kind: "human", identity: "Jordan Richter" },
+      reviewedAt: "not-a-timestamp",
+    } as unknown as PsdAuditRecord]), /blocked.*reviewed-at timestamp/i);
+
+    assert.equal(groupPsdAuditRecords([{
+      ...base,
+      reviewStatus: "blocked",
+      reviewer: { kind: "human", identity: "Jordan Richter" },
+      reviewedAt: "2026-07-12T18:00:00.000Z",
+    }]).length, 1);
+    assert.doesNotThrow(() => assertMachineCannotApprove({
+      reviewStatus: "pending-human-review",
+      reviewer: { kind: "machine", identity: "triage-v1" },
+      reviewedAt: null,
     }));
   });
 

@@ -52,7 +52,19 @@ export type PsdIdentityState =
       aliasProvenance: PsdReviewedAliasProvenance;
     }
   | {
-      identityStatus: Exclude<PsdIdentityStatus, "reviewed-alias">;
+      identityStatus: "exact-website-sku";
+      websiteSku: string;
+      graceSku: string | null;
+      aliasProvenance: null;
+    }
+  | {
+      identityStatus: "exact-grace-sku";
+      websiteSku: string | null;
+      graceSku: string;
+      aliasProvenance: null;
+    }
+  | {
+      identityStatus: "unmatched" | "ambiguous" | "conflict";
       websiteSku: string | null;
       graceSku: string | null;
       aliasProvenance: null;
@@ -66,8 +78,8 @@ export type PsdReviewState =
     }
   | {
       reviewStatus: "blocked";
-      reviewer: PsdHumanReviewer | null;
-      reviewedAt: string | null;
+      reviewer: PsdHumanReviewer;
+      reviewedAt: string;
     }
   | {
       reviewStatus: "approved";
@@ -139,6 +151,7 @@ export function groupPsdAuditRecords(records: readonly PsdAuditRecord[]): PsdRev
     sources,
     representative: [...sources].sort((a, b) =>
       a.sourceRelativePath.localeCompare(b.sourceRelativePath)
+      || a.sourcePath.localeCompare(b.sourcePath)
     )[0],
   })).sort((a, b) => a.reviewUnitKey.localeCompare(b.reviewUnitKey));
 }
@@ -187,7 +200,21 @@ function assertReviewedAliasHasProvenance(record: PsdAuditRecord): void {
 
 function assertPsdAuditRecordInvariants(record: PsdAuditRecord): void {
   assertMachineCannotApprove(record);
+  assertExactIdentityHasCanonicalSku(record);
   assertReviewedAliasHasProvenance(record);
+}
+
+function isValidSku(value: unknown): value is string {
+  return typeof value === "string" && identityToken(value) !== "";
+}
+
+function assertExactIdentityHasCanonicalSku(record: PsdAuditRecord): void {
+  if (record.identityStatus === "exact-website-sku" && !isValidSku(record.websiteSku)) {
+    throw new Error("An exact website identity requires a valid website SKU.");
+  }
+  if (record.identityStatus === "exact-grace-sku" && !isValidSku(record.graceSku)) {
+    throw new Error("An exact Grace identity requires a valid Grace SKU.");
+  }
 }
 
 export function assertMachineCannotApprove(input: {
@@ -195,15 +222,19 @@ export function assertMachineCannotApprove(input: {
   reviewer: { kind: string; identity?: unknown } | string | null;
   reviewedAt?: unknown;
 }): void {
-  if (input.reviewStatus !== "approved") {
+  if (input.reviewStatus === "pending-human-review") {
     return;
   }
 
+  const decisionLabel = input.reviewStatus === "blocked"
+    ? "A blocked cap-state decision"
+    : "Cap-state approval";
+
   if (!isNamedHumanReviewer(input.reviewer)) {
-    throw new Error("Cap-state approval requires a named human reviewer.");
+    throw new Error(`${decisionLabel} requires a named human reviewer.`);
   }
 
   if (!isValidReviewedAt(input.reviewedAt)) {
-    throw new Error("Cap-state approval requires a valid reviewed-at timestamp.");
+    throw new Error(`${decisionLabel} requires a valid reviewed-at timestamp.`);
   }
 }
