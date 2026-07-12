@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 
 import sharp from "sharp";
 
+import { prepareEligibleLayers } from "../../scripts/best-bottles/prepare-cylinder-75-type-layers";
 import { prepareLineupProductLayer } from "./bestBottlesLineupProductLayer";
 
 async function whiteFixture(rectangles: Array<{ left: number; top: number; width: number; height: number }>) {
@@ -97,5 +98,39 @@ describe("Best Bottles lineup product layers", () => {
       measuredAspect: 5,
       relativeDelta: -0.2,
     });
+  });
+
+  it("retains catalog manifest lineage separately from downloaded asset bytes", async () => {
+    const imageBytes = await whiteFixture([{ left: 80, top: 30, width: 40, height: 180 }]);
+    const downloadedAssetChecksum = createHash("sha256").update(imageBytes).digest("hex");
+    const outputRoot = await mkdtemp(path.join(os.tmpdir(), "bb-catalog-layer-"));
+    const primarySourceChecksum = "manifest-primary-source-checksum";
+
+    const result = await prepareEligibleLayers({
+      manifest: {
+        version: "fixture-manifest-v1",
+        eligibleRows: [{
+          physicalTypeKey: "fixture-type",
+          plateId: "01",
+          websiteSku: "CatalogFixture",
+          graceSku: "CATALOG-FIXTURE",
+          measurements: { heightWithCapMm: 90, diameterMm: 20 },
+          reference: {
+            source: "catalog-image-url",
+            path: "https://catalog.invalid/CatalogFixture.png",
+            sha256: null,
+          },
+          primarySourceChecksum,
+        }],
+      },
+      outputRoot,
+      loadSourceAsset: async () => ({ imageBytes, resolvedAssetChecksum: downloadedAssetChecksum }),
+    });
+
+    assert.deepEqual(result.blockers, []);
+    assert.equal(result.layers.length, 1);
+    assert.equal(result.layers[0].sourceChecksum, primarySourceChecksum);
+    assert.equal(result.layers[0].resolvedAssetChecksum, downloadedAssetChecksum);
+    assert.notEqual(result.layers[0].sourceChecksum, result.layers[0].resolvedAssetChecksum);
   });
 });

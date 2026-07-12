@@ -12,7 +12,7 @@ import {
 
 const execFileAsync = promisify(execFile);
 
-interface EligibleManifestRow {
+export interface EligibleManifestRow {
   physicalTypeKey: string;
   plateId: string;
   websiteSku: string;
@@ -29,21 +29,24 @@ interface EligibleManifestRow {
   primarySourceChecksum: string;
 }
 
-interface CylinderManifest {
+export interface CylinderManifest {
   version: string;
   eligibleRows: EligibleManifestRow[];
 }
 
-interface LoadedSource {
+export interface LoadedSourceAsset {
   imageBytes: Buffer;
-  sourceChecksum: string;
+  /** SHA-256 of imageBytes: downloaded catalog bytes or the decoded PSD composite analyzed by Sharp. */
+  resolvedAssetChecksum: string;
 }
 
-interface PreparedLayerRow extends ProductLayerResult {
+export interface PreparedLayerRow extends ProductLayerResult {
   physicalTypeKey: string;
   plateId: string;
   websiteSku: string;
   graceSku: string;
+  /** SHA-256 of the exact decoded/downloaded image bytes analyzed, separate from manifest lineage. */
+  resolvedAssetChecksum: string;
 }
 
 interface LayerBlocker {
@@ -74,30 +77,32 @@ async function renderPsdComposite(sourcePath: string): Promise<Buffer> {
   return Buffer.from(stdout);
 }
 
-async function loadSource(row: EligibleManifestRow): Promise<LoadedSource> {
+async function loadSourceAsset(row: EligibleManifestRow): Promise<LoadedSourceAsset> {
   const sourcePath = row.reference.path;
   if (/^https?:\/\//i.test(sourcePath)) {
     const response = await fetch(sourcePath, { redirect: "follow" });
     if (!response.ok) throw new Error(`source_http_${response.status}`);
     const bytes = Buffer.from(await response.arrayBuffer());
-    return { imageBytes: bytes, sourceChecksum: sha256(bytes) };
+    return { imageBytes: bytes, resolvedAssetChecksum: sha256(bytes) };
   }
 
   const sourceBytes = await readFile(sourcePath);
-  const sourceChecksum = sha256(sourceBytes);
+  const localSourceChecksum = sha256(sourceBytes);
   const declaredChecksum = row.reference.sha256 ?? row.primarySourceChecksum;
-  if (declaredChecksum && sourceChecksum !== declaredChecksum) {
-    throw new Error(`source_checksum_mismatch:${declaredChecksum}:${sourceChecksum}`);
+  if (declaredChecksum && localSourceChecksum !== declaredChecksum) {
+    throw new Error(`source_checksum_mismatch:${declaredChecksum}:${localSourceChecksum}`);
   }
+  const imageBytes = /\.ps[bd]$/i.test(sourcePath) ? await renderPsdComposite(sourcePath) : sourceBytes;
   return {
-    imageBytes: /\.ps[bd]$/i.test(sourcePath) ? await renderPsdComposite(sourcePath) : sourceBytes,
-    sourceChecksum,
+    imageBytes,
+    resolvedAssetChecksum: sha256(imageBytes),
   };
 }
 
 export async function prepareEligibleLayers(input: {
   manifest: CylinderManifest;
   outputRoot: string;
+  loadSourceAsset?: (row: EligibleManifestRow) => Promise<LoadedSourceAsset>;
 }): Promise<{ layers: PreparedLayerRow[]; blockers: LayerBlocker[] }> {
   const layersDirectory = path.join(input.outputRoot, "layers");
   await mkdir(layersDirectory, { recursive: true });
@@ -112,11 +117,11 @@ export async function prepareEligibleLayers(input: {
       graceSku: row.graceSku,
     };
     try {
-      const source = await loadSource(row);
+      const source = await (input.loadSourceAsset ?? loadSourceAsset)(row);
       const reviewLayerPath = path.join(layersDirectory, `${safeFilename(row.websiteSku)}.png`);
       const result = await prepareLineupProductLayer({
         sourceBytes: source.imageBytes,
-        sourceChecksum: source.sourceChecksum,
+        sourceChecksum: row.primarySourceChecksum,
         reviewLayerPath,
         heightWithCapMm: row.measurements.heightWithCapMm,
         diameterMm: row.measurements.diameterMm,
@@ -125,7 +130,12 @@ export async function prepareEligibleLayers(input: {
         blockers.push({ ...identity, reasons: result.blockers });
         continue;
       }
-      layers.push({ ...identity, ...result, reviewLayerPath: path.relative(process.cwd(), reviewLayerPath) });
+      layers.push({
+        ...identity,
+        ...result,
+        resolvedAssetChecksum: source.resolvedAssetChecksum,
+        reviewLayerPath: path.relative(process.cwd(), reviewLayerPath),
+      });
     } catch (error) {
       blockers.push({
         ...identity,

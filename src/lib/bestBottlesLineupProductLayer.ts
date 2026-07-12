@@ -12,6 +12,7 @@ export interface ProductBounds {
 
 export interface ProductLayerInput {
   sourceBytes: Uint8Array;
+  /** Manifest lineage checksum. The layer preparation contract preserves this value verbatim. */
   sourceChecksum: string;
   heightWithCapMm: number;
   diameterMm: number;
@@ -33,6 +34,7 @@ export interface ProductAspectComparison {
 
 export interface ProductLayerResult {
   status: "prepared" | "blocked";
+  /** Exact manifest lineage supplied by the caller; never recomputed from decoded image bytes. */
   sourceChecksum: string;
   sourceWidth: number;
   sourceHeight: number;
