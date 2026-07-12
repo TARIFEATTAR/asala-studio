@@ -360,7 +360,7 @@ export function useAssembledPromptGeneration() {
       : [];
     const callerLibraryTags = isBestBottlesStudioMasterRequest
       ? (options.extraLibraryTags ?? []).filter(
-          (tag) => !/^(?:prompt-version|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+          (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
         )
       : options.extraLibraryTags ?? [];
     const extraLibraryTags = options.extraLibraryTags
@@ -402,7 +402,7 @@ export function useAssembledPromptGeneration() {
             qa_checklist: Array.from(
               new Set([
                 ...options.precompiledPromptRecord.qa_checklist.filter(
-                  (tag) => !/^(?:prompt-version|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+                  (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
                 ),
                 ...visualTargetTags,
                 ...shadowPolicyTags,

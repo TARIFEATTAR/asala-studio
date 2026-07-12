@@ -5,7 +5,10 @@ import {
   type FramingDecision,
   type FramingQaReport,
 } from "@/lib/product-image/framingQa";
-import type { BestBottlesShadowOwner } from "@/lib/bestBottlesShadowPolicy";
+import {
+  resolveBestBottlesShadowPolicy,
+  type BestBottlesShadowOwner,
+} from "@/lib/bestBottlesShadowPolicy";
 import { analyzeModelOwnedShadow, type ShadowQaReport } from "@/lib/product-image/shadowQa";
 
 interface Rgb {
@@ -228,6 +231,8 @@ export interface RigMaskControlledForegroundMatteOptions {
   foregroundHaloPx?: number;
   shadowNeighborhoodPx?: number;
   shadowLumaDelta?: number;
+  /** Disable synthesized shadow painting when finalizeRigShadow is authoritative. */
+  paintShadow?: boolean;
   controlBounds?: RigAlphaControlBounds | null;
 }
 
@@ -697,6 +702,7 @@ export function applyMaskControlledForegroundMatte(
         x <= shadowRight &&
         distanceToMask[p] <= shadowNeighborhoodPx;
       const isContactShadow =
+        options.paintShadow !== false &&
         isWithinShadowLane &&
         currentLuma <= bgLuma - shadowLumaDelta &&
         distance >= shadowLumaDelta + 10 &&
@@ -1496,11 +1502,16 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
   };
 }
 
+/** Resolve direct-call ownership from the exact SKU policy, never the hint alone. */
+export function resolveRigShadowOwner(options: Pick<RigBaselineNormalizeOptions, "graceSku"> & { shadowOwner?: BestBottlesShadowOwner }): BestBottlesShadowOwner {
+  return resolveBestBottlesShadowPolicy(options.graceSku).owner;
+}
+
 export async function normalizeBestBottlesRigBaseline(
   imageUrl: string,
   options: RigBaselineNormalizeOptions,
 ): Promise<RigBaselineNormalizeResult> {
-  const shadowOwner: BestBottlesShadowOwner = options.shadowOwner === "model" ? "model" : "rig";
+  const shadowOwner = resolveRigShadowOwner(options);
   const rig = getFamilyRigForProduct(options);
   const bg = hexToRgb(options.targetBackgroundHex ?? "#F5F3EF");
   if (!rig || !bg) {
@@ -1655,7 +1666,8 @@ export async function normalizeBestBottlesRigBaseline(
       height,
       bg,
       { data: maskImageData.data, width, height },
-      { controlBounds: maskBounds },
+      // finalizeRigShadow is the sole shadow authority for both owners.
+      { controlBounds: maskBounds, paintShadow: false },
     );
     if (modelShadowAnalysis && sourceImageData) {
       for (let p = 0; p < modelShadowAnalysis.preservationMask.length; p += 1) {

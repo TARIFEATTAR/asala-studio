@@ -19,6 +19,7 @@ import {
   clampModelShadowGeometryToControlEnvelope,
   maskOutModelShadowGeometry,
   prepareUnmaskedRigRecanvasPixels,
+  resolveRigShadowOwner,
 } from "./rigPostprocess";
 import { analyzeModelOwnedShadow } from "./shadowQa";
 
@@ -131,6 +132,20 @@ describe("shadow ownership", () => {
     assert.equal(output.deterministicShadowPixels, 0);
     assert.equal(output.shadowQa?.status, "review");
     assert.deepEqual(Array.from(pixels), before);
+  });
+
+  it("coerces direct-call model ownership to the exact SKU policy", () => {
+    assert.equal(
+      resolveRigShadowOwner({
+        graceSku: "GB-SPR-CLR-3ML-WHT",
+        shadowOwner: "model",
+      }),
+      "rig",
+    );
+    assert.equal(
+      resolveRigShadowOwner({ graceSku: "GB-SPR-CLR-3ML-BLK" }),
+      "model",
+    );
   });
 });
 
@@ -1333,5 +1348,44 @@ describe("applyMaskControlledForegroundMatte", () => {
     assert.ok(result.mattedBackgroundPixels > 0);
     assert.ok(result.opaqueForegroundPixels > 0);
     assert.ok(result.shadowPixels > 0);
+  });
+
+  it("supports a no-shadow recanvas before final model shadow QA", () => {
+    const width = 40;
+    const height = 50;
+    const bg = { r: 238, g: 230, b: 212 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    const mask = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < pixels.length; i += 4) {
+      pixels[i] = bg.r;
+      pixels[i + 1] = bg.g;
+      pixels[i + 2] = bg.b;
+      pixels[i + 3] = 255;
+    }
+    for (let y = 20; y < 42; y += 1) {
+      const i = (y * width + 20) * 4;
+      pixels[i] = 56;
+      pixels[i + 1] = 52;
+      pixels[i + 2] = 44;
+      mask[i + 3] = 255;
+    }
+    for (let x = 22; x <= 28; x += 1) {
+      const i = (42 * width + x) * 4;
+      pixels[i] = 194;
+      pixels[i + 1] = 184;
+      pixels[i + 2] = 162;
+    }
+
+    const result = applyMaskControlledForegroundMatte(
+      pixels,
+      width,
+      height,
+      bg,
+      { data: mask, width, height },
+      { controlBounds: { left: 20, right: 20, top: 20, bottom: 41, foregroundPixels: 22, foregroundPixelRatio: 22 / (width * height) }, paintShadow: false },
+    );
+
+    assert.equal(result.shadowPixels, 0);
+    assert.equal(pixels[(42 * width + 23) * 4 + 3], 0);
   });
 });
