@@ -22,7 +22,7 @@ export const BEST_BOTTLES_CATALOG_CANON_SOURCE_PATH =
 export const BEST_BOTTLES_CATALOG_CANON_PROMPT_FLAG = "catalog_canon_v3_prompt";
 
 const MODEL_BONE_CANVAS_CONTRACT =
-  "EXPERIMENTAL BONE CANVAS CONTRACT: Render the experimental output on the Best Bottles Bone canvas #F6EFE8 at 2080 × 2288. Keep this canvas color flat, seamless, and texture-free; this contract applies only to the exact model-owned smoke SKU.";
+  "CYLINDER V6.1 BONE CANVAS CONTRACT: Render the output on the Best Bottles Bone canvas #F6EFE8 at 2080 × 2288. Keep this canvas color flat, seamless, and texture-free; this contract applies to reviewed Cylinder-family generation context.";
 const CLEAR_GLASS_SOURCE_ANCHOR =
   "The background should be visible through the glass with natural refraction and slight optical displacement.";
 const STUDIO_RIG_SHADOW_SENTENCE =
@@ -30,7 +30,7 @@ const STUDIO_RIG_SHADOW_SENTENCE =
 const FINAL_STUDIO_MEASUREMENTS_SENTENCE =
   "Respect the resolved family framing measurements while making the photograph feel like the approved v2 studio direction.";
 const MODEL_FINAL_STUDIO_CHECK_SENTENCE =
-  "The resolved model-owned contact-shadow contract is permitted only for this exact smoke SKU and does not weaken product identity, geometry, material, canvas, or framing authority.";
+  "The resolved Cylinder V6.1 model-owned contact-shadow contract does not weaken product identity, geometry, material, canvas, or framing authority.";
 
 function replaceCanonSourceText(source: string, exactText: string, replacement: string, label: string): string {
   const first = source.indexOf(exactText);
@@ -111,7 +111,10 @@ export function isBestBottlesCatalogClearGlass(sku: PromptSku): boolean {
 
 export function buildBestBottlesCatalogCanonPrompt(sku: PromptSku): string {
   const isClearGlass = isBestBottlesCatalogClearGlass(sku);
-  const policy = resolveBestBottlesShadowPolicy(sku.sku);
+  const policy = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    family: sku.product_family,
+  });
   if (policy.owner === "rig") return buildPrompt(isClearGlass);
   return [
     PRESERVE,
@@ -128,22 +131,28 @@ export interface BestBottlesCatalogCanonPromptParts {
 }
 
 function assertPolicyMatchesSku(sku: PromptSku, policy: BestBottlesShadowPolicy): void {
-  const resolved = resolveBestBottlesShadowPolicy(sku.sku);
+  const resolved = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    family: sku.product_family,
+  });
   if (
     policy.promptVersion !== resolved.promptVersion ||
     policy.owner !== resolved.owner ||
     policy.contract !== resolved.contract ||
-    policy.smokeSku !== resolved.smokeSku
+    policy.rollout !== resolved.rollout
   ) {
     throw new Error(
-      `Best Bottles shadow policy mismatch for ${sku.sku}: policy must resolve from the exact SKU allowlist.`,
+      `Best Bottles shadow policy mismatch for ${sku.sku}: policy must resolve from reviewed family context.`,
     );
   }
 }
 
 export function buildBestBottlesCatalogCanonPromptParts(
   sku: PromptSku,
-  policy: BestBottlesShadowPolicy = resolveBestBottlesShadowPolicy(sku.sku),
+  policy: BestBottlesShadowPolicy = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    family: sku.product_family,
+  }),
 ): BestBottlesCatalogCanonPromptParts {
   assertPolicyMatchesSku(sku, policy);
   const isClearGlass = isBestBottlesCatalogClearGlass(sku);

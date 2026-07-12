@@ -492,7 +492,12 @@ function buildFramingProfilePrompt(
 }
 
 function buildFinalPrompt(product: ProductLike, sku: PromptSku): string {
-  const policy = resolveBestBottlesShadowPolicy(sku.sku);
+  const policy = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    websiteSku: product.websiteSku,
+    family: product.family ?? sku.product_family,
+    bottleCollection: product.bottleCollection,
+  });
   const canonParts = buildBestBottlesCatalogCanonPromptParts(sku, policy);
   // Use the catalog-path resolver so EVERY family ships a real FRAMING PROFILE
   // block — never a blank one (previous behavior for unprofiled families).
@@ -594,7 +599,12 @@ export function buildBestBottlesPromptPreflight(
   }
 
   const sku = buildBestBottlesPromptSkuFromProduct(input);
-  const policy = resolveBestBottlesShadowPolicy(sku.sku);
+  const policy = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    websiteSku: input.product.websiteSku,
+    family: input.product.family ?? sku.product_family,
+    bottleCollection: input.product.bottleCollection,
+  });
   const canvasPreflight = buildCanvasPreflight(input.product, sku);
   const warnings = getWarnings(input.product, sku, input.bodyMaterial, canvasPreflight.warnings);
   // NOTE: buildPromptForSku() (the config/product_families.json + master_pdp_prompt.md

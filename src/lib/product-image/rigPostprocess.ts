@@ -1503,8 +1503,18 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
 }
 
 /** Resolve direct-call ownership from the exact SKU policy, never the hint alone. */
-export function resolveRigShadowOwner(options: Pick<RigBaselineNormalizeOptions, "graceSku"> & { shadowOwner?: BestBottlesShadowOwner }): BestBottlesShadowOwner {
-  return resolveBestBottlesShadowPolicy(options.graceSku).owner;
+export function resolveRigShadowOwner(
+  options: Pick<
+    RigBaselineNormalizeOptions,
+    "graceSku" | "websiteSku" | "family" | "bottleCollection"
+  > & { shadowOwner?: BestBottlesShadowOwner },
+): BestBottlesShadowOwner {
+  return resolveBestBottlesShadowPolicy({
+    graceSku: options.graceSku,
+    websiteSku: options.websiteSku,
+    family: options.family,
+    bottleCollection: options.bottleCollection,
+  }).owner;
 }
 
 export async function normalizeBestBottlesRigBaseline(

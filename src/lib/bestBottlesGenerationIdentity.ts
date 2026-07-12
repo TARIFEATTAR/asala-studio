@@ -281,7 +281,11 @@ export function buildBestBottlesGenerationIdentity(
   // the blockers and the identity hash see the fixed value.
   const product = applyBestBottlesCapColorOverride(rawProduct);
   const graceSku = optionalText(product.graceSku);
-  const shadowPolicy = resolveBestBottlesShadowPolicy(graceSku);
+  const shadowPolicy = resolveBestBottlesShadowPolicy({
+    graceSku,
+    websiteSku: product.websiteSku,
+    family: product.family,
+  });
   const websiteSku = optionalText(product.websiteSku);
   const bodyColor = optionalText(product.color);
   const inferredBodyColor = inferBodyColorFromWebsiteSku(product);

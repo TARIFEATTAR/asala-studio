@@ -7,22 +7,36 @@ import {
 } from "./bestBottlesShadowPolicy";
 
 describe("resolveBestBottlesShadowPolicy", () => {
-  it("selects model ownership only for the black 3 ml smoke SKU", () => {
-    assert.deepEqual(resolveBestBottlesShadowPolicy("GB-SPR-CLR-3ML-BLK"), {
-      promptVersion: "best-bottles-reference-locked-v6.1-shadow-smoke",
-      owner: "model",
-      contract: "contact-back-right-v1",
-      smokeSku: "GB-SPR-CLR-3ML-BLK",
-    });
+  it("selects canonical V6.1 model ownership for every reviewed Cylinder context", () => {
+    for (const product of [
+      { graceSku: "GB-CYL-CLR-3ML-SPR-BLK", family: "Cylinder" },
+      { graceSku: "GB-CYL-AMB-9ML-ROL-BLK", family: "Cylinder" },
+      { graceSku: "GB-CYL-CBL-9ML-ROL-WHT", bottleCollection: "Cylinder" },
+      { graceSku: "GB-CYL-FRS-50ML-SPR-MSLV", family: "Cylinder" },
+      { graceSku: "GB-CYL-WHT-9ML-MRL-WHT", family: "Cylinder" },
+      { graceSku: "GB-CYL-PLS-250ML-LPM-BLK", family: "Cylinder" },
+      { graceSku: "GBTallCyl9WhtSht", family: "Tall Cylinder" },
+    ]) {
+      assert.deepEqual(resolveBestBottlesShadowPolicy(product), {
+        promptVersion: "best-bottles-reference-locked-v6.1",
+        owner: "model",
+        contract: "contact-back-right-v1",
+        rollout: "cylinder-family",
+      });
+    }
   });
 
-  it("keeps every other SKU on V6.0 rig ownership", () => {
-    for (const sku of ["GB-SPR-CLR-3ML-WHT", "GB-CYL-CLR-9ML-T-03", null]) {
-      assert.deepEqual(resolveBestBottlesShadowPolicy(sku), {
+  it("keeps non-Cylinder and string-only historical calls on V6.0 rig ownership", () => {
+    for (const input of [
+      { graceSku: "GB-CIR-CLR-9ML-ROL-WHT", family: "Circle" },
+      "GB-CYL-CLR-9ML-T-03",
+      null,
+    ]) {
+      assert.deepEqual(resolveBestBottlesShadowPolicy(input), {
         promptVersion: "best-bottles-reference-locked-v6.0",
         owner: "rig",
         contract: "deterministic-contact-v1",
-        smokeSku: null,
+        rollout: null,
       });
     }
   });
@@ -30,19 +44,19 @@ describe("resolveBestBottlesShadowPolicy", () => {
   it("canonicalizes persisted reconciliation prompt lineage from SKU policy", () => {
     assert.equal(
       resolveBestBottlesReconciliationPromptVersion(
-        "GB-SPR-CLR-3ML-WHT",
+        { graceSku: "GB-CYL-CLR-3ML-WHT", family: "Cylinder" },
         true,
-        "best-bottles-reference-locked-v6.1-shadow-smoke",
+        "best-bottles-reference-locked-v6.0",
       ),
-      "best-bottles-reference-locked-v6.0",
+      "best-bottles-reference-locked-v6.1",
     );
     assert.equal(
       resolveBestBottlesReconciliationPromptVersion(
-        "GB-SPR-CLR-3ML-BLK",
+        { graceSku: "GB-CIR-CLR-9ML-ROL-WHT", family: "Circle" },
         true,
         null,
       ),
-      "best-bottles-reference-locked-v6.1-shadow-smoke",
+      "best-bottles-reference-locked-v6.0",
     );
     assert.equal(
       resolveBestBottlesReconciliationPromptVersion("OTHER", false, "caller-v1"),

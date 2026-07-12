@@ -58,10 +58,10 @@ function buildThreeMlPreflight(
 }
 
 describe("Best Bottles prompt preflight", () => {
-  it("compiles model-owned shadow smoke policy only for the black 3ml SKU", () => {
+  it("compiles canonical model-owned V6.1 policy for Cylinder siblings", () => {
     const smoke = buildThreeMlPreflight("GB-SPR-CLR-3ML-BLK", "GBSpry3mlClBlk", "Black");
     const prompt = smoke.record?.final_prompt ?? "";
-    assert.equal(smoke.record?.prompt_version, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(smoke.record?.prompt_version, "best-bottles-reference-locked-v6.1");
     assert.equal(smoke.record?.shadow_owner, "model");
     assert.equal(prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g)?.length, 1);
     assert.doesNotMatch(prompt, /deterministic post-processing responsibilities/i);
@@ -69,20 +69,24 @@ describe("Best Bottles prompt preflight", () => {
     assert.match(prompt, /32–42% opacity/);
     assert.match(prompt, /20–30% of the bottle's width/);
     const directCompilerRecord = buildPromptForSku(smoke.sku!, promptSystem);
-    assert.equal(directCompilerRecord.prompt_version, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(directCompilerRecord.prompt_version, "best-bottles-reference-locked-v6.1");
     assert.equal(directCompilerRecord.shadow_owner, "model");
     assert.equal(directCompilerRecord.final_prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g)?.length, 1);
     assert.match(directCompilerRecord.final_prompt, /#F6EFE8/);
     assert.doesNotMatch(directCompilerRecord.final_prompt, /Madison applies both deterministically after generation/i);
-    assert.ok(smoke.record?.qa_checklist.includes("prompt-version:best-bottles-reference-locked-v6.1-shadow-smoke"));
+    assert.ok(smoke.record?.qa_checklist.includes("prompt-version:best-bottles-reference-locked-v6.1"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-owner:model"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-contract:contact-back-right-v1"));
-    assert.ok(smoke.record?.qa_checklist.includes("shadow-smoke-sku:GB-SPR-CLR-3ML-BLK"));
+    assert.ok(smoke.record?.qa_checklist.includes("shadow-rollout:cylinder-family"));
+    assert.equal(
+      smoke.record?.qa_checklist.some((tag) => tag.startsWith("shadow-smoke-sku:")),
+      false,
+    );
 
     const sibling = buildThreeMlPreflight("GB-SPR-CLR-3ML-WHT", "GBSpry3mlClWht", "White");
-    assert.equal(sibling.record?.prompt_version, "best-bottles-reference-locked-v6.0");
-    assert.equal(sibling.record?.shadow_owner, "rig");
-    assert.doesNotMatch(sibling.record?.final_prompt ?? "", /MODEL OWNED/);
+    assert.equal(sibling.record?.prompt_version, "best-bottles-reference-locked-v6.1");
+    assert.equal(sibling.record?.shadow_owner, "model");
+    assert.match(sibling.record?.final_prompt ?? "", /MODEL OWNED/);
   });
 
   it("classifies swirl Cylinder fine-mist sprayers as swirl-fluted glass despite catalog plastic category text", () => {

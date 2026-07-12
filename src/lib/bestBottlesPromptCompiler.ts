@@ -239,10 +239,13 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     .replaceAll("{{OUTPUT_CANVAS_WIDTH}}", String(sku.output_canvas_width))
     .replaceAll("{{OUTPUT_CANVAS_HEIGHT}}", String(sku.output_canvas_height))
     .trim();
-  const shadowPolicy = resolveBestBottlesShadowPolicy(sku.sku);
-  // The module compiler is validation-only for ordinary SKUs. For the exact
-  // model-owned smoke SKU, however, its PromptRecord is a public consumer
-  // boundary; emit the same coherent canon-owned experimental prompt instead
+  const shadowPolicy = resolveBestBottlesShadowPolicy({
+    graceSku: sku.sku,
+    family: sku.product_family,
+  });
+  // The module compiler is validation-only for ordinary SKUs. For reviewed
+  // Cylinder V6.1 context, however, its PromptRecord is a public consumer
+  // boundary; emit the same coherent canon-owned model-shadow prompt instead
   // of pairing V6.1/model metadata with a generic module prompt that still
   // describes no model-owned shadow.
   const resolvedFinalPrompt = shadowPolicy.owner === "model"

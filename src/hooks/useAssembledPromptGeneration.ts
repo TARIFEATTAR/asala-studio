@@ -350,17 +350,21 @@ export function useAssembledPromptGeneration() {
     const visualTargetTags = isBestBottlesStudioMasterRequest
       ? getBestBottlesVisualTargetTags(options.productContext?.bodyMaterial)
       : [];
-    const shadowPolicy = resolveBestBottlesShadowPolicy(options.productContext?.sku);
-    // Shadow ownership is an exact SKU policy. Caller-supplied context fields
-    // remain metadata only and may not opt a non-smoke SKU into the model/V6.1
-    // contract (or force the smoke SKU back to rig/V6.0).
+    const shadowPolicy = resolveBestBottlesShadowPolicy({
+      graceSku: options.productContext?.sku,
+      websiteSku: options.productContext?.websiteSku,
+      family: options.productContext?.family,
+      bottleCollection: options.productContext?.collection,
+    });
+    // Shadow ownership is resolved from reviewed family context. Caller-supplied
+    // prompt/shadow metadata cannot override the canonical policy.
     const resolvedShadowPolicy: BestBottlesShadowPolicy = shadowPolicy;
     const shadowPolicyTags = isBestBottlesStudioMasterRequest
       ? getBestBottlesShadowPolicyTags(resolvedShadowPolicy)
       : [];
     const callerLibraryTags = isBestBottlesStudioMasterRequest
       ? (options.extraLibraryTags ?? []).filter(
-          (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+          (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku|shadow-rollout):/i.test(tag),
         )
       : options.extraLibraryTags ?? [];
     const extraLibraryTags = options.extraLibraryTags
@@ -402,7 +406,7 @@ export function useAssembledPromptGeneration() {
             qa_checklist: Array.from(
               new Set([
                 ...options.precompiledPromptRecord.qa_checklist.filter(
-                  (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku):/i.test(tag),
+                  (tag) => !/^(?:prompt-version|prompt|shadow-owner|shadow-contract|shadow-smoke-sku|shadow-rollout):/i.test(tag),
                 ),
                 ...visualTargetTags,
                 ...shadowPolicyTags,
@@ -611,7 +615,12 @@ export function useAssembledPromptGeneration() {
                   ? data.finalPrompt
                   : requestPrompt,
               promptVersion: resolveBestBottlesReconciliationPromptVersion(
-                options.productContext?.sku,
+                {
+                  graceSku: options.productContext?.sku,
+                  websiteSku: options.productContext?.websiteSku,
+                  family: options.productContext?.family,
+                  bottleCollection: options.productContext?.collection,
+                },
                 isBestBottlesStudioMasterRequest,
                 options.productContext?.promptVersion,
               ),

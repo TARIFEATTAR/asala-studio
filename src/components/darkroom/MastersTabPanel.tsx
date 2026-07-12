@@ -2762,7 +2762,12 @@ export function MastersTabPanel({
       bodyMaterial: skuBodyMaterial,
       sourceReference: referenceUrl ?? sku.imageUrl ?? null,
     });
-    const shadowPolicy = resolveBestBottlesShadowPolicy(sku.graceSku);
+    const shadowPolicy = resolveBestBottlesShadowPolicy({
+      graceSku: sku.graceSku,
+      websiteSku: sku.websiteSku,
+      family: sku.family,
+      bottleCollection: sku.bottleCollection,
+    });
     const identityIssue = getBestBottlesGenerationIdentityIssue(generationIdentity);
     if (identityIssue) {
       await requireLiveTruthVerification(sku, "sku_identity", identityIssue, websiteTruth);

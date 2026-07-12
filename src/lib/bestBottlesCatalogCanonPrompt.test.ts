@@ -56,16 +56,16 @@ describe("Best Bottles catalog canon prompt", () => {
     assert.match(modelGlass, /#F6EFE8/);
     assert.match(
       modelFinal,
-      /The resolved model-owned contact-shadow contract is permitted only for this exact smoke SKU/,
+      /resolved Cylinder V6\.1 model-owned contact-shadow contract/,
     );
     assert.throws(
       () => buildBestBottlesCatalogCanonPromptParts(clearRollerSku, {
-        promptVersion: "best-bottles-reference-locked-v6.1-shadow-smoke",
-        owner: "model",
-        contract: "contact-back-right-v1",
-        smokeSku: "GB-SPR-CLR-3ML-BLK",
+        promptVersion: "best-bottles-reference-locked-v6.0",
+        owner: "rig",
+        contract: "deterministic-contact-v1",
+        rollout: null,
       }),
-      /policy must resolve from the exact SKU allowlist/,
+      /policy must resolve from reviewed family context/,
     );
   });
 
@@ -112,6 +112,9 @@ describe("Best Bottles catalog canon prompt", () => {
     assert.doesNotMatch(prompt, /NEGATIVE CONSTRAINTS:/);
     assert.doesNotMatch(prompt, /FINAL CHECK BEFORE OUTPUT:/);
     assert.doesNotMatch(prompt, /TEST-ONLY MATERIAL POLISH ADDENDUM/);
-    assert.match(prompt.trimEnd(), /Respect the resolved family framing measurements while making the photograph feel like the approved v2 studio direction\.$/);
+    assert.match(
+      prompt.trimEnd(),
+      /The resolved Cylinder V6\.1 model-owned contact-shadow contract does not weaken product identity, geometry, material, canvas, or framing authority\.$/,
+    );
   });
 });

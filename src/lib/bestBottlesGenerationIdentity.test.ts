@@ -12,15 +12,15 @@ describe("buildBestBottlesGenerationIdentity", () => {
     assert.equal(BEST_BOTTLES_PROMPT_VERSION, "best-bottles-reference-locked-v6.0");
   });
 
-  it("assigns model-owned shadow smoke policy only to the black 3 ml SKU", () => {
+  it("assigns canonical V6.1 model-owned shadow policy to Cylinder identities", () => {
     const identity = buildBestBottlesGenerationIdentity({
       graceSku: "GB-SPR-CLR-3ML-BLK",
-      family: "Sprayer",
+      family: "Cylinder",
       capacityMl: 3,
       color: "Clear",
     });
 
-    assert.equal(identity.promptVersion, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(identity.promptVersion, "best-bottles-reference-locked-v6.1");
     assert.equal(identity.shadowOwner, "model");
     assert.equal(identity.shadowContract, "contact-back-right-v1");
   });

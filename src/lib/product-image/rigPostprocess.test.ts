@@ -134,16 +134,20 @@ describe("shadow ownership", () => {
     assert.deepEqual(Array.from(pixels), before);
   });
 
-  it("coerces direct-call model ownership to the exact SKU policy", () => {
+  it("coerces direct-call ownership to reviewed family policy", () => {
     assert.equal(
       resolveRigShadowOwner({
         graceSku: "GB-SPR-CLR-3ML-WHT",
+        family: "Circle",
         shadowOwner: "model",
       }),
       "rig",
     );
     assert.equal(
-      resolveRigShadowOwner({ graceSku: "GB-SPR-CLR-3ML-BLK" }),
+      resolveRigShadowOwner({
+        graceSku: "GB-SPR-CLR-3ML-BLK",
+        family: "Cylinder",
+      }),
       "model",
     );
   });
