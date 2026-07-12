@@ -2,11 +2,29 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  BEST_BOTTLES_PROMPT_VERSION,
   buildBestBottlesGenerationIdentity,
   getBestBottlesGenerationIdentityIssue,
 } from "./bestBottlesGenerationIdentity";
 
 describe("buildBestBottlesGenerationIdentity", () => {
+  it("records the deterministic-background prompt synchronization as v6", () => {
+    assert.equal(BEST_BOTTLES_PROMPT_VERSION, "best-bottles-reference-locked-v6.0");
+  });
+
+  it("assigns model-owned shadow smoke policy only to the black 3 ml SKU", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-SPR-CLR-3ML-BLK",
+      family: "Sprayer",
+      capacityMl: 3,
+      color: "Clear",
+    });
+
+    assert.equal(identity.promptVersion, "best-bottles-reference-locked-v6.1-shadow-smoke");
+    assert.equal(identity.shadowOwner, "model");
+    assert.equal(identity.shadowContract, "contact-back-right-v1");
+  });
+
   it("blocks generic Diva tassel SKUs when color evidence conflicts", () => {
     const identity = buildBestBottlesGenerationIdentity({
       graceSku: "GB-DVA-CLR-46ML-T-20",

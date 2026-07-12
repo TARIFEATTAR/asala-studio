@@ -1,8 +1,9 @@
 import { applyBestBottlesCapColorOverride } from "./bestBottlesCapColorOverrides";
+import { BestBottlesShadowPolicy, resolveBestBottlesShadowPolicy } from "./bestBottlesShadowPolicy";
 
 export type BestBottlesGenerationIdentityStatus = "ready" | "blocked";
 
-export const BEST_BOTTLES_PROMPT_VERSION = "best-bottles-reference-locked-v5.2";
+export const BEST_BOTTLES_PROMPT_VERSION = "best-bottles-reference-locked-v6.0";
 export const BEST_BOTTLES_RIG_VERSION = "uniform-fit-box-2080x2288-v1";
 
 export interface BestBottlesGenerationIdentity {
@@ -32,6 +33,8 @@ export interface BestBottlesGenerationIdentity {
   identityBlockers: string[];
   identityHash: string;
   promptVersion: string;
+  shadowOwner: BestBottlesShadowPolicy["owner"];
+  shadowContract: BestBottlesShadowPolicy["contract"];
   rigVersion: string;
   qaStatus: "pending";
   canvas: "2080x2288";
@@ -278,6 +281,7 @@ export function buildBestBottlesGenerationIdentity(
   // the blockers and the identity hash see the fixed value.
   const product = applyBestBottlesCapColorOverride(rawProduct);
   const graceSku = optionalText(product.graceSku);
+  const shadowPolicy = resolveBestBottlesShadowPolicy(graceSku);
   const websiteSku = optionalText(product.websiteSku);
   const bodyColor = optionalText(product.color);
   const inferredBodyColor = inferBodyColorFromWebsiteSku(product);
@@ -370,7 +374,9 @@ export function buildBestBottlesGenerationIdentity(
     accessoryCode,
     reducerFinish,
     options?.sourceReference,
-    BEST_BOTTLES_PROMPT_VERSION,
+    shadowPolicy.promptVersion,
+    shadowPolicy.owner,
+    shadowPolicy.contract,
     BEST_BOTTLES_RIG_VERSION,
   ]);
 
@@ -400,7 +406,9 @@ export function buildBestBottlesGenerationIdentity(
     identityStatus,
     identityBlockers: blockers,
     identityHash,
-    promptVersion: BEST_BOTTLES_PROMPT_VERSION,
+    promptVersion: shadowPolicy.promptVersion,
+    shadowOwner: shadowPolicy.owner,
+    shadowContract: shadowPolicy.contract,
     rigVersion: BEST_BOTTLES_RIG_VERSION,
     qaStatus: "pending",
     canvas: "2080x2288",
