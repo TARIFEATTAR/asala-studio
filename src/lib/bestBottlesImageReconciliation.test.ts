@@ -17,6 +17,13 @@ import type { ShadowQaReport } from "./product-image/shadowQa";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const studioSource = readFileSync(resolve(currentDir, "../pages/BestBottlesStudio.tsx"), "utf8");
+const foundationMigrationSource = readFileSync(
+  resolve(
+    currentDir,
+    "../../supabase/migrations/20260710090000_best_bottles_image_reconciliation.sql",
+  ),
+  "utf8",
+);
 const modelShadowMigrationSource = readFileSync(
   resolve(
     currentDir,
@@ -86,6 +93,32 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
+  it("guards terminal SKU jobs before the link RPC mutates assignments or state", () => {
+    const linkFunction = foundationMigrationSource.match(
+      /CREATE OR REPLACE FUNCTION public\.link_best_bottles_generated_image[\s\S]*?\$\$;/,
+    )?.[0];
+
+    assert.ok(linkFunction);
+    assert.match(linkFunction, /FOR UPDATE/);
+    assert.match(linkFunction, /status\s+IN\s+\('approved', 'shopify-pushed', 'synced'\)/);
+    assert.match(linkFunction, /approved_image_id\s+IS NOT NULL/);
+    assert.ok(linkFunction.indexOf("FOR UPDATE") < linkFunction.indexOf("INSERT INTO"));
+    assert.match(reconciliationSqlTestSource, /terminal-link-preserves-approved-job/);
+  });
+
+  it("makes the model-shadow is_reconciled predicate null-safe", () => {
+    const isReconciledExpression = modelShadowMigrationSource.match(
+      /\(\s*r\.requires_pipeline_reconciliation[\s\S]*?\) AS is_reconciled/,
+    )?.[0];
+
+    assert.ok(isReconciledExpression);
+    assert.match(
+      isReconciledExpression,
+      /AND COALESCE\(\s*r\.shadow_owner = 'rig'[\s\S]*?r\.shadow_qa->'target'->>'contract'[\s\S]*?,\s*FALSE\s*\)/,
+    );
+    assert.match(reconciliationSqlTestSource, /model-shadow-null-is-reconciled-false/);
+  });
+
   it("keeps model-shadow status pending until status and contract both pass", () => {
     const reconciliationStatusCase = modelShadowMigrationSource.match(
       /CASE[\s\S]*?END AS reconciliation_status/,
@@ -146,6 +179,32 @@ describe("Best Bottles generated master approval", () => {
     });
 
     assert.deepEqual(calls, ["link", "approve"]);
+  });
+
+  it("does not invoke approval when the fail-closed link rejects", async () => {
+    const calls: string[] = [];
+
+    await assert.rejects(
+      approveBestBottlesGeneratedMaster(
+        {
+          organizationId: "org-1",
+          pipelineSkuJobId: "terminal-job-1",
+          imageId: "image-2",
+        },
+        {
+          link: async () => {
+            calls.push("link");
+            throw new Error("Terminal SKU job cannot be relinked");
+          },
+          approve: async () => {
+            calls.push("approve");
+          },
+        },
+      ),
+      /Terminal SKU job cannot be relinked/,
+    );
+
+    assert.deepEqual(calls, ["link"]);
   });
 
   it("invokes the strict approval RPC with the linked image identifiers", async () => {

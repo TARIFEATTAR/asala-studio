@@ -96,3 +96,24 @@ The foundational migration SQL test could not run: the Docker CLI is installed b
 - Static SQL contract check confirmed the null-safe status predicate and both invalid/missing-contract regression markers.
 
 Local SQL execution remains unavailable because the Docker daemon is not running and `psql` is absent. No remote migration, deployment, provider call, paid generation, Shopify/Convex synchronization, or other external mutation was attempted.
+
+## Terminal-link and nullable-status hardening — 2026-07-11
+
+### Changes
+
+- Made `link_best_bottles_generated_image` lock and inspect the SKU job before reading the candidate or mutating any assignment. It now raises for `approved`, `shopify-pushed`, or `synced` jobs and for any row that already has an approved image.
+- Added a SQL regression that snapshots a synced job and an unlinked candidate reconciliation, attempts the terminal link, and verifies the job, approved image fields, assignment set, and reconciliation state remain unchanged.
+- Added a helper regression proving a failed link prevents the strict approval operation from running, and corrected the helper contract comment to reflect fail-closed terminal behavior.
+- Wrapped the complete model-shadow branch in the view's `is_reconciled` predicate with `COALESCE(..., FALSE)` so missing status or contract evidence returns exactly false instead of SQL null.
+- Added an otherwise fully reconciled model-row regression with missing shadow evidence that requires `review-pending` and `is_reconciled IS FALSE`.
+
+### Verification
+
+- RED confirmation: focused source tests failed because the link RPC had no pre-mutation terminal guard and `is_reconciled` lacked a null-safe shadow wrapper.
+- `npx tsx --test src/lib/bestBottlesImageReconciliation.test.ts src/lib/product-image/rigReview.test.ts src/lib/product-image/shadowQa.test.ts` — 25 tests passing.
+- `npm run test:bestbottles:image-coverage` — 281 tests / 66 suites passing.
+- `npm run build` — passed; existing stale browser-data, CSS minification, and chunk-size warnings remain.
+- Targeted ESLint for the reconciliation approval/rig/shadow files — passed with no diagnostics.
+- Static SQL verification confirmed the terminal guard runs before assignment insertion, covers all terminal statuses plus existing approved images, and the model-shadow view predicate is null-safe.
+
+Local SQL execution remains unavailable because the Docker daemon is not running and `psql` is absent. No remote migration, deployment, provider call, paid generation, Shopify/Convex synchronization, or other external mutation was attempted.

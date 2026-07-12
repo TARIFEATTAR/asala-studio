@@ -71,6 +71,16 @@ VALUES
     'fixture prompt model shadow image',
     'https://example.invalid/model-shadow.png',
     ARRAY['brand:best-bottles', 'status:unreviewed']::text[]
+  ),
+  (
+    '00000000-0000-4000-8000-000000000205',
+    '00000000-0000-4000-8000-000000000101',
+    '00000000-0000-4000-8000-000000000901',
+    'best-bottles-master',
+    '10:11',
+    'fixture prompt terminal relink candidate',
+    'https://example.invalid/terminal-candidate.png',
+    ARRAY['brand:best-bottles', 'status:unreviewed']::text[]
   );
 
 INSERT INTO public.best_bottles_pipeline_sku_jobs (
@@ -268,6 +278,39 @@ VALUES
       "measurements":{"contactGapPx":0,"contactCoreDensity":0.36,"rightExtensionPx":18,"rightExtensionRatio":0.28,"leftExtensionPx":2,"verticalDepthPx":8,"componentCount":1,"shadowPixelCount":120},
       "target":{"maxContactGapPx":2,"rightExtensionRatio":{"min":0.2,"max":0.3},"contract":"contact-back-right-v1"}
     }'::jsonb
+  ),
+  (
+    '00000000-0000-4000-8000-000000000205',
+    '00000000-0000-4000-8000-000000000101',
+    'SKU-A',
+    'WEB-A',
+    'Fixture Family',
+    '{
+      "graceSku":"SKU-A",
+      "websiteSku":"WEB-A",
+      "eligibleGraceSkus":["SKU-A"],
+      "eligibleWebsiteSkus":["WEB-A"],
+      "identityStatus":"ready",
+      "identityBlockers":[],
+      "websiteTruthStatus":"ready",
+      "heightWithoutCap":"70 mm",
+      "diameter":"20 mm"
+    }'::jsonb,
+    'https://example.invalid/terminal-candidate-raw.png',
+    'https://example.invalid/terminal-candidate.png',
+    2080,
+    2288,
+    2105,
+    2105,
+    82.25,
+    50.0,
+    50.0,
+    0.0,
+    'pass',
+    '{}'::text[],
+    'qa-passed',
+    'rig',
+    NULL
   );
 
 SELECT pg_temp.assert_true(
@@ -505,6 +548,53 @@ WHERE id IN (
   '00000000-0000-4000-8000-000000000302'
 );
 
+CREATE TEMP TABLE terminal_link_job_snapshot ON COMMIT DROP AS
+SELECT to_jsonb(j) AS row_value
+FROM public.best_bottles_pipeline_sku_jobs j
+WHERE j.id = '00000000-0000-4000-8000-000000000301';
+
+CREATE TEMP TABLE terminal_link_reconciliation_snapshot ON COMMIT DROP AS
+SELECT to_jsonb(r) AS row_value
+FROM public.best_bottles_image_reconciliations r
+WHERE r.image_id = '00000000-0000-4000-8000-000000000205';
+
+DO $$
+DECLARE
+  rejected boolean := false;
+BEGIN
+  BEGIN
+    PERFORM public.link_best_bottles_generated_image(
+      '00000000-0000-4000-8000-000000000101',
+      '00000000-0000-4000-8000-000000000301',
+      '00000000-0000-4000-8000-000000000205'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    rejected := true;
+  END;
+  IF NOT rejected THEN
+    RAISE EXCEPTION 'assertion failed: terminal-link-preserves-approved-job did not reject';
+  END IF;
+END;
+$$;
+
+SELECT pg_temp.assert_true(
+  (SELECT to_jsonb(j) = snapshot.row_value
+   FROM public.best_bottles_pipeline_sku_jobs j
+   CROSS JOIN terminal_link_job_snapshot snapshot
+   WHERE j.id = '00000000-0000-4000-8000-000000000301')
+  AND (SELECT to_jsonb(r) = snapshot.row_value
+       FROM public.best_bottles_image_reconciliations r
+       CROSS JOIN terminal_link_reconciliation_snapshot snapshot
+       WHERE r.image_id = '00000000-0000-4000-8000-000000000205')
+  AND NOT EXISTS (
+    SELECT 1
+    FROM public.best_bottles_pipeline_sku_images a
+    WHERE a.sku_job_id = '00000000-0000-4000-8000-000000000301'
+      AND a.image_id = '00000000-0000-4000-8000-000000000205'
+  ),
+  'terminal-link-preserves-approved-job: rejected link mutated job, assignment, or reconciliation state'
+);
+
 SELECT pg_temp.assert_true(
   (SELECT reconciliation_status = 'shopify-verification-pending' AND NOT is_reconciled
    FROM public.best_bottles_image_reconciliation_status
@@ -624,6 +714,23 @@ SELECT pg_temp.assert_true(
    WHERE image_id = '00000000-0000-4000-8000-000000000201'),
   'all verified active assignments did not reconcile the image'
 );
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_owner = 'model',
+    shadow_qa = '{}'::jsonb
+WHERE image_id = '00000000-0000-4000-8000-000000000201';
+
+SELECT pg_temp.assert_true(
+  (SELECT reconciliation_status = 'review-pending' AND is_reconciled IS FALSE
+   FROM public.best_bottles_image_reconciliation_status
+   WHERE image_id = '00000000-0000-4000-8000-000000000201'),
+  'model-shadow-null-is-reconciled-false: missing evidence produced null or reconciled state'
+);
+
+UPDATE public.best_bottles_image_reconciliations
+SET shadow_owner = 'rig',
+    shadow_qa = NULL
+WHERE image_id = '00000000-0000-4000-8000-000000000201';
 
 UPDATE public.best_bottles_image_reconciliations
 SET catalog_truth = '{

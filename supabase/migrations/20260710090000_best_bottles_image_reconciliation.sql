@@ -264,8 +264,28 @@ SET search_path = public
 AS $$
 DECLARE
   v_final_image_url TEXT;
+  v_job_status TEXT;
+  v_approved_image_id UUID;
 BEGIN
   PERFORM public.best_bottles_assert_org_member(p_organization_id);
+
+  SELECT j.status, j.approved_image_id
+  INTO v_job_status, v_approved_image_id
+  FROM public.best_bottles_pipeline_sku_jobs j
+  WHERE j.id = p_pipeline_sku_job_id
+    AND j.organization_id = p_organization_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'SKU job % was not found in organization %',
+      p_pipeline_sku_job_id, p_organization_id;
+  END IF;
+
+  IF v_job_status IN ('approved', 'shopify-pushed', 'synced')
+    OR v_approved_image_id IS NOT NULL THEN
+    RAISE EXCEPTION 'Terminal SKU job % cannot be relinked from status % or approved image %',
+      p_pipeline_sku_job_id, v_job_status, v_approved_image_id;
+  END IF;
 
   SELECT r.final_image_url INTO v_final_image_url
   FROM public.best_bottles_image_reconciliations r

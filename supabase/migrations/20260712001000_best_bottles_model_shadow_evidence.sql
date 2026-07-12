@@ -279,7 +279,15 @@ SELECT
     AND r.catalog_truth->>'identityStatus' = 'ready'
     AND r.catalog_truth->>'websiteTruthStatus' IN ('ready', 'alias_exception')
     AND COALESCE(jsonb_array_length(r.catalog_truth->'identityBlockers'), 0) = 0
-    AND (r.shadow_owner = 'rig' OR (r.shadow_owner = 'model' AND r.shadow_qa->>'status' = 'pass' AND r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1'))
+    AND COALESCE(
+      r.shadow_owner = 'rig'
+      OR (
+        r.shadow_owner = 'model'
+        AND r.shadow_qa->>'status' = 'pass'
+        AND r.shadow_qa->'target'->>'contract' = 'contact-back-right-v1'
+      ),
+      FALSE
+    )
     AND COALESCE(ar.assignment_count, 0) > 0
     AND COALESCE(ar.all_pipeline_images_match, FALSE)
     AND COALESCE(ar.all_assignments_approved, FALSE)

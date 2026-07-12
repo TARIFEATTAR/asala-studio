@@ -20,10 +20,10 @@ const rpcBackedApprovalOperations: BestBottlesGeneratedMasterApprovalOperations 
 };
 
 /**
- * Explicit Studio approval is also the safe replacement path for jobs already
- * marked approved/pushed/synced. The generation callback intentionally avoids
- * mutating those terminal rows, so approval must establish the idempotent image
- * assignment before invoking the strict product-truth/framing approval gate.
+ * Approval must establish the idempotent image assignment before invoking the
+ * strict product-truth/framing approval gate. The link RPC fails closed for jobs
+ * already approved, pushed, or synced so this helper never replaces an approved
+ * image or advances to approval after a terminal-link rejection.
  */
 export async function approveBestBottlesGeneratedMaster(
   input: BestBottlesGeneratedMasterApprovalInput,
