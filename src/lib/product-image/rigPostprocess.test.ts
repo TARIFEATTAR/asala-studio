@@ -14,6 +14,7 @@ import {
   getVisibleMatteArtifactQaIssues,
   detectStrongBounds,
   detectModelGeometryBaseline,
+  detectModelShadowContactBounds,
   finalizeRigShadow,
   flattenBackgroundLikePixels,
   clampModelShadowGeometryToControlEnvelope,
@@ -58,6 +59,45 @@ describe("shadow ownership", () => {
     }
     return pixels;
   };
+
+  it("detects separate bottle and sidecar contact bounds from final pixels", () => {
+    const pixels = new Uint8ClampedArray(120 * 100 * 4);
+    for (let index = 0; index < pixels.length; index += 4) {
+      pixels[index] = bone.r;
+      pixels[index + 1] = bone.g;
+      pixels[index + 2] = bone.b;
+      pixels[index + 3] = 255;
+    }
+    const paint = (left: number, top: number, right: number, bottom: number) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * 120 + x) * 4;
+          pixels[index] = 70;
+          pixels[index + 1] = 70;
+          pixels[index + 2] = 70;
+        }
+      }
+    };
+    paint(40, 20, 60, 70);
+    paint(85, 50, 100, 70);
+
+    const bounds = detectModelShadowContactBounds({
+      pixels,
+      width: 120,
+      height: 100,
+      background: bone,
+      groupBounds: { left: 40, right: 100, top: 20, bottom: 70 },
+      baselineYPx: 70,
+      topology: {
+        kind: "detached-sidecar",
+        expectedContacts: ["bottle", "sidecar"],
+        source: "reviewed-reference",
+      },
+    });
+
+    assert.deepEqual(bounds.bottle, { left: 40, right: 60, top: 20, bottom: 70 });
+    assert.deepEqual(bounds.sidecar, { left: 85, right: 100, top: 50, bottom: 70 });
+  });
 
   it("preserves a model-owned shadow mask during Bone recanvas", () => {
     const pixels = makePixels();

@@ -44,6 +44,7 @@ import {
   type BestBottlesShadowOwner,
   type BestBottlesShadowPolicy,
 } from "@/lib/bestBottlesShadowPolicy";
+import { resolveBestBottlesShadowTopology } from "@/lib/bestBottlesShadowTopology";
 import {
   applyBestBottlesVisualTargetPrompt,
   BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
@@ -356,6 +357,26 @@ export function useAssembledPromptGeneration() {
       family: options.productContext?.family,
       bottleCollection: options.productContext?.collection,
     });
+    const shadowTopology = resolveBestBottlesShadowTopology(
+      {
+        family: options.productContext?.family,
+        capState: options.productContext?.capState,
+        mode: options.productContext?.mode,
+        applicator: options.productContext?.applicator,
+        accessoryCode: options.productContext?.accessoryCode,
+        itemName: options.productContext?.name,
+        itemDescription: options.productContext?.itemDescription,
+      },
+      {
+        sku: options.productContext?.sku,
+        detached_components:
+          options.productContext?.capState === "detached" ||
+          options.productContext?.mode === "cap-off"
+            ? ["cap"]
+            : [],
+        applicator_type: options.productContext?.applicator,
+      },
+    );
     // Shadow ownership is resolved from reviewed family context. Caller-supplied
     // prompt/shadow metadata cannot override the canonical policy.
     const resolvedShadowPolicy: BestBottlesShadowPolicy = shadowPolicy;
@@ -694,6 +715,7 @@ export function useAssembledPromptGeneration() {
             mode: options.productContext?.mode,
             targetBackgroundHex: BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
             shadowOwner: resolvedShadowPolicy.owner,
+            shadowTopology,
             maskReferenceUrl: null,
             requireMaskControl: false,
           });

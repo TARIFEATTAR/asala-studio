@@ -29,6 +29,13 @@ export interface AnalyzeModelOwnedShadowInput {
   /** Alias used by rig post-processing callers. */
   objectBounds?: ShadowQaObjectBounds;
   baselineYPx: number;
+  topology?: import("../bestBottlesShadowTopology").BestBottlesShadowTopology;
+  contactBounds?: Partial<
+    Record<
+      import("../bestBottlesShadowTopology").BestBottlesShadowContact,
+      ShadowQaBounds
+    >
+  >;
 }
 
 export type ModelShadowAnalysisInput = AnalyzeModelOwnedShadowInput;
@@ -37,6 +44,8 @@ export interface ShadowQaReport {
   status: ShadowQaStatus;
   failures: string[];
   warnings: string[];
+  /** Required for new V6.1 evidence; optional only when parsing historical records. */
+  contacts?: ShadowContactQa[];
   measurements: {
     contactGapPx: number | null;
     contactCoreDensity: number | null;
@@ -52,6 +61,15 @@ export interface ShadowQaReport {
     rightExtensionRatio: { min: 0.2; max: 0.3 };
     contract: "contact-back-right-v1";
   };
+}
+
+export interface ShadowContactQa {
+  contact: import("../bestBottlesShadowTopology").BestBottlesShadowContact;
+  status: ShadowQaStatus;
+  bounds: ShadowQaBounds | null;
+  measurements: ShadowQaReport["measurements"];
+  failures: string[];
+  warnings: string[];
 }
 
 export interface ModelShadowAnalysis {
@@ -94,6 +112,7 @@ function emptyReport(status: ShadowQaStatus, warnings: string[] = []): ShadowQaR
     status,
     failures: [],
     warnings,
+    contacts: [],
     measurements: {
       contactGapPx: null,
       contactCoreDensity: null,
@@ -114,7 +133,7 @@ function emptyReport(status: ShadowQaStatus, warnings: string[] = []): ShadowQaR
  * downstream post-processing without treating arbitrary scene shading as
  * canonical product detail.
  */
-export function analyzeModelOwnedShadow(
+function analyzeSingleModelOwnedShadow(
   input: AnalyzeModelOwnedShadowInput,
 ): ModelShadowAnalysis {
   const width = Math.floor(input.width);
@@ -406,6 +425,7 @@ export function analyzeModelOwnedShadow(
     status,
     failures,
     warnings,
+    contacts: [],
     measurements: {
       contactGapPx,
       contactCoreDensity,
@@ -422,4 +442,117 @@ export function analyzeModelOwnedShadow(
     target: TARGET,
   };
   return { candidateMask, preservationMask, report };
+}
+
+function emptyMeasurements(): ShadowQaReport["measurements"] {
+  return {
+    contactGapPx: null,
+    contactCoreDensity: null,
+    rightExtensionPx: null,
+    rightExtensionRatio: null,
+    leftExtensionPx: null,
+    verticalDepthPx: null,
+    componentCount: 0,
+    shadowPixelCount: 0,
+  };
+}
+
+export function analyzeModelOwnedShadow(
+  input: AnalyzeModelOwnedShadowInput,
+): ModelShadowAnalysis {
+  const expectedContacts = input.topology?.expectedContacts ?? ["bottle"];
+  const analyses: Array<{
+    contact: import("../bestBottlesShadowTopology").BestBottlesShadowContact;
+    bounds: ShadowQaBounds | null;
+    analysis: ModelShadowAnalysis | null;
+  }> = expectedContacts.map((contact) => {
+    const supplied =
+      input.contactBounds?.[contact] ??
+      (contact === "bottle" ? input.productBounds ?? input.objectBounds : undefined);
+    const bounds = supplied
+      ? {
+          left: supplied.left ?? 0,
+          right: supplied.right ?? input.width - 1,
+          top: supplied.top,
+          bottom: supplied.bottom,
+        }
+      : null;
+    return {
+      contact,
+      bounds,
+      analysis: bounds
+        ? analyzeSingleModelOwnedShadow({
+            ...input,
+            topology: undefined,
+            contactBounds: undefined,
+            productBounds: bounds,
+            objectBounds: undefined,
+          })
+        : null,
+    };
+  });
+
+  const maskLength = Math.max(0, Math.floor(input.width) * Math.floor(input.height));
+  const candidateMask = new Uint8Array(maskLength);
+  const preservationMask = new Uint8Array(maskLength);
+  for (const { analysis } of analyses) {
+    if (!analysis) continue;
+    for (let index = 0; index < maskLength; index += 1) {
+      if (analysis.candidateMask[index]) candidateMask[index] = 1;
+      if (analysis.preservationMask[index]) preservationMask[index] = 1;
+    }
+  }
+
+  const contacts: ShadowContactQa[] = analyses.map(({ contact, bounds, analysis }) => ({
+    contact,
+    status: analysis?.report.status ?? "fail",
+    bounds,
+    measurements: analysis?.report.measurements ?? emptyMeasurements(),
+    failures: analysis
+      ? [...analysis.report.failures]
+      : [`${contact} contact bounds are missing.`],
+    warnings: analysis ? [...analysis.report.warnings] : [],
+  }));
+  const isMultiContact = expectedContacts.length > 1;
+  const failures = contacts.flatMap((contact) => {
+    if (contact.status === "pass") return [];
+    const details =
+      contact.failures.length > 0
+        ? contact.failures
+        : [`${contact.contact} shadow contact did not pass (${contact.status}).`];
+    return details.map((failure) => `${contact.contact}: ${failure}`);
+  });
+  const warnings = contacts.flatMap((contact) =>
+    contact.warnings.map((warning) => `${contact.contact}: ${warning}`),
+  );
+  const primaryReport = analyses[0]?.analysis?.report;
+  const measurements = {
+    ...(primaryReport?.measurements ?? emptyMeasurements()),
+    componentCount: contacts.reduce(
+      (total, contact) => total + contact.measurements.componentCount,
+      0,
+    ),
+    shadowPixelCount: contacts.reduce(
+      (total, contact) => total + contact.measurements.shadowPixelCount,
+      0,
+    ),
+  };
+  const status: ShadowQaStatus = isMultiContact
+    ? contacts.every((contact) => contact.status === "pass")
+      ? "pass"
+      : "fail"
+    : primaryReport?.status ?? "review";
+
+  return {
+    candidateMask,
+    preservationMask,
+    report: {
+      status,
+      failures: isMultiContact ? failures : primaryReport?.failures ?? failures,
+      warnings: isMultiContact ? warnings : primaryReport?.warnings ?? warnings,
+      contacts,
+      measurements,
+      target: TARGET,
+    },
+  };
 }

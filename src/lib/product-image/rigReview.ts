@@ -58,7 +58,9 @@ export function buildRigReviewRequirements(review: RigReviewEvidence): RigReview
   const shadowPass =
     review.shadowOwner === "rig" ||
     (review.shadowQa?.status === "pass" &&
-      review.shadowQa.target.contract === "contact-back-right-v1");
+      review.shadowQa.target.contract === "contact-back-right-v1" &&
+      (review.shadowQa.contacts?.length ?? 0) > 0 &&
+      review.shadowQa.contacts?.every((contact) => contact.status === "pass"));
 
   return [
     {
@@ -127,7 +129,12 @@ export function buildRigReviewRequirements(review: RigReviewEvidence): RigReview
       detail:
         review.shadowOwner === "model"
           ? review.shadowQa
-            ? `${review.shadowQa.status} · gap ${review.shadowQa.measurements.contactGapPx ?? "—"}px · right ${review.shadowQa.measurements.rightExtensionRatio ?? "—"}× width`
+            ? `${review.shadowQa.status} · ${(review.shadowQa.contacts ?? [])
+                .map(
+                  (contact) =>
+                    `${contact.contact} ${contact.status} (gap ${contact.measurements.contactGapPx ?? "—"}px · right ${contact.measurements.rightExtensionRatio ?? "—"}× width)`,
+                )
+                .join(" · ")}`
             : "Model-shadow evidence is missing."
           : "Madison deterministic contact shadow applied after geometry QA.",
       status: shadowPass ? "pass" : "fail",

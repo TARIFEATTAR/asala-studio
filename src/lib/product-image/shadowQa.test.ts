@@ -68,6 +68,59 @@ function makeShadowFixture(kind: ShadowFixtureKind) {
 }
 
 describe("analyzeModelOwnedShadow", () => {
+  it("passes both required contacts for a detached-sidecar topology", () => {
+    const fixture = makeShadowFixture("good");
+    const paint = (left: number, top: number, right: number, bottom: number, delta: number) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * fixture.width + x) * 4;
+          fixture.pixels[index] = fixture.background.r - delta;
+          fixture.pixels[index + 1] = fixture.background.g - delta;
+          fixture.pixels[index + 2] = fixture.background.b - delta;
+        }
+      }
+    };
+    paint(280, 300, 320, 360, 120);
+    paint(314, 361, 325, 363, 32);
+    paint(320, 364, 330, 368, 14);
+
+    const analysis = analyzeModelOwnedShadow({
+      ...fixture,
+      topology: {
+        kind: "detached-sidecar",
+        expectedContacts: ["bottle", "sidecar"],
+        source: "reviewed-reference",
+      },
+      contactBounds: {
+        bottle: fixture.productBounds,
+        sidecar: { left: 280, right: 320, top: 300, bottom: 360 },
+      },
+    });
+
+    assert.equal(analysis.report.contacts?.length, 2);
+    assert.equal(analysis.report.status, "pass");
+    assert.ok(analysis.preservationMask.some((value) => value === 1));
+  });
+
+  it("fails a detached-sidecar topology when the cap shadow is missing", () => {
+    const fixture = makeShadowFixture("good");
+    const analysis = analyzeModelOwnedShadow({
+      ...fixture,
+      topology: {
+        kind: "detached-sidecar",
+        expectedContacts: ["bottle", "sidecar"],
+        source: "reviewed-reference",
+      },
+      contactBounds: {
+        bottle: fixture.productBounds,
+        sidecar: { left: 280, right: 320, top: 300, bottom: 360 },
+      },
+    });
+
+    assert.equal(analysis.report.status, "fail");
+    assert.match(analysis.report.failures.join(" "), /sidecar/i);
+  });
+
   it("passes a continuous back-right feather and preserves its connected component", () => {
     const good = analyzeModelOwnedShadow(makeShadowFixture("good"));
 

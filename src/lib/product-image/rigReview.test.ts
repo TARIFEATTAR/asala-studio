@@ -10,6 +10,25 @@ function shadowQa(status: "pass" | "review"): ShadowQaReport {
     status,
     failures: [],
     warnings: [],
+    contacts: [
+      {
+        contact: "bottle",
+        status,
+        bounds: { left: 700, right: 1380, top: 550, bottom: 2082 },
+        measurements: {
+          contactGapPx: 0,
+          contactCoreDensity: 0.36,
+          rightExtensionPx: 18,
+          rightExtensionRatio: 0.28,
+          leftExtensionPx: 2,
+          verticalDepthPx: 8,
+          componentCount: 1,
+          shadowPixelCount: 120,
+        },
+        failures: [],
+        warnings: [],
+      },
+    ],
     measurements: {
       contactGapPx: 0,
       contactCoreDensity: 0.36,
@@ -151,5 +170,18 @@ describe("rig review approval gate", () => {
       buildRigReviewRequirements(review).find((row) => row.id === "shadow")?.status,
       "fail",
     );
+  });
+
+  it("blocks model-owned approval when one expected sidecar contact fails", () => {
+    const report = shadowQa("pass");
+    report.contacts!.push({
+      ...report.contacts![0],
+      contact: "sidecar",
+      status: "fail",
+      failures: ["Sidecar shadow missing."],
+    });
+    const review = passingReview({ shadowOwner: "model", shadowQa: report });
+
+    assert.equal(isRigApprovalReady(review, confirmed), false);
   });
 });

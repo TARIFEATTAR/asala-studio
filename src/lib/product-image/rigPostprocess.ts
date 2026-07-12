@@ -10,6 +10,10 @@ import {
   type BestBottlesShadowOwner,
 } from "@/lib/bestBottlesShadowPolicy";
 import { analyzeModelOwnedShadow, type ShadowQaReport } from "@/lib/product-image/shadowQa";
+import type {
+  BestBottlesShadowContact,
+  BestBottlesShadowTopology,
+} from "@/lib/bestBottlesShadowTopology";
 
 interface Rgb {
   r: number;
@@ -58,6 +62,7 @@ export interface RigBaselineNormalizeOptions {
   mode?: string | null;
   targetBackgroundHex?: string;
   shadowOwner?: BestBottlesShadowOwner;
+  shadowTopology?: BestBottlesShadowTopology;
   maskReferenceUrl?: string | null;
   requireMaskControl?: boolean;
 }
@@ -208,6 +213,122 @@ export interface RigFinalizeShadowInput {
   background: Rgb;
   objectBounds: RigStrongBounds | null;
   baselineYPx: number | null;
+  topology?: BestBottlesShadowTopology;
+  contactBounds?: Partial<Record<BestBottlesShadowContact, RigStrongBounds>>;
+}
+
+export interface DetectModelShadowContactBoundsInput {
+  pixels: Uint8Array | Uint8ClampedArray;
+  width: number;
+  height: number;
+  background: Rgb;
+  groupBounds: RigStrongBounds;
+  baselineYPx: number;
+  topology: BestBottlesShadowTopology;
+}
+
+export function detectModelShadowContactBounds(
+  input: DetectModelShadowContactBoundsInput,
+): Partial<Record<BestBottlesShadowContact, RigStrongBounds>> {
+  const { width, height, background, topology } = input;
+  const left = clamp(Math.round(input.groupBounds.left ?? 0), 0, width - 1);
+  const right = clamp(Math.round(input.groupBounds.right ?? width - 1), 0, width - 1);
+  const top = clamp(Math.round(input.groupBounds.top), 0, height - 1);
+  const bottom = clamp(Math.round(input.baselineYPx), top, height - 1);
+  if (topology.expectedContacts.length === 1) {
+    return {
+      [topology.expectedContacts[0]]: { left, right, top, bottom },
+    };
+  }
+
+  const columns: Array<{
+    x: number;
+    pixels: number;
+    minY: number;
+    maxY: number;
+  }> = [];
+  for (let x = left; x <= right; x += 1) {
+    let pixels = 0;
+    let minY = height;
+    let maxY = -1;
+    for (let y = top; y <= bottom; y += 1) {
+      const index = (y * width + x) * 4;
+      const alpha = input.pixels[index + 3] ?? 0;
+      const distance =
+        Math.abs((input.pixels[index] ?? 0) - background.r) +
+        Math.abs((input.pixels[index + 1] ?? 0) - background.g) +
+        Math.abs((input.pixels[index + 2] ?? 0) - background.b);
+      if (alpha > 8 && distance >= 24) {
+        pixels += 1;
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+    if (pixels >= 2) columns.push({ x, pixels, minY, maxY });
+  }
+
+  const segments: Array<RigStrongBounds & { pixels: number }> = [];
+  for (const column of columns) {
+    const current = segments[segments.length - 1];
+    if (!current || column.x - (current.right ?? column.x) > 3) {
+      segments.push({
+        left: column.x,
+        right: column.x,
+        top: column.minY,
+        bottom: column.maxY,
+        pixels: column.pixels,
+      });
+    } else {
+      current.right = column.x;
+      current.top = Math.min(current.top, column.minY);
+      current.bottom = Math.max(current.bottom, column.maxY);
+      current.pixels += column.pixels;
+    }
+  }
+  const ranked = segments
+    .filter((segment) => (segment.right ?? 0) - (segment.left ?? 0) >= 2)
+    .sort((first, second) => second.pixels - first.pixels);
+  const bottle = ranked[0];
+  if (!bottle) return {};
+  const result: Partial<Record<BestBottlesShadowContact, RigStrongBounds>> = {
+    bottle: {
+      left: bottle.left,
+      right: bottle.right,
+      top: bottle.top,
+      bottom: bottle.bottom,
+    },
+  };
+  const bottleCenter = ((bottle.left ?? 0) + (bottle.right ?? 0)) / 2;
+  if (topology.expectedContacts.includes("sidecar")) {
+    const sidecar =
+      ranked
+        .slice(1)
+        .filter(
+          (segment) =>
+            ((segment.left ?? 0) + (segment.right ?? 0)) / 2 > bottleCenter,
+        )[0] ?? ranked[1];
+    if (sidecar) {
+      result.sidecar = {
+        left: sidecar.left,
+        right: sidecar.right,
+        top: sidecar.top,
+        bottom: sidecar.bottom,
+      };
+    }
+  }
+  if (topology.expectedContacts.includes("accessory")) {
+    const used = new Set([bottle, result.sidecar ? ranked.find((segment) => segment.left === result.sidecar?.left) : null]);
+    const accessory = ranked.find((segment) => !used.has(segment));
+    if (accessory) {
+      result.accessory = {
+        left: accessory.left,
+        right: accessory.right,
+        top: accessory.top,
+        bottom: accessory.bottom,
+      };
+    }
+  }
+  return result;
 }
 
 export interface RigFinalizeShadowResult {
@@ -959,6 +1080,8 @@ export function finalizeRigShadow(
       background: input.background,
       objectBounds: input.objectBounds ?? undefined,
       baselineYPx: input.baselineYPx ?? Number.NaN,
+      topology: input.topology,
+      contactBounds: input.contactBounds,
     });
     return {
       deterministicShadowPixels: 0,
@@ -1616,6 +1739,17 @@ export async function normalizeBestBottlesRigBaseline(
 
   if (maskImageData && maskBounds) {
     const detectedBaseline = maskBounds.bottom;
+    const modelContactBounds = options.shadowTopology
+      ? detectModelShadowContactBounds({
+          pixels: imageData.data,
+          width,
+          height,
+          background: analysisBg,
+          groupBounds: maskBounds,
+          baselineYPx: detectedBaseline,
+          topology: options.shadowTopology,
+        })
+      : undefined;
     const modelShadowAnalysis = shadowOwner === "model"
       ? analyzeModelOwnedShadow({
           pixels: imageData.data,
@@ -1624,6 +1758,8 @@ export async function normalizeBestBottlesRigBaseline(
           background: analysisBg,
           objectBounds: maskBounds,
           baselineYPx: detectedBaseline,
+          topology: options.shadowTopology,
+          contactBounds: modelContactBounds,
         })
       : null;
     const geometryAnalysisPixels = modelShadowAnalysis
@@ -1751,6 +1887,18 @@ export async function normalizeBestBottlesRigBaseline(
       qaIssues.push("Mask-controlled product envelope is too small for the family rig.");
     }
 
+    const finalContactBounds =
+      options.shadowTopology && finalBounds && finalBaseline != null
+        ? detectModelShadowContactBounds({
+            pixels: finalImageData.data,
+            width,
+            height,
+            background: bg,
+            groupBounds: finalBounds,
+            baselineYPx: finalBaseline,
+            topology: options.shadowTopology,
+          })
+        : undefined;
     const finalShadow = finalizeRigShadow({
       owner: shadowOwner,
       pixels: finalImageData.data,
@@ -1759,6 +1907,8 @@ export async function normalizeBestBottlesRigBaseline(
       background: bg,
       objectBounds: finalBounds,
       baselineYPx: finalBaseline,
+      topology: options.shadowTopology,
+      contactBounds: finalContactBounds,
     });
     outCtx.putImageData(finalImageData, 0, 0);
 
@@ -1820,6 +1970,7 @@ export async function normalizeBestBottlesRigBaseline(
       rig,
       bounds: fallbackBounds,
       baselineYPx: null,
+      topology: options.shadowTopology,
       capState,
     });
     // Route every ownership branch through the same final-shadow authority.
@@ -1881,6 +2032,23 @@ export async function normalizeBestBottlesRigBaseline(
         geometryBaseline,
       )
     : null;
+  const modelGroupBounds = modelProductControlBounds
+    ? { ...modelProductControlBounds, bottom: geometryBaseline }
+    : rawStrongBounds
+      ? { ...rawStrongBounds, bottom: geometryBaseline }
+      : rawStrongBounds;
+  const modelContactBounds =
+    options.shadowTopology && modelGroupBounds
+      ? detectModelShadowContactBounds({
+          pixels: imageData.data,
+          width,
+          height,
+          background: analysisBg,
+          groupBounds: modelGroupBounds,
+          baselineYPx: geometryBaseline,
+          topology: options.shadowTopology,
+        })
+      : undefined;
 
   const modelShadowAnalysis = shadowOwner === "model"
     ? analyzeModelOwnedShadow({
@@ -1891,12 +2059,10 @@ export async function normalizeBestBottlesRigBaseline(
         // The product's geometry ends at the detected baseline. Treat pixels
         // below it as shadow candidates even when an extra component was wide
         // or dark enough to contaminate the raw strong bounds.
-        objectBounds: modelProductControlBounds
-          ? { ...modelProductControlBounds, bottom: geometryBaseline }
-          : rawStrongBounds
-            ? { ...rawStrongBounds, bottom: geometryBaseline }
-            : rawStrongBounds,
+        objectBounds: modelGroupBounds,
         baselineYPx: geometryBaseline,
+        topology: options.shadowTopology,
+        contactBounds: modelContactBounds,
       })
     : null;
   const geometryAnalysisPixels = modelShadowAnalysis
@@ -2002,6 +2168,18 @@ export async function normalizeBestBottlesRigBaseline(
   });
   const framingDecision = getFramingDecision(framingQa);
 
+  const finalContactBounds =
+    options.shadowTopology && finalBounds && finalBaseline != null
+      ? detectModelShadowContactBounds({
+          pixels: finalImageData.data,
+          width,
+          height,
+          background: bg,
+          groupBounds: finalBounds,
+          baselineYPx: finalBaseline,
+          topology: options.shadowTopology,
+        })
+      : undefined;
   const finalShadow = finalizeRigShadow({
     owner: shadowOwner,
     pixels: finalImageData.data,
@@ -2010,6 +2188,8 @@ export async function normalizeBestBottlesRigBaseline(
     background: bg,
     objectBounds: finalBounds,
     baselineYPx: finalBaseline,
+    topology: options.shadowTopology,
+    contactBounds: finalContactBounds,
   });
   outCtx.putImageData(finalImageData, 0, 0);
 

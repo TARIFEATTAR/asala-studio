@@ -12,6 +12,7 @@ export interface BestBottlesShadowTopologyProductLike {
   mode?: string | null;
   applicator?: string | null;
   accessoryCode?: string | null;
+  accessoryContactsSurface?: boolean | null;
   itemName?: string | null;
   itemDescription?: string | null;
 }
@@ -63,7 +64,7 @@ export function resolveBestBottlesShadowTopology(
       expectedContacts: [
         "bottle",
         ...(hasSidecar ? (["sidecar"] as const) : []),
-        "accessory",
+        ...(product.accessoryContactsSurface ? (["accessory"] as const) : []),
       ],
       source,
     };
