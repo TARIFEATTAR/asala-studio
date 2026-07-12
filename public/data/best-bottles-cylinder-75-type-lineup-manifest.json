@@ -20,8 +20,8 @@
   },
   "summary": {
     "physicalTypeCount": 75,
-    "eligibleCount": 68,
-    "blockerCount": 7,
+    "eligibleCount": 59,
+    "blockerCount": 16,
     "supplementalEndpointCount": 1
   },
   "coverageRows": [
@@ -351,10 +351,10 @@
       "capacityMl": 5,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 55,
         "heightWithoutCapMm": 53,
@@ -373,7 +373,9 @@
         "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
       },
       "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "5|glass bottle|13-415|cap/closure|short",
@@ -415,10 +417,10 @@
       "capacityMl": 5,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 55,
         "heightWithoutCapMm": 53,
@@ -437,7 +439,9 @@
         "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
       },
       "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "5|glass bottle|13-415|cap/closure|tall",
@@ -506,10 +510,10 @@
       "capacityMl": 9,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 109,
         "heightWithoutCapMm": 106,
@@ -528,7 +532,9 @@
         "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
       },
       "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "9|glass bottle|13-415||tall",
@@ -570,10 +576,10 @@
       "capacityMl": 9,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 109,
         "heightWithoutCapMm": 106,
@@ -592,7 +598,9 @@
         "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
       },
       "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "9|glass bottle|18-400||short",
@@ -978,10 +986,10 @@
       "capacityMl": 9,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 87,
         "heightWithoutCapMm": 74,
@@ -1000,7 +1008,9 @@
         "sha256": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26"
       },
       "primarySourceChecksum": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "28|glass bottle|16mm|metal roller ball|roll-on",
@@ -1232,10 +1242,10 @@
       "capacityMl": 9,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 75,
         "heightWithoutCapMm": 63,
@@ -1254,7 +1264,9 @@
         "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
       },
       "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "9|glass bottle|17-415|plastic roller ball|screw cap",
@@ -1328,10 +1340,10 @@
       "capacityMl": 9,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 75,
         "heightWithoutCapMm": 63,
@@ -1350,7 +1362,9 @@
         "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
       },
       "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "28|glass bottle|16mm|plastic roller ball|roll-on",
@@ -1994,10 +2008,10 @@
       "capacityMl": 50,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 121,
         "heightWithoutCapMm": 117,
@@ -2016,7 +2030,9 @@
         "sha256": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985"
       },
       "primarySourceChecksum": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "50|glass bottle|18-415|reducer|tall",
@@ -2090,10 +2106,10 @@
       "capacityMl": 100,
       "material": "glass",
       "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
+      "identityStatus": "ambiguous",
       "measurementStatus": "confirmed",
       "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
+      "topologyStatus": "ambiguous",
       "measurements": {
         "heightWithCapMm": 173,
         "heightWithoutCapMm": 154,
@@ -2112,7 +2128,9 @@
         "sha256": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04"
       },
       "primarySourceChecksum": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04",
-      "reasons": []
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
     },
     {
       "physicalTypeKey": "100|glass bottle|18-415|reducer|tall",
@@ -2693,38 +2711,6 @@
       "reasons": []
     },
     {
-      "physicalTypeKey": "5|glass bottle|13-415||short",
-      "plateId": "02",
-      "websiteSku": "GBCyl5WhtSht",
-      "graceSku": "GB-CYL-WHT-5ML-WHT-S",
-      "capacityMl": 5,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 55,
-        "heightWithoutCapMm": 53,
-        "diameterMm": 17
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 58,
-        "assembledTargetPx": 1327.04,
-        "bodyTargetPx": 1278.784,
-        "expectedWidthPx": 410.176
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/2. GBCyl5WhtSht.psd",
-        "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
-      },
-      "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
-      "reasons": []
-    },
-    {
       "physicalTypeKey": "5|glass bottle|13-415|cap/closure|short",
       "plateId": "02",
       "websiteSku": "GBCyl5BlkSht",
@@ -2754,38 +2740,6 @@
         "sha256": "2f272cbc148ca9bdb0b7ec5c27837f2450a116e5d8fd020e18c0e307b377dafe"
       },
       "primarySourceChecksum": "2f272cbc148ca9bdb0b7ec5c27837f2450a116e5d8fd020e18c0e307b377dafe",
-      "reasons": []
-    },
-    {
-      "physicalTypeKey": "5|glass bottle|13-415|cap/closure|short cap",
-      "plateId": "02",
-      "websiteSku": "GBCyl5WhtSht",
-      "graceSku": "GBCyl5WhtSht",
-      "capacityMl": 5,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 55,
-        "heightWithoutCapMm": 53,
-        "diameterMm": 17
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 58,
-        "assembledTargetPx": 1327.04,
-        "bodyTargetPx": 1278.784,
-        "expectedWidthPx": 410.176
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/2. GBCyl5WhtSht.psd",
-        "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
-      },
-      "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
       "reasons": []
     },
     {
@@ -2821,38 +2775,6 @@
       "reasons": []
     },
     {
-      "physicalTypeKey": "9|glass bottle|13-415||short",
-      "plateId": "02",
-      "websiteSku": "GBTallCyl9WhtSht",
-      "graceSku": "GB-CYL-WHT-9ML-WHT-S",
-      "capacityMl": 9,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 109,
-        "heightWithoutCapMm": 106,
-        "diameterMm": 18
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 76.96428571428571,
-        "assembledTargetPx": 1760.942857142857,
-        "bodyTargetPx": 1712.4765399737873,
-        "expectedWidthPx": 290.79790301441676
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/5. 13-415 Bottles PSD/13. Tall Cylinder 9ml/2. GBTallCyl9WhtSht.psd",
-        "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
-      },
-      "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
-      "reasons": []
-    },
-    {
       "physicalTypeKey": "9|glass bottle|13-415||tall",
       "plateId": "02",
       "websiteSku": "GBTallCyl9Gl",
@@ -2882,38 +2804,6 @@
         "sha256": null
       },
       "primarySourceChecksum": "7882ee5d521a6aaf551bc2cc9211a3d830209829d74c4675845f86effa1893cc",
-      "reasons": []
-    },
-    {
-      "physicalTypeKey": "9|glass bottle|13-415|cap/closure|short cap",
-      "plateId": "02",
-      "websiteSku": "GBTallCyl9WhtSht",
-      "graceSku": "GBTallCyl9WhtSht",
-      "capacityMl": 9,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 109,
-        "heightWithoutCapMm": 106,
-        "diameterMm": 18
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 76.96428571428571,
-        "assembledTargetPx": 1760.942857142857,
-        "bodyTargetPx": 1712.4765399737873,
-        "expectedWidthPx": 290.79790301441676
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/5. 13-415 Bottles PSD/13. Tall Cylinder 9ml/2. GBTallCyl9WhtSht.psd",
-        "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
-      },
-      "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
       "reasons": []
     },
     {
@@ -3237,38 +3127,6 @@
       "reasons": []
     },
     {
-      "physicalTypeKey": "9|roll-on bottle|17-415|metal roller ball|roll-on cap",
-      "plateId": "03",
-      "websiteSku": "GBCylSwrl9MtlRollWht",
-      "graceSku": "GBCylSwrl9MtlRollWht",
-      "capacityMl": 9,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 87,
-        "heightWithoutCapMm": 74,
-        "diameterMm": 21
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 73.4,
-        "assembledTargetPx": 1679.392,
-        "bodyTargetPx": 1428.448367816092,
-        "expectedWidthPx": 405.3704827586207
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/17-415 Bottles/7. Swirl 9ml (Uncapped)/10. GBCylSwrl9MtlRollWht.psd",
-        "sha256": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26"
-      },
-      "primarySourceChecksum": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26",
-      "reasons": []
-    },
-    {
       "physicalTypeKey": "50|glass bottle|16mm|metal roller ball|roll-on",
       "plateId": "03",
       "websiteSku": "GBCyl50MtlRollBlk",
@@ -3461,38 +3319,6 @@
       "reasons": []
     },
     {
-      "physicalTypeKey": "9|glass bottle|17-415|plastic roller ball|roll-on",
-      "plateId": "04",
-      "websiteSku": "GBCylSwrl9RollWht",
-      "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
-      "capacityMl": 9,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 75,
-        "heightWithoutCapMm": 63,
-        "diameterMm": 21
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 71,
-        "assembledTargetPx": 1624.48,
-        "bodyTargetPx": 1364.5632,
-        "expectedWidthPx": 454.85440000000006
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/17-415 Bottles/7. Swirl 9ml (Uncapped)/20. GBCylSwrl9RollWht.psd",
-        "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
-      },
-      "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
-      "reasons": []
-    },
-    {
       "physicalTypeKey": "9|glass bottle|17-415|plastic roller ball|screw cap",
       "plateId": "04",
       "websiteSku": "GBCylAmb9RollMattGl",
@@ -3554,38 +3380,6 @@
         "sha256": "9a21cac689e6f50e5496bd879a63d44c355a88b02340bc5a90d42938a1ed1d49"
       },
       "primarySourceChecksum": "9a21cac689e6f50e5496bd879a63d44c355a88b02340bc5a90d42938a1ed1d49",
-      "reasons": []
-    },
-    {
-      "physicalTypeKey": "9|roll-on bottle|17-415|plastic roller ball|roll-on cap",
-      "plateId": "04",
-      "websiteSku": "GBCylSwrl9RollWht",
-      "graceSku": "GBCylSwrl9RollWht",
-      "capacityMl": 9,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 75,
-        "heightWithoutCapMm": 63,
-        "diameterMm": 21
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 71,
-        "assembledTargetPx": 1624.48,
-        "bodyTargetPx": 1364.5632,
-        "expectedWidthPx": 454.85440000000006
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/17-415 Bottles/7. Swirl 9ml (Uncapped)/20. GBCylSwrl9RollWht.psd",
-        "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
-      },
-      "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
       "reasons": []
     },
     {
@@ -4165,38 +3959,6 @@
       "reasons": []
     },
     {
-      "physicalTypeKey": "50|glass bottle|18-415|reducer|screw cap",
-      "plateId": "07",
-      "websiteSku": "GBCyl50RdcrMtSl",
-      "graceSku": "GB-CYL-CLR-50ML-RDC-MSLV",
-      "capacityMl": 50,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 121,
-        "heightWithoutCapMm": 117,
-        "diameterMm": 32
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 78.25,
-        "assembledTargetPx": 1790.36,
-        "bodyTargetPx": 1731.1745454545453,
-        "expectedWidthPx": 473.4836363636363
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/2. 18-415 Bottles/2. Cylindrical 50ml/1. Cylindrical 50ml PSD/9. GBCyl50RdcrMtSl.psd",
-        "sha256": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985"
-      },
-      "primarySourceChecksum": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985",
-      "reasons": []
-    },
-    {
       "physicalTypeKey": "50|glass bottle|18-415|reducer|tall",
       "plateId": "07",
       "websiteSku": "GBCyl50RdcrMtSlTall",
@@ -4258,38 +4020,6 @@
         "sha256": "1288f7542f255188ce8ff914634bc352dd20e63663f970df7fc967e6bdedad7f"
       },
       "primarySourceChecksum": "1288f7542f255188ce8ff914634bc352dd20e63663f970df7fc967e6bdedad7f",
-      "reasons": []
-    },
-    {
-      "physicalTypeKey": "100|glass bottle|18-415|reducer|screw cap",
-      "plateId": "07",
-      "websiteSku": "GBCyl100RdcrMtSl",
-      "graceSku": "GB-CYL-CLR-100ML-RDC-MSLV",
-      "capacityMl": 100,
-      "material": "glass",
-      "identityMatch": "websiteSku",
-      "identityStatus": "confirmed",
-      "measurementStatus": "confirmed",
-      "referenceStatus": "exact-psd",
-      "topologyStatus": "confirmed",
-      "measurements": {
-        "heightWithCapMm": 173,
-        "heightWithoutCapMm": 154,
-        "diameterMm": 35
-      },
-      "displayScale": {
-        "version": "cylinder-measured-display-v1",
-        "assembledTargetPct": 86.66666666666667,
-        "assembledTargetPx": 1982.9333333333334,
-        "bodyTargetPx": 1765.1545279383429,
-        "expectedWidthPx": 401.17148362235065
-      },
-      "reference": {
-        "source": "authoritative-psd",
-        "path": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/2. 18-415 Bottles/3. Cylindrical 100ml/1. Cylindrical 100ml PSD/9. GBCyl100RdcrMtSl.psd",
-        "sha256": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04"
-      },
-      "primarySourceChecksum": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04",
       "reasons": []
     },
     {
@@ -4591,6 +4321,22 @@
       ]
     },
     {
+      "physicalTypeKey": "5|glass bottle|13-415||short",
+      "websiteSku": "GBCyl5WhtSht",
+      "graceSku": "GB-CYL-WHT-5ML-WHT-S",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
+      "physicalTypeKey": "5|glass bottle|13-415|cap/closure|short cap",
+      "websiteSku": "GBCyl5WhtSht",
+      "graceSku": "GBCyl5WhtSht",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
       "physicalTypeKey": "5|glass bottle|13-415|n/a|short",
       "websiteSku": "GBCylBlu5BlkShSht",
       "graceSku": "GB-CYL-BLU-5ML-CAP-SBLK",
@@ -4599,6 +4345,22 @@
         "missing_height_without_cap_mm",
         "readiness_topology_mismatch",
         "no_exact_reference"
+      ]
+    },
+    {
+      "physicalTypeKey": "9|glass bottle|13-415||short",
+      "websiteSku": "GBTallCyl9WhtSht",
+      "graceSku": "GB-CYL-WHT-9ML-WHT-S",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
+      "physicalTypeKey": "9|glass bottle|13-415|cap/closure|short cap",
+      "websiteSku": "GBTallCyl9WhtSht",
+      "graceSku": "GBTallCyl9WhtSht",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
       ]
     },
     {
@@ -4618,11 +4380,35 @@
       ]
     },
     {
+      "physicalTypeKey": "9|roll-on bottle|17-415|metal roller ball|roll-on cap",
+      "websiteSku": "GBCylSwrl9MtlRollWht",
+      "graceSku": "GBCylSwrl9MtlRollWht",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
       "physicalTypeKey": "28|glass bottle|16mm|metal roller ball|roll-on",
       "websiteSku": "GBMtlRoll28Blk",
       "graceSku": "GB-CYL-CLR-28ML-MRL-01",
       "reasons": [
         "no_exact_reference"
+      ]
+    },
+    {
+      "physicalTypeKey": "9|glass bottle|17-415|plastic roller ball|roll-on",
+      "websiteSku": "GBCylSwrl9RollWht",
+      "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
+      "physicalTypeKey": "9|roll-on bottle|17-415|plastic roller ball|roll-on cap",
+      "websiteSku": "GBCylSwrl9RollWht",
+      "graceSku": "GBCylSwrl9RollWht",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
       ]
     },
     {
@@ -4639,6 +4425,22 @@
       "graceSku": "GB-CYL-CLR-9ML-T-01",
       "reasons": [
         "invalid_measurement_geometry"
+      ]
+    },
+    {
+      "physicalTypeKey": "50|glass bottle|18-415|reducer|screw cap",
+      "websiteSku": "GBCyl50RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-MSLV",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
+      ]
+    },
+    {
+      "physicalTypeKey": "100|glass bottle|18-415|reducer|screw cap",
+      "websiteSku": "GBCyl100RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-MSLV",
+      "reasons": [
+        "ambiguous_readiness_website_sku"
       ]
     }
   ],
@@ -5004,10 +4806,10 @@
         "capacityMl": 5,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 55,
           "heightWithoutCapMm": 53,
@@ -5026,7 +4828,9 @@
           "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
         },
         "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "5|glass bottle|13-415|cap/closure|short cap",
@@ -5036,10 +4840,10 @@
         "capacityMl": 5,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 55,
           "heightWithoutCapMm": 53,
@@ -5058,7 +4862,9 @@
           "sha256": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70"
         },
         "primarySourceChecksum": "d66321b90d0b7432c3bd781860b92e0d1d4ac23bed4de245ebc9edeb7be14f70",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "5|glass bottle|13-415|cap/closure|tall",
@@ -5100,10 +4906,10 @@
         "capacityMl": 9,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 109,
           "heightWithoutCapMm": 106,
@@ -5122,7 +4928,9 @@
           "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
         },
         "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "9|glass bottle|13-415|cap/closure|short cap",
@@ -5132,10 +4940,10 @@
         "capacityMl": 9,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 109,
           "heightWithoutCapMm": 106,
@@ -5154,7 +4962,9 @@
           "sha256": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445"
         },
         "primarySourceChecksum": "65c4b40d0e44deb7bc54d470196dfdef1b899218dca928f45246e2daae2de445",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "9|glass bottle|13-415||tall",
@@ -5569,10 +5379,10 @@
         "capacityMl": 9,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 87,
           "heightWithoutCapMm": 74,
@@ -5591,7 +5401,9 @@
           "sha256": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26"
         },
         "primarySourceChecksum": "ffe03d8875115e51f2a01454fd86d6d43536a9a14cca5ae920e5a3910fed8e26",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "28|glass bottle|16mm|metal roller ball|roll-on",
@@ -5825,10 +5637,10 @@
         "capacityMl": 9,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 75,
           "heightWithoutCapMm": 63,
@@ -5847,7 +5659,9 @@
           "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
         },
         "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "9|roll-on bottle|17-415|plastic roller ball|roll-on cap",
@@ -5857,10 +5671,10 @@
         "capacityMl": 9,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 75,
           "heightWithoutCapMm": 63,
@@ -5879,7 +5693,9 @@
           "sha256": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7"
         },
         "primarySourceChecksum": "6ffcef91bcf657e33df00e7fff289527b0e644bce6fe5d234c26f74b3ceb41a7",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "9|glass bottle|17-415|plastic roller ball|tall",
@@ -6565,10 +6381,10 @@
         "capacityMl": 50,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 121,
           "heightWithoutCapMm": 117,
@@ -6587,7 +6403,9 @@
           "sha256": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985"
         },
         "primarySourceChecksum": "e74bfd9325fdcb699452a1bc4f2d067111d4eeac51f038936421b3f144349985",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "50|glass bottle|18-415|reducer|tall",
@@ -6661,10 +6479,10 @@
         "capacityMl": 100,
         "material": "glass",
         "identityMatch": "websiteSku",
-        "identityStatus": "confirmed",
+        "identityStatus": "ambiguous",
         "measurementStatus": "confirmed",
         "referenceStatus": "exact-psd",
-        "topologyStatus": "confirmed",
+        "topologyStatus": "ambiguous",
         "measurements": {
           "heightWithCapMm": 173,
           "heightWithoutCapMm": 154,
@@ -6683,7 +6501,9 @@
           "sha256": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04"
         },
         "primarySourceChecksum": "a5cd550691a63ef6f96218889e281cce0bb5525429879c5ed763d30774d26c04",
-        "reasons": []
+        "reasons": [
+          "ambiguous_readiness_website_sku"
+        ]
       },
       {
         "physicalTypeKey": "100|glass bottle|18-415|reducer|tall",

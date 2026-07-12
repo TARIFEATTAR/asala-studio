@@ -17,9 +17,9 @@ import {
 } from "../../src/lib/bestBottlesCylinderPhysicalTypes";
 
 type Bytes = Uint8Array;
-type ConfirmationStatus = "confirmed" | "missing" | "mismatch";
+type ConfirmationStatus = "confirmed" | "missing" | "mismatch" | "ambiguous";
 type MeasurementStatus = "confirmed" | "missing" | "invalid";
-type ReferenceStatus = "exact-psd" | "exact-catalog" | "missing-source" | "rejected-non-exact" | "missing";
+type ReferenceStatus = "exact-psd" | "exact-catalog" | "missing-source" | "rejected-non-exact" | "missing" | "ambiguous";
 
 export interface PsdCoverageRow {
   websiteSku?: string | null;
@@ -108,13 +108,25 @@ function sha256(bytes: Bytes): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-function parsePositiveMeasurement(value: unknown): number | null {
-  if (typeof value === "number") return Number.isFinite(value) && value > 0 ? value : null;
-  if (typeof value !== "string") return null;
-  const match = value.replaceAll(",", "").match(/\d+(?:\.\d+)?/);
-  if (!match) return null;
-  const parsed = Number(match[0]);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+function parseMeasurement(value: unknown): { status: "confirmed" | "missing" | "invalid"; value: number | null } {
+  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) {
+    return { status: "missing", value: null };
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value > 0
+      ? { status: "confirmed", value }
+      : { status: "invalid", value: null };
+  }
+  if (typeof value !== "string") return { status: "invalid", value: null };
+  const match = value.trim().match(/^(\d+(?:\.\d+)?)\s*(?:±\s*(\d+(?:\.\d+)?)\s*)?(?:mm)?$/i);
+  if (!match) return { status: "invalid", value: null };
+  const parsed = Number(match[1]);
+  const tolerance = match[2] === undefined ? null : Number(match[2]);
+  if (!Number.isFinite(parsed) || parsed <= 0 ||
+      (tolerance !== null && (!Number.isFinite(tolerance) || tolerance <= 0))) {
+    return { status: "invalid", value: null };
+  }
+  return { status: "confirmed", value: parsed };
 }
 
 function parseCapacity(value: unknown): number {
@@ -175,29 +187,61 @@ function indexRows(rows: readonly CylinderCatalogRow[], field: "websiteSku" | "g
   return index;
 }
 
+function canonicalEvidence(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalEvidence).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value as Record<string, unknown>)
+      .filter(([, child]) => child !== undefined)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, child]) => `${JSON.stringify(key)}:${canonicalEvidence(child)}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value) ?? String(value);
+}
+
+function equivalentBucket<T>(rows: readonly T[]): { row: T | null; ambiguous: boolean } {
+  if (rows.length === 0) return { row: null, ambiguous: false };
+  return new Set(rows.map(canonicalEvidence)).size === 1
+    ? { row: rows[0], ambiguous: false }
+    : { row: null, ambiguous: true };
+}
+
 function joinReadiness(
   target: CylinderCatalogRow,
   websiteIndex: Map<string, CylinderCatalogRow[]>,
   graceIndex: Map<string, CylinderCatalogRow[]>,
-): { row: CylinderCatalogRow | null; match: CylinderManifestRow["identityMatch"] } {
+): { row: CylinderCatalogRow | null; match: CylinderManifestRow["identityMatch"]; ambiguityReason: string | null } {
   const websiteMatches = websiteIndex.get(normalizedSku(target.websiteSku)) ?? [];
   if (websiteMatches.length > 0) {
-    return {
-      row: websiteMatches.find((row) => normalizedSku(row.graceSku) === normalizedSku(target.graceSku)) ?? websiteMatches[0],
-      match: "websiteSku",
-    };
+    const resolved = equivalentBucket(websiteMatches);
+    return resolved.ambiguous
+      ? { row: null, match: "websiteSku", ambiguityReason: "ambiguous_readiness_website_sku" }
+      : { row: resolved.row, match: "websiteSku", ambiguityReason: null };
   }
   const graceMatches = graceIndex.get(normalizedSku(target.graceSku)) ?? [];
-  return graceMatches.length > 0 ? { row: graceMatches[0], match: "graceSku" } : { row: null, match: null };
+  const resolved = equivalentBucket(graceMatches);
+  if (resolved.ambiguous) return { row: null, match: "graceSku", ambiguityReason: "ambiguous_readiness_grace_sku" };
+  return resolved.row
+    ? { row: resolved.row, match: "graceSku", ambiguityReason: null }
+    : { row: null, match: null, ambiguityReason: null };
 }
 
 function coverageFor(
   target: CylinderCatalogRow,
   websiteIndex: Map<string, PsdCoverageRow[]>,
   graceIndex: Map<string, PsdCoverageRow[]>,
-): PsdCoverageRow | null {
-  return websiteIndex.get(normalizedSku(target.websiteSku))?.[0] ??
-    graceIndex.get(normalizedSku(target.graceSku))?.[0] ?? null;
+): { row: PsdCoverageRow | null; ambiguityReason: string | null } {
+  const websiteMatches = websiteIndex.get(normalizedSku(target.websiteSku)) ?? [];
+  if (websiteMatches.length > 0) {
+    const resolved = equivalentBucket(websiteMatches);
+    return resolved.ambiguous
+      ? { row: null, ambiguityReason: "ambiguous_psd_coverage_website_sku" }
+      : { row: resolved.row, ambiguityReason: null };
+  }
+  const graceMatches = graceIndex.get(normalizedSku(target.graceSku)) ?? [];
+  const resolved = equivalentBucket(graceMatches);
+  if (resolved.ambiguous) return { row: null, ambiguityReason: "ambiguous_psd_coverage_grace_sku" };
+  return { row: resolved.row, ambiguityReason: null };
 }
 
 function indexCoverage(rows: readonly PsdCoverageRow[], field: "websiteSku" | "graceSku"): Map<string, PsdCoverageRow[]> {
@@ -261,18 +305,30 @@ function buildRow(
   },
 ): CylinderManifestRow {
   const joined = joinReadiness(target, indexes.readinessWebsite, indexes.readinessGrace);
-  const identityStatus: ConfirmationStatus = joined.row ? "confirmed" : "missing";
-  const topologyStatus: ConfirmationStatus = !joined.row
+  const identityStatus: ConfirmationStatus = joined.ambiguityReason ? "ambiguous" : joined.row ? "confirmed" : "missing";
+  const topologyStatus: ConfirmationStatus = joined.ambiguityReason
+    ? "ambiguous"
+    : !joined.row
     ? "missing"
     : physicalTypeKey(joined.row) === target.physicalTypeKey ? "confirmed" : "mismatch";
-  const heightWithCapMm = parsePositiveMeasurement(target.heightWithCap);
-  const heightWithoutCapMm = parsePositiveMeasurement(target.heightWithoutCap);
-  const diameterMm = parsePositiveMeasurement(target.diameter);
-  const missingReasons: string[] = [];
-  if (heightWithCapMm === null) missingReasons.push("missing_height_with_cap_mm");
-  if (heightWithoutCapMm === null) missingReasons.push("missing_height_without_cap_mm");
-  if (diameterMm === null) missingReasons.push("missing_diameter_mm");
-  let measurementStatus: MeasurementStatus = missingReasons.length > 0 ? "missing" : "confirmed";
+  const parsedMeasurements = {
+    heightWithCap: parseMeasurement(target.heightWithCap),
+    heightWithoutCap: parseMeasurement(target.heightWithoutCap),
+    diameter: parseMeasurement(target.diameter),
+  };
+  const heightWithCapMm = parsedMeasurements.heightWithCap.value;
+  const heightWithoutCapMm = parsedMeasurements.heightWithoutCap.value;
+  const diameterMm = parsedMeasurements.diameter.value;
+  const measurementReasons: string[] = [];
+  for (const [field, parsed] of Object.entries(parsedMeasurements)) {
+    const reasonField = field === "heightWithCap" ? "height_with_cap_mm" :
+      field === "heightWithoutCap" ? "height_without_cap_mm" : "diameter_mm";
+    if (parsed.status === "missing") measurementReasons.push(`missing_${reasonField}`);
+    if (parsed.status === "invalid") measurementReasons.push(`invalid_${reasonField}`);
+  }
+  let measurementStatus: MeasurementStatus = Object.values(parsedMeasurements).some((parsed) => parsed.status === "invalid")
+    ? "invalid"
+    : Object.values(parsedMeasurements).some((parsed) => parsed.status === "missing") ? "missing" : "confirmed";
   let displayScale: CylinderDisplayScale | null = null;
   if (measurementStatus === "confirmed") {
     try {
@@ -284,13 +340,16 @@ function buildRow(
       });
     } catch {
       measurementStatus = "invalid";
-      missingReasons.push("invalid_measurement_geometry");
+      measurementReasons.push("invalid_measurement_geometry");
     }
   }
   const coverage = coverageFor(target, indexes.coverageWebsite, indexes.coverageGrace);
-  const resolvedReference = resolveReference(target, coverage, input);
-  const reasons = [...missingReasons];
-  if (!joined.row) reasons.push("readiness_identity_missing");
+  const resolvedReference = coverage.ambiguityReason
+    ? { status: "ambiguous" as const, reference: null, reason: coverage.ambiguityReason }
+    : resolveReference(target, coverage.row, input);
+  const reasons = [...measurementReasons];
+  if (joined.ambiguityReason) reasons.push(joined.ambiguityReason);
+  else if (!joined.row) reasons.push("readiness_identity_missing");
   if (topologyStatus === "mismatch") reasons.push("readiness_topology_mismatch");
   if (resolvedReference.reason) reasons.push(resolvedReference.reason);
   return {
@@ -411,6 +470,63 @@ export function parsePsdCoverageCsv(text: string): PsdCoverageRow[] {
   return rows.map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])));
 }
 
+export function resolveCoverageTarget<T extends CylinderCatalogRow>(
+  coverage: PsdCoverageRow,
+  targetRows: readonly T[],
+): T | null {
+  const websiteSku = normalizedSku(coverage.websiteSku);
+  const websiteMatches = websiteSku
+    ? targetRows.filter((row) => normalizedSku(row.websiteSku) === websiteSku)
+    : [];
+  if (websiteMatches.length > 0) {
+    const graceSku = normalizedSku(coverage.graceSku);
+    const graceWithinWebsite = graceSku
+      ? websiteMatches.filter((row) => normalizedSku(row.graceSku) === graceSku)
+      : [];
+    const candidates = graceWithinWebsite.length > 0 ? graceWithinWebsite : websiteMatches;
+    return [...candidates].sort((left, right) =>
+      physicalTypeKey(left).localeCompare(physicalTypeKey(right)) ||
+      normalizedSku(left.graceSku).localeCompare(normalizedSku(right.graceSku))
+    )[0] ?? null;
+  }
+  const graceSku = normalizedSku(coverage.graceSku);
+  if (!graceSku) return null;
+  return [...targetRows]
+    .filter((row) => normalizedSku(row.graceSku) === graceSku)
+    .sort((left, right) =>
+      physicalTypeKey(left).localeCompare(physicalTypeKey(right)) ||
+      normalizedSku(left.websiteSku).localeCompare(normalizedSku(right.websiteSku))
+    )[0] ?? null;
+}
+
+function containedSourcePath(authoritativePsdRoot: string, relativePath: string): string | null {
+  const root = path.resolve(authoritativePsdRoot);
+  const sourcePath = path.resolve(root, relativePath);
+  return sourcePath !== root && sourcePath.startsWith(`${root}${path.sep}`) ? sourcePath : null;
+}
+
+export function collectPsdSourceBytes(input: {
+  coverageRows: readonly PsdCoverageRow[];
+  targetRows: readonly CylinderCatalogRow[];
+  authoritativePsdRoot: string;
+  fileExists: (sourcePath: string) => boolean;
+  readBytes: (sourcePath: string) => Bytes;
+}): Record<string, Bytes> {
+  const result: Record<string, Bytes> = {};
+  for (const coverage of input.coverageRows) {
+    const target = resolveCoverageTarget(coverage, input.targetRows);
+    if (!target) continue;
+    for (const relativePath of String(coverage.allMatchedPsdPaths ?? "")
+      .split("|").map((value) => value.trim()).filter(Boolean)) {
+      if (!exactPsdPath(relativePath, target)) continue;
+      const sourcePath = containedSourcePath(input.authoritativePsdRoot, relativePath);
+      if (!sourcePath) continue;
+      if (input.fileExists(sourcePath)) result[sourcePath] = input.readBytes(sourcePath);
+    }
+  }
+  return result;
+}
+
 function runCli(): void {
   const root = process.cwd();
   const catalogPath = path.join(root, "public/data/best-bottles-catalog-lite.json");
@@ -433,19 +549,13 @@ function runCli(): void {
   const psdCoverageRows = parsePsdCoverageCsv(coverageBytes.toString("utf8")).filter((row) =>
     targetWebsiteSkus.has(normalizedSku(row.websiteSku)) || targetGraceSkus.has(normalizedSku(row.graceSku))
   );
-  const psdSourceBytesByPath: Record<string, Bytes> = {};
-  for (const coverage of psdCoverageRows) {
-    const target = targetRows.find((row) =>
-      normalizedSku(row.websiteSku) === normalizedSku(coverage.websiteSku) ||
-      normalizedSku(row.graceSku) === normalizedSku(coverage.graceSku)
-    );
-    if (!target) continue;
-    for (const relativePath of String(coverage.allMatchedPsdPaths ?? "").split("|").map((value) => value.trim()).filter(Boolean)) {
-      if (!exactPsdPath(relativePath, target)) continue;
-      const sourcePath = path.resolve(authoritativePsdRoot, relativePath);
-      if (existsSync(sourcePath)) psdSourceBytesByPath[sourcePath] = readFileSync(sourcePath);
-    }
-  }
+  const psdSourceBytesByPath = collectPsdSourceBytes({
+    coverageRows: psdCoverageRows,
+    targetRows,
+    authoritativePsdRoot,
+    fileExists: existsSync,
+    readBytes: readFileSync,
+  });
   const manifest = buildCylinder75TypeManifest({
     catalogProducts,
     readinessRows,
