@@ -24,6 +24,7 @@
     "bestbottles:references:intake": "tsx scripts/bestBottlesReferenceIntake.ts",
     "bestbottles:references:audit-psds": "tsx scripts/best-bottles/build-psd-cap-state-audit.ts",
     "bestbottles:references:review-psds": "tsx scripts/best-bottles/render-psd-cap-state-review.ts",
+    "bestbottles:references:apply-psd-review": "tsx scripts/best-bottles/apply-psd-cap-state-review.ts",
     "bestbottles:generation:first-batch": "tsx scripts/build-bestbottles-first-controlled-batch.ts",
     "bestbottles:generation:cap-on-cycles": "tsx scripts/build-bestbottles-cap-on-generation-cycles.ts",
     "bestbottles:images:reconcile-manifest": "tsx scripts/build-bestbottles-render-reconciliation-manifest.ts",
