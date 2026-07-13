@@ -117,9 +117,9 @@ describe("immutable PSD evidence extraction", () => {
       runMagick: async (args) => {
         events.push(`magick-${args[0]}`);
         const sourceArgument = args.find((arg) => arg.startsWith("/archive/"));
-        if (args[0] === "identify" && args[2] === "%n") {
+        if (args[0] === "identify" && args[2] === "%n\n") {
           assert.equal(sourceArgument, "/archive/WebA.psd");
-          return Buffer.from("4");
+          return Buffer.from("4\n4\n4\n4\n");
         }
         assert.equal(sourceArgument, "/archive/WebA.psd[0]");
         if (args[0] === "identify") {

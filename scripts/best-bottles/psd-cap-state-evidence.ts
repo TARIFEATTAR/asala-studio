@@ -10,7 +10,7 @@ import type {
   PsdCompositeEvidence,
 } from "../../src/lib/bestBottlesPsdCapStateAudit";
 
-export const PSD_EVIDENCE_EXTRACTOR_VERSION = "best-bottles-psd-evidence-v2";
+export const PSD_EVIDENCE_EXTRACTOR_VERSION = "best-bottles-psd-evidence-v3";
 
 const DEFAULT_EVIDENCE_CONCURRENCY = 4;
 const WHITE_DIFFERENCE_THRESHOLD = 255 * 0.06;
@@ -212,8 +212,8 @@ function parseSceneMetadata(output: Buffer): SceneMetadata {
 }
 
 function parseSceneCount(output: Buffer): number {
-  const match = output.toString("utf8").trim().match(/^\d+/);
-  const count = Number(match?.[0]);
+  const firstToken = output.toString("utf8").trim().split(/\s+/)[0] ?? "";
+  const count = /^\d+$/.test(firstToken) ? Number(firstToken) : Number.NaN;
   if (!Number.isInteger(count) || count <= 0) {
     throw new Error(`Invalid ImageMagick scene count: ${output.toString("utf8")}`);
   }
@@ -609,7 +609,7 @@ async function inspectPsdEvidenceInternal(
       const sceneCount = parseSceneCount(await runMagick([
         "identify",
         "-format",
-        "%n",
+        "%n\n",
         input.sourcePath,
       ]));
       const preview = await runMagick([
