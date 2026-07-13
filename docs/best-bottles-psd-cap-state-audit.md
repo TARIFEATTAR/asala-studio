@@ -8,7 +8,7 @@ Audit scope: read-only inventory, evidence rendering, canonical identity routing
 
 The audit accounted for all **4,493** PSD source paths and found **3,963** unique source hashes. It produced **4,268** source-hash-plus-canonical-identity review units. The 4,493 source rows include 530 repeated-hash paths; identity-safe grouping consolidated 225 duplicate source paths into 225 two-source review units. Every review-unit key appears exactly once in the review sheets, and the review-unit source lists trace back to all 4,493 unique archive paths.
 
-All **4,493** evidence renders succeeded and **0** failed. Extractor `best-bottles-psd-evidence-v3` generated 3,963 hash-keyed evidence JSON files and 3,963 hash-keyed preview PNGs; at source-row level, 3,963 inspections were generated and 530 duplicate-byte paths reused the validated evidence. Cache reuse required complete ready-state schema, positive dimensions, exact hash-keyed paths, an existing preview, and preview bytes matching the recorded evidence SHA-256. No source metadata mutation or source-byte mutation was detected.
+All **4,493** evidence renders succeeded and **0** failed. Extractor `best-bottles-psd-evidence-v3` produced the existing 3,963 hash-keyed evidence JSON files and 3,963 hash-keyed preview PNGs. During the recovery verification run, all 4,493 source rows reused those saved v3 assets and **0** invalid entries required pixel regeneration. Cache reuse now requires the complete ready-evidence runtime schema and cross-field invariants, exact hash-keyed paths, matching preview bytes, a decodable single-page PNG, and exact recorded preview dimensions. No source metadata mutation or source-byte mutation was detected.
 
 The corrected embedded-scene count was queried from each full PSD path while only scene zero was rendered. Counts range from 1 to 18 scenes; 4,485 source rows contain more than one scene. This replaces the invalid scene-zero-only count from the earlier audit state.
 
@@ -43,7 +43,7 @@ The 314 renderer-owned sheets contain exactly 4,268 unique tiles.
 | Exact matched | 1,368 |
 | **Total** | **4,268** |
 
-Queue assignment is prioritization for human review, not an approval or a human-blocked decision. `ambiguous-layout` now means the evidence contains an actual layout signal (`multiple_large_components` or an explicit multi-product proposal); the universal pending classification no longer sends every exact identity there. Exact identities without that layout signal reach family/capacity/applicator `exact-matched` cohorts while remaining pending human cap-state review. Every tile includes capacity, proposed classification, confidence, and review status. All 4,268 representative rows remain low-confidence machine routing: 4,103 are proposed as `ambiguous-manual-review` and 165 as `blocked-identity-conflict` for routing purposes only.
+Queue assignment is prioritization for human review, not an approval or a human-blocked decision. `ambiguous-layout` now means the evidence contains an actual layout signal (`multiple_large_components` or an explicit multi-product proposal); the universal pending classification no longer sends every exact identity there. Exact identities without that layout signal reach family/capacity/applicator `exact-matched` cohorts while remaining pending human cap-state review. Every tile includes capacity plus dedicated, untruncated lines for the complete proposed classification, confidence, and review status. All 4,268 representative rows remain low-confidence machine routing: 4,103 are proposed as `ambiguous-manual-review` and 165 as `blocked-identity-conflict` for routing purposes only.
 
 ## Review units by family
 
@@ -100,7 +100,7 @@ Local artifact root: `tmp/best-bottles-reference-production/psd-cap-state-audit-
 
 | Artifact | SHA-256 |
 |---|---|
-| `source-inventory.json` | `9d98327bd907bf6cba3bc5f3cb8de4b12616d191f30e061628234c94130c0d69` |
+| `source-inventory.json` | `266b848fa63106b7d117a120767e8d4604185cc404bb8a8cecdf37450f94f0ac` |
 | `identity-join.json` | `dad94c71830178e65360907e35e0308c437645ee0a7515a2cda7874d738de8a1` |
 | `review-units.json` | `0ca076789f2d91917288cca7753a1e145e915ae0f82eefbb0b278e8285135dc5` |
 | `summary.json` | `d7ead168b4d015a87ee327faf1ca4331fe19294124ab62a2c6123d5b0e4bea86` |
@@ -112,7 +112,9 @@ The review index contains 314 current renderer-owned physical 2000 × 2400 PNG s
 
 ## Verification
 
-- `npm run test:bestbottles:psd-audit`: 67 passed, 0 failed.
+- `npm run test:bestbottles:psd-audit`: 70 passed, 0 failed.
+- Strict v3 cache recovery verification: 4,493 source rows reused, 0 regenerated, 0 blocked.
+- Fresh preview verification: 3,963 PNGs decoded, with 0 hash, format, or dimension mismatches.
 - Focused strict TypeScript for all PSD-audit source/tests: passed.
 - Focused ESLint for all PSD-audit source/tests: passed.
 - Empty-decision application smoke: 4,268 pending review units, 0 decisions, 0 approvals, 0 external writes.

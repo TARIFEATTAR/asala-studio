@@ -70,6 +70,12 @@ const APPROVABLE_IDENTITY_STATUSES = new Set<PsdAuditRecord["identityStatus"]>([
   "reviewed-alias",
 ]);
 
+const BLOCKING_DECISIONS = new Set<PsdReviewDecisionValue>([
+  "ambiguous-manual-review",
+  "blocked-identity-conflict",
+  "blocked",
+]);
+
 function isValidIsoDateTime(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
   if (!match) return false;
@@ -189,8 +195,11 @@ export function validatePsdReviewDecision(
   ) {
     throw new Error("A completed PSD review decision requires a valid SHA-256 source hash.");
   }
-  if (decision.decision === "blocked" && decision.notes.trim() === "") {
-    throw new Error("A blocked PSD review decision requires nonempty reason notes.");
+  if (
+    BLOCKING_DECISIONS.has(decision.decision)
+    && (typeof decision.notes !== "string" || decision.notes.trim() === "")
+  ) {
+    throw new Error("Every blocked PSD review outcome requires nonempty string reason notes.");
   }
   return decision;
 }

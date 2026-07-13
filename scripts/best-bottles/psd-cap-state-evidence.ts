@@ -224,7 +224,19 @@ function isPositiveInteger(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) > 0;
 }
 
-function isValidBounds(value: unknown): boolean {
+function isNonnegativeFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function isNonemptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function isValidBounds(
+  value: unknown,
+  previewWidth: number,
+  previewHeight: number,
+): value is NonNullable<PsdCompositeEvidence["foregroundBounds"]> | null {
   if (value === null) return true;
   if (typeof value !== "object" || value === null) return false;
   const bounds = value as Record<string, unknown>;
@@ -233,33 +245,95 @@ function isValidBounds(value: unknown): boolean {
     && Number.isInteger(bounds.left)
     && Number(bounds.left) >= 0
     && Number.isInteger(bounds.top)
-    && Number(bounds.top) >= 0;
+    && Number(bounds.top) >= 0
+    && Number(bounds.left) + Number(bounds.width) <= previewWidth
+    && Number(bounds.top) + Number(bounds.height) <= previewHeight;
+}
+
+function isValidCornerSamples(
+  value: unknown,
+  previewWidth: number,
+  previewHeight: number,
+): value is PsdCornerSample[] {
+  if (!Array.isArray(value) || value.length !== 4) return false;
+  const expected = [
+    { corner: "top-left", x: 0, y: 0 },
+    { corner: "top-right", x: previewWidth - 1, y: 0 },
+    { corner: "bottom-left", x: 0, y: previewHeight - 1 },
+    { corner: "bottom-right", x: previewWidth - 1, y: previewHeight - 1 },
+  ] as const;
+  return value.every((sample, index) => {
+    if (typeof sample !== "object" || sample === null) return false;
+    const candidate = sample as Record<string, unknown>;
+    const rgb = candidate.rgb;
+    return candidate.corner === expected[index].corner
+      && candidate.x === expected[index].x
+      && candidate.y === expected[index].y
+      && Array.isArray(rgb)
+      && rgb.length === 3
+      && rgb.every((channel) => Number.isInteger(channel) && channel >= 0 && channel <= 255)
+      && typeof candidate.white === "boolean"
+      && candidate.white === isWhiteSample(rgb as number[]);
+  });
+}
+
+function expectedMinimumSafeMarginPct(
+  bounds: NonNullable<PsdCompositeEvidence["foregroundBounds"]>,
+  previewWidth: number,
+  previewHeight: number,
+): number {
+  return Number((Math.min(
+    bounds.left / previewWidth,
+    bounds.top / previewHeight,
+    (previewWidth - bounds.left - bounds.width) / previewWidth,
+    (previewHeight - bounds.top - bounds.height) / previewHeight,
+  ) * 100).toFixed(4));
 }
 
 async function isReusableCachedEvidence(input: {
   cached: PsdSourceEvidence | null;
   sourceSha256: string;
+  sourceBytes: number;
   previewPath: string;
   evidencePath: string;
   readArtifact: ReadArtifact;
 }): Promise<boolean> {
   const cached = input.cached;
+  const composite = cached?.status === "ok" ? cached.composite : null;
+  const previewWidth = composite?.previewWidth;
+  const previewHeight = composite?.previewHeight;
   if (
     cached === null
     || cached.extractorVersion !== PSD_EVIDENCE_EXTRACTOR_VERSION
     || cached.status !== "ok"
+    || !["generated", "reused"].includes(cached.cacheStatus)
+    || !isNonemptyString(cached.sourcePath)
+    || !isNonemptyString(cached.sourceRelativePath)
     || cached.sourceSha256 !== input.sourceSha256
+    || cached.sourceBytes !== input.sourceBytes
+    || !isPositiveInteger(cached.sourceBytes)
+    || !isNonnegativeFiniteNumber(cached.sourceMtimeBefore)
+    || !isNonnegativeFiniteNumber(cached.sourceMtimeAfter)
+    || cached.sourceMtimeBefore !== cached.sourceMtimeAfter
+    || cached.sourceSizeBefore !== input.sourceBytes
+    || cached.sourceSizeAfter !== input.sourceBytes
     || cached.previewPath !== input.previewPath
     || cached.evidencePath !== input.evidencePath
     || cached.error !== null
     || cached.proposedClassification !== PROPOSED_CLASSIFICATION
     || !Array.isArray(cached.routingHints)
+    || !cached.routingHints.every(isNonemptyString)
+    || new Set(cached.routingHints).size !== cached.routingHints.length
     || cached.composite === null
     || cached.composite.previewPath !== input.previewPath
     || !isPositiveInteger(cached.composite.width)
     || !isPositiveInteger(cached.composite.height)
     || !isPositiveInteger(cached.composite.previewWidth)
     || !isPositiveInteger(cached.composite.previewHeight)
+    || cached.composite.previewWidth > cached.composite.width
+    || cached.composite.previewHeight > cached.composite.height
+    || cached.composite.previewWidth > 900
+    || cached.composite.previewHeight > 1_200
     || !isPositiveInteger(cached.composite.sceneCount)
     || typeof cached.composite.opaque !== "boolean"
     || !Number.isInteger(cached.composite.largeForegroundComponentCount)
@@ -267,21 +341,43 @@ async function isReusableCachedEvidence(input: {
     || !Number.isInteger(cached.composite.whiteCornerCount)
     || cached.composite.whiteCornerCount < 0
     || cached.composite.whiteCornerCount > 4
-    || !isValidBounds(cached.composite.foregroundBounds)
-    || !(
-      cached.composite.minimumSafeMarginPct === null
-      || Number.isFinite(cached.composite.minimumSafeMarginPct)
-    )
-    || !Array.isArray(cached.composite.cornerSamples)
-    || cached.composite.cornerSamples.length !== 4
+    || !isPositiveInteger(previewWidth)
+    || !isPositiveInteger(previewHeight)
+    || !isValidBounds(cached.composite.foregroundBounds, previewWidth, previewHeight)
+    || (cached.composite.foregroundBounds === null
+      ? cached.composite.minimumSafeMarginPct !== null
+      : !isNonnegativeFiniteNumber(cached.composite.minimumSafeMarginPct)
+        || cached.composite.minimumSafeMarginPct > 100
+        || cached.composite.minimumSafeMarginPct !== expectedMinimumSafeMarginPct(
+          cached.composite.foregroundBounds,
+          previewWidth,
+          previewHeight,
+        ))
+    || !isValidCornerSamples(cached.composite.cornerSamples, previewWidth, previewHeight)
+    || cached.composite.whiteCornerCount
+      !== cached.composite.cornerSamples.filter((sample) => sample.white).length
+    || cached.composite.largeForegroundComponentCount > previewWidth * previewHeight
+    || JSON.stringify(cached.routingHints) !== JSON.stringify(buildRoutingHints(
+      cached.sourceRelativePath,
+      cached.composite.largeForegroundComponentCount,
+    ))
     || !/^[a-f0-9]{64}$/i.test(cached.composite.evidenceSha256)
   ) {
     return false;
   }
   try {
     const preview = await input.readArtifact(input.previewPath);
-    return createHash("sha256").update(preview).digest("hex")
-      === cached.composite.evidenceSha256.toLowerCase();
+    if (
+      createHash("sha256").update(preview).digest("hex")
+      !== cached.composite.evidenceSha256.toLowerCase()
+    ) {
+      return false;
+    }
+    const metadata = await sharp(preview, { animated: false, failOn: "error" }).metadata();
+    return metadata.format === "png"
+      && metadata.width === cached.composite.previewWidth
+      && metadata.height === cached.composite.previewHeight
+      && (metadata.pages ?? 1) === 1;
   } catch {
     return false;
   }
@@ -554,6 +650,7 @@ async function inspectPsdEvidenceInternal(
     if (await isReusableCachedEvidence({
       cached,
       sourceSha256,
+      sourceBytes: sourceBytes.length,
       previewPath,
       evidencePath,
       readArtifact,

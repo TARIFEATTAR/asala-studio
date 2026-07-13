@@ -207,12 +207,20 @@ describe("PSD human review decision validation", () => {
     assert.equal(blocked.approved.length, 0);
   });
 
-  it("requires durable reason notes for a human blocked decision", () => {
-    assert.throws(() => validatePsdReviewDecision({
-      ...validDecision,
-      decision: "blocked",
-      notes: "   ",
-    }), /notes|reason/i);
+  it("requires string reason notes for every decision that becomes blocked", () => {
+    for (const decision of [
+      "blocked",
+      "blocked-identity-conflict",
+      "ambiguous-manual-review",
+    ] as const) {
+      for (const notes of ["   ", null, 42]) {
+        assert.throws(() => validatePsdReviewDecision({
+          ...validDecision,
+          decision,
+          notes,
+        } as unknown as Parameters<typeof validatePsdReviewDecision>[0]), /notes|reason/i);
+      }
+    }
   });
 
   it("rejects malformed persisted unit internals before any propagation", () => {

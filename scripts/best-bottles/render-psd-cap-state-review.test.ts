@@ -12,6 +12,7 @@ import type {
   PsdReviewUnit,
 } from "../../src/lib/bestBottlesPsdCapStateAudit";
 import {
+  buildPsdReviewTileLabelSvg,
   buildPsdReviewSheetPlan,
   renderPsdReviewSheets,
 } from "./render-psd-cap-state-review";
@@ -200,6 +201,21 @@ describe("PSD cap-state review sheet planning", () => {
 });
 
 describe("PSD cap-state review sheet rendering", () => {
+  it("renders proposed classification, confidence, and review status in full", () => {
+    const unit = fixtureUnit({
+      key: "full-label",
+      family: "Cylinder",
+      classification: "cap-off-applicator-exposed",
+    });
+    const tile = buildPsdReviewSheetPlan([unit]).sheets[0].tiles[0];
+    const svg = buildPsdReviewTileLabelSvg(tile, "exact-matched").toString("utf8");
+
+    assert.match(svg, />proposed: cap-off-applicator-exposed</);
+    assert.match(svg, />confidence: low</);
+    assert.match(svg, />review: pending-human-review</);
+    assert.doesNotMatch(svg, /cap-off-applicator-expose…|pending-hum…/);
+  });
+
   it("writes 2000 x 2400 PNG sheets, a manifest, and a read-only index", async () => {
     const root = await mkdtemp(join(tmpdir(), "psd-review-sheets-"));
     try {

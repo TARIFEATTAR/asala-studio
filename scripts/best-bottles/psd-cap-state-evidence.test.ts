@@ -282,6 +282,8 @@ describe("immutable PSD evidence extraction", () => {
     const preview = await makePreview();
     const cached = readyCachedEvidence(preview);
     if (cached.status === "ok") {
+      cached.sourcePath = "/archive/Capped Components/Original.psd";
+      cached.sourceRelativePath = "Capped Components/Original.psd";
       cached.composite.largeForegroundComponentCount = 2;
       cached.routingHints = [
         "folder_hint:capped",
@@ -364,6 +366,99 @@ describe("immutable PSD evidence extraction", () => {
         writeArtifact: async () => undefined,
         readCachedEvidence: async () => testCase.cached,
         readArtifact: testCase.readArtifact,
+      });
+      assert.equal(result.cacheStatus, "generated");
+      assert.equal(magickCalls, 3);
+    }
+  });
+
+  it("regenerates malformed ready caches instead of returning impossible evidence", async () => {
+    const preview = await makePreview();
+    const valid = readyCachedEvidence(preview);
+    assert.equal(valid.status, "ok");
+    if (valid.status !== "ok") return;
+    const malformedCaches: PsdSourceEvidence[] = [
+      { ...valid, cacheStatus: "impossible" as never },
+      { ...valid, sourceMtimeAfter: valid.sourceMtimeBefore + 1 },
+      { ...valid, routingHints: ["valid", 42] as never },
+      {
+        ...valid,
+        composite: { ...valid.composite, minimumSafeMarginPct: -0.1 },
+      },
+      {
+        ...valid,
+        composite: {
+          ...valid.composite,
+          width: 50,
+        },
+      },
+      {
+        ...valid,
+        composite: {
+          ...valid.composite,
+          foregroundBounds: { left: 90, top: 10, width: 20, height: 40 },
+        },
+      },
+      {
+        ...valid,
+        composite: {
+          ...valid.composite,
+          cornerSamples: [null, ...valid.composite.cornerSamples.slice(1)] as never,
+        },
+      },
+    ];
+
+    for (const cached of malformedCaches) {
+      let magickCalls = 0;
+      const result = await inspectPsdEvidence({
+        sourcePath: "/archive/WebA.psd",
+        sourceRelativePath: "Cylinder/WebA.psd",
+        outputRoot: "/audit",
+        readSource: async () => Buffer.from("immutable-psd"),
+        statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+        runMagick: async (args) => {
+          magickCalls += 1;
+          return mockMagick(preview, 4)(args);
+        },
+        writeArtifact: async () => undefined,
+        readCachedEvidence: async () => cached,
+        readArtifact: async () => preview,
+      });
+      assert.equal(result.cacheStatus, "generated");
+      assert.equal(magickCalls, 3);
+    }
+  });
+
+  it("decodes a hash-matching cached preview and regenerates invalid PNGs or wrong dimensions", async () => {
+    const generatedPreview = await makePreview();
+    const invalidPreview = Buffer.from("not-a-png");
+    const wrongSizePreview = await makePreview({ width: 80, height: 100 });
+    const valid = readyCachedEvidence(generatedPreview);
+    assert.equal(valid.status, "ok");
+    if (valid.status !== "ok") return;
+
+    for (const cachedPreview of [invalidPreview, wrongSizePreview]) {
+      const cached = {
+        ...valid,
+        composite: {
+          ...valid.composite,
+          evidenceSha256: createHash("sha256").update(cachedPreview).digest("hex"),
+        },
+      };
+      let magickCalls = 0;
+      const result = await inspectPsdEvidence({
+        sourcePath: "/archive/WebA.psd",
+        sourceRelativePath: "Cylinder/WebA.psd",
+        outputRoot: "/audit",
+        readSource: async () => Buffer.from("immutable-psd"),
+        statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+        runMagick: async (args) => {
+          magickCalls += 1;
+          return mockMagick(generatedPreview, 4)(args);
+        },
+        writeArtifact: async () => undefined,
+        readCachedEvidence: async () => cached,
+        readArtifact: async () => cachedPreview,
       });
       assert.equal(result.cacheStatus, "generated");
       assert.equal(magickCalls, 3);

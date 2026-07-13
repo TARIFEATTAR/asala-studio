@@ -279,17 +279,22 @@ function shorten(value: string, length: number): string {
   return value.length <= length ? value : `${value.slice(0, Math.max(0, length - 1))}…`;
 }
 
-function tileLabelSvg(tile: PsdReviewSheetTile, queue: PsdReviewQueue): Buffer {
+export function buildPsdReviewTileLabelSvg(
+  tile: PsdReviewSheetTile,
+  queue: PsdReviewQueue,
+): Buffer {
   const routingHints = tile.machineRoutingHints.length > 0
     ? tile.machineRoutingHints.join(", ")
     : "none";
   const lines = [
     `${tile.websiteSku ?? "—"} | ${tile.graceSku ?? "—"}`,
     `${tile.family ?? "Unassigned"} | ${tile.capacityMl ?? "?"} ml | ${tile.applicator ?? "?"}`,
-    `${tile.proposedClassification} | ${tile.confidence} | ${tile.reviewStatus}`,
+    `proposed: ${tile.proposedClassification}`,
+    `confidence: ${tile.confidence}`,
+    `review: ${tile.reviewStatus}`,
     `${tile.identityStatus} | ${routingHints}`,
     `${tile.sourceRelativeBasename} | …${tile.reviewUnitKeySuffix}`,
-  ].map((line) => escapeXml(shorten(line, 44)));
+  ].map((line, index) => escapeXml(index >= 2 && index <= 4 ? line : shorten(line, 44)));
   const borderColor: Record<PsdReviewQueue, string> = {
     "identity-blockers": "rgb(155, 28, 28)",
     "evidence-blockers": "rgb(180, 83, 9)",
@@ -300,9 +305,9 @@ function tileLabelSvg(tile: PsdReviewSheetTile, queue: PsdReviewQueue): Buffer {
   return Buffer.from(`
     <svg width="${TILE_WIDTH}" height="${TILE_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
       <rect x="1" y="1" width="${TILE_WIDTH - 2}" height="${TILE_HEIGHT - 2}" fill="none" stroke="${borderColor[queue]}" stroke-width="3"/>
-      <rect x="0" y="410" width="${TILE_WIDTH}" height="190" fill="#ffffff"/>
+      <rect x="0" y="404" width="${TILE_WIDTH}" height="196" fill="#ffffff"/>
       ${lines.map((line, index) => (
-        `<text x="18" y="${440 + index * 30}" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="${index === 0 ? 700 : 400}">${line}</text>`
+        `<text x="18" y="${426 + index * 24}" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="${index === 0 ? 700 : 400}">${line}</text>`
       )).join("\n")}
     </svg>
   `);
@@ -339,7 +344,7 @@ async function renderSheet(sheet: PsdReviewSheet, outputPath: string): Promise<v
     const top = row * TILE_HEIGHT;
     overlays.push(
       { input: previews[index], left: left + 20, top: top + 16 },
-      { input: tileLabelSvg(tile, sheet.queue), left, top },
+      { input: buildPsdReviewTileLabelSvg(tile, sheet.queue), left, top },
     );
   });
   await sharp({
