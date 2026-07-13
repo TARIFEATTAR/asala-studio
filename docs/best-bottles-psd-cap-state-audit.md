@@ -8,7 +8,9 @@ Audit scope: read-only inventory, evidence rendering, canonical identity routing
 
 The audit accounted for all **4,493** PSD source paths and found **3,963** unique source hashes. It produced **4,268** source-hash-plus-canonical-identity review units. The 4,493 source rows include 530 repeated-hash paths; identity-safe grouping consolidated 225 duplicate source paths into 225 two-source review units. Every review-unit key appears exactly once in the review sheets, and the review-unit source lists trace back to all 4,493 unique archive paths.
 
-All **4,493** evidence renders succeeded and **0** failed. The run created or reused 3,963 unique evidence JSON files and 3,963 unique preview PNGs; at source-row level, 3,961 evidence inspections were generated and 532 were reused. No source metadata mutation or source-byte mutation was detected.
+All **4,493** evidence renders succeeded and **0** failed. Extractor `best-bottles-psd-evidence-v3` generated 3,963 hash-keyed evidence JSON files and 3,963 hash-keyed preview PNGs; at source-row level, 3,963 inspections were generated and 530 duplicate-byte paths reused the validated evidence. Cache reuse required complete ready-state schema, positive dimensions, exact hash-keyed paths, an existing preview, and preview bytes matching the recorded evidence SHA-256. No source metadata mutation or source-byte mutation was detected.
+
+The corrected embedded-scene count was queried from each full PSD path while only scene zero was rendered. Counts range from 1 to 18 scenes; 4,485 source rows contain more than one scene. This replaces the invalid scene-zero-only count from the earlier audit state.
 
 Initial approvals are **zero**. All 4,493 source rows remain pending human review. Machine classifications, routing hints, queue placement, and confidence values described below are **non-approval metadata only**; they do not establish a cap state, qualify an export, or represent a human decision.
 
@@ -30,18 +32,18 @@ The reviewed-alias input file was absent, which the audited loader treats as an 
 
 ## Review units by queue
 
-The 228 rendered sheets contain exactly 4,268 unique tiles.
+The 314 renderer-owned sheets contain exactly 4,268 unique tiles.
 
 | Queue | Review units |
 |---|---:|
 | Identity blockers | 165 |
 | Evidence blockers | 0 |
 | Unmatched | 1,597 |
-| Ambiguous layout | 2,506 |
-| Exact matched | 0 |
+| Ambiguous layout | 1,138 |
+| Exact matched | 1,368 |
 | **Total** | **4,268** |
 
-Queue assignment is prioritization for human review, not an approval or a human-blocked decision. All 4,268 representative rows have low-confidence machine routing: 4,103 are proposed as `ambiguous-manual-review` and 165 as `blocked-identity-conflict` for routing purposes only.
+Queue assignment is prioritization for human review, not an approval or a human-blocked decision. `ambiguous-layout` now means the evidence contains an actual layout signal (`multiple_large_components` or an explicit multi-product proposal); the universal pending classification no longer sends every exact identity there. Exact identities without that layout signal reach family/capacity/applicator `exact-matched` cohorts while remaining pending human cap-state review. Every tile includes capacity, proposed classification, confidence, and review status. All 4,268 representative rows remain low-confidence machine routing: 4,103 are proposed as `ambiguous-manual-review` and 165 as `blocked-identity-conflict` for routing purposes only.
 
 ## Review units by family
 
@@ -98,20 +100,24 @@ Local artifact root: `tmp/best-bottles-reference-production/psd-cap-state-audit-
 
 | Artifact | SHA-256 |
 |---|---|
-| `source-inventory.json` | `b73eabbb90260869de472797d90f309c83b3b732293a9b35690303702b5b34ec` |
-| `identity-join.json` | `4283dea6690cf3986b71fd81843fae5fe4542d52f9a163bbc78c3b224ed08502` |
-| `review-units.json` | `9e290423353a9babb64b76618297db4ac2166780239d9b81f57366f64e32f708` |
+| `source-inventory.json` | `9d98327bd907bf6cba3bc5f3cb8de4b12616d191f30e061628234c94130c0d69` |
+| `identity-join.json` | `dad94c71830178e65360907e35e0308c437645ee0a7515a2cda7874d738de8a1` |
+| `review-units.json` | `0ca076789f2d91917288cca7753a1e145e915ae0f82eefbb0b278e8285135dc5` |
 | `summary.json` | `d7ead168b4d015a87ee327faf1ca4331fe19294124ab62a2c6123d5b0e4bea86` |
-| `review-sheets/review-sheet-manifest.json` | `6bb11152bd8da6f21581b59e7c2b0d7c801df66619159697461e77af8b91a801` |
-| `review-sheets/index.html` | `c0748f2d2b4966819924e66dc76ba53d15ca49463853d814879930d1486306fe` |
+| `review-sheets/review-sheet-manifest.json` | `8d60325896208243a1ef25bc557de43b45ea02c66023cb494c0d1fd84d871668` |
+| `review-sheets/index.html` | `417c630a80852238e462b9c47dae7be197e5d2eccf6d20b100f2e074ad96a89c` |
+| `review-summary.json` | `b6f36326f03ba2f3ac0216b218fafc11880b725e21f44b7859031ec5db4800d3` |
 
-The review index contains 228 physical 2000 × 2400 PNG sheets matching the 228 manifest entries. The manifest has 4,268 tiles and 4,268 unique review-unit keys; its sorted key set exactly matches `review-units.json`. Flattening those review units yields 4,493 unique source paths, exactly matching `source-inventory.json`.
+The review index contains 314 current renderer-owned physical 2000 × 2400 PNG sheets matching all 314 manifest entries by filename and dimensions. The renderer manifest carries owner/version markers, and cleanup accepts only owned v2 filenames; unrelated or foreign-manifest files are preserved. The manifest has 4,268 tiles and 4,268 unique review-unit keys; its sorted key set exactly matches `review-units.json`. Flattening those review units yields 4,493 unique source paths, exactly matching `source-inventory.json`.
 
 ## Verification
 
-- `npm run test:bestbottles:psd-audit`: 60 passed, 0 failed.
+- `npm run test:bestbottles:psd-audit`: 67 passed, 0 failed.
+- Focused strict TypeScript for all PSD-audit source/tests: passed.
+- Focused ESLint for all PSD-audit source/tests: passed.
+- Empty-decision application smoke: 4,268 pending review units, 0 decisions, 0 approvals, 0 external writes.
 - `git diff --check`: passed.
-- `npx tsc -p tsconfig.app.json --noEmit`: did not pass. It reported the pre-existing repository baseline of 1,290 diagnostics across 285 files; this is not a passing verification result. One diagnostic is in the clean, previously committed Task 6 test fixture at `src/lib/bestBottlesPsdReviewDecisions.test.ts:69`: TS2345 because a negative-test decision omits the now-required `sourceSha256`. Task 7 did not edit or stage that source; it is reserved for the focused Task 6 follow-up before final branch review. The other diagnostics belong to the existing unrelated project-wide TypeScript backlog.
+- `npx tsc -p tsconfig.app.json --noEmit --pretty false`: did not pass. It reported the current unrelated repository baseline of 1,289 diagnostics across 284 files. A path-filtered audit of the output found 0 diagnostics in the PSD cap-state audit source or tests; the former Task 6 negative-fixture diagnostic is resolved.
 
 ## Next review cohort and boundary
 
