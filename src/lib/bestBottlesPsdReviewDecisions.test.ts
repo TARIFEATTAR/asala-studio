@@ -66,6 +66,7 @@ const validDecision = {
 
 describe("PSD human review decision validation", () => {
   it("requires a named reviewer and ISO timestamp for an approved state", () => {
+    // @ts-expect-error -- Intentionally omits sourceSha256 to exercise the runtime reviewer guard.
     assert.throws(() => validatePsdReviewDecision({
       reviewUnitKey: "unit",
       decision: "assembled-cap-on",

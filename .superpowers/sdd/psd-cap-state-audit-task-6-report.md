@@ -40,3 +40,12 @@ The public validator now makes `sourceSha256` required in `PsdReviewDecision` an
 - Full PSD audit suite: 60 passed, 0 failed.
 - TypeScript: `npx tsc --noEmit --pretty false` exited 0.
 - Empty-template smoke: 2 pending units, 0 decisions, 0 approvals, and 0 external writes.
+
+## Post-Task 7 type-test correction
+
+The reviewer/timestamp negative fixture intentionally omits the now-required `sourceSha256`. A narrow `@ts-expect-error` documents that deliberate compile-time violation while preserving the runtime negative test and the required production type.
+
+- Focused strict Task 6 typecheck passed with no diagnostics.
+- Focused Task 6 tests: 11 passed, 0 failed.
+- Full PSD audit suite: 60 passed, 0 failed.
+- `npx tsc -p tsconfig.app.json --noEmit --pretty false` was captured at `/tmp/task6-tsconfig-app-after.log`; it retained 1,289 unrelated baseline diagnostics and contained no reference to `bestBottlesPsdReviewDecisions.test.ts`.
