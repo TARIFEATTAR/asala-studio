@@ -290,6 +290,17 @@ function expectedMinimumSafeMarginPct(
   ) * 100).toFixed(4));
 }
 
+function maximumPossibleLargeComponentCount(
+  previewWidth: number,
+  previewHeight: number,
+): number {
+  const canvasPixels = previewWidth * previewHeight;
+  const minimumPixelsPerLargeComponent = Math.floor(
+    canvasPixels * LARGE_COMPONENT_CANVAS_FRACTION,
+  ) + 1;
+  return Math.floor(canvasPixels / minimumPixelsPerLargeComponent);
+}
+
 async function isReusableCachedEvidence(input: {
   cached: PsdSourceEvidence | null;
   sourceSha256: string;
@@ -356,7 +367,14 @@ async function isReusableCachedEvidence(input: {
     || !isValidCornerSamples(cached.composite.cornerSamples, previewWidth, previewHeight)
     || cached.composite.whiteCornerCount
       !== cached.composite.cornerSamples.filter((sample) => sample.white).length
-    || cached.composite.largeForegroundComponentCount > previewWidth * previewHeight
+    || cached.composite.largeForegroundComponentCount
+      > maximumPossibleLargeComponentCount(previewWidth, previewHeight)
+    || (cached.composite.foregroundBounds === null && (
+      cached.composite.largeForegroundComponentCount !== 0
+      || cached.composite.whiteCornerCount !== 4
+      || !cached.composite.cornerSamples.every((sample) => sample.white)
+      || cached.routingHints.includes("multiple_large_components")
+    ))
     || JSON.stringify(cached.routingHints) !== JSON.stringify(buildRoutingHints(
       cached.sourceRelativePath,
       cached.composite.largeForegroundComponentCount,

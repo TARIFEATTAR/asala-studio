@@ -406,6 +406,31 @@ describe("immutable PSD evidence extraction", () => {
           cornerSamples: [null, ...valid.composite.cornerSamples.slice(1)] as never,
         },
       },
+      {
+        ...valid,
+        routingHints: ["multiple_large_components"],
+        composite: {
+          ...valid.composite,
+          foregroundBounds: null,
+          minimumSafeMarginPct: null,
+          largeForegroundComponentCount: 2,
+        },
+      },
+      {
+        ...valid,
+        composite: {
+          ...valid.composite,
+          foregroundBounds: null,
+          minimumSafeMarginPct: null,
+          largeForegroundComponentCount: 0,
+          whiteCornerCount: 0,
+          cornerSamples: valid.composite.cornerSamples.map((sample) => ({
+            ...sample,
+            rgb: [0, 0, 0] as [number, number, number],
+            white: false,
+          })),
+        },
+      },
     ];
 
     for (const cached of malformedCaches) {
