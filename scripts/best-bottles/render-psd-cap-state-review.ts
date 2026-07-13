@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -67,6 +68,7 @@ const SHEET_WIDTH = 2_000;
 const SHEET_HEIGHT = 2_400;
 const SHEET_COLUMNS = 5;
 const SHEET_ROWS = 4;
+const FIXED_TILES_PER_SHEET = SHEET_COLUMNS * SHEET_ROWS;
 const TILE_WIDTH = SHEET_WIDTH / SHEET_COLUMNS;
 const TILE_HEIGHT = SHEET_HEIGHT / SHEET_ROWS;
 const DEFAULT_AUDIT_ROOT = "tmp/best-bottles-reference-production/psd-cap-state-audit-v1";
@@ -155,9 +157,9 @@ export function buildPsdReviewSheetPlan(
   units: readonly PsdReviewUnit[],
   options: BuildPsdReviewSheetPlanOptions = {},
 ): PsdReviewSheetPlan {
-  const tilesPerSheet = options.tilesPerSheet ?? 20;
-  if (!Number.isInteger(tilesPerSheet) || tilesPerSheet <= 0) {
-    throw new Error("tilesPerSheet must be a positive integer.");
+  const tilesPerSheet = options.tilesPerSheet ?? FIXED_TILES_PER_SHEET;
+  if (tilesPerSheet !== FIXED_TILES_PER_SHEET) {
+    throw new Error(`tilesPerSheet must be exactly ${FIXED_TILES_PER_SHEET} for the fixed 5 x 4 sheet geometry.`);
   }
   const reviewUnitKeys = units.map((unit) => unit.reviewUnitKey);
   if (new Set(reviewUnitKeys).size !== reviewUnitKeys.length) {
@@ -165,6 +167,7 @@ export function buildPsdReviewSheetPlan(
   }
 
   const buckets = new Map<string, {
+    bucketIdentity: string;
     queue: PsdReviewQueue;
     family: string | null;
     cohort: string | null;
@@ -174,7 +177,13 @@ export function buildPsdReviewSheetPlan(
     const queue = queueForUnit(unit);
     const cohort = queue === "exact-matched" ? exactCohort(unit) : null;
     const bucketKey = JSON.stringify([queue, unit.family, cohort]);
-    const bucket = buckets.get(bucketKey) ?? { queue, family: unit.family, cohort, tiles: [] };
+    const bucket = buckets.get(bucketKey) ?? {
+      bucketIdentity: bucketKey,
+      queue,
+      family: unit.family,
+      cohort,
+      tiles: [],
+    };
     bucket.tiles.push(toTile(unit));
     buckets.set(bucketKey, bucket);
   }
@@ -185,7 +194,7 @@ export function buildPsdReviewSheetPlan(
     || compareText(left.cohort ?? "", right.cohort ?? "")
   ));
 
-  const sheets: PsdReviewSheet[] = [];
+  const sheetDrafts: Array<PsdReviewSheet & { bucketIdentity: string }> = [];
   for (const bucket of orderedBuckets) {
     const tiles = [...bucket.tiles].sort((left, right) => compareText(
       left.reviewUnitKey,
@@ -199,7 +208,8 @@ export function buildPsdReviewSheetPlan(
         ...(bucket.cohort ? [filenameToken(bucket.cohort, "cohort-unspecified")] : []),
         `p${String(page).padStart(3, "0")}`,
       ].join("--");
-      sheets.push({
+      sheetDrafts.push({
+        bucketIdentity: bucket.bucketIdentity,
         id,
         queue: bucket.queue,
         family: bucket.family,
@@ -209,6 +219,28 @@ export function buildPsdReviewSheetPlan(
         tiles: tiles.slice(offset, offset + tilesPerSheet),
       });
     }
+  }
+
+  const candidateIdCounts = new Map<string, number>();
+  for (const sheet of sheetDrafts) {
+    candidateIdCounts.set(sheet.id, (candidateIdCounts.get(sheet.id) ?? 0) + 1);
+  }
+  const sheets = sheetDrafts.map((draft) => {
+    const disambiguatedId = (candidateIdCounts.get(draft.id) ?? 0) > 1
+      ? `${draft.id}--${createHash("sha256").update(draft.bucketIdentity).digest("hex").slice(0, 12)}`
+      : draft.id;
+    return {
+      id: disambiguatedId,
+      queue: draft.queue,
+      family: draft.family,
+      cohort: draft.cohort,
+      page: draft.page,
+      filename: `${disambiguatedId}.png`,
+      tiles: draft.tiles,
+    };
+  });
+  if (new Set(sheets.map((sheet) => sheet.filename)).size !== sheets.length) {
+    throw new Error("Review sheet filename disambiguation did not produce one-to-one filenames.");
   }
 
   return { tilesPerSheet, sheets };
@@ -346,12 +378,26 @@ export async function renderPsdReviewSheets(
 ): Promise<RenderPsdReviewSheetsResult> {
   const plan = buildPsdReviewSheetPlan(units, options);
   await mkdir(options.outputRoot, { recursive: true });
+  const manifestPath = join(options.outputRoot, "review-sheet-manifest.json");
+  const previousSheetFilenames = await loadManifestOwnedSheetFilenames(manifestPath);
   const sheetPaths = plan.sheets.map((sheet) => join(options.outputRoot, sheet.filename));
   for (let index = 0; index < plan.sheets.length; index += 1) {
     await renderSheet(plan.sheets[index], sheetPaths[index]);
   }
 
-  const manifestPath = join(options.outputRoot, "review-sheet-manifest.json");
+  const currentSheetFilenames = new Set(plan.sheets.map((sheet) => sheet.filename));
+  await Promise.all(previousSheetFilenames
+    .filter((filename) => !currentSheetFilenames.has(filename))
+    .map(async (filename) => {
+      try {
+        await unlink(join(options.outputRoot, filename));
+      } catch (error) {
+        if (!isNodeErrorWithCode(error, "ENOENT")) {
+          throw error;
+        }
+      }
+    }));
+
   const indexPath = join(options.outputRoot, "index.html");
   const manifest = {
     version: "best-bottles-psd-review-sheets-v1",
@@ -368,6 +414,39 @@ export async function renderPsdReviewSheets(
     writeFile(indexPath, buildReadOnlyIndex(plan), "utf8"),
   ]);
   return { plan, sheetPaths, manifestPath, indexPath };
+}
+
+function isNodeErrorWithCode(error: unknown, code: string): boolean {
+  return error instanceof Error
+    && "code" in error
+    && (error as NodeJS.ErrnoException).code === code;
+}
+
+async function loadManifestOwnedSheetFilenames(manifestPath: string): Promise<string[]> {
+  let raw: string;
+  try {
+    raw = await readFile(manifestPath, "utf8");
+  } catch (error) {
+    if (isNodeErrorWithCode(error, "ENOENT")) {
+      return [];
+    }
+    throw error;
+  }
+  const parsed: unknown = JSON.parse(raw);
+  if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as { sheets?: unknown }).sheets)) {
+    return [];
+  }
+  return (parsed as { sheets: unknown[] }).sheets.flatMap((sheet) => {
+    if (typeof sheet !== "object" || sheet === null) {
+      return [];
+    }
+    const filename = (sheet as { filename?: unknown }).filename;
+    return typeof filename === "string"
+      && filename === basename(filename)
+      && filename.endsWith(".png")
+      ? [filename]
+      : [];
+  });
 }
 
 function argumentValue(name: string): string | null {

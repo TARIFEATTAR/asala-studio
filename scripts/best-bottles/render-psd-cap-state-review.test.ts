@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -136,6 +136,33 @@ describe("PSD cap-state review sheet planning", () => {
       "15ml--roll-on",
     ]);
   });
+
+  it("assigns stable one-to-one filenames when distinct buckets normalize identically", () => {
+    const collidingUnits = [
+      fixtureUnit({ key: "slash", family: "A/B" }),
+      fixtureUnit({ key: "space", family: "A B" }),
+    ];
+
+    const forward = buildPsdReviewSheetPlan(collidingUnits, { tilesPerSheet: 20 });
+    const reverse = buildPsdReviewSheetPlan([...collidingUnits].reverse(), { tilesPerSheet: 20 });
+    const familyFilenames = (plan: ReturnType<typeof buildPsdReviewSheetPlan>) => (
+      plan.sheets.map((sheet) => [sheet.family, sheet.filename]).sort()
+    );
+
+    assert.equal(new Set(forward.sheets.map((sheet) => sheet.filename)).size, 2);
+    assert.deepEqual(familyFilenames(forward), familyFilenames(reverse));
+  });
+
+  it("rejects tile counts that do not match the fixed 5 x 4 geometry", () => {
+    assert.throws(
+      () => buildPsdReviewSheetPlan(units, { tilesPerSheet: 19 }),
+      /exactly 20/i,
+    );
+    assert.throws(
+      () => buildPsdReviewSheetPlan(units, { tilesPerSheet: 21 }),
+      /exactly 20/i,
+    );
+  });
 });
 
 describe("PSD cap-state review sheet rendering", () => {
@@ -165,6 +192,36 @@ describe("PSD cap-state review sheet rendering", () => {
       assert.match(html, /render\.psd/);
       assert.match(html, /read-only/i);
       assert.doesNotMatch(html, /<form|<input|<button|fetch\(|approved cap-state/i);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("removes stale manifest-owned sheets on rerun while preserving unrelated files", async () => {
+    const root = await mkdtemp(join(tmpdir(), "psd-review-rerun-"));
+    try {
+      const previewPath = join(root, "preview.png");
+      await sharp({
+        create: { width: 120, height: 240, channels: 3, background: "white" },
+      }).png().toFile(previewPath);
+      const first = fixtureUnit({ key: "first", family: "First Family" });
+      const second = fixtureUnit({ key: "second", family: "Second Family" });
+      assert.ok(first.representative.composite);
+      assert.ok(second.representative.composite);
+      first.representative.composite.previewPath = previewPath;
+      second.representative.composite.previewPath = previewPath;
+
+      const outputRoot = join(root, "review");
+      const firstResult = await renderPsdReviewSheets([first], { outputRoot });
+      const staleSheetPath = firstResult.sheetPaths[0];
+      const unrelatedPath = join(outputRoot, "keep-me.png");
+      await writeFile(unrelatedPath, "unrelated\n", "utf8");
+
+      const secondResult = await renderPsdReviewSheets([second], { outputRoot });
+
+      await assert.rejects(access(staleSheetPath), /ENOENT/);
+      assert.equal(await readFile(unrelatedPath, "utf8"), "unrelated\n");
+      await access(secondResult.sheetPaths[0]);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
