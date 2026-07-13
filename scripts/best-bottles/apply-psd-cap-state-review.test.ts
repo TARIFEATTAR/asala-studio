@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
@@ -11,7 +12,7 @@ import {
 } from "./apply-psd-cap-state-review";
 
 function makeUnit(key: string): PsdReviewUnit {
-  const sourceSha256 = key.padEnd(64, "a").slice(0, 64);
+  const sourceSha256 = createHash("sha256").update(key).digest("hex");
   const record = {
     sourcePath: `/archive/${key}.psd`,
     sourceRelativePath: `${key}.psd`,

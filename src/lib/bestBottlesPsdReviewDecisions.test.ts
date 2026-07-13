@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { describe, it } from "node:test";
 
 import type {
@@ -17,7 +18,7 @@ function makeUnit(input: {
   identityStatus?: PsdIdentityStatus;
 }): PsdReviewUnit {
   const identityStatus = input.identityStatus ?? "exact-website-sku";
-  const sourceSha256 = input.hash ?? input.key.padEnd(64, "a").slice(0, 64);
+  const sourceSha256 = input.hash ?? createHash("sha256").update(input.key).digest("hex");
   const websiteSku = identityStatus === "exact-website-sku" ? `WEB-${input.key}` : null;
   const graceSku = identityStatus === "exact-grace-sku" ? `GB-${input.key}` : null;
   const record = {
@@ -92,6 +93,15 @@ describe("PSD human review decision validation", () => {
       ...validDecision,
       decision: "approved" as never,
     }), /decision/i);
+  });
+
+  it("requires a valid SHA-256 source hash for every completed decision", () => {
+    for (const sourceSha256 of [undefined, "", "not-a-sha-256"]) {
+      assert.throws(() => validatePsdReviewDecision({
+        ...validDecision,
+        sourceSha256,
+      } as unknown as Parameters<typeof validatePsdReviewDecision>[0]), /source hash|SHA-256/i);
+    }
   });
 
   it("rejects approval when canonical identity is ambiguous or conflicting", () => {

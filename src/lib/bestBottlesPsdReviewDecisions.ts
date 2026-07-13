@@ -20,7 +20,7 @@ export type PsdApprovedClassification = Exclude<
 
 export interface PsdReviewDecision {
   reviewUnitKey: string;
-  sourceSha256?: string;
+  sourceSha256: string;
   decision: PsdReviewDecisionValue;
   reviewer: string;
   reviewedAt: string;
@@ -114,8 +114,11 @@ export function validatePsdReviewDecision(
   if (typeof decision.reviewedAt !== "string" || !isValidIsoDateTime(decision.reviewedAt)) {
     throw new Error("A completed PSD review decision requires a valid ISO date-time timestamp.");
   }
-  if (decision.sourceSha256 !== undefined && decision.sourceSha256.trim() === "") {
-    throw new Error("A supplied decision source hash cannot be empty.");
+  if (
+    typeof decision.sourceSha256 !== "string"
+    || !/^[a-f0-9]{64}$/i.test(decision.sourceSha256)
+  ) {
+    throw new Error("A completed PSD review decision requires a valid SHA-256 source hash.");
   }
   return decision;
 }

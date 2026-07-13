@@ -31,3 +31,12 @@ Initial focused test run failed with `ERR_MODULE_NOT_FOUND` for both Task 6 modu
 ## Self-review
 
 No correctness or scope concerns remain. The CLI reads `review-decisions.csv` when present and intentionally falls back to the untouched Task 4 template for the required empty-decision smoke. All writes are confined to the selected local output directory; there are no export, upload, pipeline, network, or external-write paths.
+
+## Review follow-up — required completed-decision source hash
+
+The public validator now makes `sourceSha256` required in `PsdReviewDecision` and rejects missing, blank, or non-64-hex values directly. The regression was observed failing before the validator change and passing afterward. Empty template rows remain safe because the CSV parser filters rows with no decision before completed-decision validation.
+
+- Focused Task 6 tests: 11 passed, 0 failed.
+- Full PSD audit suite: 60 passed, 0 failed.
+- TypeScript: `npx tsc --noEmit --pretty false` exited 0.
+- Empty-template smoke: 2 pending units, 0 decisions, 0 approvals, and 0 external writes.
