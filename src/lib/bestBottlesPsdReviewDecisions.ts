@@ -100,12 +100,8 @@ function normalizedIdentity(value: string | null): string {
   return String(value ?? "UNMATCHED").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-function sameRecordIdentity(left: PsdAuditRecord, right: PsdAuditRecord): boolean {
-  return left.sourcePath === right.sourcePath
-    && left.sourceRelativePath === right.sourceRelativePath
-    && left.sourceSha256 === right.sourceSha256
-    && normalizedIdentity(left.websiteSku) === normalizedIdentity(right.websiteSku)
-    && normalizedIdentity(left.graceSku) === normalizedIdentity(right.graceSku);
+function samePersistedRecord(left: PsdAuditRecord, right: PsdAuditRecord): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function hasUsableCompositeEvidence(record: PsdAuditRecord): boolean {
@@ -152,7 +148,7 @@ export function assertValidPersistedPsdReviewUnit(unit: PsdReviewUnit): void {
       throw new Error(`Review unit ${unit.reviewUnitKey} contains mixed canonical metadata or identity status.`);
     }
   }
-  if (!unit.sources.some((source) => sameRecordIdentity(source, unit.representative))) {
+  if (!unit.sources.some((source) => samePersistedRecord(source, unit.representative))) {
     throw new Error(`Review unit ${unit.reviewUnitKey} representative is not a member of its sources.`);
   }
   if (
@@ -229,7 +225,9 @@ function mergeDecision(unit: PsdReviewUnit, decision: PsdReviewDecision): PsdRev
     reviewedAt,
   });
   const sources = unit.sources.map(mergeRecord);
-  const representativeIndex = unit.sources.indexOf(unit.representative);
+  const representativeIndex = unit.sources.findIndex((source) => (
+    samePersistedRecord(source, unit.representative)
+  ));
   const representative = representativeIndex >= 0
     ? sources[representativeIndex]
     : mergeRecord(unit.representative);

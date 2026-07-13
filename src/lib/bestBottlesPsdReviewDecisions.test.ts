@@ -234,5 +234,15 @@ describe("PSD human review decision validation", () => {
       reviewUnits: [foreignRepresentative],
       decisions: [],
     }), /representative/i);
+
+    const tamperedRepresentative = makeUnit({ key: "tampered-representative" });
+    tamperedRepresentative.representative = {
+      ...tamperedRepresentative.representative,
+      composite: null,
+    } as PsdAuditRecord;
+    assert.throws(() => applyPsdReviewDecisions({
+      reviewUnits: [tamperedRepresentative],
+      decisions: [],
+    }), /representative/i);
   });
 });
