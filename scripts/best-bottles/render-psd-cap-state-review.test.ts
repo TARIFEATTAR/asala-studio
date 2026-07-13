@@ -37,6 +37,23 @@ function fixtureUnit(options: FixtureOptions): PsdReviewUnit {
     sourceSha256: options.key.padEnd(64, "0"),
     sourceBytes: 100,
     family,
+    canonicalReviewMetadata: options.capacityMl || options.applicator ? {
+      capacityMl: options.capacityMl ?? null,
+      applicator: options.applicator ?? null,
+      capStyle: null,
+      capColor: null,
+      trimColor: null,
+      bodyMaterial: null,
+      glassFinish: null,
+      assemblyType: null,
+      ballMaterial: null,
+      category: null,
+      shape: null,
+      canonBodyHeightMm: null,
+      canonWidthAxisMm: null,
+      canonSecondAxisMm: null,
+      canonHeightWithCapMm: null,
+    } : null,
     identityReasons: [`identity:${identityStatus}`],
     composite: options.composite === false ? null : {
       width: 100,
@@ -70,6 +87,7 @@ function fixtureUnit(options: FixtureOptions): PsdReviewUnit {
     websiteSku,
     graceSku,
     family,
+    canonicalReviewMetadata: record.canonicalReviewMetadata,
     sources: [record],
     representative: record,
     ...(options.capacityMl ? { capacityMl: options.capacityMl } : {}),
@@ -81,7 +99,7 @@ const units = [
   fixtureUnit({ key: "exact-b", family: "Circle" }),
   fixtureUnit({ key: "unmatched", family: null, identityStatus: "unmatched" }),
   fixtureUnit({ key: "conflict", family: "Cylinder", identityStatus: "conflict" }),
-  fixtureUnit({ key: "layout", family: "Cylinder", classification: "ambiguous-manual-review" }),
+  fixtureUnit({ key: "layout", family: "Cylinder", classification: "multi-product-layout" }),
   fixtureUnit({ key: "evidence", family: "Cylinder", composite: false }),
   fixtureUnit({ key: "exact-a", family: "Cylinder" }),
 ];
@@ -135,6 +153,22 @@ describe("PSD cap-state review sheet planning", () => {
       "15ml--dropper",
       "15ml--roll-on",
     ]);
+    const firstTile = plan.sheets[0].tiles[0];
+    assert.equal(firstTile.capacityMl, "15");
+    assert.equal(firstTile.applicator, "Dropper");
+    assert.equal(firstTile.proposedClassification, "assembled-cap-on");
+    assert.equal(firstTile.confidence, "low");
+    assert.equal(firstTile.reviewStatus, "pending-human-review");
+  });
+
+  it("routes pending exact identities to exact-matched unless layout evidence exists", () => {
+    const pendingExact = fixtureUnit({
+      key: "pending-exact",
+      family: "Cylinder",
+      classification: "ambiguous-manual-review",
+    });
+    const plan = buildPsdReviewSheetPlan([pendingExact], { tilesPerSheet: 20 });
+    assert.equal(plan.sheets[0].queue, "exact-matched");
   });
 
   it("assigns stable one-to-one filenames when distinct buckets normalize identically", () => {
@@ -222,6 +256,37 @@ describe("PSD cap-state review sheet rendering", () => {
       await assert.rejects(access(staleSheetPath), /ENOENT/);
       assert.equal(await readFile(unrelatedPath, "utf8"), "unrelated\n");
       await access(secondResult.sheetPaths[0]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("never deletes files named only by a foreign or corrupt manifest", async () => {
+    const root = await mkdtemp(join(tmpdir(), "psd-review-foreign-manifest-"));
+    try {
+      const outputRoot = join(root, "review");
+      await rm(outputRoot, { recursive: true, force: true });
+      const previewPath = join(root, "preview.png");
+      await sharp({
+        create: { width: 120, height: 240, channels: 3, background: "white" },
+      }).png().toFile(previewPath);
+      const unit = fixtureUnit({ key: "safe", family: "Cylinder" });
+      assert.ok(unit.representative.composite);
+      unit.representative.composite.previewPath = previewPath;
+
+      await writeFile(join(root, "keep-me.png"), "keep\n", "utf8");
+      await rm(outputRoot, { recursive: true, force: true });
+      await import("node:fs/promises").then(({ mkdir }) => mkdir(outputRoot, { recursive: true }));
+      const foreignOwnedLooking = "bb-psd-review-v2--exact-matched--cylinder--p999.png";
+      await writeFile(join(outputRoot, foreignOwnedLooking), "foreign\n", "utf8");
+      await writeFile(join(outputRoot, "review-sheet-manifest.json"), JSON.stringify({
+        owner: "foreign-renderer",
+        version: "best-bottles-psd-review-sheets-v2",
+        sheets: [{ filename: foreignOwnedLooking }, { filename: "../outside.png" }],
+      }), "utf8");
+
+      await renderPsdReviewSheets([unit], { outputRoot });
+      assert.equal(await readFile(join(outputRoot, foreignOwnedLooking), "utf8"), "foreign\n");
     } finally {
       await rm(root, { recursive: true, force: true });
     }

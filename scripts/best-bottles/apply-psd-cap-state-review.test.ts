@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { describe, it } from "node:test";
 
-import type { PsdAuditRecord, PsdReviewUnit } from "../../src/lib/bestBottlesPsdCapStateAudit";
+import {
+  buildPsdReviewUnitKey,
+  type PsdAuditRecord,
+  type PsdReviewUnit,
+} from "../../src/lib/bestBottlesPsdCapStateAudit";
 import {
   applyPsdCapStateReview,
   parsePsdReviewDecisionsCsv,
@@ -19,8 +23,20 @@ function makeUnit(key: string): PsdReviewUnit {
     sourceSha256,
     sourceBytes: 100,
     family: "Cylinder",
+    canonicalReviewMetadata: null,
     identityReasons: [],
-    composite: null,
+    composite: {
+      width: 100,
+      height: 130,
+      opaque: true,
+      sceneCount: 1,
+      foregroundBounds: { left: 10, top: 10, width: 80, height: 110 },
+      largeForegroundComponentCount: 1,
+      whiteCornerCount: 4,
+      minimumSafeMarginPct: 7,
+      previewPath: `/previews/${sourceSha256}.png`,
+      evidenceSha256: "e".repeat(64),
+    },
     machineTriage: {
       proposedClassification: "ambiguous-manual-review",
       confidence: "low",
@@ -35,11 +51,12 @@ function makeUnit(key: string): PsdReviewUnit {
     reviewedAt: null,
   } as PsdAuditRecord;
   return {
-    reviewUnitKey: key,
+    reviewUnitKey: buildPsdReviewUnitKey(record),
     sourceSha256,
     websiteSku: `WEB-${key}`,
     graceSku: null,
     family: "Cylinder",
+    canonicalReviewMetadata: null,
     sources: [record],
     representative: record,
   };
@@ -95,6 +112,15 @@ describe("apply PSD cap-state review CLI", () => {
     try {
       const approved = makeUnit("approved");
       const blocked = makeUnit("blocked");
+      const previewBytes = Buffer.from("reviewed-preview");
+      const previewRoot = join(root, "previews");
+      await mkdir(previewRoot, { recursive: true });
+      const previewPath = join(previewRoot, `${approved.sourceSha256}.png`);
+      await writeFile(previewPath, previewBytes);
+      assert.ok(approved.representative.composite);
+      approved.representative.composite.previewPath = previewPath;
+      approved.representative.composite.evidenceSha256 = createHash("sha256")
+        .update(previewBytes).digest("hex");
       const reviewUnitsPath = join(root, "review-units.json");
       const decisionsPath = join(root, "review-decisions.csv");
       await writeFile(reviewUnitsPath, JSON.stringify([approved, blocked]), "utf8");
@@ -109,6 +135,33 @@ describe("apply PSD cap-state review CLI", () => {
       assert.equal(result.summary.blockedCount, 1);
       assert.match(await readFile(join(root, "approved-cap-off.csv"), "utf8"), /cap, verified/);
       assert.match(await readFile(join(root, "blocked-review.csv"), "utf8"), /identity blocked/);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects an approved decision when preview bytes no longer match evidence", async () => {
+    const root = await mkdtemp(join(tmpdir(), "psd-review-tampered-"));
+    try {
+      const approved = makeUnit("tampered");
+      const previewRoot = join(root, "previews");
+      await mkdir(previewRoot, { recursive: true });
+      const previewPath = join(previewRoot, `${approved.sourceSha256}.png`);
+      await writeFile(previewPath, "tampered bytes");
+      assert.ok(approved.representative.composite);
+      approved.representative.composite.previewPath = previewPath;
+      approved.representative.composite.evidenceSha256 = "e".repeat(64);
+      const reviewUnitsPath = join(root, "review-units.json");
+      const decisionsPath = join(root, "review-decisions.csv");
+      await writeFile(reviewUnitsPath, JSON.stringify([approved]), "utf8");
+      await writeFile(decisionsPath, [
+        columns,
+        `${approved.reviewUnitKey},${approved.sourceSha256},${approved.websiteSku},,Cylinder,,ambiguous-manual-review,assembled-cap-on,Jordan Richter,2026-07-12T20:00:00-07:00,reviewed`,
+      ].join("\n"), "utf8");
+      await assert.rejects(
+        applyPsdCapStateReview({ reviewUnitsPath, decisionsPath, outputRoot: root }),
+        /preview hash/i,
+      );
     } finally {
       await rm(root, { recursive: true, force: true });
     }

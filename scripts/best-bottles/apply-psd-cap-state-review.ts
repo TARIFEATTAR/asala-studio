@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import type { PsdReviewUnit } from "../../src/lib/bestBottlesPsdCapStateAudit";
@@ -185,6 +186,29 @@ export async function applyPsdCapStateReview(input: {
   const reviewUnits = parsedUnits as PsdReviewUnit[];
   const decisions = parsePsdReviewDecisionsCsv(await readFile(input.decisionsPath, "utf8"));
   const result = applyPsdReviewDecisions({ reviewUnits, decisions });
+  for (const unit of result.approved) {
+    for (const source of unit.sources) {
+      const composite = source.composite;
+      if (composite === null) {
+        throw new Error(`Approved review unit ${unit.reviewUnitKey} is missing composite evidence.`);
+      }
+      if (basename(composite.previewPath) !== `${source.sourceSha256}.png`) {
+        throw new Error(`Approved review unit ${unit.reviewUnitKey} has a non-hash-keyed preview path.`);
+      }
+      let preview: Buffer;
+      try {
+        preview = await readFile(composite.previewPath);
+      } catch (error) {
+        throw new Error(
+          `Approved review unit ${unit.reviewUnitKey} preview cannot be read: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+      const actualHash = createHash("sha256").update(preview).digest("hex");
+      if (actualHash !== composite.evidenceSha256.toLowerCase()) {
+        throw new Error(`Approved review unit ${unit.reviewUnitKey} preview hash does not match evidence.`);
+      }
+    }
+  }
 
   const approvedCapOn = result.approved.filter((unit) => unit.classification === "assembled-cap-on");
   const approvedCapOff = result.approved.filter((unit) => unit.classification === "cap-off-applicator-exposed");

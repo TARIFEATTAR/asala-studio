@@ -1,6 +1,7 @@
 import {
   PSD_CAP_STATE_CLASSIFICATIONS,
   assertMachineCannotApprove,
+  buildPsdReviewUnitKey,
   type PsdAuditRecord,
   type PsdCapStateClassification,
   type PsdHumanReviewer,
@@ -95,6 +96,78 @@ function isDecision(value: unknown): value is PsdReviewDecisionValue {
     && (PSD_REVIEW_DECISIONS as readonly string[]).includes(value);
 }
 
+function normalizedIdentity(value: string | null): string {
+  return String(value ?? "UNMATCHED").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function sameRecordIdentity(left: PsdAuditRecord, right: PsdAuditRecord): boolean {
+  return left.sourcePath === right.sourcePath
+    && left.sourceRelativePath === right.sourceRelativePath
+    && left.sourceSha256 === right.sourceSha256
+    && normalizedIdentity(left.websiteSku) === normalizedIdentity(right.websiteSku)
+    && normalizedIdentity(left.graceSku) === normalizedIdentity(right.graceSku);
+}
+
+function hasUsableCompositeEvidence(record: PsdAuditRecord): boolean {
+  const composite = record.composite;
+  return composite !== null
+    && Number.isInteger(composite.width)
+    && composite.width > 0
+    && Number.isInteger(composite.height)
+    && composite.height > 0
+    && Number.isInteger(composite.sceneCount)
+    && composite.sceneCount > 0
+    && typeof composite.previewPath === "string"
+    && composite.previewPath.trim() !== ""
+    && /^[a-f0-9]{64}$/i.test(composite.evidenceSha256);
+}
+
+export function assertValidPersistedPsdReviewUnit(unit: PsdReviewUnit): void {
+  if (!unit || typeof unit !== "object" || !Array.isArray(unit.sources) || unit.sources.length === 0) {
+    throw new Error("A persisted PSD review unit requires at least one source.");
+  }
+  if (!unit.representative || typeof unit.representative !== "object") {
+    throw new Error(`Review unit ${unit.reviewUnitKey} requires a representative source.`);
+  }
+  for (const source of unit.sources) {
+    const recomputedKey = buildPsdReviewUnitKey(source);
+    if (recomputedKey !== unit.reviewUnitKey) {
+      throw new Error(`Review unit ${unit.reviewUnitKey} contains a source with mismatched review-unit key ${recomputedKey}.`);
+    }
+    if (source.sourceSha256 !== unit.sourceSha256) {
+      throw new Error(`Review unit ${unit.reviewUnitKey} contains a source with a mismatched hash.`);
+    }
+    if (
+      normalizedIdentity(source.websiteSku) !== normalizedIdentity(unit.websiteSku)
+      || normalizedIdentity(source.graceSku) !== normalizedIdentity(unit.graceSku)
+    ) {
+      throw new Error(`Review unit ${unit.reviewUnitKey} contains mixed canonical identities.`);
+    }
+    if (
+      source.family !== unit.family
+      || source.identityStatus !== unit.representative.identityStatus
+      || JSON.stringify(source.canonicalReviewMetadata ?? null)
+        !== JSON.stringify(unit.canonicalReviewMetadata ?? null)
+    ) {
+      throw new Error(`Review unit ${unit.reviewUnitKey} contains mixed canonical metadata or identity status.`);
+    }
+  }
+  if (!unit.sources.some((source) => sameRecordIdentity(source, unit.representative))) {
+    throw new Error(`Review unit ${unit.reviewUnitKey} representative is not a member of its sources.`);
+  }
+  if (
+    buildPsdReviewUnitKey(unit.representative) !== unit.reviewUnitKey
+    || unit.representative.sourceSha256 !== unit.sourceSha256
+    || normalizedIdentity(unit.representative.websiteSku) !== normalizedIdentity(unit.websiteSku)
+    || normalizedIdentity(unit.representative.graceSku) !== normalizedIdentity(unit.graceSku)
+    || unit.representative.family !== unit.family
+    || JSON.stringify(unit.representative.canonicalReviewMetadata ?? null)
+      !== JSON.stringify(unit.canonicalReviewMetadata ?? null)
+  ) {
+    throw new Error(`Review unit ${unit.reviewUnitKey} top-level fields do not match its representative.`);
+  }
+}
+
 export function validatePsdReviewDecision(
   decision: PsdReviewDecision,
 ): PsdReviewDecision {
@@ -120,6 +193,9 @@ export function validatePsdReviewDecision(
   ) {
     throw new Error("A completed PSD review decision requires a valid SHA-256 source hash.");
   }
+  if (decision.decision === "blocked" && decision.notes.trim() === "") {
+    throw new Error("A blocked PSD review decision requires nonempty reason notes.");
+  }
   return decision;
 }
 
@@ -129,6 +205,11 @@ function mergeDecision(unit: PsdReviewUnit, decision: PsdReviewDecision): PsdRev
   if (approved && !APPROVABLE_IDENTITY_STATUSES.has(identityStatus)) {
     throw new Error(
       `Review unit ${unit.reviewUnitKey} cannot be approved because its canonical identity is ${identityStatus}.`,
+    );
+  }
+  if (approved && !unit.sources.every(hasUsableCompositeEvidence)) {
+    throw new Error(
+      `Review unit ${unit.reviewUnitKey} cannot be approved because usable composite preview evidence is missing or invalid.`,
     );
   }
 
@@ -171,6 +252,7 @@ export function applyPsdReviewDecisions(input: {
 }): ApplyPsdReviewDecisionsResult {
   const unitsByKey = new Map<string, PsdReviewUnit>();
   for (const unit of input.reviewUnits) {
+    assertValidPersistedPsdReviewUnit(unit);
     if (unitsByKey.has(unit.reviewUnitKey)) {
       throw new Error(`Review units contain duplicate key ${unit.reviewUnitKey}.`);
     }

@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import {
   groupPsdAuditRecords,
   type PsdAuditRecord,
+  type PsdCanonicalReviewMetadata,
   type PsdIdentityState,
   type PsdReviewUnit,
 } from "../../src/lib/bestBottlesPsdCapStateAudit";
@@ -80,6 +81,11 @@ const RECORD_COLUMNS = [
   "websiteSku",
   "graceSku",
   "family",
+  "capacityMl",
+  "applicator",
+  "capStyle",
+  "capColor",
+  "bodyMaterial",
   "identityStatus",
   "identityReasons",
   "previewPath",
@@ -396,6 +402,7 @@ function buildRecord(input: {
   identityState: PsdIdentityState;
   identityReasons: string[];
   family: string | null;
+  canonicalReviewMetadata: PsdCanonicalReviewMetadata | null;
 }): PsdAuditRecord {
   const identityBlocked = ["ambiguous", "conflict"].includes(input.identityState.identityStatus);
   const machineReasons = input.evidence.status === "ok"
@@ -407,6 +414,7 @@ function buildRecord(input: {
     sourceSha256: input.evidence.sourceSha256 ?? blockedSourceKey(input.evidence),
     sourceBytes: input.evidence.sourceBytes ?? input.evidence.sourceSizeBefore ?? 0,
     family: input.family,
+    canonicalReviewMetadata: input.canonicalReviewMetadata,
     identityReasons: input.identityReasons,
     composite: input.evidence.composite,
     machineTriage: {
@@ -420,6 +428,34 @@ function buildRecord(input: {
     reviewStatus: "pending-human-review",
     reviewer: null,
     reviewedAt: null,
+  };
+}
+
+function canonicalValue(row: CanonicalTruthRow, key: string): string | null {
+  const value = row[key];
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : null;
+}
+
+function buildCanonicalReviewMetadata(
+  row: CanonicalTruthRow | null,
+): PsdCanonicalReviewMetadata | null {
+  if (row === null) return null;
+  return {
+    capacityMl: canonicalValue(row, "capacityMl"),
+    applicator: canonicalValue(row, "applicator"),
+    capStyle: canonicalValue(row, "capStyle"),
+    capColor: canonicalValue(row, "capColor"),
+    trimColor: canonicalValue(row, "trimColor"),
+    bodyMaterial: canonicalValue(row, "material"),
+    glassFinish: canonicalValue(row, "glassFinish"),
+    assemblyType: canonicalValue(row, "assemblyType"),
+    ballMaterial: canonicalValue(row, "ballMaterial"),
+    category: canonicalValue(row, "category"),
+    shape: canonicalValue(row, "shape"),
+    canonBodyHeightMm: canonicalValue(row, "canon_bodyHeightMm"),
+    canonWidthAxisMm: canonicalValue(row, "canon_widthAxisMm"),
+    canonSecondAxisMm: canonicalValue(row, "canon_secondAxisMm"),
+    canonHeightWithCapMm: canonicalValue(row, "canon_heightWithCapMm"),
   };
 }
 
@@ -485,6 +521,11 @@ function recordCsvRows(records: readonly PsdAuditRecord[]): CsvRow[] {
     websiteSku: row.websiteSku,
     graceSku: row.graceSku,
     family: row.family,
+    capacityMl: row.canonicalReviewMetadata?.capacityMl ?? null,
+    applicator: row.canonicalReviewMetadata?.applicator ?? null,
+    capStyle: row.canonicalReviewMetadata?.capStyle ?? null,
+    capColor: row.canonicalReviewMetadata?.capColor ?? null,
+    bodyMaterial: row.canonicalReviewMetadata?.bodyMaterial ?? null,
     identityStatus: row.identityStatus,
     identityReasons: row.identityReasons,
     previewPath: row.composite?.previewPath ?? null,
@@ -582,6 +623,7 @@ export async function buildPsdCapStateAudit(
       }),
       identityReasons: joined.reasons,
       family: joined.row?.family || null,
+      canonicalReviewMetadata: buildCanonicalReviewMetadata(joined.row),
     });
   });
   const reviewUnits = groupPsdAuditRecords(records);

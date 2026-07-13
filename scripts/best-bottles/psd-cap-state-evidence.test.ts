@@ -42,6 +42,58 @@ function sourceSha(): string {
   return createHash("sha256").update("immutable-psd").digest("hex");
 }
 
+function mockMagick(preview: Buffer, sceneCount = 1) {
+  return async (args: readonly string[]): Promise<Buffer> => {
+    if (args[0] !== "identify") return preview;
+    if (args[3]?.endsWith("[0]")) {
+      return Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}');
+    }
+    return Buffer.from(String(sceneCount));
+  };
+}
+
+function readyCachedEvidence(preview: Buffer): PsdSourceEvidence {
+  const previewPath = `/audit/previews/${sourceSha()}.png`;
+  return {
+    extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
+    status: "ok",
+    cacheStatus: "generated",
+    sourcePath: "/archive/Original.psd",
+    sourceRelativePath: "Original.psd",
+    sourceSha256: sourceSha(),
+    sourceBytes: 13,
+    sourceMtimeBefore: 900,
+    sourceMtimeAfter: 900,
+    sourceSizeBefore: 13,
+    sourceSizeAfter: 13,
+    previewPath,
+    evidencePath: `/audit/evidence/${sourceSha()}.json`,
+    composite: {
+      width: 100,
+      height: 100,
+      opaque: true,
+      sceneCount: 4,
+      foregroundBounds: { left: 20, top: 10, width: 20, height: 40 },
+      largeForegroundComponentCount: 1,
+      whiteCornerCount: 4,
+      minimumSafeMarginPct: 10,
+      previewPath,
+      evidenceSha256: createHash("sha256").update(preview).digest("hex"),
+      previewWidth: 100,
+      previewHeight: 100,
+      cornerSamples: [
+        { corner: "top-left", x: 0, y: 0, rgb: [255, 255, 255], white: true },
+        { corner: "top-right", x: 99, y: 0, rgb: [255, 255, 255], white: true },
+        { corner: "bottom-left", x: 0, y: 99, rgb: [255, 255, 255], white: true },
+        { corner: "bottom-right", x: 99, y: 99, rgb: [255, 255, 255], white: true },
+      ],
+    },
+    proposedClassification: "ambiguous-manual-review",
+    routingHints: [],
+    error: null,
+  };
+}
+
 describe("immutable PSD evidence extraction", () => {
   it("hashes source bytes before rendering scene zero and leaves source metadata unchanged", async () => {
     const events: string[] = [];
@@ -65,6 +117,10 @@ describe("immutable PSD evidence extraction", () => {
       runMagick: async (args) => {
         events.push(`magick-${args[0]}`);
         const sourceArgument = args.find((arg) => arg.startsWith("/archive/"));
+        if (args[0] === "identify" && args[2] === "%n") {
+          assert.equal(sourceArgument, "/archive/WebA.psd");
+          return Buffer.from("4");
+        }
         assert.equal(sourceArgument, "/archive/WebA.psd[0]");
         if (args[0] === "identify") {
           assert.equal(args[1], "-format");
@@ -110,9 +166,10 @@ describe("immutable PSD evidence extraction", () => {
       outputRoot: "/audit",
       readSource: async () => Buffer.from("immutable-psd"),
       statSource: async () => ({ size: 13, mtimeMs: 1000 }),
-      runMagick: async (args) => args[0] === "identify"
-        ? Buffer.from('{"width":1000,"height":1600,"opaque":"True","sceneCount":4}')
-        : preview,
+      runMagick: async (args) => args[0] !== "identify" ? preview
+        : args[3]?.endsWith("[0]")
+          ? Buffer.from('{"width":1000,"height":1600,"opaque":"True","sceneCount":1}')
+          : Buffer.from("4"),
       writeArtifact: async () => undefined,
       readCachedEvidence: async () => null,
     });
@@ -151,9 +208,10 @@ describe("immutable PSD evidence extraction", () => {
       outputRoot: "/audit",
       readSource: async () => Buffer.from("immutable-psd"),
       statSource: async () => ({ size: 13, mtimeMs: 1000 }),
-      runMagick: async (args) => args[0] === "identify"
-        ? Buffer.from('{"width":100,"height":100,"opaque":"False","sceneCount":2}')
-        : preview,
+      runMagick: async (args) => args[0] !== "identify" ? preview
+        : args[3]?.endsWith("[0]")
+          ? Buffer.from('{"width":100,"height":100,"opaque":"False","sceneCount":1}')
+          : Buffer.from("2"),
       writeArtifact: async () => undefined,
       readCachedEvidence: async () => null,
     });
@@ -175,9 +233,7 @@ describe("immutable PSD evidence extraction", () => {
       outputRoot: "/audit",
       readSource: async () => Buffer.from("immutable-psd"),
       statSource: async () => ({ size: 13, mtimeMs: 1000 }),
-      runMagick: async (args) => args[0] === "identify"
-        ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
-        : preview,
+      runMagick: mockMagick(preview, 1),
       writeArtifact: async () => undefined,
       readCachedEvidence: async () => null,
     });
@@ -189,19 +245,8 @@ describe("immutable PSD evidence extraction", () => {
   it("reuses evidence only when source hash and extractor version match", async () => {
     let magickCalls = 0;
     let writeCalls = 0;
-    const cached = {
-      extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
-      status: "ok",
-      cacheStatus: "generated",
-      sourcePath: "/archive/Original.psd",
-      sourceRelativePath: "Original.psd",
-      sourceSha256: sourceSha(),
-      sourceBytes: 13,
-      sourceMtimeBefore: 900,
-      sourceMtimeAfter: 900,
-      sourceSizeBefore: 13,
-      sourceSizeAfter: 13,
-    } as PsdSourceEvidence;
+    const preview = await makePreview();
+    const cached = readyCachedEvidence(preview);
 
     const result = await inspectPsdEvidence({
       sourcePath: "/archive/WebA copy.psd",
@@ -220,6 +265,7 @@ describe("immutable PSD evidence extraction", () => {
         assert.equal(target, `/audit/evidence/${sourceSha()}.json`);
         return cached;
       },
+      readArtifact: async () => preview,
     });
 
     assert.equal(result.status, "ok");
@@ -233,29 +279,16 @@ describe("immutable PSD evidence extraction", () => {
   });
 
   it("recomputes cached path hints while preserving pixel-derived hints", async () => {
-    const cached = {
-      extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
-      status: "ok",
-      cacheStatus: "generated",
-      sourcePath: "/archive/Capped Components/WebA.psd",
-      sourceRelativePath: "Capped Components/WebA.psd",
-      sourceSha256: sourceSha(),
-      sourceBytes: 13,
-      sourceMtimeBefore: 900,
-      sourceMtimeAfter: 900,
-      sourceSizeBefore: 13,
-      sourceSizeAfter: 13,
-      previewPath: `/audit/previews/${sourceSha()}.png`,
-      evidencePath: `/audit/evidence/${sourceSha()}.json`,
-      composite: { largeForegroundComponentCount: 2 },
-      proposedClassification: "ambiguous-manual-review",
-      routingHints: [
+    const preview = await makePreview();
+    const cached = readyCachedEvidence(preview);
+    if (cached.status === "ok") {
+      cached.composite.largeForegroundComponentCount = 2;
+      cached.routingHints = [
         "folder_hint:capped",
         "multiple_large_components",
         "component_path_hint",
-      ],
-      error: null,
-    } as PsdSourceEvidence;
+      ];
+    }
 
     const result = await inspectPsdEvidence({
       sourcePath: "/archive/Uncapped/WebA.psd",
@@ -270,6 +303,7 @@ describe("immutable PSD evidence extraction", () => {
         throw new Error("cache should avoid writes");
       },
       readCachedEvidence: async () => cached,
+      readArtifact: async () => preview,
     });
 
     assert.deepEqual(result.routingHints, [
@@ -293,16 +327,46 @@ describe("immutable PSD evidence extraction", () => {
         statSource: async () => ({ size: 13, mtimeMs: 1000 }),
         runMagick: async (args) => {
           magickCalls += 1;
-          return args[0] === "identify"
-            ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
-            : preview;
+          return mockMagick(preview, 1)(args);
         },
         writeArtifact: async () => undefined,
         readCachedEvidence: async () => cached as PsdSourceEvidence,
       });
       assert.equal(result.status, "ok");
       assert.equal(result.cacheStatus, "generated");
-      assert.equal(magickCalls, 2);
+      assert.equal(magickCalls, 3);
+    }
+  });
+
+  it("regenerates incomplete, path-mismatched, missing, and tampered cached previews", async () => {
+    const preview = await makePreview();
+    const valid = readyCachedEvidence(preview);
+    assert.equal(valid.status, "ok");
+    if (valid.status !== "ok") return;
+    const cases: Array<{ cached: PsdSourceEvidence; readArtifact: () => Promise<Buffer> }> = [
+      { cached: { ...valid, composite: { ...valid.composite, previewWidth: 0 } }, readArtifact: async () => preview },
+      { cached: { ...valid, previewPath: "/audit/previews/wrong.png" }, readArtifact: async () => preview },
+      { cached: valid, readArtifact: async () => { throw Object.assign(new Error("missing"), { code: "ENOENT" }); } },
+      { cached: valid, readArtifact: async () => Buffer.from("tampered-preview") },
+    ];
+    for (const testCase of cases) {
+      let magickCalls = 0;
+      const result = await inspectPsdEvidence({
+        sourcePath: "/archive/WebA.psd",
+        sourceRelativePath: "Cylinder/WebA.psd",
+        outputRoot: "/audit",
+        readSource: async () => Buffer.from("immutable-psd"),
+        statSource: async () => ({ size: 13, mtimeMs: 1000 }),
+        runMagick: async (args) => {
+          magickCalls += 1;
+          return mockMagick(preview, 4)(args);
+        },
+        writeArtifact: async () => undefined,
+        readCachedEvidence: async () => testCase.cached,
+        readArtifact: testCase.readArtifact,
+      });
+      assert.equal(result.cacheStatus, "generated");
+      assert.equal(magickCalls, 3);
     }
   });
 
@@ -320,9 +384,7 @@ describe("immutable PSD evidence extraction", () => {
         outputRoot: "/audit",
         readSource: async () => Buffer.from("immutable-psd"),
         statSource: async () => (++statCalls === 1 ? { size: 13, mtimeMs: 1000 } : after),
-        runMagick: async (args) => args[0] === "identify"
-          ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
-          : preview,
+        runMagick: mockMagick(preview, 1),
         writeArtifact: async () => {
           writeCalls += 1;
         },
@@ -427,9 +489,7 @@ describe("PSD evidence pool", () => {
       runMagick: async (args) => {
         magickCalls += 1;
         await new Promise((resolve) => setTimeout(resolve, 5));
-        return args[0] === "identify"
-          ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
-          : preview;
+        return mockMagick(preview, 1)(args);
       },
       writeArtifact: async (target) => {
         writes.push(target);
@@ -437,7 +497,7 @@ describe("PSD evidence pool", () => {
       readCachedEvidence: async () => null,
     });
 
-    assert.equal(magickCalls, 2);
+    assert.equal(magickCalls, 3);
     assert.deepEqual(writes, [
       `/audit/previews/${sourceSha()}.png`,
       `/audit/evidence/${sourceSha()}.json`,
@@ -487,9 +547,7 @@ describe("PSD evidence pool", () => {
           throw new Error("broken source path exactly");
         }
         usableMagickCalls += 1;
-        return args[0] === "identify"
-          ? Buffer.from('{"width":100,"height":100,"opaque":"True","sceneCount":1}')
-          : preview;
+        return mockMagick(preview, 1)(args);
       },
       writeArtifact: async () => undefined,
       readCachedEvidence: async () => null,
@@ -498,7 +556,7 @@ describe("PSD evidence pool", () => {
     assert.equal(results[0].status, "blocked");
     assert.equal(results[0].error, "broken source path exactly");
     assert.equal(results[1].status, "ok");
-    assert.equal(usableMagickCalls, 2);
+    assert.equal(usableMagickCalls, 3);
   });
 
   it("defaults to four concurrent rows and preserves row-scoped failures", async () => {

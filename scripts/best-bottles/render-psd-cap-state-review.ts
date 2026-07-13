@@ -31,6 +31,11 @@ export interface PsdReviewSheetTile {
   sourceRelativePath: string;
   identityStatus: PsdAuditRecord["identityStatus"];
   machineRoutingHints: string[];
+  capacityMl: string | null;
+  applicator: string | null;
+  proposedClassification: PsdAuditRecord["machineTriage"]["proposedClassification"];
+  confidence: PsdAuditRecord["machineTriage"]["confidence"];
+  reviewStatus: PsdAuditRecord["reviewStatus"];
   previewPath: string | null;
 }
 
@@ -72,6 +77,9 @@ const FIXED_TILES_PER_SHEET = SHEET_COLUMNS * SHEET_ROWS;
 const TILE_WIDTH = SHEET_WIDTH / SHEET_COLUMNS;
 const TILE_HEIGHT = SHEET_HEIGHT / SHEET_ROWS;
 const DEFAULT_AUDIT_ROOT = "tmp/best-bottles-reference-production/psd-cap-state-audit-v1";
+export const PSD_REVIEW_SHEET_RENDERER_OWNER = "madison-best-bottles-psd-review-renderer";
+export const PSD_REVIEW_SHEET_RENDERER_VERSION = "best-bottles-psd-review-sheets-v2";
+const OWNED_SHEET_PREFIX = "bb-psd-review-v2--";
 
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -88,9 +96,10 @@ function queueForUnit(unit: PsdReviewUnit): PsdReviewQueue {
   if (representative.identityStatus === "unmatched") {
     return "unmatched";
   }
-  if (["ambiguous-manual-review", "multi-product-layout"].includes(
-    representative.machineTriage.proposedClassification,
-  )) {
+  if (
+    representative.machineTriage.proposedClassification === "multi-product-layout"
+    || representative.machineTriage.reasons.includes("multiple_large_components")
+  ) {
     return "ambiguous-layout";
   }
   return "exact-matched";
@@ -121,8 +130,10 @@ function normalizeCohortToken(value: string): string {
 }
 
 function exactCohort(unit: PsdReviewUnit): string | null {
-  const capacity = optionalCanonicalValue(unit, ["capacityMl", "capacity_ml"]);
-  const applicator = optionalCanonicalValue(unit, ["applicator", "applicatorType"]);
+  const capacity = unit.canonicalReviewMetadata?.capacityMl
+    ?? optionalCanonicalValue(unit, ["capacityMl", "capacity_ml"]);
+  const applicator = unit.canonicalReviewMetadata?.applicator
+    ?? optionalCanonicalValue(unit, ["applicator", "applicatorType"]);
   if (capacity === null && applicator === null) {
     return null;
   }
@@ -149,6 +160,11 @@ function toTile(unit: PsdReviewUnit): PsdReviewSheetTile {
     sourceRelativePath: representative.sourceRelativePath,
     identityStatus: representative.identityStatus,
     machineRoutingHints: [...representative.machineTriage.reasons],
+    capacityMl: unit.canonicalReviewMetadata?.capacityMl ?? null,
+    applicator: unit.canonicalReviewMetadata?.applicator ?? null,
+    proposedClassification: representative.machineTriage.proposedClassification,
+    confidence: representative.machineTriage.confidence,
+    reviewStatus: representative.reviewStatus,
     previewPath: representative.composite?.previewPath ?? null,
   };
 }
@@ -202,12 +218,12 @@ export function buildPsdReviewSheetPlan(
     ));
     for (let offset = 0; offset < tiles.length; offset += tilesPerSheet) {
       const page = Math.floor(offset / tilesPerSheet) + 1;
-      const id = [
+      const id = `${OWNED_SHEET_PREFIX}${[
         bucket.queue,
         filenameToken(bucket.family, "unassigned"),
         ...(bucket.cohort ? [filenameToken(bucket.cohort, "cohort-unspecified")] : []),
         `p${String(page).padStart(3, "0")}`,
-      ].join("--");
+      ].join("--")}`;
       sheetDrafts.push({
         bucketIdentity: bucket.bucketIdentity,
         id,
@@ -269,9 +285,10 @@ function tileLabelSvg(tile: PsdReviewSheetTile, queue: PsdReviewQueue): Buffer {
     : "none";
   const lines = [
     `${tile.websiteSku ?? "—"} | ${tile.graceSku ?? "—"}`,
-    `${tile.family ?? "Unassigned"} | ${tile.sourceRelativeBasename}`,
+    `${tile.family ?? "Unassigned"} | ${tile.capacityMl ?? "?"} ml | ${tile.applicator ?? "?"}`,
+    `${tile.proposedClassification} | ${tile.confidence} | ${tile.reviewStatus}`,
     `${tile.identityStatus} | ${routingHints}`,
-    `review unit …${tile.reviewUnitKeySuffix}`,
+    `${tile.sourceRelativeBasename} | …${tile.reviewUnitKeySuffix}`,
   ].map((line) => escapeXml(shorten(line, 44)));
   const borderColor: Record<PsdReviewQueue, string> = {
     "identity-blockers": "rgb(155, 28, 28)",
@@ -283,9 +300,9 @@ function tileLabelSvg(tile: PsdReviewSheetTile, queue: PsdReviewQueue): Buffer {
   return Buffer.from(`
     <svg width="${TILE_WIDTH}" height="${TILE_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
       <rect x="1" y="1" width="${TILE_WIDTH - 2}" height="${TILE_HEIGHT - 2}" fill="none" stroke="${borderColor[queue]}" stroke-width="3"/>
-      <rect x="0" y="430" width="${TILE_WIDTH}" height="170" fill="#ffffff"/>
+      <rect x="0" y="410" width="${TILE_WIDTH}" height="190" fill="#ffffff"/>
       ${lines.map((line, index) => (
-        `<text x="18" y="${462 + index * 33}" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="${index === 0 ? 700 : 400}">${line}</text>`
+        `<text x="18" y="${440 + index * 30}" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="${index === 0 ? 700 : 400}">${line}</text>`
       )).join("\n")}
     </svg>
   `);
@@ -314,7 +331,7 @@ async function previewBuffer(tile: PsdReviewSheetTile): Promise<Buffer> {
 
 async function renderSheet(sheet: PsdReviewSheet, outputPath: string): Promise<void> {
   const previews = await Promise.all(sheet.tiles.map(previewBuffer));
-  const overlays: sharp.OverlayOptions[] = [];
+  const overlays: Parameters<ReturnType<typeof sharp>["composite"]>[0] = [];
   sheet.tiles.forEach((tile, index) => {
     const column = index % SHEET_COLUMNS;
     const row = Math.floor(index / SHEET_COLUMNS);
@@ -400,7 +417,8 @@ export async function renderPsdReviewSheets(
 
   const indexPath = join(options.outputRoot, "index.html");
   const manifest = {
-    version: "best-bottles-psd-review-sheets-v1",
+    owner: PSD_REVIEW_SHEET_RENDERER_OWNER,
+    version: PSD_REVIEW_SHEET_RENDERER_VERSION,
     sheetWidth: SHEET_WIDTH,
     sheetHeight: SHEET_HEIGHT,
     columns: SHEET_COLUMNS,
@@ -433,7 +451,13 @@ async function loadManifestOwnedSheetFilenames(manifestPath: string): Promise<st
     throw error;
   }
   const parsed: unknown = JSON.parse(raw);
-  if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as { sheets?: unknown }).sheets)) {
+  if (
+    typeof parsed !== "object"
+    || parsed === null
+    || (parsed as { owner?: unknown }).owner !== PSD_REVIEW_SHEET_RENDERER_OWNER
+    || (parsed as { version?: unknown }).version !== PSD_REVIEW_SHEET_RENDERER_VERSION
+    || !Array.isArray((parsed as { sheets?: unknown }).sheets)
+  ) {
     return [];
   }
   return (parsed as { sheets: unknown[] }).sheets.flatMap((sheet) => {
@@ -443,7 +467,8 @@ async function loadManifestOwnedSheetFilenames(manifestPath: string): Promise<st
     const filename = (sheet as { filename?: unknown }).filename;
     return typeof filename === "string"
       && filename === basename(filename)
-      && filename.endsWith(".png")
+      && filename.startsWith(OWNED_SHEET_PREFIX)
+      && /^bb-psd-review-v2--[a-z0-9-]+(?:--[a-z0-9-]+)*\.png$/.test(filename)
       ? [filename]
       : [];
   });

@@ -7,6 +7,7 @@ import type {
   PsdIdentityStatus,
   PsdReviewUnit,
 } from "./bestBottlesPsdCapStateAudit";
+import { buildPsdReviewUnitKey } from "./bestBottlesPsdCapStateAudit";
 import {
   applyPsdReviewDecisions,
   validatePsdReviewDecision,
@@ -28,7 +29,19 @@ function makeUnit(input: {
     sourceBytes: 100,
     family: "Cylinder",
     identityReasons: [],
-    composite: null,
+    canonicalReviewMetadata: null,
+    composite: {
+      width: 100,
+      height: 130,
+      opaque: true,
+      sceneCount: 1,
+      foregroundBounds: { left: 10, top: 10, width: 80, height: 110 },
+      largeForegroundComponentCount: 1,
+      whiteCornerCount: 4,
+      minimumSafeMarginPct: 7,
+      previewPath: `/previews/${sourceSha256}.png`,
+      evidenceSha256: "e".repeat(64),
+    },
     machineTriage: {
       proposedClassification: "ambiguous-manual-review",
       confidence: "low",
@@ -43,11 +56,12 @@ function makeUnit(input: {
     reviewedAt: null,
   } as PsdAuditRecord;
   return {
-    reviewUnitKey: input.key,
+    reviewUnitKey: buildPsdReviewUnitKey(record),
     sourceSha256,
     websiteSku,
     graceSku,
     family: "Cylinder",
+    canonicalReviewMetadata: null,
     sources: [record],
     representative: record,
   };
@@ -165,5 +179,60 @@ describe("PSD human review decision validation", () => {
     assert.deepEqual(result.blocked[0].reviewer, { kind: "human", identity: "Jordan Richter" });
     assert.equal(result.blocked[0].reviewedAt, new Date(validDecision.reviewedAt).toISOString());
     assert.equal(result.approved.length, 0);
+  });
+
+  it("requires usable composite preview evidence for concrete approval", () => {
+    const evidenceBlocked = makeUnit({ key: "evidence-blocked" });
+    evidenceBlocked.representative.composite = null;
+    assert.throws(() => applyPsdReviewDecisions({
+      reviewUnits: [evidenceBlocked],
+      decisions: [{
+        ...validDecision,
+        reviewUnitKey: evidenceBlocked.reviewUnitKey,
+        sourceSha256: evidenceBlocked.sourceSha256,
+      }],
+    }), /evidence|preview|composite/i);
+
+    const blocked = applyPsdReviewDecisions({
+      reviewUnits: [evidenceBlocked],
+      decisions: [{
+        ...validDecision,
+        reviewUnitKey: evidenceBlocked.reviewUnitKey,
+        sourceSha256: evidenceBlocked.sourceSha256,
+        decision: "blocked",
+        notes: "ImageMagick could not render the PSD composite.",
+      }],
+    });
+    assert.equal(blocked.blocked.length, 1);
+    assert.equal(blocked.approved.length, 0);
+  });
+
+  it("requires durable reason notes for a human blocked decision", () => {
+    assert.throws(() => validatePsdReviewDecision({
+      ...validDecision,
+      decision: "blocked",
+      notes: "   ",
+    }), /notes|reason/i);
+  });
+
+  it("rejects malformed persisted unit internals before any propagation", () => {
+    const malformed = makeUnit({ key: "malformed" });
+    const injected = makeUnit({ key: "injected" }).representative;
+    malformed.sources.push(injected);
+    assert.throws(() => applyPsdReviewDecisions({
+      reviewUnits: [malformed],
+      decisions: [{
+        ...validDecision,
+        reviewUnitKey: malformed.reviewUnitKey,
+        sourceSha256: malformed.sourceSha256,
+      }],
+    }), /mismatch|mixed|review-unit key|hash/i);
+
+    const foreignRepresentative = makeUnit({ key: "foreign-representative" });
+    foreignRepresentative.representative = makeUnit({ key: "other" }).representative;
+    assert.throws(() => applyPsdReviewDecisions({
+      reviewUnits: [foreignRepresentative],
+      decisions: [],
+    }), /representative/i);
   });
 });

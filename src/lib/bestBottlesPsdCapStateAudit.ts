@@ -93,6 +93,7 @@ export interface PsdAuditRecordFields {
   sourceSha256: string;
   sourceBytes: number;
   family: string | null;
+  canonicalReviewMetadata: PsdCanonicalReviewMetadata | null;
   identityReasons: string[];
   composite: PsdCompositeEvidence | null;
   machineTriage: {
@@ -100,6 +101,24 @@ export interface PsdAuditRecordFields {
     confidence: "low" | "medium" | "high";
     reasons: string[];
   };
+}
+
+export interface PsdCanonicalReviewMetadata {
+  capacityMl: string | null;
+  applicator: string | null;
+  capStyle: string | null;
+  capColor: string | null;
+  trimColor: string | null;
+  bodyMaterial: string | null;
+  glassFinish: string | null;
+  assemblyType: string | null;
+  ballMaterial: string | null;
+  category: string | null;
+  shape: string | null;
+  canonBodyHeightMm: string | null;
+  canonWidthAxisMm: string | null;
+  canonSecondAxisMm: string | null;
+  canonHeightWithCapMm: string | null;
 }
 
 export type PsdAuditRecord = PsdAuditRecordFields & PsdIdentityState & PsdReviewState;
@@ -110,6 +129,7 @@ export interface PsdReviewUnit {
   websiteSku: string | null;
   graceSku: string | null;
   family: string | null;
+  canonicalReviewMetadata: PsdCanonicalReviewMetadata | null;
   sources: PsdAuditRecord[];
   representative: PsdAuditRecord;
 }
@@ -148,6 +168,7 @@ export function groupPsdAuditRecords(records: readonly PsdAuditRecord[]): PsdRev
     websiteSku: sources[0].websiteSku,
     graceSku: sources[0].graceSku,
     family: sources[0].family,
+    canonicalReviewMetadata: sources[0].canonicalReviewMetadata,
     sources,
     representative: [...sources].sort((a, b) =>
       a.sourceRelativePath.localeCompare(b.sourceRelativePath)

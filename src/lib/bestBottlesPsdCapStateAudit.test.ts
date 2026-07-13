@@ -8,7 +8,12 @@ import {
   type PsdAuditRecord,
 } from "./bestBottlesPsdCapStateAudit";
 
-const base: PsdAuditRecord = {
+type PendingExactWebsiteRecord = Extract<
+  PsdAuditRecord,
+  { identityStatus: "exact-website-sku"; reviewStatus: "pending-human-review" }
+>;
+
+const base: PendingExactWebsiteRecord = {
   sourcePath: "/archive/A.psd",
   sourceRelativePath: "Cylinder/A.psd",
   sourceSha256: "a".repeat(64),
@@ -16,6 +21,7 @@ const base: PsdAuditRecord = {
   websiteSku: "WebA",
   graceSku: "GB-A",
   family: "Cylinder",
+  canonicalReviewMetadata: null,
   identityStatus: "exact-website-sku",
   identityReasons: [],
   aliasProvenance: null,

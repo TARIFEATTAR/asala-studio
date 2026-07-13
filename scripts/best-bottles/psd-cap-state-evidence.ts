@@ -10,7 +10,7 @@ import type {
   PsdCompositeEvidence,
 } from "../../src/lib/bestBottlesPsdCapStateAudit";
 
-export const PSD_EVIDENCE_EXTRACTOR_VERSION = "best-bottles-psd-evidence-v1";
+export const PSD_EVIDENCE_EXTRACTOR_VERSION = "best-bottles-psd-evidence-v2";
 
 const DEFAULT_EVIDENCE_CONCURRENCY = 4;
 const WHITE_DIFFERENCE_THRESHOLD = 255 * 0.06;
@@ -84,6 +84,7 @@ type StatSource = (sourcePath: string) => Promise<PsdSourceStat>;
 type RunMagick = (args: readonly string[]) => Promise<Buffer>;
 type WriteArtifact = (target: string, data: Buffer) => Promise<void>;
 type ReadCachedEvidence = (target: string) => Promise<PsdSourceEvidence | null>;
+type ReadArtifact = (target: string) => Promise<Buffer>;
 
 export interface InspectPsdEvidenceInput extends PsdSourceInput {
   outputRoot: string;
@@ -92,6 +93,7 @@ export interface InspectPsdEvidenceInput extends PsdSourceInput {
   runMagick?: RunMagick;
   writeArtifact?: WriteArtifact;
   readCachedEvidence?: ReadCachedEvidence;
+  readArtifact?: ReadArtifact;
 }
 
 interface SceneMetadata {
@@ -143,7 +145,13 @@ const defaultWriteArtifact: WriteArtifact = async (target, data) => {
 
 const defaultReadCachedEvidence: ReadCachedEvidence = async (target) => {
   try {
-    return JSON.parse(await readFile(target, "utf8")) as PsdSourceEvidence;
+    const raw = await readFile(target, "utf8");
+    try {
+      return JSON.parse(raw) as PsdSourceEvidence;
+    } catch (error) {
+      if (error instanceof SyntaxError) return null;
+      throw error;
+    }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
@@ -151,6 +159,7 @@ const defaultReadCachedEvidence: ReadCachedEvidence = async (target) => {
     throw error;
   }
 };
+const defaultReadArtifact: ReadArtifact = async (target) => readFile(target);
 
 const defaultRunMagick: RunMagick = async (args) => new Promise((resolve, reject) => {
   const child = spawn("magick", [...args], { stdio: ["ignore", "pipe", "pipe"] });
@@ -200,6 +209,82 @@ function parseSceneMetadata(output: Buffer): SceneMetadata {
     sceneCount,
     opaque: opaqueToken === "true",
   };
+}
+
+function parseSceneCount(output: Buffer): number {
+  const match = output.toString("utf8").trim().match(/^\d+/);
+  const count = Number(match?.[0]);
+  if (!Number.isInteger(count) || count <= 0) {
+    throw new Error(`Invalid ImageMagick scene count: ${output.toString("utf8")}`);
+  }
+  return count;
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return Number.isInteger(value) && Number(value) > 0;
+}
+
+function isValidBounds(value: unknown): boolean {
+  if (value === null) return true;
+  if (typeof value !== "object" || value === null) return false;
+  const bounds = value as Record<string, unknown>;
+  return isPositiveInteger(bounds.width)
+    && isPositiveInteger(bounds.height)
+    && Number.isInteger(bounds.left)
+    && Number(bounds.left) >= 0
+    && Number.isInteger(bounds.top)
+    && Number(bounds.top) >= 0;
+}
+
+async function isReusableCachedEvidence(input: {
+  cached: PsdSourceEvidence | null;
+  sourceSha256: string;
+  previewPath: string;
+  evidencePath: string;
+  readArtifact: ReadArtifact;
+}): Promise<boolean> {
+  const cached = input.cached;
+  if (
+    cached === null
+    || cached.extractorVersion !== PSD_EVIDENCE_EXTRACTOR_VERSION
+    || cached.status !== "ok"
+    || cached.sourceSha256 !== input.sourceSha256
+    || cached.previewPath !== input.previewPath
+    || cached.evidencePath !== input.evidencePath
+    || cached.error !== null
+    || cached.proposedClassification !== PROPOSED_CLASSIFICATION
+    || !Array.isArray(cached.routingHints)
+    || cached.composite === null
+    || cached.composite.previewPath !== input.previewPath
+    || !isPositiveInteger(cached.composite.width)
+    || !isPositiveInteger(cached.composite.height)
+    || !isPositiveInteger(cached.composite.previewWidth)
+    || !isPositiveInteger(cached.composite.previewHeight)
+    || !isPositiveInteger(cached.composite.sceneCount)
+    || typeof cached.composite.opaque !== "boolean"
+    || !Number.isInteger(cached.composite.largeForegroundComponentCount)
+    || cached.composite.largeForegroundComponentCount < 0
+    || !Number.isInteger(cached.composite.whiteCornerCount)
+    || cached.composite.whiteCornerCount < 0
+    || cached.composite.whiteCornerCount > 4
+    || !isValidBounds(cached.composite.foregroundBounds)
+    || !(
+      cached.composite.minimumSafeMarginPct === null
+      || Number.isFinite(cached.composite.minimumSafeMarginPct)
+    )
+    || !Array.isArray(cached.composite.cornerSamples)
+    || cached.composite.cornerSamples.length !== 4
+    || !/^[a-f0-9]{64}$/i.test(cached.composite.evidenceSha256)
+  ) {
+    return false;
+  }
+  try {
+    const preview = await input.readArtifact(input.previewPath);
+    return createHash("sha256").update(preview).digest("hex")
+      === cached.composite.evidenceSha256.toLowerCase();
+  } catch {
+    return false;
+  }
 }
 
 function isForegroundPixel(data: Buffer, offset: number): boolean {
@@ -435,6 +520,7 @@ async function inspectPsdEvidenceInternal(
   const runMagick = input.runMagick ?? defaultRunMagick;
   const writeArtifact = input.writeArtifact ?? defaultWriteArtifact;
   const readCachedEvidence = input.readCachedEvidence ?? defaultReadCachedEvidence;
+  const readArtifact = input.readArtifact ?? defaultReadArtifact;
 
   const sourceStatBefore = await statSource(input.sourcePath);
   let sourceBytes: Buffer;
@@ -465,10 +551,13 @@ async function inspectPsdEvidenceInternal(
 
   try {
     const cached = await readCachedEvidence(evidencePath);
-    if (
-      cached?.extractorVersion === PSD_EVIDENCE_EXTRACTOR_VERSION
-      && cached.sourceSha256 === sourceSha256
-    ) {
+    if (await isReusableCachedEvidence({
+      cached,
+      sourceSha256,
+      previewPath,
+      evidencePath,
+      readArtifact,
+    })) {
       sourceStatAfter = await statSource(input.sourcePath);
       assertSourceUnchanged(input.sourcePath, sourceStatBefore, sourceStatAfter);
       return rebindReadyEvidence({
@@ -513,10 +602,16 @@ async function inspectPsdEvidenceInternal(
       const metadataOutput = await runMagick([
         "identify",
         "-format",
-        '{"width":%w,"height":%h,"opaque":"%[opaque]","sceneCount":%n}',
+        '{"width":%w,"height":%h,"opaque":"%[opaque]","sceneCount":1}',
         scenePath,
       ]);
       const metadata = parseSceneMetadata(metadataOutput);
+      const sceneCount = parseSceneCount(await runMagick([
+        "identify",
+        "-format",
+        "%n",
+        input.sourcePath,
+      ]));
       const preview = await runMagick([
         scenePath,
         "-background", "white",
@@ -534,7 +629,7 @@ async function inspectPsdEvidenceInternal(
         width: metadata.width,
         height: metadata.height,
         opaque: metadata.opaque,
-        sceneCount: metadata.sceneCount,
+        sceneCount,
         foregroundBounds: pixelAnalysis.foregroundBounds,
         largeForegroundComponentCount: pixelAnalysis.largeForegroundComponentCount,
         whiteCornerCount: pixelAnalysis.whiteCornerCount,
@@ -625,6 +720,7 @@ export interface RunEvidencePoolInput {
   runMagick?: RunMagick;
   writeArtifact?: WriteArtifact;
   readCachedEvidence?: ReadCachedEvidence;
+  readArtifact?: ReadArtifact;
 }
 
 function exactError(error: unknown): string {
@@ -662,6 +758,7 @@ export async function runEvidencePool(
           runMagick: input.runMagick,
           writeArtifact: input.writeArtifact,
           readCachedEvidence: input.readCachedEvidence,
+          readArtifact: input.readArtifact,
         });
         results[index] = {
           ...result,

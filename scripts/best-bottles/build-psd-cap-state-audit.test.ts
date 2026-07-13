@@ -9,6 +9,7 @@ import type {
   InspectPsdEvidenceInput,
   PsdReadySourceEvidence,
 } from "./psd-cap-state-evidence";
+import { PSD_EVIDENCE_EXTRACTOR_VERSION } from "./psd-cap-state-evidence";
 import {
   buildPsdCapStateAudit,
   listPsdSourceFiles,
@@ -17,7 +18,11 @@ import {
 } from "./build-psd-cap-state-audit";
 
 const canonicalRows: CanonicalTruthRow[] = [
-  { website_sku: "WebA", grace_sku: "GB-A", family: "Cylinder" },
+  {
+    website_sku: "WebA", grace_sku: "GB-A", family: "Cylinder",
+    capacityMl: "3", applicator: "Fine Mist Sprayer", capStyle: "Overcap",
+    capColor: "Black", material: "Glass", canon_bodyHeightMm: "37",
+  },
   { website_sku: "WebB", grace_sku: "GB-B", family: "Circle" },
   { website_sku: "Ambiguous", grace_sku: "GB-C", family: "Diva" },
   { website_sku: "Ambiguous", grace_sku: "GB-D", family: "Grace" },
@@ -46,7 +51,7 @@ async function inspectEvidence(
 ): Promise<PsdReadySourceEvidence> {
   const sourceSha256 = hashesByFilename[basename(input.sourcePath)];
   return {
-    extractorVersion: "best-bottles-psd-evidence-v1",
+    extractorVersion: PSD_EVIDENCE_EXTRACTOR_VERSION,
     status: "ok",
     cacheStatus: "generated",
     sourcePath: input.sourcePath,
@@ -107,6 +112,24 @@ describe("archive-wide PSD cap-state audit builder", () => {
       sharedHash,
     );
     assert.ok(result.records.every((row) => row.reviewStatus === "pending-human-review"));
+    const webAUnit = result.reviewUnits.find((unit) => unit.websiteSku === "WebA");
+    assert.deepEqual(webAUnit?.canonicalReviewMetadata, {
+      capacityMl: "3",
+      applicator: "Fine Mist Sprayer",
+      capStyle: "Overcap",
+      capColor: "Black",
+      trimColor: null,
+      bodyMaterial: "Glass",
+      glassFinish: null,
+      assemblyType: null,
+      ballMaterial: null,
+      category: null,
+      shape: null,
+      canonBodyHeightMm: "37",
+      canonWidthAxisMm: null,
+      canonSecondAxisMm: null,
+      canonHeightWithCapMm: null,
+    });
   });
 
   it("never changes a machine-triaged row to approved", async () => {
