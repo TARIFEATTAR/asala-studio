@@ -1,0 +1,418 @@
+{
+  "version": "best-bottles-reviewed-psd-aliases-v1",
+  "aliases": [
+    {
+      "sourceToken": "GBCyl100RdcrMtSl",
+      "websiteSku": "GBCyl100RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl100RdcrShnBlk",
+      "websiteSku": "GBCyl100RdcrShnBlk",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-SBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl28MtlRollBlk",
+      "websiteSku": "GBMtlRoll28Blk",
+      "graceSku": "GB-CYL-CLR-28ML-MRL-01",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl28MtlRollWht",
+      "websiteSku": "GBMtlRoll28Wht",
+      "graceSku": "GB-CYL-CLR-28ML-MRL-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl28RollBlk",
+      "websiteSku": "GBRoll28Blk",
+      "graceSku": "GB-CYL-CLR-28ML-RBL",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl28RollWht",
+      "websiteSku": "GBCyl1ozRollWht",
+      "graceSku": "GB-CYL-CLR-28ML-RBL-WHT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl50RdcrMtSl",
+      "websiteSku": "GBCyl50RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl50RdcrShnBlk",
+      "websiteSku": "GBCyl50RdcrShnBlk",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-SBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollCuMt",
+      "websiteSku": "GBCyl5RollCuMatt",
+      "graceSku": "GB-CYL-CLR-5ML-ROL-MCPR",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollGlMt",
+      "websiteSku": "GBCyl5RollGlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-ROL-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlBlkDot",
+      "websiteSku": "GBCyl5MtlRollBlkDot",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-BKDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlBlkSh",
+      "websiteSku": "GBCyl5MtlRollBlkSh",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-SBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlCuMt",
+      "websiteSku": "GBCyl5MtlRollCuMatt",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-MCPR",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlGlMt",
+      "websiteSku": "GBCyl5MtlRollGlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlGlSh",
+      "websiteSku": "GBCyl5MtlRollGlSh",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-SGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlPinkDot",
+      "websiteSku": "GBCyl5MtlRollPinkDot",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-PKDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlSlDot",
+      "websiteSku": "GBCyl5MtlRollSlDot",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-SLDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlSlMt",
+      "websiteSku": "GBCyl5MtlRollSlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollMtlSlSh",
+      "websiteSku": "GBCyl5MtlRollSlSh",
+      "graceSku": "GB-CYL-CLR-5ML-MRL-SSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5RollSlMt",
+      "websiteSku": "GBCyl5RollSlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-ROL-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5SpryBlkMt",
+      "websiteSku": "GBCyl5SpryBlkMatt",
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5SpryBluMt",
+      "websiteSku": "GBCyl5SpryBluMatt",
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MBLU",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5SpryGlMt",
+      "websiteSku": "GBCyl5SpryGlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5SprySlMt",
+      "websiteSku": "GBCyl5SprySlMatt",
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCyl5WhtSht",
+      "websiteSku": "GBCyl5WhtSht",
+      "graceSku": "GB-CYL-WHT-5ML-WHT-S",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollCuMt",
+      "websiteSku": "GBCylBlu5RollCuMatt",
+      "graceSku": "GB-CYL-BLU-5ML-ROL-MCPR",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollGlMt",
+      "websiteSku": "GBCylBlu5RollGlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-ROL-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlBlkDot",
+      "websiteSku": "GBCylBlu5MtlRollBlkDot",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-BKDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlBlkSh",
+      "websiteSku": "GBCylBlu5MtlRollBlkSh",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-SBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlCuMt",
+      "websiteSku": "GBCylBlu5MtlRollCuMatt",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-MCPR",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlGlMt",
+      "websiteSku": "GBCylBlu5MtlRollGlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlGlSh",
+      "websiteSku": "GBCylBlu5MtlRollGlSh",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-SGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlPinkDot",
+      "websiteSku": "GBCylBlu5MtlRollPinkDot",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-PKDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlSlDot",
+      "websiteSku": "GBCylBlu5MtlRollSlDot",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-SLDT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlSlMt",
+      "websiteSku": "GBCylBlu5MtlRollSlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollMtlSlSh",
+      "websiteSku": "GBCylBlu5MtlRollSlSh",
+      "graceSku": "GB-CYL-BLU-5ML-MRL-SSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5RollSlMt",
+      "websiteSku": "GBCylBlu5RollSlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-ROL-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5SpryBluMt",
+      "websiteSku": "GBCylBlu5SpryBluMatt",
+      "graceSku": "GB-CYL-BLU-5ML-SPR-MBLU",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5SpryGlMt",
+      "websiteSku": "GBCylBlu5SpryGlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-SPR-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylBlu5SprySlMt",
+      "websiteSku": "GBCylBlu5SprySlMatt",
+      "graceSku": "GB-CYL-BLU-5ML-SPR-MSLV",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylSwrl9MtlRollWht",
+      "websiteSku": "GBCylSwrl9MtlRollWht",
+      "graceSku": "GB-CYL-WHT-9ML-MRL-WHT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBCylSwrl9RollWht",
+      "websiteSku": "GBCylSwrl9RollWht",
+      "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollCuMt",
+      "websiteSku": "GBTallCyl9RollCuMatt",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MCPR-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollGlMt",
+      "websiteSku": "GBTallCyl9RollGlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MGLD-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlBlkDot",
+      "websiteSku": "GBTallCyl9MtlRollBlkDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-BKDT-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlBlkSh",
+      "websiteSku": "GBTallCyl9MtlRollBlkSh",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SBLK-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlCuMt",
+      "websiteSku": "GBTallCyl9MtlRollCuMatt",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MCPR-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlGlMt",
+      "websiteSku": "GBTallCyl9MtlRollGlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MGLD-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlGlSh",
+      "websiteSku": "GBTallCyl9MtlRollGlSh",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SGLD-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlPinkDot",
+      "websiteSku": "GBTallCyl9MtlRollPinkDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-PKDT-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlSlDot",
+      "websiteSku": "GBTallCyl9MtlRollSlDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SLDT-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlSlMt",
+      "websiteSku": "GBTallCyl9MtlRollSlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MSLV-03",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollMtlSlSh",
+      "websiteSku": "GBTallCyl9MtlRollSlSh",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SSLV-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9RollSlMt",
+      "websiteSku": "GBTallCyl9RollSlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MSLV-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9SpryBlkMt",
+      "websiteSku": "GBTallCyl9SpryBlkMatt",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-MBLK",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9SpryBluMt",
+      "websiteSku": "GBTallCyl9SpryBluMatt",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-MBLU",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9SpryGlMt",
+      "websiteSku": "GBTallCyl9SpryGlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-MGLD",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9SprySlMt",
+      "websiteSku": "GBTallCyl9SprySlMatt",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-MSLV-02",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    },
+    {
+      "sourceToken": "GBTallCyl9WhtSht",
+      "websiteSku": "GBTallCyl9WhtSht",
+      "graceSku": "GB-CYL-WHT-9ML-WHT-S",
+      "reviewedBy": "Jordan Richter",
+      "reviewedAt": "2026-07-14T16:49:06.074Z"
+    }
+  ]
+}
