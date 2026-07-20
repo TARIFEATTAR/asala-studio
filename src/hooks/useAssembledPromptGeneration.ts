@@ -473,9 +473,11 @@ export function useAssembledPromptGeneration() {
       isBestBottlesStudioMaster && options.precompiledPromptRecord
         ? {
             ...options.precompiledPromptRecord,
-            prompt_version: sceneEnvironmentPrompt
-              ? `${resolvedShadowPolicy.promptVersion}+scene-overlay`
-              : resolvedShadowPolicy.promptVersion,
+            // prompt_version must stay the EXACT canonical string — the edge
+            // validator hard-requires "best-bottles-reference-locked-v6.1"
+            // (a "+scene-overlay" suffix failed generation, 2026-07-20).
+            // Scene provenance rides in qa_checklist instead.
+            prompt_version: resolvedShadowPolicy.promptVersion,
             shadow_owner: resolvedShadowPolicy.owner,
             final_prompt: appendSceneEnvironmentOverride(
               appendMeasuredProportionLock(
@@ -493,6 +495,11 @@ export function useAssembledPromptGeneration() {
                 ),
                 ...visualTargetTags,
                 ...shadowPolicyTags,
+                ...(sceneEnvironmentPrompt
+                  ? [
+                      `scene-overlay:${options.sceneOverlay?.backgroundPresetId ?? "custom"}`,
+                    ]
+                  : []),
               ]),
             ),
           }
