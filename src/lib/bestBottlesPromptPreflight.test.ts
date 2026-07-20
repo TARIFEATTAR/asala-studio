@@ -58,6 +58,81 @@ function buildThreeMlPreflight(
 }
 
 describe("Best Bottles prompt preflight", () => {
+  it("blocks explicit cap-off generation without confirmed PSD evidence", () => {
+    const blocked = buildBestBottlesPromptPreflight({
+      product: { ...baseProduct, capState: "detached" },
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-SPR-GLD.png",
+      bodyMaterial: "swirl glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+    assert.equal(blocked.status, "error");
+    assert.match(blocked.issue ?? "", /cap-off PSD/i);
+
+    const confirmed = buildBestBottlesPromptPreflight({
+      product: { ...baseProduct, capState: "detached", capOffReferenceId: "approved-cap-off-psd" },
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-SPR-GLD.png",
+      bodyMaterial: "swirl glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+    assert.notEqual(confirmed.status, "error");
+    assert.ok(confirmed.record?.qa_checklist.includes("cap-off-psd:approved-cap-off-psd"));
+  });
+
+  it("requires consistent structured sidecar topology authority", () => {
+    const blocked = buildBestBottlesPromptPreflight({
+      product: {
+        ...baseProduct,
+        capState: "assembled",
+        componentTopology: "fitment-attached-cap-right-sidecar",
+        capOffReferenceId: "approved-sidecar-reference",
+        topologyReferenceId: "approved-sidecar-reference",
+      },
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-SPR-GLD.png",
+      bodyMaterial: "swirl glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+    assert.equal(blocked.status, "error");
+    assert.match(blocked.issue ?? "", /requires detached cap state/i);
+
+    const confirmed = buildBestBottlesPromptPreflight({
+      product: {
+        ...baseProduct,
+        itemDescription: "Clear glass cylinder bottle with fine mist sprayer.",
+        capState: "detached",
+        componentTopology: "fitment-attached-cap-right-sidecar",
+        capOffReferenceId: "approved-sidecar-reference",
+        topologyReferenceId: "approved-sidecar-reference",
+      },
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-SPR-GLD.png",
+      bodyMaterial: "swirl glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+    assert.notEqual(confirmed.status, "error");
+    assert.ok(confirmed.record?.qa_checklist.includes(
+      "component-topology:fitment-attached-cap-right-sidecar",
+    ));
+    assert.ok(confirmed.record?.qa_checklist.includes("shadow-topology:detached-sidecar"));
+    assert.equal(
+      confirmed.record?.qa_checklist.some((tag) => tag.startsWith("geometry-scale:")),
+      false,
+    );
+    assert.ok(confirmed.record?.qa_checklist.includes(
+      "scale-assembled-target:69",
+    ));
+    assert.deepEqual(
+      confirmed.record?.qa_checklist.filter((tag) => tag.startsWith("shadow-topology:")),
+      ["shadow-topology:detached-sidecar"],
+    );
+    assert.deepEqual(
+      confirmed.record?.qa_checklist.filter((tag) => tag.startsWith("shadow-contact:")),
+      ["shadow-contact:bottle", "shadow-contact:sidecar"],
+    );
+  });
+
   it("compiles detached-sidecar contact instructions into the shipped prompt", () => {
     const preflight = buildBestBottlesPromptPreflight({
       product: baseProduct,
@@ -67,7 +142,7 @@ describe("Best Bottles prompt preflight", () => {
       system: promptSystem,
     });
 
-    assert.match(preflight.record?.final_prompt ?? "", /bottle base and detached cap/i);
+    assert.match(preflight.record?.final_prompt ?? "", /bottle and the detached cap/i);
   });
 
   it("compiles canonical model-owned V6.1 policy for Cylinder siblings", () => {
@@ -78,8 +153,9 @@ describe("Best Bottles prompt preflight", () => {
     assert.equal(prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g)?.length, 1);
     assert.doesNotMatch(prompt, /deterministic post-processing responsibilities/i);
     assert.doesNotMatch(prompt, /Madison applies both deterministically after generation/i);
-    assert.match(prompt, /32–42% opacity/);
-    assert.match(prompt, /20–30% of the primary bottle's width/);
+    // Jordan 2026-07-19: plain-language shadow direction, no numeric engineering.
+    assert.match(prompt, /very subtle, light, softly feathered grounded shadow/);
+    assert.doesNotMatch(prompt, /% opacity|extension ratio/i);
     const directCompilerRecord = buildPromptForSku(smoke.sku!, promptSystem);
     assert.equal(directCompilerRecord.prompt_version, "best-bottles-reference-locked-v6.1");
     assert.equal(directCompilerRecord.shadow_owner, "model");
@@ -89,7 +165,17 @@ describe("Best Bottles prompt preflight", () => {
     assert.ok(smoke.record?.qa_checklist.includes("prompt-version:best-bottles-reference-locked-v6.1"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-owner:model"));
     assert.ok(smoke.record?.qa_checklist.includes("shadow-contract:contact-back-right-v1"));
-    assert.ok(smoke.record?.qa_checklist.includes("shadow-rollout:cylinder-family"));
+    assert.ok(smoke.record?.qa_checklist.includes("shadow-rollout:all-bottle-families"));
+    assert.ok(smoke.record?.qa_checklist.includes("scale-contract:best-bottles-catalog-scale-v1"));
+    assert.ok(smoke.record?.qa_checklist.includes("scale-global-target:56"));
+    assert.ok(smoke.record?.qa_checklist.includes("scale-family-correction:0"));
+    assert.ok(smoke.record?.qa_checklist.includes("scale-assembled-target:56"));
+    assert.equal(
+      smoke.record?.qa_checklist.some((tag) => tag.startsWith("geometry-scale:")),
+      false,
+    );
+    assert.equal(smoke.record?.qa_checklist.filter((tag) => tag.startsWith("scale-global-target:")).length, 1);
+    assert.equal(smoke.record?.qa_checklist.filter((tag) => tag.startsWith("scale-assembled-target:")).length, 1);
     assert.equal(
       smoke.record?.qa_checklist.some((tag) => tag.startsWith("shadow-smoke-sku:")),
       false,
@@ -442,9 +528,10 @@ describe("Best Bottles prompt preflight", () => {
     assert.ok(compactPreflight.record);
     assert.ok(tallPreflight.record);
     assert.match(compactPreflight.record.final_prompt, /CYLINDER SAMPLE VIAL FRAMING PROFILE/i);
-    assert.match(compactPreflight.record.final_prompt, /Approved fill-height range: 55-60%/i);
+    assert.match(compactPreflight.record.final_prompt, /Approved fill-height range: 54-58%/i);
     assert.match(compactPreflight.record.final_prompt, /fills approximately 56% of the canvas height/i);
     assert.match(compactPreflight.record.final_prompt, /Relative scale zone: Sample vials \(sample-vial\)/i);
+    assert.match(compactPreflight.record.final_prompt, /versioned global catalog curve owns assembled height/i);
     assert.match(compactPreflight.record.final_prompt, /primary bottle centered on the canvas vertical centerline/i);
     assert.match(compactPreflight.record.final_prompt, /PRIMARY GOAL:/i);
     assert.match(compactPreflight.record.final_prompt, /The base should show clear curved glass geometry, transparent thickness, and crisp circular base rings/i);
@@ -482,11 +569,44 @@ describe("Best Bottles prompt preflight", () => {
     assert.doesNotMatch(compactPreflight.record.final_prompt, /exactly as Image 1 shows it/i);
     assert.doesNotMatch(compactPreflight.record.final_prompt, /external pump housing position/i);
     assert.match(tallPreflight.record.final_prompt, /CYLINDER STANDARD FRAMING PROFILE/i);
-    assert.match(tallPreflight.record.final_prompt, /Approved fill-height range: 60-64%/i);
-    assert.match(tallPreflight.record.final_prompt, /fills approximately 64% of the canvas height/i);
+    assert.match(tallPreflight.record.final_prompt, /Approved fill-height range: 67-71%/i);
+    assert.match(tallPreflight.record.final_prompt, /fills approximately 69% of the canvas height/i);
     assert.match(tallPreflight.record.final_prompt, /Relative scale zone: Small Cylinder bottles \(small-cylinder\)/i);
     assert.doesNotMatch(compactPreflight.record.final_prompt, /Do NOT vary the on-canvas size by ml capacity/i);
     assert.doesNotMatch(tallPreflight.record.final_prompt, /Do NOT vary the on-canvas size by ml capacity/i);
+  });
+
+  it("adds the smooth round-glass volume cue to clear Cylinder prompts without restoring cap refinishing", () => {
+    const preflight = buildBestBottlesPromptPreflight({
+      product: {
+        ...baseProduct,
+        graceSku: "GB-CYL-CLR-9ML-T-21",
+        websiteSku: "GBCyl9SpryBlk",
+        itemName: "9 ml Clear Cylinder Fine Mist Spray Bottle",
+        itemDescription: "9 ml clear round glass Cylinder bottle with black fine mist sprayer.",
+        color: "Clear",
+        heightWithoutCap: "70 mm",
+        heightWithCap: "98 mm",
+        diameter: "20 mm",
+      },
+      referenceImagePath: "/references/GB-CYL-CLR-9ML-T-21.png",
+      bodyMaterial: "clear glass",
+      canvas: { widthPx: 2080, heightPx: 2288 },
+      system: promptSystem,
+    });
+
+    assert.notEqual(preflight.status, "error");
+    assert.ok(preflight.record);
+    assert.match(preflight.record.final_prompt, /Round-glass volume cue:/i);
+    assert.match(preflight.record.final_prompt, /curved cylinder, not a flat pane/i);
+    assert.match(preflight.record.final_prompt, /half-tone deeper than the bare canvas/i);
+    assert.match(preflight.record.final_prompt, /PERFECTLY SMOOTH/i);
+    assert.match(preflight.record.final_prompt, /must remain visibly dimensional at ecommerce thumbnail size/i);
+    assert.match(preflight.record.final_prompt, /uniform Bone-colored rectangle or empty cutout window/i);
+    assert.match(preflight.record.final_prompt, /narrow asymmetric studio-card reflections.*curved sidewalls/i);
+    assert.match(preflight.record.final_prompt, /never resolve into a discrete dark rail/i);
+    assert.doesNotMatch(preflight.record.final_prompt, /continuous fine dark glass edge line/i);
+    assert.doesNotMatch(preflight.record.final_prompt, /Component material targeting:/i);
   });
 
   it("uses the roller-bottle profile for Cylinder roller products in prompt and QA", () => {

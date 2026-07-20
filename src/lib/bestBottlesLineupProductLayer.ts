@@ -18,6 +18,7 @@ export interface ProductLayerInput {
   diameterMm: number;
   reviewLayerPath?: string;
   expectedPrimaryLane?: { leftPct: number; rightPct: number };
+  clipPrimarySearchToLane?: boolean;
   analysisMaxDimension?: number;
 }
 
@@ -40,6 +41,7 @@ export interface ProductLayerResult {
   sourceHeight: number;
   reviewLayerPath: string | null;
   primaryBounds: ProductBounds | null;
+  fullForegroundBounds: ProductBounds | null;
   sidecars: ProductLayerComponent[];
   topologyStatus: "confirmed" | "topology-review" | "unresolved";
   aspectComparison: ProductAspectComparison | null;
@@ -183,13 +185,71 @@ function intersectsLane(component: Component, width: number, lane: { leftPct: nu
   return component.bounds.left < laneRight && componentRight > laneLeft;
 }
 
-function choosePrimary(components: Component[], width: number, lane: { leftPct: number; rightPct: number }): Component | null {
+function aspectError(component: Component, measuredAspect: number): number {
+  const observedAspect = component.bounds.height / component.bounds.width;
+  return Math.abs(observedAspect - measuredAspect) / measuredAspect;
+}
+
+function choosePrimary(
+  components: Component[],
+  width: number,
+  lane: { leftPct: number; rightPct: number },
+  measuredAspect: number,
+): Component | null {
   const center = width * ((lane.leftPct + lane.rightPct) / 2);
   return components.filter((component) => intersectsLane(component, width, lane)).sort((left, right) =>
+    aspectError(left, measuredAspect) - aspectError(right, measuredAspect) ||
     right.pixelCount - left.pixelCount ||
     Math.abs(left.centerX - center) - Math.abs(right.centerX - center) ||
     left.bounds.left - right.bounds.left
   )[0] ?? null;
+}
+
+function clipMaskToLane(
+  mask: Uint8Array,
+  width: number,
+  lane: { leftPct: number; rightPct: number },
+): Uint8Array {
+  const clipped = mask.slice();
+  const left = Math.floor(width * lane.leftPct);
+  const right = Math.ceil(width * lane.rightPct);
+  for (let pixel = 0; pixel < clipped.length; pixel += 1) {
+    const x = pixel % width;
+    if (x < left || x >= right) clipped[pixel] = 0;
+  }
+  return clipped;
+}
+
+function unionComponents(components: Component[]): Component | null {
+  if (components.length === 0) return null;
+  const left = Math.min(...components.map((component) => component.bounds.left));
+  const top = Math.min(...components.map((component) => component.bounds.top));
+  const right = Math.max(...components.map((component) => component.bounds.left + component.bounds.width));
+  const bottom = Math.max(...components.map((component) => component.bounds.top + component.bounds.height));
+  const pixelCount = components.reduce((total, component) => total + component.pixelCount, 0);
+  return {
+    id: -1,
+    bounds: { left, top, width: right - left, height: bottom - top },
+    pixelCount,
+    centerX: left + (right - left) / 2,
+  };
+}
+
+function recoverMeasuredWidthForRightHandLane(
+  primary: Component | null,
+  measuredAspect: number,
+  imageWidth: number,
+): Component | null {
+  if (!primary) return null;
+  const expectedWidth = Math.max(1, Math.round(primary.bounds.height / measuredAspect));
+  if (primary.bounds.width >= expectedWidth * 0.75) return primary;
+  const right = Math.min(imageWidth, primary.bounds.left + primary.bounds.width);
+  const left = Math.max(0, right - expectedWidth);
+  return {
+    ...primary,
+    bounds: { ...primary.bounds, left, width: right - left },
+    centerX: left + (right - left) / 2,
+  };
 }
 
 function refinePrimary(
@@ -215,14 +275,34 @@ function refinePrimary(
 export async function prepareLineupProductLayer(input: ProductLayerInput): Promise<ProductLayerResult> {
   validateInput(input);
   const lane = input.expectedPrimaryLane ?? DEFAULT_PRIMARY_LANE;
+  const measuredAspect = input.heightWithCapMm / input.diameterMm;
   const full = await rawImage(input.sourceBytes);
-  const analysis = await rawImage(input.sourceBytes, input.analysisMaxDimension ?? 512);
-  const analysisComponents = componentsFor(foregroundMask(analysis), analysis.width, analysis.height);
-  const analysisPrimary = choosePrimary(analysisComponents, analysis.width, lane);
-  const fullComponents = componentsFor(foregroundMask(full), full.width, full.height);
-  const primary = analysisPrimary
-    ? refinePrimary(fullComponents, analysisPrimary, analysis.width, analysis.height, full.width, full.height, lane)
-    : null;
+  const analysis = await rawImage(input.sourceBytes, input.analysisMaxDimension ?? 1024);
+  const analysisMask = foregroundMask(analysis);
+  const fullMask = foregroundMask(full);
+  const analysisPrimaryMask = input.clipPrimarySearchToLane
+    ? clipMaskToLane(analysisMask, analysis.width, lane)
+    : analysisMask;
+  const fullPrimaryMask = input.clipPrimarySearchToLane
+    ? clipMaskToLane(fullMask, full.width, lane)
+    : fullMask;
+  const analysisComponents = componentsFor(analysisPrimaryMask, analysis.width, analysis.height);
+  const analysisPrimary = input.clipPrimarySearchToLane
+    ? unionComponents(analysisComponents)
+    : choosePrimary(analysisComponents, analysis.width, lane, measuredAspect);
+  const fullComponents = componentsFor(fullPrimaryMask, full.width, full.height);
+  const fullSourceComponents = input.clipPrimarySearchToLane
+    ? componentsFor(fullMask, full.width, full.height)
+    : fullComponents;
+  const fullForegroundBounds = unionComponents(fullSourceComponents)?.bounds ?? null;
+  const detectedPrimary = input.clipPrimarySearchToLane
+    ? unionComponents(fullComponents)
+    : analysisPrimary
+      ? refinePrimary(fullComponents, analysisPrimary, analysis.width, analysis.height, full.width, full.height, lane)
+      : null;
+  const primary = input.clipPrimarySearchToLane
+    ? recoverMeasuredWidthForRightHandLane(detectedPrimary, measuredAspect, full.width)
+    : detectedPrimary;
 
   if (input.reviewLayerPath) {
     await mkdir(path.dirname(input.reviewLayerPath), { recursive: true });
@@ -237,19 +317,26 @@ export async function prepareLineupProductLayer(input: ProductLayerInput): Promi
       sourceHeight: full.height,
       reviewLayerPath: input.reviewLayerPath ?? null,
       primaryBounds: null,
-      sidecars: fullComponents.map(({ bounds, pixelCount }) => ({ bounds, pixelCount })),
+      fullForegroundBounds,
+      sidecars: fullSourceComponents.map(({ bounds, pixelCount }) => ({ bounds, pixelCount })),
       topologyStatus: "unresolved",
       aspectComparison: null,
       blockers: ["primary_bounds_unresolved"],
     };
   }
 
-  const sidecars = fullComponents
-    .filter((component) => component.id !== primary.id)
+  const primaryRight = primary.bounds.left + primary.bounds.width;
+  const primaryBottom = primary.bounds.top + primary.bounds.height;
+  const sidecars = fullSourceComponents
+    .filter((component) => input.clipPrimarySearchToLane
+      ? component.bounds.left + component.bounds.width <= primary.bounds.left
+        || component.bounds.left >= primaryRight
+        || component.bounds.top + component.bounds.height <= primary.bounds.top
+        || component.bounds.top >= primaryBottom
+      : component.id !== primary.id)
     .sort((left, right) => left.bounds.left - right.bounds.left || left.bounds.top - right.bounds.top)
     .map(({ bounds, pixelCount }) => ({ bounds, pixelCount }));
   const observedSourceAspect = primary.bounds.height / primary.bounds.width;
-  const measuredAspect = input.heightWithCapMm / input.diameterMm;
   return {
     status: "prepared",
     sourceChecksum: input.sourceChecksum,
@@ -257,8 +344,9 @@ export async function prepareLineupProductLayer(input: ProductLayerInput): Promi
     sourceHeight: full.height,
     reviewLayerPath: input.reviewLayerPath ?? null,
     primaryBounds: primary.bounds,
+    fullForegroundBounds,
     sidecars,
-    topologyStatus: sidecars.length > 0 ? "topology-review" : "confirmed",
+    topologyStatus: sidecars.length > 0 || input.clipPrimarySearchToLane ? "topology-review" : "confirmed",
     aspectComparison: {
       observedSourceAspect: roundEvidence(observedSourceAspect),
       measuredAspect: roundEvidence(measuredAspect),

@@ -1922,11 +1922,17 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
         categorizedRefs.product.length +
         categorizedRefs.background.length +
         categorizedRefs.style.length;
-      if (totalReferences !== 1 || categorizedRefs.product.length !== 1) {
+      const hasValidCylinderReferenceSet =
+        categorizedRefs.product.length === 1 &&
+        categorizedRefs.background.length === 0 &&
+        categorizedRefs.style.length <= 1 &&
+        totalReferences >= 1 &&
+        totalReferences <= 2;
+      if (!hasValidCylinderReferenceSet) {
         return new Response(
           JSON.stringify({
             error:
-              "Cylinder master generation accepts exactly one flattened product-truth reference. Remove mask/control, paper-doll, background, and style references.",
+              "Cylinder master generation accepts exactly one flattened product-truth reference and optionally one style-only reference. Background, mask/control, paper-doll, and additional product references are blocked.",
           }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
@@ -2828,7 +2834,11 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
       const exactCanvas = requestedOutputCanvas ?? getExactCanvasForAspectRatio(generationAspectRatio);
       let base64Image = rawBase64Image;
 
-      if (exactCanvas && isBestBottlesReferenceLocked && forceBestBottlesOpenAIProvider) {
+      // Skip conformance for ALL Best Bottles reference-locked runs, not just
+      // OpenAI-forced ones: Gemini comparison runs (provider override) hit the
+      // same 2080×2288 ImageScript resize and died with WORKER_LIMIT / empty
+      // responses (2026-07-20). The client-side rig re-canvases masters anyway.
+      if (exactCanvas && isBestBottlesReferenceLocked) {
         console.log("🖼️ Gemini canvas conformance skipped for Best Bottles reference-locked run", {
           requested: generationAspectRatio,
           targetCanvas: `${exactCanvas.width}×${exactCanvas.height}`,

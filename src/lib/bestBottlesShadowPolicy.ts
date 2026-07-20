@@ -14,11 +14,35 @@ export interface BestBottlesShadowPolicy {
   promptVersion: BestBottlesPromptVersion;
   owner: BestBottlesShadowOwner;
   contract: "deterministic-contact-v1" | "contact-back-right-v1";
-  rollout: "cylinder-family" | null;
+  rollout: "cylinder-family" | "all-bottle-families" | null;
 }
 
 function normalizedFamily(value: string | null | undefined): string {
-  return String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ");
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const NON_BOTTLE_FAMILIES = new Set([
+  "cap closure",
+  "cap component",
+  "dropper",
+  "gift bag",
+  "gift box",
+  "lotion pump",
+  "packaging supply",
+  "roll on cap",
+  "sprayer",
+  "tool",
+  "unknown",
+]);
+
+function isBottleFamilyContext(family: string, collection: string): boolean {
+  const value = family || collection;
+  return value.length > 0 && !NON_BOTTLE_FAMILIES.has(value);
 }
 
 export function resolveBestBottlesShadowPolicy(
@@ -29,17 +53,12 @@ export function resolveBestBottlesShadowPolicy(
   const context = typeof input === "object" && input !== null ? input : null;
   const family = normalizedFamily(context?.family);
   const collection = normalizedFamily(context?.bottleCollection);
-  if (
-    family === "cylinder" ||
-    family === "tall cylinder" ||
-    collection === "cylinder" ||
-    collection === "tall cylinder"
-  ) {
+  if (isBottleFamilyContext(family, collection)) {
     return {
       promptVersion: "best-bottles-reference-locked-v6.1",
       owner: "model",
       contract: "contact-back-right-v1",
-      rollout: "cylinder-family",
+      rollout: "all-bottle-families",
     };
   }
   return {

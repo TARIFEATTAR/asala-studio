@@ -221,7 +221,7 @@ const SPRAY_FINISH_TOKENS: VisualToken[] = [
   { pattern: /(?:^|[-_])SSLV(?:$|[-_])|SHNSL|SHSL/i, identity: "Shiny Silver", reasonLabel: "SSLV/ShnSl" },
   { pattern: /(?:^|[-_])MSLV(?:$|[-_])|MTSL/i, identity: "Matte Silver", reasonLabel: "MSLV/MtSl" },
   { pattern: /(?:^|[-_])SBLK(?:$|[-_])|SHNBLK|SHBK/i, identity: "Shiny Black", reasonLabel: "SBLK/ShnBlk" },
-  { pattern: /(?:^|[-_])CPR(?:$|[-_])|CU\b|MTCP/i, identity: "Copper", reasonLabel: "CPR/Cu" },
+  { pattern: /(?:^|[-_])M?CPR(?:$|[-_])|CUMATT|CU\b|MTCP/i, identity: "Copper", reasonLabel: "CPR/MCPR/CuMatt" },
   { pattern: /(?:^|[-_])WHT(?:$|[-_])|WHT|WHITE/i, identity: "White", reasonLabel: "WHT/Wht" },
   { pattern: /(?:^|[-_])BLK(?:$|[-_])|BLK|BLACK/i, identity: "Black", reasonLabel: "BLK/Blk" },
 ];
@@ -249,8 +249,12 @@ const CLOSURE_TOKENS: VisualToken[] = [
 ];
 
 const ROLL_ON_TOKENS: VisualToken[] = [
-  { pattern: /BLDOT|BLKDOT/i, identity: "Black Dots", reasonLabel: "BLDOT/BlkDot" },
-  { pattern: /SLDOT|SLDOT/i, identity: "Silver Dots", reasonLabel: "SLDOT/SlDot" },
+  // Grace short codes (BKDT/SLDT/PKDT) and website long codes (BlkDot/SlDot/
+  // PinkDot) both occur in the wild — 2026-07-20: PKDT + MCPR rows forced
+  // manual review because only the long forms (and no pink at all) were known.
+  { pattern: /BLDOT|BLKDOT|(?:^|[-_])BKDT(?:$|[-_])/i, identity: "Black Dots", reasonLabel: "BLDOT/BlkDot/BKDT" },
+  { pattern: /SLDOT|(?:^|[-_])SLDT(?:$|[-_])/i, identity: "Silver Dots", reasonLabel: "SLDOT/SlDot/SLDT" },
+  { pattern: /PINKDOT|PNKDOT|(?:^|[-_])PKDT(?:$|[-_])/i, identity: "Pink Dots", reasonLabel: "PinkDot/PKDT" },
   ...SPRAY_FINISH_TOKENS,
 ];
 

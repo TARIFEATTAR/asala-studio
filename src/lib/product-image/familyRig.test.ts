@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   FAMILY_RIG,
   buildImposedRigBlock,
+  computePrimaryBottleRigScale,
   computeRigFitScale,
   getFamilyRig,
   getFamilyRigForProduct,
@@ -37,6 +38,69 @@ describe("family rig (profile-aware fit-to-box)", () => {
     assert.ok(approx(scale, Math.min(sH, sW)));
   });
 
+  it("derives one persistent body target for cap-on and cap-off states", () => {
+    const rig = getFamilyRigForProduct({
+      family: "Cylinder",
+      capacityMl: 100,
+      heightWithCap: "150 ±2 mm",
+      heightWithoutCap: "130 ±2 mm",
+      diameter: "42 ±0.5 mm",
+    });
+
+    assert.ok(rig);
+    assert.equal(rig.fillHeightPct, 79);
+    assert.equal(rig.targetBodyHeightPx, 1567);
+  });
+
+  it("derives the Cylinder rig body target from the global catalog curve and body ratio", () => {
+    const rig = getFamilyRigForProduct({
+      family: "Tall Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "111 ±2 mm",
+      heightWithoutCap: "106 ±2 mm",
+      diameter: "18 ±0.5 mm",
+      applicator: "Fine Mist Sprayer",
+    });
+    assert.ok(rig);
+    assert.equal(rig.fillHeightPct, 69);
+    assert.equal(rig.targetBodyHeightPx, 1508);
+  });
+
+  it("keeps a detached 9 ml sidecar on the global PDP catalog-scale contract", () => {
+    const rig = getFamilyRigForProduct({
+      family: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "98 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      capState: "detached",
+      mode: "fitment-attached-cap-right-sidecar",
+    });
+    assert.ok(rig);
+    assert.equal(rig.scaleContractVersion, "best-bottles-catalog-scale-v1");
+    assert.equal(rig.geometryScaleVersion, undefined);
+    assert.equal(rig.fillHeightPct, 69);
+    assert.equal(rig.targetBodyHeightPx, 1128);
+    assert.equal(rig.baselinePct, 9);
+
+    const block = buildImposedRigBlock({ family: "Cylinder", capState: "detached", rig });
+    assert.ok(block);
+    assert.match(block, /~69% of the canvas height/i);
+    assert.doesNotMatch(block, /6 px per canonical millimeter/i);
+    assert.match(block, /Do not leave the product tiny with excessive empty margins/i);
+  });
+
+  it("scales the primary bottle without sidecar width participation", () => {
+    const scale = computePrimaryBottleRigScale({
+      primaryBoxWidthPx: 300,
+      primaryBoxHeightPx: 1500,
+      targetBodyHeightPx: 1567,
+      maxPrimaryWidthPx: 1000,
+    });
+    assert.ok(approx(scale, 1567 / 1500));
+  });
+
   it("normalizes Tall Cylinder to the Cylinder rig, enables Circle, and falls back to the universal PDP rig", () => {
     assert.equal(getFamilyRig("Tall Cylinder"), FAMILY_RIG.cylinder);
     assert.equal(hasFamilyRig("Tall Cylinder"), true);
@@ -63,8 +127,10 @@ describe("family rig (profile-aware fit-to-box)", () => {
 
     assert.ok(rig);
     assert.equal(rig.profileId, "roller-bottle");
-    assert.equal(rig.fillHeightRangePct?.min, 65);
-    assert.equal(rig.fillHeightRangePct?.max, 70);
+    assert.equal(rig.relativeScaleZoneId, "roller-tall");
+    assert.equal(rig.fillHeightPct, 74);
+    assert.equal(rig.fillHeightRangePct?.min, 72);
+    assert.equal(rig.fillHeightRangePct?.max, 76);
   });
 
   it("builds a profile-capable imposed rig block with composition authority", () => {

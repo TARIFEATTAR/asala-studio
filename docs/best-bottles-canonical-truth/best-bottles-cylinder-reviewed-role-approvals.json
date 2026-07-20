@@ -1,0 +1,503 @@
+{
+  "version": "best-bottles-cylinder-reviewed-role-approvals-v1",
+  "reviewedBy": "Jordan Richter",
+  "reviewedAt": "2026-07-16",
+  "note": "User-approved exact identity references. 2026-07-16 initial handoff approved both 3 mL black-sprayer lanes (cap-on 30219a2e\u2026, sidecar cb577236\u2026). 2026-07-16 sidecar review sheet (cylinder-sidecar-review-2026-07-16.html) approved 53 further exact-live-PDP cap-off sidecars as preserve-exact identity references. Explicitly EXCLUDED from that review because the source image is not a true detached-cap sidecar: GBSpry4mlClBlk|GB-SPR-CLR-4ML-BLK (80c1f35c\u2026) and GBCyl50RdcrShnBlkTall|GB-CYL-CLR-50ML-RDC-SBLK-T (aa20b096\u2026) \u2014 both remain blocked until individually created sidecar references are reviewed. Each approved lane preserves exact local reference bytes already in immutable storage; sourceSha256 and reviewedOutputSha256 are identical because no remediation transform is applied. The Bone-conditioned derivative eddfd543\u2026 is deliberately NOT an approved identity source. All remaining raw exact-live-pdp-sidecar rows stay blocked until individually reviewed here.",
+  "decisions": [
+    {
+      "canonicalIdentityKey": "GBSPRY3MLCLBLK|GBSPRCLR3MLBLK",
+      "websiteSku": "GBSpry3mlClBlk",
+      "graceSku": "GB-SPR-CLR-3ML-BLK",
+      "roleId": "identity-cap-on",
+      "sourceSha256": "30219a2e8a6034fb4b55bcbcbcd76d8ed0bd0c60f02cc5bd1071a5286759cb3a",
+      "reviewedOutputSha256": "30219a2e8a6034fb4b55bcbcbcd76d8ed0bd0c60f02cc5bd1071a5286759cb3a",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBSPRY3MLCLBLK|GBSPRCLR3MLBLK",
+      "websiteSku": "GBSpry3mlClBlk",
+      "graceSku": "GB-SPR-CLR-3ML-BLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "cb57723673c9389aab618be65980117137b6b77c8146e9b998e7abd325719ef5",
+      "reviewedOutputSha256": "cb57723673c9389aab618be65980117137b6b77c8146e9b998e7abd325719ef5",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBSPRY3MLCLWHT|GBSPRCLR3MLWHT",
+      "websiteSku": "GBSpry3mlClWht",
+      "graceSku": "GB-SPR-CLR-3ML-WHT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "bd4326b7d629055d4de2a592cca9bfb7c6594f5be4942e8cb272a9e39320c11c",
+      "reviewedOutputSha256": "bd4326b7d629055d4de2a592cca9bfb7c6594f5be4942e8cb272a9e39320c11c",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBSPRY4MLCLWH|GBSPRCLR4MLWHT",
+      "websiteSku": "GBSpry4mlClWh",
+      "graceSku": "GB-SPR-CLR-4ML-WHT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "3f2b45fa11753df572feb22c5a7f0e23bfe0ac0cc36bfcb6d31afe11d0d6adbd",
+      "reviewedOutputSha256": "3f2b45fa11753df572feb22c5a7f0e23bfe0ac0cc36bfcb6d31afe11d0d6adbd",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYL9BLKSHT|GBCYLCLR9MLS02",
+      "websiteSku": "GBTallCyl9BlkSht",
+      "graceSku": "GB-CYL-CLR-9ML-S-02",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "8b012afcbd26d6e4dc938911afc27f5063c4286f5bd9eba34d40717985d0622c",
+      "reviewedOutputSha256": "8b012afcbd26d6e4dc938911afc27f5063c4286f5bd9eba34d40717985d0622c",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYL9WHTSHT|GBCYLWHT9MLWHTS",
+      "websiteSku": "GBTallCyl9WhtSht",
+      "graceSku": "GB-CYL-WHT-9ML-WHT-S",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "dcbfa0bd7340c962adc5581def1ab75f13a49635a774ef0aba10bddf3cdb481d",
+      "reviewedOutputSha256": "dcbfa0bd7340c962adc5581def1ab75f13a49635a774ef0aba10bddf3cdb481d",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRBLKLTHR|GBCYLCLR50MLRDCBKLT",
+      "websiteSku": "GBCyl50RdcrBlkLthr",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-BKLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "54e0ac4f64b9bb70c3115f0d38654d152f9e3dca83f76cc394b70b31c61aa982",
+      "reviewedOutputSha256": "54e0ac4f64b9bb70c3115f0d38654d152f9e3dca83f76cc394b70b31c61aa982",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRBRWNLTHR|GBCYLCLR50MLRDCBRLT",
+      "websiteSku": "GBCyl50RdcrBrwnLthr",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-BRLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "71fdd632ff58861e32787a79642c5a0d1a7a98fa4d2ae5679c459e8504eef1c6",
+      "reviewedOutputSha256": "71fdd632ff58861e32787a79642c5a0d1a7a98fa4d2ae5679c459e8504eef1c6",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRIVYLTHR|GBCYLCLR50MLRDCIVLT",
+      "websiteSku": "GBCyl50RdcrIvyLthr",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-IVLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "22802c6edc8ae0b4503817831a19c2d5e6d85d2556aeaa2e02cf4e56e9dd839d",
+      "reviewedOutputSha256": "22802c6edc8ae0b4503817831a19c2d5e6d85d2556aeaa2e02cf4e56e9dd839d",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRLBRWNLTHR|GBCYLCLR50MLRDCLBLT",
+      "websiteSku": "GBCyl50RdcrLBrwnLthr",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-LBLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "b59284c8ddb04309fe6dd804ca8d47de3411623f1c5a447286e47bfacdd69281",
+      "reviewedOutputSha256": "b59284c8ddb04309fe6dd804ca8d47de3411623f1c5a447286e47bfacdd69281",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRMTSL|GBCYLCLR50MLRDCMSLV",
+      "websiteSku": "GBCyl50RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "9f757b9f2d0325ddb9cd3a56f16e32a4590ccd5157ff26ef25dd28ead4ff225c",
+      "reviewedOutputSha256": "9f757b9f2d0325ddb9cd3a56f16e32a4590ccd5157ff26ef25dd28ead4ff225c",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRMTSLTALL|GBCYLCLR50MLRDCMSLVT",
+      "websiteSku": "GBCyl50RdcrMtSlTall",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-MSLV-T",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "fc967e4d1b7820046b570dd108a53411ba368bc352b4f6739012d5929265a7ff",
+      "reviewedOutputSha256": "fc967e4d1b7820046b570dd108a53411ba368bc352b4f6739012d5929265a7ff",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRPNKLTHR|GBCYLCLR50MLRDCPKLT",
+      "websiteSku": "GBCyl50RdcrPnkLthr",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-PKLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "b928b0fa5b3c358657916a6f5ec22090758c07188ddc1535b156df690db87aba",
+      "reviewedOutputSha256": "b928b0fa5b3c358657916a6f5ec22090758c07188ddc1535b156df690db87aba",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRSHNBLK|GBCYLCLR50MLRDCSBLK",
+      "websiteSku": "GBCyl50RdcrShnBlk",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2b37608f1d78d7e526d2714d43f0b2de5e714f62f298bbd0c6de1a37a0ccd23c",
+      "reviewedOutputSha256": "2b37608f1d78d7e526d2714d43f0b2de5e714f62f298bbd0c6de1a37a0ccd23c",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRSHNGL|GBCYLCLR50MLRDCSGLD",
+      "websiteSku": "GBCyl50RdcrShnGl",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "a86e10aa9f8bb24223b1c293c3cd2b2bbe4cafe2175549c3366dc7c4da1db310",
+      "reviewedOutputSha256": "a86e10aa9f8bb24223b1c293c3cd2b2bbe4cafe2175549c3366dc7c4da1db310",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRSHNSL|GBCYLCLR50MLRDCSSLV",
+      "websiteSku": "GBCyl50RdcrShnSl",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "c69b39be642218318dd323daef9b6d949451c40e174748819f7dcb32ca3f4214",
+      "reviewedOutputSha256": "c69b39be642218318dd323daef9b6d949451c40e174748819f7dcb32ca3f4214",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50RDCRWHT|GBCYLCLR50MLRDCWHT",
+      "websiteSku": "GBCyl50RdcrWht",
+      "graceSku": "GB-CYL-CLR-50ML-RDC-WHT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "4ffd09f43f0ec749638efc61e59424d80c8a157eaa32661525530106ca48a0c0",
+      "reviewedOutputSha256": "4ffd09f43f0ec749638efc61e59424d80c8a157eaa32661525530106ca48a0c0",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYCU|GBCYLCLR50MLSPRCPR",
+      "websiteSku": "GBCyl50SpryCu",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-CPR",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "98a5a40a2af35d931ae37bc389973ce6be65b85b883e2966e44e695aa5ec4a17",
+      "reviewedOutputSha256": "98a5a40a2af35d931ae37bc389973ce6be65b85b883e2966e44e695aa5ec4a17",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYMTGL|GBCYLCLR50MLSPRMGLD",
+      "websiteSku": "GBCyl50SpryMtGl",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-MGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "294aeadd566b52d8f928f07d64dc8ac40a1baf1dabb0994c58b1915ad9c24e63",
+      "reviewedOutputSha256": "294aeadd566b52d8f928f07d64dc8ac40a1baf1dabb0994c58b1915ad9c24e63",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYMTSL|GBCYLCLR50MLSPRMSLV",
+      "websiteSku": "GBCyl50SpryMtSl",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "df239f2f887c0132e6f83ab40d1285dbceac98dddc1d77c5c259e91f76aa76e1",
+      "reviewedOutputSha256": "df239f2f887c0132e6f83ab40d1285dbceac98dddc1d77c5c259e91f76aa76e1",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYSHNBLK|GBCYLCLR50MLSPRSBLK",
+      "websiteSku": "GBCyl50SpryShnBlk",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "c7fe01732ab9c8abab17e787ede5ac735d885e2393266d747e52671f92e28301",
+      "reviewedOutputSha256": "c7fe01732ab9c8abab17e787ede5ac735d885e2393266d747e52671f92e28301",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYSHNGL|GBCYLCLR50MLSPRSGLD",
+      "websiteSku": "GBCyl50SpryShnGl",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "24b8450c7d7b0e95cf57b0b7fee0bdbe433606184450032bb10fb77d32f1cbc0",
+      "reviewedOutputSha256": "24b8450c7d7b0e95cf57b0b7fee0bdbe433606184450032bb10fb77d32f1cbc0",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL50SPRYSHNSL|GBCYLCLR50MLSPRSSLV",
+      "websiteSku": "GBCyl50SpryShnSl",
+      "graceSku": "GB-CYL-CLR-50ML-SPR-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "8bce7802310eb49237afebc1c10f0c96e5762646940536b1fe3e007f1c27eeef",
+      "reviewedOutputSha256": "8bce7802310eb49237afebc1c10f0c96e5762646940536b1fe3e007f1c27eeef",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNCLOVRCAP|LBCYLCLR50MLLPMCOCP",
+      "websiteSku": "LBCyl50LtnClOvrCap",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-COCP",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2efa8b05ded82f2672fdefe1c0f0423d145c8f831753c1dd3ac24e3e9c94264a",
+      "reviewedOutputSha256": "2efa8b05ded82f2672fdefe1c0f0423d145c8f831753c1dd3ac24e3e9c94264a",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNCU|LBCYLCLR50MLLPMCPR",
+      "websiteSku": "LBCyl50LtnCu",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-CPR",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2d307d31b4c28b4d5e3f9c28dedb3799e11da8b84fb97764cb0f9741d7129ea8",
+      "reviewedOutputSha256": "2d307d31b4c28b4d5e3f9c28dedb3799e11da8b84fb97764cb0f9741d7129ea8",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNMTGL|LBCYLCLR50MLLPMMGLD",
+      "websiteSku": "LBCyl50LtnMtGl",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-MGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "20830b009d30cf68fab6cd8e5ba6dc6045db191c2c50a3c82ecaf37e64be4641",
+      "reviewedOutputSha256": "20830b009d30cf68fab6cd8e5ba6dc6045db191c2c50a3c82ecaf37e64be4641",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNMTSL|LBCYLCLR50MLLPMMSLV",
+      "websiteSku": "LBCyl50LtnMtSl",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "432b946af614efdc582df67d58c2418805875ada40eac21459d8ef5be6601dca",
+      "reviewedOutputSha256": "432b946af614efdc582df67d58c2418805875ada40eac21459d8ef5be6601dca",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNSHNBLK|LBCYLCLR50MLLPMSBLK",
+      "websiteSku": "LBCyl50LtnShnBlk",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "0f848a554a0e655feb00764badc70955658ee5bf359ee37377bb5dba541128ff",
+      "reviewedOutputSha256": "0f848a554a0e655feb00764badc70955658ee5bf359ee37377bb5dba541128ff",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNSHNGL|LBCYLCLR50MLLPMSGLD",
+      "websiteSku": "LBCyl50LtnShnGl",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2ccff14b318f167ea48e9fa8de0d0d61eafa0ff13bbbb4256e3c6b3911313fae",
+      "reviewedOutputSha256": "2ccff14b318f167ea48e9fa8de0d0d61eafa0ff13bbbb4256e3c6b3911313fae",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL50LTNSHNSL|LBCYLCLR50MLLPMSSLV",
+      "websiteSku": "LBCyl50LtnShnSl",
+      "graceSku": "LB-CYL-CLR-50ML-LPM-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "bbe8523283147a55117fb1b6b58224bccb1ad6e456c921a2bda9c05879484c9a",
+      "reviewedOutputSha256": "bbe8523283147a55117fb1b6b58224bccb1ad6e456c921a2bda9c05879484c9a",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRBLKLTHR|GBCYLCLR100MLRDCBKLT",
+      "websiteSku": "GBCyl100RdcrBlkLthr",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-BKLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2f3d9158f49407b45217831b425d3caa18e64084751cfb15d8cdd39aa476d755",
+      "reviewedOutputSha256": "2f3d9158f49407b45217831b425d3caa18e64084751cfb15d8cdd39aa476d755",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRBRWNLTHR|GBCYLCLR100MLRDCBRLT",
+      "websiteSku": "GBCyl100RdcrBrwnLthr",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-BRLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "931bad6364b3997003d1b2f8d4e9ef1a70db770248752aebd4dbeacfd156ad37",
+      "reviewedOutputSha256": "931bad6364b3997003d1b2f8d4e9ef1a70db770248752aebd4dbeacfd156ad37",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRIVYLTHR|GBCYLCLR100MLRDCIVLT",
+      "websiteSku": "GBCyl100RdcrIvyLthr",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-IVLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "fa917a0caf4434af41bc66588c7ba1295682c62ca7eeda188ff67df4a940a3bb",
+      "reviewedOutputSha256": "fa917a0caf4434af41bc66588c7ba1295682c62ca7eeda188ff67df4a940a3bb",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRLBRWNLTHR|GBCYLCLR100MLRDCLBLT",
+      "websiteSku": "GBCyl100RdcrLBrwnLthr",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-LBLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "5a1e8c5218abe435cb487bcaccce77120a451955bb87f77d9b64a7b7ca07d8eb",
+      "reviewedOutputSha256": "5a1e8c5218abe435cb487bcaccce77120a451955bb87f77d9b64a7b7ca07d8eb",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRMTSL|GBCYLCLR100MLRDCMSLV",
+      "websiteSku": "GBCyl100RdcrMtSl",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "6c2f9d6108c46734aafe417c52d15b43e1fbde62f4b567c4d7eeefc0cc44b048",
+      "reviewedOutputSha256": "6c2f9d6108c46734aafe417c52d15b43e1fbde62f4b567c4d7eeefc0cc44b048",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRMTSLTALL|GBCYLCLR100MLRDCMSLVT",
+      "websiteSku": "GBCyl100RdcrMtSlTall",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-MSLV-T",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "5770f43f100d8efca58abce80b081abfda7fb5517a8104796df69f6712f6ec86",
+      "reviewedOutputSha256": "5770f43f100d8efca58abce80b081abfda7fb5517a8104796df69f6712f6ec86",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRPNKLTHR|GBCYLCLR100MLRDCPKLT",
+      "websiteSku": "GBCyl100RdcrPnkLthr",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-PKLT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "2bc86ff7c42ade25430c766e93f93d2398d8be32bb83a14bc78bd9ac07966eca",
+      "reviewedOutputSha256": "2bc86ff7c42ade25430c766e93f93d2398d8be32bb83a14bc78bd9ac07966eca",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRSHNBLK|GBCYLCLR100MLRDCSBLK",
+      "websiteSku": "GBCyl100RdcrShnBlk",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "7519d410ec344bc78fe61314005a8caa4f175299d0f1fb69d4719694b6e73a66",
+      "reviewedOutputSha256": "7519d410ec344bc78fe61314005a8caa4f175299d0f1fb69d4719694b6e73a66",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRSHNBLKTALL|GBCYLCLR100MLRDCSBLKT",
+      "websiteSku": "GBCyl100RdcrShnBlkTall",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-SBLK-T",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "b97e7c5d23d067742c92df973ac6ade1ea064c9704062a99a5c59edc85de85d3",
+      "reviewedOutputSha256": "b97e7c5d23d067742c92df973ac6ade1ea064c9704062a99a5c59edc85de85d3",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRSHNGL|GBCYLCLR100MLRDCSGLD",
+      "websiteSku": "GBCyl100RdcrShnGl",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "1fedb7089974875514f867943227b4ee2f09f49fc46a564d1e65780d256e2879",
+      "reviewedOutputSha256": "1fedb7089974875514f867943227b4ee2f09f49fc46a564d1e65780d256e2879",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRSHNSL|GBCYLCLR100MLRDCSSLV",
+      "websiteSku": "GBCyl100RdcrShnSl",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "ca632c53ab22beecb156c7403146d6ded20df433219c40c9267e16a855f8c2c2",
+      "reviewedOutputSha256": "ca632c53ab22beecb156c7403146d6ded20df433219c40c9267e16a855f8c2c2",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100RDCRWHT|GBCYLCLR100MLRDCWHT",
+      "websiteSku": "GBCyl100RdcrWht",
+      "graceSku": "GB-CYL-CLR-100ML-RDC-WHT",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "1889eb4243eaceecb8d3ceeed669ac11c58f57bdc9d49911e50e3d9eb389e3c5",
+      "reviewedOutputSha256": "1889eb4243eaceecb8d3ceeed669ac11c58f57bdc9d49911e50e3d9eb389e3c5",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYCU|GBCYLCLR100MLSPRCPR",
+      "websiteSku": "GBCyl100SpryCu",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-CPR",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "473b52d8f60cbac2b60bff61f2e94e05ce21e6b40bed4dd44be3c22da9d1f1c2",
+      "reviewedOutputSha256": "473b52d8f60cbac2b60bff61f2e94e05ce21e6b40bed4dd44be3c22da9d1f1c2",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYMTGL|GBCYLCLR100MLSPRMGLD",
+      "websiteSku": "GBCyl100SpryMtGl",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-MGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "04f962d3186f4bb97fec41655ad4f5f206e0014f01ccdce167faac10ed2bd142",
+      "reviewedOutputSha256": "04f962d3186f4bb97fec41655ad4f5f206e0014f01ccdce167faac10ed2bd142",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYMTSL|GBCYLCLR100MLSPRMSLV",
+      "websiteSku": "GBCyl100SpryMtSl",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "204be3798da0b63dd65b6c814894e01474b5c99922b4d5969ae43fa31d5f2d43",
+      "reviewedOutputSha256": "204be3798da0b63dd65b6c814894e01474b5c99922b4d5969ae43fa31d5f2d43",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYSHNBLK|GBCYLCLR100MLSPRSBLK",
+      "websiteSku": "GBCyl100SpryShnBlk",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "c7754124238c040062936e18e50fa11ff13ba09aa68745fe009aa927242f571a",
+      "reviewedOutputSha256": "c7754124238c040062936e18e50fa11ff13ba09aa68745fe009aa927242f571a",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYSHNGL|GBCYLCLR100MLSPRSGLD",
+      "websiteSku": "GBCyl100SpryShnGl",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "a383e99593ef9ff4a7fb7518747759a5754bac0f8cd67d4dd167820586fc6537",
+      "reviewedOutputSha256": "a383e99593ef9ff4a7fb7518747759a5754bac0f8cd67d4dd167820586fc6537",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "GBCYL100SPRYSHNSL|GBCYLCLR100MLSPRSSLV",
+      "websiteSku": "GBCyl100SpryShnSl",
+      "graceSku": "GB-CYL-CLR-100ML-SPR-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "76a23b98d3017269a60e7f6e67f8b5ffe8f6e637c1cc3f2bcec8d9b94609c7bc",
+      "reviewedOutputSha256": "76a23b98d3017269a60e7f6e67f8b5ffe8f6e637c1cc3f2bcec8d9b94609c7bc",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNCLOVRCAP|LBCYLCLR100MLLPMCOCP",
+      "websiteSku": "LBCyl100LtnClOvrCap",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-COCP",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "be4f2efbc517192f996b2f93e8ccd582a00a63a2566b9a7acb2cc98d74fe32da",
+      "reviewedOutputSha256": "be4f2efbc517192f996b2f93e8ccd582a00a63a2566b9a7acb2cc98d74fe32da",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNCU|LBCYLCLR100MLLPMCPR",
+      "websiteSku": "LBCyl100LtnCu",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-CPR",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "e93dcc6a8d5a3d7e0ac4b6578dbfeffd9ec57e3b79e032bee5f13dd2e727fe05",
+      "reviewedOutputSha256": "e93dcc6a8d5a3d7e0ac4b6578dbfeffd9ec57e3b79e032bee5f13dd2e727fe05",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNMTGL|LBCYLCLR100MLLPMMGLD",
+      "websiteSku": "LBCyl100LtnMtGl",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-MGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "f7578790d8ee8d680b4882020664247daed72ffbeaaae24f964a775c7d1a2a3b",
+      "reviewedOutputSha256": "f7578790d8ee8d680b4882020664247daed72ffbeaaae24f964a775c7d1a2a3b",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNMTSL|LBCYLCLR100MLLPMMSLV",
+      "websiteSku": "LBCyl100LtnMtSl",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-MSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "efd2690b94c531f1e3994862f05fcd72bd5eda59a63ff8da64132e762b9dc959",
+      "reviewedOutputSha256": "efd2690b94c531f1e3994862f05fcd72bd5eda59a63ff8da64132e762b9dc959",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNSHNBLK|LBCYLCLR100MLLPMSBLK",
+      "websiteSku": "LBCyl100LtnShnBlk",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-SBLK",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "4a5a57ae3d4fc30c92ffa0b7a77b721d4405a4139f6cfee488a6545c4e4bd40c",
+      "reviewedOutputSha256": "4a5a57ae3d4fc30c92ffa0b7a77b721d4405a4139f6cfee488a6545c4e4bd40c",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNSHNGL|LBCYLCLR100MLLPMSGLD",
+      "websiteSku": "LBCyl100LtnShnGl",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-SGLD",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "941810763b7fc180698435635a9b3bae8d6c55091708192b930d6d2fb09200fc",
+      "reviewedOutputSha256": "941810763b7fc180698435635a9b3bae8d6c55091708192b930d6d2fb09200fc",
+      "decision": "preserve-exact-local-reference"
+    },
+    {
+      "canonicalIdentityKey": "LBCYL100LTNSHNSL|LBCYLCLR100MLLPMSSLV",
+      "websiteSku": "LBCyl100LtnShnSl",
+      "graceSku": "LB-CYL-CLR-100ML-LPM-SSLV",
+      "roleId": "pdp-cap-off-sidecar",
+      "sourceSha256": "65f8d27710ee24f7119f80ef05ff3792c47365082611ab526e3ab5661ff99f9f",
+      "reviewedOutputSha256": "65f8d27710ee24f7119f80ef05ff3792c47365082611ab526e3ab5661ff99f9f",
+      "decision": "preserve-exact-local-reference"
+    }
+  ]
+}

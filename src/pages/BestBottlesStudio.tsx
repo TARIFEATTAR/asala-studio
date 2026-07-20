@@ -208,7 +208,11 @@ export default function BestBottlesStudio() {
     const primaryGroupVariants = studioData.variants.filter(isPrimaryGroupVariant);
     const selectionPool = primaryGroupVariants.length > 0 ? primaryGroupVariants : studioData.variants;
 
-    if (selectedSku && selectionPool.some((variant) => variant.graceSku === selectedSku)) {
+    // Guard against the FULL variant list, not just the primary-group pool:
+    // the sidebar renders every variant as clickable, so a click outside the
+    // pool (e.g. when the pool holds a single stale/corrupt pipeline row) must
+    // stick instead of being auto-reverted. The pool only seeds the initial pick.
+    if (selectedSku && studioData.variants.some((variant) => variant.graceSku === selectedSku)) {
       return;
     }
 

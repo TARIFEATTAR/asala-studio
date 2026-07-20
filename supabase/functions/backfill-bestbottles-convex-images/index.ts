@@ -31,6 +31,7 @@ type PipelineSkuJob = {
   shopify_image_url: string | null;
   shopify_pushed_at: string | null;
   convex_synced_at: string | null;
+  approved_image_id: string | null;
 };
 
 type ShopifyConfig = {
@@ -379,6 +380,68 @@ async function callBestBottlesConvexMutation(
   };
 }
 
+async function callBestBottlesConvexQuery(
+  bbConvexUrl: string,
+  path: string,
+  args: Record<string, unknown>,
+): Promise<{ ok: boolean; status: number; body: ConvexResponseBody | null }> {
+  const res = await fetch(`${bbConvexUrl}/api/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args, format: "json" }),
+  });
+  let body: ConvexResponseBody | null = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+  return { ok: res.ok && body?.status !== "error", status: res.status, body };
+}
+
+async function verifyConvexAssignment(params: {
+  supabase: SupabaseClient;
+  bbConvexUrl: string;
+  organizationId: string;
+  row: PipelineSkuJob;
+  expectedImageUrl: string;
+}): Promise<{ matched: boolean; readbackImageUrl: string | null; error: string | null }> {
+  const { supabase, bbConvexUrl, organizationId, row, expectedImageUrl } = params;
+  if (!row.approved_image_id || !row.website_sku) {
+    return {
+      matched: false,
+      readbackImageUrl: null,
+      error: "Cannot verify Convex without an approved image ID and website SKU.",
+    };
+  }
+  const readback = await callBestBottlesConvexQuery(
+    bbConvexUrl,
+    "products:getByWebsiteSku",
+    { websiteSku: row.website_sku },
+  );
+  const value = readback.body?.value as Record<string, unknown> | null | undefined;
+  const readbackImageUrl = typeof value?.imageUrl === "string" ? value.imageUrl.trim() : null;
+  const matched = readback.ok && readbackImageUrl === expectedImageUrl;
+  const error = matched
+    ? null
+    : `Convex read-back ${readbackImageUrl ?? "missing"} did not equal ${expectedImageUrl}.`;
+  const { error: rpcError } = await supabase.rpc(
+    "record_best_bottles_destination_verification",
+    {
+      p_organization_id: organizationId,
+      p_pipeline_sku_job_id: row.id,
+      p_image_id: row.approved_image_id,
+      p_destination: "convex",
+      p_state: matched ? "matched" : "mismatch",
+      p_verified_image_url: readbackImageUrl,
+      p_verified_image_hash: null,
+      p_error: error,
+    },
+  );
+  if (rpcError) throw new Error(rpcError.message);
+  return { matched, readbackImageUrl, error };
+}
+
 async function isAuthorized(req: Request): Promise<boolean> {
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace(/^Bearer\s+/i, "").trim() ?? "";
@@ -443,6 +506,7 @@ async function recoverMissingShopifyImageUrls(params: {
         "shopify_image_url",
         "shopify_pushed_at",
         "convex_synced_at",
+        "approved_image_id",
       ].join(","),
     )
     .eq("organization_id", organizationId)
@@ -614,6 +678,7 @@ serve(async (req) => {
         "shopify_image_url",
         "shopify_pushed_at",
         "convex_synced_at",
+        "approved_image_id",
       ].join(","),
     )
     .eq("organization_id", organizationId)
@@ -670,6 +735,25 @@ serve(async (req) => {
             productGroupSlug: row.product_group_slug,
             status: "failed",
             message: updateError.message,
+          });
+          continue;
+        }
+        const verification = await verifyConvexAssignment({
+          supabase,
+          bbConvexUrl,
+          organizationId,
+          row,
+          expectedImageUrl: shopifyImageUrl,
+        });
+        if (!verification.matched) {
+          results.push({
+            id: row.id,
+            graceSku: row.grace_sku,
+            websiteSku,
+            shopifySku: row.shopify_sku,
+            productGroupSlug: row.product_group_slug,
+            status: "failed",
+            message: verification.error ?? "Convex read-back mismatch.",
           });
           continue;
         }
@@ -752,6 +836,29 @@ serve(async (req) => {
         productGroupSlug: row.product_group_slug,
         status: "failed",
         message: updateError.message,
+        field: "imageUrl",
+        shopifyImageUrl,
+        mutation: mutation.body?.value ?? mutation.body,
+      });
+      continue;
+    }
+
+    const verification = await verifyConvexAssignment({
+      supabase,
+      bbConvexUrl,
+      organizationId,
+      row,
+      expectedImageUrl: shopifyImageUrl,
+    });
+    if (!verification.matched) {
+      results.push({
+        id: row.id,
+        graceSku: row.grace_sku,
+        websiteSku,
+        shopifySku: row.shopify_sku,
+        productGroupSlug: row.product_group_slug,
+        status: "failed",
+        message: verification.error ?? "Convex read-back mismatch.",
         field: "imageUrl",
         shopifyImageUrl,
         mutation: mutation.body?.value ?? mutation.body,

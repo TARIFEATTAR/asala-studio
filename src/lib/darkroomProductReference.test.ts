@@ -33,6 +33,22 @@ describe("isRetiredTransparentBestBottlesReferenceUrl", () => {
     );
   });
 
+  it("ignores an empty optional mask-reference placeholder", () => {
+    assert.equal(
+      isRetiredTransparentBestBottlesReferenceCandidate([
+        {
+          url: "https://example.com/generated-images/org/reference.png",
+          role: "product-reference",
+        },
+        {
+          url: "",
+          role: "mask-reference",
+        },
+      ]),
+      false,
+    );
+  });
+
   it("allows flattened reference imports", () => {
     assert.equal(
       isRetiredTransparentBestBottlesReferenceUrl(
@@ -117,16 +133,15 @@ describe("isRetiredTransparentBestBottlesReferenceUrl", () => {
   });
 
   it("blocks retired Cylinder persisted references from auto-association by SKU", () => {
-    assert.match(
-      getBestBottlesCylinderProductTruthReferenceIssue([
+    const issue = getBestBottlesCylinderProductTruthReferenceIssue([
         {
           url: "https://example.com/generated-images/org/user/best-bottles/reference-imports/background-removed/Cylinder/GB-CYL-CLR-9ML-SPR-MSLV-01.png",
           name: "GB-CYL-CLR-9ML-SPR-MSLV-01.png",
           libraryTags: ["role:product-reference", "mask-ref:transparent-png"],
         },
-      ]) ?? "",
-      /retired|flattened/i,
-    );
+      ]) ?? "";
+    assert.match(issue, /retired.*lineage/i);
+    assert.match(issue, /does not prove.*pixels.*transparent/i);
   });
 });
 
@@ -138,7 +153,7 @@ describe("resolveDarkroomProductReferenceImage", () => {
         hero_image_url:
           "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/clean-references/cylinder/GB-SPR-CLR-3ML-BLK.png",
         metadata: {},
-      } as any,
+      } as Parameters<typeof resolveDarkroomProductReferenceImage>[0],
       null,
     );
 
@@ -161,7 +176,7 @@ describe("resolveDarkroomProductReferenceImage", () => {
             referenceLineage: "flattened-single-source",
           },
         },
-      } as any,
+      } as Parameters<typeof resolveDarkroomProductReferenceImage>[0],
       null,
     );
 

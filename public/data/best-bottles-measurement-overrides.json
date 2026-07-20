@@ -34,30 +34,6 @@
       "note": "Exact website SKU page lists 68 mm body height and 25 mm diameter."
     },
     {
-      "graceSku": "PB-CYL-CLR-118ML-WFLP",
-      "heightWithoutCap": "116",
-      "diameter": "41",
-      "source": "BestBottles product page",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-4-oz-plastic-bottle-white-flip-top-cap",
-      "note": "Exact website SKU page lists 116 mm body height and 41 mm diameter."
-    },
-    {
-      "graceSku": "PB-CYL-227ML-WFLP",
-      "heightWithoutCap": "156",
-      "diameter": "51",
-      "source": "BestBottles product page",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-16-oz-plastic-bottle-white-flip-top-cap",
-      "note": "Exact website SKU page lists 156 mm body height and 51 mm diameter. The legacy URL slug says 16 oz, but the page content is PbClear8ozFlpWh."
-    },
-    {
-      "graceSku": "PB-CYL-454ML-WFLP",
-      "heightWithoutCap": "195",
-      "diameter": "62",
-      "source": "BestBottles product page",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-8-oz-plastic-bottle-white-flip-top-cap",
-      "note": "Exact website SKU page lists 195 mm body height and 62 mm diameter. The legacy URL slug says 8 oz, but the page content is PbNat16ozFlpWh."
-    },
-    {
       "graceSku": "GB-ELG-FRS-15ML-CAP-SBLK",
       "heightWithoutCap": "61",
       "diameter": "35",
@@ -104,70 +80,6 @@
       "source": "Local Convex live products export",
       "sourceUrl": "https://www.bestbottles.com/product/cream-jar-style-5-ml-amber-glass-bottle-silver-cap",
       "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU CJ-JAR-AMB-5ML-SLV lists 24 mm body height and 31 mm diameter."
-    },
-    {
-      "graceSku": "GBCyl5WhtSht",
-      "heightWithoutCap": "53",
-      "diameter": "17",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-short-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact legacy SKU GBCyl5WhtSht lists 53 mm body height and 17 mm diameter."
-    },
-    {
-      "graceSku": "GB-CYL-WHT-5ML-WHT-S",
-      "heightWithoutCap": "53",
-      "diameter": "17",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-short-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU GB-CYL-WHT-5ML-WHT-S lists 53 mm body height and 17 mm diameter."
-    },
-    {
-      "graceSku": "GBCylSwrl9MtlRollWht",
-      "heightWithoutCap": "74",
-      "diameter": "21",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-9-ml-swirl-glass-bottle-metal-roller-ball-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact legacy SKU GBCylSwrl9MtlRollWht lists 74 mm body height and 21 mm diameter."
-    },
-    {
-      "graceSku": "GBCylSwrl9RollWht",
-      "heightWithoutCap": "63",
-      "diameter": "21",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-9-ml-swirled-glass-bottle-plastic-roller-ball-plug-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact legacy SKU GBCylSwrl9RollWht lists 63 mm body height and 21 mm diameter."
-    },
-    {
-      "graceSku": "GB-CYL-WHT-9ML-WHT-S",
-      "heightWithoutCap": "106",
-      "diameter": "18",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-glass-bottle-short-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU GB-CYL-WHT-9ML-WHT-S lists 106 mm body height and 18 mm diameter."
-    },
-    {
-      "graceSku": "GB-CYL-WHT-9ML-MRL-WHT",
-      "heightWithoutCap": "74",
-      "diameter": "21",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-9-ml-swirl-glass-bottle-metal-roller-ball-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU GB-CYL-WHT-9ML-MRL-WHT lists 74 mm body height and 21 mm diameter."
-    },
-    {
-      "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
-      "heightWithoutCap": "63",
-      "diameter": "21",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-9-ml-swirled-glass-bottle-plastic-roller-ball-plug-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU GB-CYL-WHT-9ML-ROL-WHT lists 63 mm body height and 21 mm diameter."
-    },
-    {
-      "graceSku": "GBTallCyl9WhtSht",
-      "heightWithoutCap": "106",
-      "diameter": "18",
-      "source": "Local Convex live products export",
-      "sourceUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-glass-bottle-short-white-cap",
-      "note": "tmp/best-bottles-convex-live-products.csv row for exact legacy SKU GBTallCyl9WhtSht lists 106 mm body height and 18 mm diameter."
     }
   ]
 }

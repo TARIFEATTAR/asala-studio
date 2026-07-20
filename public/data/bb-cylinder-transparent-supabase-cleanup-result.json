@@ -1,0 +1,122 @@
+{
+  "createdAt": "2026-06-22T09:27:21.238Z",
+  "backupPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/public/data/bb-cylinder-transparent-supabase-cleanup-backup.json",
+  "pipelineRowsTargeted": 333,
+  "pipelineRowsUpdated": 333,
+  "storageObjectsTargeted": 333,
+  "storageRemoveReturnCount": 333,
+  "verifyRows": [
+    {
+      "id": "0d94d428-ceb7-45c1-9cda-af42eed1b9d3",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-GLD",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "10dce18c-b8b4-40a6-bb22-559e87b5579d",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-IVGD",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "3bb826f2-69ef-4aa9-8c5b-583b0205d453",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-WHT",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "5f773213-fd96-486f-af55-cc6013981f67",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-BLK",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "6d4d86c2-e420-454f-a4b4-08211aa0ccc5",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-IVSL",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "7f749331-792a-4fd3-8298-4b30d62ae3d3",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-LVN",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "9a39e760-ce65-4b1c-bd2c-b622fc96b56f",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-MSLV",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "ac84bdf9-b44e-4601-99dc-f7bf4da74aec",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-PNK",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "d5b1410a-6520-4feb-ac02-a7c66235add9",
+      "grace_sku": "GB-CYL-CLR-100ML-AST-BLK",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    },
+    {
+      "id": "d6272924-e67e-4e4b-bbb7-2fa6d6aa3028",
+      "grace_sku": "GB-CYL-CLR-100ML-ASP-RED",
+      "best_reference_candidate_path": null,
+      "coverage_status": "needs_reference"
+    }
+  ],
+  "verifyObjects": [
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-BLK.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-GLD.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-IVGD.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-IVSL.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-LVN.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-MSLV.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-PNK.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-RED.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-ASP-WHT.png",
+      "exists": false,
+      "error": "{}"
+    },
+    {
+      "objectPath": "best-bottles/clean-references/cylinder/GB-CYL-CLR-100ML-AST-BLK.png",
+      "exists": false,
+      "error": "{}"
+    }
+  ]
+}

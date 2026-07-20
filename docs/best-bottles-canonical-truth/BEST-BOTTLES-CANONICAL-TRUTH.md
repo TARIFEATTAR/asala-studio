@@ -7,7 +7,7 @@
 > resolved with the resolution recorded, or listed as an open escalation.
 >
 > Companion data files (same folder):
-> - **`best-bottles-master-truth.csv`** — one row per catalog variant (2,483 rows, all lanes + canonical values + provenance + conflict flags)
+> - **`best-bottles-master-truth.csv`** — one row per reconciled catalog or live-site variant (2,484 rows after the 2026-07-16 `GBcyl25SpryShnBlk` manual reconciliation; all lanes + canonical values + provenance + conflict flags)
 > - **`best-bottles-body-geometry.csv`** — one row per distinct physical glass body (118 bodies across 28 bottle families)
 
 ---
@@ -96,7 +96,7 @@ Grace 55 = 52×30 · Flair 15 = 41×20 · Rectangle (footed) 10 = 29×19 · Diam
 ## 4. Canonical body geometry — 118 physical bodies, 28 families
 
 The unit of geometric truth is the **body** (family × size × glass shell), not the
-SKU: 2,483 sellable variants collapse onto 118 bodies. Full detail (incl. per-body
+SKU: 2,484 reconciled variants collapse onto 118 bodies. Full detail (incl. per-body
 finish/applicator/variant rollups and raw-value histograms) is in
 `best-bottles-body-geometry.csv`. Summary — canonical mm, site-confirmed unless noted;
 `**?**` = depth unknown (escalated); a few residual same-size twin bodies are real

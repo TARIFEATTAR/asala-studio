@@ -55,6 +55,7 @@ import {
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useGridPipelineFeatureFlag } from "@/hooks/useGridPipelineFeatureFlag";
+import { useBestBottlesCylinderProductionReadiness } from "@/hooks/useBestBottlesCylinderProductionReadiness";
 import {
   listPipelineGroups,
   listPipelineSkuJobs,
@@ -1337,6 +1338,7 @@ export default function BestBottlesPipeline() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { enabled, isLoading: flagLoading, organizationId } = useGridPipelineFeatureFlag();
+  const cylinderProductionReadinessQuery = useBestBottlesCylinderProductionReadiness();
 
   const [familyFilter, setFamilyFilter] = useState<string>("Cylinder");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -1359,7 +1361,12 @@ export default function BestBottlesPipeline() {
 
       // Synthesize a calming, professional double chime using Web Audio API
       try {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const webkitAudioContext = (
+          window as typeof window & { webkitAudioContext?: typeof AudioContext }
+        ).webkitAudioContext;
+        const AudioContextConstructor = window.AudioContext || webkitAudioContext;
+        if (!AudioContextConstructor) throw new Error("Web Audio is unavailable.");
+        const audioCtx = new AudioContextConstructor();
         const playTone = (freq: number, startDelay: number, duration: number) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -3069,6 +3076,33 @@ export default function BestBottlesPipeline() {
             </DropdownMenu>
           </div>
         </header>
+
+        <Card className="border-emerald-500/25 bg-emerald-500/[0.04] p-4 text-white">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
+                <PackageCheck className="h-4 w-4" />
+                Cylinder Stage 1 production cutover
+              </div>
+              <p className="mt-1 max-w-3xl text-xs leading-relaxed text-white/60">
+                Exact Website + Grace SKU identity, canonical body geometry, reviewed opaque PNG evidence,
+                and native-resolution validation now gate generation. Blocked identities remain visible and cannot borrow a reference.
+              </p>
+            </div>
+            {cylinderProductionReadinessQuery.isLoading ? (
+              <Badge variant="outline" className="border-white/15 text-white/60">Verifying artifact…</Badge>
+            ) : cylinderProductionReadinessQuery.isError ? (
+              <Badge variant="outline" className="border-rose-500/35 text-rose-300">Locked · artifact invalid</Badge>
+            ) : (
+              <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-wider">
+                <Badge variant="outline" className="border-white/15 text-white/70">377 canonical</Badge>
+                <Badge variant="outline" className="border-emerald-500/35 text-emerald-300">219 qualified</Badge>
+                <Badge variant="outline" className="border-rose-500/35 text-rose-300">158 blocked</Badge>
+                <Badge variant="outline" className="border-amber-500/35 text-amber-300">0 external writes</Badge>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {/* Pipeline Stepper, Velocity, & Cost Panel */}
         {adhdMode ? (

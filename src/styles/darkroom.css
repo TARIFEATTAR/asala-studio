@@ -626,7 +626,7 @@
 .upload-filled img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .upload-zone__preview-error {

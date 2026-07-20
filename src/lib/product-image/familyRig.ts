@@ -2,6 +2,7 @@ import {
   getBestBottlesFamilyProfileForProduct,
   type BestBottlesFamilyProfileProductInput,
 } from "@/config/bestBottlesFamilyProfiles";
+import { deriveBestBottlesBodyTargetPx } from "@/config/bestBottlesCatalogScale";
 
 /**
  * IMPOSED STUDIO RIG — single source of truth (Vite / Node runtime).
@@ -40,6 +41,14 @@ export interface FamilyRigConfig {
   relativeScaleZoneId?: string;
   /** Human label for the relative scale zone. */
   relativeScaleZoneLabel?: string;
+  /** Versioned global catalog scale contract applied to this product. */
+  scaleContractVersion?: string;
+  /** Global curve target before the bounded family correction. */
+  globalTargetProductHeightPct?: number;
+  /** Bounded family correction applied to the global target. */
+  familyScaleCorrectionPct?: number;
+  /** Reconciled body-geometry display curve, when this is a measured Cylinder. */
+  geometryScaleVersion?: string;
   /**
    * The whole assembly (bottle + cap/applicator) is fit-to-box: scaled to fit
    * within this % of canvas HEIGHT and `fillWidthPct` of canvas WIDTH,
@@ -47,6 +56,8 @@ export interface FamilyRigConfig {
    * consistent catalog framing regardless of real size.
    */
   fillHeightPct: number;
+  /** Persistent bottle-body target shared by cap-on and cap-off variants. */
+  targetBodyHeightPx?: number;
   /** Accepted QA fill-height range for this resolved profile. */
   fillHeightRangePct?: { min: number; max: number };
   /** Width half of the fit-to-box (see fillHeightPct). */
@@ -96,6 +107,11 @@ export function normalizeFamily(family?: string | null): string {
   return (family ?? "").trim().toLowerCase();
 }
 
+export function isCylinderFamilyAlias(family?: string | null): boolean {
+  const normalized = normalizeFamily(family).replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
 /**
  * Resolve the rig config for a family. "Tall Cylinder" is treated as Cylinder.
  * Families without a custom rig use the universal PDP rig so their on-canvas
@@ -103,7 +119,7 @@ export function normalizeFamily(family?: string | null): string {
  */
 export function getFamilyRig(family?: string | null): FamilyRigConfig | null {
   const f = normalizeFamily(family);
-  if (f === "tall cylinder") return FAMILY_RIG.cylinder;
+  if (isCylinderFamilyAlias(f)) return FAMILY_RIG.cylinder;
   return FAMILY_RIG[f] ?? FAMILY_RIG.defaultPdp;
 }
 
@@ -112,18 +128,43 @@ export function getFamilyRigForProduct(
 ): FamilyRigConfig | null {
   const profile = getBestBottlesFamilyProfileForProduct(input);
   if (!profile) return getFamilyRig(input?.family ?? input?.bottleCollection);
+  const bodyHeightMm = parseFirstNumber(input?.heightWithoutCap);
+  const assembledHeightMm = parseFirstNumber(input?.heightWithCap);
+  const targetBodyHeightPx =
+    bodyHeightMm != null
+    && assembledHeightMm != null
+    && bodyHeightMm <= assembledHeightMm
+      ? deriveBestBottlesBodyTargetPx({
+          canvasHeightPx: profile.canvas.heightPx,
+          assembledHeightPct: profile.targetProductHeightPct,
+          verifiedBodyHeightMm: bodyHeightMm,
+          verifiedAssembledHeightMm: assembledHeightMm,
+        })
+      : undefined;
   return {
     family: profile.family,
     profileId: profile.id,
     profileLabel: profile.label,
     relativeScaleZoneId: profile.relativeScaleZoneId,
     relativeScaleZoneLabel: profile.relativeScaleZoneLabel,
+    scaleContractVersion: profile.scaleContractVersion,
+    globalTargetProductHeightPct: profile.globalTargetProductHeightPct,
+    familyScaleCorrectionPct: profile.familyScaleCorrectionPct,
+    geometryScaleVersion: profile.geometryScaleVersion,
     fillHeightPct: profile.targetProductHeightPct,
+    targetBodyHeightPx,
     fillHeightRangePct: profile.targetProductHeightRangePct,
     fillWidthPct: profile.fillWidthPct,
     baselinePct: profile.baselinePct,
     primaryObjectCenterXPct: profile.primaryObjectCenterXPct,
   };
+}
+
+function parseFirstNumber(value: string | null | undefined): number | null {
+  const match = value?.match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 function formatFamilyLabel(cfg: FamilyRigConfig): string {
@@ -154,6 +195,25 @@ export function computeRigFitScale(
   const scaleH = (cfg.fillHeightPct / 100) * canvasHeightPx / boxHeightPx;
   const scaleW = (cfg.fillWidthPct / 100) * canvasWidthPx / boxWidthPx;
   return Math.min(scaleH, scaleW);
+}
+
+export function computePrimaryBottleRigScale(input: {
+  primaryBoxWidthPx: number;
+  primaryBoxHeightPx: number;
+  targetBodyHeightPx: number;
+  maxPrimaryWidthPx: number;
+}): number {
+  if (
+    input.primaryBoxWidthPx <= 0
+    || input.primaryBoxHeightPx <= 0
+    || input.targetBodyHeightPx <= 0
+    || input.maxPrimaryWidthPx <= 0
+  ) {
+    return 1;
+  }
+  const heightScale = input.targetBodyHeightPx / input.primaryBoxHeightPx;
+  const widthScale = input.maxPrimaryWidthPx / input.primaryBoxWidthPx;
+  return Math.min(heightScale, widthScale);
 }
 
 export type RigCapState = "assembled" | "detached";

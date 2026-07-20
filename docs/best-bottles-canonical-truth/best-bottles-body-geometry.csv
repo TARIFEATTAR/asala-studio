@@ -43,7 +43,7 @@ Cylinder,9,74,20,20.0,round,equal-to-diameter(circular),9,Frosted,Fine Mist Spra
 Cylinder,9,79,21,21.0,round,equal-to-diameter(circular),1,Clear,,cylinder-9ml-clear-18-400,h:inch_conversion_artifact×1,79.4×1,21 ±0.5 mm×1
 Cylinder,9,79,20,20.0,round,equal-to-diameter(circular),1,Clear,Glass Rod,cylinder-9ml-clear-18-400-glasswand,h:inch_conversion_artifact×1,79.4×1,20 ±0.5 mm×1
 Cylinder,9,106,18,18.0,round,equal-to-diameter(circular),60,Clear|Frosted,Fine Mist Sprayer|Metal Roller Ball|Plastic Roller Ball,cylinder-9ml-clear-13-415|cylinder-9ml-clear-13-415-finemist|cylinder-9ml-clear-13-415-rollon|cylinder-9ml-frosted-13-415|cylinder-9ml-frosted-13-415-finemist|cylinder-9ml-frosted-13-415-rollon|cylinder-9ml-white-13-415,h:dup_lineage_stale_value×2;h:group_outlier_unresolved×1;convex_height_corrected_by_site(was=76.0)×1,106 ±2 mm×57|76 ±1 mm×3,18 ±0.5 mm×60
-Cylinder,25,83,32,32.0,round,equal-to-diameter(circular),7,Clear,Lotion Pump,cylinder-25ml-clear-18-415-lotionpump,,83 ±1 mm×7,32 ±0.5 mm×7
+Cylinder,25,83,32,32.0,round,equal-to-diameter(circular),8,Clear,Fine Mist Sprayer|Lotion Pump,cylinder-25ml-clear-18-415-finemist|cylinder-25ml-clear-18-415-lotionpump,manual_grace_identity_assignment_20260716×1;live_site_sku_absent_from_2026-07-12_join×1,83 ±1 mm×8,32 ±0.5 mm×8
 Cylinder,28,81,31,31.0,round,equal-to-diameter(circular),4,Clear,Metal Roller Ball|Plastic Roller Ball,cylinder-28ml-clear-16mm-rollon,,81 ±1 mm×4,31 ±0.5 mm×4
 Cylinder,30,51,42,42.0,round,equal-to-diameter(circular),2,Clear,Fine Mist Sprayer,cylinder-30ml-clear-18-415,h:inch_conversion_artifact×2,50.8×2,42 ±0.5 mm×2
 Cylinder,50,98,37,37.0,round,equal-to-diameter(circular),4,Clear,Metal Roller Ball|Plastic Roller Ball,cylinder-50ml-clear-16mm-rollon,,98 ±1 mm×4,37 ±0.5 mm×4

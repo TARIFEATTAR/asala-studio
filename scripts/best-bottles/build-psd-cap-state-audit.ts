@@ -28,7 +28,7 @@ const DEFAULT_PSD_ARCHIVE_ROOT = "/Users/jordanrichter/Projects/Clients/Nemat-In
 const DEFAULT_CANONICAL_CSV = "docs/best-bottles-canonical-truth/best-bottles-master-truth.csv";
 const REVIEWED_ALIAS_PATH = "docs/best-bottles-canonical-truth/best-bottles-psd-reviewed-aliases.json";
 const DEFAULT_OUTPUT_ROOT = "tmp/best-bottles-reference-production/psd-cap-state-audit-v1";
-const EXPECTED_CANONICAL_ROW_COUNT = 2_483;
+const EXPECTED_CANONICAL_ROW_COUNT = 2_484;
 
 const ARTIFACT_FILENAMES = [
   "source-inventory.json",

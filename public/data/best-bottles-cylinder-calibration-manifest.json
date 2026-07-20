@@ -1,0 +1,46 @@
+{
+  "scaleContractVersion": "best-bottles-catalog-scale-v1",
+  "anchors": [
+    {
+      "scaleContractVersion": "best-bottles-catalog-scale-v1",
+      "registryKey": "cylinder:3:kh7ayajaxscgv7jjakdg3r9ahx83k95d",
+      "graceSku": "GB-SPR-CLR-3ML-BLK",
+      "websiteSku": "GBSpry3mlClBlk",
+      "productGroupId": "kh7ayajaxscgv7jjakdg3r9ahx83k95d",
+      "family": "Cylinder",
+      "capacityMl": 3,
+      "bodyMaterial": "Glass Bottle",
+      "shapeClass": "sample-vial",
+      "heightWithCapMm": 54,
+      "heightWithoutCapMm": 37,
+      "diameterMm": 14,
+      "measurementStatus": "reconciled",
+      "measurementSources": [
+        "catalog",
+        "convex-catalog"
+      ],
+      "capOnReferenceId": "9efd0794f4295dfba367759e8825f9bf894fb5a6696892256d35b047e19a84bb",
+      "capOffReferenceId": null,
+      "topologyReferenceId": null,
+      "capStateEligibility": "cap-off-unavailable",
+      "globalTargetPct": 56,
+      "familyCorrectionPct": 0,
+      "finalAssembledTargetPct": 56,
+      "bodyTargetPx": 878,
+      "promptVersion": "best-bottles-reference-locked-v6.1"
+    }
+  ],
+  "missingAnchorCapacitiesMl": [
+    1,
+    4,
+    5,
+    9,
+    28,
+    30,
+    50,
+    100,
+    118,
+    227,
+    454
+  ]
+}

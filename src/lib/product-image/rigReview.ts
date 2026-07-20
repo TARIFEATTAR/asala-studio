@@ -132,16 +132,9 @@ export function buildRigReviewRequirements(review: RigReviewEvidence): RigReview
           : "Deterministic grounding shadow",
       detail:
         review.shadowOwner === "model"
-          ? review.shadowQa
-            ? `${review.shadowQa.status} · ${(review.shadowQa.contacts ?? [])
-                .map(
-                  (contact) =>
-                    `${contact.contact} ${contact.status} (gap ${contact.measurements.contactGapPx ?? "—"}px · right ${contact.measurements.rightExtensionRatio ?? "—"}× width)`,
-                )
-                .join(" · ")}`
-            : "Model-shadow evidence is missing."
+          ? "Model-painted shadow — judged by human visual review only (analyzer removed, Jordan 2026-07-19)."
           : "Madison deterministic contact shadow applied after geometry QA.",
-      status: shadowPass ? "pass" : "fail",
+      status: review.shadowOwner === "model" ? "pass" : (shadowPass ? "pass" : "fail"),
     },
   ];
 }

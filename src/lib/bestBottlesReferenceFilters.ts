@@ -115,6 +115,24 @@ function collectReferenceFingerprintValues(
   }
 
   const record = value as Record<string, unknown>;
+
+  // Optional generation slots are represented as descriptors even when no
+  // asset is attached (for example { url: "", role: "mask-reference" }).
+  // The role describes the empty slot; it is not provenance for a real asset.
+  // Keep inspecting descriptors that carry any other metadata, filename, tag,
+  // path, or source signal so real retired lineage remains fail-closed.
+  if (Object.prototype.hasOwnProperty.call(record, "url") && !String(record.url ?? "").trim()) {
+    const hasAssetMetadata = Object.entries(record).some(([key, entry]) => {
+      if (key === "url" || key === "role" || key === "label" || key === "description") {
+        return false;
+      }
+      if (!shouldInspectMetadataValue(key)) return false;
+      if (Array.isArray(entry)) return entry.length > 0;
+      return entry != null && String(entry).trim().length > 0;
+    });
+    if (!hasAssetMetadata) return [];
+  }
+
   const values: unknown[] = [];
 
   // Browser File fields are not guaranteed to be enumerable.
@@ -155,7 +173,7 @@ export function getRetiredTransparentBestBottlesReferenceIssue(
   values: readonly unknown[],
 ): string | null {
   return isRetiredTransparentBestBottlesReferenceCandidate(values)
-    ? "Transparent/background-removed references are retired for Cylinder masters. Use the flattened Photoshop export with the original source background."
+    ? "Retired reference lineage detected in the asset URL or metadata (clean-reference, background-removed, paper-doll, or mask/control). This does not prove the current pixels are transparent; the asset must be re-imported from the approved opaque canonical export with clean provenance."
     : null;
 }
 

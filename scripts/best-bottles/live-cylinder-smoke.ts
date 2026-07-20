@@ -6,6 +6,7 @@ import { chromium, type Page } from "playwright";
 import sharp from "sharp";
 
 import { IMAGE_PRESETS } from "../../src/config/imagePresets";
+import { BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX } from "../../src/config/bestBottlesVisualTarget";
 import { inferBestBottlesBodyMaterial } from "../../src/lib/bestBottlesBodyMaterial";
 import { buildBestBottlesPromptPreflight } from "../../src/lib/bestBottlesPromptPreflight";
 import {
@@ -172,13 +173,11 @@ async function rigPostprocessSmokeOutput(input: {
   };
 }> {
   const rigged = await input.page.evaluate(
-    async ({ imageUrl, product, capState, mode }) => {
-      const [{ colorCorrectToTarget }, { normalizeBestBottlesRigBaseline }] = await Promise.all([
-        import("/src/lib/product-image/colorCorrect.ts"),
-        import("/src/lib/product-image/rigPostprocess.ts"),
-      ]);
-      const correctedDataUrl = await colorCorrectToTarget(imageUrl, "#F5F3EF");
-      return normalizeBestBottlesRigBaseline(correctedDataUrl, {
+    async ({ imageUrl, product, capState, mode, targetBackgroundHex }) => {
+      const { normalizeBestBottlesRigBaseline } = await import(
+        "/src/lib/product-image/rigPostprocess.ts"
+      );
+      return normalizeBestBottlesRigBaseline(imageUrl, {
         family: product.family,
         bottleCollection: product.bottleCollection,
         graceSku: product.graceSku,
@@ -192,7 +191,7 @@ async function rigPostprocessSmokeOutput(input: {
         diameter: product.diameter,
         capState,
         mode,
-        targetBackgroundHex: "#F5F3EF",
+        targetBackgroundHex,
         maskReferenceUrl: null,
         requireMaskControl: false,
       });
@@ -202,6 +201,7 @@ async function rigPostprocessSmokeOutput(input: {
       product: input.product,
       capState: input.target.capState ?? null,
       mode: input.target.mode ?? null,
+      targetBackgroundHex: BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
     },
   );
 
@@ -271,10 +271,19 @@ try {
 for (const target of targets) {
   const row = snapshot.products.find((product) => getText(product, "graceSku") === target.sku);
   if (!row) throw new Error(`Missing Convex product for ${target.sku}`);
-  const product = productFromSnapshot(row);
-  const bodyMaterial = inferBestBottlesBodyMaterial(product);
   const referenceFile = referenceOverrides.get(target.sku) ?? target.reference;
   const referenceSource = referenceOverrides.has(target.sku) ? "override" : "flattened-png";
+  const product = {
+    ...productFromSnapshot(row),
+    capState: target.capState ?? null,
+    mode: target.mode ?? null,
+    capOffReferenceId: target.capState === "detached" ? referenceFile : null,
+    componentTopology:
+      target.capState === "detached"
+        ? "fitment-attached-cap-right-sidecar" as const
+        : "assembled" as const,
+  };
+  const bodyMaterial = inferBestBottlesBodyMaterial(product);
 
   const referenceBuffer = readFileSync(referenceFile);
   const referenceMeta = await sharp(referenceBuffer).metadata();

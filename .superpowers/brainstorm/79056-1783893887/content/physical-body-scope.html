@@ -1,0 +1,111 @@
+<style>
+  .bb-scope { color: #1d1d1f; font-family: Inter, system-ui, sans-serif; }
+  .bb-scope h2, .bb-scope h3 { font-family: Georgia, 'Times New Roman', serif; font-weight: 500; }
+  .bb-kicker { color: #8b6f42; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }
+  .bb-intro { max-width: 820px; color: #637588; }
+  .bb-example { display: grid; grid-template-columns: minmax(190px, .8fr) minmax(280px, 1.25fr); gap: 24px; margin: 24px 0 34px; align-items: stretch; }
+  .bb-stage { position: relative; min-height: 360px; overflow: hidden; border-radius: 12px; background: linear-gradient(150deg,#eee4d4 0%,#ddd0bd 58%,#c9b79e 100%); box-shadow: inset 0 0 0 1px rgba(80,60,40,.1); }
+  .bb-stage:after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 72px; background: linear-gradient(#eadfce,#cfbfa8); box-shadow: 0 -1px 0 rgba(100,75,50,.12); }
+  .bb-bottle { position: absolute; left: 50%; bottom: 48px; width: 60px; height: 215px; transform: translateX(-50%); border: 3px solid rgba(53,57,59,.55); border-radius: 8px 8px 15px 15px; background: linear-gradient(90deg,rgba(255,255,255,.26),rgba(255,255,255,.75) 28%,rgba(255,255,255,.16) 55%,rgba(255,255,255,.64) 78%,rgba(140,130,120,.12)); box-shadow: inset 7px 0 8px rgba(255,255,255,.62), inset -5px 0 6px rgba(60,55,50,.12), 15px 18px 26px rgba(84,61,40,.18); z-index: 2; }
+  .bb-bottle:before { content:''; position:absolute; width:30px; height:22px; left:12px; top:-25px; border:3px solid rgba(53,57,59,.55); border-bottom:0; border-radius:5px 5px 0 0; background:rgba(255,255,255,.42); }
+  .bb-bottle:after { content:''; position:absolute; left:5px; right:5px; bottom:8px; height:12px; border-radius:50%; background:rgba(197,160,101,.14); box-shadow:0 8px 10px rgba(91,66,42,.16); }
+  .bb-measure { position:absolute; left:calc(50% + 48px); bottom:57px; height:215px; border-left:1px solid #8b6f42; z-index:3; color:#6d5638; font-size:12px; }
+  .bb-measure:before,.bb-measure:after { content:''; position:absolute; left:-5px; width:10px; border-top:1px solid #8b6f42; }
+  .bb-measure:before { top:0; } .bb-measure:after { bottom:0; }
+  .bb-measure span { position:absolute; top:46%; left:9px; white-space:nowrap; }
+  .bb-stage-label { position:absolute; left:18px; top:18px; z-index:3; padding:7px 10px; border-radius:999px; background:rgba(253,251,248,.84); color:#493c2d; font-size:12px; font-weight:600; }
+  .bb-logic { display:flex; flex-direction:column; justify-content:center; }
+  .bb-flow { display:grid; grid-template-columns: 1fr 32px 1fr; gap:10px; align-items:center; margin-top:14px; }
+  .bb-node { padding:16px; background:#fdfbf8; border:1px solid #d4c5a9; border-radius:10px; }
+  .bb-node strong { display:block; margin-bottom:4px; font-family: Georgia, 'Times New Roman', serif; font-size:18px; font-weight:500; }
+  .bb-node span { color:#637588; font-size:12px; line-height:1.45; }
+  .bb-arrow { text-align:center; color:#c5a065; font-size:24px; }
+  .bb-variants { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .bb-variant { padding:12px; background:#f5f3ef; border-radius:8px; color:#3c3c3d; font-size:12px; }
+  .bb-variant b { display:block; margin-bottom:2px; font-size:13px; }
+  .bb-rule { margin-top:14px; padding:14px 16px; border-left:3px solid #c5a065; background:rgba(197,160,101,.10); color:#4d463d; }
+  .bb-scope-map { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0 28px; }
+  .bb-scope-card { padding:18px; border-top:3px solid #d4c5a9; background:#faf8f5; }
+  .bb-scope-card.primary { border-top-color:#c5a065; background:#f5f0e8; }
+  .bb-number { font-family:Georgia,'Times New Roman',serif; font-size:40px; color:#1d1d1f; }
+  .bb-scope-card p { margin:6px 0 0; color:#637588; font-size:13px; }
+  .bb-families { display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:7px; align-items:end; min-height:190px; margin-top:16px; padding:16px 8px 0; border-bottom:1px solid #d4c5a9; }
+  .bb-family { text-align:center; }
+  .bb-bar { width:100%; max-width:54px; margin:0 auto 8px; background:linear-gradient(180deg,#d4c5a9,#b99b6e); border-radius:5px 5px 0 0; min-height:18px; }
+  .bb-family strong { display:block; font-size:12px; }
+  .bb-family span { display:block; font-size:10px; color:#637588; margin-top:3px; }
+  .bb-takeaway { margin-top:24px; padding:18px 20px; background:#1d1d1f; color:#f5f3ef; border-radius:10px; }
+  .bb-takeaway strong { color:#d4c5a9; }
+  @media (max-width:760px){
+    .bb-example { grid-template-columns:1fr; }
+    .bb-stage { min-height:310px; }
+    .bb-scope-map { grid-template-columns:1fr; }
+    .bb-families { grid-template-columns:repeat(3,1fr); align-items:end; min-height:0; }
+    .bb-family { margin-top:12px; }
+  }
+</style>
+
+<div class="bb-scope">
+  <div class="bb-kicker">Best Bottles image-system scope</div>
+  <h2>What “57 physical bottle bodies” actually means</h2>
+  <p class="bb-intro">A physical body is one repeatable glass mold and size: family, capacity, measured height, width, shoulder shape, base, and neck finish. Changing the sprayer, roller, cap color, or trim does not create a new body.</p>
+
+  <div class="bb-example">
+    <div class="bb-stage" aria-label="Illustration of one Cylinder 9 milliliter bottle body on a stone studio stage">
+      <div class="bb-stage-label">BODY MASTER · Cylinder 9 ml</div>
+      <div class="bb-bottle"></div>
+      <div class="bb-measure"><span>70 × Ø20 mm<br>17-415 neck</span></div>
+    </div>
+    <div class="bb-logic">
+      <h3>One body can become many sellable configurations</h3>
+      <div class="bb-flow">
+        <div class="bb-node">
+          <strong>1 stone-stage body master</strong>
+          <span>Exact Cylinder 9 ml geometry, common camera, baseline, glass lighting, and family stone.</span>
+        </div>
+        <div class="bb-arrow">→</div>
+        <div class="bb-variants">
+          <div class="bb-variant"><b>Fine-mist spray</b>Black, white, gold, or silver fitment</div>
+          <div class="bb-variant"><b>Roll-on</b>Plastic or metal roller with the correct housing</div>
+          <div class="bb-variant"><b>Glass finish</b>Clear, amber, cobalt, frosted, or swirl</div>
+          <div class="bb-variant"><b>Closure finish</b>Matte, shiny, dotted, tall, or short</div>
+        </div>
+      </div>
+      <div class="bb-rule"><strong>The geometry master is reusable.</strong> The customer-facing assembled image must still receive the exact color and fitment for its product group.</div>
+    </div>
+  </div>
+
+  <h3>Why 57 is a production foundation—not the whole purchasable catalog</h3>
+  <div class="bb-scope-map">
+    <div class="bb-scope-card primary">
+      <div class="bb-number">57</div>
+      <strong>physical body masters</strong>
+      <p>Unique measured bodies across the nine priority families. These establish shape, scale, baseline, and stone-studio lighting.</p>
+    </div>
+    <div class="bb-scope-card">
+      <div class="bb-number">215</div>
+      <strong>product groups</strong>
+      <p>Customer-facing combinations of body, color, neck, and applicator. These may reuse a body master but still need truthful assembly imagery.</p>
+    </div>
+    <div class="bb-scope-card">
+      <div class="bb-number">1,738</div>
+      <strong>individual SKUs</strong>
+      <p>Fine variations such as trim, cap color, finish, and stock identity. Many can share a product-group image or variant swatch.</p>
+    </div>
+  </div>
+
+  <h3>The 57 body masters by priority family</h3>
+  <div class="bb-families" role="img" aria-label="Bar chart showing 57 body masters: Cylinder 22, Elegant 8, Sleek 7, Diva 4, Boston Round 4, Circle 4, Round 3, Atomizer 3, Empire 2">
+    <div class="bb-family"><div class="bb-bar" style="height:150px"></div><strong>Cylinder</strong><span>22 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:55px"></div><strong>Elegant</strong><span>8 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:48px"></div><strong>Sleek</strong><span>7 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:28px"></div><strong>Diva</strong><span>4 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:28px"></div><strong>Boston</strong><span>4 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:28px"></div><strong>Circle</strong><span>4 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:22px"></div><strong>Round</strong><span>3 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:22px"></div><strong>Atomizer</strong><span>3 bodies</span></div>
+    <div class="bb-family"><div class="bb-bar" style="height:18px"></div><strong>Empire</strong><span>2 bodies</span></div>
+  </div>
+
+  <div class="bb-takeaway"><strong>Recommended interpretation:</strong> make 57 geometry-true stone masters first, then use those masters to create the exact assembled product-group images required by the website. Do not use one generic 9 ml photo to represent every 9 ml sprayer, roller, and finish.</div>
+</div>

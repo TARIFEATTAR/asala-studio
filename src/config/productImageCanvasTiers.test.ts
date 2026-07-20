@@ -8,7 +8,11 @@ import {
   getBestBottlesCanvasTierForProduct,
   resolveBestBottlesCanvasTier,
 } from "./productImageCanvasTiers";
-import { IMAGE_PRESETS, getBestBottlesCatalogPresetIdForProduct } from "./imagePresets";
+import {
+  IMAGE_PRESETS,
+  getBestBottlesCatalogPresetIdForFamily,
+  getBestBottlesCatalogPresetIdForProduct,
+} from "./imagePresets";
 
 const flattenedReferenceFamilyKeys = [
   "aluminum-bottle",
@@ -59,6 +63,10 @@ describe("Best Bottles product image canvas tiers", () => {
     assert.equal(tier.id, "tall-portrait");
     assert.deepEqual(tier.canvas, { widthPx: 2080, heightPx: 2288 });
     assert.equal(tier.aspectRatio, "10:11");
+    assert.equal(
+      getBestBottlesCatalogPresetIdForFamily("Cylinder"),
+      "grid-card-exploded-2000x2200",
+    );
   });
 
   it("routes round and square families to a square canvas", () => {
@@ -116,7 +124,14 @@ describe("Best Bottles product image canvas tiers", () => {
     assert.equal(tier.id, "tall-portrait");
     assert.deepEqual(tier.canvas, { widthPx: 2080, heightPx: 2288 });
     assert.equal(tier.aspectRatio, "10:11");
-    assert.equal(getBestBottlesCatalogPresetIdForProduct(product), "grid-card-2000x2200");
+    assert.equal(
+      getBestBottlesCatalogPresetIdForProduct(product),
+      "grid-card-exploded-2000x2200",
+    );
+    assert.deepEqual(IMAGE_PRESETS["grid-card-exploded-2000x2200"].canvas, {
+      widthPx: 2080,
+      heightPx: 2288,
+    });
 
     assert.equal(
       getBestBottlesCatalogPresetIdForProduct({
@@ -128,7 +143,7 @@ describe("Best Bottles product image canvas tiers", () => {
         heightWithCap: "96 mm",
         diameter: "16 mm",
       }),
-      "grid-card-2000x2200",
+      "grid-card-exploded-2000x2200",
     );
   });
 

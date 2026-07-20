@@ -10,6 +10,7 @@ import {
   type BestBottlesShadowOwner,
 } from "@/lib/bestBottlesShadowPolicy";
 import { analyzeModelOwnedShadow, type ShadowQaReport } from "@/lib/product-image/shadowQa";
+import { detectSilverProofComponents } from "@/lib/product-image/sidecarCapSplice";
 import type {
   BestBottlesShadowContact,
   BestBottlesShadowTopology,
@@ -65,6 +66,15 @@ export interface RigBaselineNormalizeOptions {
   shadowTopology?: BestBottlesShadowTopology;
   maskReferenceUrl?: string | null;
   requireMaskControl?: boolean;
+  /** Production masters keep provider-rendered scale; the rig may translate and QA but never resize. */
+  preserveGeneratedScale?: boolean;
+  /**
+   * Truth H/W ratio for the primary bottle. When omitted, cap-on lanes fall
+   * back to canonical mm (heightWithCap / diameter); detached-sidecar lanes
+   * have no canonical assembled-cap-off height so the caller should measure
+   * the byte-locked reference and pass it here.
+   */
+  expectedPrimaryAspectRatio?: number | null;
 }
 
 export interface RigStrongBounds {
@@ -93,7 +103,11 @@ export interface RigFrameTransformInput {
   rig: FamilyRigConfig;
   detectedBaselineYPx: number;
   strongBounds: RigStrongBounds | null;
+  /** Bottle-only bounds. Required for detached topology to prevent sidecar shrink. */
+  primaryBounds?: RigStrongBounds | null;
   capState?: RigCapState;
+  /** Keep provider-rendered scale and use this pass for baseline/center translation plus QA only. */
+  preserveGeneratedScale?: boolean;
 }
 
 export interface RigFrameTransform {
@@ -241,6 +255,14 @@ export function detectModelShadowContactBounds(
     };
   }
 
+  // Multi-contact object identity must be derived above the governed shadow
+  // depth. Faint floor/contact pixels legitimately bridge beneath detached
+  // objects and must not merge their physical horizontal segments.
+  const objectScanBottom = Math.max(
+    top,
+    bottom - Math.max(12, Math.round(height * 0.035)),
+  );
+
   const columns: Array<{
     x: number;
     pixels: number;
@@ -251,7 +273,7 @@ export function detectModelShadowContactBounds(
     let pixels = 0;
     let minY = height;
     let maxY = -1;
-    for (let y = top; y <= bottom; y += 1) {
+    for (let y = top; y <= objectScanBottom; y += 1) {
       const index = (y * width + x) * 4;
       const alpha = input.pixels[index + 3] ?? 0;
       const distance =
@@ -295,7 +317,7 @@ export function detectModelShadowContactBounds(
       left: bottle.left,
       right: bottle.right,
       top: bottle.top,
-      bottom: bottle.bottom,
+      bottom,
     },
   };
   const bottleCenter = ((bottle.left ?? 0) + (bottle.right ?? 0)) / 2;
@@ -312,7 +334,7 @@ export function detectModelShadowContactBounds(
         left: sidecar.left,
         right: sidecar.right,
         top: sidecar.top,
-        bottom: sidecar.bottom,
+        bottom,
       };
     }
   }
@@ -324,7 +346,7 @@ export function detectModelShadowContactBounds(
         left: accessory.left,
         right: accessory.right,
         top: accessory.top,
-        bottom: accessory.bottom,
+        bottom,
       };
     }
   }
@@ -1073,19 +1095,13 @@ export function finalizeRigShadow(
   input: RigFinalizeShadowInput,
 ): RigFinalizeShadowResult {
   if (input.owner === "model") {
-    const analysis = analyzeModelOwnedShadow({
-      pixels: input.pixels,
-      width: input.width,
-      height: input.height,
-      background: input.background,
-      objectBounds: input.objectBounds ?? undefined,
-      baselineYPx: input.baselineYPx ?? Number.NaN,
-      topology: input.topology,
-      contactBounds: input.contactBounds,
-    });
+    // Jordan 2026-07-19: the shadow QA analyzer is REMOVED from the flow.
+    // The model paints a subtle grounded shadow per the prompt; the human
+    // review checkboxes are the only shadow judgment. Too many legitimate
+    // photographic configurations for a numeric contract.
     return {
       deterministicShadowPixels: 0,
-      shadowQa: analysis.report,
+      shadowQa: null,
     };
   }
 
@@ -1380,11 +1396,14 @@ export function detectStrongBounds(
   height: number,
   bg: Rgb,
   maxBottomYPx?: number,
+  xRegion?: { left: number; right: number },
 ): RigStrongBounds | null {
   const strongThreshold = 52;
   const paleForegroundThreshold = 16;
   const xStep = 2;
-  const minRowHits = Math.max(6, Math.floor((width / xStep) * 0.02));
+  const minX = Math.max(0, Math.ceil((xRegion?.left ?? 0) / xStep) * xStep);
+  const maxX = Math.min(width - 1, Math.floor((xRegion?.right ?? width - 1) / xStep) * xStep);
+  const minRowHits = Math.max(6, Math.floor(((maxX - minX + 1) / xStep) * 0.02));
   let top = height;
   let bottom = -1;
   let left = width;
@@ -1396,7 +1415,7 @@ export function detectStrongBounds(
     let rowHits = 0;
     let rowLeft = width;
     let rowRight = -1;
-    for (let x = 0; x < width; x += xStep) {
+    for (let x = minX; x <= maxX; x += xStep) {
       const i = row + x * 4;
       const distance = colorDistance(pixels, i, bg);
       const isPaleForeground =
@@ -1419,6 +1438,31 @@ export function detectStrongBounds(
   }
 
   return bottom >= 0 ? { top, bottom, left, right } : null;
+}
+
+/**
+ * Detached topology is authored with the primary bottle centered and the
+ * loose component in a right sidecar. Restricting detection to the bottle lane
+ * keeps the sidecar out of scale, centerline, baseline, and fill-height QA.
+ */
+export function detectPrimaryBottleBounds(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number,
+): RigStrongBounds | null {
+  return detectStrongBounds(
+    pixels,
+    width,
+    height,
+    bg,
+    maxBottomYPx,
+    {
+      left: Math.round(width * 0.12),
+      right: Math.round(width * 0.70),
+    },
+  );
 }
 
 /**
@@ -1547,14 +1591,26 @@ function clamp(value: number, min: number, max: number): number {
 
 export function computeRigFrameTransform(input: RigFrameTransformInput): RigFrameTransform {
   const targetBaseline = Math.round(input.height * (1 - input.rig.baselinePct / 100));
-  const bounds = input.strongBounds;
+  const fullBounds = input.strongBounds;
+  const bounds = input.capState === "detached"
+    ? input.primaryBounds ?? fullBounds
+    : fullBounds;
   const baselineToTop = bounds ? input.detectedBaselineYPx - bounds.top : 0;
+  // `primaryBounds` is the whole visible primary product (body plus any seated
+  // applicator), not a body-only segmentation mask. Use the assembled/profile
+  // target here. Applying targetBodyHeightPx to this envelope falsely shrinks
+  // cap-off sidecars whose raw glass body is already at canonical scale.
   const targetFillHeight = input.height * (input.rig.fillHeightPct / 100);
   const idealScale = baselineToTop > 0 ? targetFillHeight / baselineToTop : 1;
   const scaleNeedsCorrection = Math.abs(idealScale - 1) > 0.025;
-  let scale = scaleNeedsCorrection ? clamp(idealScale, 0.5, 2.5) : 1;
+  const minimumScale = 0.5;
+  let scale = input.preserveGeneratedScale
+    ? 1
+    : scaleNeedsCorrection
+      ? clamp(idealScale, minimumScale, 2.5)
+      : 1;
 
-  if (bounds) {
+  if (bounds && !input.preserveGeneratedScale) {
     if (typeof bounds.left === "number" && typeof bounds.right === "number" && bounds.right > bounds.left) {
       const boundsWidth = bounds.right - bounds.left + 1;
       const targetFillWidth = input.width * (input.rig.fillWidthPct / 100);
@@ -1572,7 +1628,7 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
       ? (input.height - 12 - targetBaseline) / baselineToBottom
       : scale;
     scale = Math.min(scale, topLimitScale, bottomLimitScale);
-    scale = clamp(scale, 0.5, 2.5);
+    scale = clamp(scale, minimumScale, 2.5);
   }
 
   let shiftY = targetBaseline - input.detectedBaselineYPx * scale;
@@ -1583,7 +1639,7 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
 
   let shiftX = 0;
   if (
-    input.capState !== "detached" &&
+    (input.capState !== "detached" || input.primaryBounds != null) &&
     bounds &&
     typeof bounds.left === "number" &&
     typeof bounds.right === "number" &&
@@ -1602,14 +1658,14 @@ export function computeRigFrameTransform(input: RigFrameTransformInput): RigFram
     if (Math.abs(shiftX) <= 8) shiftX = 0;
   }
 
-  const transformedTop = bounds ? bounds.top * scale + shiftY : null;
-  const transformedBottom = bounds ? bounds.bottom * scale + shiftY : null;
+  const transformedTop = fullBounds ? fullBounds.top * scale + shiftY : null;
+  const transformedBottom = fullBounds ? fullBounds.bottom * scale + shiftY : null;
   const baseDrawX = (input.width - input.width * scale) / 2;
-  const transformedLeft = bounds && typeof bounds.left === "number"
-    ? bounds.left * scale + baseDrawX + shiftX
+  const transformedLeft = fullBounds && typeof fullBounds.left === "number"
+    ? fullBounds.left * scale + baseDrawX + shiftX
     : null;
-  const transformedRight = bounds && typeof bounds.right === "number"
-    ? bounds.right * scale + baseDrawX + shiftX
+  const transformedRight = fullBounds && typeof fullBounds.right === "number"
+    ? fullBounds.right * scale + baseDrawX + shiftX
     : null;
 
   return {
@@ -1638,6 +1694,285 @@ export function resolveRigShadowOwner(
     family: options.family,
     bottleCollection: options.bottleCollection,
   }).owner;
+}
+
+function parseLeadingMm(value: string | null | undefined): number | null {
+  const match = String(value ?? "").match(/[\d.]+/);
+  const parsed = match ? Number(match[0]) : Number.NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/**
+ * Isolate the primary bottle in a frame that may also contain a detached
+ * sidecar cap: split foreground columns on horizontal gaps and take the
+ * TALLEST connected run (the pilot-proven "tallest component = bottle" rule).
+ * Region-window isolation (detectPrimaryBottleBounds) can merge bottle+cap
+ * when the sidecar sits close, which poisons aspect-ratio measurement — this
+ * detector exists for proportion QA only and never feeds other metrics.
+ */
+export function detectTallestComponentBounds(
+  pixels: ArrayLike<number>,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number | null,
+): RigStrongBounds | null {
+  const yLimit = Math.min(
+    height,
+    typeof maxBottomYPx === "number" && Number.isFinite(maxBottomYPx)
+      ? Math.max(1, Math.round(maxBottomYPx) + 1)
+      : height,
+  );
+  const threshold = 40;
+  // A column only counts as occupied with a real vertical presence, so a few
+  // rows of feathered shadow or anti-aliasing cannot bridge bottle and cap.
+  const minColumnPixels = Math.max(6, Math.round(height * 0.004));
+  const colTop = new Array<number | null>(width).fill(null);
+  const colBottom = new Array<number | null>(width).fill(null);
+  for (let x = 0; x < width; x += 1) {
+    let occupied = 0;
+    let top: number | null = null;
+    let bottom: number | null = null;
+    for (let y = 0; y < yLimit; y += 1) {
+      const i = (y * width + x) * 4;
+      const delta = Math.max(
+        Math.abs(pixels[i] - bg.r),
+        Math.abs(pixels[i + 1] - bg.g),
+        Math.abs(pixels[i + 2] - bg.b),
+      );
+      if (delta > threshold) {
+        occupied += 1;
+        if (top === null) top = y;
+        bottom = y;
+      }
+    }
+    if (occupied >= minColumnPixels) {
+      colTop[x] = top;
+      colBottom[x] = bottom;
+    }
+  }
+  const minGap = Math.max(4, Math.round(width * 0.01));
+  const runs: Array<{ left: number; right: number }> = [];
+  let runStart: number | null = null;
+  let gap = 0;
+  for (let x = 0; x < width; x += 1) {
+    if (colTop[x] != null) {
+      if (runStart === null) runStart = x;
+      gap = 0;
+    } else if (runStart !== null) {
+      gap += 1;
+      if (gap >= minGap) {
+        runs.push({ left: runStart, right: x - gap });
+        runStart = null;
+        gap = 0;
+      }
+    }
+  }
+  if (runStart !== null) runs.push({ left: runStart, right: width - 1 - gap });
+
+  let best: RigStrongBounds | null = null;
+  let bestHeight = 0;
+  for (const run of runs) {
+    let top = Number.POSITIVE_INFINITY;
+    let bottom = -1;
+    for (let x = run.left; x <= run.right; x += 1) {
+      const t = colTop[x];
+      const b = colBottom[x];
+      if (t != null && t < top) top = t;
+      if (b != null && b > bottom) bottom = b;
+    }
+    const runHeight = bottom - top + 1;
+    if (bottom >= 0 && runHeight > bestHeight) {
+      bestHeight = runHeight;
+      best = { top, bottom, left: run.left, right: run.right };
+    }
+  }
+  return best;
+}
+
+/**
+ * Measure the primary bottle's height/width ratio in a reference image.
+ * Gates render proportions against byte-locked truth for lanes where canonical
+ * mm cannot describe the pictured state (e.g. cap-off sidecar with fitment).
+ * Returns null on any load/detection failure — the caller falls back to
+ * canonical mm or skips the aspect gate rather than blocking generation.
+ */
+/**
+ * Deterministic model-owned shadow remediation (Jordan-approved 2026-07-19):
+ * the model cannot hold the 0.18–0.32 right-extension band (honest series: 0,
+ * 0.345, 0.351, 0.353) and occasionally splits the shadow into stray blobs.
+ * Instead of failing otherwise-perfect renders, clip every below-baseline
+ * shadow pixel outside each component's keep-zone (left −10% / right +29% of
+ * the primary bottle's width, vertical depth ≤3.2% of canvas) with a soft fade,
+ * then re-run the shadow analyzer so QA reports the trimmed truth. Product
+ * pixels are untouched — the trim operates strictly below the baseline.
+ */
+export function trimModelOwnedShadowIntoBand(params: {
+  pixels: Uint8ClampedArray;
+  width: number;
+  height: number;
+  bg: Rgb;
+  baselineYPx: number;
+}): number {
+  const { pixels, width, height, bg } = params;
+  const baseline = Math.max(0, Math.min(height - 1, Math.round(params.baselineYPx)));
+  // Component runs measured ABOVE the baseline so shadow can't join components.
+  const threshold = 40;
+  const minColumnPixels = Math.max(6, Math.round(height * 0.004));
+  const occupied: boolean[] = new Array(width).fill(false);
+  for (let x = 0; x < width; x += 1) {
+    let count = 0;
+    for (let y = 0; y < baseline; y += 1) {
+      const i = (y * width + x) * 4;
+      const delta = Math.max(
+        Math.abs(pixels[i] - bg.r),
+        Math.abs(pixels[i + 1] - bg.g),
+        Math.abs(pixels[i + 2] - bg.b),
+      );
+      if (delta > threshold) count += 1;
+    }
+    occupied[x] = count >= minColumnPixels;
+  }
+  const minGap = Math.max(4, Math.round(width * 0.01));
+  const runs: Array<{ left: number; right: number }> = [];
+  let runStart: number | null = null;
+  let gap = 0;
+  for (let x = 0; x < width; x += 1) {
+    if (occupied[x]) {
+      if (runStart === null) runStart = x;
+      gap = 0;
+    } else if (runStart !== null) {
+      gap += 1;
+      if (gap >= minGap) {
+        runs.push({ left: runStart, right: x - gap });
+        runStart = null;
+        gap = 0;
+      }
+    }
+  }
+  if (runStart !== null) runs.push({ left: runStart, right: width - 1 - gap });
+  const components = runs.filter((run) => run.right - run.left >= width * 0.02);
+  if (components.length === 0) return 0;
+  const primaryWidth = Math.max(
+    1,
+    ...components.map((run) => run.right - run.left + 1),
+  );
+  const rightAllowancePx = Math.round(primaryWidth * 0.29);
+  const leftAllowancePx = Math.round(primaryWidth * 0.10);
+  const fadePx = 24;
+  const verticalCutY = baseline + Math.round(height * 0.032);
+  const keepFactor = (x: number, y: number): number => {
+    let horizontal = 0;
+    for (const run of components) {
+      const left = run.left - leftAllowancePx;
+      const right = run.right + rightAllowancePx;
+      let k = 0;
+      if (x >= left && x <= right - fadePx) k = 1;
+      else if (x > right - fadePx && x <= right) k = (right - x) / fadePx;
+      else if (x < left && x >= left - fadePx) k = (x - (left - fadePx)) / fadePx;
+      if (k > horizontal) horizontal = k;
+    }
+    let vertical = 1;
+    if (y > verticalCutY) vertical = 0;
+    else if (y > verticalCutY - fadePx) vertical = (verticalCutY - y) / fadePx;
+    return horizontal * vertical;
+  };
+  let changed = 0;
+  for (let y = baseline + 1; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const k = keepFactor(x, y);
+      if (k >= 1) continue;
+      const i = (y * width + x) * 4;
+      const nr = Math.round(bg.r + (pixels[i] - bg.r) * k);
+      const ng = Math.round(bg.g + (pixels[i + 1] - bg.g) * k);
+      const nb = Math.round(bg.b + (pixels[i + 2] - bg.b) * k);
+      if (nr !== pixels[i] || ng !== pixels[i + 1] || nb !== pixels[i + 2]) changed += 1;
+      pixels[i] = nr;
+      pixels[i + 1] = ng;
+      pixels[i + 2] = nb;
+      pixels[i + 3] = 255;
+    }
+  }
+  return changed;
+}
+
+const TRIMMABLE_SHADOW_FAILURE =
+  /exceeds 0\.32|Multiple connected shadow components|vertical depth|left extension exceeds/i;
+
+export function isModelShadowFailureTrimmable(
+  failures: readonly string[] | null | undefined,
+): boolean {
+  return Boolean(
+    failures &&
+    failures.length > 0 &&
+    failures.every((failure) => TRIMMABLE_SHADOW_FAILURE.test(failure)),
+  );
+}
+
+/** Tallest silver-proof component as RigStrongBounds (null when none found). */
+export function tallestSilverProofBounds(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number | null,
+): RigStrongBounds | null {
+  const components = detectSilverProofComponents(pixels, width, height, bg, maxBottomYPx);
+  let best: RigStrongBounds | null = null;
+  let bestHeight = 0;
+  for (const c of components) {
+    const h = c.bottom - c.top + 1;
+    if (h > bestHeight) {
+      bestHeight = h;
+      best = { top: c.top, bottom: c.bottom, left: c.left, right: c.right };
+    }
+  }
+  return best;
+}
+
+export async function measureReferencePrimaryAspectRatio(
+  url: string,
+): Promise<number | null> {
+  try {
+    const img = await loadImage(url);
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(img, 0, 0);
+    const { width, height } = canvas;
+    if (width < 8 || height < 8) return null;
+    const pixels = ctx.getImageData(0, 0, width, height).data;
+    // References carry their own studio background (white/near-white), not the
+    // Bone output canvas — sample the corner instead of assuming a hex.
+    const bgSample: Rgb = { r: pixels[0], g: pixels[1], b: pixels[2] };
+    // Tallest-component isolation: sidecar references contain bottle AND
+    // detached cap; window-based primary detection can merge them and report
+    // a bottle+cap group ratio instead of the bottle's own proportions.
+    // Silver-proof detection first: the threshold-40 detector reads bare
+    // clear-glass bottles as one thin side-wall sliver (measured 7.34:1 truth
+    // on a ~3.1:1 bottle, 2026-07-20) — transparent interiors need the low
+    // threshold + extent-merge treatment to stay whole.
+    const bounds =
+      tallestSilverProofBounds(pixels, width, height, bgSample) ??
+      detectTallestComponentBounds(pixels, width, height, bgSample) ??
+      detectStrongBounds(pixels, width, height, bgSample);
+    if (
+      !bounds ||
+      typeof bounds.left !== "number" ||
+      typeof bounds.right !== "number" ||
+      bounds.right <= bounds.left ||
+      bounds.bottom <= bounds.top
+    ) {
+      return null;
+    }
+    const ratio =
+      (bounds.bottom - bounds.top + 1) / (bounds.right - bounds.left + 1);
+    return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function normalizeBestBottlesRigBaseline(
@@ -1701,6 +2036,19 @@ export async function normalizeBestBottlesRigBaseline(
     bg,
   );
   const capState = resolveCapState(options);
+  // Proportion truth for the aspect gate: caller-provided (reference-measured)
+  // wins; assembled cap-on falls back to canonical mm; detached sidecar has no
+  // canonical assembled-cap-off height, so without a caller value the gate is off.
+  const canonHeightWithCapMm = parseLeadingMm(options.heightWithCap);
+  const canonDiameterMm = parseLeadingMm(options.diameter);
+  const expectedPrimaryAspectRatio =
+    typeof options.expectedPrimaryAspectRatio === "number" &&
+    Number.isFinite(options.expectedPrimaryAspectRatio) &&
+    options.expectedPrimaryAspectRatio > 0
+      ? options.expectedPrimaryAspectRatio
+      : capState !== "detached" && canonHeightWithCapMm != null && canonDiameterMm != null
+        ? canonHeightWithCapMm / canonDiameterMm
+        : null;
   let maskImageData: ImageData | null = null;
   let maskBounds: RigAlphaControlBounds | null = null;
   const maskReferenceUrl = options.maskReferenceUrl?.trim();
@@ -1781,6 +2129,15 @@ export async function normalizeBestBottlesRigBaseline(
       );
     }
     const generatedBounds = detectStrongBounds(geometryAnalysisPixels, width, height, analysisBg);
+    const primaryBounds = capState === "detached"
+      ? detectPrimaryBottleBounds(
+          geometryAnalysisPixels,
+          width,
+          height,
+          analysisBg,
+          detectedBaseline,
+        )
+      : generatedBounds;
     const qaIssues = [
       ...getMaskControlledBoundsQaIssues({
         generatedBounds,
@@ -1793,6 +2150,9 @@ export async function normalizeBestBottlesRigBaseline(
         bg: analysisBg,
         controlBounds: maskBounds,
       }),
+      ...(capState === "detached" && !primaryBounds
+        ? ["Primary bottle bounds were unresolved for detached topology."]
+        : []),
     ];
     const sourceImageData = modelShadowAnalysis
       ? new Uint8ClampedArray(imageData.data)
@@ -1803,7 +2163,9 @@ export async function normalizeBestBottlesRigBaseline(
       rig,
       detectedBaselineYPx: detectedBaseline,
       strongBounds: maskBounds,
+      primaryBounds,
       capState,
+      preserveGeneratedScale: options.preserveGeneratedScale,
     });
 
     applyMaskControlledForegroundMatte(
@@ -1832,57 +2194,120 @@ export async function normalizeBestBottlesRigBaseline(
     out.height = height;
     const outCtx = out.getContext("2d");
     if (!outCtx) throw new Error("Unable to acquire 2d canvas context");
-    outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
-    outCtx.fillRect(0, 0, width, height);
     const scaledWidth = Math.round(width * transform.scale);
     const scaledHeight = Math.round(height * transform.scale);
     const drawX = Math.round((width - scaledWidth) / 2 + transform.shiftXPx);
-    outCtx.drawImage(canvas, drawX, transform.shiftYPx, scaledWidth, scaledHeight);
-    const finalImageData = outCtx.getImageData(0, 0, width, height);
-    const transformedControlBounds =
-      transform.transformedTopYPx != null &&
-      transform.transformedBottomYPx != null &&
-      transform.transformedLeftXPx != null &&
-      transform.transformedRightXPx != null
-        ? {
-            top: transform.transformedTopYPx,
-            bottom: transform.transformedBottomYPx,
-            left: transform.transformedLeftXPx,
-            right: transform.transformedRightXPx,
-          }
-        : null;
-    const finalBounds =
-      detectControlledRigBounds(
+    // Same bounded translate-only second seat pass as the unmasked branch:
+    // post-composite re-detection can drift a few pixels off the affine target,
+    // and that residual is a pure translation the rig can correct itself.
+    // Aspect correction mirrors the unmasked branch: bounded horizontal
+    // resample toward measured truth when the bottle ratio fails tolerance.
+    let appliedShiftYPx = transform.shiftYPx;
+    let appliedHScaleX = 1;
+    let finalImageData!: ImageData;
+    let transformedControlBounds: { top: number; bottom: number; left: number; right: number } | null = null;
+    let finalBounds: RigStrongBounds | null = null;
+    let finalPrimaryBounds: RigStrongBounds | null = null;
+    let finalBaseline: number | null = null;
+    let framingQa!: ReturnType<typeof buildFramingQaReport>;
+    for (let seatPass = 1; seatPass <= 2; seatPass += 1) {
+      const seatShiftDeltaYPx = appliedShiftYPx - transform.shiftYPx;
+      const scaleXAboutCenter = (value: number): number =>
+        Math.round((value - width / 2) * appliedHScaleX + width / 2);
+      const passDrawWidth = Math.round(scaledWidth * appliedHScaleX);
+      const passDrawX = Math.round((width - passDrawWidth) / 2 + transform.shiftXPx * appliedHScaleX);
+      outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
+      outCtx.fillRect(0, 0, width, height);
+      outCtx.drawImage(canvas, passDrawX, appliedShiftYPx, passDrawWidth, scaledHeight);
+      finalImageData = outCtx.getImageData(0, 0, width, height);
+      transformedControlBounds =
+        transform.transformedTopYPx != null &&
+        transform.transformedBottomYPx != null &&
+        transform.transformedLeftXPx != null &&
+        transform.transformedRightXPx != null
+          ? {
+              top: transform.transformedTopYPx + seatShiftDeltaYPx,
+              bottom: transform.transformedBottomYPx + seatShiftDeltaYPx,
+              left: scaleXAboutCenter(transform.transformedLeftXPx),
+              right: scaleXAboutCenter(transform.transformedRightXPx),
+            }
+          : null;
+      finalBounds =
+        detectControlledRigBounds(
+          finalImageData.data,
+          width,
+          height,
+          bg,
+          transformedControlBounds,
+        ) ?? detectStrongBounds(finalImageData.data, width, height, bg);
+      finalPrimaryBounds = capState === "detached"
+        ? detectPrimaryBottleBounds(finalImageData.data, width, height, bg)
+        : finalBounds;
+      finalBaseline = detectStrongBottomY(
         finalImageData.data,
         width,
         height,
         bg,
-        transformedControlBounds,
-      ) ?? detectStrongBounds(finalImageData.data, width, height, bg);
-    const finalBaseline = detectStrongBottomY(
-      finalImageData.data,
-      width,
-      height,
-      bg,
-      capState,
-      shadowOwner === "model" ? transformedControlBounds?.bottom : null,
-    );
-    const framingQa = buildFramingQaReport({
-      width,
-      height,
-      rig,
-      bounds: finalBounds,
-      baselineYPx: finalBaseline,
-      capState,
-    });
+        capState,
+        shadowOwner === "model" ? transformedControlBounds?.bottom : null,
+      );
+      framingQa = buildFramingQaReport({
+        width,
+        height,
+        rig,
+        bounds: finalPrimaryBounds,
+        primaryBounds: finalPrimaryBounds,
+        baselineYPx: finalBaseline,
+        capState,
+        expectedPrimaryAspectRatio,
+        aspectBounds: capState === "detached"
+          ? tallestSilverProofBounds(
+              finalImageData.data,
+              width,
+              height,
+              bg,
+              finalBaseline,
+            ) ??
+            detectTallestComponentBounds(
+              finalImageData.data,
+              width,
+              height,
+              bg,
+              finalBaseline,
+            )
+          : null,
+      });
+      const baselineResidualPx =
+        finalBaseline != null ? finalBaseline - transform.targetBaselineYPx : null;
+      const needsBaselineReseat =
+        baselineResidualPx != null &&
+        Math.abs(baselineResidualPx) > 4 &&
+        Math.abs(baselineResidualPx) <= 48;
+      const aspectDriftPct = framingQa.measurements.aspectRatioDriftPct;
+      const aspectFactor = aspectDriftPct != null ? 1 + aspectDriftPct / 100 : null;
+      const needsAspectCorrection =
+        aspectDriftPct != null &&
+        Math.abs(aspectDriftPct) > 6 &&
+        aspectFactor != null &&
+        Math.abs(aspectFactor - 1) <= 0.25;
+      if (seatPass === 1 && (needsBaselineReseat || needsAspectCorrection)) {
+        if (needsBaselineReseat && baselineResidualPx != null) {
+          appliedShiftYPx -= baselineResidualPx;
+        }
+        if (needsAspectCorrection && aspectFactor != null) {
+          appliedHScaleX *= aspectFactor;
+        }
+        continue;
+      }
+      break;
+    }
     const framingDecision = getFramingDecision(framingQa);
     qaIssues.push(...framingQa.failures);
 
     const targetFillHeight = height * (rig.fillHeightPct / 100);
-    const transformedHeight =
-      transform.transformedTopYPx != null && transform.transformedBottomYPx != null
-        ? transform.transformedBottomYPx - transform.transformedTopYPx
-        : null;
+    const transformedHeight = finalPrimaryBounds
+      ? finalPrimaryBounds.bottom - finalPrimaryBounds.top
+      : null;
     if (transformedHeight != null && transformedHeight < targetFillHeight * 0.78) {
       qaIssues.push("Mask-controlled product envelope is too small for the family rig.");
     }
@@ -1899,7 +2324,7 @@ export async function normalizeBestBottlesRigBaseline(
             topology: options.shadowTopology,
           })
         : undefined;
-    const finalShadow = finalizeRigShadow({
+    let finalShadow = finalizeRigShadow({
       owner: shadowOwner,
       pixels: finalImageData.data,
       width,
@@ -1910,13 +2335,49 @@ export async function normalizeBestBottlesRigBaseline(
       topology: options.shadowTopology,
       contactBounds: finalContactBounds,
     });
+    if (
+      false && // Jordan 2026-07-19: code never alters model shadows; QA is advisory.
+      shadowOwner === "model" &&
+      finalBaseline != null &&
+      finalShadow.shadowQa?.status === "fail" &&
+      isModelShadowFailureTrimmable(finalShadow.shadowQa.failures)
+    ) {
+      trimModelOwnedShadowIntoBand({
+        pixels: finalImageData.data,
+        width,
+        height,
+        bg,
+        baselineYPx: finalBaseline,
+      });
+      finalShadow = finalizeRigShadow({
+        owner: shadowOwner,
+        pixels: finalImageData.data,
+        width,
+        height,
+        background: bg,
+        objectBounds: finalBounds,
+        baselineYPx: finalBaseline,
+        topology: options.shadowTopology,
+        contactBounds: options.shadowTopology && finalBounds
+          ? detectModelShadowContactBounds({
+              pixels: finalImageData.data,
+              width,
+              height,
+              background: bg,
+              groupBounds: finalBounds,
+              baselineYPx: finalBaseline,
+              topology: options.shadowTopology,
+            })
+          : undefined,
+      });
+    }
     outCtx.putImageData(finalImageData, 0, 0);
 
     return {
       dataUrl: out.toDataURL("image/png"),
-      shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || transform.shiftYPx !== 0,
+      shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || appliedShiftYPx !== 0,
       shiftXPx: transform.shiftXPx,
-      shiftYPx: transform.shiftYPx,
+      shiftYPx: appliedShiftYPx,
       scale: transform.scale,
       preTransformBaselineYPx: generatedBounds?.bottom ?? null,
       detectedBaselineYPx: finalBaseline,
@@ -1970,8 +2431,8 @@ export async function normalizeBestBottlesRigBaseline(
       rig,
       bounds: fallbackBounds,
       baselineYPx: null,
-      topology: options.shadowTopology,
       capState,
+      expectedPrimaryAspectRatio,
     });
     // Route every ownership branch through the same final-shadow authority.
     // With no baseline the helper paints zero pixels and returns a review
@@ -2089,13 +2550,24 @@ export async function normalizeBestBottlesRigBaseline(
   const detectedBaseline = modelShadowAnalysis
     ? detectStrongBottomY(geometryAnalysisPixels, width, height, analysisBg, capState) ?? geometryBaseline
     : geometryBaseline;
+  const primaryBounds = capState === "detached"
+    ? detectPrimaryBottleBounds(
+        geometryAnalysisPixels,
+        width,
+        height,
+        analysisBg,
+        detectedBaseline,
+      )
+    : strongBounds;
   const transform = computeRigFrameTransform({
     width,
     height,
     rig,
     detectedBaselineYPx: detectedBaseline,
     strongBounds,
+    primaryBounds,
     capState,
+    preserveGeneratedScale: options.preserveGeneratedScale,
   });
 
   // Moving an opaque generated canvas would expose the target background only in
@@ -2117,59 +2589,157 @@ export async function normalizeBestBottlesRigBaseline(
   out.height = height;
   const outCtx = out.getContext("2d");
   if (!outCtx) throw new Error("Unable to acquire 2d canvas context");
-  outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
-  outCtx.fillRect(0, 0, width, height);
   const scaledWidth = Math.round(width * transform.scale);
   const scaledHeight = Math.round(height * transform.scale);
   const drawX = Math.round((width - scaledWidth) / 2 + transform.shiftXPx);
-  outCtx.drawImage(canvas, drawX, transform.shiftYPx, scaledWidth, scaledHeight);
-  const finalImageData = outCtx.getImageData(0, 0, width, height);
-  const finalAnalysisImageData = new ImageData(
-    new Uint8ClampedArray(finalImageData.data),
-    width,
-    height,
-  );
-  flattenBackgroundLikePixels(finalAnalysisImageData.data, bg);
-  const transformedControlBounds =
-    transform.transformedTopYPx != null &&
-    transform.transformedBottomYPx != null &&
-    transform.transformedLeftXPx != null &&
-    transform.transformedRightXPx != null
-      ? {
-          top: transform.transformedTopYPx,
-          bottom: transform.transformedBottomYPx,
-          left: transform.transformedLeftXPx,
-          right: transform.transformedRightXPx,
-        }
-      : null;
-  const finalBounds =
-    detectControlledRigBounds(
-      finalImageData.data,
+  // The affine transform aims the detected pre-transform baseline exactly at
+  // target, but re-detection on the composited output can land a few pixels
+  // off (recanvas + anti-aliased bottom rows read differently). That residual
+  // is a pure translation, so one bounded translate-only second pass re-seats
+  // it instead of failing framing QA on an image the rig can correct.
+  let appliedShiftYPx = transform.shiftYPx;
+  // Bounded deterministic aspect correction (Jordan-approved 2026-07-19): the
+  // model slenderizes sidecar renders ~10-14% and prompt anchoring cannot fully
+  // stop it, so when the measured bottle ratio drifts beyond the fail tolerance
+  // the rig re-draws with a horizontal resample toward truth — same doctrine as
+  // the baseline re-seat: model owns material, deterministic code owns geometry.
+  let appliedHScaleX = 1;
+  let finalImageData!: ImageData;
+  let finalAnalysisImageData!: ImageData;
+  let transformedControlBounds: { top: number; bottom: number; left: number; right: number } | null = null;
+  let finalBounds: RigStrongBounds | null = null;
+  let finalPrimaryBounds: RigStrongBounds | null = null;
+  let finalBaseline: number | null = null;
+  let framingQa!: ReturnType<typeof buildFramingQaReport>;
+  for (let seatPass = 1; seatPass <= 2; seatPass += 1) {
+    const seatShiftDeltaYPx = appliedShiftYPx - transform.shiftYPx;
+    const scaleXAboutCenter = (value: number): number =>
+      Math.round((value - width / 2) * appliedHScaleX + width / 2);
+    const passDrawWidth = Math.round(scaledWidth * appliedHScaleX);
+    const passDrawX = Math.round((width - passDrawWidth) / 2 + transform.shiftXPx * appliedHScaleX);
+    outCtx.fillStyle = options.targetBackgroundHex ?? "#F5F3EF";
+    outCtx.fillRect(0, 0, width, height);
+    outCtx.drawImage(canvas, passDrawX, appliedShiftYPx, passDrawWidth, scaledHeight);
+    finalImageData = outCtx.getImageData(0, 0, width, height);
+    finalAnalysisImageData = new ImageData(
+      new Uint8ClampedArray(finalImageData.data),
+      width,
+      height,
+    );
+    flattenBackgroundLikePixels(finalAnalysisImageData.data, bg);
+    transformedControlBounds =
+      transform.transformedTopYPx != null &&
+      transform.transformedBottomYPx != null &&
+      transform.transformedLeftXPx != null &&
+      transform.transformedRightXPx != null
+        ? {
+            top: transform.transformedTopYPx + seatShiftDeltaYPx,
+            bottom: transform.transformedBottomYPx + seatShiftDeltaYPx,
+            left: scaleXAboutCenter(transform.transformedLeftXPx),
+            right: scaleXAboutCenter(transform.transformedRightXPx),
+          }
+        : null;
+    const transformedPrimaryControlBounds = primaryBounds &&
+      typeof primaryBounds.left === "number" &&
+      typeof primaryBounds.right === "number"
+        ? {
+            top: Math.round(primaryBounds.top * transform.scale + appliedShiftYPx),
+            bottom: Math.round(primaryBounds.bottom * transform.scale + appliedShiftYPx),
+            left: scaleXAboutCenter(Math.round(
+              primaryBounds.left * transform.scale
+                + (width - width * transform.scale) / 2
+                + transform.shiftXPx,
+            )),
+            right: scaleXAboutCenter(Math.round(
+              primaryBounds.right * transform.scale
+                + (width - width * transform.scale) / 2
+                + transform.shiftXPx,
+            )),
+          }
+        : null;
+    finalBounds =
+      detectControlledRigBounds(
+        finalImageData.data,
+        width,
+        height,
+        bg,
+        transformedControlBounds,
+      ) ?? detectStrongBounds(finalAnalysisImageData.data, width, height, bg);
+    finalPrimaryBounds = capState === "detached"
+      ? detectControlledRigBounds(
+          finalImageData.data,
+          width,
+          height,
+          bg,
+          transformedPrimaryControlBounds,
+        ) ?? detectPrimaryBottleBounds(finalAnalysisImageData.data, width, height, bg)
+      : finalBounds;
+    finalBaseline = detectStrongBottomY(
+      finalAnalysisImageData.data,
       width,
       height,
       bg,
-      transformedControlBounds,
-    ) ?? detectStrongBounds(finalAnalysisImageData.data, width, height, bg);
-  const finalBaseline = detectStrongBottomY(
-    finalAnalysisImageData.data,
-    width,
-    height,
-    bg,
-    capState,
-    shadowOwner === "model" ? transformedControlBounds?.bottom : null,
-  );
-  const framingQa = buildFramingQaReport({
-    width,
-    height,
-    rig,
-    bounds: finalBounds,
-    baselineYPx: finalBaseline,
-    capState,
-  });
+      capState,
+      shadowOwner === "model" ? transformedControlBounds?.bottom : null,
+    );
+    framingQa = buildFramingQaReport({
+      width,
+      height,
+      rig,
+      bounds: finalPrimaryBounds,
+      primaryBounds: finalPrimaryBounds,
+      baselineYPx: finalBaseline,
+      capState,
+      expectedPrimaryAspectRatio,
+      aspectBounds: capState === "detached"
+        ? tallestSilverProofBounds(
+            finalAnalysisImageData.data,
+            width,
+            height,
+            bg,
+            finalBaseline,
+          ) ??
+          detectTallestComponentBounds(
+            finalAnalysisImageData.data,
+            width,
+            height,
+            bg,
+            finalBaseline,
+          )
+        : null,
+    });
+    const baselineResidualPx =
+      finalBaseline != null ? finalBaseline - transform.targetBaselineYPx : null;
+    const needsBaselineReseat =
+      baselineResidualPx != null &&
+      Math.abs(baselineResidualPx) > 4 &&
+      Math.abs(baselineResidualPx) <= 48;
+    const aspectDriftPct = framingQa.measurements.aspectRatioDriftPct;
+    const aspectFactor = aspectDriftPct != null ? 1 + aspectDriftPct / 100 : null;
+    const needsAspectCorrection =
+      aspectDriftPct != null &&
+      Math.abs(aspectDriftPct) > 6 &&
+      aspectFactor != null &&
+      Math.abs(aspectFactor - 1) <= 0.25;
+    if (seatPass === 1 && (needsBaselineReseat || needsAspectCorrection)) {
+      if (needsBaselineReseat && baselineResidualPx != null) {
+        appliedShiftYPx -= baselineResidualPx;
+      }
+      if (needsAspectCorrection && aspectFactor != null) {
+        appliedHScaleX *= aspectFactor;
+      }
+      continue;
+    }
+    break;
+  }
   const framingDecision = getFramingDecision(framingQa);
 
+  // Cap fidelity doctrine (Jordan 2026-07-19): the model beautifies the cap
+  // from the reference via the prompt — code never splices or color-gates it.
+  // Geometry gates above are the only blockers; cap beauty is judged by eye.
+
   const finalContactBounds =
-    options.shadowTopology && finalBounds && finalBaseline != null
+    (options.shadowTopology && finalBounds && finalBaseline != null
       ? detectModelShadowContactBounds({
           pixels: finalImageData.data,
           width,
@@ -2179,8 +2749,8 @@ export async function normalizeBestBottlesRigBaseline(
           baselineYPx: finalBaseline,
           topology: options.shadowTopology,
         })
-      : undefined;
-  const finalShadow = finalizeRigShadow({
+      : undefined);
+  let finalShadow = finalizeRigShadow({
     owner: shadowOwner,
     pixels: finalImageData.data,
     width,
@@ -2191,19 +2761,61 @@ export async function normalizeBestBottlesRigBaseline(
     topology: options.shadowTopology,
     contactBounds: finalContactBounds,
   });
+  if (
+    false && // Jordan 2026-07-19: code never alters model shadows; QA is advisory.
+    shadowOwner === "model" &&
+    finalBaseline != null &&
+    finalShadow.shadowQa?.status === "fail" &&
+    isModelShadowFailureTrimmable(finalShadow.shadowQa.failures)
+  ) {
+    trimModelOwnedShadowIntoBand({
+      pixels: finalImageData.data,
+      width,
+      height,
+      bg,
+      baselineYPx: finalBaseline,
+    });
+    finalShadow = finalizeRigShadow({
+      owner: shadowOwner,
+      pixels: finalImageData.data,
+      width,
+      height,
+      background: bg,
+      objectBounds: finalBounds,
+      baselineYPx: finalBaseline,
+      topology: options.shadowTopology,
+      contactBounds:
+        (options.shadowTopology && finalBounds
+          ? detectModelShadowContactBounds({
+              pixels: finalImageData.data,
+              width,
+              height,
+              background: bg,
+              groupBounds: finalBounds,
+              baselineYPx: finalBaseline,
+              topology: options.shadowTopology,
+            })
+          : undefined),
+    });
+  }
   outCtx.putImageData(finalImageData, 0, 0);
 
   return {
     dataUrl: out.toDataURL("image/png"),
-    shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || transform.shiftYPx !== 0,
+    shifted: transform.scale !== 1 || transform.shiftXPx !== 0 || appliedShiftYPx !== 0,
     shiftXPx: transform.shiftXPx,
-    shiftYPx: transform.shiftYPx,
+    shiftYPx: appliedShiftYPx,
     scale: transform.scale,
     preTransformBaselineYPx: detectedBaseline,
     detectedBaselineYPx: finalBaseline,
     targetBaselineYPx: targetBaseline,
     maskControlled: false,
-    qaIssues: framingQa.failures,
+    qaIssues: [
+      ...(capState === "detached" && !primaryBounds
+        ? ["Primary bottle bounds were unresolved for detached topology."]
+        : []),
+      ...framingQa.failures,
+    ],
     framingQa,
     framingDecision,
     preTransformObjectBounds: strongBounds,

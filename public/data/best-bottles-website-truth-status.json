@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-06-20T17:05:48.521Z",
-  "sourceOfTruth": "live bestbottles.com when live evidence is checked; websiteSku is the primary classifier",
+  "generatedAt": "2026-07-11T23:30:00.000Z",
+  "sourceOfTruth": "live bestbottles.com when live evidence is checked; websiteSku is the primary classifier; individual live verifications are recorded per row",
   "auditReportPath": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/data/audits/website-sku-grace-alias-consistency-2026-06-20/website_sku_grace_alias_consistency.md",
   "summary": {
     "sourceRowsAudited": 2285,
     "pdpRowsAudited": 2105,
     "componentLaneRows": 180,
-    "liveEvidenceMode": "off",
-    "liveEvidenceRows": 0,
-    "liveEvidenceOkRows": 0,
-    "liveWebsiteSkuConfirmedRows": 0,
+    "liveEvidenceMode": "partial_manual",
+    "liveEvidenceRows": 1,
+    "liveEvidenceOkRows": 1,
+    "liveWebsiteSkuConfirmedRows": 1,
     "truthStatusCounts": {
       "ready": 1815,
-      "truth_conflict": 206,
+      "truth_conflict": 205,
       "component_lane": 180,
-      "alias_exception": 84
+      "alias_exception": 85
     },
     "criticalHighBlockers": 136,
     "pdpCriticalHighBlockers": 136,
@@ -3110,10 +3110,10 @@
       "liveFinalUrl": ""
     },
     {
-      "truthStatus": "truth_conflict",
-      "truthStatusLabel": "Truth Conflict",
-      "severity": "medium",
-      "issueTypes": "convex_family_mismatch_with_website_sku;product_group_slug_family_mismatch",
+      "truthStatus": "alias_exception",
+      "truthStatusLabel": "Live-Verified Taxonomy Alias",
+      "severity": "info",
+      "issueTypes": "live_verified_sprayer_commercial_family_with_cylinder_geometry_cohort",
       "commercialLane": "pdp",
       "websiteSku": "GBSpry3mlClBlk",
       "graceSku": "GB-SPR-CLR-3ML-BLK",
@@ -3122,12 +3122,12 @@
       "convexFamily": "Cylinder",
       "sourceCategory": "Glass Bottle",
       "productGroupSlug": "cylinder-3ml-clear-12mm-finemist",
-      "liveEvidenceStatus": "",
-      "liveWebsiteSkuPresent": "",
-      "liveFamily": "",
-      "liveConfiguration": "",
-      "liveSourceUrl": "",
-      "liveFinalUrl": ""
+      "liveEvidenceStatus": "verified_current_live_pdp_2026-07-11",
+      "liveWebsiteSkuPresent": "true",
+      "liveFamily": "Refillable Glass Bottles with Fine Mist Sprayers",
+      "liveConfiguration": "3 ml clear glass; black spray pump; clear cap; 54 \u00b11 mm with cap; 37 \u00b10.5 mm without cap; 14 \u00b10.5 mm diameter; 12mm neck",
+      "liveSourceUrl": "https://www.bestbottles.com/product/Sample-Promotional-Decant-Spray-clear-glass-vial-Black-Sprayer-3ml",
+      "liveFinalUrl": "https://www.bestbottles.com/product/Sample-Promotional-Decant-Spray-clear-glass-vial-Black-Sprayer-3ml"
     },
     {
       "truthStatus": "ready",
@@ -5522,12 +5522,12 @@
       "convexFamily": "Cylinder",
       "sourceCategory": "Glass Bottle",
       "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
-      "liveEvidenceStatus": "",
-      "liveWebsiteSkuPresent": "",
-      "liveFamily": "",
-      "liveConfiguration": "",
-      "liveSourceUrl": "",
-      "liveFinalUrl": ""
+      "liveEvidenceStatus": "verified_current_live_pdp_2026-07-11_reference_blocked",
+      "liveWebsiteSkuPresent": "true",
+      "liveFamily": "Refillable Glass Bottles with Fine Mist Sprayers",
+      "liveConfiguration": "Tall cylinder 9 ml frosted glass bottle; matte-black fine-mist sprayer; black overcap; primary image cap detached; alternate image cap attached",
+      "liveSourceUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-black-spray",
+      "liveFinalUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-black-spray"
     },
     {
       "truthStatus": "ready",

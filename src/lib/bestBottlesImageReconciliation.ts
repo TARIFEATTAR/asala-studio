@@ -4,6 +4,10 @@ import type { RigStrongBounds } from "@/lib/product-image/rigPostprocess";
 import type { ShadowQaReport } from "@/lib/product-image/shadowQa";
 import type { BestBottlesShadowOwner } from "@/lib/bestBottlesShadowPolicy";
 import type { BestBottlesShadowTopology } from "@/lib/bestBottlesShadowTopology";
+import {
+  isBestBottlesShadowReviewExceptionValid,
+  type BestBottlesShadowReviewException,
+} from "@/lib/bestBottlesShadowReviewException";
 import type {
   BestBottlesCatalogTruthSnapshot,
   BestBottlesImageAssetRole,
@@ -93,6 +97,9 @@ export interface BestBottlesImageReconciliationStatusRow {
   requires_pipeline_reconciliation: boolean;
   raw_image_url: string;
   final_image_url: string | null;
+  final_image_hash: string | null;
+  shadow_report_hash: string | null;
+  shadow_topology_hash: string | null;
   canvas_width_px: number | null;
   canvas_height_px: number | null;
   pre_transform_baseline_y_px: number | null;
@@ -144,7 +151,9 @@ export interface RecordBestBottlesRawImageInput {
   websiteSku?: string | null;
   family?: string | null;
   sourceReferenceUrl?: string | null;
+  sourceReferenceHash?: string | null;
   prompt?: string | null;
+  promptHash?: string | null;
   promptVersion?: string | null;
   rigVersion?: string | null;
   providerModel?: string | null;
@@ -152,11 +161,13 @@ export interface RecordBestBottlesRawImageInput {
   shadowQa?: ShadowQaReport | null;
   shadowTopology?: BestBottlesShadowTopology | null;
   catalogTruth?: BestBottlesCatalogTruthSnapshot | null;
+  catalogTruthHash?: string | null;
   assetRole?: BestBottlesImageAssetRole;
   requiresPipelineReconciliation?: boolean;
   rawImageUrl: string;
   canvasWidthPx?: number | null;
   canvasHeightPx?: number | null;
+  now?: string;
 }
 
 export interface RecordBestBottlesRigResultInput extends RecordBestBottlesRawImageInput {
@@ -190,29 +201,93 @@ export interface BestBottlesApprovalEvidence {
   shadowOwner?: BestBottlesShadowOwner | null;
   shadowTopology?: BestBottlesShadowTopology | null;
   shadowQa?: ShadowQaReport | null;
+  imageId?: string | null;
+  pipelineSkuJobId?: string | null;
+  finalImageHash?: string | null;
+  sourceReferenceHash?: string | null;
+  promptHash?: string | null;
+  shadowReportHash?: string | null;
+  shadowTopologyHash?: string | null;
+  geometryReady?: boolean;
+  identityReady?: boolean;
+  shadowReviewException?: BestBottlesShadowReviewException | null;
 }
 
+/**
+ * Shadow policy 2026-07-18 (Jordan): shadow QA is ADVISORY, never blocking.
+ * Human review sees the shadow in the image itself; an imperfect shadow ships
+ * and is retaken later rather than stopping the Shopify push. Shadow QA and
+ * topology verdicts are still recorded for retake triage, and the strict
+ * evaluator below remains available as the advisory scorer.
+ */
 export function isBestBottlesCylinderApprovalEvidenceReady(
+  _evidence: BestBottlesApprovalEvidence,
+): boolean {
+  return true;
+}
+
+/** Strict shadow evaluation, now advisory-only (see policy note above). */
+export function meetsBestBottlesCylinderStrictShadowEvidence(
   evidence: BestBottlesApprovalEvidence,
 ): boolean {
   const family = String(evidence.family ?? "").trim().toLowerCase();
   if (family !== "cylinder" && family !== "tall cylinder") return true;
+  const contacts = evidence.shadowQa?.contacts ?? [];
+  const hasStrictEvidence =
+    evidence.promptVersion === "best-bottles-reference-locked-v6.1" &&
+    evidence.shadowOwner === "model" &&
+    Boolean(evidence.shadowTopology) &&
+    evidence.shadowQa?.status === "pass" &&
+    evidence.shadowQa.target.contract === "contact-back-right-v1" &&
+    contacts.length > 0 &&
+    contacts.every((contact) => contact.status === "pass") &&
+    evidence.shadowTopology!.expectedContacts.every((expected) =>
+      contacts.some((contact) => contact.contact === expected && contact.status === "pass"),
+    );
+  if (hasStrictEvidence) return true;
+
   if (
     evidence.promptVersion !== "best-bottles-reference-locked-v6.1" ||
     evidence.shadowOwner !== "model" ||
     !evidence.shadowTopology ||
-    evidence.shadowQa?.status !== "pass" ||
-    evidence.shadowQa.target.contract !== "contact-back-right-v1"
+    !evidence.shadowQa ||
+    !evidence.imageId ||
+    !evidence.pipelineSkuJobId ||
+    !evidence.finalImageHash ||
+    !evidence.sourceReferenceHash ||
+    !evidence.promptHash ||
+    !evidence.shadowReportHash ||
+    !evidence.shadowTopologyHash
   ) {
     return false;
   }
-  const contacts = evidence.shadowQa.contacts ?? [];
-  if (contacts.length === 0 || contacts.some((contact) => contact.status !== "pass")) {
-    return false;
-  }
-  return evidence.shadowTopology.expectedContacts.every((expected) =>
-    contacts.some((contact) => contact.contact === expected && contact.status === "pass"),
-  );
+
+  return isBestBottlesShadowReviewExceptionValid(evidence.shadowReviewException, {
+    imageId: evidence.imageId,
+    pipelineSkuJobId: evidence.pipelineSkuJobId,
+    finalImageHash: evidence.finalImageHash,
+    sourceReferenceHash: evidence.sourceReferenceHash,
+    promptHash: evidence.promptHash,
+    shadowReportHash: evidence.shadowReportHash,
+    shadowTopologyHash: evidence.shadowTopologyHash,
+    geometryReady: evidence.geometryReady === true,
+    identityReady: evidence.identityReady === true,
+    shadowTopology: {
+      kind: evidence.shadowTopology.kind,
+      expectedContacts: evidence.shadowTopology.expectedContacts,
+    },
+    shadowQa: {
+      status: evidence.shadowQa.status,
+      contract: evidence.shadowQa.target.contract,
+      contacts: (evidence.shadowQa.contacts ?? []).map((contact) => ({
+        contact: contact.contact,
+        status: contact.status,
+        bounds: contact.bounds,
+        shadowPixelCount: contact.measurements.shadowPixelCount,
+        failures: contact.failures,
+      })),
+    },
+  });
 }
 
 /**
@@ -290,19 +365,27 @@ function cleanNullable(value: string | null | undefined): string | null {
   return cleaned ? cleaned : null;
 }
 
-export async function recordBestBottlesRawImage(
+function cleanSha256(value: string | null | undefined, label: string): string | null {
+  const cleaned = cleanNullable(value);
+  if (cleaned && !/^[a-f0-9]{64}$/i.test(cleaned)) {
+    throw new Error(`${label} must be a SHA-256 hash.`);
+  }
+  return cleaned?.toLowerCase() ?? null;
+}
+
+export function buildBestBottlesRawReconciliationPayload(
   input: RecordBestBottlesRawImageInput,
-): Promise<void> {
-  const now = new Date().toISOString();
-  const payload: ReconciliationWrite = {
+): ReconciliationWrite {
+  const now = input.now ?? new Date().toISOString();
+  return {
     image_id: input.imageId,
     organization_id: input.organizationId,
     grace_sku: cleanNullable(input.graceSku),
     website_sku: cleanNullable(input.websiteSku),
     family: cleanNullable(input.family),
     source_reference_url: cleanNullable(input.sourceReferenceUrl),
-    source_reference_hash: await sha256(input.sourceReferenceUrl),
-    prompt_hash: await sha256(input.prompt),
+    source_reference_hash: cleanSha256(input.sourceReferenceHash, "Source reference hash"),
+    prompt_hash: cleanSha256(input.promptHash, "Prompt hash"),
     prompt_version: cleanNullable(input.promptVersion),
     rig_version: cleanNullable(input.rigVersion),
     provider_model: cleanNullable(input.providerModel),
@@ -310,7 +393,7 @@ export async function recordBestBottlesRawImage(
     shadow_qa: input.shadowQa ?? null,
     shadow_topology: input.shadowTopology ?? null,
     catalog_truth: input.catalogTruth ?? null,
-    catalog_truth_hash: await sha256(input.catalogTruth ? JSON.stringify(input.catalogTruth) : null),
+    catalog_truth_hash: cleanSha256(input.catalogTruthHash, "Catalog truth hash"),
     asset_role: input.assetRole ?? "pdp-primary",
     requires_pipeline_reconciliation: input.requiresPipelineReconciliation ?? true,
     raw_image_url: input.rawImageUrl,
@@ -320,6 +403,19 @@ export async function recordBestBottlesRawImage(
     last_error: null,
     updated_at: now,
   };
+}
+
+export async function recordBestBottlesRawImage(
+  input: RecordBestBottlesRawImageInput,
+): Promise<void> {
+  const payload = buildBestBottlesRawReconciliationPayload({
+    ...input,
+    sourceReferenceHash: input.sourceReferenceHash ?? await sha256(input.sourceReferenceUrl),
+    promptHash: input.promptHash ?? await sha256(input.prompt),
+    catalogTruthHash:
+      input.catalogTruthHash ??
+      await sha256(input.catalogTruth ? JSON.stringify(input.catalogTruth) : null),
+  });
 
   const { error } = await (await db())
     .from("best_bottles_image_reconciliations")

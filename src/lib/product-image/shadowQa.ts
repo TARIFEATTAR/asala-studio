@@ -90,8 +90,13 @@ interface ShadowComponent {
   contactDeltaTotal: number;
   lowerPixelCount: number;
   lowerDeltaTotal: number;
+  deltaTotal: number;
   seeded: boolean;
 }
+
+type AnalyzeSingleModelOwnedShadowInput = AnalyzeModelOwnedShadowInput & {
+  qaLaneBounds?: { left: number; right: number };
+};
 
 const TARGET = {
   maxContactGapPx: 2 as const,
@@ -134,7 +139,7 @@ function emptyReport(status: ShadowQaStatus, warnings: string[] = []): ShadowQaR
  * canonical product detail.
  */
 function analyzeSingleModelOwnedShadow(
-  input: AnalyzeModelOwnedShadowInput,
+  input: AnalyzeSingleModelOwnedShadowInput,
 ): ModelShadowAnalysis {
   const width = Math.floor(input.width);
   const height = Math.floor(input.height);
@@ -173,10 +178,18 @@ function analyzeSingleModelOwnedShadow(
 
   const baselineYPx = clampInt(input.baselineYPx, 0, height - 1);
   const productWidth = bounds.right - bounds.left + 1;
-  const laneLeft = Math.max(0, Math.floor(bounds.left - productWidth * 0.1));
-  const laneRight = Math.min(
+  const candidateLaneLeft = Math.max(0, Math.floor(bounds.left - productWidth * 0.1));
+  const candidateLaneRight = Math.min(
     width - 1,
     Math.ceil(bounds.right + productWidth * 0.35),
+  );
+  const qaLaneLeft = Math.max(
+    candidateLaneLeft,
+    clampInt(input.qaLaneBounds?.left ?? candidateLaneLeft, 0, width - 1),
+  );
+  const qaLaneRight = Math.min(
+    candidateLaneRight,
+    clampInt(input.qaLaneBounds?.right ?? candidateLaneRight, 0, width - 1),
   );
   const laneTop = Math.max(0, baselineYPx - 2);
   const laneBottom = Math.min(
@@ -187,7 +200,7 @@ function analyzeSingleModelOwnedShadow(
   const candidate = new Uint8Array(width * height);
 
   for (let y = laneTop; y <= laneBottom; y += 1) {
-    for (let x = laneLeft; x <= laneRight; x += 1) {
+    for (let x = candidateLaneLeft; x <= candidateLaneRight; x += 1) {
       const pixelIndex = (y * width + x) * 4;
       const alpha = input.pixels[pixelIndex + 3] ?? 0;
       const pixelLuma = luma({
@@ -232,7 +245,7 @@ function analyzeSingleModelOwnedShadow(
   };
 
   for (let y = laneTop; y <= laneBottom; y += 1) {
-    for (let x = laneLeft; x <= laneRight; x += 1) {
+    for (let x = qaLaneLeft; x <= qaLaneRight; x += 1) {
       const startIndex = y * width + x;
       if (candidate[startIndex] === 0 || visited[startIndex] === 1) continue;
 
@@ -246,6 +259,7 @@ function analyzeSingleModelOwnedShadow(
       let contactDeltaTotal = 0;
       let lowerPixelCount = 0;
       let lowerDeltaTotal = 0;
+      let deltaTotal = 0;
       let seeded = false;
 
       visited[startIndex] = 1;
@@ -255,6 +269,7 @@ function analyzeSingleModelOwnedShadow(
         const currentY = Math.floor(index / width);
         const delta = pixelDelta(index);
         componentPixels.push(index);
+        deltaTotal += delta;
         minX = Math.min(minX, currentX);
         maxX = Math.max(maxX, currentX);
         minY = Math.min(minY, currentY);
@@ -278,8 +293,8 @@ function analyzeSingleModelOwnedShadow(
           const nextX = currentX + offsetX;
           const nextY = currentY + offsetY;
           if (
-            nextX < laneLeft ||
-            nextX > laneRight ||
+            nextX < qaLaneLeft ||
+            nextX > qaLaneRight ||
             nextY < laneTop ||
             nextY > laneBottom
           ) {
@@ -303,6 +318,7 @@ function analyzeSingleModelOwnedShadow(
         contactDeltaTotal,
         lowerPixelCount,
         lowerDeltaTotal,
+        deltaTotal,
         seeded,
       });
     }
@@ -311,9 +327,8 @@ function analyzeSingleModelOwnedShadow(
   // Even when the main lane has no connected component, continue scanning the
   // lower continuation. A detached/overlong candidate must still be removed
   // from geometry analysis; only the preservation mask remains empty/review.
-  let continuationCandidateMaxY = -1;
   for (let y = laneBottom + 1; y < height; y += 1) {
-    for (let x = laneLeft; x <= laneRight; x += 1) {
+    for (let x = candidateLaneLeft; x <= candidateLaneRight; x += 1) {
       const pixelIndex = (y * width + x) * 4;
       const alpha = input.pixels[pixelIndex + 3] ?? 0;
       const delta = backgroundLuma -
@@ -326,12 +341,19 @@ function analyzeSingleModelOwnedShadow(
         y > bounds.bottom || x < bounds.left || x > bounds.right;
       if (outsideProduct && alpha > 8 && delta >= 4) {
         candidateMask[y * width + x] = 1;
-        continuationCandidateMaxY = y;
       }
     }
   }
 
-  if (components.length === 0) {
+  const minimumContrastedPixels = Math.max(6, Math.round(productWidth * 0.04));
+  const minimumLowContrastPixels = Math.max(12, Math.round(productWidth * 0.5));
+  const meaningfulComponents = components.filter((component) => {
+    const averageDelta = component.deltaTotal / Math.max(1, component.pixels.length);
+    return component.pixels.length >= minimumLowContrastPixels ||
+      (component.pixels.length >= minimumContrastedPixels && averageDelta >= 8);
+  });
+
+  if (meaningfulComponents.length === 0) {
     const report = emptyReport("review", [
       "No reliable model-owned shadow candidate could be analyzed.",
     ]);
@@ -342,9 +364,9 @@ function analyzeSingleModelOwnedShadow(
     items.reduce((best, component) =>
       component.pixels.length > best.pixels.length ? component : best,
     );
-  const seededComponents = components.filter((component) => component.seeded);
+  const seededComponents = meaningfulComponents.filter((component) => component.seeded);
   const retained = seededComponents.length > 0 ? largest(seededComponents) : null;
-  const representative = retained ?? largest(components);
+  const representative = retained ?? largest(meaningfulComponents);
   for (const index of retained?.pixels ?? []) preservationMask[index] = 1;
 
   // The candidate lane is bounded by design. Inspect its immediate continuation
@@ -352,7 +374,47 @@ function analyzeSingleModelOwnedShadow(
   // The retained preservation mask intentionally remains limited to the
   // largest seeded component, but an overlong tail or floor seam is already
   // represented in candidateMask and must never inflate geometry metrics.
-  const continuationMaxY = Math.max(representative.maxY, continuationCandidateMaxY);
+  let connectedContinuationMaxY = -1;
+  let connectedContinuationDeltaTotal = 0;
+  let connectedContinuationPixelCount = 0;
+  const continuationVisited = new Uint8Array(width * height);
+  const continuationStack = [...representative.pixels];
+  for (const index of representative.pixels) continuationVisited[index] = 1;
+  while (continuationStack.length > 0) {
+    const index = continuationStack.pop() as number;
+    const currentX = index % width;
+    const currentY = Math.floor(index / width);
+    if (currentY > laneBottom) {
+      connectedContinuationMaxY = Math.max(connectedContinuationMaxY, currentY);
+      connectedContinuationDeltaTotal += pixelDelta(index);
+      connectedContinuationPixelCount += 1;
+    }
+    for (const [offsetX, offsetY] of neighborOffsets) {
+      const nextX = currentX + offsetX;
+      const nextY = currentY + offsetY;
+      if (
+        nextX < qaLaneLeft ||
+        nextX > qaLaneRight ||
+        nextY < laneTop ||
+        nextY >= height
+      ) continue;
+      const nextIndex = nextY * width + nextX;
+      if (candidateMask[nextIndex] === 1 && continuationVisited[nextIndex] === 0) {
+        continuationVisited[nextIndex] = 1;
+        continuationStack.push(nextIndex);
+      }
+    }
+  }
+  const connectedContinuationAverage = connectedContinuationPixelCount > 0
+    ? connectedContinuationDeltaTotal / connectedContinuationPixelCount
+    : 0;
+  const hasMeaningfulContinuation =
+    connectedContinuationPixelCount >= minimumLowContrastPixels ||
+    (connectedContinuationPixelCount >= minimumContrastedPixels &&
+      connectedContinuationAverage >= 8);
+  const continuationMaxY = hasMeaningfulContinuation
+    ? Math.max(representative.maxY, connectedContinuationMaxY)
+    : representative.maxY;
 
   const contactGapPx = Math.max(0, representative.minY - baselineYPx - 1);
   const contactCoreDensity =
@@ -381,8 +443,8 @@ function analyzeSingleModelOwnedShadow(
   if (contactGapPx > TARGET.maxContactGapPx) {
     failures.push(`Shadow contact gap is ${contactGapPx}px (maximum ${TARGET.maxContactGapPx}px).`);
   }
-  if (components.length > 1) {
-    failures.push(`Multiple connected shadow components detected (${components.length}).`);
+  if (meaningfulComponents.length > 1) {
+    failures.push(`Multiple connected shadow components detected (${meaningfulComponents.length}).`);
   }
   if (seededComponents.length === 0) {
     warnings.push("Shadow candidate is not reliably connected to the product baseline.");
@@ -433,8 +495,8 @@ function analyzeSingleModelOwnedShadow(
       rightExtensionRatio,
       leftExtensionPx,
       verticalDepthPx,
-      componentCount: components.length,
-      shadowPixelCount: components.reduce(
+      componentCount: meaningfulComponents.length,
+      shadowPixelCount: meaningfulComponents.reduce(
         (total, component) => total + component.pixels.length,
         0,
       ),
@@ -461,22 +523,47 @@ export function analyzeModelOwnedShadow(
   input: AnalyzeModelOwnedShadowInput,
 ): ModelShadowAnalysis {
   const expectedContacts = input.topology?.expectedContacts ?? ["bottle"];
+  const resolvedContacts = expectedContacts.map((contact) => {
+    const supplied =
+      input.contactBounds?.[contact] ??
+      (contact === "bottle" ? input.productBounds ?? input.objectBounds : undefined);
+    return {
+      contact,
+      bounds: supplied
+        ? {
+            left: supplied.left ?? 0,
+            right: supplied.right ?? input.width - 1,
+            top: supplied.top,
+            bottom: supplied.bottom,
+          }
+        : null,
+    };
+  });
+  const horizontallyRanked = resolvedContacts
+    .filter((entry): entry is typeof entry & { bounds: ShadowQaBounds } => Boolean(entry.bounds))
+    .sort((first, second) =>
+      (first.bounds.left + first.bounds.right) / 2 -
+      (second.bounds.left + second.bounds.right) / 2
+    );
+  const qaLaneBounds = new Map<ShadowQaBounds, { left: number; right: number }>();
+  for (let index = 0; index < horizontallyRanked.length; index += 1) {
+    const current = horizontallyRanked[index].bounds;
+    const previous = horizontallyRanked[index - 1]?.bounds;
+    const next = horizontallyRanked[index + 1]?.bounds;
+    qaLaneBounds.set(current, {
+      left: previous
+        ? Math.ceil((previous.right + current.left) / 2)
+        : 0,
+      right: next
+        ? Math.floor((current.right + next.left) / 2)
+        : input.width - 1,
+    });
+  }
   const analyses: Array<{
     contact: import("../bestBottlesShadowTopology").BestBottlesShadowContact;
     bounds: ShadowQaBounds | null;
     analysis: ModelShadowAnalysis | null;
-  }> = expectedContacts.map((contact) => {
-    const supplied =
-      input.contactBounds?.[contact] ??
-      (contact === "bottle" ? input.productBounds ?? input.objectBounds : undefined);
-    const bounds = supplied
-      ? {
-          left: supplied.left ?? 0,
-          right: supplied.right ?? input.width - 1,
-          top: supplied.top,
-          bottom: supplied.bottom,
-        }
-      : null;
+  }> = resolvedContacts.map(({ contact, bounds }) => {
     return {
       contact,
       bounds,
@@ -487,6 +574,7 @@ export function analyzeModelOwnedShadow(
             contactBounds: undefined,
             productBounds: bounds,
             objectBounds: undefined,
+            qaLaneBounds: qaLaneBounds.get(bounds),
           })
         : null,
     };

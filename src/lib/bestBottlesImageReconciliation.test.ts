@@ -9,8 +9,10 @@ import {
 } from "./bestBottlesImageReconciliationRules";
 import {
   approveBestBottlesReconciledImage,
+  buildBestBottlesRawReconciliationPayload,
   buildBestBottlesRigReconciliationPayload,
   isBestBottlesCylinderApprovalEvidenceReady,
+  meetsBestBottlesCylinderStrictShadowEvidence,
 } from "./bestBottlesImageReconciliation";
 import { approveBestBottlesGeneratedMaster } from "./bestBottlesMasterApproval";
 import type { BestBottlesCatalogTruthSnapshot } from "./bestBottlesImageReconciliationRules";
@@ -33,6 +35,13 @@ const modelShadowMigrationSource = readFileSync(
   resolve(
     currentDir,
     "../../supabase/migrations/20260712001000_best_bottles_model_shadow_evidence.sql",
+  ),
+  "utf8",
+);
+const shadowExceptionMigrationSource = readFileSync(
+  resolve(
+    currentDir,
+    "../../supabase/migrations/20260713002000_best_bottles_shadow_review_exceptions.sql",
   ),
   "utf8",
 );
@@ -117,7 +126,14 @@ describe("Best Bottles image reconciliation asset roles", () => {
 });
 
 describe("Best Bottles generated master approval", () => {
-  it("requires complete canonical V6.1 evidence for Cylinder approval", () => {
+  it("never blocks approval on shadow evidence (advisory policy, Jordan 2026-07-18)", () => {
+    assert.equal(
+      isBestBottlesCylinderApprovalEvidenceReady({ family: "Cylinder" } as never),
+      true,
+    );
+  });
+
+  it("scores strict canonical V6.1 shadow evidence (advisory since 2026-07-18)", () => {
     const complete = {
       family: "Cylinder",
       promptVersion: "best-bottles-reference-locked-v6.1",
@@ -130,23 +146,23 @@ describe("Best Bottles generated master approval", () => {
       shadowQa: shadowQa("pass"),
     };
 
-    assert.equal(isBestBottlesCylinderApprovalEvidenceReady(complete), true);
+    assert.equal(meetsBestBottlesCylinderStrictShadowEvidence(complete), true);
     assert.equal(
-      isBestBottlesCylinderApprovalEvidenceReady({
+      meetsBestBottlesCylinderStrictShadowEvidence({
         ...complete,
         promptVersion: "best-bottles-reference-locked-v6.0",
       }),
       false,
     );
     assert.equal(
-      isBestBottlesCylinderApprovalEvidenceReady({
+      meetsBestBottlesCylinderStrictShadowEvidence({
         ...complete,
         shadowOwner: "rig",
       }),
       false,
     );
     assert.equal(
-      isBestBottlesCylinderApprovalEvidenceReady({
+      meetsBestBottlesCylinderStrictShadowEvidence({
         ...complete,
         shadowTopology: null,
       }),
@@ -160,12 +176,83 @@ describe("Best Bottles generated master approval", () => {
       failures: ["missing"],
     });
     assert.equal(
-      isBestBottlesCylinderApprovalEvidenceReady({
+      meetsBestBottlesCylinderStrictShadowEvidence({
         ...complete,
         shadowQa: failedSidecar,
       }),
       false,
     );
+  });
+
+  it("advisory scorer honors only an exact-hash, geometry-safe shadow review exception", () => {
+    const report = shadowQa("review");
+    report.contacts![0].status = "review";
+    report.contacts![0].failures = ["right extension ratio is 0.31"];
+    report.contacts![0].measurements.shadowPixelCount = 700;
+    const hash = (character: string) => character.repeat(64);
+    const evidence = {
+      family: "Cylinder",
+      promptVersion: "best-bottles-reference-locked-v6.1",
+      shadowOwner: "model" as const,
+      shadowTopology: {
+        kind: "assembled" as const,
+        expectedContacts: ["bottle" as const],
+        source: "reviewed-reference" as const,
+      },
+      shadowQa: report,
+      imageId: "image-1",
+      pipelineSkuJobId: "job-1",
+      finalImageHash: hash("a"),
+      sourceReferenceHash: hash("b"),
+      promptHash: hash("c"),
+      shadowReportHash: hash("d"),
+      shadowTopologyHash: hash("e"),
+      geometryReady: true,
+      identityReady: true,
+      shadowReviewException: {
+        policyVersion: "best-bottles-shadow-review-exception-v1" as const,
+        status: "active" as const,
+        reasonCode: "extension-ratio-boundary" as const,
+        reason: "Visible contact and direction are correct; extension is just outside detector tolerance.",
+        imageId: "image-1",
+        pipelineSkuJobId: "job-1",
+        finalImageHash: hash("a"),
+        sourceReferenceHash: hash("b"),
+        promptHash: hash("c"),
+        shadowReportHash: hash("d"),
+        shadowTopologyHash: hash("e"),
+        shadowContract: "contact-back-right-v1" as const,
+        shadowTopologyKind: "assembled",
+        expectedContacts: ["bottle"],
+        reviewerId: "reviewer-1",
+        createdAt: "2026-07-13T15:00:00.000Z",
+        revokedAt: null,
+      },
+    };
+
+    assert.equal(meetsBestBottlesCylinderStrictShadowEvidence(evidence), true);
+    assert.equal(
+      meetsBestBottlesCylinderStrictShadowEvidence({
+        ...evidence,
+        finalImageHash: hash("f"),
+      }),
+      false,
+    );
+  });
+
+  it("keeps database shadow exceptions append-only, hash-bound, and inside the guarded approval RPC", () => {
+    assert.match(shadowExceptionMigrationSource, /final_image_hash TEXT NOT NULL/);
+    assert.match(shadowExceptionMigrationSource, /source_reference_hash TEXT NOT NULL/);
+    assert.match(shadowExceptionMigrationSource, /prompt_hash TEXT NOT NULL/);
+    assert.match(shadowExceptionMigrationSource, /shadow_report_hash TEXT NOT NULL/);
+    assert.match(shadowExceptionMigrationSource, /shadow_topology_hash TEXT NOT NULL/);
+    assert.doesNotMatch(shadowExceptionMigrationSource, /FOR UPDATE\s+ON public\.best_bottles_shadow_review_exceptions/);
+    assert.match(
+      shadowExceptionMigrationSource,
+      /OR public\.best_bottles_shadow_review_exception_passes\(/,
+    );
+    assert.match(shadowExceptionMigrationSource, /FOR UPDATE;/);
+    assert.match(shadowExceptionMigrationSource, /v_job_generated_image_id IS DISTINCT FROM p_image_id/);
   });
 
   it("guards the strict approval RPC before any mutation", () => {
@@ -385,5 +472,75 @@ describe("Best Bottles generated master approval", () => {
       expectedContacts: ["bottle"],
       source: "reviewed-reference",
     });
+  });
+
+  it("builds durable raw batch evidence from exact caller-supplied hashes", () => {
+    const catalogTruth = {
+      name: "9 ml Cylinder",
+      graceSku: "GB-CYL-CLR-9ML-MRL-01",
+      websiteSku: "WebSku",
+      eligibleGraceSkus: ["GB-CYL-CLR-9ML-MRL-01"],
+      eligibleWebsiteSkus: ["WebSku"],
+      family: "Cylinder",
+      category: "Glass Bottle",
+      capacityMl: 9,
+      heightWithoutCap: "70",
+      heightWithCap: "96",
+      diameter: "20",
+      neckThreadSize: "17-415",
+      applicator: "Metal Roll-On",
+      capState: "assembled-cap-on",
+      capColor: "Black",
+      trimColor: null,
+      bodyMaterial: "glass",
+      color: "Clear",
+      identityStatus: "ready" as const,
+      identityBlockers: [],
+      identityHash: "identity-hash",
+      sourceReferenceUrl: "https://example.invalid/reference.png",
+      sourcePageUrl: null,
+      measurementSource: "best-bottles-canonical-truth-2026-07-12",
+      measurementSourceUrl: null,
+      measurementSourceNote: "canon_* columns",
+      websiteTruthStatus: "ready" as const,
+      websiteTruthIssues: [],
+    };
+    const payload = buildBestBottlesRawReconciliationPayload({
+      imageId: "image-1",
+      organizationId: "org-1",
+      graceSku: "GB-CYL-CLR-9ML-MRL-01",
+      websiteSku: "WebSku",
+      family: "Cylinder",
+      sourceReferenceUrl: "https://example.invalid/reference.png",
+      sourceReferenceHash: "a".repeat(64),
+      prompt: "prompt",
+      promptHash: "b".repeat(64),
+      promptVersion: "best-bottles-reference-locked-v6.1",
+      rigVersion: "best-bottles-rig-v1",
+      providerModel: "openai-image-2",
+      shadowOwner: "model",
+      shadowTopology: {
+        kind: "assembled",
+        expectedContacts: ["bottle"],
+        source: "reviewed-reference",
+      },
+      catalogTruth,
+      catalogTruthHash: "c".repeat(64),
+      assetRole: "pdp-primary",
+      requiresPipelineReconciliation: true,
+      rawImageUrl: "https://example.invalid/raw.png",
+      canvasWidthPx: 2080,
+      canvasHeightPx: 2288,
+      now: "2026-07-13T00:00:00.000Z",
+    });
+
+    assert.equal(payload.source_reference_hash, "a".repeat(64));
+    assert.equal(payload.prompt_hash, "b".repeat(64));
+    assert.equal(payload.catalog_truth_hash, "c".repeat(64));
+    assert.equal(payload.canvas_width_px, 2080);
+    assert.equal(payload.canvas_height_px, 2288);
+    assert.equal(payload.lifecycle_state, "rigging");
+    assert.deepEqual(payload.catalog_truth, catalogTruth);
+    assert.equal(payload.updated_at, "2026-07-13T00:00:00.000Z");
   });
 });

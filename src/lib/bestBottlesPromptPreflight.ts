@@ -27,6 +27,7 @@ import {
   getBestBottlesFamilyProfileForProduct,
   type BestBottlesFamilyProfile,
 } from "@/config/bestBottlesFamilyProfiles";
+import { BEST_BOTTLES_CATALOG_SCALE_VERSION } from "@/config/bestBottlesCatalogScale";
 
 type ProductLike = {
   graceSku?: string | null;
@@ -44,6 +45,13 @@ type ProductLike = {
   capStyle?: string | null;
   capState?: string | null;
   mode?: string | null;
+  capOffReferenceId?: string | null;
+  topologyReferenceId?: string | null;
+  componentTopology?:
+    | "assembled"
+    | "fitment-attached-cap-right-sidecar"
+    | "assembled-live-site-exception"
+    | null;
   accessoryCode?: string | null;
   heightWithoutCap?: string | null;
   heightWithCap?: string | null;
@@ -462,10 +470,64 @@ function buildCanvasPreflight(product: ProductLike, sku: PromptSku): BestBottles
 const BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE =
   "- Ground the product with a soft but clearly visible contact shadow directly beneath the bottle base, and a matching one beneath the detached cap: darkest right at the contact line at roughly 32-42% opacity, feathering outward and fading within about 15-20% of the bottle's width. One soft key light means one soft-edged shadow — no hard outline, no long dramatic cast, no doubled shadow, no mirror reflection, and no visible floor plane.";
 
+function parseLeadingMm(value: string | null | undefined): number | null {
+  const match = String(value ?? "").match(/[\d.]+/);
+  const parsed = match ? Number(match[0]) : Number.NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/**
+ * Numeric proportion anchor. The framing block gives the model a numeric HEIGHT
+ * target but historically nothing numeric about width, so the model satisfied
+ * fill height with its slender-vial prior (+11%/+23% vertical stretch measured
+ * 2026-07-19). Anchoring the second axis with canonical mm closes that gap;
+ * the aspect-ratio framing QA gate catches whatever drift remains.
+ */
+function buildProportionLockLine(
+  product: ProductLike,
+  profile: BestBottlesFamilyProfile,
+  topology: BestBottlesShadowTopology,
+): string | null {
+  const bodyHeightMm = parseLeadingMm(product.heightWithoutCap);
+  const capHeightMm = parseLeadingMm(product.heightWithCap);
+  const diameterMm = parseLeadingMm(product.diameter);
+  if (diameterMm == null || (bodyHeightMm == null && capHeightMm == null)) return null;
+
+  const parts: string[] = ["- Canonical proportion lock:"];
+  if (bodyHeightMm != null) {
+    parts.push(
+      `the glass body is ${bodyHeightMm} mm tall × ${diameterMm} mm wide (${(bodyHeightMm / diameterMm).toFixed(2)}:1 height-to-width)`,
+    );
+  }
+  if (capHeightMm != null) {
+    parts.push(
+      `${bodyHeightMm != null ? "and " : "the product is "}${capHeightMm} mm tall with cap (${(capHeightMm / diameterMm).toFixed(2)}:1)`,
+    );
+  }
+  // Assembled cap-on: the rendered product height IS the canonical with-cap
+  // height, so the exact on-canvas body width is computable. Detached sidecar
+  // has no canonical assembled-cap-off height — ratio guidance only.
+  if (topology.kind === "assembled" && capHeightMm != null) {
+    const widthPct = Math.round(
+      ((profile.targetProductHeightPct / 100) * profile.canvas.heightPx *
+        (diameterMm / capHeightMm) / profile.canvas.widthPx) * 100,
+    );
+    parts.push(
+      `— at the ${profile.targetProductHeightPct}% fill height the body spans approximately ${widthPct}% of the canvas width`,
+    );
+  }
+  parts.push(
+    ". Match this width-to-height relationship exactly; never render the product taller, thinner, or more slender than these canonical proportions.",
+  );
+  return parts.join(" ").replace(/\s+\./g, ".");
+}
+
 function buildFramingProfilePrompt(
+  product: ProductLike,
   profile: BestBottlesFamilyProfile | null,
   policy: BestBottlesShadowPolicy,
   topology: BestBottlesShadowTopology,
+  bodyMaterial: PromptSku["body_material"],
 ): string | null {
   if (!profile) return null;
   const label = profile.label.toUpperCase();
@@ -476,9 +538,12 @@ function buildFramingProfilePrompt(
     `${label} FRAMING PROFILE (CANVAS COMPOSITION AUTHORITY):`,
     `- Canvas is fixed at ${profile.canvas.widthPx} × ${profile.canvas.heightPx}. Do not change aspect ratio, crop, or canvas size.`,
     "- The reference image is product truth, not framing truth. Preserve the product identity and proportions, but do not inherit the reference image's tiny source scale, source crop, source padding, or off-center placement.",
-    `- Relative scale zone: ${profile.relativeScaleZoneLabel} (${profile.relativeScaleZoneId}). Use this zone to communicate realistic size differences within the family.`,
+    profile.geometryScaleVersion
+      ? `- Relative scale zone: ${profile.relativeScaleZoneLabel} (${profile.relativeScaleZoneId}). Reconciled body geometry owns assembled height through ${profile.geometryScaleVersion}; this zone classifies composition only.`
+      : `- Relative scale zone: ${profile.relativeScaleZoneLabel} (${profile.relativeScaleZoneId}). The versioned global catalog curve owns assembled height; this zone classifies composition only.`,
     `- Approved fill-height range: ${profile.targetProductHeightRangePct.min}-${profile.targetProductHeightRangePct.max}% of the canvas height for this family profile.`,
     `- Render the full assembled product so it fills approximately ${profile.targetProductHeightPct}% of the canvas height and no more than ${profile.fillWidthPct}% of the canvas width.`,
+    buildProportionLockLine(product, profile, topology),
     `- Seat the visible bottle base on the shared studio baseline at ${baselineLow}-${baselineHigh}% up from the canvas bottom.`,
     `- Keep the primary bottle centered on the canvas vertical centerline at ${profile.primaryObjectCenterXPct}% width.`,
     profile.detachedComponentPlacement === "right-sidecar"
@@ -487,14 +552,12 @@ function buildFramingProfilePrompt(
     policy.owner === "model"
       ? buildModelOwnedShadowPrompt(topology)
       : BEST_BOTTLES_CONTACT_SHADOW_DIRECTIVE,
-    // NOTE (2026-07-04): the round-glass volume cue and the cap material-targeting
-    // cue were intentionally REMOVED. Both were interpretive instructions that
-    // invited the model to reinterpret components the PRESERVE block already locks
-    // to the reference — the observed result was caps drifting / "paint stripped"
-    // and mottled glass interiors. Framing here controls placement + shadow only;
-    // component fidelity is left entirely to the reference image + PRESERVE. The
-    // cue constants remain in bestBottlesFamilyProfiles.ts if a scoped, lighter
-    // reintroduction is ever justified by evidence.
+    // Clear round glass needs an optical volume cue because a white-background
+    // product reference otherwise reads as a flat white cutout on the Bone canvas.
+    // Keep this scoped to clear_glass profiles that explicitly declare the cue.
+    // The separate component material-targeting cue remains intentionally absent,
+    // so this cannot reintroduce cap / sidecar refinishing or "paint stripped" drift.
+    bodyMaterial === "clear_glass" ? profile.glassGeometryHint : null,
     "- Keep all physical proportions locked to the reference; this framing profile controls only placement, scale on canvas, baseline, centering, and grounding shadow.",
   ]
     .filter((line): line is string => Boolean(line))
@@ -515,9 +578,11 @@ function buildFinalPrompt(product: ProductLike, sku: PromptSku): string {
   return [
     canonParts.basePrompt,
     buildFramingProfilePrompt(
+      product,
       getBestBottlesCatalogFramingProfile(product),
       policy,
       topology,
+      sku.body_material,
     ),
     canonParts.finalStudioDirection,
   ]
@@ -613,6 +678,48 @@ export function buildBestBottlesPromptPreflight(
     };
   }
 
+  const requestedState = `${input.product.capState ?? ""} ${input.product.mode ?? ""}`.toLowerCase();
+  const explicitlyDetached = /\b(?:detached|cap[-_\s]?off|exploded)\b/.test(requestedState);
+  if (
+    input.product.componentTopology === "fitment-attached-cap-right-sidecar"
+    && !explicitlyDetached
+  ) {
+    return {
+      status: "error",
+      issue: "Fitment-attached cap-right-sidecar topology requires detached cap state.",
+      warnings: [],
+      sku: null,
+      record: null,
+    };
+  }
+  if (explicitlyDetached && !input.product.capOffReferenceId?.trim()) {
+    return {
+      status: "error",
+      issue: "Explicit cap-off generation requires a confirmed cap-off PSD reference ID.",
+      warnings: [],
+      sku: null,
+      record: null,
+    };
+  }
+  const topologyText = [
+    input.product.itemName,
+    input.product.itemDescription,
+    input.product.applicator,
+    input.product.capStyle,
+  ].filter(Boolean).join(" ");
+  if (
+    /\b(?:vintage|antique|bulb|tassel|two[- ]piece)\b/i.test(topologyText)
+    && !input.product.topologyReferenceId?.trim()
+  ) {
+    return {
+      status: "error",
+      issue: "Multi-component generation requires confirmed topology PSD evidence.",
+      warnings: [],
+      sku: null,
+      record: null,
+    };
+  }
+
   const sku = buildBestBottlesPromptSkuFromProduct(input);
   const policy = resolveBestBottlesShadowPolicy({
     graceSku: sku.sku,
@@ -660,6 +767,22 @@ export function buildBestBottlesPromptPreflight(
     };
   }
 
+  const scaleProfile = getBestBottlesCatalogFramingProfile(input.product);
+  // The validation-only module compiler can emit capacity-derived scale tags.
+  // The shipped catalog prompt is compiled later from canonical product geometry,
+  // so retain exactly one authoritative set and never expose contradictory tags
+  // to downstream QA parsers.
+  const moduleQaWithoutScale = moduleQaChecklist.filter(
+    (tag) => (
+      !tag.startsWith("scale-")
+      && !tag.startsWith("geometry-scale:")
+      && !tag.startsWith("shadow-topology:")
+      && !tag.startsWith("shadow-contact:")
+      && !tag.startsWith("component-topology:")
+      && !tag.startsWith("cap-off-psd:")
+      && !tag.startsWith("topology-psd:")
+    ),
+  );
   const record: PromptRecord = {
     sku: sku.sku,
     reference_image_path: sku.reference_image_path,
@@ -670,9 +793,25 @@ export function buildBestBottlesPromptPreflight(
     final_prompt: finalPrompt,
     qa_checklist: Array.from(
       new Set([
-        ...moduleQaChecklist,
+        ...moduleQaWithoutScale,
         ...canvasPreflight.qaChecklist,
         ...getBestBottlesShadowPolicyTags(policy),
+        `scale-contract:${BEST_BOTTLES_CATALOG_SCALE_VERSION}`,
+        `scale-global-target:${scaleProfile.globalTargetProductHeightPct}`,
+        `scale-family-correction:${scaleProfile.familyScaleCorrectionPct}`,
+        `scale-assembled-target:${scaleProfile.targetProductHeightPct}`,
+        ...(scaleProfile.geometryScaleVersion
+          ? [`geometry-scale:${scaleProfile.geometryScaleVersion}`]
+          : []),
+        ...(input.product.capOffReferenceId
+          ? [`cap-off-psd:${input.product.capOffReferenceId}`]
+          : []),
+        ...(input.product.topologyReferenceId
+          ? [`topology-psd:${input.product.topologyReferenceId}`]
+          : []),
+        ...(input.product.componentTopology
+          ? [`component-topology:${input.product.componentTopology}`]
+          : []),
         `shadow-topology:${shadowTopology.kind}`,
         ...shadowTopology.expectedContacts.map(
           (contact) => `shadow-contact:${contact}`,

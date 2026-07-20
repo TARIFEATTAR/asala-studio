@@ -64,6 +64,14 @@ describe("Best Bottles cylinder smoke targets", () => {
     assert.match(target?.reference ?? "", /cylinder-4ml-clear-12mm-finemist/);
   });
 
+  it("marks the 3ml production canary as cap-off/detached", () => {
+    const target = ALL_CYLINDER_SMOKE_TARGETS.find((item) => item.caseId === "3ml");
+
+    assert.equal(target?.sku, "GB-SPR-CLR-3ML-BLK");
+    assert.equal(target?.mode, "cap-off");
+    assert.equal(target?.capState, "detached");
+  });
+
   it("selects targets by either case id or SKU", () => {
     const targets = selectCylinderSmokeTargets(
       "5ml-cap-off,9ml-regular,GB-CYL-CLR-9ML-SPR-SBLK",

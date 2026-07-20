@@ -1,0 +1,70 @@
+{
+  "artifact": "Best Bottles Project and Image Production Update",
+  "version": "2026-07-16",
+  "format": "PDF",
+  "pageCount": 7,
+  "pageSize": "US Letter landscape",
+  "sourcePreservation": {
+    "mode": "exact",
+    "notes": "The three supplied system figures are embedded without generative alteration. The email was used as the factual and narrative source."
+  },
+  "sources": {
+    "email": "/Users/jordanrichter/.codex/attachments/3a6d4252-f7e7-4285-84b5-4a85658181d1/pasted-text.txt",
+    "figures": [
+      {
+        "path": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-reference-production/figures/two-lanes-diagram.png",
+        "sha256": "31f4050f872af386a2ba96fc70e1c9fdab8d26a93bdefdbba60db704d1b5e8b4"
+      },
+      {
+        "path": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-reference-production/figures/identity-vs-material.png",
+        "sha256": "e34b9731cbc751748ab4171b3b7954c39529888558600b5d284c6b11adea2336"
+      },
+      {
+        "path": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-reference-production/figures/quality-gate.png",
+        "sha256": "cc7504d6204898f1b3c1bdf55b76a0bfd1653acf54c81fcdbe0701525d4e9ddf"
+      }
+    ]
+  },
+  "output": {
+    "path": "/Users/jordanrichter/Projects/Madison Studio/madison-app/output/pdf/best-bottles-project-and-image-system-update-2026-07-16.pdf",
+    "sha256": "3bdcc0374756bdc3a4a76c5869718abca6a1106cf4dd96e9a5b83e5fad02feab",
+    "nativeMasterReference": "2080 x 2288 catalog image output"
+  },
+  "pagePreviews": [
+    {
+      "page": 1,
+      "role": "cover",
+      "sha256": "c286391bb21ddf3debc9bc8191f9e67daa928f08bea6a96b12b0e5ad4477e898"
+    },
+    {
+      "page": 2,
+      "role": "platform-status",
+      "sha256": "5e90aa40b799b06834a77ed7725b93afa6134f02f13e3fafcaa37e1464eee71d"
+    },
+    {
+      "page": 3,
+      "role": "system-explanation",
+      "sha256": "9b092f9df0cdc07024add855b12ffc0da4ccc9a57731f0283333844709a813ce"
+    },
+    {
+      "page": 4,
+      "role": "two-lanes",
+      "sha256": "48342ddc325bf8036eaa14d25baf74cb4ffd6bfd22773b2cca5ff23da6490b62"
+    },
+    {
+      "page": 5,
+      "role": "identity-vs-material",
+      "sha256": "c9ed0637be754b9a114c8ee211fbe48bdc85b19e9053660f7a41331ce17d0c1b"
+    },
+    {
+      "page": 6,
+      "role": "quality-gate",
+      "sha256": "544970a7c3b8ab425bca630f42a19138fa469d3946b43e40e02cd4aa6f4f6c0b"
+    },
+    {
+      "page": 7,
+      "role": "roadmap",
+      "sha256": "4e78090c7447a962d6dba77de34abee4601e02e7405fe518b4b4d4185a35a31d"
+    }
+  ]
+}

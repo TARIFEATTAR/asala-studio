@@ -114,6 +114,28 @@ describe("buildBestBottlesFamilyRigPromptAdjustment", () => {
     assert.match(adjustment.canvasCompositionLines.join("\n"), /same horizontal baseline/i);
   });
 
+  it("passes detached state into the global Cylinder PDP scale contract", () => {
+    const adjustment = buildBestBottlesFamilyRigPromptAdjustment({
+      family: "Cylinder",
+      sku: "GB-CYL-CLR-9ML-T-21",
+      websiteSku: "GBCyl9SpryBlk",
+      applicator: "Fine Mist Sprayer",
+      capacityMl: 9,
+      heightWithCap: "98 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      capState: "detached",
+      mode: "fitment-attached-cap-right-sidecar",
+    });
+
+    const composition = adjustment.canvasCompositionLines.join("\n");
+    assert.equal(adjustment.rigImposed, true);
+    assert.match(composition, /~69% of the canvas height/i);
+    assert.doesNotMatch(composition, /6 px per canonical millimeter/i);
+    assert.match(composition, /8-10% up from the canvas bottom/i);
+    assert.doesNotMatch(composition, /~25\.7% of the canvas height/i);
+  });
+
   it("keeps roll-ons assembled unless cap-off is explicit", () => {
     const adjustment = buildBestBottlesFamilyRigPromptAdjustment({
       family: "Cylinder",

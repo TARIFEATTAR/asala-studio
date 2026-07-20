@@ -13,7 +13,10 @@ export interface FamilyRigConfig {
   profileLabel?: string;
   relativeScaleZoneId?: string;
   relativeScaleZoneLabel?: string;
+  scaleContractVersion?: string;
+  geometryScaleVersion?: string;
   fillHeightPct: number;
+  targetBodyHeightPx?: number;
   fillHeightRangePct?: { min: number; max: number };
   fillWidthPct: number;
   baselinePct: number;
@@ -34,7 +37,12 @@ export interface FamilyRigProductInput {
   heightWithCap?: string | null;
   heightWithoutCap?: string | null;
   diameter?: string | null;
+  capState?: string | null;
+  mode?: string | null;
 }
+
+const BEST_BOTTLES_MASTER_CANVAS_HEIGHT_PX = 2288;
+const BEST_BOTTLES_CATALOG_SCALE_VERSION = "best-bottles-catalog-scale-v1";
 
 export const FAMILY_RIG: Record<string, FamilyRigConfig> = {
   defaultPdp: {
@@ -67,9 +75,14 @@ export function normalizeFamily(family?: string | null): string {
   return (family ?? "").trim().toLowerCase();
 }
 
+export function isCylinderFamilyAlias(family?: string | null): boolean {
+  const normalized = normalizeFamily(family).replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
 export function getFamilyRig(family?: string | null): FamilyRigConfig | null {
   const normalized = normalizeFamily(family);
-  if (normalized === "tall cylinder") return FAMILY_RIG.cylinder;
+  if (isCylinderFamilyAlias(normalized)) return FAMILY_RIG.cylinder;
   return FAMILY_RIG[normalized] ?? FAMILY_RIG.defaultPdp;
 }
 
@@ -151,9 +164,80 @@ function isSlimTallCylinderProduct(input: FamilyRigProductInput): boolean {
 
 function isCylinderProduct(input: FamilyRigProductInput): boolean {
   const family = normalizeFamily(input.family ?? input.bottleCollection).replace(/[_]+/g, "-");
-  if (family === "cylinder" || family === "tall-cylinder") return true;
+  if (family === "vial") return false;
+  if (isCylinderFamilyAlias(family)) return true;
   const text = normalizeSearchText(input);
   return text.includes("cylinder") || /\b(?:gb|lb)-cyl\b/.test(text) || text.includes("-cyl-");
+}
+
+const BEST_BOTTLES_GLOBAL_SCALE_KNOTS = [
+  { capacityMl: 1, assembledHeightPct: 54 },
+  { capacityMl: 3, assembledHeightPct: 56 },
+  { capacityMl: 4, assembledHeightPct: 58 },
+  { capacityMl: 5, assembledHeightPct: 61 },
+  { capacityMl: 9, assembledHeightPct: 69 },
+  { capacityMl: 28, assembledHeightPct: 74 },
+  { capacityMl: 30, assembledHeightPct: 75 },
+  { capacityMl: 50, assembledHeightPct: 78 },
+  { capacityMl: 100, assembledHeightPct: 79 },
+  { capacityMl: 118, assembledHeightPct: 80 },
+  { capacityMl: 227, assembledHeightPct: 82 },
+  { capacityMl: 454, assembledHeightPct: 84 },
+] as const;
+
+export function resolveBestBottlesGlobalScalePct(capacityMl: number): number {
+  const first = BEST_BOTTLES_GLOBAL_SCALE_KNOTS[0];
+  const last = BEST_BOTTLES_GLOBAL_SCALE_KNOTS[BEST_BOTTLES_GLOBAL_SCALE_KNOTS.length - 1];
+  if (capacityMl <= first.capacityMl) return first.assembledHeightPct;
+  if (capacityMl >= last.capacityMl) return last.assembledHeightPct;
+  for (let index = 1; index < BEST_BOTTLES_GLOBAL_SCALE_KNOTS.length; index += 1) {
+    const upper = BEST_BOTTLES_GLOBAL_SCALE_KNOTS[index];
+    if (capacityMl <= upper.capacityMl) {
+      const lower = BEST_BOTTLES_GLOBAL_SCALE_KNOTS[index - 1];
+      const progress = (capacityMl - lower.capacityMl) / (upper.capacityMl - lower.capacityMl);
+      return lower.assembledHeightPct
+        + progress * (upper.assembledHeightPct - lower.assembledHeightPct);
+    }
+  }
+  return last.assembledHeightPct;
+}
+
+function withGlobalCylinderSidecarScale(
+  input: FamilyRigProductInput,
+  rig: FamilyRigConfig,
+): FamilyRigConfig {
+  if (!isCylinderProduct(input)) return rig;
+  const capStateText = `${input.capState ?? ""} ${input.mode ?? ""}`;
+  if (!/\b(?:detached|cap[-_\s]?off|sidecar)\b/i.test(capStateText)) return rig;
+
+  const capacityMl = getCapacityMl(input);
+  const heightWithCapMm = parseFirstNumber(input.heightWithCap);
+  const heightWithoutCapMm = parseFirstNumber(input.heightWithoutCap);
+  if (
+    capacityMl == null
+    || heightWithCapMm == null
+    || heightWithoutCapMm == null
+    || heightWithoutCapMm > heightWithCapMm
+  ) {
+    return rig;
+  }
+
+  const fillHeightPct = resolveBestBottlesGlobalScalePct(capacityMl);
+  return {
+    ...rig,
+    scaleContractVersion: BEST_BOTTLES_CATALOG_SCALE_VERSION,
+    geometryScaleVersion: undefined,
+    fillHeightPct,
+    targetBodyHeightPx: Math.round(
+      BEST_BOTTLES_MASTER_CANVAS_HEIGHT_PX
+        * (fillHeightPct / 100)
+        * (heightWithoutCapMm / heightWithCapMm),
+    ),
+    fillHeightRangePct: {
+      min: Math.max(0, fillHeightPct - 2),
+      max: Math.min(100, fillHeightPct + 2),
+    },
+  };
 }
 
 function isSampleVialProduct(input: FamilyRigProductInput): boolean {
@@ -261,9 +345,9 @@ function cylinderProfile(input: FamilyRigProductInput): FamilyRigConfig {
 export function getFamilyRigForProduct(input?: FamilyRigProductInput | null): FamilyRigConfig | null {
   if (!input) return null;
 
-  if (isSampleVialProduct(input)) return cylinderProfile(input);
+  if (isSampleVialProduct(input)) return withGlobalCylinderSidecarScale(input, cylinderProfile(input));
   if (isRollerBottleProduct(input)) {
-    return {
+    return withGlobalCylinderSidecarScale(input, {
       family: "roller-bottle",
       profileId: "roller-bottle",
       profileLabel: "Roller Bottle",
@@ -274,9 +358,9 @@ export function getFamilyRigForProduct(input?: FamilyRigProductInput | null): Fa
       fillWidthPct: 58,
       baselinePct: 9,
       primaryObjectCenterXPct: 50,
-    };
+    });
   }
-  if (isCylinderProduct(input)) return cylinderProfile(input);
+  if (isCylinderProduct(input)) return withGlobalCylinderSidecarScale(input, cylinderProfile(input));
 
   return getFamilyRig(input.family ?? input.bottleCollection);
 }

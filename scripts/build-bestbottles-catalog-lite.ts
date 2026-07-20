@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
+import {
+  mergeBestBottlesCatalogSourceRows,
+  selectBestBottlesCatalogMeasurement,
+} from "../src/lib/bestBottlesCatalogMeasurementMerge";
+
 interface CatalogProduct {
   _id: string;
   websiteSku: string;
@@ -62,6 +67,10 @@ const DEFAULT_CONVEX_CANDIDATES = [
 const DEFAULT_ENRICHMENT_CANDIDATES = [
   path.join(
     CLIENTS_ROOT,
+    "Nemat-International/Best-Bottles-Website-02-20-2026/outputs/product-knowledge-2026-05-14/best_bottles_product_knowledge_products_2026-05-14.csv",
+  ),
+  path.join(
+    CLIENTS_ROOT,
     "Nemat-International/Best-Bottles-Website-02-20-2026-pr34/outputs/product-knowledge-2026-05-14/best_bottles_product_knowledge_products_2026-05-14.csv",
   ),
   path.join(
@@ -73,6 +82,10 @@ const DEFAULT_ENRICHMENT_CANDIDATES = [
 ];
 
 const DEFAULT_GROUPS_CANDIDATES = [
+  path.join(
+    CLIENTS_ROOT,
+    "Nemat-International/Best-Bottles-Website-02-20-2026/outputs/product-knowledge-2026-05-14/best_bottles_product_groups_2026-05-14.csv",
+  ),
   path.join(
     CLIENTS_ROOT,
     "Nemat-International/Best-Bottles-Website-02-20-2026-pr34/outputs/product-knowledge-2026-05-14/best_bottles_product_groups_2026-05-14.csv",
@@ -310,15 +323,18 @@ function mapProduct(row: Record<string, string>, convexRow?: Record<string, stri
     capacity: stringOrNull(pick(row, "capacity")),
     capacityMl: numberOrNull(pick(row, "capacityMl", "capacity_ml")) ?? numberOrNull(pick(fallback, "capacityMl", "capacity_ml")),
     capacityOz: numberOrNull(pick(row, "capacityOz", "capacity_oz")) ?? numberOrNull(pick(fallback, "capacityOz", "capacity_oz")),
-    heightWithCap:
-      stringOrNull(pick(row, "heightWithCap", "height_with_cap_mm")) ??
-      stringOrNull(pick(fallback, "heightWithCap", "height_with_cap_mm")),
-    heightWithoutCap:
-      stringOrNull(pick(row, "heightWithoutCap", "height_without_cap_mm")) ??
-      stringOrNull(pick(fallback, "heightWithoutCap", "height_without_cap_mm")),
-    diameter:
-      stringOrNull(pick(row, "diameter", "diameter_mm")) ??
-      stringOrNull(pick(fallback, "diameter", "diameter_mm")),
+    heightWithCap: selectBestBottlesCatalogMeasurement(
+      pick(row, "heightWithCap", "height_with_cap_mm"),
+      pick(fallback, "heightWithCap", "height_with_cap_mm"),
+    ),
+    heightWithoutCap: selectBestBottlesCatalogMeasurement(
+      pick(row, "heightWithoutCap", "height_without_cap_mm"),
+      pick(fallback, "heightWithoutCap", "height_without_cap_mm"),
+    ),
+    diameter: selectBestBottlesCatalogMeasurement(
+      pick(row, "diameter", "diameter_mm"),
+      pick(fallback, "diameter", "diameter_mm"),
+    ),
     neckThreadSize:
       stringOrNull(pick(row, "neckThreadSize", "neck_thread_size")) ??
       stringOrNull(pick(fallback, "neckThreadSize", "neck_thread_size")),
@@ -509,7 +525,8 @@ function main() {
   const enrichmentBySku = rowsBySku(enrichmentRows);
   const masterBySku = rowsBySku(masterRows);
 
-  const products = masterRows
+  const catalogSourceRows = mergeBestBottlesCatalogSourceRows(masterRows, convexRows);
+  const products = catalogSourceRows
     .map((row) => {
       const key = skuKey(pick(row, "graceSku", "grace_sku", "sku"));
       return mapProduct(row, {

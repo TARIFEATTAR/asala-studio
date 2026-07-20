@@ -35,6 +35,30 @@ describe("PSD canonical identity join", () => {
     assert.match(result.reasons.join(" "), /duplicate website sku/i);
   });
 
+  it("lets a fully reviewed alias disambiguate duplicate website rows only when it selects one of those rows", () => {
+    const ambiguousRows = [
+      ...rows,
+      { website_sku: "WebA", grace_sku: "GB-X", family: "Diva" },
+    ];
+    const index = buildCanonicalIdentityIndex(ambiguousRows);
+    const result = joinPsdSourceIdentity({
+      websiteSku: "WebA",
+      graceSku: null,
+      sourceToken: "WebA",
+      index,
+      aliases: [{
+        sourceToken: "WebA",
+        websiteSku: "WebA",
+        graceSku: "GB-A",
+        reviewedBy: "Jordan Richter",
+        reviewedAt: "2026-07-14T16:00:00.000Z",
+      }],
+    });
+    assert.equal(result.status, "reviewed-alias");
+    assert.equal(result.row?.grace_sku, "GB-A");
+    assert.match(result.reasons.join(" "), /reviewed alias.*disambiguated.*duplicate website sku/i);
+  });
+
   it("does not let an exact Grace SKU override a supplied unmatched website SKU", () => {
     const index = buildCanonicalIdentityIndex(rows);
     const result = joinPsdSourceIdentity({ websiteSku: "Missing", graceSku: "GB-B", index, aliases: [] });

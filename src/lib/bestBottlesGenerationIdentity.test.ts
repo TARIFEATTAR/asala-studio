@@ -25,6 +25,28 @@ describe("buildBestBottlesGenerationIdentity", () => {
     assert.equal(identity.shadowContract, "contact-back-right-v1");
   });
 
+  it("assigns canonical V6.1 and global scale lineage to every bottle family", () => {
+    const identity = buildBestBottlesGenerationIdentity({
+      graceSku: "GB-BOS-CLR-100ML-S",
+      websiteSku: "GBBoston100ShortCap",
+      productGroupId: "group-boston-100",
+      family: "Boston Round",
+      bottleCollection: "Boston Round",
+      capacityMl: 100,
+      color: "Clear",
+      heightWithCap: "150 ±2 mm",
+      heightWithoutCap: "130 ±2 mm",
+      diameter: "42 ±0.5 mm",
+    });
+
+    assert.equal(identity.promptVersion, "best-bottles-reference-locked-v6.1");
+    assert.equal(identity.shadowOwner, "model");
+    assert.equal(identity.scaleContractVersion, "best-bottles-catalog-scale-v1");
+    assert.equal(identity.resolvedAssembledTargetPct, 79);
+    assert.equal(identity.resolvedBodyTargetPx, 1567);
+    assert.equal(identity.calibrationRegistryKey, "boston-round:100:group-boston-100");
+  });
+
   it("blocks generic Diva tassel SKUs when color evidence conflicts", () => {
     const identity = buildBestBottlesGenerationIdentity({
       graceSku: "GB-DVA-CLR-46ML-T-20",

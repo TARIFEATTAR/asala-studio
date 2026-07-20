@@ -2,10 +2,25 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   assertMonotonicCylinderBodies,
+  CYLINDER_DISPLAY_CURVE_VERSION,
   resolveCylinderDisplayScale,
 } from "./bestBottlesCylinderDisplayCurve";
 
 describe("Cylinder measurement-driven display curve", () => {
+  it("keeps the measured Cylinder lineup curve distinct from technical sheet pixel density", () => {
+    const nineMl = resolveCylinderDisplayScale({
+      canvasHeightPx: 2288,
+      heightWithCapMm: 98,
+      heightWithoutCapMm: 70,
+      diameterMm: 20,
+    });
+
+    assert.equal(nineMl.version, CYLINDER_DISPLAY_CURVE_VERSION);
+    assert.equal(nineMl.assembledTargetPct, 75.6);
+    assert.ok(nineMl.assembledTargetPx > 1_700);
+    assert.ok(nineMl.bodyTargetPx > 1_200);
+  });
+
   it("keeps the 9 ml body taller than the 5 ml body", () => {
     const five = resolveCylinderDisplayScale({
       canvasHeightPx: 2288, heightWithCapMm: 55, heightWithoutCapMm: 53, diameterMm: 17,

@@ -139,22 +139,28 @@ function joinReviewedAlias(input: {
 
   const aliasRows: CanonicalTruthRow[] = [];
   for (const alias of completeAliases) {
-    const websiteMatch = resolveExact(input.index.byWebsiteSku, alias.websiteSku);
-    const graceMatch = resolveExact(input.index.byGraceSku, alias.graceSku);
-
-    if (websiteMatch.kind === "ambiguous" || graceMatch.kind === "ambiguous") {
-      input.reasons.push("Reviewed alias evidence is ambiguous because a target maps to duplicate canonical SKU rows.");
-      return { status: "ambiguous", row: null, reasons: input.reasons };
-    }
-    if (websiteMatch.kind === "unmatched" || graceMatch.kind === "unmatched") {
+    const websiteRows = distinctRows(
+      input.index.byWebsiteSku.get(normalizeIdentityKey(alias.websiteSku)) ?? [],
+    );
+    const graceRows = distinctRows(
+      input.index.byGraceSku.get(normalizeIdentityKey(alias.graceSku)) ?? [],
+    );
+    if (websiteRows.length === 0 || graceRows.length === 0) {
       input.reasons.push("Reviewed alias evidence is unmatched because a target did not resolve both canonical SKUs.");
       return { status: "unmatched", row: null, reasons: input.reasons };
     }
-    if (!rowsAreEquivalent(websiteMatch.row, graceMatch.row)) {
+    const pairMatches = distinctRows(websiteRows.filter((websiteRow) => (
+      graceRows.some((graceRow) => rowsAreEquivalent(websiteRow, graceRow))
+    )));
+    if (pairMatches.length === 0) {
       input.reasons.push("The reviewed alias website and Grace SKUs identify different canonical rows.");
       return { status: "conflict", row: null, reasons: input.reasons };
     }
-    aliasRows.push(websiteMatch.row);
+    if (pairMatches.length > 1) {
+      input.reasons.push("Reviewed alias evidence is ambiguous because the complete website and Grace SKU pair maps to duplicate canonical rows.");
+      return { status: "ambiguous", row: null, reasons: input.reasons };
+    }
+    aliasRows.push(pairMatches[0]);
   }
 
   const distinctAliasRows = distinctRows(aliasRows);
@@ -246,6 +252,24 @@ export function joinPsdSourceIdentity(input: {
     const websiteMatch = resolveExact(input.index.byWebsiteSku, input.websiteSku);
     if (websiteMatch.kind === "ambiguous") {
       reasons.push(`Duplicate website SKU ${normalizedWebsiteSku} maps to non-equivalent canonical rows.`);
+      if (hasToken(input.sourceToken)) {
+        const aliasResult = joinReviewedAlias({
+          sourceToken: input.sourceToken,
+          index: input.index,
+          aliases: input.aliases,
+          reasons: [],
+        });
+        if (
+          aliasResult.status === "reviewed-alias"
+          && aliasResult.row
+          && websiteMatch.rows.some((row) => rowsAreEquivalent(row, aliasResult.row!))
+        ) {
+          reasons.push(
+            `A fully reviewed alias disambiguated duplicate website SKU ${normalizedWebsiteSku} to canonical Grace SKU ${aliasResult.row.grace_sku}.`,
+          );
+          return { status: "reviewed-alias", row: aliasResult.row, reasons };
+        }
+      }
       appendGraceDiagnostic({
         graceSku: input.graceSku,
         index: input.index,

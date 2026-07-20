@@ -107,6 +107,34 @@ describe("Deno familyRig twin", () => {
     assert.ok(regular9Ml.fillHeightPct < slim9Ml.fillHeightPct);
   });
 
+  it("uses the global catalog-scale curve for detached Cylinder sidecars", () => {
+    const rig = getFamilyRigForProduct({
+      family: "Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "98 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      applicator: "Fine Mist Sprayer",
+      capState: "detached",
+      mode: "fitment-attached-cap-right-sidecar",
+      websiteSku: "GBCyl9SpryBlk",
+      sku: "GB-CYL-CLR-9ML-T-21",
+    });
+
+    assert.ok(rig);
+    assert.equal(rig.geometryScaleVersion, undefined);
+    assert.equal(rig.fillHeightPct, 69);
+    assert.equal(rig.targetBodyHeightPx, 1128);
+    assert.equal(rig.baselinePct, 9);
+
+    const block = buildImposedRigBlock({ family: "Cylinder", capState: "detached", rig });
+    assert.ok(block);
+    assert.match(block, /~69% of the canvas height/i);
+    assert.doesNotMatch(block, /6 px per canonical millimeter/i);
+    assert.match(block, /Do not leave the product tiny with excessive empty margins/i);
+  });
+
   it("builds the same imposed rig language shape for edge prompts", () => {
     const block = buildImposedRigBlock({
       family: "Cylinder",

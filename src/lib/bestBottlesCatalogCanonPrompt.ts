@@ -88,13 +88,32 @@ function normalizedSkuText(sku: PromptSku): string {
     .toLowerCase();
 }
 
+/**
+ * Grace SKU BODY-segment color codes (-AMB-, -BLU-, -CBL-, -FRS-, -GRN-,
+ * -SWL-). The word checks below miss them ("amber" ≠ "AMB"), which sent
+ * colored-glass SKUs down the CLEAR_GLASS path whenever the catalog color
+ * field was empty — the 2026-07-20 muddy-amber renders were prompted
+ * "transparent, colorless, no tint" against an amber reference. Segment
+ * codes are body slots only; cap-finish tokens (MBLU/SBLK/…) don't match.
+ */
+function skuBodyColorSegment(sku: PromptSku): string | null {
+  const value = (sku.sku ?? "").toUpperCase();
+  if (/-AMB-/.test(value)) return "amber";
+  if (/-(?:BLU|CBL)-/.test(value)) return "cobalt";
+  if (/-FRS-/.test(value)) return "frosted";
+  if (/-GRN-/.test(value)) return "green";
+  if (/-SWL-/.test(value)) return "swirl";
+  return null;
+}
+
 export function getBestBottlesCatalogGlassType(sku: PromptSku): string {
   const text = normalizedSkuText(sku);
-  if (text.includes("frost")) return "frosted";
-  if (text.includes("swirl") || text.includes("flute")) return "swirl";
-  if (text.includes("cobalt") || text.includes("blue")) return "cobalt";
-  if (text.includes("amber")) return "amber";
-  if (text.includes("green") || text.includes("emerald")) return "green";
+  const segment = skuBodyColorSegment(sku);
+  if (text.includes("frost") || segment === "frosted") return "frosted";
+  if (text.includes("swirl") || text.includes("flute") || segment === "swirl") return "swirl";
+  if (text.includes("cobalt") || text.includes("blue") || segment === "cobalt") return "cobalt";
+  if (text.includes("amber") || segment === "amber") return "amber";
+  if (text.includes("green") || text.includes("emerald") || segment === "green") return "green";
   if (text.includes("apothecary")) return "apothecary";
   if (text.includes("heart") || text.includes("keychain") || text.includes("novelty")) return "novelty";
   return "colored";
@@ -104,6 +123,7 @@ export function isBestBottlesCatalogClearGlass(sku: PromptSku): boolean {
   const text = normalizedSkuText(sku);
   return (
     sku.body_material === "clear_glass" &&
+    skuBodyColorSegment(sku) === null &&
     !text.includes("frost") &&
     !text.includes("swirl") &&
     !text.includes("amber") &&

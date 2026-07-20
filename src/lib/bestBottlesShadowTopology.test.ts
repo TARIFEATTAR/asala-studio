@@ -49,10 +49,11 @@ describe("Best Bottles Cylinder shadow topology", () => {
     );
     const prompt = buildModelOwnedShadowPrompt(detached);
 
-    assert.match(prompt, /bottle base and detached cap/i);
-    assert.match(prompt, /32–42% opacity/);
-    assert.match(prompt, /20–30% of the primary bottle's width/);
-    assert.match(prompt, /camera-right/);
+    assert.match(prompt, /bottle and the detached cap/i);
+    assert.match(prompt, /very subtle, light, softly feathered grounded shadow/);
+    assert.match(prompt, /Barely there/);
     assert.doesNotMatch(prompt, /deterministic/i);
+    // Jordan 2026-07-19: no numeric shadow engineering in the prompt.
+    assert.doesNotMatch(prompt, /%|ratio|opacity/i);
   });
 });

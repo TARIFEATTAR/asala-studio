@@ -129,7 +129,12 @@ const cylinderV61Record = {
     "shadow-owner:model",
     "shadow-contract:contact-back-right-v1",
     "prompt-version:best-bottles-reference-locked-v6.1",
-    "shadow-rollout:cylinder-family",
+    "shadow-rollout:all-bottle-families",
+    "scale-contract:best-bottles-catalog-scale-v1",
+    "scale-global-target:69",
+    "scale-family-correction:0",
+    "scale-assembled-target:69",
+    "component-topology:assembled",
     "shadow-topology:assembled",
     "shadow-contact:bottle",
   ],
@@ -146,13 +151,41 @@ describe("resolveBestBottlesPrecompiledPrompt", () => {
     assert.equal(accepted.shadowOwner, "model");
   });
 
-  it("rejects model-owned shadow records outside reviewed Cylinder context", () => {
-    const wrongSku = resolveBestBottlesPrecompiledPrompt(
+  it("accepts canonical V6.1 model-owned shadow records for other bottle families", () => {
+    const circle = resolveBestBottlesPrecompiledPrompt(
       { ...cylinderV61Record, product_family: "circle" },
       { isBestBottlesStudioMasterRequest: true },
     );
 
-    assert.match(wrongSku.error ?? "", /only valid for Cylinder/i);
+    assert.equal(circle.error, null);
+    assert.equal(circle.shadowOwner, "model");
+  });
+
+  it("accepts sidecar topology only when its shadow topology also has a sidecar contact", () => {
+    const sidecarRecord = {
+      ...cylinderV61Record,
+      qa_checklist: cylinderV61Record.qa_checklist.map((tag) => {
+        if (tag === "component-topology:assembled") {
+          return "component-topology:fitment-attached-cap-right-sidecar";
+        }
+        if (tag === "shadow-topology:assembled") return "shadow-topology:detached-sidecar";
+        return tag;
+      }).concat("shadow-contact:sidecar"),
+    };
+    const accepted = resolveBestBottlesPrecompiledPrompt(sidecarRecord, {
+      isBestBottlesStudioMasterRequest: true,
+    });
+    assert.equal(accepted.error, null);
+
+    const mismatched = resolveBestBottlesPrecompiledPrompt(
+      {
+        ...sidecarRecord,
+        qa_checklist: sidecarRecord.qa_checklist.map((tag) =>
+          tag === "shadow-topology:detached-sidecar" ? "shadow-topology:assembled" : tag),
+      },
+      { isBestBottlesStudioMasterRequest: true },
+    );
+    assert.match(mismatched.error ?? "", /component topology.*shadow topology/i);
   });
 
   it("rejects Cylinder V6.0 and missing topology lineage", () => {
@@ -271,6 +304,19 @@ describe("resolveBestBottlesPrecompiledPrompt", () => {
 });
 
 describe("ensureBestBottlesStudioDirection", () => {
+  it("does not invite cosmetic refinishing of caps, fitments, or detached sidecars", () => {
+    const normalized = ensureBestBottlesStudioDirection(canonV3Record.final_prompt);
+
+    assert.doesNotMatch(
+      normalized,
+      /controlled material finish|refined ecommerce polish|cap material polish/i,
+    );
+    assert.match(
+      normalized,
+      /preserve the photographed surface texture, translucency, edge density, tonal variation, highlights, and imperfections of every cap, actuator, collar, fitment, and detached sidecar exactly as shown/i,
+    );
+  });
+
   it("keeps the Edge runtime studio direction exactly synchronized with the browser canon", () => {
     assert.equal(BEST_BOTTLES_STUDIO_DIRECTION_V2, STUDIO_DIRECTION);
     assert.equal(BEST_BOTTLES_FINAL_V2_STUDIO_CHECK, FINAL_V2_STUDIO_CHECK);

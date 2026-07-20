@@ -44,6 +44,7 @@ describe("buildFramingQaReport", () => {
     assert.equal(report.measurements.fillHeightPct, 56);
     assert.equal(report.measurements.baselineDeltaPx, 0);
     assert.ok(Math.abs((report.measurements.centerDeltaPct ?? 0)) < 0.1);
+    assert.deepEqual(report.primaryBounds, boundsForFillHeight(56));
   });
 
   it("fails an undersized sample vial against the Convex-derived profile range", () => {
@@ -96,6 +97,29 @@ describe("buildFramingQaReport", () => {
     assert.equal(report.measurements.baselineDeltaPx, -42);
   });
 
+  it("fails when the primary bottle crosses the output canvas bounds", () => {
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig(),
+      bounds: {
+        ...boundsForFillHeight(56),
+        left: -10,
+        right: 2070,
+      },
+      baselineYPx: 2082,
+      capState: "detached",
+      primaryBounds: {
+        ...boundsForFillHeight(56),
+        left: -10,
+        right: 2070,
+      },
+    });
+
+    assert.equal(report.status, "fail");
+    assert.match(report.failures.join(" "), /primary bottle.*canvas bounds/i);
+  });
+
   it("warns when detached-cap outputs lack primary-bottle bounds for centerline QA", () => {
     const report = buildFramingQaReport({
       width: canvas.width,
@@ -112,6 +136,49 @@ describe("buildFramingQaReport", () => {
     assert.equal(report.status, "warn");
     assert.deepEqual(report.failures, []);
     assert.match(report.warnings.join(" "), /Primary bottle bounds unavailable/i);
+  });
+
+  it("does not treat the full detached primary product as a body-only measurement", () => {
+    const primaryBounds = boundsForFillHeight(54.7);
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig({
+        fillHeightPct: 75.2,
+        fillHeightRangePct: { min: 73.2, max: 77.2 },
+        targetBodyHeightPx: Math.round(canvas.height * 0.547),
+      }),
+      bounds: primaryBounds,
+      primaryBounds,
+      baselineYPx: 2082,
+      capState: "detached",
+    });
+
+    assert.equal(report.status, "fail");
+    assert.match(report.failures.join(" "), /below target range/i);
+    assert.equal(report.measurements.fillHeightPct, 54.7);
+    assert.equal(report.target.fillHeightPct, 75.2);
+    assert.deepEqual(report.target.fillHeightRangePct, { min: 73.2, max: 77.2 });
+  });
+
+  it("passes a detached primary product at the assembled-profile target", () => {
+    const primaryBounds = boundsForFillHeight(75.2);
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig({
+        fillHeightPct: 75.2,
+        fillHeightRangePct: { min: 73.2, max: 77.2 },
+        targetBodyHeightPx: Math.round(canvas.height * 0.547),
+      }),
+      bounds: primaryBounds,
+      primaryBounds,
+      baselineYPx: 2082,
+      capState: "detached",
+    });
+
+    assert.equal(report.status, "pass");
+    assert.deepEqual(report.failures, []);
   });
 });
 
@@ -172,5 +239,70 @@ describe("getFramingDecision", () => {
     });
 
     assert.equal(getFramingDecision(report), "reject");
+  });
+});
+
+describe("aspect-ratio gate", () => {
+  // boundsForFillHeight(56) → h=1281, w=381 → measured H/W ≈ 3.36.
+  const measuredRatio = (2082 - (2082 - Math.round(canvas.height * 0.56) + 1) + 1) /
+    (1230 - 850 + 1);
+
+  it("passes when the render matches truth proportions", () => {
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig(),
+      bounds: boundsForFillHeight(56),
+      baselineYPx: 2082,
+      capState: "assembled",
+      expectedPrimaryAspectRatio: measuredRatio,
+    });
+    assert.equal(report.status, "pass");
+    // Measured ratio is rounded to two decimals before drift is computed, so
+    // an exact-match input may report a sub-0.2% residual rather than zero.
+    assert.ok(Math.abs(report.measurements.aspectRatioDriftPct ?? 99) <= 0.2);
+  });
+
+  it("warns between 4% and 6% drift", () => {
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig(),
+      bounds: boundsForFillHeight(56),
+      baselineYPx: 2082,
+      capState: "assembled",
+      expectedPrimaryAspectRatio: measuredRatio / 1.05,
+    });
+    assert.equal(report.status, "warn");
+    assert.match(report.warnings.join(" "), /aspect ratio/i);
+  });
+
+  it("fails a render stretched taller/thinner than truth beyond 6%", () => {
+    // 2026-07-19 probes measured +11% (4 mL) and +23% (5 mL) stretch — both must fail.
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig(),
+      bounds: boundsForFillHeight(56),
+      baselineYPx: 2082,
+      capState: "assembled",
+      expectedPrimaryAspectRatio: measuredRatio / 1.11,
+    });
+    assert.equal(report.status, "fail");
+    assert.match(report.failures.join(" "), /taller\/thinner/);
+  });
+
+  it("stays silent when no truth ratio is available", () => {
+    const report = buildFramingQaReport({
+      width: canvas.width,
+      height: canvas.height,
+      rig: rig(),
+      bounds: boundsForFillHeight(56),
+      baselineYPx: 2082,
+      capState: "assembled",
+      expectedPrimaryAspectRatio: null,
+    });
+    assert.equal(report.status, "pass");
+    assert.equal(report.measurements.aspectRatioDriftPct, null);
   });
 });

@@ -6,6 +6,10 @@ export interface FamilyBatchGenerationIdentity {
   shadowOwner: string;
   shadowContract: string;
   shadowTopology: string;
+  scaleContractVersion: string;
+  calibrationRegistryKey: string;
+  resolvedAssembledTargetPct: number;
+  resolvedBodyTargetPx: number;
 }
 
 export interface FamilyBatchRenderedEntryLike {
@@ -26,6 +30,10 @@ const IDENTITY_KEYS: ReadonlyArray<keyof FamilyBatchGenerationIdentity> = [
   "shadowOwner",
   "shadowContract",
   "shadowTopology",
+  "scaleContractVersion",
+  "calibrationRegistryKey",
+  "resolvedAssembledTargetPct",
+  "resolvedBodyTargetPx",
 ];
 
 export function canSkipRenderedEntry(

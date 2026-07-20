@@ -19,8 +19,10 @@ import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import type { AssembledPrompt } from "@/lib/product-image/promptAssembler";
 import { getBestBottlesReferenceUrlIssue } from "@/lib/bestBottlesReferenceValidation";
 import { getRetiredTransparentBestBottlesReferenceIssue } from "@/lib/bestBottlesReferenceFilters";
+import type { CylinderCanonicalGeometryContract } from "@/lib/bestBottlesCylinderRoleAuthority";
 import { dataUrlToBlob } from "@/lib/product-image/colorCorrect";
 import {
+  measureReferencePrimaryAspectRatio,
   normalizeBestBottlesRigBaseline,
   type RigBaselineNormalizeResult,
 } from "@/lib/product-image/rigPostprocess";
@@ -50,8 +52,10 @@ import {
   BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
   getBestBottlesVisualTargetReference,
   getBestBottlesVisualTargetTags,
+  type BestBottlesVisualComponentTopology,
 } from "@/config/bestBottlesVisualTarget";
 import type { RigReviewEvidence } from "@/lib/product-image/rigReview";
+import { resolveBestBottlesStyleReferenceUrl } from "@/lib/bestBottlesStyleReferenceRouting";
 
 
 export interface AssembledGenerationResult {
@@ -63,6 +67,16 @@ export interface AssembledGenerationResult {
   presetId: string;
   sessionId: string;
   rigReview: RigReviewEvidence | null;
+  /**
+   * The provider/model the server ACTUALLY executed (edge `usedProvider`),
+   * which can differ from the dropdown selection — Best Bottles masters
+   * force GPT Image 2 unless the comparison override is sent (2026-07-20:
+   * Gemini selections silently ran GPT). Surfaced as a rig-review badge so
+   * the operator always sees the truth.
+   */
+  usedProvider: string | null;
+  /** Wall-clock generation time (invoke start → response), for the rig-review timer. */
+  durationMs: number | null;
 }
 
 export interface AssembledGenerateOptions {
@@ -88,6 +102,10 @@ export interface AssembledGenerateOptions {
     presetId?: string | null;
     capState?: string | null;
     mode?: string | null;
+    componentTopology?: BestBottlesVisualComponentTopology;
+    capOffReferenceId?: string | null;
+    topologyReferenceId?: string | null;
+    referenceRoleId?: string | null;
     bodyMaterial?: string | null;
     color?: string | null;
     scent_family?: string;
@@ -126,6 +144,7 @@ export interface AssembledGenerateOptions {
     shadowContract?: BestBottlesShadowPolicy["contract"];
     qaStatus?: "pending" | string;
     canvas?: "2080x2288" | string;
+    canonicalGeometryContract?: CylinderCanonicalGeometryContract | null;
   };
   /** JSON-driven Best Bottles prompt compiler output, used as the authoritative prompt for Studio masters. */
   precompiledPromptRecord?: PromptRecord | null;
@@ -178,13 +197,6 @@ function getBodyMaterialLabel(productContext: AssembledGenerateOptions["productC
   return "the exact referenced bottle body material";
 }
 
-function isCylinderBestBottlesContext(
-  productContext: AssembledGenerateOptions["productContext"],
-): boolean {
-  const family = productContext?.family?.trim().toLowerCase();
-  return family === "cylinder" || family === "tall cylinder";
-}
-
 export function useAssembledPromptGeneration() {
   const { user } = useAuth();
   const { currentOrganizationId } = useOnboarding();
@@ -232,14 +244,21 @@ export function useAssembledPromptGeneration() {
       Boolean(options.extraLibraryTags?.includes("studio-master"));
     const visualTargetReference = getBestBottlesVisualTargetReference(
       options.productContext?.bodyMaterial,
+      // Body-color evidence: catalog color field + grace SKU body segment.
+      // Without these, every colored-glass bottle fell back to the clear
+      // exemplar (style-surface:clear on the 2026-07-20 amber renders).
+      {
+        color: options.productContext?.color ?? null,
+        graceSku: options.productContext?.sku ?? null,
+      },
     );
-    const rawGlassRef =
-      options.glassSpecularityReferenceImageUrl?.trim() ||
-      (isBestBottlesStudioMasterRequest ? visualTargetReference.imageUrl : "");
+    const rawGlassRef = resolveBestBottlesStyleReferenceUrl({
+      explicitStyleReferenceUrl: options.glassSpecularityReferenceImageUrl,
+      fallbackCylinderStyleReferenceUrl: visualTargetReference.imageUrl,
+      isBestBottlesStudioMasterRequest,
+      family: options.productContext?.family,
+    });
     const rawMaskRef = options.productContext?.maskReference?.trim() || "";
-    const isCylinderBestBottlesMasterRequest =
-      isBestBottlesStudioMasterRequest &&
-      isCylinderBestBottlesContext(options.productContext);
     const productReferenceIssue = getBestBottlesReferenceUrlIssue(rawRef);
     const retiredReferenceIssue =
       isBestBottlesStudioMasterRequest
@@ -408,10 +427,29 @@ export function useAssembledPromptGeneration() {
           "Server will build the full locked prompt from productContext, measurements, and reference metadata.",
         ].join("\n")
       : assembled.prompt;
+    // Detached-sidecar lanes: canon mm can't describe the pictured cap-off
+    // bottle (body + attached fitment), so measure the byte-locked reference's
+    // actual bottle ratio and tell the model the exact number the aspect QA
+    // gate will grade it against. Same measurement feeds the rig gate below.
+    const detachedAspectReferenceUrl =
+      options.productContext?.sourceReference || rawRef || null;
+    const referenceAspectRatio =
+      isBestBottlesStudioMaster &&
+      options.productContext?.capState === "detached" &&
+      detachedAspectReferenceUrl
+        ? await measureReferencePrimaryAspectRatio(detachedAspectReferenceUrl)
+        : null;
+    const appendMeasuredProportionLock = (prompt: string): string =>
+      referenceAspectRatio != null
+        ? `${prompt.trim()}\nMEASURED REFERENCE PROPORTION LOCK: the primary bottle in the attached Product Reference measures exactly ${referenceAspectRatio.toFixed(2)}:1 height-to-width. Render the bottle at exactly this height-to-width relationship — do not elongate, slim, or stretch it; QA rejects any render whose bottle deviates from this ratio.`
+        : prompt;
     const requestPrompt = isBestBottlesStudioMaster
-      ? applyBestBottlesVisualTargetPrompt(
-          uncalibratedRequestPrompt,
-          options.productContext?.bodyMaterial,
+      ? appendMeasuredProportionLock(
+          applyBestBottlesVisualTargetPrompt(
+            uncalibratedRequestPrompt,
+            options.productContext?.bodyMaterial,
+            options.productContext?.componentTopology,
+          ),
         )
       : uncalibratedRequestPrompt;
     const calibratedPromptRecord =
@@ -420,9 +458,12 @@ export function useAssembledPromptGeneration() {
             ...options.precompiledPromptRecord,
             prompt_version: resolvedShadowPolicy.promptVersion,
             shadow_owner: resolvedShadowPolicy.owner,
-            final_prompt: applyBestBottlesVisualTargetPrompt(
-              options.precompiledPromptRecord.final_prompt,
-              options.productContext?.bodyMaterial,
+            final_prompt: appendMeasuredProportionLock(
+              applyBestBottlesVisualTargetPrompt(
+                options.precompiledPromptRecord.final_prompt,
+                options.productContext?.bodyMaterial,
+                options.productContext?.componentTopology,
+              ),
             ),
             qa_checklist: Array.from(
               new Set([
@@ -437,6 +478,7 @@ export function useAssembledPromptGeneration() {
         : options.precompiledPromptRecord;
 
     try {
+      const generationStartedAtMs = Date.now();
       const { data, error: invokeError } = await supabase.functions.invoke(
         "generate-madison-image",
         {
@@ -456,6 +498,18 @@ export function useAssembledPromptGeneration() {
             referenceImages,
             proModeControls,
             aiProvider: options.aiProvider ?? DEFAULT_IMAGE_AI_PROVIDER,
+            // Provider policy (Jordan 2026-07-20): pdp-primary/pdp-secondary
+            // presets ALWAYS render on GPT Image 2 — the server force stands
+            // and the override hatch is not sent (Gemini comparison runs broke
+            // the rig contract: -29% aspect on the tall roll-on, 17% under-fill
+            // on the swirl sprayer). marketing/scene presets are the Nano
+            // Banana lane: a non-OpenAI dropdown selection there sends the
+            // hatch so the requested model actually executes.
+            allowBestBottlesProviderOverride:
+              ["marketing", "scene"].includes(
+                getBestBottlesImageAssetRoleForPreset(assembled.preset.id),
+              ) &&
+              Boolean(options.aiProvider && options.aiProvider !== "openai-image-2"),
             // Resolution override is locked to standard|high. "high" gives
             // visibly better cap-texture / refraction / neck-thread detail
             // per the OpenAI gpt-image-2 guide, BUT on the larger 2080×2288
@@ -700,6 +754,8 @@ export function useAssembledPromptGeneration() {
         try {
           // Geometry-only rig. Global paint-after color correction is intentionally
           // retired because it shifts the product material and washes out clear glass.
+          // The aspect gate's truth for detached lanes is the reference ratio
+          // measured above — the same number injected into the prompt lock.
           const rigged = await normalizeBestBottlesRigBaseline(data.imageUrl, {
             family: options.productContext?.family,
             bottleCollection: options.productContext?.collection,
@@ -719,6 +775,7 @@ export function useAssembledPromptGeneration() {
             shadowTopology,
             maskReferenceUrl: null,
             requireMaskControl: false,
+            expectedPrimaryAspectRatio: referenceAspectRatio,
           });
           riggedSnapshot = rigged;
           const finalMeasurements = rigged.framingQa?.measurements ?? null;
@@ -732,16 +789,10 @@ export function useAssembledPromptGeneration() {
           if (rigged.qaIssues.length > 0) {
             throw new Error(`Rig QA failed: ${rigged.qaIssues.join(" ")}`);
           }
-          const shadowQaIssues =
-            rigged.shadowOwner === "model" && rigged.shadowQa?.status !== "pass"
-              ? [
-                  `Model-owned shadow ${rigged.shadowQa?.status ?? "review"}: ${[
-                    ...(rigged.shadowQa?.failures ?? []),
-                    ...(rigged.shadowQa?.warnings ?? []),
-                  ].join(" ") || "candidate requires review."}`,
-                ]
-              : [];
-          const reviewQaIssues = [...rigged.qaIssues, ...shadowQaIssues];
+          // Shadow QA is advisory, never blocking (Jordan standing policy
+          // 2026-07-18, reaffirmed 2026-07-19): measurements are recorded in
+          // shadowQa for display; only framing/geometry issues gate.
+          const reviewQaIssues = [...rigged.qaIssues];
           console.info("[useAssembledPromptGeneration] Best Bottles rig postprocess", {
             shifted: rigged.shifted,
             shiftXPx: rigged.shiftXPx,
@@ -810,12 +861,7 @@ export function useAssembledPromptGeneration() {
                 shadowQa: rigged.shadowQa,
                 qaIssues: reviewQaIssues,
                 framingDecision: rigged.framingDecision,
-                lifecycleState:
-                  rigged.shadowOwner !== "model" || rigged.shadowQa?.status === "pass"
-                    ? "qa-passed"
-                    : rigged.shadowQa?.status === "fail"
-                      ? "qa-failed"
-                      : "review-pending",
+                lifecycleState: "qa-passed",
                 lastError: null,
               });
             }
@@ -891,6 +937,11 @@ export function useAssembledPromptGeneration() {
       const generated: AssembledGenerationResult = {
         imageUrl: finalImageUrl,
         savedImageId,
+        usedProvider:
+          typeof data.usedProvider === "string" && data.usedProvider.trim()
+            ? data.usedProvider
+            : null,
+        durationMs: Date.now() - generationStartedAtMs,
         prompt: typeof data.finalPrompt === "string" && data.finalPrompt.trim()
           ? data.finalPrompt
           : assembled.prompt,
@@ -904,13 +955,9 @@ export function useAssembledPromptGeneration() {
           reason: rigPostprocessDecision.reason,
           framingDecision: riggedSnapshot?.framingDecision ?? null,
           framingQa: riggedSnapshot?.framingQa ?? null,
-          qaIssues:
-            riggedSnapshot?.shadowOwner === "model" && riggedSnapshot.shadowQa?.status !== "pass"
-              ? [
-                  ...(riggedSnapshot.qaIssues ?? []),
-                  `Model-owned shadow ${riggedSnapshot.shadowQa?.status ?? "review"} requires review.`,
-                ]
-              : riggedSnapshot?.qaIssues ?? [],
+          // Model-owned shadows carry no machine QA (analyzer removed, Jordan
+          // 2026-07-19) — human visual confirmation is the only shadow review.
+          qaIssues: riggedSnapshot?.qaIssues ?? [],
           objectBounds: riggedSnapshot?.objectBounds ?? null,
           preTransformObjectBounds: riggedSnapshot?.preTransformObjectBounds ?? null,
           shiftXPx: riggedSnapshot?.shiftXPx ?? null,

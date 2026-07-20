@@ -20,6 +20,8 @@ export const ALL_CYLINDER_SMOKE_TARGETS: readonly CylinderSmokeTarget[] = [
     sku: "GB-SPR-CLR-3ML-BLK",
     reference:
       `${ROOT}/pipeline/aios-shopify-pdp-images/00-input/reference-flattened/cylinder-3ml-clear-12mm-finemist/GB-SPR-CLR-3ML-BLK__GBSpry3mlClBlk__pdp-main__v001.png`,
+    mode: "cap-off",
+    capState: "detached",
   },
   {
     caseId: "4ml",

@@ -1,0 +1,69 @@
+{
+  "version": "best-bottles-cylinder-remediation-geometry-overrides-v1",
+  "reviewer": "Jordan Richter",
+  "reviewedAt": "2026-07-14",
+  "precedence": "manual review + exact live-site PDP specification > catalog consensus",
+  "notes": "Narrow Cylinder reference-remediation exceptions. These do not write to Convex and must not be generalized to sibling identities.",
+  "overrides": [
+    {
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MBLU",
+      "websiteSku": "GBCyl5SpryBluMatt",
+      "bodyHeightMm": 53,
+      "assembledHeightMm": 72,
+      "widthAxisMm": 17,
+      "secondAxisMm": 17,
+      "scaleAuthority": "exact-pdp-override",
+      "source": "Live Best Bottles PDP + client visual approval",
+      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-matte-blue-spray",
+      "note": "Exact PDP publishes 53 ±1 mm body, 72 ±1 mm assembled, and 17 ±0.5 mm diameter. Client approved the exact PSD-derived identity on 2026-07-14."
+    },
+    {
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MGLD",
+      "websiteSku": "GBCyl5SpryGlMatt",
+      "bodyHeightMm": 53,
+      "assembledHeightMm": 72,
+      "widthAxisMm": 17,
+      "secondAxisMm": 17,
+      "scaleAuthority": "exact-pdp-override",
+      "source": "Live Best Bottles PDP + client visual approval",
+      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-matte-gold-spray",
+      "note": "Exact PDP publishes 53 ±1 mm body, 72 ±1 mm assembled, and 17 ±0.5 mm diameter. Client approved the exact PSD-derived identity on 2026-07-14."
+    },
+    {
+      "graceSku": "GB-CYL-CLR-5ML-SPR-SGLD",
+      "websiteSku": "GBCyl5SpryGlSh",
+      "bodyHeightMm": 53,
+      "assembledHeightMm": 72,
+      "widthAxisMm": 17,
+      "secondAxisMm": 17,
+      "scaleAuthority": "exact-pdp-override",
+      "source": "Live Best Bottles PDP + client visual approval",
+      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-shiny-gold-spray",
+      "note": "Exact PDP publishes 53 ±1 mm body, 72 ±1 mm assembled, and 17 ±0.5 mm diameter. Client approved the exact PSD-derived identity on 2026-07-14."
+    },
+    {
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MSLV",
+      "websiteSku": "GBCyl5SprySlMatt",
+      "bodyHeightMm": 53,
+      "assembledHeightMm": 72,
+      "widthAxisMm": 17,
+      "secondAxisMm": 17,
+      "scaleAuthority": "exact-pdp-override",
+      "source": "Live Best Bottles PDP + client visual approval",
+      "sourceUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-matte-silver-spray",
+      "note": "Exact PDP publishes 53 ±1 mm body, 72 ±1 mm assembled, and 17 ±0.5 mm diameter. Client approved the exact PSD-derived identity on 2026-07-14."
+    },
+    {
+      "graceSku": "GB-CYL-CLR-9ML-T-01",
+      "websiteSku": "GB09BlackCapApp",
+      "bodyHeightMm": null,
+      "assembledHeightMm": 50,
+      "widthAxisMm": 20,
+      "secondAxisMm": 20,
+      "scaleAuthority": "assembled-height-only",
+      "source": "Live Best Bottles PDP + client visual approval",
+      "sourceUrl": "https://www.bestbottles.com/product/Vial-design-9-ml-clear-glass-black-cap-with-glass-rod-applicator",
+      "note": "Exact PDP publishes 50 ±0.5 mm assembled height, 20 ±0.5 mm diameter, and 18-400 neck but no body-only height. The contradictory 79.4 mm body value is not consumed. This identity remains a Vial/glass-wand outlier and must never resolve to a roll-on."
+    }
+  ]
+}

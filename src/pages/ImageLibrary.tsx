@@ -53,6 +53,7 @@ import { cn } from "@/lib/utils";
 import { ImageEditorModal, type ImageEditorImage } from "@/components/image-editor/ImageEditorModal";
 import { ProductSelector } from "@/components/forge/ProductSelector";
 import { SanityMediaPlacementDialog } from "@/components/library/SanityMediaPlacementDialog";
+import { BestBottlesReconciliationBadges } from "@/components/bestbottles/BestBottlesReconciliationBadges";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import {
   getBestBottlesCatalogProducts,
@@ -84,6 +85,11 @@ import {
   type PipelineSkuJob,
 } from "@/lib/bestBottlesPipeline";
 import { expectedBestBottlesVisualIdentityForProduct } from "@/lib/bestBottlesShopifyPushIdentity";
+import {
+  BEST_BOTTLES_RECONCILIATION_QUERY_KEY,
+  indexBestBottlesImageReconciliations,
+  listBestBottlesImageReconciliationStatus,
+} from "@/lib/bestBottlesImageReconciliation";
 import {
   getBestBottlesImageProvenance,
   type BestBottlesImageProvenance,
@@ -203,6 +209,11 @@ const PRIMARY_PDP_MODE: BestBottlesPdpMode = "cap-on";
 const IMAGE_LIBRARY_INITIAL_ROWS = 10000;
 const IMAGE_LIBRARY_PAGE_SIZE = 300;
 const IMAGE_LIBRARY_MAX_ROWS = 10000;
+// Tiles are layout-animated motion.divs — mounting thousands at once locks the
+// main thread for tens of seconds (the 2026-07-20 "modal won't close" freeze:
+// 3,565 tiles re-rendered on every open/close). Render a window; selection,
+// search, and bulk actions still operate on the FULL filtered set.
+const IMAGE_LIBRARY_VISIBLE_TILES_INITIAL = 120;
 const IMAGE_LIBRARY_SELECT =
   "id, image_url, session_id, session_name, goal_type, aspect_ratio, final_prompt, description, library_category, library_tags, reference_image_url, brand_context_used, parent_image_id, is_hero_image, created_at, is_archived";
 const BEST_BOTTLES_GRACE_SKU_PATTERN = /\b(?:GB|LB|PB|AB|BB)-[A-Z0-9][A-Z0-9-]*\b/i;
@@ -1055,6 +1066,21 @@ export default function ImageLibrary() {
     staleTime: 2 * 60 * 1000,
   });
 
+  const {
+    data: bestBottlesImageReconciliations = [],
+    error: bestBottlesImageReconciliationError,
+  } = useQuery({
+    queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY, currentOrganizationId],
+    queryFn: async () => listBestBottlesImageReconciliationStatus(currentOrganizationId!),
+    enabled: isBestBottlesOrg && Boolean(currentOrganizationId),
+    staleTime: 30 * 1000,
+  });
+
+  const bestBottlesImageReconciliationById = useMemo(
+    () => indexBestBottlesImageReconciliations(bestBottlesImageReconciliations),
+    [bestBottlesImageReconciliations],
+  );
+
   const filteredBestBottlesProductGroups = useMemo(() => {
     const query = bestBottlesGroupSearch.trim().toLowerCase();
     const groups = [...bestBottlesProductGroups].sort((a, b) =>
@@ -1715,6 +1741,18 @@ export default function ImageLibrary() {
     sortBy,
     skuSizeFilter,
   ]);
+
+  // Windowed grid rendering — see IMAGE_LIBRARY_VISIBLE_TILES_INITIAL.
+  const [visibleTileCount, setVisibleTileCount] = useState(
+    IMAGE_LIBRARY_VISIBLE_TILES_INITIAL,
+  );
+  useEffect(() => {
+    setVisibleTileCount(IMAGE_LIBRARY_VISIBLE_TILES_INITIAL);
+  }, [filteredImages]);
+  const visibleImages = useMemo(
+    () => filteredImages.slice(0, visibleTileCount),
+    [filteredImages, visibleTileCount],
+  );
 
   // Handlers
   const handleImageClick = (image: GeneratedImage) => {
@@ -2880,6 +2918,12 @@ export default function ImageLibrary() {
             </Button>
           </div>
 
+          {isBestBottlesOrg && bestBottlesImageReconciliationError && (
+            <div className="rounded border border-red-400/50 bg-red-950/40 px-3 py-2 text-xs text-red-100">
+              Reconciliation state is unavailable. Apply the Best Bottles image reconciliation migration before approving or publishing new Studio masters.
+            </div>
+          )}
+
           {/* Search Bar - Full Width */}
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-[var(--darkroom-text)]/40 transition-colors group-focus-within:text-[var(--darkroom-accent)]" />
@@ -3175,7 +3219,7 @@ export default function ImageLibrary() {
             )}
           >
             <AnimatePresence mode="popLayout">
-              {filteredImages.map((image) => (
+              {visibleImages.map((image) => (
                 <motion.div
                   key={image.id}
                   layout
@@ -3473,6 +3517,15 @@ export default function ImageLibrary() {
                           {t.replace(/^sku:/, "")}
                         </Badge>
                       ))}
+                    {isBestBottlesOrg && !bestBottlesImageReconciliationError && (
+                      <BestBottlesReconciliationBadges
+                        reconciliation={bestBottlesImageReconciliationById.get(image.id) ?? null}
+                        isStudioMaster={
+                          (image.library_tags ?? []).includes("brand:best-bottles") &&
+                          (image.library_tags ?? []).includes("studio-master")
+                        }
+                      />
+                    )}
                     {(() => {
                       const syncBadge = getBestBottlesSyncBadge(image);
                       if (!syncBadge) return null;
@@ -3491,6 +3544,18 @@ export default function ImageLibrary() {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
+        )}
+        {filteredImages.length > visibleImages.length && (
+          <div className="flex justify-center py-6">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setVisibleTileCount((count) => count + IMAGE_LIBRARY_PAGE_SIZE)
+              }
+            >
+              Show more ({filteredImages.length - visibleImages.length} remaining)
+            </Button>
           </div>
         )}
           </div>

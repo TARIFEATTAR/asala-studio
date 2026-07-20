@@ -119,12 +119,17 @@ export async function prepareEligibleLayers(input: {
     try {
       const source = await (input.loadSourceAsset ?? loadSourceAsset)(row);
       const reviewLayerPath = path.join(layersDirectory, `${safeFilename(row.websiteSku)}.png`);
+      const usesRightHandVintageBottleLane = row.plateId === "08";
       const result = await prepareLineupProductLayer({
         sourceBytes: source.imageBytes,
         sourceChecksum: row.primarySourceChecksum,
         reviewLayerPath,
         heightWithCapMm: row.measurements.heightWithCapMm,
         diameterMm: row.measurements.diameterMm,
+        expectedPrimaryLane: usesRightHandVintageBottleLane
+          ? { leftPct: 0.6, rightPct: 1 }
+          : undefined,
+        clipPrimarySearchToLane: usesRightHandVintageBottleLane,
       });
       if (result.status === "blocked") {
         blockers.push({ ...identity, reasons: result.blockers });

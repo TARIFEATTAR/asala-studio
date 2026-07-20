@@ -14,6 +14,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import {
+  getCylinderGenerationTopologyForPreset,
+  getCylinderReferenceForPreset,
+  getCylinderRoleAwareReadinessForIdentity,
+  getCylinderVerifiedReferenceCacheKey,
+  isCylinderReferenceAuthorizedForPreset,
+  useBestBottlesCylinderRoleAwareReadiness,
+} from "@/hooks/useBestBottlesCylinderProductionReadiness";
+import {
+  orchestrateCylinderStudioGeneration,
+  prepareCylinderStudioGeneration,
+  type CylinderStudioPreparedGeneration,
+} from "@/lib/bestBottlesCylinderStudioOrchestration";
 import { toast } from "@/hooks/use-toast";
 import { UploadZone } from "@/components/darkroom/UploadZone";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
@@ -78,6 +91,21 @@ const MASTER_IMAGE_MODEL_OPTIONS = [
     value: "openai-image-2",
     label: "GPT Image 2",
     description: "Primary high-fidelity reference edit model",
+  },
+  // Google image models — supported server side (aiProvider mapping → Gemini).
+  // Provider policy (Jordan 2026-07-20): PDP masters ALWAYS render on GPT
+  // Image 2 — the server force is unconditional and these selections do not
+  // override it. Nano Banana is for hero thumbnails and marketing assets,
+  // where the rig contract is not geometry-locked.
+  {
+    value: "nano-banana-pro",
+    label: "Nano Banana Pro (Gemini 3 Pro Image)",
+    description: "Hero thumbnails + marketing only — PDP masters stay on GPT Image 2",
+  },
+  {
+    value: "nano-banana-2",
+    label: "Nano Banana 2 (Gemini 3.1 Flash Image)",
+    description: "Hero thumbnails + marketing only — PDP masters stay on GPT Image 2",
   },
 ] as const;
 
@@ -1145,6 +1173,62 @@ export function MastersTabPanel({
   const isCylinderReferenceWorkflow = isCylinderFamilyName(
     selectedProduct?.family ?? familyName,
   );
+  const cylinderRoleAwareReadinessQuery = useBestBottlesCylinderRoleAwareReadiness();
+  const cylinderRoleAwareReadinessIndex =
+    cylinderRoleAwareReadinessQuery.data?.index ?? null;
+  const selectedCylinderRoleAwareReadiness = isCylinderReferenceWorkflow
+    ? getCylinderRoleAwareReadinessForIdentity(
+        cylinderRoleAwareReadinessIndex,
+        selectedProduct?.websiteSku,
+        selectedProduct?.graceSku,
+      )
+    : null;
+  const selectedCylinderReferenceAuthority = getCylinderReferenceForPreset(
+    selectedCylinderRoleAwareReadiness,
+    presetId,
+  );
+  const isSelectedCylinderProductionQualified =
+    !isCylinderReferenceWorkflow ||
+    isCylinderReferenceAuthorizedForPreset(
+      selectedCylinderRoleAwareReadiness,
+      presetId,
+      selectedCylinderReferenceAuthority?.publicUrl,
+    );
+  const isCylinderStudioReferencePromoted =
+    !isCylinderReferenceWorkflow ||
+    isCylinderReferenceAuthorizedForPreset(
+      selectedCylinderRoleAwareReadiness,
+      presetId,
+      customReference?.url,
+    );
+  const isCylinderVariantProductionQualified = (product: Product): boolean =>
+    !isCylinderFamilyName(product.family ?? familyName) || (() => {
+      const row = getCylinderRoleAwareReadinessForIdentity(
+        cylinderRoleAwareReadinessIndex,
+        product.websiteSku,
+        product.graceSku,
+      );
+      const reference = getCylinderReferenceForPreset(row, presetId);
+      return isCylinderReferenceAuthorizedForPreset(row, presetId, reference?.publicUrl);
+    })();
+  const getCylinderRoleReference = (
+    product: Product,
+    preset: string,
+  ): UploadedReferenceImage | null => {
+    if (!isCylinderFamilyName(product.family ?? familyName)) return null;
+    const row = getCylinderRoleAwareReadinessForIdentity(
+      cylinderRoleAwareReadinessIndex,
+      product.websiteSku,
+      product.graceSku,
+    );
+    const reference = getCylinderReferenceForPreset(row, preset);
+    if (!isCylinderReferenceAuthorizedForPreset(row, preset, reference?.publicUrl)) return null;
+    return {
+      url: reference?.publicUrl ?? "",
+      name: `${product.graceSku}--${reference?.roleId ?? "reference"}.png`,
+      referenceSource: "flattened-product-truth",
+    };
+  };
   const getCylinderRetiredReferenceIssue = (
     candidateValues: readonly unknown[],
     sku: Product | null = selectedProduct,
@@ -1330,6 +1414,9 @@ export function MastersTabPanel({
     sku: Product,
     preset: string,
   ): UploadedReferenceImage | FolderReferenceEntry | null => {
+    if (isCylinderFamilyName(sku.family ?? familyName)) {
+      return getCylinderRoleReference(sku, preset);
+    }
     const folderReference =
       referenceFolder.size > 0 ? lookupFolderReference(sku, preset) : null;
     return folderReference ?? lookupPersistedReference(sku);
@@ -1386,6 +1473,13 @@ export function MastersTabPanel({
     reference: UploadedReferenceImage | FolderReferenceEntry | null;
     source: BatchPreflightEntry["referenceSource"];
   } => {
+    if (isCylinderFamilyName(sku.family ?? familyName)) {
+      const reference = getCylinderRoleReference(sku, preset);
+      return {
+        reference,
+        source: reference ? "synced" : "missing",
+      };
+    }
     const folderReference =
       referenceFolder.size > 0 ? lookupFolderReference(sku, preset) : null;
     if (folderReference) return { reference: folderReference, source: "uploaded" };
@@ -1551,19 +1645,17 @@ export function MastersTabPanel({
    * isn't silently overwritten by SKU navigation.
    */
   useEffect(() => {
-    if (folderUserOverride) return;
+    if (folderUserOverride && !isCylinderReferenceWorkflow) return;
     if (!selectedProduct) return;
-    const matched =
-      referenceFolder.size > 0 ? lookupFolderReference(selectedProduct, presetId) : null;
+    const matched = lookupAvailableReference(selectedProduct, presetId);
     if (matched) {
-      setCustomReference({ url: matched.url, name: matched.name });
+      setCustomReference({
+        url: matched.url,
+        name: matched.name,
+        referenceSource: matched.referenceSource,
+      });
     } else {
-      const persisted = lookupPersistedReference(selectedProduct);
-      if (persisted) {
-        setCustomReference(persisted);
-      } else {
-        setCustomReference(null);
-      }
+      setCustomReference(null);
     }
     // selectedAngleId is in the dep list so picking a new angle chip re-runs
     // the lookup against the angle's own modifier suffix (3qtr-left, side, etc.).
@@ -1576,6 +1668,8 @@ export function MastersTabPanel({
     selectedAngleId,
     persistedReferenceImagesBySku,
     usePersistedReferences,
+    cylinderRoleAwareReadinessIndex,
+    isCylinderReferenceWorkflow,
   ]);
 
   useEffect(() => {
@@ -1766,6 +1860,7 @@ export function MastersTabPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allFamilyProducts, familyVariants, persistedReferenceImagesBySku]);
   const hasAnyReferenceSource =
+    (isCylinderReferenceWorkflow && cylinderRoleAwareReadinessIndex !== null) ||
     referenceFolder.size > 0 ||
     (usePersistedReferences && usablePersistedReferenceCount > 0);
 
@@ -1859,6 +1954,7 @@ export function MastersTabPanel({
     const source = uniqueProductsByGraceSku(allFamilyProducts ?? familyVariants ?? []);
     return source.filter(
       (v) =>
+        isCylinderVariantProductionQualified(v) &&
         lookupAvailableReference(v, presetId) !== null &&
         getMaskControlIssueForSku(v, presetId) === null &&
         getMeasurementIssue(v) === null,
@@ -1875,6 +1971,7 @@ export function MastersTabPanel({
     persistedReferenceImagesBySku,
     hasAnyReferenceSource,
     usePersistedReferences,
+    cylinderRoleAwareReadinessIndex,
   ]);
 
   const allReferenceMeasurementBlockedSkus = useMemo(() => {
@@ -2511,13 +2608,13 @@ export function MastersTabPanel({
     // re-apply the match immediately.
     setFolderUserOverride(false);
     if (!selectedProduct) return;
-    const matched =
-      referenceFolder.size > 0 ? lookupFolderReference(selectedProduct, presetId) : null;
+    const matched = lookupAvailableReference(selectedProduct, presetId);
     if (matched) {
-      setCustomReference({ url: matched.url, name: matched.name });
-    } else {
-      const persisted = lookupPersistedReference(selectedProduct);
-      if (persisted) setCustomReference(persisted);
+      setCustomReference({
+        url: matched.url,
+        name: matched.name,
+        referenceSource: matched.referenceSource,
+      });
     }
   };
 
@@ -2527,13 +2624,16 @@ export function MastersTabPanel({
       setCustomReference(null);
       return;
     }
-    const matched =
-      referenceFolder.size > 0 ? lookupFolderReference(selectedProduct, presetId) : null;
+    const matched = lookupAvailableReference(selectedProduct, presetId);
     if (matched) {
-      setCustomReference({ url: matched.url, name: matched.name });
+      setCustomReference({
+        url: matched.url,
+        name: matched.name,
+        referenceSource: matched.referenceSource,
+      });
       return;
     }
-    setCustomReference(lookupPersistedReference(selectedProduct));
+    setCustomReference(null);
   };
 
   const togglePersistedReferences = () => {
@@ -2548,14 +2648,47 @@ export function MastersTabPanel({
   const buildPromptPreflightForSku = (
     product: Product,
     referenceImagePath: string | null | undefined,
-  ): BestBottlesPromptPreflight =>
-    buildBestBottlesPromptPreflight({
-      product,
+  ): BestBottlesPromptPreflight => {
+    const isCylinderProduct = isCylinderFamilyName(product.family ?? familyName);
+    const roleAwareRow = isCylinderProduct
+      ? getCylinderRoleAwareReadinessForIdentity(
+          cylinderRoleAwareReadinessIndex,
+          product.websiteSku,
+          product.graceSku,
+        )
+      : null;
+    const roleAwareTopology = isCylinderProduct
+      ? getCylinderGenerationTopologyForPreset(roleAwareRow, selectedPreset.id)
+      : null;
+    const detachedSidecar = selectedPreset.id === "grid-card-exploded-2000x2200";
+    const generationTopology = roleAwareTopology ?? (
+      isCylinderProduct
+        ? null
+        : {
+            capState: detachedSidecar ? "detached" as const : "assembled" as const,
+            mode: detachedSidecar ? "cap-off" as const : "cap-on" as const,
+            componentTopology: detachedSidecar
+              ? "fitment-attached-cap-right-sidecar" as const
+              : "assembled" as const,
+            requiresCapOffReference: detachedSidecar,
+          }
+    );
+    return buildBestBottlesPromptPreflight({
+      product: {
+        ...product,
+        capState: generationTopology?.capState ?? null,
+        mode: generationTopology?.mode ?? null,
+        capOffReferenceId: generationTopology?.requiresCapOffReference
+          ? referenceImagePath ?? undefined
+          : undefined,
+        componentTopology: generationTopology?.componentTopology ?? null,
+      },
       referenceImagePath,
       bodyMaterial: inferBestBottlesBodyMaterial(product),
       canvas: selectedPreset.canvas,
       system: BEST_BOTTLES_PROMPT_SYSTEM,
     });
+  };
   const selectedPromptPreflight = selectedProduct
     ? buildPromptPreflightForSku(selectedProduct, customReference?.url ?? null)
     : null;
@@ -2623,6 +2756,7 @@ export function MastersTabPanel({
       reference: UploadedReferenceImage | FolderReferenceEntry | null;
       qcResult: BestBottlesAlphaMaskQcResult | null;
     },
+    preparedCylinderGeneration?: CylinderStudioPreparedGeneration | null,
   ) => {
     const liquid: LiquidSpec | null = liquidEnabled
       ? { present: true, color: liquidColor, fillPercent: liquidFill }
@@ -2712,6 +2846,37 @@ export function MastersTabPanel({
     }
     const skuBodyMaterial = inferBestBottlesBodyMaterial(sku);
     const isCylinderSku = isCylinderFamilyName(sku.family);
+    const cylinderRoleAwareRow = isCylinderSku
+      ? getCylinderRoleAwareReadinessForIdentity(
+          cylinderRoleAwareReadinessIndex,
+          sku.websiteSku,
+          sku.graceSku,
+        )
+      : null;
+    const cylinderGenerationTopology = isCylinderSku
+      ? getCylinderGenerationTopologyForPreset(cylinderRoleAwareRow, selectedPreset.id)
+      : null;
+    const cylinderRoleReference = isCylinderSku
+      ? getCylinderReferenceForPreset(cylinderRoleAwareRow, selectedPreset.id)
+      : null;
+    if (
+      isCylinderSku &&
+      (
+        !cylinderGenerationTopology ||
+        !isCylinderReferenceAuthorizedForPreset(
+          cylinderRoleAwareRow,
+          selectedPreset.id,
+          referenceUrl,
+        )
+      )
+    ) {
+      toast({
+        title: "Cylinder reference role blocked",
+        description: `${sku.graceSku}: the selected preset requires its exact immutable ${cylinderRoleReference?.roleId ?? "reference role"} URL and export hash.`,
+        variant: "destructive",
+      });
+      return null;
+    }
     const retiredReferenceIssue =
       isCylinderSku && referenceUrl
         ? getRetiredTransparentBestBottlesReferenceIssue([
@@ -2794,12 +2959,12 @@ export function MastersTabPanel({
       return null;
     }
 
-    return generate(assembled, {
+    const invokeGeneration = (cylinderPreparation: CylinderStudioPreparedGeneration | null) => generate(assembled, {
       aiProvider: masterAiProvider,
       // Custom upload (PSD-rendered PNG) takes priority over Convex's
       // legacy .gif imageUrl — the latter is silently dropped by the
       // unsupported-format filter in useAssembledPromptGeneration.
-      referenceImageUrl: referenceUrl ?? sku.imageUrl,
+      referenceImageUrl: cylinderPreparation?.verifiedReference.dataUrl ?? referenceUrl ?? sku.imageUrl,
       glassSpecularityReferenceImageUrl: secondaryReferenceForGeneration,
       productContext: {
         name: sku.itemName,
@@ -2809,8 +2974,26 @@ export function MastersTabPanel({
         family: sku.family,
         category: sku.category,
         presetId: selectedPreset.id,
-        capState: selectedPreset.id === "grid-card-exploded-2000x2200" ? "detached" : null,
-        mode: selectedPreset.id === "grid-card-exploded-2000x2200" ? "cap-off" : null,
+        capState: cylinderGenerationTopology?.capState ?? (
+          selectedPreset.id === "grid-card-exploded-2000x2200" ? "detached" : null
+        ),
+        mode: cylinderGenerationTopology?.mode ?? (
+          selectedPreset.id === "grid-card-exploded-2000x2200" ? "cap-off" : null
+        ),
+        componentTopology: cylinderGenerationTopology?.componentTopology ?? (
+          selectedPreset.id === "grid-card-exploded-2000x2200"
+            ? "fitment-attached-cap-right-sidecar"
+            : "assembled"
+        ),
+        capOffReferenceId: cylinderGenerationTopology?.requiresCapOffReference
+          ? cylinderPreparation?.verifiedReference.authority.capOffReferenceId ?? null
+          : !isCylinderSku && selectedPreset.id === "grid-card-exploded-2000x2200"
+            ? referenceUrl ?? null
+            : null,
+        topologyReferenceId:
+          cylinderPreparation?.verifiedReference.authority.topologyReferenceId ?? null,
+        referenceRoleId:
+          cylinderPreparation?.verifiedReference.authority.referenceRoleId ?? null,
         bodyMaterial: skuBodyMaterial,
         color: sku.color ?? null,
         sku: sku.graceSku,
@@ -2819,7 +3002,7 @@ export function MastersTabPanel({
         heightWithCap: sku.heightWithCap,
         diameter: sku.diameter,
         neckThreadSize: sku.neckThreadSize,
-        measurementSource: "best-bottles-convex-catalog",
+        measurementSource: cylinderPreparation?.product.measurementSource ?? "best-bottles-convex-catalog",
         measurementSourceUrl: websiteTruth?.liveFinalUrl || websiteTruth?.liveSourceUrl || null,
         measurementSourceNote:
           "Generation-time snapshot of the Best Bottles catalog fields; tolerances remain embedded in the source strings.",
@@ -2859,6 +3042,7 @@ export function MastersTabPanel({
         rigVersion: generationIdentity.rigVersion,
         qaStatus: generationIdentity.qaStatus,
         canvas: generationIdentity.canvas,
+        canonicalGeometryContract: cylinderPreparation?.canonicalGeometryContract ?? null,
       },
       sceneOverlay,
       // Human-readable identifiers live on library tags. sessionId is a uuid
@@ -2877,6 +3061,22 @@ export function MastersTabPanel({
         sku.websiteSku ? `websiteSku:${sku.websiteSku}` : null,
         isCylinderSku ? "reference-lineage:flattened-single-source" : null,
         isCylinderSku ? "truth-ref:flattened-png" : null,
+        cylinderRoleReference ? `reference-role:${cylinderRoleReference.roleId}` : null,
+        cylinderRoleReference?.exportSha256
+          ? `reference-sha256:${cylinderRoleReference.exportSha256}`
+          : null,
+        cylinderRoleReference?.topology
+          ? `reference-topology:${cylinderRoleReference.topology}`
+          : null,
+        cylinderRoleReference?.approvedException
+          ? `reference-exception:${cylinderRoleReference.approvedException}`
+          : null,
+        cylinderRoleReference?.productionStatus
+          ? `reference-production:${cylinderRoleReference.productionStatus}`
+          : null,
+        cylinderRoleReference?.sourceReviewStatus
+          ? `reference-source-review:${cylinderRoleReference.sourceReviewStatus}`
+          : null,
         usesCylinderMaskControl && cylinderMaskReference?.url ? "mask-ref:transparent-png" : null,
         usesCylinderMaskControl && cylinderMaskQcResult?.passed ? "mask-qc:passed" : null,
         glassSpecularityReference?.url ? "material-specularity-ref:operator-override" : null,
@@ -2890,35 +3090,41 @@ export function MastersTabPanel({
       ].filter((t): t is string => Boolean(t)),
       precompiledPromptRecord: promptPreflight.record,
     });
+    if (!isCylinderSku) return invokeGeneration(null);
+    try {
+      return await orchestrateCylinderStudioGeneration({
+        product: sku,
+        row: cylinderRoleAwareRow,
+        presetId: selectedPreset.id,
+        referenceUrl,
+        prepared: preparedCylinderGeneration,
+        invoke: invokeGeneration,
+      });
+    } catch (error) {
+      toast({
+        title: "Cylinder reference bytes blocked",
+        description: `${sku.graceSku}: ${error instanceof Error ? error.message : String(error)}`,
+        variant: "destructive",
+      });
+      return null;
+    }
   };
 
   const handleGenerate = async () => {
     if (!selectedProduct) return;
+    if (!isSelectedCylinderProductionQualified || !isCylinderStudioReferencePromoted) {
+      toast({
+        title: "Cylinder reference role blocked",
+        description: selectedCylinderReferenceAuthority?.productionStatus === "generation-authorized"
+          ? `${selectedProduct.graceSku}: use the exact immutable ${selectedCylinderReferenceAuthority.roleId} URL selected by this preset; the current URL/hash belongs to a different or unverified role.`
+          : selectedCylinderReferenceAuthority
+            ? `${selectedProduct.graceSku}: ${selectedCylinderReferenceAuthority.blockers.join(", ") || "this reference role is not generation-authorized"}.`
+            : `${selectedProduct.graceSku}: exact Website + Grace SKU role authority is unavailable.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setLiveTruthRecovery(null);
-    const measurementIssue = getMeasurementIssue(selectedProduct);
-    if (measurementIssue) {
-      await requireLiveTruthVerification(selectedProduct, "measurement", measurementIssue);
-      toast({
-        title: "Missing measurements",
-        description: `${selectedProduct.graceSku}: ${measurementIssue} Add or measure dimensions before generating.`,
-        variant: "destructive",
-      });
-      return;
-    }
-    const identity = buildBestBottlesGenerationIdentity(selectedProduct, {
-      bodyMaterial: inferBestBottlesBodyMaterial(selectedProduct),
-      sourceReference: customReference?.url ?? selectedProduct.imageUrl ?? null,
-    });
-    const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
-    if (identityIssue) {
-      await requireLiveTruthVerification(selectedProduct, "sku_identity", identityIssue);
-      toast({
-        title: "SKU identity blocked",
-        description: `${selectedProduct.graceSku}: ${identityIssue}`,
-        variant: "destructive",
-      });
-      return;
-    }
     if (!customReference?.url) {
       await requireLiveTruthVerification(
         selectedProduct,
@@ -2942,8 +3148,54 @@ export function MastersTabPanel({
       });
       return;
     }
-    const referenceCanvas = await readImageCanvasSize(customReference.url);
-        const canonicalReferenceIssue = getBestBottlesCanonicalReferenceIssue(
+    let cylinderPreparation: CylinderStudioPreparedGeneration | null = null;
+    if (isCylinderReferenceWorkflow) {
+      try {
+        cylinderPreparation = await prepareCylinderStudioGeneration({
+          product: selectedProduct,
+          row: selectedCylinderRoleAwareReadiness,
+          presetId,
+          referenceUrl: customReference.url,
+        });
+      } catch (error) {
+        toast({
+          title: "Cylinder canonical generation blocked",
+          description: `${selectedProduct.graceSku}: ${error instanceof Error ? error.message : String(error)}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    const generationProduct = cylinderPreparation?.product ?? selectedProduct;
+    const measurementIssue = getMeasurementIssue(generationProduct);
+    if (measurementIssue) {
+      await requireLiveTruthVerification(selectedProduct, "measurement", measurementIssue);
+      toast({
+        title: "Missing measurements",
+        description: `${selectedProduct.graceSku}: ${measurementIssue} Add or measure dimensions before generating.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    const identity = buildBestBottlesGenerationIdentity(generationProduct, {
+      bodyMaterial: inferBestBottlesBodyMaterial(generationProduct),
+      sourceReference: customReference.url,
+    });
+    const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
+    if (identityIssue) {
+      await requireLiveTruthVerification(selectedProduct, "sku_identity", identityIssue);
+      toast({
+        title: "SKU identity blocked",
+        description: `${selectedProduct.graceSku}: ${identityIssue}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    const referenceCanvas = cylinderPreparation?.referenceCanvas
+      ?? await readImageCanvasSize(customReference.url);
+    const canonicalReferenceIssue = isCylinderReferenceWorkflow && isCylinderStudioReferencePromoted
+      ? null
+      : getBestBottlesCanonicalReferenceIssue(
           customReference.url,
           referenceCanvas,
           {
@@ -2969,15 +3221,16 @@ export function MastersTabPanel({
       });
       return;
     }
-    if (selectedPromptPreflight?.status === "error") {
+    const generationPromptPreflight = buildPromptPreflightForSku(generationProduct, customReference.url);
+    if (generationPromptPreflight.status === "error") {
       await requireLiveTruthVerification(
         selectedProduct,
         "prompt_preflight",
-        selectedPromptPreflight.issue ?? "Compiled prompt is missing.",
+        generationPromptPreflight.issue ?? "Compiled prompt is missing.",
       );
       toast({
         title: "Prompt preflight blocked",
-        description: `${selectedProduct.graceSku}: ${selectedPromptPreflight.issue ?? "Compiled prompt is missing."}`,
+        description: `${selectedProduct.graceSku}: ${generationPromptPreflight.issue ?? "Compiled prompt is missing."}`,
         variant: "destructive",
       });
       return;
@@ -2992,9 +3245,10 @@ export function MastersTabPanel({
     }
     await handleAssemble(); // populate assembledCache for the prompt-preview button
     const result = await generateOne(
-      selectedProduct,
+      generationProduct,
       customReference?.url ?? null,
       lookupMaskControlForSku(selectedProduct, presetId),
+      cylinderPreparation,
     );
     if (result) {
       await onMasterGenerated?.(result, selectedProduct);
@@ -3032,6 +3286,7 @@ export function MastersTabPanel({
     if (!familyVariants || !hasAnyReferenceSource) return [];
     return familyVariants.filter(
       (v) =>
+        isCylinderVariantProductionQualified(v) &&
         lookupAvailableReference(v, presetId) !== null &&
         getMaskControlIssueForSku(v, presetId) === null &&
         getMeasurementIssue(v) === null,
@@ -3047,6 +3302,7 @@ export function MastersTabPanel({
     persistedReferenceImagesBySku,
     hasAnyReferenceSource,
     usePersistedReferences,
+    cylinderRoleAwareReadinessIndex,
   ]);
 
   const measurementBlockedSkus = useMemo(() => {
@@ -3281,6 +3537,7 @@ export function MastersTabPanel({
   const handleGenerateBatch = async (variantsToGenerate: Product[]) => {
     if (variantsToGenerate.length === 0) return;
     const failures: Array<{ graceSku: string; error: string }> = [];
+    const verifiedCylinderPreparations = new Map<string, CylinderStudioPreparedGeneration>();
     const recordFailure = async (sku: Product, error: string) => {
       failures.push({ graceSku: sku.graceSku, error });
       await onMasterGenerationFailed?.(error, sku);
@@ -3305,15 +3562,49 @@ export function MastersTabPanel({
           await recordFailure(sku, referenceIssue ?? "No usable reference is attached.");
           continue;
         }
-        const referenceCanvas = await readImageCanvasSize(ref.url);
-        const canonicalReferenceIssue = getBestBottlesCanonicalReferenceIssue(
-          ref.url,
-          referenceCanvas,
-          {
-            referenceSource: ref.referenceSource,
-            referenceName: ref.name,
-          },
-        );
+        const isCylinderBatchSku = isCylinderFamilyName(sku.family ?? familyName);
+        const cylinderRoleRow = isCylinderBatchSku
+          ? getCylinderRoleAwareReadinessForIdentity(
+              cylinderRoleAwareReadinessIndex,
+              sku.websiteSku,
+              sku.graceSku,
+            )
+          : null;
+        let cylinderRoleAuthorized = false;
+        let cylinderPreparation: CylinderStudioPreparedGeneration | null = null;
+        if (isCylinderBatchSku) {
+          try {
+            cylinderPreparation = await prepareCylinderStudioGeneration({
+              product: sku,
+              row: cylinderRoleRow,
+              presetId,
+              referenceUrl: ref.url,
+            });
+            verifiedCylinderPreparations.set(
+              getCylinderVerifiedReferenceCacheKey(cylinderRoleRow, presetId),
+              cylinderPreparation,
+            );
+            cylinderRoleAuthorized = true;
+          } catch {
+            cylinderRoleAuthorized = false;
+          }
+        }
+        const referenceCanvas = isCylinderBatchSku
+          ? cylinderPreparation?.referenceCanvas ?? null
+          : await readImageCanvasSize(ref.url);
+        const generationSku = cylinderPreparation?.product ?? sku;
+        const canonicalReferenceIssue = isCylinderBatchSku
+          ? cylinderRoleAuthorized
+            ? null
+            : "Cylinder generation requires the exact immutable reference role URL and export hash selected by this preset."
+          : getBestBottlesCanonicalReferenceIssue(
+              ref.url,
+              referenceCanvas,
+              {
+                referenceSource: ref.referenceSource,
+                referenceName: ref.name,
+              },
+            );
         if (canonicalReferenceIssue) {
           await recordFailure(sku, canonicalReferenceIssue);
           continue;
@@ -3329,8 +3620,8 @@ export function MastersTabPanel({
           await recordFailure(sku, maskIssue);
           continue;
         }
-        const identity = buildBestBottlesGenerationIdentity(sku, {
-          bodyMaterial: inferBestBottlesBodyMaterial(sku),
+        const identity = buildBestBottlesGenerationIdentity(generationSku, {
+          bodyMaterial: inferBestBottlesBodyMaterial(generationSku),
           sourceReference: ref.url ?? sku.imageUrl ?? null,
         });
         const identityIssue = getBestBottlesGenerationIdentityIssue(identity);
@@ -3338,12 +3629,22 @@ export function MastersTabPanel({
           await recordFailure(sku, identityIssue);
           continue;
         }
-        const promptPreflight = buildPromptPreflightForSku(sku, ref.url ?? null);
+        const promptPreflight = buildPromptPreflightForSku(generationSku, ref.url ?? null);
         if (promptPreflight.status === "error" || !promptPreflight.record) {
           await recordFailure(sku, promptPreflight.issue ?? "Prompt preflight failed.");
           continue;
         }
-        const result = await generateOne(sku, ref?.url ?? null, maskControl);
+        const preparedCylinderGeneration = isCylinderBatchSku
+          ? verifiedCylinderPreparations.get(
+              getCylinderVerifiedReferenceCacheKey(cylinderRoleRow, presetId),
+            ) ?? null
+          : null;
+        const result = await generateOne(
+          generationSku,
+          ref?.url ?? null,
+          maskControl,
+          preparedCylinderGeneration,
+        );
         if (!result) {
           await recordFailure(sku, "Generation returned no result");
         } else {
@@ -5036,6 +5337,35 @@ export function MastersTabPanel({
         </div>
       )}
 
+      {isCylinderReferenceWorkflow && (
+        <div
+          className="rounded border p-2 text-[10px] leading-snug"
+          style={{
+            borderColor: isSelectedCylinderProductionQualified && isCylinderStudioReferencePromoted
+              ? "rgba(52,211,153,.35)"
+              : "rgba(248,113,113,.4)",
+            background: isSelectedCylinderProductionQualified && isCylinderStudioReferencePromoted
+              ? "rgba(16,185,129,.06)"
+              : "rgba(239,68,68,.06)",
+            color: isSelectedCylinderProductionQualified && isCylinderStudioReferencePromoted
+              ? "#A7F3D0"
+              : "#FCA5A5",
+          }}
+        >
+          {cylinderRoleAwareReadinessQuery.isLoading
+            ? "Loading the 377-identity Cylinder role gate…"
+            : cylinderRoleAwareReadinessQuery.isError
+              ? "Cylinder generation is locked because the role-aware reference artifact could not be verified."
+              : isSelectedCylinderProductionQualified
+                ? isCylinderStudioReferencePromoted
+                  ? selectedCylinderReferenceAuthority?.approvedException
+                    ? `Generation-authorized ${selectedCylinderReferenceAuthority.roleId}. Remote bytes and export hash are verified; approved ${selectedCylinderReferenceAuthority.approvedException} topology is preserved exactly.`
+                    : `Generation-authorized ${selectedCylinderReferenceAuthority?.roleId ?? "reference"}. Remote bytes and export hash are verified${selectedCylinderReferenceAuthority?.sourceReviewStatus.startsWith("pending") ? "; source review remains pending, so this is not a claim of individual human content approval" : ""}.`
+                  : `The ${selectedCylinderReferenceAuthority?.roleId ?? "required"} role is generation-authorized, but the selected reference URL/hash does not match its immutable artifact record.`
+                : `Role blocked: ${selectedCylinderReferenceAuthority?.blockers.join(", ") || selectedCylinderRoleAwareReadiness?.blockers.join(", ") || "no exact generation-authorized role evidence"}.`}
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Button
           onClick={handleGenerate}
@@ -5046,6 +5376,8 @@ export function MastersTabPanel({
             customReferenceIssue !== null ||
             productTruthReferenceIssue !== null ||
             maskControlIssue !== null ||
+            !isSelectedCylinderProductionQualified ||
+            !isCylinderStudioReferencePromoted ||
             selectedPromptPreflight?.status === "error"
           }
           className="flex-1 bg-[var(--darkroom-accent,#B8956A)] text-black hover:bg-[var(--darkroom-accent,#B8956A)]/90"
@@ -5208,6 +5540,9 @@ export function MastersTabPanel({
             review={result.rigReview}
             manualChecks={rigManualChecks}
             onManualChecksChange={setRigManualChecks}
+            usedProvider={result.usedProvider}
+            selectedModel={masterAiProvider}
+            durationMs={result.durationMs}
           />
           <div className="text-[11px] space-y-0.5" style={{ color: "var(--darkroom-text-dim)" }}>
             <div>

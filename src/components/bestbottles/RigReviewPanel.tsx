@@ -16,6 +16,39 @@ interface RigReviewPanelProps {
   review: RigReviewEvidence | null;
   manualChecks: RigManualChecks;
   onManualChecksChange: (checks: RigManualChecks) => void;
+  /** Provider/model the server actually executed (truth, not the selection). */
+  usedProvider?: string | null;
+  /** The dropdown selection at generation time, for comparison context. */
+  selectedModel?: string | null;
+  /** Wall-clock generation duration in milliseconds. */
+  durationMs?: number | null;
+}
+
+/**
+ * Per-render cost estimates by executed provider. OpenAI is the OBSERVED
+ * production average (2026-07-20 batch: $11 / 21 renders ≈ $0.52 at standard
+ * quality on the 2080×2288 canvas). Gemini figures are published-rate
+ * estimates — tune them against real billing as comparison runs accumulate.
+ */
+const PROVIDER_COST_ESTIMATES: Array<{ match: RegExp; label: string }> = [
+  { match: /openai|gpt/i, label: "~$0.52 (observed avg)" },
+  { match: /gemini.*pro|nano-banana-pro/i, label: "~$0.24 (est.)" },
+  { match: /gemini|nano/i, label: "~$0.04 (est.)" },
+  { match: /freepik/i, label: "varies (Freepik credits)" },
+];
+
+function estimateCostLabel(usedProvider: string | null | undefined): string {
+  if (!usedProvider) return "—";
+  return (
+    PROVIDER_COST_ESTIMATES.find((entry) => entry.match.test(usedProvider))?.label ?? "—"
+  );
+}
+
+function formatDuration(durationMs: number | null | undefined): string {
+  if (durationMs == null || !Number.isFinite(durationMs)) return "—";
+  const seconds = durationMs / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)}s`;
+  return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
 }
 
 function valueOrDash(value: string | number | null | undefined, suffix = ""): string {
@@ -40,6 +73,9 @@ export function RigReviewPanel({
   review,
   manualChecks,
   onManualChecksChange,
+  usedProvider,
+  selectedModel,
+  durationMs,
 }: RigReviewPanelProps) {
   const [showOverlay, setShowOverlay] = useState(true);
   const requirements = review ? buildRigReviewRequirements(review) : [];
@@ -137,6 +173,21 @@ export function RigReviewPanel({
               label="Shadow spread"
               measured={valueOrDash(review?.shadowQa?.measurements.rightExtensionRatio, "× width")}
               target={review?.shadowQa ? `${review.shadowQa.target.rightExtensionRatio.min}–${review.shadowQa.target.rightExtensionRatio.max}×` : "—"}
+            />
+            <Metric
+              label="Image model"
+              measured={valueOrDash(usedProvider)}
+              target={selectedModel ? `selected: ${selectedModel}` : "—"}
+            />
+            <Metric
+              label="Generation time"
+              measured={formatDuration(durationMs)}
+              target="typical 60–120s"
+            />
+            <Metric
+              label="Est. cost"
+              measured={estimateCostLabel(usedProvider)}
+              target="per render"
             />
             <Metric
               label="Prompt version"

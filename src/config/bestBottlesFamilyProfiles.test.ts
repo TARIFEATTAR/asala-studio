@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
 import {
+  BEST_BOTTLES_FAMILY_SCALE_CORRECTIONS,
   BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES,
   BEST_BOTTLES_CYLINDER_COMPACT_PROFILE,
   getBestBottlesCatalogFramingProfile,
@@ -10,6 +11,10 @@ import {
   getBestBottlesCylinderFamilyProfile,
   getBestBottlesFamilyProfileForProduct,
 } from "./bestBottlesFamilyProfiles";
+import {
+  BEST_BOTTLES_CATALOG_SCALE_VERSION,
+  resolveBestBottlesGlobalScalePct,
+} from "./bestBottlesCatalogScale";
 
 // The 39 distinct families the live catalog actually contains (Convex →
 // reference-intake). Split by the server rendering-contract lanes: the 28 that
@@ -28,6 +33,93 @@ const NON_BOTTLE_FAMILIES = [
 ];
 
 describe("Best Bottles family profiles", () => {
+  it("keeps detached Cylinder sidecars on the global PDP catalog-scale contract", () => {
+    const profile = getBestBottlesCylinderFamilyProfile({
+      family: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "98 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      capState: "detached",
+      mode: "fitment-attached-cap-right-sidecar",
+    });
+    assert.equal(profile.scaleContractVersion, BEST_BOTTLES_CATALOG_SCALE_VERSION);
+    assert.equal(profile.geometryScaleVersion, undefined);
+    assert.equal(profile.targetProductHeightPct, 69);
+    assert.deepEqual(profile.targetProductHeightRangePct, {
+      min: 67,
+      max: 71,
+    });
+  });
+
+  it("keeps regular and tall 9ml Cylinder assemblies on the same capacity-owned PDP target", () => {
+    const regular = getBestBottlesFamilyProfileForProduct({
+      family: "Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "96 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      applicator: "Fine Mist Sprayer",
+    });
+    const tall = getBestBottlesFamilyProfileForProduct({
+      family: "Tall Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      heightWithCap: "111 ±2 mm",
+      heightWithoutCap: "106 ±2 mm",
+      diameter: "18 ±0.5 mm",
+      applicator: "Fine Mist Sprayer",
+    });
+
+    assert.ok(regular);
+    assert.ok(tall);
+    assert.equal(regular.targetProductHeightPct, 69);
+    assert.equal(tall.targetProductHeightPct, 69);
+  });
+
+  it("does not apply the Cylinder display curve to an explicitly classified Vial", () => {
+    const vial = getBestBottlesFamilyProfileForProduct({
+      family: "Vial",
+      bottleCollection: "Vial",
+      capacityMl: 9,
+      heightWithCap: "50 ±0.5 mm",
+      diameter: "20 ±0.5 mm",
+      itemName: "Cylinder design 9 ml clear glass vial with glass rod applicator",
+      websiteSku: "GB09BlackCapApp",
+    });
+
+    assert.ok(vial);
+    assert.equal(vial.id, "sample-vial");
+    assert.equal(vial.targetProductHeightPct, resolveBestBottlesGlobalScalePct(9));
+  });
+
+  it("uses the global catalog curve as Cylinder height authority", () => {
+    const expected = new Map([
+      [1, 54], [3, 56], [4, 58], [5, 61], [9, 69], [28, 74],
+      [30, 75], [50, 78], [100, 79], [118, 80], [227, 82], [454, 84],
+    ]);
+
+    for (const [capacityMl, targetPct] of expected) {
+      const profile = getBestBottlesFamilyProfileForProduct({
+        family: "Cylinder",
+        bottleCollection: "Cylinder",
+        capacityMl,
+      });
+      assert.ok(profile);
+      assert.equal(profile.scaleContractVersion, BEST_BOTTLES_CATALOG_SCALE_VERSION);
+      assert.equal(profile.globalTargetProductHeightPct, targetPct);
+      assert.equal(profile.familyScaleCorrectionPct, 0);
+      assert.equal(profile.targetProductHeightPct, targetPct);
+    }
+  });
+
+  it("keeps every authored family correction inside the global rail", () => {
+    for (const [profileId, correction] of Object.entries(BEST_BOTTLES_FAMILY_SCALE_CORRECTIONS)) {
+      assert.ok(Math.abs(correction) <= 2, `${profileId} correction exceeds ±2: ${correction}`);
+    }
+  });
+
   it("classifies 3ml Cylinder sprayers as compact fixed-studio products", () => {
     const profile = getBestBottlesCylinderFamilyProfile({
       family: "Cylinder",
@@ -37,11 +129,11 @@ describe("Best Bottles family profiles", () => {
       diameter: "14 mm",
     });
 
-    assert.deepEqual(profile, BEST_BOTTLES_CYLINDER_COMPACT_PROFILE);
+    assert.equal(profile.id, BEST_BOTTLES_CYLINDER_COMPACT_PROFILE.id);
     assert.equal(profile.canvas.widthPx, 2080);
     assert.equal(profile.canvas.heightPx, 2288);
     assert.equal(profile.label, "Cylinder Sample Vial");
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.sampleVials);
+    assert.deepEqual(profile.targetProductHeightRangePct, { min: 54, max: 58 });
     assert.equal(profile.targetProductHeightPct, 56);
     assert.equal(profile.relativeScaleZoneId, "sample-vial");
     assert.equal(profile.primaryObjectCenterXPct, 50);
@@ -60,7 +152,7 @@ describe("Best Bottles family profiles", () => {
 
     assert.equal(profile.id, "sample-vial");
     assert.equal(profile.label, "Cylinder Sample Vial");
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.sampleVials);
+    assert.deepEqual(profile.targetProductHeightRangePct, { min: 56, max: 60 });
     assert.equal(profile.targetProductHeightPct, 58);
     assert.equal(profile.relativeScaleZoneId, "sample-vial");
   });
@@ -110,12 +202,12 @@ describe("Best Bottles family profiles", () => {
 
     assert.equal(getBestBottlesFamilyProfileForProduct(sample3ml)?.targetProductHeightPct, 56);
     assert.equal(getBestBottlesFamilyProfileForProduct(sample4ml)?.targetProductHeightPct, 58);
-    assert.equal(getBestBottlesFamilyProfileForProduct(small9ml)?.targetProductHeightPct, 63);
-    assert.equal(getBestBottlesFamilyProfileForProduct(standard28ml)?.targetProductHeightPct, 76);
-    assert.equal(getBestBottlesFamilyProfileForProduct(tall100ml)?.targetProductHeightPct, 82);
+    assert.equal(getBestBottlesFamilyProfileForProduct(small9ml)?.targetProductHeightPct, 69);
+    assert.equal(getBestBottlesFamilyProfileForProduct(standard28ml)?.targetProductHeightPct, 74);
+    assert.equal(getBestBottlesFamilyProfileForProduct(tall100ml)?.targetProductHeightPct, 79);
   });
 
-  it("keeps 5ml short Cylinder sprayers below regular 9ml roll-ons and slim 9ml sprayers", () => {
+  it("keeps 5ml Cylinder products below both regular and slim 9ml products", () => {
     const fiveMlCapOffSprayer = getBestBottlesFamilyProfileForProduct({
       family: "Cylinder",
       bottleCollection: "Cylinder",
@@ -157,13 +249,14 @@ describe("Best Bottles family profiles", () => {
     assert.ok(regular9MlRollOn);
     assert.ok(slim9MlSprayer);
     assert.equal(fiveMlCapOffSprayer.relativeScaleZoneId, "small-cylinder");
-    assert.deepEqual(fiveMlCapOffSprayer.targetProductHeightRangePct, { min: 60, max: 64 });
-    assert.equal(fiveMlCapOffSprayer.targetProductHeightPct, 62);
+    assert.deepEqual(fiveMlCapOffSprayer.targetProductHeightRangePct, { min: 59, max: 63 });
+    assert.equal(fiveMlCapOffSprayer.targetProductHeightPct, 61);
     assert.ok(fiveMlCapOffSprayer.targetProductHeightPct < regular9MlRollOn.targetProductHeightPct);
-    assert.ok(regular9MlRollOn.targetProductHeightPct < slim9MlSprayer.targetProductHeightPct);
+    assert.equal(regular9MlRollOn.targetProductHeightPct, 69);
+    assert.equal(slim9MlSprayer.targetProductHeightPct, 69);
   });
 
-  it("uses measured slim height, not just 9ml capacity, for 13-415 slim 9ml Cylinder sprayers", () => {
+  it("uses measured slim height for profile classification while capacity owns PDP scale", () => {
     const profile = getBestBottlesFamilyProfileForProduct({
       family: "Cylinder",
       bottleCollection: "Cylinder",
@@ -180,8 +273,11 @@ describe("Best Bottles family profiles", () => {
     assert.ok(profile);
     assert.equal(profile.id, "cylinder-standard");
     assert.equal(profile.relativeScaleZoneId, "standard-cylinder");
-    assert.equal(profile.targetProductHeightPct, 76);
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.cylinders10To30Ml);
+    assert.equal(profile.targetProductHeightPct, 69);
+    assert.deepEqual(profile.targetProductHeightRangePct, {
+      min: 67,
+      max: 71,
+    });
   });
 
   it("maps measured 10-30ml Cylinder sprayers inside the Cylinder fill-height range", () => {
@@ -196,9 +292,11 @@ describe("Best Bottles family profiles", () => {
     assert.equal(profile.id, "cylinder-standard");
     assert.equal(profile.canvas.widthPx, 2080);
     assert.equal(profile.canvas.heightPx, 2288);
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.cylinders10To30Ml);
-    assert.ok(profile.targetProductHeightPct >= 72);
-    assert.ok(profile.targetProductHeightPct <= 78);
+    assert.deepEqual(profile.targetProductHeightRangePct, {
+      min: 73,
+      max: 77,
+    });
+    assert.equal(profile.targetProductHeightPct, 75);
     assert.equal(profile.primaryObjectCenterXPct, 50);
   });
 
@@ -214,9 +312,12 @@ describe("Best Bottles family profiles", () => {
 
     assert.ok(profile);
     assert.equal(profile.id, "roller-bottle");
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottles);
-    assert.ok(profile.targetProductHeightPct >= 65);
-    assert.ok(profile.targetProductHeightPct <= 70);
+    // 73mm w/cap, 9ml → standard roller zone (roll-ons are now split into
+    // small/standard/tall by real size so a 5ml no longer renders the same
+    // height as a 9ml). See the roll-on capacity-gradation test below.
+    assert.equal(profile.relativeScaleZoneId, "roller-standard");
+    assert.deepEqual(profile.targetProductHeightRangePct, { min: 67, max: 71 });
+    assert.equal(profile.targetProductHeightPct, 69);
   });
 
   it("maps Boston Round products to the Boston Round fill-height range", () => {
@@ -231,7 +332,8 @@ describe("Best Bottles family profiles", () => {
 
     assert.ok(profile);
     assert.equal(profile.id, "boston-round");
-    assert.deepEqual(profile.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.bostonRounds);
+    assert.deepEqual(profile.targetProductHeightRangePct, { min: 73, max: 77 });
+    assert.equal(profile.targetProductHeightPct, 75);
   });
 
   it("maps Empire and Aluminum Bottle products to their larger fill-height bands", () => {
@@ -253,16 +355,16 @@ describe("Best Bottles family profiles", () => {
     assert.ok(empire);
     assert.ok(aluminum);
     assert.equal(empire.id, "empire-bottle");
-    assert.deepEqual(empire.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.empireBottles);
+    assert.deepEqual(empire.targetProductHeightRangePct, { min: 76, max: 80 });
+    assert.equal(empire.targetProductHeightPct, 78);
     assert.equal(aluminum.id, "aluminum-bottle");
-    assert.deepEqual(aluminum.targetProductHeightRangePct, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.aluminumBottles);
+    assert.equal(aluminum.scaleContractVersion, BEST_BOTTLES_CATALOG_SCALE_VERSION);
+    assert.equal(aluminum.familyScaleCorrectionPct, 0);
+    assert.ok(aluminum.targetProductHeightPct >= 82 && aluminum.targetProductHeightPct <= 84);
   });
 
-  // LOCKED-IN capacity scale staircase — render-validated 2026-07-04 on the real
-  // production sprayer/roller SKUs (measured fill-heights matched to the tenth:
-  // 3ml→56.0%, 4ml→58.1%, 5ml→62.0%, 9ml→67%). This pins the relative-scale
-  // gradation so smaller capacities always render genuinely smaller on the shared
-  // canvas. Do not change these zone/fill targets without re-validating renders.
+  // Global catalog scale staircase. Zone IDs remain composition classifiers;
+  // capacity owns the assembled-height target across closure variants.
   it("locks the 3/4/5/9ml capacity scale gradation on real production SKUs", () => {
     const threeMl = getBestBottlesFamilyProfileForProduct({
       graceSku: "GB-SPR-CLR-3ML-BLK", family: "Cylinder", bottleCollection: "Cylinder",
@@ -279,13 +381,21 @@ describe("Best Bottles family profiles", () => {
       capacityMl: 5, applicator: "Fine Mist Sprayer",
       heightWithCap: "72 ±1 mm", heightWithoutCap: "53 ±1 mm", diameter: "17 ±0.5 mm",
     });
+    // A real 5ml ROLL-ON (not a sprayer): must land in the small roller zone and
+    // render clearly shorter than a 9ml roll-on — this is the exact defect the
+    // re-zoning fixes.
+    const fiveMlRollOn = getBestBottlesFamilyProfileForProduct({
+      graceSku: "GB-CYL-CLR-5ML-MRL-SBLK", family: "Cylinder", bottleCollection: "Cylinder",
+      capacityMl: 5, applicator: "Metal Roller Ball",
+      heightWithCap: "65 ±1 mm", heightWithoutCap: "53 ±1 mm", diameter: "17 ±0.5 mm",
+    });
     const nineMl = getBestBottlesFamilyProfileForProduct({
       graceSku: "GB-CYL-CLR-9ML-T-07", family: "Cylinder", bottleCollection: "Cylinder",
       capacityMl: 9, applicator: "Metal Roller Ball",
       heightWithCap: "83 ±1 mm", heightWithoutCap: "70 ±1 mm", diameter: "20 ±0.5 mm",
     });
 
-    for (const p of [threeMl, fourMl, fiveMl, nineMl]) {
+    for (const p of [threeMl, fourMl, fiveMl, fiveMlRollOn, nineMl]) {
       assert.ok(p);
       assert.equal(p.canvas.widthPx, 2080);
       assert.equal(p.canvas.heightPx, 2288);
@@ -297,13 +407,17 @@ describe("Best Bottles family profiles", () => {
     assert.equal(fourMl.relativeScaleZoneId, "sample-vial");
     assert.equal(fourMl.targetProductHeightPct, 58);
     assert.equal(fiveMl.relativeScaleZoneId, "small-cylinder");
-    assert.equal(fiveMl.targetProductHeightPct, 62);
-    assert.equal(nineMl.relativeScaleZoneId, "roller-bottle");
-    assert.equal(nineMl.targetProductHeightPct, 67);
+    assert.equal(fiveMl.targetProductHeightPct, 61);
+    assert.equal(fiveMlRollOn.relativeScaleZoneId, "roller-small");
+    assert.equal(nineMl.relativeScaleZoneId, "roller-standard");
+    assert.equal(fiveMlRollOn.targetProductHeightPct, 61);
+    assert.equal(nineMl.targetProductHeightPct, 69);
     // Strictly monotonic: smaller capacity is always rendered smaller.
     assert.ok(threeMl.targetProductHeightPct < fourMl.targetProductHeightPct);
     assert.ok(fourMl.targetProductHeightPct < fiveMl.targetProductHeightPct);
-    assert.ok(fiveMl.targetProductHeightPct < nineMl.targetProductHeightPct);
+    // The core fix: a 5ml roll-on now renders clearly shorter than a 9ml roll-on.
+    assert.ok(fiveMlRollOn.targetProductHeightPct < nineMl.targetProductHeightPct);
+    assert.ok(nineMl.targetProductHeightPct - fiveMlRollOn.targetProductHeightPct >= 4);
   });
 
   it("now resolves a framing profile for the previously-uncovered Circle family", () => {

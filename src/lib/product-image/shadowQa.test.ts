@@ -98,8 +98,50 @@ describe("analyzeModelOwnedShadow", () => {
     });
 
     assert.equal(analysis.report.contacts?.length, 2);
-    assert.equal(analysis.report.status, "pass");
+    assert.equal(analysis.report.status, "pass", JSON.stringify(analysis.report));
     assert.ok(analysis.preservationMask.some((value) => value === 1));
+  });
+
+  it("partitions nearby expected contact shadows instead of reporting a false double", () => {
+    const fixture = makeShadowFixture("good");
+    const paint = (
+      left: number,
+      top: number,
+      right: number,
+      bottom: number,
+      delta: number,
+    ) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * fixture.width + x) * 4;
+          fixture.pixels[index] = fixture.background.r - delta;
+          fixture.pixels[index + 1] = fixture.background.g - delta;
+          fixture.pixels[index + 2] = fixture.background.b - delta;
+        }
+      }
+    };
+    paint(260, 300, 360, 360, 120);
+    // The sidecar feather extends left into the bottle's default 35% right
+    // analysis lane, but remains the expected sidecar contact—not a double.
+    paint(250, 361, 385, 363, 32);
+    paint(330, 364, 388, 368, 14);
+
+    const analysis = analyzeModelOwnedShadow({
+      ...fixture,
+      topology: {
+        kind: "detached-sidecar",
+        expectedContacts: ["bottle", "sidecar"],
+        source: "reviewed-reference",
+      },
+      contactBounds: {
+        bottle: fixture.productBounds,
+        sidecar: { left: 260, right: 360, top: 300, bottom: 360 },
+      },
+    });
+
+    assert.equal(analysis.report.status, "pass", JSON.stringify(analysis.report));
+    assert.equal(analysis.report.contacts?.[0]?.measurements.componentCount, 1);
+    assert.equal(analysis.report.contacts?.[1]?.measurements.componentCount, 1);
   });
 
   it("fails a detached-sidecar topology when the cap shadow is missing", () => {
@@ -129,6 +171,48 @@ describe("analyzeModelOwnedShadow", () => {
     assert.ok((good.report.measurements.rightExtensionRatio ?? 0) >= 0.2);
     assert.ok((good.report.measurements.rightExtensionRatio ?? 1) <= 0.32);
     assert.ok(good.preservationMask.some((value) => value === 1));
+  });
+
+  it("ignores tiny disconnected specks for QA and disconnected depth while masking every candidate", () => {
+    const fixture = makeShadowFixture("good");
+    const specks = [
+      [164, 365],
+      [166, 371],
+      [250, 374],
+      [200, 401],
+    ] as const;
+    for (const [x, y] of specks) {
+      const index = (y * fixture.width + x) * 4;
+      fixture.pixels[index] = fixture.background.r - 5;
+      fixture.pixels[index + 1] = fixture.background.g - 5;
+      fixture.pixels[index + 2] = fixture.background.b - 5;
+    }
+
+    const analysis = analyzeModelOwnedShadow(fixture);
+
+    assert.equal(analysis.report.status, "pass");
+    assert.equal(analysis.report.measurements.componentCount, 1);
+    assert.equal(analysis.report.measurements.verticalDepthPx, 8);
+    for (const [x, y] of specks) {
+      assert.equal(analysis.candidateMask[y * fixture.width + x], 1);
+    }
+  });
+
+  it("does not extend depth for a connected but non-meaningful continuation fringe", () => {
+    const fixture = makeShadowFixture("good");
+    for (let y = 369; y <= 376; y += 1) {
+      const x = 235;
+      const index = (y * fixture.width + x) * 4;
+      fixture.pixels[index] = fixture.background.r - 5;
+      fixture.pixels[index + 1] = fixture.background.g - 5;
+      fixture.pixels[index + 2] = fixture.background.b - 5;
+    }
+
+    const analysis = analyzeModelOwnedShadow(fixture);
+
+    assert.equal(analysis.report.status, "pass");
+    assert.equal(analysis.report.measurements.verticalDepthPx, 15);
+    assert.equal(analysis.candidateMask[376 * fixture.width + 235], 1);
   });
 
   it("fails a detached shadow with an excessive contact gap", () => {

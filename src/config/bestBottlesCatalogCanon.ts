@@ -69,11 +69,12 @@ export const KEEP_MATERIAL = `GLASS: preserve the glass's exact color, tint, fro
 // ── STUDIO_DIRECTION  (approved Kinfolk/Aesop v2 production mood anchor) ────────
 export const STUDIO_DIRECTION = `STUDIO DIRECTION:
 Strict studio-direction refinement for restrained premium ecommerce photography:
-Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, controlled material finish, clean restraint, subtle dimensional contact shadow, and refined ecommerce polish.
+Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, clean restraint, and a subtle dimensional contact shadow.
 This is not lifestyle photography. Do not add props, labels, packaging, typography, scenes, brand marks, retail environments, Aesop-style product design, or any brand-specific asset.
 The catalog contract remains absolute: preserve the exact 2080x2288 canvas, product fill-height target, shared baseline, centerline, crop, product scale, detached-cap sidecar position, geometry, color, material, and component placement.
 Shadow direction may become slightly more dimensional and premium, but it must remain one realistic contact-only shadow under the bottle base and any detached cap. No floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture.
-The attached product reference remains the source of truth. Improve only light, glass clarity, cap material polish, and contact shadow realism.`;
+Preserve the photographed surface texture, translucency, edge density, tonal variation, highlights, and imperfections of every cap, actuator, collar, fitment, and detached sidecar exactly as shown in the Product Reference. Studio direction may change only the illumination falling on those components, never their material finish or surface character.
+The attached Product Reference remains the source of truth. Changes are limited to scene lighting, the specified glass treatment, the flat Bone background, and contact shadow realism.`;
 
 // ── FINAL_V2_STUDIO_CHECK  (last controlling instruction) ─────────────────────
 export const FINAL_V2_STUDIO_CHECK = `FINAL V2 STUDIO CHECK:

@@ -16,6 +16,10 @@ const v61Identity: FamilyBatchGenerationIdentity = {
   shadowOwner: "model",
   shadowContract: "contact-back-right-v1",
   shadowTopology: "assembled",
+  scaleContractVersion: "best-bottles-catalog-scale-v1",
+  calibrationRegistryKey: "cylinder:9:group-cylinder-9",
+  resolvedAssembledTargetPct: 69,
+  resolvedBodyTargetPx: 1320,
 };
 
 const rendered: FamilyBatchRenderedEntryLike = {
@@ -58,6 +62,23 @@ test("does not skip when the canonical reference hash changes", () => {
       },
       v61Identity,
     ),
+    false,
+  );
+});
+
+test("does not skip when the global scale contract or resolved target changes", () => {
+  assert.equal(
+    canSkipRenderedEntry({
+      ...rendered,
+      generationIdentity: { ...v61Identity, scaleContractVersion: "historical-scale-v0" },
+    }, v61Identity),
+    false,
+  );
+  assert.equal(
+    canSkipRenderedEntry({
+      ...rendered,
+      generationIdentity: { ...v61Identity, resolvedAssembledTargetPct: 68 },
+    }, v61Identity),
     false,
   );
 });

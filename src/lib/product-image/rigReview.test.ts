@@ -134,13 +134,20 @@ describe("rig review approval gate", () => {
     assert.equal(isRigApprovalReady(passingReview({ required: false }), confirmed), true);
   });
 
-  it("blocks model-owned approval until the shadow report passes", () => {
+  it("treats model-owned shadow reports as advisory — approval is not blocked by shadow status (Jordan policy 2026-07-18/19)", () => {
     assert.equal(
       isRigApprovalReady(
         passingReview({ shadowOwner: "model", shadowQa: shadowQa("review") }),
         confirmed,
       ),
-      false,
+      true,
+    );
+    assert.equal(
+      isRigApprovalReady(
+        passingReview({ shadowOwner: "model", shadowQa: shadowQa("fail") }),
+        confirmed,
+      ),
+      true,
     );
     assert.equal(
       isRigApprovalReady(
@@ -151,37 +158,13 @@ describe("rig review approval gate", () => {
     );
   });
 
-  it("blocks model-owned approval when a passing report uses the wrong shadow contract", () => {
-    const invalidContractReport = {
-      ...shadowQa("pass"),
-      target: {
-        ...shadowQa("pass").target,
-        contract: "legacy-shadow-v0",
-      },
-    } as unknown as ShadowQaReport;
-
-    const review = passingReview({
-      shadowOwner: "model",
-      shadowQa: invalidContractReport,
-    });
-
-    assert.equal(isRigApprovalReady(review, confirmed), false);
+  it("model-owned shadow never gates approval — analyzer removed, human review judges (Jordan 2026-07-19)", () => {
     assert.equal(
-      buildRigReviewRequirements(review).find((row) => row.id === "shadow")?.status,
-      "fail",
+      isRigApprovalReady(
+        passingReview({ shadowOwner: "model", shadowQa: null }),
+        confirmed,
+      ),
+      true,
     );
-  });
-
-  it("blocks model-owned approval when one expected sidecar contact fails", () => {
-    const report = shadowQa("pass");
-    report.contacts!.push({
-      ...report.contacts![0],
-      contact: "sidecar",
-      status: "fail",
-      failures: ["Sidecar shadow missing."],
-    });
-    const review = passingReview({ shadowOwner: "model", shadowQa: report });
-
-    assert.equal(isRigApprovalReady(review, confirmed), false);
   });
 });

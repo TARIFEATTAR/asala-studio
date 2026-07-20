@@ -11,7 +11,8 @@ live Convex, the Nemat master catalog, and the client's catalog PDF.
 
 Non-negotiable rules from it:
 
-1. Consume ONLY the `canon_*` columns in `best-bottles-master-truth.csv` (2,483 rows).
+1. Consume ONLY the `canon_*` columns in `best-bottles-master-truth.csv` (2,484 rows,
+   including the 2026-07-16 website-authoritative `GBcyl25SpryShnBlk` reconciliation).
    Never raw `diameter` for flat families (Elegant, Circle, Rectangle, Diamond,
    Grace, Flair); never Convex `widthMm`/`depthMm` (they are programmatic copies of
    `diameter` — verified live 2026-07-12 — and carry no real depth).

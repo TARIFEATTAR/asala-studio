@@ -184,7 +184,7 @@ export const GRID_CARD_2000X2200: ImagePreset = {
   // OpenAI can generate at a supported native size, then Madison re-canvases
   // the returned image to this exact Best Bottles grid/hero contract.
   id: "grid-card-2000x2200",
-  label: "Grid Card · 2080 × 2288",
+  label: "Grid Card · Cap-On · 2080 × 2288",
   purpose:
     "Catalog grid tile for bestbottles.com. Matches the current image-gen pipeline output dimensions.",
   kind: "final_render",
@@ -421,7 +421,7 @@ export const GRID_CARD_EXPLODED_2000X2200: ImagePreset = {
   // ID stable for tag continuity; canvas follows the canonical 2080×2288
   // Best Bottles grid/hero contract.
   id: "grid-card-exploded-2000x2200",
-  label: "Grid Card · Exploded (cap beside) · 2080 × 2288",
+  label: "Grid Card · Cap-Off Sidecar (cap beside) · 2080 × 2288",
   purpose:
     "Catalog grid tile for SKUs where the over-cap is shown removed and standing beside the bottle (e.g. Lotion Pump · Clear Overcap, decorative stopper variants). Same canvas, lighting, and background as the standard Grid Card — composition is the only change.",
   kind: "final_render",
@@ -651,9 +651,19 @@ export function getPaperDollPresetIdForFamily(family: string | null | undefined)
   return PAPER_DOLL_COMPONENT_1000X1300.id;
 }
 
+function isCylinderCatalogFamily(family: string | null | undefined): boolean {
+  const normalized = String(family ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
 export function getBestBottlesCatalogPresetIdForFamily(
   family: string | null | undefined,
 ): string {
+  if (isCylinderCatalogFamily(family)) return GRID_CARD_EXPLODED_2000X2200.id;
   const tier = getBestBottlesCanvasTierForFamily(family);
   if (tier.id === "tall-narrow") return GRID_CARD_TALL_NARROW_1024X1536.id;
   if (tier.id === "square-round") return GRID_CARD_SQUARE_ROUND_2048X2048.id;
@@ -666,9 +676,12 @@ export function getBestBottlesCatalogPresetIdForProduct(
   familyFallback?: string | null,
 ): string {
   if (!product) return getBestBottlesCatalogPresetIdForFamily(familyFallback);
+  const resolvedFamily = [product.family, product.bottleCollection, familyFallback]
+    .find((value) => Boolean(value?.trim()));
+  if (isCylinderCatalogFamily(resolvedFamily)) return GRID_CARD_EXPLODED_2000X2200.id;
   const tier = getBestBottlesCanvasTierForProduct({
     ...product,
-    family: product.family ?? product.bottleCollection ?? familyFallback,
+    family: resolvedFamily,
   });
   if (tier.id === "tall-narrow") return GRID_CARD_TALL_NARROW_1024X1536.id;
   if (tier.id === "square-round") return GRID_CARD_SQUARE_ROUND_2048X2048.id;

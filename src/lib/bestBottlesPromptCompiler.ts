@@ -4,6 +4,8 @@ import {
 } from "./bestBottlesShadowPolicy";
 import { buildBestBottlesCatalogCanonPrompt } from "./bestBottlesCatalogCanonPrompt";
 import { resolveBestBottlesShadowTopology } from "./bestBottlesShadowTopology";
+import { BEST_BOTTLES_CATALOG_SCALE_VERSION } from "../config/bestBottlesCatalogScale";
+import { getBestBottlesCatalogFramingProfile } from "../config/bestBottlesFamilyProfiles";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -245,6 +247,13 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
     family: sku.product_family,
   });
   const shadowTopology = resolveBestBottlesShadowTopology({}, sku);
+  const capacityMatch = sku.sku.match(/-(\d+(?:\.\d+)?)ML(?:-|$)/i);
+  const capacityMl = capacityMatch ? Number.parseFloat(capacityMatch[1]) : null;
+  const scaleProfile = getBestBottlesCatalogFramingProfile({
+    family: sku.product_family,
+    graceSku: sku.sku,
+    capacityMl: Number.isFinite(capacityMl) ? capacityMl : null,
+  });
   // The module compiler is validation-only for ordinary SKUs. For reviewed
   // Cylinder V6.1 context, however, its PromptRecord is a public consumer
   // boundary; emit the same coherent canon-owned model-shadow prompt instead
@@ -272,6 +281,10 @@ export function buildPromptForSku(sku: PromptSku, system: PromptSystem): PromptR
       ...closure.qa,
       ...system.negativeRules.map((rule) => rule.qa_key),
       ...getBestBottlesShadowPolicyTags(shadowPolicy),
+      `scale-contract:${BEST_BOTTLES_CATALOG_SCALE_VERSION}`,
+      `scale-global-target:${scaleProfile.globalTargetProductHeightPct}`,
+      `scale-family-correction:${scaleProfile.familyScaleCorrectionPct}`,
+      `scale-assembled-target:${scaleProfile.targetProductHeightPct}`,
       `shadow-topology:${shadowTopology.kind}`,
       ...shadowTopology.expectedContacts.map((contact) => `shadow-contact:${contact}`),
     ]),

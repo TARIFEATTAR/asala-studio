@@ -55,11 +55,12 @@ const CATALOG_CANON_PROMPT_FLAGS = new Set([
 
 export const BEST_BOTTLES_STUDIO_DIRECTION_V2 = `STUDIO DIRECTION:
 Strict studio-direction refinement for restrained premium ecommerce photography:
-Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, controlled material finish, clean restraint, subtle dimensional contact shadow, and refined ecommerce polish.
+Use the restrained studio product-photography sensibility associated with Kinfolk and Aesop only as a mood reference: quiet premium lighting, clean restraint, and a subtle dimensional contact shadow.
 This is not lifestyle photography. Do not add props, labels, packaging, typography, scenes, brand marks, retail environments, Aesop-style product design, or any brand-specific asset.
 The catalog contract remains absolute: preserve the exact 2080x2288 canvas, product fill-height target, shared baseline, centerline, crop, product scale, detached-cap sidecar position, geometry, color, material, and component placement.
 Shadow direction may become slightly more dimensional and premium, but it must remain one realistic contact-only shadow under the bottle base and any detached cap. No floor plane, reflection, hard cast shadow, smear, horizon, vignette, or background texture.
-The attached product reference remains the source of truth. Improve only light, glass clarity, cap material polish, and contact shadow realism.`;
+Preserve the photographed surface texture, translucency, edge density, tonal variation, highlights, and imperfections of every cap, actuator, collar, fitment, and detached sidecar exactly as shown in the Product Reference. Studio direction may change only the illumination falling on those components, never their material finish or surface character.
+The attached Product Reference remains the source of truth. Changes are limited to scene lighting, the specified glass treatment, the flat Bone background, and contact shadow realism.`;
 
 export const BEST_BOTTLES_FINAL_V2_STUDIO_CHECK = `FINAL V2 STUDIO CHECK:
 This v2 studio direction is the final controlling instruction for visual style and finish. Do not apply any older Best Bottles parchment, darkroom, paper-doll, visual-squad, generic ecommerce, or post-generation prompt language after this point.
@@ -179,12 +180,24 @@ export function resolveBestBottlesPrecompiledPrompt(
   )
     .trim()
     .toLowerCase()
-    .replace(/[_-]+/g, " ");
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   const isCylinder = normalizedFamily === "cylinder" || normalizedFamily === "tall cylinder";
+  const nonBottleFamilies = new Set([
+    "cap closure", "cap component", "dropper", "gift bag", "gift box",
+    "lotion pump", "packaging supply", "roll on cap", "sprayer", "tool", "unknown",
+  ]);
+  const isBottleFamily = normalizedFamily.length > 0 && !nonBottleFamilies.has(normalizedFamily);
   const shadowContractTag = qaChecklist.find((tag) => tag.startsWith("shadow-contract:"));
   const shadowContract = shadowContractTag?.slice("shadow-contract:".length) || null;
   const topologyTags = qaChecklist.filter((tag) => tag.startsWith("shadow-topology:"));
   const shadowTopology = topologyTags[0]?.slice("shadow-topology:".length) || null;
+  const componentTopologyTags = qaChecklist.filter((tag) =>
+    tag.startsWith("component-topology:")
+  );
+  const componentTopology = componentTopologyTags[0]
+    ?.slice("component-topology:".length) || null;
 
   if (!sku) return errorResult("Precompiled prompt record is missing sku.");
   if (!referenceImagePath) return errorResult(`Precompiled prompt record for ${sku} is missing reference_image_path.`);
@@ -201,20 +214,28 @@ export function resolveBestBottlesPrecompiledPrompt(
     return errorResult(`Historical V6.1 smoke lineage is not valid for new generation (${sku}).`);
   }
 
-  if (isCylinder) {
+  if (isBottleFamily && (promptVersion != null || shadowOwner != null)) {
     if (promptVersion !== "best-bottles-reference-locked-v6.1") {
-      return errorResult(`Cylinder ${sku} requires canonical V6.1 prompt lineage.`);
+      return errorResult(`Best Bottles family ${normalizedFamily} ${sku} requires canonical V6.1 prompt lineage.`);
     }
     if (shadowOwner !== "model") {
-      return errorResult(`Cylinder ${sku} requires model-owned shadow authority.`);
+      return errorResult(`Best Bottles family ${normalizedFamily} ${sku} requires model-owned shadow authority.`);
     }
     if (
       !qaChecklist.includes("prompt-version:best-bottles-reference-locked-v6.1") ||
       !qaChecklist.includes("shadow-owner:model") ||
       !qaChecklist.includes("shadow-contract:contact-back-right-v1") ||
-      !qaChecklist.includes("shadow-rollout:cylinder-family")
+      !qaChecklist.includes("shadow-rollout:all-bottle-families")
     ) {
       return errorResult(`Model-owned shadow for ${sku} is missing policy QA lineage.`);
+    }
+    if (
+      !qaChecklist.includes("scale-contract:best-bottles-catalog-scale-v1") ||
+      !qaChecklist.some((tag) => tag.startsWith("scale-global-target:")) ||
+      !qaChecklist.some((tag) => tag.startsWith("scale-family-correction:")) ||
+      !qaChecklist.some((tag) => tag.startsWith("scale-assembled-target:"))
+    ) {
+      return errorResult(`Global catalog scale for ${sku} is missing policy QA lineage.`);
     }
     if (
       topologyTags.length !== 1 ||
@@ -224,13 +245,31 @@ export function resolveBestBottlesPrecompiledPrompt(
     ) {
       return errorResult(`Cylinder ${sku} is missing valid shadow topology lineage.`);
     }
+    const expectedShadowTopologyByComponent: Record<string, string> = {
+      assembled: "assembled",
+      "fitment-attached-cap-right-sidecar": "detached-sidecar",
+      "assembled-live-site-exception": "complex-contact",
+      "assembled-closure-live-site-exception": "assembled",
+    };
+    if (
+      componentTopologyTags.length !== 1
+      || !componentTopology
+      || !(componentTopology in expectedShadowTopologyByComponent)
+    ) {
+      return errorResult(`Cylinder ${sku} is missing valid component topology lineage.`);
+    }
+    if (expectedShadowTopologyByComponent[componentTopology] !== shadowTopology) {
+      return errorResult(
+        `Cylinder ${sku} component topology ${componentTopology} conflicts with shadow topology ${shadowTopology}.`,
+      );
+    }
     const blockCount = (prompt.match(/GROUNDING SHADOW — MODEL OWNED:/g) ?? []).length;
     const mixedAuthority = /deterministic post-processing responsibilities|Madison applies both deterministically after generation/i.test(prompt);
     if (blockCount !== 1 || mixedAuthority) {
       return errorResult(`Model-owned shadow for ${sku} has conflicting shadow ownership.`);
     }
   } else if (shadowOwner === "model") {
-    return errorResult(`Model-owned shadow is only valid for Cylinder family context (${sku}).`);
+    return errorResult(`Model-owned shadow is only valid for bottle-family context (${sku}).`);
   }
 
   const resolvedPrompt = shadowOwner === "model"
@@ -239,8 +278,8 @@ export function resolveBestBottlesPrecompiledPrompt(
       ? ensureBestBottlesStudioDirection(prompt)
       : prompt;
 
-  if (isCylinder) {
-    console.info("[best-bottles-precompiled-prompt] Cylinder V6.1 policy", {
+  if (isBottleFamily && shadowOwner === "model") {
+    console.info("[best-bottles-precompiled-prompt] Best Bottles V6.1 policy", {
       sku,
       promptVersion,
       shadowOwner,

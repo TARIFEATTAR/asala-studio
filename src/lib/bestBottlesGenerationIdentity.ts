@@ -1,5 +1,10 @@
 import { applyBestBottlesCapColorOverride } from "./bestBottlesCapColorOverrides";
 import { BestBottlesShadowPolicy, resolveBestBottlesShadowPolicy } from "./bestBottlesShadowPolicy";
+import {
+  BEST_BOTTLES_CATALOG_SCALE_VERSION,
+  deriveBestBottlesBodyTargetPx,
+} from "../config/bestBottlesCatalogScale";
+import { getBestBottlesCatalogFramingProfile } from "../config/bestBottlesFamilyProfiles";
 
 export type BestBottlesGenerationIdentityStatus = "ready" | "blocked";
 
@@ -33,6 +38,10 @@ export interface BestBottlesGenerationIdentity {
   identityBlockers: string[];
   identityHash: string;
   promptVersion: string;
+  scaleContractVersion: typeof BEST_BOTTLES_CATALOG_SCALE_VERSION;
+  calibrationRegistryKey: string | null;
+  resolvedAssembledTargetPct: number;
+  resolvedBodyTargetPx: number | null;
   shadowOwner: BestBottlesShadowPolicy["owner"];
   shadowContract: BestBottlesShadowPolicy["contract"];
   rigVersion: string;
@@ -46,6 +55,8 @@ export interface BestBottlesIdentityProductLike {
   productId?: string | null;
   productGroupId?: string | null;
   family?: string | null;
+  bottleCollection?: string | null;
+  category?: string | null;
   capacityMl?: number | null;
   color?: string | null;
   bodyMaterial?: string | null;
@@ -56,6 +67,11 @@ export interface BestBottlesIdentityProductLike {
   trimColor?: string | null;
   itemName?: string | null;
   itemDescription?: string | null;
+  heightWithCap?: string | null;
+  heightWithoutCap?: string | null;
+  diameter?: string | null;
+  capState?: string | null;
+  mode?: string | null;
 }
 
 function text(value: unknown): string {
@@ -65,6 +81,18 @@ function text(value: unknown): string {
 function optionalText(value: unknown): string | null {
   const v = text(value);
   return v.length > 0 ? v : null;
+}
+
+function positiveNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  const match = text(value).match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const parsed = Number.parseFloat(match[1]);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function slug(value: string | null | undefined): string {
+  return text(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 function boolOrNull(value: unknown): boolean | null {
@@ -280,6 +308,41 @@ export function buildBestBottlesGenerationIdentity(
   // Correct known-bad catalog color fields before any inference runs, so both
   // the blockers and the identity hash see the fixed value.
   const product = applyBestBottlesCapColorOverride(rawProduct);
+  const scaleProfile = getBestBottlesCatalogFramingProfile({
+    family: product.family,
+    bottleCollection: product.bottleCollection,
+    category: product.category,
+    graceSku: product.graceSku,
+    websiteSku: product.websiteSku,
+    itemName: product.itemName,
+    itemDescription: product.itemDescription,
+    applicator: product.applicator,
+    capacityMl: product.capacityMl,
+    heightWithCap: product.heightWithCap,
+    heightWithoutCap: product.heightWithoutCap,
+    diameter: product.diameter,
+    capState: product.capState,
+    mode: product.mode,
+  });
+  const assembledHeightMm = positiveNumber(product.heightWithCap);
+  const bodyHeightMm = positiveNumber(product.heightWithoutCap);
+  const resolvedBodyTargetPx =
+    assembledHeightMm != null
+    && bodyHeightMm != null
+    && bodyHeightMm <= assembledHeightMm
+      ? deriveBestBottlesBodyTargetPx({
+          canvasHeightPx: scaleProfile.canvas.heightPx,
+          assembledHeightPct: scaleProfile.targetProductHeightPct,
+          verifiedBodyHeightMm: bodyHeightMm,
+          verifiedAssembledHeightMm: assembledHeightMm,
+        })
+      : null;
+  const registryFamily = slug(product.family || product.bottleCollection || product.category);
+  const registryOwner = optionalText(product.productGroupId) ?? optionalText(product.graceSku);
+  const calibrationRegistryKey =
+    registryFamily && product.capacityMl && registryOwner
+      ? `${registryFamily}:${product.capacityMl}:${registryOwner}`
+      : null;
   const graceSku = optionalText(product.graceSku);
   const shadowPolicy = resolveBestBottlesShadowPolicy({
     graceSku,
@@ -381,6 +444,10 @@ export function buildBestBottlesGenerationIdentity(
     shadowPolicy.promptVersion,
     shadowPolicy.owner,
     shadowPolicy.contract,
+    BEST_BOTTLES_CATALOG_SCALE_VERSION,
+    calibrationRegistryKey,
+    scaleProfile.targetProductHeightPct,
+    resolvedBodyTargetPx,
     BEST_BOTTLES_RIG_VERSION,
   ]);
 
@@ -411,6 +478,10 @@ export function buildBestBottlesGenerationIdentity(
     identityBlockers: blockers,
     identityHash,
     promptVersion: shadowPolicy.promptVersion,
+    scaleContractVersion: BEST_BOTTLES_CATALOG_SCALE_VERSION,
+    calibrationRegistryKey,
+    resolvedAssembledTargetPct: scaleProfile.targetProductHeightPct,
+    resolvedBodyTargetPx,
     shadowOwner: shadowPolicy.owner,
     shadowContract: shadowPolicy.contract,
     rigVersion: BEST_BOTTLES_RIG_VERSION,

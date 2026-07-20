@@ -7,6 +7,16 @@ import {
   validateBestBottlesImageIdentity,
 } from "../_shared/bestBottlesVisualIdentity.ts";
 import { buildShopifyPushDryRunResult } from "../_shared/shopifyPushDryRun.ts";
+import {
+  assertCylinderShopifyPublishAuthorized,
+  executeCylinderShopifyGuardedMutation,
+  isCylinderProductSku,
+  isExactConfiguredServiceRoleToken,
+} from "../_shared/shopifyPublishGuard.ts";
+import type {
+  CylinderShopifyPublishGuardInput,
+  TrustedCylinderShopifyPublishAuthorization,
+} from "../_shared/shopifyPublishGuard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +24,8 @@ const corsHeaders = {
 };
 
 type RequestItem = {
+  pipelineSkuJobId?: string;
+  publishAuthorizationId?: string;
   imageId?: string;
   imageUrl?: string;
   sku?: string;
@@ -106,10 +118,17 @@ function toBestBottlesVisualProduct(
 
 type PipelineSkuJobLookup = {
   id?: string | null;
+  organization_id?: string | null;
+  family?: string | null;
   grace_sku?: string | null;
   website_sku?: string | null;
   shopify_sku?: string | null;
   product_group_slug?: string | null;
+  status?: string | null;
+  generated_image_id?: string | null;
+  generated_image_url?: string | null;
+  approved_image_id?: string | null;
+  approved_image_url?: string | null;
 };
 
 type ResolvedBestBottlesProduct = {
@@ -444,32 +463,39 @@ function isMissingShopifySkuColumn(error: unknown): boolean {
   );
 }
 
-function isServiceRoleToken(token: string, serviceRoleKey: string): boolean {
-  if (token === serviceRoleKey) return true;
-  try {
-    const [, payload] = token.split(".");
-    const parsed = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))) as {
-      role?: unknown;
-    };
-    return parsed.role === "service_role";
-  } catch {
-    return false;
-  }
-}
-
 async function findPipelineSkuJob(
   supabase: SupabaseClient,
   organizationId: string,
   candidates: string[],
+  exactJobId?: string,
 ): Promise<PipelineSkuJobLookup | null> {
+  const selectFields = [
+    "id", "organization_id", "family", "grace_sku", "website_sku", "shopify_sku",
+    "product_group_slug", "status", "generated_image_id", "generated_image_url",
+    "approved_image_id", "approved_image_url",
+  ].join(",");
+  if (exactJobId?.trim()) {
+    const { data, error } = await supabase
+      .from("best_bottles_pipeline_sku_jobs")
+      .select(selectFields)
+      .eq("organization_id", organizationId)
+      .eq("id", exactJobId.trim())
+      .maybeSingle();
+    if (error) throw new Error(`Exact pipeline job lookup failed: ${error.message}`);
+    return data as PipelineSkuJobLookup | null;
+  }
   const skuCandidates = uniqueTrimmedStrings(candidates);
   if (skuCandidates.length === 0) return null;
 
   for (const candidate of skuCandidates) {
     const lookup = async (includeShopifySku: boolean) => {
       const select = includeShopifySku
-        ? "id,grace_sku,website_sku,shopify_sku,product_group_slug"
-        : "id,grace_sku,website_sku,product_group_slug";
+        ? selectFields
+        : [
+            "id", "organization_id", "family", "grace_sku", "website_sku",
+            "product_group_slug", "status", "generated_image_id", "generated_image_url",
+            "approved_image_id", "approved_image_url",
+          ].join(",");
       const clauses = [
         `grace_sku.eq.${postgrestEqValue(candidate)}`,
         `website_sku.eq.${postgrestEqValue(candidate)}`,
@@ -495,6 +521,92 @@ async function findPipelineSkuJob(
   }
 
   return null;
+}
+
+type ShopifyPublishAuthorizationRow = {
+  id: string;
+  purpose: "shopify-product-image-publish";
+  organization_id: string;
+  pipeline_sku_job_id: string;
+  generated_image_id: string;
+  website_sku: string;
+  grace_sku: string;
+  authorized_by_user_id: string;
+  authorized_at: string;
+  expires_at: string;
+  consumed_at: string | null;
+};
+
+async function loadTrustedShopifyPublishAuthorization(
+  supabase: SupabaseClient,
+  organizationId: string,
+  authorizationId: string | undefined,
+): Promise<TrustedCylinderShopifyPublishAuthorization | null> {
+  const exactAuthorizationId = authorizationId?.trim();
+  if (!exactAuthorizationId) return null;
+
+  const { data, error } = await supabase
+    .from("shopify_publish_authorizations")
+    .select([
+      "id", "purpose", "organization_id", "pipeline_sku_job_id", "generated_image_id",
+      "website_sku", "grace_sku", "authorized_by_user_id", "authorized_at", "expires_at",
+      "consumed_at",
+    ].join(","))
+    .eq("id", exactAuthorizationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (error) throw new Error(`Shopify publish authorization lookup failed: ${error.message}`);
+  if (!data) return null;
+
+  const row = data as ShopifyPublishAuthorizationRow;
+  return {
+    id: row.id,
+    purpose: row.purpose,
+    organizationId: row.organization_id,
+    pipelineSkuJobId: row.pipeline_sku_job_id,
+    generatedImageId: row.generated_image_id,
+    websiteSku: row.website_sku,
+    graceSku: row.grace_sku,
+    authorizedByUserId: row.authorized_by_user_id,
+    authorizedAt: row.authorized_at,
+    expiresAt: row.expires_at,
+    consumedAt: row.consumed_at,
+    singleUse: true,
+  };
+}
+
+async function claimTrustedShopifyPublishAuthorization(
+  supabase: SupabaseClient,
+  input: {
+    authorizationId: string;
+    organizationId: string;
+    pipelineSkuJobId: string;
+    generatedImageId: string;
+    websiteSku: string;
+    graceSku: string;
+    consumedByUserId: string | null;
+    consumedAt: string;
+  },
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("shopify_publish_authorizations")
+    .update({
+      consumed_at: input.consumedAt,
+      consumed_by_user_id: input.consumedByUserId,
+    })
+    .eq("id", input.authorizationId)
+    .eq("organization_id", input.organizationId)
+    .eq("pipeline_sku_job_id", input.pipelineSkuJobId)
+    .eq("generated_image_id", input.generatedImageId)
+    .eq("website_sku", input.websiteSku)
+    .eq("grace_sku", input.graceSku)
+    .eq("purpose", "shopify-product-image-publish")
+    .is("consumed_at", null)
+    .gt("expires_at", input.consumedAt)
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(`Shopify publish authorization claim failed: ${error.message}`);
+  return Boolean(data?.id);
 }
 
 function looksLikeProductGroupSlug(value: string): boolean {
@@ -1132,7 +1244,7 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const isServiceRoleRequest = isServiceRoleToken(token, serviceRoleKey);
+    const isServiceRoleRequest = isExactConfiguredServiceRoleToken(token, serviceRoleKey);
     const { data: { user }, error: userError } = isServiceRoleRequest
       ? { data: { user: null }, error: null }
       : await supabase.auth.getUser(token);
@@ -1189,12 +1301,13 @@ serve(async (req) => {
       final_prompt: string | null;
       organization_id: string | null;
       user_id: string;
+      library_tags: string[] | null;
     }>();
 
     if (imageIds.length > 0) {
       const { data: images, error: imagesError } = await supabase
         .from("generated_images")
-        .select("id, image_url, session_name, final_prompt, organization_id, user_id")
+        .select("id, image_url, session_name, final_prompt, organization_id, user_id, library_tags")
         .in("id", imageIds);
 
       if (imagesError) throw new Error(imagesError.message);
@@ -1250,7 +1363,11 @@ serve(async (req) => {
       }
 
       try {
-        const pipelineSkuJob = syncBestBottlesConvex
+        // Exact guarded-job resolution is independent of the optional Convex sync path.
+        // When an exact id is supplied, never fall back to a fuzzy SKU match.
+        const pipelineSkuJob = item.pipelineSkuJobId?.trim()
+          ? await findPipelineSkuJob(supabase, organizationId, [], item.pipelineSkuJobId)
+          : syncBestBottlesConvex
           ? await findPipelineSkuJob(
               supabase,
               organizationId,
@@ -1305,6 +1422,42 @@ serve(async (req) => {
             );
           }
         }
+
+        const cylinderPublishRequested = (
+          /^(?:tall\s+)?cylinder$/i.test(getString(pipelineSkuJob?.family))
+          || /^(?:tall\s+)?cylinder$/i.test(getString(bestBottlesProduct?.product?.family))
+          || [
+            sku,
+            requestedWebsiteSku,
+            requestedGraceSku,
+            pipelineSkuJob?.website_sku,
+            pipelineSkuJob?.grace_sku,
+            bestBottlesProduct?.websiteSku,
+            bestBottlesProduct?.graceSku,
+          ].some(isCylinderProductSku)
+        );
+        const guardNow = new Date().toISOString();
+        const trustedAuthorization = !dryRun && cylinderPublishRequested
+          ? await loadTrustedShopifyPublishAuthorization(
+              supabase,
+              organizationId,
+              item.publishAuthorizationId,
+            )
+          : null;
+        const cylinderGuardInput: CylinderShopifyPublishGuardInput = {
+          organizationId,
+          dryRun,
+          isCylinderProduct: cylinderPublishRequested,
+          isServiceRoleRequest,
+          authenticatedUserId: user?.id ?? null,
+          organizationMembershipVerified: !isServiceRoleRequest,
+          now: guardNow,
+          item,
+          trustedAuthorization,
+          job: pipelineSkuJob,
+          image: dbImage,
+        };
+        assertCylinderShopifyPublishAuthorized(cylinderGuardInput);
 
         const baseShopifySkuCandidates = expandBestBottlesSkuCandidates([
             pipelineSkuJob?.shopify_sku,
@@ -1372,11 +1525,24 @@ serve(async (req) => {
           continue;
         }
 
-        const media = await createProductMedia(
-          shopifyConfig,
-          variant.product.id,
-          imageUrl,
-          label,
+        const media = await executeCylinderShopifyGuardedMutation(
+          cylinderGuardInput,
+          () => createProductMedia(
+            shopifyConfig,
+            variant.product.id,
+            imageUrl,
+            label,
+          ),
+          (authorizationId) => claimTrustedShopifyPublishAuthorization(supabase, {
+            authorizationId,
+            organizationId,
+            pipelineSkuJobId: pipelineSkuJob?.id ?? "",
+            generatedImageId: dbImage?.id ?? "",
+            websiteSku: pipelineSkuJob?.website_sku ?? "",
+            graceSku: pipelineSkuJob?.grace_sku ?? "",
+            consumedByUserId: user?.id ?? null,
+            consumedAt: new Date().toISOString(),
+          }),
         );
 
         let readyMedia: { status: string | null; url: string | null } = {
@@ -1393,6 +1559,12 @@ serve(async (req) => {
         }
 
         const shopifyImageUrl = readyMedia.url ?? await waitForMediaImageUrl(shopifyConfig, media.id);
+        const attachedVariantMediaIds = body.attachToVariant === false
+          ? []
+          : await listVariantMediaIds(shopifyConfig, variant.id);
+        const shopifyReadbackMatched = attachedVariantMediaIds.includes(media.id);
+        let convexReadbackMatched: boolean | null = null;
+        let convexReadbackImageUrl: string | null = null;
         let bestBottlesConvex: Record<string, unknown> | null = null;
         if (syncBestBottlesConvex && bestBottlesProduct) {
           if (!shopifyImageUrl) {
@@ -1421,11 +1593,25 @@ serve(async (req) => {
             );
           }
 
+          const convexReadback = await callBestBottlesConvex(
+            bbConvexUrl,
+            "query",
+            "products:getByWebsiteSku",
+            { websiteSku: bestBottlesProduct.websiteSku },
+          );
+          const convexReadbackValue = convexReadback.body?.value as Record<string, unknown> | null | undefined;
+          convexReadbackImageUrl = typeof convexReadbackValue?.[field] === "string"
+            ? String(convexReadbackValue[field]).trim()
+            : null;
+          convexReadbackMatched = convexReadback.ok && convexReadbackImageUrl === shopifyImageUrl;
+
           bestBottlesConvex = {
             websiteSku: bestBottlesProduct.websiteSku,
             resolvedVia: bestBottlesProduct.resolvedVia,
             field,
             imageUrl: shopifyImageUrl,
+            readbackImageUrl: convexReadbackImageUrl,
+            readbackMatched: convexReadbackMatched,
             mutation: mutation.body?.value ?? null,
           };
         }
@@ -1477,8 +1663,8 @@ serve(async (req) => {
           },
         });
 
-        if (pipelineSkuJob?.id && shopifyImageUrl) {
-          await supabase
+        if (pipelineSkuJob?.id && item.imageId && shopifyImageUrl) {
+          const { error: skuJobUpdateError } = await supabase
             .from("best_bottles_pipeline_sku_jobs")
             .update({
               status: syncBestBottlesConvex ? "synced" : "shopify-pushed",
@@ -1493,6 +1679,50 @@ serve(async (req) => {
               last_error: null,
             })
             .eq("id", pipelineSkuJob.id);
+          if (skuJobUpdateError) throw new Error(skuJobUpdateError.message);
+
+          const { error: shopifyVerificationError } = await supabase.rpc(
+            "record_best_bottles_destination_verification",
+            {
+              p_organization_id: organizationId,
+              p_pipeline_sku_job_id: pipelineSkuJob.id,
+              p_image_id: item.imageId,
+              p_destination: "shopify",
+              p_state: shopifyReadbackMatched ? "matched" : "mismatch",
+              p_verified_image_url: shopifyImageUrl,
+              p_verified_image_hash: null,
+              p_error: shopifyReadbackMatched
+                ? null
+                : `Shopify media ${media.id} was not present on variant ${variant.id} after attachment.`,
+            },
+          );
+          if (shopifyVerificationError) throw new Error(shopifyVerificationError.message);
+
+          if (syncBestBottlesConvex) {
+            const { error: convexVerificationError } = await supabase.rpc(
+              "record_best_bottles_destination_verification",
+              {
+                p_organization_id: organizationId,
+                p_pipeline_sku_job_id: pipelineSkuJob.id,
+                p_image_id: item.imageId,
+                p_destination: "convex",
+                p_state: convexReadbackMatched ? "matched" : "mismatch",
+                p_verified_image_url: convexReadbackImageUrl,
+                p_verified_image_hash: null,
+                p_error: convexReadbackMatched
+                  ? null
+                  : "Convex read-back did not equal the verified Shopify CDN URL.",
+              },
+            );
+            if (convexVerificationError) throw new Error(convexVerificationError.message);
+          }
+
+          if (!shopifyReadbackMatched) {
+            throw new Error("Shopify write completed but variant-media read-back did not match.");
+          }
+          if (syncBestBottlesConvex && !convexReadbackMatched) {
+            throw new Error("Convex write completed but product read-back did not match.");
+          }
         }
 
         results.push({

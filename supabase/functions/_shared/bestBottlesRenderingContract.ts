@@ -1,4 +1,8 @@
-import { getFamilyRigForProduct, type FamilyRigConfig } from "./familyRig.ts";
+import {
+  getFamilyRigForProduct,
+  isCylinderFamilyAlias,
+  type FamilyRigConfig,
+} from "./familyRig.ts";
 import { shouldForceBestBottlesOpenAIProvider } from "./bestBottlesProviderRouting.ts";
 
 export type BestBottlesRenderingLane =
@@ -77,6 +81,17 @@ export interface BestBottlesRenderingContractInput {
   categorizedRefs: BestBottlesCategorizedReferences;
   extraLibraryTags?: string[];
   referenceAuditValues?: readonly unknown[];
+}
+
+interface BestBottlesCanonicalGeometryContract {
+  version: "best-bottles-canonical-geometry-v1";
+  websiteSku: string;
+  graceSku: string;
+  canon_bodyHeightMm: string;
+  canon_heightWithCapMm: string;
+  canon_widthAxisMm: string;
+  canon_secondAxisMm: string;
+  sha256: string;
 }
 
 export interface BestBottlesProductTruthResolver {
@@ -225,6 +240,90 @@ function readRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function normalizedIdentity(value: unknown): string {
+  return textValue(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function nominalMillimeters(value: unknown): number | null {
+  const normalized = textValue(value);
+  if (!normalized) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function resolveSealedCanonicalCylinderProduct(
+  input: BestBottlesRenderingContractInput,
+  product: BestBottlesContractProduct,
+): Promise<{ product: BestBottlesContractProduct; geometry: BestBottlesCanonicalGeometryContract | null; error: string | null }> {
+  const family = product.family ?? product.bottleCollection;
+  if (!isCylinderFamilyAlias(family)) return { product, geometry: null, error: null };
+  const raw = readRecord(input.productContext?.canonicalGeometryContract);
+  if (!raw) {
+    return {
+      product,
+      geometry: null,
+      error: "Best Bottles Cylinder generation requires a sealed canonical geometry contract.",
+    };
+  }
+
+  const geometry = {
+    version: textValue(raw.version),
+    websiteSku: textValue(raw.websiteSku),
+    graceSku: textValue(raw.graceSku),
+    canon_bodyHeightMm: textValue(raw.canon_bodyHeightMm),
+    canon_heightWithCapMm: textValue(raw.canon_heightWithCapMm),
+    canon_widthAxisMm: textValue(raw.canon_widthAxisMm),
+    canon_secondAxisMm: textValue(raw.canon_secondAxisMm),
+    sha256: textValue(raw.sha256).toLowerCase(),
+  };
+  if (
+    geometry.version !== "best-bottles-canonical-geometry-v1"
+    || !/^[a-f0-9]{64}$/.test(geometry.sha256)
+    || [
+      geometry.canon_bodyHeightMm,
+      geometry.canon_heightWithCapMm,
+      geometry.canon_widthAxisMm,
+      geometry.canon_secondAxisMm,
+    ].some((value) => nominalMillimeters(value) == null)
+  ) {
+    return { product, geometry: null, error: "Best Bottles sealed canonical geometry contract is malformed." };
+  }
+  const sealInput = {
+    version: geometry.version,
+    websiteSku: geometry.websiteSku,
+    graceSku: geometry.graceSku,
+    canon_bodyHeightMm: geometry.canon_bodyHeightMm,
+    canon_heightWithCapMm: geometry.canon_heightWithCapMm,
+    canon_widthAxisMm: geometry.canon_widthAxisMm,
+    canon_secondAxisMm: geometry.canon_secondAxisMm,
+  };
+  if (await sha256Hex(JSON.stringify(sealInput)) !== geometry.sha256) {
+    return { product, geometry: null, error: "Best Bottles sealed canonical geometry contract SHA-256 is invalid." };
+  }
+  if (
+    normalizedIdentity(geometry.websiteSku) !== normalizedIdentity(product.websiteSku)
+    || normalizedIdentity(geometry.graceSku) !== normalizedIdentity(product.graceSku)
+  ) {
+    return { product, geometry: null, error: "Best Bottles sealed canonical geometry contract does not match the exact dual identity." };
+  }
+
+  return {
+    product: {
+      ...product,
+      heightWithoutCap: `${geometry.canon_bodyHeightMm} mm`,
+      heightWithCap: `${geometry.canon_heightWithCapMm} mm`,
+      diameter: `${geometry.canon_widthAxisMm} mm`,
+    },
+    geometry: geometry as BestBottlesCanonicalGeometryContract,
+    error: null,
+  };
+}
+
 function readSkuCandidates(input: BestBottlesRenderingContractInput): string[] {
   const productContext = input.productContext ?? {};
   const precompiled = readRecord(input.precompiledPromptRecord);
@@ -241,9 +340,35 @@ function readSkuCandidates(input: BestBottlesRenderingContractInput): string[] {
   ].filter(Boolean)));
 }
 
-function contractProductContext(product: BestBottlesContractProduct): Record<string, unknown> {
+const CALLER_ROLE_TOPOLOGY_FIELDS = [
+  "presetId",
+  "capState",
+  "mode",
+  "componentTopology",
+  "capOffReferenceId",
+  "topologyReferenceId",
+  "referenceRoleId",
+  "roleId",
+] as const;
+
+function callerRoleTopologyContext(
+  inputContext: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  if (!inputContext) return {};
+  return Object.fromEntries(
+    CALLER_ROLE_TOPOLOGY_FIELDS
+      .filter((field) => Object.prototype.hasOwnProperty.call(inputContext, field))
+      .map((field) => [field, inputContext[field]]),
+  );
+}
+
+function contractProductContext(
+  product: BestBottlesContractProduct,
+  inputContext?: Record<string, unknown> | null,
+): Record<string, unknown> {
   return {
     ...product,
+    ...callerRoleTopologyContext(inputContext),
     sku: product.graceSku ?? null,
     name: product.itemName ?? null,
     collection: product.bottleCollection ?? null,
@@ -293,6 +418,13 @@ function getFamilyLaneDefinition(family: string): FamilyLaneDefinition {
       enhancementStatus: "needs_review",
     };
   }
+  if (isCylinderFamilyAlias(normalized)) {
+    return {
+      renderingLane: "bottle_catalog",
+      bottleScaleStatus: "mapped",
+      enhancementStatus: "needs_review",
+    };
+  }
   if (MAPPED_BOTTLE_FAMILIES.has(normalized)) {
     return {
       renderingLane: "bottle_catalog",
@@ -332,6 +464,7 @@ function componentRig(profileId: "component-enhancement" | "packaging-enhancemen
 function resolveRig(
   product: BestBottlesContractProduct,
   lane: BestBottlesRenderingLane,
+  inputContext?: Record<string, unknown> | null,
 ): FamilyRigConfig | null {
   if (lane === "component_enhancement") return componentRig("component-enhancement");
   if (lane === "packaging_enhancement") return componentRig("packaging-enhancement");
@@ -350,6 +483,8 @@ function resolveRig(
     heightWithCap: product.heightWithCap,
     heightWithoutCap: product.heightWithoutCap,
     diameter: product.diameter,
+    capState: textValue(inputContext?.capState) || null,
+    mode: textValue(inputContext?.mode) || null,
   });
 }
 
@@ -391,12 +526,11 @@ function resolveQaPolicy(lane: BestBottlesRenderingLane): BestBottlesRenderingCo
 
 function getReferenceCountIssue(input: BestBottlesRenderingContractInput): string | null {
   const refs = input.categorizedRefs;
-  const total = refs.product.length + refs.background.length + refs.style.length;
-  if (refs.product.length === 0) {
+  if (refs.product.length !== 1) {
     return "Best Bottles master generation requires exactly one product reference image.";
   }
-  if (total !== 1 || refs.product.length !== 1) {
-    return "Best Bottles master generation accepts exactly one product reference image and no background/style references.";
+  if (refs.background.length > 0 || refs.style.length > 1) {
+    return "Best Bottles master generation accepts exactly one product reference, no background references, and at most one Cylinder-only style calibration reference.";
   }
   return null;
 }
@@ -427,10 +561,12 @@ function collectReferenceValues(value: unknown, seen = new WeakSet<object>(), de
 }
 
 function getRetiredReferenceIssue(input: BestBottlesRenderingContractInput): string | null {
+  // Transparent/background-removed/paper-doll/mask lineage is prohibited in
+  // every reference role—product, style, and background—not just geometry.
   const values = [
     ...input.categorizedRefs.product,
-    ...input.categorizedRefs.background,
     ...input.categorizedRefs.style,
+    ...input.categorizedRefs.background,
     ...(input.referenceAuditValues ?? []),
   ].flatMap((value) => collectReferenceValues(value));
   const retired = values
@@ -514,18 +650,21 @@ export async function resolveBestBottlesRenderingContract(
   const retiredReferenceIssue = getRetiredReferenceIssue(input);
   if (retiredReferenceIssue) return blockedContract(retiredReferenceIssue);
 
-  const product = await resolveProductTruth(input, resolver);
-  if (!product) {
+  const resolvedProduct = await resolveProductTruth(input, resolver);
+  if (!resolvedProduct) {
     return blockedContract("Best Bottles rendering contract could not resolve product truth from Convex.");
   }
 
+  const sealedCanonical = await resolveSealedCanonicalCylinderProduct(input, resolvedProduct);
+  if (sealedCanonical.error) return blockedContract(sealedCanonical.error);
+  const product = sealedCanonical.product;
   const family = product.family ?? product.bottleCollection ?? null;
   const definition = getFamilyLaneDefinition(family ?? "");
   if (definition.renderingLane === "blocked_unknown") {
     return {
       ...blockedContract("Best Bottles rendering contract blocked unknown product truth or family mapping."),
       product,
-      productContext: contractProductContext(product),
+      productContext: contractProductContext(product, input.productContext),
       sku: product.graceSku ?? null,
       websiteSku: product.websiteSku ?? null,
       family,
@@ -533,11 +672,12 @@ export async function resolveBestBottlesRenderingContract(
   }
 
   const providerPolicy = resolveProviderPolicy(input);
-  const rig = resolveRig(product, definition.renderingLane);
+  const rig = resolveRig(product, definition.renderingLane, input.productContext);
   const status = statusForDefinition(definition);
   const promptProfile = resolvePromptProfile(definition.renderingLane);
   const productContext = {
-    ...contractProductContext(product),
+    ...contractProductContext(product, input.productContext),
+    ...(sealedCanonical.geometry ? { canonicalGeometryContract: sealedCanonical.geometry } : {}),
     renderingLane: definition.renderingLane,
     bottleScaleStatus: definition.bottleScaleStatus,
     enhancementStatus: definition.enhancementStatus,

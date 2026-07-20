@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-07-11T00:00:00-07:00",
+  "mode": "read-only",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "rollbackRule": "Export current rows and preserve object copies before any approved migration write.",
+  "objects": [
+    {
+      "graceSku": "GB-SPR-CLR-3ML-BLK",
+      "websiteSku": "GBSpry3mlClBlk",
+      "activeObjectUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/best-bottles/reference-images/GB-SPR-CLR-3ML-BLK__GBSpry3mlClBlk__pdp-main__v001.png",
+      "activeObjectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/best-bottles/reference-images/GB-SPR-CLR-3ML-BLK__GBSpry3mlClBlk__pdp-main__v001.png",
+      "activeObject": {
+        "sha256": "149116400be3970f44817fd6840e49fe112fdf84f3ca6cd547eaf5187cdbc841",
+        "bytes": 287855,
+        "width": 2080,
+        "height": 2288,
+        "format": "PNG",
+        "colorProfile": "sRGB",
+        "pixelAlphaState": "opaque; RGB/TrueColor with no alpha channel"
+      },
+      "persistedProvenance": {
+        "referenceSource": "flattened-product-truth",
+        "sourcePath": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/pipeline/aios-shopify-pdp-images/00-input/reference-flattened/cylinder-3ml-clear-12mm-finemist/GB-SPR-CLR-3ML-BLK__GBSpry3mlClBlk__pdp-main__v001.png",
+        "metadataAssessment": "The provenance claim does not match the active object bytes or dimensions."
+      },
+      "activeConsumers": [
+        "best_bottles_pipeline_sku_jobs.best_reference_candidate_path",
+        "BestBottlesStudio persisted reference hydration",
+        "MastersTabPanel preview and single generation preflight",
+        "generate-family-batch target resolver"
+      ],
+      "classification": ["2080x2288 output-canvas-staged reference", "duplicate filename with bytes differing from the reviewed native export", "requires product-state review rather than dimension rejection"],
+      "approvedReplacement": {
+        "localPath": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026/pipeline/aios-shopify-pdp-images/00-input/reference-flattened/cylinder-3ml-clear-12mm-finemist/GB-SPR-CLR-3ML-BLK__GBSpry3mlClBlk__pdp-main__v001.png",
+        "sha256": "9efd0794f4295dfba367759e8825f9bf894fb5a6696892256d35b047e19a84bb",
+        "bytes": 185463,
+        "width": 750,
+        "height": 1594,
+        "format": "PNG",
+        "colorProfile": "sRGB",
+        "pixelAlphaState": "opaque; RGB/TrueColor with no alpha channel"
+      }
+    },
+    {
+      "graceSku": "GB-CYL-FRS-9ML-01",
+      "websiteSku": "GBTallCylFrst9SpryBlkMatt",
+      "activeObjectUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/best-bottles/reference-images/GB-CYL-FRS-9ML-01__GBTallCylFrst9SpryBlkMatt__pdp-main__v001.png",
+      "activeObjectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/best-bottles/reference-images/GB-CYL-FRS-9ML-01__GBTallCylFrst9SpryBlkMatt__pdp-main__v001.png",
+      "activeObject": {
+        "sha256": "d78ec4b71e0f3fb8fbe44deca75cb7217a5e4db42ec62efb102d0d78614df646",
+        "bytes": 9023,
+        "width": 360,
+        "height": 480,
+        "format": "PNG",
+        "colorProfile": "Gray",
+        "pixelAlphaState": "opaque; grayscale with no alpha channel"
+      },
+      "persistedProvenance": {
+        "referenceSource": null,
+        "sourcePath": null,
+        "sourceUrl": null,
+        "metadataAssessment": "No approved provenance. Coverage says covered_needs_canonical_copy."
+      },
+      "activeConsumers": [
+        "best_bottles_pipeline_sku_jobs.best_reference_candidate_path",
+        "BestBottlesStudio persisted reference hydration",
+        "MastersTabPanel preview and single generation preflight",
+        "generate-family-batch target resolver"
+      ],
+      "classification": ["legacy website copy", "detached-cap", "low-resolution", "blocked"],
+      "approvedReplacement": null
+    }
+  ],
+  "proposedMigration": [
+    { "order": 1, "action": "Export these SKU-job rows and preserve byte-identical rollback copies of both active objects.", "requiresApproval": true },
+    { "order": 2, "action": "Upload the approved 9efd0794... canonical under clean provenance without overwriting the current object.", "requiresApproval": true },
+    { "order": 3, "action": "Update only GB-SPR-CLR-3ML-BLK to the new object URL and verified flattened-product-truth metadata.", "requiresApproval": true },
+    { "order": 4, "action": "Verify Madison resolves the replacement hash, dimensions, alpha state, preview containment, and prompt preflight.", "requiresApproval": true },
+    { "order": 5, "action": "Quarantine the mismatched 2080x2288 object and the invalid 360x480 frosted website copy; leave GB-CYL-FRS-9ML-01 blocked.", "requiresApproval": true },
+    { "order": 6, "action": "Delete only separately approved, confirmed-unreferenced quarantined objects.", "requiresApproval": true, "separateDeletionApproval": true }
+  ]
+}

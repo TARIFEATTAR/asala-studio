@@ -1,0 +1,22 @@
+{
+  "version": "best-bottles-family-taxonomy-overrides-v1",
+  "reviewer": "Jordan Richter",
+  "reviewedAt": "2026-07-14",
+  "notes": "Exact PDP classifications that override the broad Convex/Catalog family label for generation and publication lanes. These do not write to Convex.",
+  "overrides": [
+    {
+      "graceSku": "GB-CYL-CLR-9ML-T-01",
+      "websiteSku": "GB09BlackCapApp",
+      "canonicalFamily": "Vial",
+      "sourceUrl": "https://www.bestbottles.com/product/Vial-design-9-ml-clear-glass-black-cap-with-glass-rod-applicator",
+      "note": "Exact PDP item type is Perfume vials and tubes With Caps & Droppers. Glass-rod applicator; 50 ±0.5 mm assembled, 20 ±0.5 mm diameter, 18-400 neck. Never resolve as a Cylinder roll-on."
+    },
+    {
+      "graceSku": "GB-CYL-CLR-9ML-S-01",
+      "websiteSku": "GB09BlackCapSht",
+      "canonicalFamily": "Vial",
+      "sourceUrl": "https://www.bestbottles.com/product/Vial-design-9-ml-clear-glass-black-short-cap",
+      "note": "Exact PDP item type is Perfume vials and tubes With Caps & Droppers. Short cap; 47 ±0.5 mm assembled, 21 ±0.5 mm diameter, 18-400 neck."
+    }
+  ]
+}

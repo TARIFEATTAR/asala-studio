@@ -15,6 +15,7 @@ import {
   detectStrongBounds,
   detectModelGeometryBaseline,
   detectModelShadowContactBounds,
+  detectPrimaryBottleBounds,
   finalizeRigShadow,
   flattenBackgroundLikePixels,
   clampModelShadowGeometryToControlEnvelope,
@@ -23,6 +24,59 @@ import {
   resolveRigShadowOwner,
 } from "./rigPostprocess";
 import { analyzeModelOwnedShadow } from "./shadowQa";
+
+describe("primary bottle transform authority", () => {
+  it("isolates the centered bottle from a right-sidecar component", () => {
+    const width = 120;
+    const height = 100;
+    const bone = { r: 245, g: 243, b: 239 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let index = 0; index < pixels.length; index += 4) {
+      pixels[index] = bone.r;
+      pixels[index + 1] = bone.g;
+      pixels[index + 2] = bone.b;
+      pixels[index + 3] = 255;
+    }
+    const paint = (left: number, top: number, right: number, bottom: number) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * width + x) * 4;
+          pixels[index] = 70;
+          pixels[index + 1] = 70;
+          pixels[index + 2] = 70;
+        }
+      }
+    };
+    paint(40, 20, 60, 70);
+    paint(85, 45, 100, 70);
+
+    assert.deepEqual(
+      detectPrimaryBottleBounds(pixels, width, height, bone),
+      { top: 20, bottom: 70, left: 40, right: 60 },
+    );
+  });
+
+  it("ignores detached sidecar width while sizing the full primary product", () => {
+    const transform = computeRigFrameTransform({
+      width: 2080,
+      height: 2288,
+      rig: {
+        ...FAMILY_RIG.cylinder,
+        fillHeightPct: 79,
+        fillWidthPct: 96,
+        targetBodyHeightPx: 1400,
+      },
+      detectedBaselineYPx: 2000,
+      strongBounds: { top: 200, bottom: 2000, left: 400, right: 1900 },
+      primaryBounds: { top: 400, bottom: 2000, left: 500, right: 800 },
+      capState: "detached",
+    });
+
+    const expectedScale = (2288 * 0.79) / 1600;
+    assert.ok(Math.abs(transform.scale - expectedScale) < 1e-6);
+    assert.notEqual(transform.shiftXPx, 0, "primary bottle should be centered independently");
+  });
+});
 
 describe("shadow ownership", () => {
   const width = 80;
@@ -99,6 +153,56 @@ describe("shadow ownership", () => {
     assert.deepEqual(bounds.sidecar, { left: 85, right: 100, top: 50, bottom: 70 });
   });
 
+  it("derives detached contact segments above a faint bridging floor lane", () => {
+    const testWidth = 120;
+    const testHeight = 100;
+    const pixels = new Uint8ClampedArray(testWidth * testHeight * 4);
+    for (let index = 0; index < pixels.length; index += 4) {
+      pixels[index] = bone.r;
+      pixels[index + 1] = bone.g;
+      pixels[index + 2] = bone.b;
+      pixels[index + 3] = 255;
+    }
+    const paint = (
+      left: number,
+      top: number,
+      right: number,
+      bottom: number,
+      delta: number,
+    ) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * testWidth + x) * 4;
+          pixels[index] = bone.r - delta;
+          pixels[index + 1] = bone.g - delta;
+          pixels[index + 2] = bone.b - delta;
+        }
+      }
+    };
+    paint(40, 20, 60, 70, 150);
+    paint(85, 45, 100, 70, 150);
+    // Strong enough for the object threshold, but confined to the governed
+    // lower floor/shadow lane. It must not merge the two physical objects.
+    paint(61, 62, 84, 70, 8);
+
+    const bounds = detectModelShadowContactBounds({
+      pixels,
+      width: testWidth,
+      height: testHeight,
+      background: bone,
+      groupBounds: { left: 40, right: 100, top: 20, bottom: 70 },
+      baselineYPx: 70,
+      topology: {
+        kind: "detached-sidecar",
+        expectedContacts: ["bottle", "sidecar"],
+        source: "reviewed-reference",
+      },
+    });
+
+    assert.deepEqual(bounds.bottle, { left: 40, right: 60, top: 20, bottom: 70 });
+    assert.deepEqual(bounds.sidecar, { left: 85, right: 100, top: 45, bottom: 70 });
+  });
+
   it("preserves a model-owned shadow mask during Bone recanvas", () => {
     const pixels = makePixels();
     const shadowMask = new Uint8Array(width * height);
@@ -137,7 +241,9 @@ describe("shadow ownership", () => {
     });
 
     assert.equal(output.deterministicShadowPixels, 0);
-    assert.equal(output.shadowQa?.status, "pass");
+    // Analyzer removed from the flow (Jordan 2026-07-19): model-owned shadows
+    // report no QA object; human review judges them.
+    assert.equal(output.shadowQa, null);
   });
 
   it("retains deterministic paint for rig ownership", () => {
@@ -156,7 +262,7 @@ describe("shadow ownership", () => {
     assert.equal(output.shadowQa, null);
   });
 
-  it("routes a model-owned baseline fallback to review without deterministic paint", () => {
+  it("leaves model-owned pixels untouched with no QA report even without a baseline", () => {
     const pixels = makePixels();
     const before = Array.from(pixels);
     const output = finalizeRigShadow({
@@ -170,7 +276,7 @@ describe("shadow ownership", () => {
     });
 
     assert.equal(output.deterministicShadowPixels, 0);
-    assert.equal(output.shadowQa?.status, "review");
+    assert.equal(output.shadowQa, null);
     assert.deepEqual(Array.from(pixels), before);
   });
 
@@ -181,6 +287,10 @@ describe("shadow ownership", () => {
         family: "Circle",
         shadowOwner: "model",
       }),
+      "model",
+    );
+    assert.equal(
+      resolveRigShadowOwner({ family: "Cap/Closure", shadowOwner: "model" }),
       "rig",
     );
     assert.equal(
@@ -359,7 +469,28 @@ describe("addDeterministicContactShadow", () => {
 });
 
 describe("computeRigFrameTransform", () => {
-  it("keeps a wide 9ml roll-on assembly inside its minimum fill-height gate", () => {
+  it("preserves provider scale for production masters while still seating the baseline", () => {
+    const result = computeRigFrameTransform({
+      width: 2080,
+      height: 2288,
+      rig: {
+        ...FAMILY_RIG.cylinder,
+        fillHeightPct: 69,
+        fillHeightRangePct: { min: 67, max: 71 },
+      },
+      detectedBaselineYPx: 1980,
+      strongBounds: { top: 250, bottom: 1980, left: 650, right: 1450 },
+      primaryBounds: { top: 250, bottom: 1980, left: 650, right: 1050 },
+      capState: "detached",
+      preserveGeneratedScale: true,
+    });
+
+    assert.equal(result.scale, 1);
+    assert.equal(result.targetBaselineYPx, 2082);
+    assert.equal(result.shiftYPx, 102);
+  });
+
+  it("uses the assembled profile target for a detached primary product without a body mask", () => {
     const rig = getFamilyRigForProduct({
       graceSku: "GB-CYL-BLU-9ML-MRL-MCPR",
       family: "Cylinder",
@@ -373,22 +504,56 @@ describe("computeRigFrameTransform", () => {
     assert.ok(rig);
 
     // Reproduces the geometry behind the worst manifest failure: a bottle plus
-    // right-side cap produces a 1,287px-wide assembly whose old 58% width cap
-    // shrinks a 1,001px-tall bottle envelope to roughly 41% of the canvas.
+    // right-side cap produces a 1,287px-wide full envelope. Detached topology
+    // must size from the bottle-only bounds, not from that combined width.
+    const primaryBounds = { top: 800, bottom: 1800, left: 620, right: 920 };
     const result = computeRigFrameTransform({
       width: 2080,
       height: 2288,
       rig,
       detectedBaselineYPx: 1800,
       strongBounds: { top: 800, bottom: 1800, left: 396, right: 1682 },
+      primaryBounds,
+      capState: "detached",
     });
-    const transformedFillHeightPct =
-      ((result.transformedBottomYPx! - result.transformedTopYPx! + 1) / 2288) * 100;
+    const transformedPrimaryHeightPx =
+      (primaryBounds.bottom - primaryBounds.top) * result.scale;
+    const expectedPrimaryHeightPx = 2288 * (rig.fillHeightPct / 100);
 
     assert.ok(
-      transformedFillHeightPct >= rig.fillHeightRangePct!.min,
-      `expected at least ${rig.fillHeightRangePct!.min}% fill, got ${transformedFillHeightPct.toFixed(1)}%`,
+      Math.abs(transformedPrimaryHeightPx - expectedPrimaryHeightPx) <= 1,
+      `expected ${expectedPrimaryHeightPx.toFixed(1)}px primary target, got ${transformedPrimaryHeightPx.toFixed(1)}px`,
     );
+  });
+
+  it("reduces a 9 ml PDP sidecar to the global ecommerce-scale envelope", () => {
+    const rig = getFamilyRigForProduct({
+      graceSku: "GB-CYL-CLR-9ML-T-21",
+      family: "Cylinder",
+      bottleCollection: "Cylinder",
+      capacityMl: 9,
+      applicator: "Fine Mist Sprayer",
+      heightWithCap: "98 ±1 mm",
+      heightWithoutCap: "70 ±1 mm",
+      diameter: "20 ±0.5 mm",
+      capState: "detached",
+      mode: "fitment-attached-cap-right-sidecar",
+    });
+    assert.ok(rig);
+    const primaryBounds = { top: 250, bottom: 1980, left: 700, right: 1050 };
+    const result = computeRigFrameTransform({
+      width: 2080,
+      height: 2288,
+      rig,
+      detectedBaselineYPx: 1980,
+      strongBounds: { top: 250, bottom: 1980, left: 700, right: 1600 },
+      primaryBounds,
+      capState: "detached",
+    });
+
+    assert.ok(result.scale > 0.85 && result.scale < 0.95);
+    assert.ok(Math.abs((primaryBounds.bottom - primaryBounds.top) * result.scale - 1579) <= 1);
+    assert.equal(Math.round(result.detectedBaselineYPx * result.scale + result.shiftYPx), 2082);
   });
 
   it("scales down a too-tall output while keeping the rig baseline fixed", () => {
@@ -1431,5 +1596,75 @@ describe("applyMaskControlledForegroundMatte", () => {
 
     assert.equal(result.shadowPixels, 0);
     assert.equal(pixels[(42 * width + 23) * 4 + 3], 0);
+  });
+});
+
+describe("detectTallestComponentBounds", () => {
+  it("isolates the tallest component instead of merging bottle and sidecar cap", () => {
+    const width = 200;
+    const height = 100;
+    const bg = { r: 246, g: 239, b: 232 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      pixels[i * 4] = bg.r; pixels[i * 4 + 1] = bg.g; pixels[i * 4 + 2] = bg.b; pixels[i * 4 + 3] = 255;
+    }
+    const paint = (x0: number, x1: number, y0: number, y1: number) => {
+      for (let y = y0; y <= y1; y += 1) for (let x = x0; x <= x1; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = 40; pixels[i + 1] = 40; pixels[i + 2] = 40;
+      }
+    };
+    paint(40, 59, 10, 89);   // tall narrow bottle: h=80 w=20
+    paint(120, 159, 60, 89); // short wide sidecar cap: h=30 w=40
+
+    const bounds = rigPostprocess.detectTallestComponentBounds(pixels, width, height, bg);
+    assert.ok(bounds);
+    assert.equal(bounds?.left, 40);
+    assert.equal(bounds?.right, 59);
+    assert.equal(bounds?.top, 10);
+    assert.equal(bounds?.bottom, 89);
+  });
+});
+
+describe("trimModelOwnedShadowIntoBand", () => {
+  it("clips over-extended feather and stray blobs while keeping in-band shadow", () => {
+    const width = 400, height = 1000, baseline = 900;
+    const bg = { r: 246, g: 239, b: 232 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      pixels[i * 4] = bg.r; pixels[i * 4 + 1] = bg.g; pixels[i * 4 + 2] = bg.b; pixels[i * 4 + 3] = 255;
+    }
+    const paint = (x0: number, x1: number, y0: number, y1: number, v: number) => {
+      for (let y = y0; y <= y1; y += 1) for (let x = x0; x <= x1; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = v; pixels[i + 1] = v; pixels[i + 2] = v;
+      }
+    };
+    paint(100, 179, 100, baseline, 40);        // bottle above baseline: width 80
+    paint(100, 340, baseline + 2, baseline + 8, 170); // feather extending 161px right of bottle (2x width)
+    paint(360, 390, baseline + 2, baseline + 10, 170); // stray disconnected blob
+    const changed = rigPostprocess.trimModelOwnedShadowIntoBand({
+      pixels, width, height, bg, baselineYPx: baseline,
+    });
+    assert.ok(changed > 0);
+    const shadowAt = (x: number) => {
+      const i = ((baseline + 3) * width + x) * 4;
+      return Math.abs(pixels[i] - bg.r) > 12;
+    };
+    assert.ok(shadowAt(190), "in-band feather must survive");   // within right+0.29w-fade
+    assert.ok(!shadowAt(230), "feather beyond keep-zone must be gone"); // 179+23=202 cutoff
+    assert.ok(!shadowAt(370), "stray blob must be erased");
+  });
+
+  it("declares only band/blob/depth failures trimmable", () => {
+    assert.ok(rigPostprocess.isModelShadowFailureTrimmable([
+      "sidecar: Shadow right extension ratio 0.353 exceeds 0.32.",
+      "Multiple connected shadow components detected (2).",
+    ]));
+    assert.ok(!rigPostprocess.isModelShadowFailureTrimmable([
+      "Shadow right extension ratio 0.353 exceeds 0.32.",
+      "Lower shadow feather is darker than the contact band.",
+    ]));
+    assert.ok(!rigPostprocess.isModelShadowFailureTrimmable([]));
   });
 });

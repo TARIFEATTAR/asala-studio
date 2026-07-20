@@ -101,6 +101,7 @@ export function buildBestBottlesFamilyRigPromptAdjustment(
   productContext?: BestBottlesFamilyRigProductContext | null,
 ): BestBottlesFamilyRigPromptAdjustment {
   const family = textValue(productContext?.family);
+  const resolvedCapState = resolveCapState(productContext);
   const rig = getFamilyRigForProduct({
     family,
     bottleCollection: textValue(productContext?.bottleCollection),
@@ -115,11 +116,13 @@ export function buildBestBottlesFamilyRigPromptAdjustment(
     heightWithCap: textValue(productContext?.heightWithCap),
     heightWithoutCap: textValue(productContext?.heightWithoutCap),
     diameter: textValue(productContext?.diameter),
+    capState: resolvedCapState,
+    mode: textValue(productContext?.mode),
   });
   const rigBlock = rig
     ? buildImposedRigBlock({
         family,
-        capState: resolveCapState(productContext),
+        capState: resolvedCapState,
         rig,
       })
     : null;

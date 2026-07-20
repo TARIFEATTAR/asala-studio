@@ -1,4 +1,9 @@
 import { BEST_BOTTLES_TALL_PORTRAIT_CANVAS_PX } from "./productImageDimensions";
+import {
+  applyBestBottlesFamilyScaleCorrection,
+  BEST_BOTTLES_CATALOG_SCALE_VERSION,
+  resolveBestBottlesGlobalScalePct,
+} from "./bestBottlesCatalogScale";
 
 export type BestBottlesFamilyProfileId =
   | "sample-vial"
@@ -36,6 +41,9 @@ export type BestBottlesRelativeScaleZoneId =
   | "standard-cylinder"
   | "large-cylinder"
   | "roller-bottle"
+  | "roller-small"
+  | "roller-standard"
+  | "roller-tall"
   | "boston-round"
   | "empire-bottle"
   | "heavy-perfume-bottle"
@@ -63,6 +71,11 @@ export interface BestBottlesFamilyProfile {
   id: BestBottlesFamilyProfileId;
   family: string;
   label: string;
+  scaleContractVersion: typeof BEST_BOTTLES_CATALOG_SCALE_VERSION;
+  globalTargetProductHeightPct: number;
+  familyScaleCorrectionPct: number;
+  /** Reserved for non-production comparison views; PDP profiles do not set it. */
+  geometryScaleVersion?: string;
   relativeScaleZoneId: BestBottlesRelativeScaleZoneId;
   relativeScaleZoneLabel: string;
   canvas: { widthPx: number; heightPx: number };
@@ -94,7 +107,7 @@ export interface BestBottlesFamilyProfile {
  * highlight stripe, and does not contradict the canon's "quiet mid-body" rule.
  */
 export const BEST_BOTTLES_ROUND_GLASS_VOLUME_CUE =
-  "- Round-glass volume cue: the body is a curved cylinder, not a flat pane. The backdrop seen THROUGH the glass reads about a half-tone deeper than the bare canvas beside the bottle, and that interior tone deepens gradually toward the left and right walls where the glass is optically thickest, with a continuous fine dark glass edge line on both silhouette walls. This interior tone change is purely optical and PERFECTLY SMOOTH — an even, continuous gradient with zero grain, speckle, mottling, smudges, brushy streaks, haze patches, or painted texture inside the glass; the interior stays optically clean. The mid-body stays quiet but must not match the background exactly. Do not add a central highlight stripe.";
+  "- Round-glass volume cue: the body is a curved cylinder, not a flat pane. It must remain visibly dimensional at ecommerce thumbnail size while staying empty, transparent, and colorless. The backdrop seen THROUGH the glass reads about a half-tone deeper than the bare canvas beside the bottle, and that interior tone deepens gradually toward the left and right walls where the glass is optically thickest. Sidewall density must emerge as a soft graduated optical transition from refraction and real wall thickness; it must never resolve into a discrete dark rail, drawn outline, black stripe, or continuous line on either side. The interior must never become a uniform Bone-colored rectangle or empty cutout window inside the bottle silhouette. Add narrow asymmetric studio-card reflections that softly feather with the curved sidewalls, plus faint rear-wall refraction and an elliptical internal base ring, so the circular cross-section is unmistakable without changing the silhouette. This interior tone change is purely optical and PERFECTLY SMOOTH — an even, continuous gradient with zero grain, speckle, mottling, smudges, brushy streaks, haze patches, or painted texture inside the glass; the interior stays optically clean. The mid-body stays quiet but must not match the background exactly. Do not add a broad central highlight stripe.";
 
 /**
  * Component material-targeting cue. PRODUCT TRUTH (operator-confirmed
@@ -140,6 +153,8 @@ export interface BestBottlesFamilyProfileProductInput {
   heightWithCap?: string | null;
   heightWithoutCap?: string | null;
   diameter?: string | null;
+  capState?: string | null;
+  mode?: string | null;
 }
 
 const FIXED_STUDIO_CANVAS = {
@@ -149,10 +164,49 @@ const FIXED_STUDIO_CANVAS = {
 
 const BEST_BOTTLES_SHARED_BASELINE_PCT = 9;
 
+/**
+ * Family profiles may correct silhouette framing, but the global catalog curve
+ * owns product height. The first contract launches at zero correction for every
+ * family; any future non-zero value requires versioned visual calibration.
+ */
+export const BEST_BOTTLES_FAMILY_SCALE_CORRECTIONS: Record<BestBottlesFamilyProfileId, number> = {
+  "sample-vial": 0,
+  "roller-bottle": 0,
+  "cylinder-standard": 0,
+  "cylinder-tall": 0,
+  "boston-round": 0,
+  "empire-bottle": 0,
+  "heavy-perfume-bottle": 0,
+  "aluminum-bottle": 0,
+  "round-bottle": 0,
+  "circle-bottle": 0,
+  "square-bottle": 0,
+  "rectangle-bottle": 0,
+  "cream-jar": 0,
+  "apothecary-bottle": 0,
+  "pillar-bottle": 0,
+  "atomizer-bottle": 0,
+  "lotion-bottle": 0,
+  "plastic-bottle": 0,
+  "bell-bottle": 0,
+  "flair-bottle": 0,
+  "royal-bottle": 0,
+  "tulip-bottle": 0,
+  "teardrop-bottle": 0,
+  "generic-bottle": 0,
+};
+
 export const BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES = {
   sampleVials: { min: 55, max: 60 },
   smallCylinders: { min: 60, max: 64 },
   rollerBottles: { min: 65, max: 70 },
+  // Roll-ons split into 3 capacity/height zones so a 5ml reads visibly shorter
+  // than a 9ml, and a tall 118mm 9ml reads visibly taller than a standard 75mm
+  // one. The old single rollerBottles band (65-70) compressed a 2x real-size
+  // spread into ~2%, making 5ml and 9ml render at the same on-canvas height.
+  rollerBottlesSmall: { min: 58, max: 64 },
+  rollerBottlesStandard: { min: 67, max: 72 },
+  rollerBottlesTall: { min: 75, max: 80 },
   cylinders10To30Ml: { min: 72, max: 78 },
   largeCylinders: { min: 80, max: 84 },
   bostonRounds: { min: 78, max: 82 },
@@ -190,7 +244,12 @@ const ROLLER_BOTTLE_TEMPLATE: BestBottlesFamilyProfileTemplate = {
   targetProductHeightRangePct: BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottles,
   observedHeightRangeMm: { min: 55, max: 118 },
   fallbackTargetProductHeightPct: 68,
-  fillWidthPct: 58,
+  // Flattened roll-on references commonly include the matching cap as a wide
+  // right-sidecar. A narrow 58% full-assembly width cap became the binding
+  // dimension and crushed otherwise-correct bottle heights as low as 41%.
+  // Keep 4% total canvas air for the sidecar assembly; height remains the
+  // framing authority for normal assembled roll-ons.
+  fillWidthPct: 96,
   baselinePct: BEST_BOTTLES_SHARED_BASELINE_PCT,
   primaryObjectCenterXPct: 50,
   detachedComponentPlacement: "right-sidecar",
@@ -499,12 +558,30 @@ function buildProfile(
   scaleZone?: BestBottlesRelativeScaleZone | null,
 ): BestBottlesFamilyProfile {
   const { observedHeightRangeMm: _observedHeightRangeMm, fallbackTargetProductHeightPct: _fallback, ...profile } = template;
+  const capacityMl = input ? getCapacityMl(input) : null;
+  const globalTargetProductHeightPct = capacityMl == null
+    ? resolveTargetProductHeightPct(template, input)
+    : resolveBestBottlesGlobalScalePct(capacityMl);
+  const familyScaleCorrectionPct = BEST_BOTTLES_FAMILY_SCALE_CORRECTIONS[template.id];
+  const targetProductHeightPct = applyBestBottlesFamilyScaleCorrection(
+    globalTargetProductHeightPct,
+    familyScaleCorrectionPct,
+  );
   return {
     ...profile,
+    scaleContractVersion: BEST_BOTTLES_CATALOG_SCALE_VERSION,
+    globalTargetProductHeightPct,
+    familyScaleCorrectionPct,
     relativeScaleZoneId: scaleZone?.id ?? profile.relativeScaleZoneId,
     relativeScaleZoneLabel: scaleZone?.label ?? profile.relativeScaleZoneLabel,
-    targetProductHeightRangePct: scaleZone?.targetProductHeightRangePct ?? profile.targetProductHeightRangePct,
-    targetProductHeightPct: scaleZone?.targetProductHeightPct ?? resolveTargetProductHeightPct(template, input),
+    // Relative zones remain useful composition labels, but cannot own an
+    // independent scale curve. The range now exposes the bounded correction
+    // rail around the global target.
+    targetProductHeightRangePct: {
+      min: Math.max(0, targetProductHeightPct - 2),
+      max: Math.min(100, targetProductHeightPct + 2),
+    },
+    targetProductHeightPct,
   };
 }
 
@@ -597,7 +674,12 @@ function isSlimTallCylinderProduct(input: BestBottlesFamilyProfileProductInput):
     return false;
   }
 
-  return heightMm >= 110 && diameterMm <= 19 && heightMm / diameterMm >= 6;
+  // Threshold is 105mm, not 110: the frosted slim 9ml (GB-CYL-FRS-9ML-S-02) is
+  // 109mm with cap / 106mm without (Convex 2026-07-05, ±2mm) — a genuinely
+  // tall, slender bottle that was missing this test by ~1mm and wrongly falling
+  // into the short-bottle "small-cylinder" bucket. The diameter (<=19mm) and
+  // aspect-ratio (>=6) constraints still guarantee it's actually slim + tall.
+  return heightMm >= 105 && diameterMm <= 19 && heightMm / diameterMm >= 6;
 }
 
 function getCylinderRelativeScaleZone(
@@ -664,6 +746,68 @@ function getCylinderRelativeScaleZone(
   );
 }
 
+function interpolateFill(
+  heightMm: number | null,
+  observedMinMm: number,
+  observedMaxMm: number,
+  range: { min: number; max: number },
+  fallback: number,
+): number {
+  if (heightMm == null || observedMaxMm <= observedMinMm) return fallback;
+  const normalized =
+    (clamp(heightMm, observedMinMm, observedMaxMm) - observedMinMm) /
+    (observedMaxMm - observedMinMm);
+  return Math.round(range.min + normalized * (range.max - range.min));
+}
+
+/**
+ * Roll-ons split by real size so 5ml, standard 9ml, and tall 9ml read as three
+ * distinct heights on the shared shelf line (was one 65-70% band that made every
+ * roll-on the same height regardless of capacity). Capacity is the primary key
+ * (reliable in catalog data); measured height is the tiebreaker and drives the
+ * within-zone interpolation. Observed height bands come from the 2026-06-27
+ * Convex snapshot: 5ml roll-ons 57-72mm w/cap, standard 9ml 70-88mm, tall 9ml
+ * 106-118mm.
+ */
+function getRollerRelativeScaleZone(
+  input: BestBottlesFamilyProfileProductInput,
+): BestBottlesRelativeScaleZone {
+  const capacityMl = getCapacityMl(input);
+  const heightMm = parseFirstNumber(input.heightWithCap) ?? parseFirstNumber(input.heightWithoutCap);
+
+  const isTall =
+    (heightMm != null && heightMm >= 100) ||
+    (parseFirstNumber(input.heightWithoutCap) != null &&
+      (parseFirstNumber(input.heightWithoutCap) as number) >= 95);
+  const isSmall =
+    !isTall &&
+    ((capacityMl != null && capacityMl <= 5) ||
+      (capacityMl == null && heightMm != null && heightMm <= 72));
+
+  if (isSmall) {
+    return makeScaleZone(
+      "roller-small",
+      "Small roller bottles (5ml)",
+      BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesSmall,
+      interpolateFill(heightMm, 57, 72, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesSmall, 61),
+    );
+  }
+  if (isTall) {
+    return makeScaleZone(
+      "roller-tall",
+      "Tall roller bottles (9ml)",
+      BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesTall,
+      interpolateFill(heightMm, 106, 118, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesTall, 78),
+    );
+  }
+  return makeScaleZone(
+    "roller-standard",
+    "Standard roller bottles (9ml)",
+    BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesStandard,
+    interpolateFill(heightMm, 70, 88, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesStandard, 70),
+  );
+}
+
 function normalizedFamilyTokens(input: BestBottlesFamilyProfileProductInput): Set<string> {
   return new Set([
     normalizeFamilyText(input.family),
@@ -727,6 +871,9 @@ export function isBestBottlesCylinderFamilyProduct(
   if (!input) return false;
 
   const explicitFamily = normalizeFamilyText(input.family ?? input.bottleCollection);
+  // Canonical family assignment wins over descriptive legacy copy such as
+  // "Cylinder design ... vial". Vial outliers must never borrow Cylinder scale.
+  if (explicitFamily === "vial") return false;
   if (explicitFamily === "cylinder" || explicitFamily === "tall-cylinder") return true;
 
   const text = normalizeSearchText(input);
@@ -771,14 +918,31 @@ export function getBestBottlesRelativeScaleZoneForProduct(
   input: BestBottlesFamilyProfileProductInput | null | undefined,
 ): BestBottlesRelativeScaleZone | null {
   if (!input) return null;
+  const base = getBestBottlesRelativeScaleZoneForProductInner(input);
+  if (!base) return null;
+  const capacityMl = getCapacityMl(input);
+  if (capacityMl == null) return base;
+  const targetProductHeightPct = resolveBestBottlesGlobalScalePct(capacityMl);
+  return {
+    ...base,
+    label: isBestBottlesTasselSprayerProduct(input)
+      ? `${base.label} (bulb + tassel)`
+      : base.label,
+    targetProductHeightRangePct: {
+      min: Math.max(0, targetProductHeightPct - 2),
+      max: Math.min(100, targetProductHeightPct + 2),
+    },
+    targetProductHeightPct,
+  };
+}
+
+function getBestBottlesRelativeScaleZoneForProductInner(
+  input: BestBottlesFamilyProfileProductInput | null | undefined,
+): BestBottlesRelativeScaleZone | null {
+  if (!input) return null;
   if (isBestBottlesSampleVialProduct(input)) return getCylinderRelativeScaleZone(input);
   if (isBestBottlesRollerBottleProduct(input)) {
-    return makeScaleZone(
-      "roller-bottle",
-      "Roller bottles",
-      BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottles,
-      resolveTargetProductHeightPct(ROLLER_BOTTLE_TEMPLATE, input),
-    );
+    return getRollerRelativeScaleZone(input);
   }
   if (isBestBottlesCylinderFamilyProduct(input)) return getCylinderRelativeScaleZone(input);
   if (isBestBottlesBostonRoundProduct(input)) {
@@ -826,23 +990,75 @@ function lookupRegisteredFamilyTemplate(
   return null;
 }
 
+/**
+ * Vintage bulb sprayers WITH a tassel compose very differently from plain
+ * bottles: the bulb + braided hose + tassel drape widens/varies the detected
+ * product bounds, so the family's tight fill-height range (e.g. 80-84% for
+ * large cylinders) hard-fails renders whose bottles are actually correct
+ * (observed real fills: ~52-68%, 2026-07-05 truth-v1 generalization test).
+ * Tassel products get a widened acceptance range and a gentle normalize
+ * target so the framing QA judges the assembly, not the bottle alone.
+ */
+// The bulb + draped tassel make the product WIDE. The rig scales to the lesser
+// of the height target and the width target, and the default (narrow-bottle)
+// fillWidthPct then crushes the scale — so the BOTTLE renders too short (the
+// 100ml tassel came out clearly shorter than the 100ml spray, 2026-07-05).
+// Fix: keep the bottle at a proper large-cylinder HEIGHT and RELAX the width
+// target so the bulb + tassel extend into the side margin instead of shrinking
+// the bottle. Range stays a touch permissive on the low end for tassel-drape
+// variance; these ~18 SKUs are human-reviewed regardless.
+// Target is pushed to 86 (was 80) so the GLASS BOTTLE shoulder lines up with the
+// plain 100ml spray of the same bottle: the bulb+collar sits taller above the
+// shoulder than a sprayer, so at a lower target the tassel bottle rendered
+// visibly shorter. Higher target moves the bulb nearer the top margin and grows
+// the glass. (The rig's top-air limit caps effective fill ~85%, so this is close
+// to the practical max; exact shoulder-match confirmed by render on resume.)
+export const BEST_BOTTLES_TASSEL_SPRAYER_FILL_HEIGHT_RANGE = { min: 70, max: 90 } as const;
+export const BEST_BOTTLES_TASSEL_SPRAYER_TARGET_FILL_PCT = 86;
+export const BEST_BOTTLES_TASSEL_SPRAYER_FILL_WIDTH_PCT = 96;
+
+export function isBestBottlesTasselSprayerProduct(
+  input: BestBottlesFamilyProfileProductInput | null | undefined,
+): boolean {
+  if (!input) return false;
+  const haystack = `${input.applicator ?? ""} ${input.itemName ?? ""}`.toLowerCase();
+  return haystack.includes("tassel");
+}
+
+function applyTasselSprayerFillAllowance(
+  profile: BestBottlesFamilyProfile | null,
+  input: BestBottlesFamilyProfileProductInput,
+): BestBottlesFamilyProfile | null {
+  if (!profile || !isBestBottlesTasselSprayerProduct(input)) return profile;
+  return {
+    ...profile,
+    // Bulb + tassel topology needs width allowance, not a separate height
+    // curve. Scale remains globally resolved and versioned.
+    fillWidthPct: BEST_BOTTLES_TASSEL_SPRAYER_FILL_WIDTH_PCT,
+    relativeScaleZoneLabel: `${profile.relativeScaleZoneLabel} (bulb + tassel)`,
+  };
+}
+
 export function getBestBottlesFamilyProfileForProduct(
   input: BestBottlesFamilyProfileProductInput | null | undefined,
 ): BestBottlesFamilyProfile | null {
   if (!input) return null;
-  if (isBestBottlesSampleVialProduct(input)) return buildProfile(SAMPLE_VIAL_TEMPLATE, input, getCylinderRelativeScaleZone(input));
-  if (isBestBottlesRollerBottleProduct(input)) return buildProfile(ROLLER_BOTTLE_TEMPLATE, input);
-  if (isBestBottlesCylinderFamilyProduct(input)) return getBestBottlesCylinderFamilyProfile(input);
-  if (isBestBottlesBostonRoundProduct(input)) return buildProfile(BOSTON_ROUND_TEMPLATE, input);
-  if (isBestBottlesEmpireProduct(input)) return buildProfile(EMPIRE_BOTTLE_TEMPLATE, input);
-  if (isBestBottlesAluminumBottleProduct(input)) return buildProfile(ALUMINUM_BOTTLE_TEMPLATE, input);
-  if (isBestBottlesHeavyPerfumeProduct(input)) return buildProfile(HEAVY_PERFUME_BOTTLE_TEMPLATE, input);
-  const registered = lookupRegisteredFamilyTemplate(input);
-  if (registered) return buildProfile(registered, input);
-  // Unknown / non-bottle families intentionally return null here; the catalog
-  // prompt path uses getBestBottlesCatalogFramingProfile() for a non-blank
-  // fallback, while familyRig keeps its own universal-PDP default.
-  return null;
+  const resolve = (): BestBottlesFamilyProfile | null => {
+    if (isBestBottlesSampleVialProduct(input)) return buildProfile(SAMPLE_VIAL_TEMPLATE, input, getCylinderRelativeScaleZone(input));
+    if (isBestBottlesRollerBottleProduct(input)) return buildProfile(ROLLER_BOTTLE_TEMPLATE, input, getRollerRelativeScaleZone(input));
+    if (isBestBottlesCylinderFamilyProduct(input)) return getBestBottlesCylinderFamilyProfile(input);
+    if (isBestBottlesBostonRoundProduct(input)) return buildProfile(BOSTON_ROUND_TEMPLATE, input);
+    if (isBestBottlesEmpireProduct(input)) return buildProfile(EMPIRE_BOTTLE_TEMPLATE, input);
+    if (isBestBottlesAluminumBottleProduct(input)) return buildProfile(ALUMINUM_BOTTLE_TEMPLATE, input);
+    if (isBestBottlesHeavyPerfumeProduct(input)) return buildProfile(HEAVY_PERFUME_BOTTLE_TEMPLATE, input);
+    const registered = lookupRegisteredFamilyTemplate(input);
+    if (registered) return buildProfile(registered, input);
+    // Unknown / non-bottle families intentionally return null here; the catalog
+    // prompt path uses getBestBottlesCatalogFramingProfile() for a non-blank
+    // fallback, while familyRig keeps its own universal-PDP default.
+    return null;
+  };
+  return applyTasselSprayerFillAllowance(resolve(), input);
 }
 
 /**

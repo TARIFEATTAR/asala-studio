@@ -15,7 +15,28 @@ export interface BestBottlesShadowTopologyProductLike {
   accessoryContactsSurface?: boolean | null;
   itemName?: string | null;
   itemDescription?: string | null;
+  /** Reviewed component topology from the Cylinder role authority, when present. */
+  componentTopology?: string | null;
 }
+
+/**
+ * Reviewed component topology → shadow topology. This is the SAME mapping the
+ * generation edge function enforces (bestBottlesPrecompiledPrompt.ts), so when
+ * reviewed evidence is present the compiled record is consistent with the gate
+ * by construction. The text heuristics below remain only as a fallback for
+ * products without reviewed topology — marketing copy ("vintage", "antique")
+ * must never override reviewed evidence (2026-07-19: it deterministically
+ * blocked all 5 mL sprayers with a complex-contact/sidecar conflict).
+ */
+const REVIEWED_COMPONENT_SHADOW_TOPOLOGY: Record<
+  string,
+  BestBottlesShadowTopology["kind"]
+> = {
+  assembled: "assembled",
+  "fitment-attached-cap-right-sidecar": "detached-sidecar",
+  "assembled-live-site-exception": "complex-contact",
+  "assembled-closure-live-site-exception": "assembled",
+};
 
 export interface BestBottlesShadowTopologyPromptSkuLike {
   sku?: string | null;
@@ -36,6 +57,17 @@ export function resolveBestBottlesShadowTopology(
   product: BestBottlesShadowTopologyProductLike,
   promptSku: BestBottlesShadowTopologyPromptSkuLike,
 ): BestBottlesShadowTopology {
+  const reviewedKind = product.componentTopology
+    ? REVIEWED_COMPONENT_SHADOW_TOPOLOGY[product.componentTopology]
+    : undefined;
+  if (reviewedKind) {
+    return {
+      kind: reviewedKind,
+      expectedContacts:
+        reviewedKind === "detached-sidecar" ? ["bottle", "sidecar"] : ["bottle"],
+      source: "reviewed-reference",
+    };
+  }
   const compositionText = normalizedText(
     product.capState,
     product.mode,
@@ -88,16 +120,14 @@ export function buildModelOwnedShadowPrompt(
 ): string {
   const contactInstruction =
     topology.kind === "assembled"
-      ? "Render one continuous soft contact shadow attached directly to the bottle base."
+      ? "The bottle stands on a very subtle, light, softly feathered grounded shadow."
       : topology.kind === "detached-sidecar"
-        ? "Render separate but visually coherent soft contact shadows at the bottle base and detached cap; each must attach directly to its own physical contact line."
-        : "Render only the physically required soft contact shadows for the bottle base and every accessory or sidecar that actually touches the surface; each contact must attach directly to that component.";
+        ? "The bottle and the detached cap each stand on a very subtle, light, softly feathered grounded shadow."
+        : "The bottle and each piece touching the surface stand on a very subtle, light, softly feathered grounded shadow.";
 
   return [
     "GROUNDING SHADOW — MODEL OWNED:",
     contactInstruction,
-    "Each contact core must be darkest and most concentrated at the physical contact line, approximately 32–42% opacity at its densest point, then feather softly behind and toward camera-right, fading within approximately 20–30% of the primary bottle's width.",
-    "Every contact core and its feather must read as one continuous grounded shadow. Use one soft key-light direction across all contacts.",
-    "No missing expected contact, unexpected disconnected shadow, detached oval, gap beneath a grounded component, hard outline, long dramatic cast, doubled shadow, reflection, floor plane, smear, or horizon.",
+    "Barely there — like quiet natural studio light. No hard edges, no long casts, no reflections, no floor plane.",
   ].join("\n");
 }
