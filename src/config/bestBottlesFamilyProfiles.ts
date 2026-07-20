@@ -552,6 +552,22 @@ function resolveTargetProductHeightPct(
   return Math.round(range.min + normalized * (range.max - range.min));
 }
 
+/**
+ * Height-split zones OWN their scale band. The capacity-keyed global curve
+ * cannot distinguish two real bottles that share a capacity: the 9 ml TALL
+ * roll-on (106 mm) and the 9 ml standard roll-on (70 mm) both resolved to
+ * 69% ± 2 fill, so a 51% real-height difference rendered as identical canvas
+ * height (Jordan caught it on the storefront, 2026-07-20). The roller zones
+ * were calibrated for exactly this split (small 58-64 / standard 67-72 /
+ * tall 75-80); restore their authority. All other zones stay on the global
+ * capacity rail per scale-contract v1.
+ */
+const HEIGHT_SPLIT_SCALE_ZONE_IDS = new Set<BestBottlesRelativeScaleZoneId>([
+  "roller-small",
+  "roller-standard",
+  "roller-tall",
+]);
+
 function buildProfile(
   template: BestBottlesFamilyProfileTemplate,
   input?: BestBottlesFamilyProfileProductInput,
@@ -563,10 +579,15 @@ function buildProfile(
     ? resolveTargetProductHeightPct(template, input)
     : resolveBestBottlesGlobalScalePct(capacityMl);
   const familyScaleCorrectionPct = BEST_BOTTLES_FAMILY_SCALE_CORRECTIONS[template.id];
-  const targetProductHeightPct = applyBestBottlesFamilyScaleCorrection(
-    globalTargetProductHeightPct,
-    familyScaleCorrectionPct,
+  const zoneOwnsScale = Boolean(
+    scaleZone && HEIGHT_SPLIT_SCALE_ZONE_IDS.has(scaleZone.id),
   );
+  const targetProductHeightPct = zoneOwnsScale
+    ? scaleZone!.targetProductHeightPct
+    : applyBestBottlesFamilyScaleCorrection(
+        globalTargetProductHeightPct,
+        familyScaleCorrectionPct,
+      );
   return {
     ...profile,
     scaleContractVersion: BEST_BOTTLES_CATALOG_SCALE_VERSION,
@@ -574,13 +595,14 @@ function buildProfile(
     familyScaleCorrectionPct,
     relativeScaleZoneId: scaleZone?.id ?? profile.relativeScaleZoneId,
     relativeScaleZoneLabel: scaleZone?.label ?? profile.relativeScaleZoneLabel,
-    // Relative zones remain useful composition labels, but cannot own an
-    // independent scale curve. The range now exposes the bounded correction
-    // rail around the global target.
-    targetProductHeightRangePct: {
-      min: Math.max(0, targetProductHeightPct - 2),
-      max: Math.min(100, targetProductHeightPct + 2),
-    },
+    // Height-split zones own their calibrated band; every other zone exposes
+    // the bounded correction rail around the global capacity target.
+    targetProductHeightRangePct: zoneOwnsScale
+      ? scaleZone!.targetProductHeightRangePct
+      : {
+          min: Math.max(0, targetProductHeightPct - 2),
+          max: Math.min(100, targetProductHeightPct + 2),
+        },
     targetProductHeightPct,
   };
 }

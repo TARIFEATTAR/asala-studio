@@ -252,7 +252,9 @@ describe("Best Bottles family profiles", () => {
     assert.deepEqual(fiveMlCapOffSprayer.targetProductHeightRangePct, { min: 59, max: 63 });
     assert.equal(fiveMlCapOffSprayer.targetProductHeightPct, 61);
     assert.ok(fiveMlCapOffSprayer.targetProductHeightPct < regular9MlRollOn.targetProductHeightPct);
-    assert.equal(regular9MlRollOn.targetProductHeightPct, 69);
+    // Roll-ons are zone-owned (2026-07-20): the standard 9ml roll-on (83mm
+    // w/cap) interpolates within the 67-72 standard-roller band.
+    assert.equal(regular9MlRollOn.targetProductHeightPct, 71);
     assert.equal(slim9MlSprayer.targetProductHeightPct, 69);
   });
 
@@ -316,8 +318,11 @@ describe("Best Bottles family profiles", () => {
     // small/standard/tall by real size so a 5ml no longer renders the same
     // height as a 9ml). See the roll-on capacity-gradation test below.
     assert.equal(profile.relativeScaleZoneId, "roller-standard");
-    assert.deepEqual(profile.targetProductHeightRangePct, { min: 67, max: 71 });
-    assert.equal(profile.targetProductHeightPct, 69);
+    // Height-split roller zones own their calibrated band (2026-07-20): a
+    // 73mm-with-cap 9ml lands low inside the 67-72 standard band, so the real
+    // 106mm TALL 9ml roll-on (75-80 band) reads visibly taller on canvas.
+    assert.deepEqual(profile.targetProductHeightRangePct, { min: 67, max: 72 });
+    assert.equal(profile.targetProductHeightPct, 68);
   });
 
   it("maps Boston Round products to the Boston Round fill-height range", () => {
@@ -411,7 +416,9 @@ describe("Best Bottles family profiles", () => {
     assert.equal(fiveMlRollOn.relativeScaleZoneId, "roller-small");
     assert.equal(nineMl.relativeScaleZoneId, "roller-standard");
     assert.equal(fiveMlRollOn.targetProductHeightPct, 61);
-    assert.equal(nineMl.targetProductHeightPct, 69);
+    // Zone-owned roller scale (2026-07-20): 83mm-with-cap 9ml roll-on
+    // interpolates to 71 inside the 67-72 standard-roller band.
+    assert.equal(nineMl.targetProductHeightPct, 71);
     // Strictly monotonic: smaller capacity is always rendered smaller.
     assert.ok(threeMl.targetProductHeightPct < fourMl.targetProductHeightPct);
     assert.ok(fourMl.targetProductHeightPct < fiveMl.targetProductHeightPct);
