@@ -26,6 +26,7 @@ import {
   normalizeBestBottlesRigBaseline,
   type RigBaselineNormalizeResult,
 } from "@/lib/product-image/rigPostprocess";
+import { getFamilyRigForProduct } from "@/lib/product-image/familyRig";
 import {
   getBestBottlesImageAssetRoleForPreset,
   recordBestBottlesRawImage,
@@ -466,9 +467,27 @@ export function useAssembledPromptGeneration() {
     );
     // Pinned composition for hero-grid THUMBNAILS: themes vary (stones,
     // materials, light), but the bottle's position, scale, and shelf line
-    // never do — that's what makes a themed grid read as one collection.
+    // never do. The numbers come from the product's OWN PDP rig (shared
+    // baseline + capacity-derived catalog scale), so a themed hero card can
+    // sit beside — or replace — the bone-studio PDP card in the storefront
+    // grid with the same shelf line and the same relative bottle size
+    // (Jordan 2026-07-20: heroes must coexist with PDP cards).
+    const heroGridRig = heroGridBaselineActive
+      ? getFamilyRigForProduct({
+          family: options.productContext?.family ?? null,
+          bottleCollection: options.productContext?.collection ?? null,
+          category: options.productContext?.category ?? null,
+          itemName: options.productContext?.name ?? null,
+          capacityMl: options.productContext?.capacityMl ?? null,
+          heightWithCap: options.productContext?.heightWithCap ?? null,
+          heightWithoutCap: options.productContext?.heightWithoutCap ?? null,
+          diameter: options.productContext?.diameter ?? null,
+        })
+      : null;
+    const heroGridBaselinePct = heroGridRig?.baselinePct ?? 12;
+    const heroGridFillPct = heroGridRig?.fillHeightPct ?? 62;
     const HERO_GRID_COMPOSITION_CONTRACT =
-      "HERO GRID COMPOSITION CONTRACT (GRID-CONSISTENCY AUTHORITY — applies on top of the scene direction): this render belongs to a themed hero-thumbnail series that must align perfectly in a grid. Pin the composition: bottle perfectly upright and centered at 50% of canvas width; bottle base seated on one consistent surface line about 12% up from the canvas bottom; bottle occupies about 60-65% of canvas height; camera at a consistent straight-on eye level with the same lens feel across the series. Scene props (stones, materials, botanicals) stay low around or behind the base — they must not lift or tilt the bottle, change its scale, or cover more than the bottom tenth of the bottle. Keep generous even margins. The theme changes between renders; the bottle's position, scale, and shelf line never change.";
+      `HERO GRID COMPOSITION CONTRACT (GRID-CONSISTENCY AUTHORITY — applies on top of the scene direction): this render belongs to a themed hero-thumbnail series that must align in a storefront grid NEXT TO this product's standard catalog card, so it uses the catalog card's exact framing numbers. Pin the composition: bottle perfectly upright and centered at 50% of canvas width; bottle base seated on the catalog shelf line, about ${heroGridBaselinePct}% up from the canvas bottom; bottle occupies about ${heroGridFillPct}% of canvas height — the same catalog scale as its product-page card, so larger bottles read larger across the grid; camera at a consistent straight-on eye level with the same lens feel across the series. Scene props (stones, materials, botanicals) stay low around or behind the base — they must not lift or tilt the bottle, change its scale, or cover more than the bottom tenth of the bottle. Keep generous even margins. The theme changes between renders; the bottle's position, scale, and shelf line never change.`;
     const appendSceneEnvironmentOverride = (prompt: string): string =>
       sceneEnvironmentPrompt
         ? [
