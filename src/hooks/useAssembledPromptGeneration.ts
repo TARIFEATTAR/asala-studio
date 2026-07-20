@@ -168,6 +168,13 @@ export interface AssembledGenerateOptions {
     backgroundPrompt?: string | null;
     aspectRatioOverride?: string | null;
     resolutionOverride?: "standard" | "high" | null;
+    /**
+     * Hero-grid composition contract (Jordan 2026-07-20): themed hero
+     * THUMBNAILS share one pinned composition (centerline, shelf line,
+     * bottle scale) so a grid of different stone/material themes reads as
+     * one collection. OFF for free-flowing editorial/blog scenes.
+     */
+    heroGridBaseline?: boolean | null;
   };
 }
 
@@ -454,9 +461,20 @@ export function useAssembledPromptGeneration() {
       presetAssetRole === "scene" || presetAssetRole === "marketing"
         ? options.sceneOverlay?.backgroundPrompt?.trim() || null
         : null;
+    const heroGridBaselineActive = Boolean(
+      sceneEnvironmentPrompt && options.sceneOverlay?.heroGridBaseline,
+    );
+    // Pinned composition for hero-grid THUMBNAILS: themes vary (stones,
+    // materials, light), but the bottle's position, scale, and shelf line
+    // never do — that's what makes a themed grid read as one collection.
+    const HERO_GRID_COMPOSITION_CONTRACT =
+      "HERO GRID COMPOSITION CONTRACT (GRID-CONSISTENCY AUTHORITY — applies on top of the scene direction): this render belongs to a themed hero-thumbnail series that must align perfectly in a grid. Pin the composition: bottle perfectly upright and centered at 50% of canvas width; bottle base seated on one consistent surface line about 12% up from the canvas bottom; bottle occupies about 60-65% of canvas height; camera at a consistent straight-on eye level with the same lens feel across the series. Scene props (stones, materials, botanicals) stay low around or behind the base — they must not lift or tilt the bottle, change its scale, or cover more than the bottom tenth of the bottle. Keep generous even margins. The theme changes between renders; the bottle's position, scale, and shelf line never change.";
     const appendSceneEnvironmentOverride = (prompt: string): string =>
       sceneEnvironmentPrompt
-        ? `${prompt.trim()}\nSCENE ENVIRONMENT OVERRIDE (ENVIRONMENT AUTHORITY — this block supersedes every earlier background, surface, prop, and environment rule in this prompt, including the flat-Bone-background law and all no-prop / no-texture / single-background bans): stage the SAME locked bottle in this environment: ${sceneEnvironmentPrompt}. Product identity remains fully locked — geometry, silhouette, proportions, colors, cap state, component count, and material identity must not change. Only the backdrop, surface, props, lighting mood, and shadow behavior follow this scene direction.`
+        ? [
+            `${prompt.trim()}\nSCENE ENVIRONMENT OVERRIDE (ENVIRONMENT AUTHORITY — this block supersedes every earlier background, surface, prop, and environment rule in this prompt, including the flat-Bone-background law and all no-prop / no-texture / single-background bans): stage the SAME locked bottle in this environment: ${sceneEnvironmentPrompt}. Product identity remains fully locked — geometry, silhouette, proportions, colors, cap state, component count, and material identity must not change. Only the backdrop, surface, props, lighting mood, and shadow behavior follow this scene direction.`,
+            ...(heroGridBaselineActive ? [HERO_GRID_COMPOSITION_CONTRACT] : []),
+          ].join("\n")
         : prompt;
     const requestPrompt = isBestBottlesStudioMaster
       ? appendSceneEnvironmentOverride(
@@ -500,6 +518,7 @@ export function useAssembledPromptGeneration() {
                       `scene-overlay:${options.sceneOverlay?.backgroundPresetId ?? "custom"}`,
                     ]
                   : []),
+                ...(heroGridBaselineActive ? ["hero-grid:baseline"] : []),
               ]),
             ),
           }

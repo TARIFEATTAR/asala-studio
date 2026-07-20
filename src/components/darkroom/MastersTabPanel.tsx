@@ -1086,6 +1086,11 @@ export function MastersTabPanel({
   // master into a 16:9 hero or 1:1 marketplace tile per generation.
   const [sceneBackgroundPresetId, setSceneBackgroundPresetId] = useState<string | null>(null);
   const [sceneBackgroundPrompt, setSceneBackgroundPrompt] = useState("");
+  // Hero-grid composition contract (Jordan 2026-07-20): pinned centerline /
+  // shelf line / bottle scale so themed thumbnails align as one grid.
+  // Default ON — the grid is the primary hero use; turn off for free-flow
+  // editorial scenes.
+  const [sceneHeroGridBaseline, setSceneHeroGridBaseline] = useState(true);
   const [sceneAspectRatio, setSceneAspectRatio] = useState<string>("10:11");
   const [sceneResolution, setSceneResolution] = useState<"standard" | "high">("standard");
   const isSceneFlexible = presetId === SCENE_FLEXIBLE_PRESET_ID;
@@ -2826,6 +2831,7 @@ export function MastersTabPanel({
         backgroundPrompt: finalBackgroundPrompt,
         aspectRatioOverride: sceneAspectRatio,
         resolutionOverride: sceneResolution,
+        heroGridBaseline: allowsBackgroundOverride ? sceneHeroGridBaseline : null,
       };
       const variantTag = isSceneFlexible
         ? "scene-flexible"
@@ -3864,6 +3870,27 @@ export function MastersTabPanel({
                 onChange={(e) => setSceneBackgroundPrompt(e.target.value)}
                 placeholder="e.g. natural travertine surface, soft morning daylight from a north-facing window, gentle bounce-fill from cream walls"
                 className="min-h-[60px] text-xs bg-white/[0.03] border-white/10 text-white"
+              />
+            </div>
+          )}
+
+          {/* Hero-grid baseline — pinned centerline / shelf line / bottle
+              scale so themed thumbnails align as one grid. Off = free-flow
+              editorial composition. */}
+          {(isSceneFlexible || isMarketing) && (
+            <div className="flex items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="hero-grid-baseline-toggle" className="text-[11px]" style={{ color: "var(--darkroom-text-dim)" }}>
+                  Hero grid baseline
+                </Label>
+                <p className="text-[10px]" style={{ color: "var(--darkroom-text-dim)" }}>
+                  Pins bottle position, scale, and shelf line so themed thumbnails align in a grid. Turn off for free-flow editorial scenes.
+                </p>
+              </div>
+              <Switch
+                id="hero-grid-baseline-toggle"
+                checked={sceneHeroGridBaseline}
+                onCheckedChange={setSceneHeroGridBaseline}
               />
             </div>
           )}
