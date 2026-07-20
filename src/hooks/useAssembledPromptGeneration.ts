@@ -443,12 +443,29 @@ export function useAssembledPromptGeneration() {
       referenceAspectRatio != null
         ? `${prompt.trim()}\nMEASURED REFERENCE PROPORTION LOCK: the primary bottle in the attached Product Reference measures exactly ${referenceAspectRatio.toFixed(2)}:1 height-to-width. Render the bottle at exactly this height-to-width relationship — do not elongate, slim, or stretch it; QA rejects any render whose bottle deviates from this ratio.`
         : prompt;
+    // Scene/marketing presets: the operator's background direction must BEAT
+    // the reference-locked prompt's studio laws ("flat Bone background only",
+    // no-props bans), which otherwise steamroll the server's one-line
+    // BACKGROUND STYLE note (observed 2026-07-20: Natural Stone chip run
+    // returned a bone-studio replica). Identity stays locked; only the
+    // environment is released. PDP presets never get this block.
+    const presetAssetRole = getBestBottlesImageAssetRoleForPreset(assembled.preset.id);
+    const sceneEnvironmentPrompt =
+      presetAssetRole === "scene" || presetAssetRole === "marketing"
+        ? options.sceneOverlay?.backgroundPrompt?.trim() || null
+        : null;
+    const appendSceneEnvironmentOverride = (prompt: string): string =>
+      sceneEnvironmentPrompt
+        ? `${prompt.trim()}\nSCENE ENVIRONMENT OVERRIDE (ENVIRONMENT AUTHORITY — this block supersedes every earlier background, surface, prop, and environment rule in this prompt, including the flat-Bone-background law and all no-prop / no-texture / single-background bans): stage the SAME locked bottle in this environment: ${sceneEnvironmentPrompt}. Product identity remains fully locked — geometry, silhouette, proportions, colors, cap state, component count, and material identity must not change. Only the backdrop, surface, props, lighting mood, and shadow behavior follow this scene direction.`
+        : prompt;
     const requestPrompt = isBestBottlesStudioMaster
-      ? appendMeasuredProportionLock(
-          applyBestBottlesVisualTargetPrompt(
-            uncalibratedRequestPrompt,
-            options.productContext?.bodyMaterial,
-            options.productContext?.componentTopology,
+      ? appendSceneEnvironmentOverride(
+          appendMeasuredProportionLock(
+            applyBestBottlesVisualTargetPrompt(
+              uncalibratedRequestPrompt,
+              options.productContext?.bodyMaterial,
+              options.productContext?.componentTopology,
+            ),
           ),
         )
       : uncalibratedRequestPrompt;
@@ -456,13 +473,17 @@ export function useAssembledPromptGeneration() {
       isBestBottlesStudioMaster && options.precompiledPromptRecord
         ? {
             ...options.precompiledPromptRecord,
-            prompt_version: resolvedShadowPolicy.promptVersion,
+            prompt_version: sceneEnvironmentPrompt
+              ? `${resolvedShadowPolicy.promptVersion}+scene-overlay`
+              : resolvedShadowPolicy.promptVersion,
             shadow_owner: resolvedShadowPolicy.owner,
-            final_prompt: appendMeasuredProportionLock(
-              applyBestBottlesVisualTargetPrompt(
-                options.precompiledPromptRecord.final_prompt,
-                options.productContext?.bodyMaterial,
-                options.productContext?.componentTopology,
+            final_prompt: appendSceneEnvironmentOverride(
+              appendMeasuredProportionLock(
+                applyBestBottlesVisualTargetPrompt(
+                  options.precompiledPromptRecord.final_prompt,
+                  options.productContext?.bodyMaterial,
+                  options.productContext?.componentTopology,
+                ),
               ),
             ),
             qa_checklist: Array.from(
