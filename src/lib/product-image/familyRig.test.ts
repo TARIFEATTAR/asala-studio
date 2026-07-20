@@ -128,11 +128,11 @@ describe("family rig (profile-aware fit-to-box)", () => {
     assert.ok(rig);
     assert.equal(rig.profileId, "roller-bottle");
     assert.equal(rig.relativeScaleZoneId, "roller-tall");
-    // Zone-owned roller scale (2026-07-20): 100mm-with-cap sits at the floor
-    // of the tall-roller band (75-80), below the 118mm tall 9ml at 80.
-    assert.equal(rig.fillHeightPct, 75);
-    assert.equal(rig.fillHeightRangePct?.min, 75);
-    assert.equal(rig.fillHeightRangePct?.max, 80);
+    // Zone-owned roller scale, tall band trimmed to 74-77 (Jordan 2026-07-20):
+    // 100mm-with-cap sits at the band floor, below the 118mm tall 9ml at 77.
+    assert.equal(rig.fillHeightPct, 74);
+    assert.equal(rig.fillHeightRangePct?.min, 74);
+    assert.equal(rig.fillHeightRangePct?.max, 77);
   });
 
   it("builds a profile-capable imposed rig block with composition authority", () => {

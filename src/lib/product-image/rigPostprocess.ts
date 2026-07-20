@@ -1975,6 +1975,62 @@ export async function measureReferencePrimaryAspectRatio(
   }
 }
 
+export interface ReferenceSidecarCapMetrics {
+  /** Detached cap height ÷ its own width. */
+  capAspectRatio: number;
+  /** Detached cap height as a percentage of the primary bottle's height. */
+  capHeightPctOfBottle: number;
+}
+
+/**
+ * Measure the DETACHED cap in a cap-off sidecar reference.
+ *
+ * The bottle already gets a measured proportion lock; the cap had none, and
+ * the model fills that vacuum with its own prior. On the tall 13-415 roll-on
+ * the real cap is only ~21% of the bottle's height (vs ~31% on the standard
+ * 9 ml), so the model stretched it back toward "normal" and extrapolated the
+ * dot pattern over the extra length — an extra row of dots (Jordan, 2026-07-20).
+ * Stating the measured cap proportions closes that gap in the prompt rather
+ * than in post-processing.
+ */
+export async function measureReferenceSidecarCapMetrics(
+  url: string,
+): Promise<ReferenceSidecarCapMetrics | null> {
+  try {
+    const img = await loadImage(url);
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(img, 0, 0);
+    const { width, height } = canvas;
+    if (width < 8 || height < 8) return null;
+    const pixels = ctx.getImageData(0, 0, width, height).data;
+    const bgSample: Rgb = { r: pixels[0], g: pixels[1], b: pixels[2] };
+    const components = detectSilverProofComponents(pixels, width, height, bgSample);
+    if (!Array.isArray(components) || components.length < 2) return null;
+    const sized = components
+      .map((c) => ({
+        w: c.right - c.left + 1,
+        h: c.bottom - c.top + 1,
+      }))
+      .filter((c) => c.w > 0 && c.h > 0);
+    if (sized.length < 2) return null;
+    // Tallest component is the bottle; the tallest of the rest is the cap.
+    const byHeight = [...sized].sort((a, b) => b.h - a.h);
+    const bottle = byHeight[0];
+    const cap = byHeight[1];
+    const capAspectRatio = cap.h / cap.w;
+    const capHeightPctOfBottle = (cap.h / bottle.h) * 100;
+    if (!Number.isFinite(capAspectRatio) || !Number.isFinite(capHeightPctOfBottle)) return null;
+    if (capAspectRatio <= 0 || capHeightPctOfBottle <= 0 || capHeightPctOfBottle >= 100) return null;
+    return { capAspectRatio, capHeightPctOfBottle };
+  } catch {
+    return null;
+  }
+}
+
 export async function normalizeBestBottlesRigBaseline(
   imageUrl: string,
   options: RigBaselineNormalizeOptions,

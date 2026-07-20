@@ -23,6 +23,7 @@ import type { CylinderCanonicalGeometryContract } from "@/lib/bestBottlesCylinde
 import { dataUrlToBlob } from "@/lib/product-image/colorCorrect";
 import {
   measureReferencePrimaryAspectRatio,
+  measureReferenceSidecarCapMetrics,
   normalizeBestBottlesRigBaseline,
   type RigBaselineNormalizeResult,
 } from "@/lib/product-image/rigPostprocess";
@@ -447,10 +448,30 @@ export function useAssembledPromptGeneration() {
       detachedAspectReferenceUrl
         ? await measureReferencePrimaryAspectRatio(detachedAspectReferenceUrl)
         : null;
-    const appendMeasuredProportionLock = (prompt: string): string =>
-      referenceAspectRatio != null
-        ? `${prompt.trim()}\nMEASURED REFERENCE PROPORTION LOCK: the primary bottle in the attached Product Reference measures exactly ${referenceAspectRatio.toFixed(2)}:1 height-to-width. Render the bottle at exactly this height-to-width relationship — do not elongate, slim, or stretch it; QA rejects any render whose bottle deviates from this ratio.`
-        : prompt;
+    // Detached cap proportions, measured from the same byte-locked reference.
+    // Without this the model applies its own roll-on prior to the cap: on the
+    // tall 13-415 bottle (cap ≈21% of bottle height vs ≈31% on the standard
+    // 9 ml) it stretched the cap and grew an extra row of dots.
+    const referenceCapMetrics =
+      isBestBottlesStudioMaster &&
+      options.productContext?.capState === "detached" &&
+      detachedAspectReferenceUrl
+        ? await measureReferenceSidecarCapMetrics(detachedAspectReferenceUrl)
+        : null;
+    const appendMeasuredProportionLock = (prompt: string): string => {
+      const blocks: string[] = [prompt.trim()];
+      if (referenceAspectRatio != null) {
+        blocks.push(
+          `MEASURED REFERENCE PROPORTION LOCK: the primary bottle in the attached Product Reference measures exactly ${referenceAspectRatio.toFixed(2)}:1 height-to-width. Render the bottle at exactly this height-to-width relationship — do not elongate, slim, or stretch it; QA rejects any render whose bottle deviates from this ratio.`,
+        );
+      }
+      if (referenceCapMetrics) {
+        blocks.push(
+          `MEASURED DETACHED CAP LOCK: the detached cap in the attached Product Reference measures exactly ${referenceCapMetrics.capAspectRatio.toFixed(2)}:1 height-to-width, and its total height is exactly ${referenceCapMetrics.capHeightPctOfBottle.toFixed(0)}% of the bottle's height. Reproduce the cap at exactly these proportions. Do NOT lengthen, shorten, widen, or "normalize" the cap toward a more typical roll-on cap — a tall slender bottle legitimately pairs with a proportionally short cap. Copy the cap's surface decoration exactly as it appears: reproduce the SAME NUMBER of dots, studs, bands, or facets in the SAME rows and spacing as the reference. Never add, remove, or extrapolate an extra row of decoration to fill a different cap length.`,
+        );
+      }
+      return blocks.join("\n");
+    };
     // Scene/marketing presets: the operator's background direction must BEAT
     // the reference-locked prompt's studio laws ("flat Bone background only",
     // no-props bans), which otherwise steamroll the server's one-line

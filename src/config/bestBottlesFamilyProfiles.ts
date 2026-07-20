@@ -206,7 +206,11 @@ export const BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES = {
   // spread into ~2%, making 5ml and 9ml render at the same on-canvas height.
   rollerBottlesSmall: { min: 58, max: 64 },
   rollerBottlesStandard: { min: 67, max: 72 },
-  rollerBottlesTall: { min: 75, max: 80 },
+  // Tall band trimmed 75-80 -> 74-77 (Jordan 2026-07-20): at 80 the 118mm
+  // tall roll-on dominated the grid beside the 71% standard roll-on. 77 keeps
+  // a clearly readable ~8% canvas separation (the bottles are 42% apart in
+  // reality) without the tall bottle crowding its frame.
+  rollerBottlesTall: { min: 74, max: 77 },
   cylinders10To30Ml: { min: 72, max: 78 },
   largeCylinders: { min: 80, max: 84 },
   bostonRounds: { min: 78, max: 82 },
@@ -819,7 +823,7 @@ function getRollerRelativeScaleZone(
       "roller-tall",
       "Tall roller bottles (9ml)",
       BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesTall,
-      interpolateFill(heightMm, 106, 118, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesTall, 78),
+      interpolateFill(heightMm, 106, 118, BEST_BOTTLES_FAMILY_FILL_HEIGHT_RANGES.rollerBottlesTall, 76),
     );
   }
   return makeScaleZone(
