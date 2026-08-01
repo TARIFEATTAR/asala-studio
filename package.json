@@ -77,12 +77,13 @@
     "paperdoll:weld": "tsx scripts/paper-doll/weld.ts",
     "paperdoll:export-doll": "tsx scripts/paper-doll/export-doll-layers.ts",
     "paperdoll:pilot": "tsx scripts/paper-doll/pilot.ts",
+    "paperdoll:pilot-closure-materials": "tsx scripts/paper-doll/closure-material-pilot.ts",
     "paperdoll:extract-bodies": "tsx scripts/paper-doll/extract-bodies.ts",
     "paperdoll:stage-bodies": "tsx scripts/paper-doll/stage-bodies.ts",
     "paperdoll:generate-plate": "tsx scripts/paper-doll/generate-plate.ts",
     "paperdoll:normalize-plate": "tsx scripts/paper-doll/normalize-plate.ts",
     "paperdoll:regen-closures": "tsx scripts/paper-doll/regenerate-closures.ts",
-    "test:paperdoll": "tsx --test src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/qaGates.test.ts"
+    "test:paperdoll": "tsx --test src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/closureMaterialPilot.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
