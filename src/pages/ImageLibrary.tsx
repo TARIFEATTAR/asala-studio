@@ -53,6 +53,7 @@ import { cn } from "@/lib/utils";
 import { ImageEditorModal, type ImageEditorImage } from "@/components/image-editor/ImageEditorModal";
 import { ProductSelector } from "@/components/forge/ProductSelector";
 import { SanityMediaPlacementDialog } from "@/components/library/SanityMediaPlacementDialog";
+import { CreateFilledHoverTwinDialog } from "@/components/library/CreateFilledHoverTwinDialog";
 import { BestBottlesReconciliationBadges } from "@/components/bestbottles/BestBottlesReconciliationBadges";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import {
@@ -105,6 +106,7 @@ import {
   getImageLibraryPublishDestinations,
   type ImageLibraryPublishDestination as PublishDestination,
 } from "@/lib/imageLibraryPublishDestinations";
+import { getFilledHoverTwinParentEligibility } from "@/lib/bestBottlesFilledHoverTwinClient";
 import {
   BEST_BOTTLES_DARKROOM_ASSET_TAG_SOURCE,
   BEST_BOTTLES_DARKROOM_IDENTITY_TAG_MATCHED,
@@ -974,6 +976,11 @@ export default function ImageLibrary() {
   const [bulkShopifyOpen, setBulkShopifyOpen] = useState(false);
   const [bulkShopifyRows, setBulkShopifyRows] = useState<BulkShopifyRow[]>([]);
   const [bulkShopifyLoading, setBulkShopifyLoading] = useState(false);
+
+  // Dedicated marketing-only empty/filled hover pilot. This state never
+  // participates in the PDP/Shopify dialogs above.
+  const [filledTwinOpen, setFilledTwinOpen] = useState(false);
+  const [filledTwinImage, setFilledTwinImage] = useState<GeneratedImage | null>(null);
 
   // Image editor modal
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -2505,6 +2512,11 @@ export default function ImageLibrary() {
     setTagsEditOpen(true);
   };
 
+  const openFilledTwin = (image: GeneratedImage) => {
+    setFilledTwinImage(image);
+    setFilledTwinOpen(true);
+  };
+
   const handleBestBottlesDarkroomAttachToProduct = (image: GeneratedImage) => {
     openTagsEdit(image);
     toast({
@@ -3341,6 +3353,22 @@ export default function ImageLibrary() {
                             <Tags className="w-4 h-4 mr-2" />
                             Edit library tags
                           </DropdownMenuItem>
+                          {isBestBottlesOrg && getFilledHoverTwinParentEligibility({
+                            id: image.id,
+                            imageUrl: image.image_url,
+                            libraryTags: image.library_tags ?? [],
+                          }).eligible && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openFilledTwin(image);
+                              }}
+                              className="text-[var(--darkroom-text)] focus:bg-[var(--darkroom-border)]"
+                            >
+                              <MagicWand02 className="w-4 h-4 mr-2" />
+                              Create filled hover twin
+                            </DropdownMenuItem>
+                          )}
                           {isBestBottlesOrg && (() => {
                             const workflow = getBestBottlesDarkroomWorkflowForImage(image);
                             if (workflow.status === "not-darkroom-workflow" || workflow.status === "rejected") {
@@ -4666,6 +4694,23 @@ export default function ImageLibrary() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CreateFilledHoverTwinDialog
+        open={filledTwinOpen}
+        onOpenChange={(nextOpen) => {
+          setFilledTwinOpen(nextOpen);
+          if (!nextOpen) setFilledTwinImage(null);
+        }}
+        image={filledTwinImage ? {
+          id: filledTwinImage.id,
+          imageUrl: filledTwinImage.image_url,
+          libraryTags: filledTwinImage.library_tags ?? [],
+        } : null}
+        organizationId={currentOrganizationId}
+        userId={user?.id}
+        reviewedBy={user?.email ?? user?.id}
+        onChanged={refetch}
+      />
 
       {/* Image Editor Modal */}
       <ImageEditorModal

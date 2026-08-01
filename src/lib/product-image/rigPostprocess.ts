@@ -45,6 +45,8 @@ export interface RigBaselineNormalizeResult {
   objectBounds: RigStrongBounds | null;
   shadowOwner: BestBottlesShadowOwner;
   shadowQa: ShadowQaReport | null;
+  /** Reference-measured detached-cap geometry gate; null outside governed detached lanes. */
+  detachedCapGeometryQa: DetachedCapGeometryQa | null;
 }
 
 export interface RigBaselineNormalizeOptions {
@@ -75,6 +77,8 @@ export interface RigBaselineNormalizeOptions {
    * the byte-locked reference and pass it here.
    */
   expectedPrimaryAspectRatio?: number | null;
+  /** Byte-locked reference truth used to reject model-generated detached-cap proportion drift. */
+  expectedDetachedCapMetrics?: ReferenceSidecarCapMetrics | null;
 }
 
 export interface RigStrongBounds {
@@ -1542,9 +1546,9 @@ export function detectControlledRigBounds(
   if (!controlBounds) return null;
   const xStep = 2;
   const yStep = 2;
-  const minRowHits = Math.max(6, Math.floor((width / xStep) * 0.02));
   const minX = Math.max(0, Math.ceil((controlBounds.left ?? 0) / xStep) * xStep);
   const maxX = Math.min(width - 1, Math.floor((controlBounds.right ?? width - 1) / xStep) * xStep);
+  const minRowHits = Math.max(6, Math.floor(((maxX - minX + 1) / xStep) * 0.02));
   const minY = Math.max(0, Math.ceil(controlBounds.top / yStep) * yStep);
   const maxY = Math.min(height - 1, Math.floor(controlBounds.bottom / yStep) * yStep);
   const bgLuma = luma(bg);
@@ -1930,6 +1934,137 @@ export function tallestSilverProofBounds(
   return best;
 }
 
+/**
+ * Whole-vessel bounds for transparent glass — the clear-glass sliver fix
+ * (2026-07-29, Jordan directive: read bare glass as the vessel it is, not as
+ * thin slivers).
+ *
+ * Failure mode this corrects: `detectSilverProofComponents` requires a column
+ * to hold foreground in ≥5% of image height before it counts as occupied. A
+ * clear glass bottle photographed for e-commerce reads almost entirely as
+ * background through its interior — only the refractive side walls, neck
+ * finish, and base band carry strong signal — so the interior columns
+ * evaporate and the bottle splits into two tall wall slivers. The component
+ * merge rule caps the bridgeable gap at 2× a fragment's width; wall slivers
+ * are ~30–80 px wide while the interior spans hundreds, so the walls never
+ * rejoin, the tallest sliver is reported as "the bottle", and aspect QA reads
+ * 6:1 on a 3.7:1 vessel (measured on the 50 mL reducer cohort: observed 6.12
+ * – 6.66 recorded against physical 3.5 – 4.0).
+ *
+ * The correction is optical, not heuristic: the two walls of one transparent
+ * vessel share the same vertical extent by construction, because they are the
+ * same object. Distinct objects in this domain (bottle vs detached sidecar
+ * cap) differ strongly in height — the governed cap classes run 21–31% of
+ * bottle height — so vertical-extent alignment is a safe sibling key. When
+ * extent-aligned fragments exist, we additionally demand weak interior glass
+ * evidence (refraction shading / meniscus / base band at a low threshold)
+ * across the gap before uniting them, so two genuinely separate aligned
+ * objects can never fuse.
+ */
+export function resolveWholeVesselBounds(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number | null,
+): RigStrongBounds | null {
+  const components = detectSilverProofComponents(pixels, width, height, bg, maxBottomYPx);
+  if (components.length === 0) {
+    return (
+      detectTallestComponentBounds(pixels, width, height, bg, maxBottomYPx) ??
+      detectStrongBounds(pixels, width, height, bg)
+    );
+  }
+  let tallest = components[0];
+  for (const c of components) {
+    if (c.bottom - c.top > tallest.bottom - tallest.top) tallest = c;
+  }
+  const tallestHeight = tallest.bottom - tallest.top + 1;
+  // Sibling fragments of one vessel share a BASE, not a top: on a capped
+  // clear bottle the frame splits into wall-sliver / center-column / wall-
+  // sliver, where the center column carries the closure and rises above the
+  // shoulder — its top sits hundreds of px higher than the walls' (measured
+  // 266 px on GB-CYL-CLR-50ML-RDC-MSLV-T). Requiring top alignment rejected
+  // the walls and returned the center column alone (aspect 6.6). So the keys
+  // are: bottom within 4% of frame height (everything stands on one floor
+  // line) and height ratio ≥ 0.8 (the governed detached cap classes run
+  // 21–31% of bottle height and can never qualify). No gap ≤ 2×width cap —
+  // a transparent interior can never satisfy it.
+  const aligned = components.filter((c) => {
+    const h = c.bottom - c.top + 1;
+    return (
+      Math.abs(c.bottom - tallest.bottom) <= height * 0.04 &&
+      Math.min(h, tallestHeight) / Math.max(h, tallestHeight) >= 0.8
+    );
+  });
+  if (aligned.length <= 1) {
+    return { top: tallest.top, bottom: tallest.bottom, left: tallest.left, right: tallest.right };
+  }
+  aligned.sort((a, b) => a.left - b.left);
+  // Unite fragments pairwise left→right, but only across gaps that carry
+  // interior glass evidence: a low-threshold scan (delta > 12 against the
+  // studio background) with the same lenient per-column occupancy the
+  // non-silver-proof detector uses (0.4% of frame height). Clear glass
+  // interiors always carry this much signal — refraction gradients at the
+  // shoulder, the base thickness band, roller/dip-tube hardware — while true
+  // background between separate objects carries none.
+  const interiorDeltaThreshold = 12;
+  const minInteriorRows = Math.max(4, Math.round(height * 0.004));
+  const columnHasInteriorEvidence = (x: number, top: number, bottom: number): boolean => {
+    let rows = 0;
+    for (let y = top; y <= bottom; y += 1) {
+      const i = (y * width + x) * 4;
+      const delta = Math.max(
+        Math.abs(pixels[i] - bg.r),
+        Math.abs(pixels[i + 1] - bg.g),
+        Math.abs(pixels[i + 2] - bg.b),
+      );
+      if (delta > interiorDeltaThreshold) {
+        rows += 1;
+        if (rows >= minInteriorRows) return true;
+      }
+    }
+    return false;
+  };
+  let union: RigStrongBounds = {
+    top: aligned[0].top,
+    bottom: aligned[0].bottom,
+    left: aligned[0].left,
+    right: aligned[0].right,
+  };
+  for (let i = 1; i < aligned.length; i += 1) {
+    const next = aligned[i];
+    const gapLeft = union.right + 1;
+    const gapRight = next.left - 1;
+    let evidenceColumns = 0;
+    let gapColumns = 0;
+    for (let x = gapLeft; x <= gapRight; x += 1) {
+      gapColumns += 1;
+      if (columnHasInteriorEvidence(x, Math.min(union.top, next.top), Math.max(union.bottom, next.bottom))) {
+        evidenceColumns += 1;
+      }
+    }
+    // ≥30% of the gap columns must show glass — enough that shading noise
+    // cannot fuse separate objects, low enough that pristine clear bodies
+    // (whose evidence concentrates at shoulder and base) still qualify.
+    const connected = gapColumns === 0 || evidenceColumns / gapColumns >= 0.3;
+    if (connected) {
+      union = {
+        top: Math.min(union.top, next.top),
+        bottom: Math.max(union.bottom, next.bottom),
+        left: union.left,
+        right: next.right,
+      };
+    } else if (
+      next.bottom - next.top > union.bottom - union.top
+    ) {
+      // Disconnected sibling that is itself taller: restart the union there.
+      union = { top: next.top, bottom: next.bottom, left: next.left, right: next.right };
+    }
+  }
+  return union;
+}
+
 export async function measureReferencePrimaryAspectRatio(
   url: string,
 ): Promise<number | null> {
@@ -1954,10 +2089,7 @@ export async function measureReferencePrimaryAspectRatio(
     // clear-glass bottles as one thin side-wall sliver (measured 7.34:1 truth
     // on a ~3.1:1 bottle, 2026-07-20) — transparent interiors need the low
     // threshold + extent-merge treatment to stay whole.
-    const bounds =
-      tallestSilverProofBounds(pixels, width, height, bgSample) ??
-      detectTallestComponentBounds(pixels, width, height, bgSample) ??
-      detectStrongBounds(pixels, width, height, bgSample);
+    const bounds = resolveWholeVesselBounds(pixels, width, height, bgSample);
     if (
       !bounds ||
       typeof bounds.left !== "number" ||
@@ -1980,6 +2112,166 @@ export interface ReferenceSidecarCapMetrics {
   capAspectRatio: number;
   /** Detached cap height as a percentage of the primary bottle's height. */
   capHeightPctOfBottle: number;
+}
+
+export interface DetachedCapGeometryQa {
+  policy: "reference-measured-detached-cap-geometry-v1";
+  status: "pass" | "fail";
+  enforcement: "strict" | "advisory";
+  expected: ReferenceSidecarCapMetrics;
+  observed: ReferenceSidecarCapMetrics | null;
+  capAspectRatioDriftPct: number | null;
+  capHeightPctOfBottleDelta: number | null;
+  maxAbsCapAspectRatioDriftPct: number;
+  maxAbsCapHeightPctOfBottleDelta: number;
+  failures: string[];
+  blockingFailures: string[];
+}
+
+export interface DetachedCapGeometryQaInput {
+  expected: ReferenceSidecarCapMetrics;
+  observed: ReferenceSidecarCapMetrics | null;
+  enforcement?: "strict" | "advisory";
+  maxAbsCapAspectRatioDriftPct?: number;
+  maxAbsCapHeightPctOfBottleDelta?: number;
+}
+
+export function resolveDetachedCapGeometryEnforcement(
+  input: Pick<RigBaselineNormalizeOptions, "family" | "capState" | "applicator">,
+): "strict" | "advisory" {
+  const family = String(input.family ?? "").trim().toLowerCase();
+  const capState = String(input.capState ?? "").trim().toLowerCase();
+  const applicator = String(input.applicator ?? "").trim().toLowerCase();
+  const isCylinder = family === "cylinder" || family.startsWith("cylinder ");
+  const isDetached = capState === "detached";
+  const isFineMist = /\bfine[\s-]*mist\b|\bsprayer\b/.test(applicator);
+  return isCylinder && isDetached && isFineMist ? "advisory" : "strict";
+}
+
+/**
+ * Measure the bottle and detached right-sidecar cap with the same component
+ * detector for source truth and generated output. No pixels are changed.
+ */
+export function measureDetachedSidecarCapMetricsFromPixels(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number | null,
+): ReferenceSidecarCapMetrics | null {
+  const components = detectSilverProofComponents(
+    pixels,
+    width,
+    height,
+    bg,
+    maxBottomYPx,
+  );
+  if (!Array.isArray(components) || components.length < 2) return null;
+  // Whole-vessel bottle bounds (clear-glass sliver fix, 2026-07-29): on bare
+  // clear glass the component list holds the bottle's two wall slivers plus
+  // the cap. Taking sized[0] as "the bottle" made the bottle's own right wall
+  // pass the `left > bottle.right` cap filter and masquerade as a ~97%-height
+  // cap, failing good renders. The vessel resolver reunites the walls first,
+  // so "right of the bottle" means right of the whole vessel.
+  const vessel = resolveWholeVesselBounds(pixels, width, height, bg, maxBottomYPx);
+  if (!vessel) return null;
+  const bottle = {
+    ...vessel,
+    w: vessel.right - vessel.left + 1,
+    h: vessel.bottom - vessel.top + 1,
+  };
+  if (bottle.w <= 0 || bottle.h <= 0) return null;
+  // Detached PDP topology is bottle-left / cap-right. Requiring that spatial
+  // relationship prevents a split bottle highlight from masquerading as cap.
+  const cap = components
+    .map((component) => ({
+      ...component,
+      w: component.right - component.left + 1,
+      h: component.bottom - component.top + 1,
+    }))
+    .filter((component) => component.w > 0 && component.h > 0)
+    .filter((component) => component.left > bottle.right)
+    .sort((a, b) => b.h - a.h)[0];
+  if (!cap) return null;
+
+  const capAspectRatio = cap.h / cap.w;
+  const capHeightPctOfBottle = (cap.h / bottle.h) * 100;
+  if (!Number.isFinite(capAspectRatio) || !Number.isFinite(capHeightPctOfBottle)) return null;
+  if (capAspectRatio <= 0 || capHeightPctOfBottle <= 0 || capHeightPctOfBottle >= 100) return null;
+  return { capAspectRatio, capHeightPctOfBottle };
+}
+
+/**
+ * Geometry-only acceptance gate. The model owns appearance; this report only
+ * rejects caps whose measured proportions drift from the byte-locked source.
+ */
+export function evaluateDetachedCapGeometryQa(
+  input: DetachedCapGeometryQaInput,
+): DetachedCapGeometryQa {
+  const maxAspectDrift = input.maxAbsCapAspectRatioDriftPct ?? 8;
+  const maxHeightDelta = input.maxAbsCapHeightPctOfBottleDelta ?? 3;
+  const failures: string[] = [];
+  const observed = input.observed;
+  const enforcement = input.enforcement ?? "strict";
+  const aspectDrift = observed
+    ? ((observed.capAspectRatio - input.expected.capAspectRatio) /
+      input.expected.capAspectRatio) * 100
+    : null;
+  const heightDelta = observed
+    ? observed.capHeightPctOfBottle - input.expected.capHeightPctOfBottle
+    : null;
+
+  if (!observed) {
+    failures.push("Detached cap geometry could not be measured from the generated output.");
+  } else {
+    if (aspectDrift == null || Math.abs(aspectDrift) > maxAspectDrift) {
+      failures.push(
+        `Detached cap aspect ratio drift ${aspectDrift?.toFixed(1) ?? "unknown"}% exceeds the allowed ±${maxAspectDrift}% from reference.`,
+      );
+    }
+    if (heightDelta == null || Math.abs(heightDelta) > maxHeightDelta) {
+      failures.push(
+        `Detached cap height relative to bottle differs by ${heightDelta?.toFixed(1) ?? "unknown"} percentage points; allowed ±${maxHeightDelta}.`,
+      );
+    }
+  }
+
+  return {
+    policy: "reference-measured-detached-cap-geometry-v1",
+    status: failures.length === 0 ? "pass" : "fail",
+    enforcement,
+    expected: input.expected,
+    observed,
+    capAspectRatioDriftPct: aspectDrift,
+    capHeightPctOfBottleDelta: heightDelta,
+    maxAbsCapAspectRatioDriftPct: maxAspectDrift,
+    maxAbsCapHeightPctOfBottleDelta: maxHeightDelta,
+    failures,
+    blockingFailures: enforcement === "strict" ? failures : [],
+  };
+}
+
+function buildDetachedCapGeometryQa(
+  expected: ReferenceSidecarCapMetrics | null | undefined,
+  enforcement: "strict" | "advisory",
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  bg: Rgb,
+  maxBottomYPx?: number | null,
+): DetachedCapGeometryQa | null {
+  if (!expected) return null;
+  return evaluateDetachedCapGeometryQa({
+    expected,
+    enforcement,
+    observed: measureDetachedSidecarCapMetricsFromPixels(
+      pixels,
+      width,
+      height,
+      bg,
+      maxBottomYPx,
+    ),
+  });
 }
 
 /**
@@ -2008,24 +2300,12 @@ export async function measureReferenceSidecarCapMetrics(
     if (width < 8 || height < 8) return null;
     const pixels = ctx.getImageData(0, 0, width, height).data;
     const bgSample: Rgb = { r: pixels[0], g: pixels[1], b: pixels[2] };
-    const components = detectSilverProofComponents(pixels, width, height, bgSample);
-    if (!Array.isArray(components) || components.length < 2) return null;
-    const sized = components
-      .map((c) => ({
-        w: c.right - c.left + 1,
-        h: c.bottom - c.top + 1,
-      }))
-      .filter((c) => c.w > 0 && c.h > 0);
-    if (sized.length < 2) return null;
-    // Tallest component is the bottle; the tallest of the rest is the cap.
-    const byHeight = [...sized].sort((a, b) => b.h - a.h);
-    const bottle = byHeight[0];
-    const cap = byHeight[1];
-    const capAspectRatio = cap.h / cap.w;
-    const capHeightPctOfBottle = (cap.h / bottle.h) * 100;
-    if (!Number.isFinite(capAspectRatio) || !Number.isFinite(capHeightPctOfBottle)) return null;
-    if (capAspectRatio <= 0 || capHeightPctOfBottle <= 0 || capHeightPctOfBottle >= 100) return null;
-    return { capAspectRatio, capHeightPctOfBottle };
+    return measureDetachedSidecarCapMetricsFromPixels(
+      pixels,
+      width,
+      height,
+      bgSample,
+    );
   } catch {
     return null;
   }
@@ -2064,6 +2344,7 @@ export async function normalizeBestBottlesRigBaseline(
       objectBounds: null,
       shadowOwner,
       shadowQa: null,
+      detachedCapGeometryQa: null,
     };
   }
 
@@ -2092,19 +2373,41 @@ export async function normalizeBestBottlesRigBaseline(
     bg,
   );
   const capState = resolveCapState(options);
-  // Proportion truth for the aspect gate: caller-provided (reference-measured)
-  // wins; assembled cap-on falls back to canonical mm; detached sidecar has no
-  // canonical assembled-cap-off height, so without a caller value the gate is off.
+  const detachedCapGeometryEnforcement =
+    resolveDetachedCapGeometryEnforcement(options);
+  // Proportion truth for the aspect gate — CANON-POLICED REFERENCE
+  // (Jordan rulings, 2026-07-29).
+  //
+  // Detached (cap-off sidecar) frames picture the bottle WITH its fitment
+  // attached, and canon carries no fitment height: grading against the bare
+  // canon body aspect fails good renders by exactly the fitment tower
+  // (measured medians: sprayers +41.5%, lotion pumps +42.4%, rollers ~+15%,
+  // reducers +3.4%). So for detached lanes the expectation comes from the
+  // byte-locked reference measured with the whole-vessel detector — the true
+  // pictured state — and CANON POLICES THE REFERENCE instead of being the
+  // numerator: the caller (generate-family-batch / Studio hook) condemns any
+  // reference whose vessel reads slimmer than the canon body allows or
+  // implies an impossible fitment, and blocks generation rather than letting
+  // a weak reference move the goalpost (see
+  // getBestBottlesCanonReferenceAspectIssue).
+  //
+  // Assembled frames keep the pure canonical-mm expectation: heightWithCap /
+  // diameter fully describes the pictured state there.
   const canonHeightWithCapMm = parseLeadingMm(options.heightWithCap);
   const canonDiameterMm = parseLeadingMm(options.diameter);
-  const expectedPrimaryAspectRatio =
+  const callerPrimaryAspectRatio =
     typeof options.expectedPrimaryAspectRatio === "number" &&
     Number.isFinite(options.expectedPrimaryAspectRatio) &&
     options.expectedPrimaryAspectRatio > 0
       ? options.expectedPrimaryAspectRatio
-      : capState !== "detached" && canonHeightWithCapMm != null && canonDiameterMm != null
-        ? canonHeightWithCapMm / canonDiameterMm
-        : null;
+      : null;
+  const canonAssembledAspectRatio =
+    canonHeightWithCapMm != null && canonDiameterMm != null && canonDiameterMm > 0
+      ? canonHeightWithCapMm / canonDiameterMm
+      : null;
+  const expectedPrimaryAspectRatio = capState === "detached"
+    ? callerPrimaryAspectRatio
+    : canonAssembledAspectRatio ?? callerPrimaryAspectRatio;
   let maskImageData: ImageData | null = null;
   let maskBounds: RigAlphaControlBounds | null = null;
   const maskReferenceUrl = options.maskReferenceUrl?.trim();
@@ -2317,14 +2620,7 @@ export async function normalizeBestBottlesRigBaseline(
         capState,
         expectedPrimaryAspectRatio,
         aspectBounds: capState === "detached"
-          ? tallestSilverProofBounds(
-              finalImageData.data,
-              width,
-              height,
-              bg,
-              finalBaseline,
-            ) ??
-            detectTallestComponentBounds(
+          ? resolveWholeVesselBounds(
               finalImageData.data,
               width,
               height,
@@ -2427,6 +2723,18 @@ export async function normalizeBestBottlesRigBaseline(
           : undefined,
       });
     }
+    const detachedCapGeometryQa = capState === "detached"
+      ? buildDetachedCapGeometryQa(
+          options.expectedDetachedCapMetrics,
+          detachedCapGeometryEnforcement,
+          finalImageData.data,
+          width,
+          height,
+          bg,
+          finalBaseline,
+        )
+      : null;
+    if (detachedCapGeometryQa) qaIssues.push(...detachedCapGeometryQa.blockingFailures);
     outCtx.putImageData(finalImageData, 0, 0);
 
     return {
@@ -2447,6 +2755,7 @@ export async function normalizeBestBottlesRigBaseline(
       objectBounds: finalBounds,
       shadowOwner,
       shadowQa: finalShadow.shadowQa,
+      detachedCapGeometryQa,
     };
   }
 
@@ -2503,6 +2812,16 @@ export async function normalizeBestBottlesRigBaseline(
       baselineYPx: null,
     });
 
+    const detachedCapGeometryQa = capState === "detached"
+      ? buildDetachedCapGeometryQa(
+          options.expectedDetachedCapMetrics,
+          detachedCapGeometryEnforcement,
+          analysisImageData.data,
+          width,
+          height,
+          analysisBg,
+        )
+      : null;
     return {
       dataUrl: fallbackOut.toDataURL("image/png"),
       shifted: false,
@@ -2513,7 +2832,10 @@ export async function normalizeBestBottlesRigBaseline(
       detectedBaselineYPx: null,
       targetBaselineYPx: targetBaseline,
       maskControlled: false,
-      qaIssues: ["Product baseline was not detectable for framing QA."],
+      qaIssues: [
+        "Product baseline was not detectable for framing QA.",
+        ...(detachedCapGeometryQa?.blockingFailures ?? []),
+      ],
       framingQa,
       framingDecision: getFramingDecision(framingQa),
       preTransformObjectBounds: fallbackBounds,
@@ -2521,6 +2843,7 @@ export async function normalizeBestBottlesRigBaseline(
       objectBounds: fallbackBounds,
       shadowOwner,
       shadowQa: fallbackShadow.shadowQa,
+      detachedCapGeometryQa,
     };
   }
 
@@ -2748,14 +3071,7 @@ export async function normalizeBestBottlesRigBaseline(
       capState,
       expectedPrimaryAspectRatio,
       aspectBounds: capState === "detached"
-        ? tallestSilverProofBounds(
-            finalAnalysisImageData.data,
-            width,
-            height,
-            bg,
-            finalBaseline,
-          ) ??
-          detectTallestComponentBounds(
+        ? resolveWholeVesselBounds(
             finalAnalysisImageData.data,
             width,
             height,
@@ -2854,6 +3170,17 @@ export async function normalizeBestBottlesRigBaseline(
           : undefined),
     });
   }
+  const detachedCapGeometryQa = capState === "detached"
+    ? buildDetachedCapGeometryQa(
+        options.expectedDetachedCapMetrics,
+        detachedCapGeometryEnforcement,
+        finalAnalysisImageData.data,
+        width,
+        height,
+        bg,
+        finalBaseline,
+      )
+    : null;
   outCtx.putImageData(finalImageData, 0, 0);
 
   return {
@@ -2871,6 +3198,7 @@ export async function normalizeBestBottlesRigBaseline(
         ? ["Primary bottle bounds were unresolved for detached topology."]
         : []),
       ...framingQa.failures,
+      ...(detachedCapGeometryQa?.blockingFailures ?? []),
     ],
     framingQa,
     framingDecision,
@@ -2879,5 +3207,6 @@ export async function normalizeBestBottlesRigBaseline(
     objectBounds: finalBounds,
     shadowOwner,
     shadowQa: finalShadow.shadowQa,
+    detachedCapGeometryQa,
   };
 }

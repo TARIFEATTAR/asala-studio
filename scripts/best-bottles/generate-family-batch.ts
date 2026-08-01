@@ -83,6 +83,7 @@ import {
   getBestBottlesReferenceUrlIssue,
 } from "../../src/lib/bestBottlesReferenceValidation";
 import { getExactOutputCanvasConstraints } from "../../src/lib/product-image/exactOutputCanvas";
+import { resolveWholeVesselBounds } from "../../src/lib/product-image/rigPostprocess";
 import { resolveBestBottlesShadowTopology } from "../../src/lib/bestBottlesShadowTopology";
 import {
   buildBestBottlesRawReconciliationPayload,
@@ -447,12 +448,24 @@ function recordManifest(entry: ManifestEntry): void {
 // ---------------------------------------------------------------------------
 // Rig postprocess — identical semantics to live-cylinder-smoke.ts
 // (upload to generated-images, patch generated_images.image_url to rigged URL).
-// Cap/mode are always null for family batch (no per-SKU cap-off staging list);
-// the smoke script's cap-off cases are hand-curated and out of scope here.
+// capState/mode come from the reviewed sidecar authority (see resolveTargets),
+// so cap-off lanes arrive here as capState="detached".
+//
+// ASPECT GATE (2026-07-29): rigPostprocess deliberately disables its
+// canonical-mm aspect fallback for detached lanes — a cap-off frame has no
+// assembled heightWithCap to grade against — so without a caller-supplied
+// `expectedPrimaryAspectRatio` the width/proportion gate is OFF and only the
+// baseline re-seat runs. That is why the 50 ml reducer cap-off cohort shipped
+// with a 460–527 px bottle-width spread (h/w 3.50–4.00 against a canonical
+// 117/32 = 3.66) while every badge still read a 0–3 px baseline delta.
+// We now measure the byte-locked reference's own bottle ratio and hand it to
+// the gate, exactly as the Studio hook does (useAssembledPromptGeneration).
 // ---------------------------------------------------------------------------
 async function rigPostprocessOutput(input: {
   page: Page;
   imageUrl: string;
+  /** Canon-policed, reference-measured pictured-state aspect (detached lanes). */
+  expectedPrimaryAspectRatio: number | null;
   savedImageId: string;
   product: BBProduct;
   sku: string;
@@ -487,14 +500,29 @@ async function rigPostprocessOutput(input: {
 }> {
   const shadowTopology = resolveBestBottlesShadowTopology(input.product, {});
   const rigged = await input.page.evaluate(
-    async ({ imageUrl, product, targetBackgroundHex, shadowTopology }) => {
+    async ({ imageUrl, expectedPrimaryAspectRatio, product, targetBackgroundHex, shadowTopology }) => {
       // PAINT-AFTER REMOVED (2026-07-10): the global corner-sampled colorCorrectToTarget
       // shift tinted the whole image and washed out clear glass. The bone background is
       // now painted by the model in-scene (framing-profile directive), so the rig runs
       // GEOMETRY ONLY. normalizeBestBottlesRigBaseline still fills bone behind the masked
       // product as a deterministic backstop and resizes to the exact 2080x2288 canvas.
-      const { normalizeBestBottlesRigBaseline } = await import("/src/lib/product-image/rigPostprocess.ts");
+      const { normalizeBestBottlesRigBaseline } =
+        await import("/src/lib/product-image/rigPostprocess.ts");
+      // Detached (cap-off sidecar) lanes carry their proportion truth in from
+      // resolveTargets: the byte-locked reference measured with the
+      // whole-vessel detector, already canon-policed BEFORE provider spend.
+      // Fail closed: an ungated cap-off render is exactly the defect this
+      // measurement exists to prevent.
+      const isDetached = /\b(?:detached|cap[-_\s]?off|exploded)\b/.test(
+        `${product.capState ?? ""} ${product.mode ?? ""}`.toLowerCase(),
+      );
+      if (isDetached && expectedPrimaryAspectRatio == null) {
+        throw new Error(
+          "detached-lane aspect truth missing — refusing to rig a cap-off render with the width gate off",
+        );
+      }
       return normalizeBestBottlesRigBaseline(imageUrl, {
+        expectedPrimaryAspectRatio,
         family: product.family,
         bottleCollection: product.bottleCollection,
         graceSku: product.graceSku,
@@ -516,6 +544,7 @@ async function rigPostprocessOutput(input: {
     },
     {
       imageUrl: input.imageUrl,
+      expectedPrimaryAspectRatio: input.expectedPrimaryAspectRatio,
       product: input.product,
       targetBackgroundHex: BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
       shadowTopology,
@@ -653,6 +682,18 @@ function buildCatalogTruthSnapshot(target: FamilyTarget): BestBottlesCatalogTrut
   };
 }
 
+/** Terminal = the job's linked image is the LIVE cap-on PDP candidate (guarded by the DB). */
+async function isTerminalSkuJob(pipelineSkuJobId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("best_bottles_pipeline_sku_jobs")
+    .select("status,approved_image_id")
+    .eq("id", pipelineSkuJobId)
+    .maybeSingle();
+  if (error || !data) return false; // unknown → attempt the link; the DB guard stays authoritative
+  return ["approved", "shopify-pushed", "synced"].includes(String(data.status)) ||
+    data.approved_image_id != null;
+}
+
 async function persistReconciliation(payload: Record<string, unknown>, sku: string): Promise<void> {
   const { error } = await supabase
     .from("best_bottles_image_reconciliations")
@@ -692,13 +733,22 @@ function buildBodyForTarget(target: FamilyTarget) {
     sku: promptPreflight.sku,
     mode: promptMode,
   });
-  const visualTargetReference = getBestBottlesVisualTargetReference(bodyMaterial);
-  const visualTargetTags = getBestBottlesVisualTargetTags(bodyMaterial);
+  // Surface hints mirror the Studio hook (2026-07-20 lesson): without the
+  // catalog color + grace-SKU body segment, every colored/textured glass
+  // bottle silently fell back to the clear exemplar — which the deployed
+  // edge contract now rejects as a surface mismatch.
+  const visualTargetSurfaceHints = {
+    color: product.color ?? null,
+    graceSku: product.graceSku ?? null,
+  };
+  const visualTargetReference = getBestBottlesVisualTargetReference(bodyMaterial, visualTargetSurfaceHints);
+  const visualTargetTags = getBestBottlesVisualTargetTags(bodyMaterial, visualTargetSurfaceHints);
   const addendumPrompt = applySmokePromptAddendum(promptRecord.final_prompt, promptAddendum);
   const finalPrompt = applyBestBottlesVisualTargetPrompt(
     addendumPrompt,
     bodyMaterial,
     componentTopology,
+    visualTargetSurfaceHints,
   );
   const precompiledPromptRecord = {
     ...promptRecord,
@@ -834,6 +884,14 @@ function buildBodyForTarget(target: FamilyTarget) {
       capOffReferenceId: target.sidecarAuthority?.capOffReferenceId ?? (capState === "detached" ? target.referenceHash : null),
       topologyReferenceId,
       referenceRoleId: target.sidecarAuthority?.referenceRoleId ?? null,
+      // Resolved material binding — the deployed edge contract fails closed
+      // ("Cylinder style reference requires one complete resolved material
+      // binding") when a style reference arrives without all four fields.
+      // Mirrors useAssembledPromptGeneration's Studio payload exactly.
+      styleReferenceSurface: visualTargetReference.surface,
+      styleReferenceImageId: visualTargetReference.imageId,
+      styleReferenceImageUrl: visualTargetReference.imageUrl,
+      styleReferenceExportSha256: visualTargetReference.exportSha256,
       bodyMaterial,
       color: product.color ?? null,
       sku: product.graceSku,
@@ -969,7 +1027,10 @@ async function generateOnce(target: FamilyTarget, page: Page | null): Promise<Ge
     shadowTopology,
     catalogTruth,
     catalogTruthHash,
-    assetRole: "pdp-primary" as const,
+    // Role follows the preset: the cap-off sidecar preset is the PDP-secondary
+    // lane (2026-07-29 fix — the hardcoded "pdp-primary" mislabeled 112
+    // wave-1 cap-off reconciliation rows; backfill noted in the loop ledger).
+    assetRole: (preset.id === "grid-card-exploded-2000x2200" ? "pdp-secondary" : "pdp-primary") as "pdp-primary" | "pdp-secondary",
     requiresPipelineReconciliation: true,
     rawImageUrl,
     canvasWidthPx: preset.canvas.widthPx,
@@ -983,7 +1044,14 @@ async function generateOnce(target: FamilyTarget, page: Page | null): Promise<Ge
   let rigged: Awaited<ReturnType<typeof rigPostprocessOutput>> | null = null;
   try {
     rigged = page
-      ? await rigPostprocessOutput({ page, imageUrl: rawImageUrl, savedImageId, product: target.product, sku: target.sku })
+      ? await rigPostprocessOutput({
+        page,
+        imageUrl: rawImageUrl,
+        expectedPrimaryAspectRatio: target.referenceAspectRatio,
+        savedImageId,
+        product: target.product,
+        sku: target.sku,
+      })
       : null;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -1022,13 +1090,26 @@ async function generateOnce(target: FamilyTarget, page: Page | null): Promise<Ge
       shadow_topology_hash: shadowTopologyHash,
     }, target.sku);
 
-    const { error: linkError } = await supabase.rpc("link_best_bottles_generated_image", {
-      p_organization_id: ORG_ID,
-      p_pipeline_sku_job_id: target.pipelineSkuJobId,
-      p_image_id: savedImageId,
-    });
-    if (linkError) {
-      throw new Error(`${target.sku} generated image/SKU job link failed: ${linkError.message}`);
+    // Cap-off sidecar renders are LIBRARY-LANE assets (tracked by tags), not
+    // PDP-main candidates. A SKU job in a terminal state (synced / approved /
+    // shopify-pushed, or with an approved image) is protected by the DB's
+    // terminal-link guard — correctly, because its linked image IS the live
+    // cap-on PDP candidate and must never be overwritten by a cap-off frame.
+    // Batch 1 (2026-07-29) burned duplicate renders retrying that guard on
+    // frosted rollers whose cap-on was already synced. Skip the link for
+    // terminal jobs on the cap-off preset; everything else still links.
+    const jobTerminal = await isTerminalSkuJob(target.pipelineSkuJobId);
+    if (preset.id === "grid-card-exploded-2000x2200" && jobTerminal) {
+      console.log(`  ↷ ${target.sku}: cap-off render saved as library asset; SKU job is terminal (cap-on live) — link skipped by design.`);
+    } else {
+      const { error: linkError } = await supabase.rpc("link_best_bottles_generated_image", {
+        p_organization_id: ORG_ID,
+        p_pipeline_sku_job_id: target.pipelineSkuJobId,
+        p_image_id: savedImageId,
+      });
+      if (linkError) {
+        throw new Error(`${target.sku} generated image/SKU job link failed: ${linkError.message}`);
+      }
     }
   }
 
@@ -1152,6 +1233,7 @@ async function resolveTargets(): Promise<{ targets: FamilyTarget[]; skips: Skip[
     const productGroupSlug = job.product_group_slug ?? "unknown";
     let referenceUrl = "";
     let resolvedReferenceHash = "";
+    let referenceAspectRatio: number | null = null;
     let verifiedReference: CylinderVerifiedReferenceBytes | null = null;
     const readinessKey = cylinderProductionIdentityKey(websiteSku, sku);
     const canonicalReadiness = readinessKey
@@ -1227,6 +1309,54 @@ async function resolveTargets(): Promise<{ targets: FamilyTarget[]; skips: Skip[
         });
         continue;
       }
+      // CANON POLICE (Jordan ruling 2026-07-29): the reference sets the
+      // pictured-state aspect expectation for detached lanes, and canon
+      // guards the reference — BEFORE provider spend. A cap-off reference
+      // whose whole-vessel aspect reads slimmer than the canonical bare body
+      // (beyond 3% tolerance), or implies a fitment adding more than 55%
+      // height, is condemned and skipped; a weak reference must never move
+      // the goalpost.
+      if (sidecarAuthority?.capState === "detached") {
+        const rgba = new Uint8ClampedArray(
+          await sharp(referenceBytes).ensureAlpha().raw().toBuffer(),
+        );
+        const refW = metadata.width ?? 0;
+        const refH = metadata.height ?? 0;
+        const px = (x: number, y: number) => [
+          rgba[(y * refW + x) * 4], rgba[(y * refW + x) * 4 + 1], rgba[(y * refW + x) * 4 + 2],
+        ];
+        const corners = [px(2, 2), px(refW - 3, 2), px(2, refH - 3), px(refW - 3, refH - 3)];
+        const refBg = {
+          r: Math.round(corners.reduce((a, c) => a + c[0], 0) / 4),
+          g: Math.round(corners.reduce((a, c) => a + c[1], 0) / 4),
+          b: Math.round(corners.reduce((a, c) => a + c[2], 0) / 4),
+        };
+        const vessel = resolveWholeVesselBounds(rgba, refW, refH, refBg);
+        const measuredRefAspect = vessel && vessel.right > vessel.left
+          ? (vessel.bottom - vessel.top + 1) / (vessel.right - vessel.left + 1)
+          : null;
+        const canonBodyMm = Number(canonicalReadiness?.canonical?.canon_bodyHeightMm ?? NaN);
+        const canonWidthMm = Number(canonicalReadiness?.canonical?.canon_widthAxisMm ?? NaN);
+        const canonBodyAspect = Number.isFinite(canonBodyMm) && Number.isFinite(canonWidthMm) && canonWidthMm > 0
+          ? canonBodyMm / canonWidthMm
+          : null;
+        if (measuredRefAspect == null) {
+          skips.push({ sku, productGroupSlug, reason: "canon police: reference vessel aspect unmeasurable" });
+          continue;
+        }
+        if (canonBodyAspect != null) {
+          const ratio = measuredRefAspect / canonBodyAspect;
+          if (ratio < 0.97 || ratio > 1.55) {
+            skips.push({
+              sku,
+              productGroupSlug,
+              reason: `canon police: reference condemned — vessel aspect ${measuredRefAspect.toFixed(3)} vs canon body ${canonBodyAspect.toFixed(3)} (ratio ${ratio.toFixed(2)}, allowed 0.97–1.55)`,
+            });
+            continue;
+          }
+        }
+        referenceAspectRatio = measuredRefAspect;
+      }
     } catch (referenceError) {
       skips.push({
         sku,
@@ -1278,6 +1408,7 @@ async function resolveTargets(): Promise<{ targets: FamilyTarget[]; skips: Skip[
       productGroupSlug,
       referenceUrl,
       referenceHash: resolvedReferenceHash,
+      referenceAspectRatio,
       verifiedReference,
       product,
       canonicalReadiness,
@@ -1427,7 +1558,8 @@ async function main(): Promise<void> {
       if (framingHeader) console.log(`  ${framingHeader.trim()}`);
       console.log(`visual target block present : ${hasVisualTargetBlock}`);
       console.log(`style reference attached    : ${Boolean(visualTargetReference)} (${visualTargetReference?.label ?? "missing"})`);
-      console.log(`style reference image id    : ${getBestBottlesVisualTargetReference(body.productContext.bodyMaterial).imageId}`);
+      console.log(`style reference image id    : ${body.productContext.styleReferenceImageId ?? "MISSING"}`);
+      console.log(`style reference surface     : ${body.productContext.styleReferenceSurface ?? "MISSING"} (sha ${String(body.productContext.styleReferenceExportSha256 ?? "MISSING").slice(0, 12)}…)`);
       console.log(`visual target lineage tags  : ${hasVisualTargetLineage}`);
       console.log(`component topology lineage  : ${body.precompiledPromptRecord.qa_checklist.filter((tag) => tag.startsWith("component-topology:")).join(", ") || "missing"}`);
       console.log(`shadow topology lineage     : ${body.precompiledPromptRecord.qa_checklist.filter((tag) => tag.startsWith("shadow-topology:")).join(", ") || "missing"}`);

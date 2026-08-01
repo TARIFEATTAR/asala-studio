@@ -380,6 +380,16 @@ export function hasSkuJobGeneratedImage(job: SkuJobCoverageInput): boolean {
   );
 }
 
+/**
+ * Durable evidence that Madison has an image result linked to the SKU job.
+ * Approved images count even when the earlier generated-image fields were
+ * cleared during promotion. Destination-only Shopify/Convex state does not
+ * fabricate generation evidence.
+ */
+export function hasSkuJobGeneratedOrApprovedImage(job: SkuJobCoverageInput): boolean {
+  return hasSkuJobGeneratedImage(job) || Boolean(job.approvedImageUrl || job.approvedImageId);
+}
+
 export function buildBestBottlesGroupWorkflowSummary(
   jobs: SkuJobCoverageInput[],
 ): BestBottlesGroupWorkflowSummary {

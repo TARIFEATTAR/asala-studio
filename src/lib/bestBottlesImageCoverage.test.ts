@@ -13,6 +13,8 @@ import {
   getBestBottlesReferenceLineage,
   getSkuJobNextAction,
   hasSkuJobApprovedKeep,
+  hasSkuJobGeneratedOrApprovedImage,
+  hasSkuJobShopifyDestination,
   isBestBottlesCleanLineage,
   isSkuJobComplete,
   selectBulkCreateBatchRows,
@@ -128,6 +130,36 @@ describe("Best Bottles approval-status parsing", () => {
 });
 
 describe("Best Bottles SKU image coverage next action", () => {
+  it("counts linked generated or approved image evidence without inventing it from destinations", () => {
+    assert.equal(
+      hasSkuJobGeneratedOrApprovedImage(job({ generatedImageId: "generated-image-id" })),
+      true,
+    );
+    assert.equal(
+      hasSkuJobGeneratedOrApprovedImage(job({ approvedImageUrl: "https://madison.example/approved.png" })),
+      true,
+    );
+    assert.equal(
+      hasSkuJobGeneratedOrApprovedImage(
+        job({
+          status: "synced",
+          shopifyImageUrl: "https://cdn.shopify.com/live.png",
+          convexSyncedAt: "2026-07-23T00:00:00.000Z",
+        }),
+      ),
+      false,
+    );
+  });
+
+  it("counts explicit Shopify destination evidence independently of generation evidence", () => {
+    assert.equal(hasSkuJobShopifyDestination(job({ shopifyMediaId: "gid://shopify/MediaImage/1" })), true);
+    assert.equal(hasSkuJobShopifyDestination(job({ shopifyImageUrl: "https://cdn.shopify.com/live.png" })), true);
+    assert.equal(hasSkuJobShopifyDestination(job({ shopifyPushedAt: "2026-07-23T00:00:00.000Z" })), true);
+    assert.equal(hasSkuJobShopifyDestination(job({ status: "shopify-pushed" })), true);
+    assert.equal(hasSkuJobShopifyDestination(job({ status: "synced" })), true);
+    assert.equal(hasSkuJobShopifyDestination(job({ generatedImageId: "generated-image-id" })), false);
+  });
+
   it("only treats approved-keep jobs as complete and hides them from Needs Work", () => {
     const approvedKeep = job({
       status: "synced",

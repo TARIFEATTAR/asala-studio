@@ -1,3 +1,5 @@
+import { KEEP_MATERIAL } from "./bestBottlesCatalogCanon";
+
 export const BEST_BOTTLES_VISUAL_TARGET_VERSION = "best-bottles-pdp-v2" as const;
 
 /** Median corner tone across the seven approved aluminum references. */
@@ -46,8 +48,16 @@ export interface BestBottlesVisualTargetReference {
   imageUrl: string;
   exportSha256: string;
   role: "style-only";
+  transferMode: "style" | "optical-material";
   /** True when an unmapped surface fell back to the clear-glass exemplar. */
   fallbackApplied: boolean;
+}
+
+export interface BestBottlesVisualTargetBinding {
+  reference: BestBottlesVisualTargetReference;
+  componentTopology: BestBottlesVisualComponentTopology;
+  promptBlock: string;
+  tags: string[];
 }
 
 type SurfaceRegistryEntry = Omit<BestBottlesVisualTargetReference, "fallbackApplied">;
@@ -72,24 +82,33 @@ export const BEST_BOTTLES_VISUAL_TARGET_SURFACES: Record<
       "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/clear/v3/clear-cylinder__e2bdaaa1ac56c55d7133cbc64180560677ce3ed3fdf5c6dcc50c61a865bc6733.png",
     exportSha256: "e2bdaaa1ac56c55d7133cbc64180560677ce3ed3fdf5c6dcc50c61a865bc6733",
     role: "style-only",
+    transferMode: "style",
   },
+  // v3 test candidate (Jordan 2026-07-20): isolated cobalt glass material
+  // plate. Stored under visual-target-candidates until the probe is reviewed;
+  // product identity remains exclusively controlled by Image 1.
   cobalt: {
     material: "glass",
     surface: "cobalt",
-    imageId: "cobalt-v2-9abd0cdf",
+    imageId: "cobalt-v3-candidate-81d0b658",
     imageUrl:
-      "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/cobalt/v2/cobalt__9abd0cdf4e141aa45cb3b7be56026aceda5adc290ab9d45bf4dd59457ef0fe52.png",
-    exportSha256: "9abd0cdf4e141aa45cb3b7be56026aceda5adc290ab9d45bf4dd59457ef0fe52",
+      "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-target-candidates/cobalt/v3/cobalt-material-plate__81d0b658b9c46c2403dc3cf102d573aa667e1bcd7bd33773d70e6643a9167f80.png",
+    exportSha256: "81d0b658b9c46c2403dc3cf102d573aa667e1bcd7bd33773d70e6643a9167f80",
     role: "style-only",
+    transferMode: "optical-material",
   },
+  // v3 test candidate (Jordan 2026-07-20): isolated amber glass material
+  // plate. Stored under visual-target-candidates until the probe is reviewed;
+  // product identity remains exclusively controlled by Image 1.
   amber: {
     material: "glass",
     surface: "amber",
-    imageId: "amber-v2-d4295a25",
+    imageId: "amber-v3-candidate-e3d46bd0",
     imageUrl:
-      "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/amber/v2/amber__d4295a25e32fe5cacb470dd117ea4f9da1fad75ff46ad60c20973d48653fdc30.png",
-    exportSha256: "d4295a25e32fe5cacb470dd117ea4f9da1fad75ff46ad60c20973d48653fdc30",
+      "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-target-candidates/amber/v3/amber-material-plate__e3d46bd038749a139b9840d1d7d539a9b854198176fb4c6b3664ebd545d7aca7.png",
+    exportSha256: "e3d46bd038749a139b9840d1d7d539a9b854198176fb4c6b3664ebd545d7aca7",
     role: "style-only",
+    transferMode: "optical-material",
   },
   green: {
     material: "glass",
@@ -99,6 +118,7 @@ export const BEST_BOTTLES_VISUAL_TARGET_SURFACES: Record<
       "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/green/v2/green__7521b23978342f9e1daa5c1ba7b7044c281dcf1bbfca42c9ad1ade1fbf9b32b5.png",
     exportSha256: "7521b23978342f9e1daa5c1ba7b7044c281dcf1bbfca42c9ad1ade1fbf9b32b5",
     role: "style-only",
+    transferMode: "style",
   },
   swirl: {
     material: "glass",
@@ -108,6 +128,7 @@ export const BEST_BOTTLES_VISUAL_TARGET_SURFACES: Record<
       "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/swirl/v2/swirl__ee1381f4a0c9cf5102d5cd1b5756b07c43e4dc0b18a3c36393fa68671abd222c.png",
     exportSha256: "ee1381f4a0c9cf5102d5cd1b5756b07c43e4dc0b18a3c36393fa68671abd222c",
     role: "style-only",
+    transferMode: "style",
   },
   frosted: {
     material: "glass",
@@ -117,6 +138,7 @@ export const BEST_BOTTLES_VISUAL_TARGET_SURFACES: Record<
       "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/frosted/v2/frosted__523332637c649c16331bc92e275a67c8bb43d5d4567c4ff3acac3ff4bee7f416.png",
     exportSha256: "523332637c649c16331bc92e275a67c8bb43d5d4567c4ff3acac3ff4bee7f416",
     role: "style-only",
+    transferMode: "style",
   },
   aluminum: {
     material: "aluminum",
@@ -126,6 +148,7 @@ export const BEST_BOTTLES_VISUAL_TARGET_SURFACES: Record<
       "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/aluminum/v2/aluminum__d972c7d814c83943d777c266c7d4b80eae9dd98957bf16d0e8c7aa45de85983a.png",
     exportSha256: "d972c7d814c83943d777c266c7d4b80eae9dd98957bf16d0e8c7aa45de85983a",
     role: "style-only",
+    transferMode: "style",
   },
 };
 
@@ -208,11 +231,10 @@ export function getBestBottlesVisualTargetReference(
   return { ...BEST_BOTTLES_VISUAL_TARGET_SURFACES.clear, fallbackApplied: true };
 }
 
-export function buildBestBottlesVisualTargetPromptBlock(
-  bodyMaterial?: string | null,
+function buildBestBottlesVisualTargetPromptBlockFromReference(
+  target: BestBottlesVisualTargetReference,
   componentTopology: BestBottlesVisualComponentTopology = "assembled",
 ): string {
-  const target = getBestBottlesVisualTargetReference(bodyMaterial);
   const surfaceDirections: Record<BestBottlesVisualTargetSurface, string> = {
     clear:
       "Match the approved target's clear-glass wall definition, edge density, refraction, specular rhythm, material separation, and premium glass finish.",
@@ -230,6 +252,12 @@ export function buildBestBottlesVisualTargetPromptBlock(
       "Match the approved target's satin-metal gradient, controlled reflection-card rhythm, edge glints, material separation, and premium opaque-metal finish.",
   };
   const materialDirection = surfaceDirections[target.surface];
+  const coloredGlassAuthority = target.material === "glass" && ["amber", "cobalt", "green"].includes(target.surface)
+    ? "Use the secondary reference's glass-body hue, transmitted color, density, edge saturation, thin-section glow, and refraction as material authority. Do not copy hardware or closure colors; those remain controlled only by the primary Product Reference."
+    : "Do not use the secondary reference to recolor the product or any component; product color remains controlled only by the primary Product Reference.";
+  const materialPlateGuard = ["amber", "cobalt"].includes(target.surface)
+    ? "Treat the secondary reference as a material plate only. Transfer optical material behavior only; never transfer its slab silhouette, outline, corners, top edge, rectangular curvature, camera angle, crop, geometry, or proportions."
+    : null;
 
   const referenceStatus = target.imageUrl
     ? `Secondary reference image ${target.imageId} is STYLE-ONLY.`
@@ -238,44 +266,176 @@ export function buildBestBottlesVisualTargetPromptBlock(
     `VISUAL CALIBRATION TARGET — ${BEST_BOTTLES_VISUAL_TARGET_VERSION}.`,
     referenceStatus,
     materialDirection,
+    coloredGlassAuthority,
+    ...(materialPlateGuard ? [materialPlateGuard] : []),
     target.imageUrl
       ? `Render the final canvas in the approved warm tone ${BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX} and match the reference's refined natural contact/drop shadow: local grounding, soft feathered falloff, restrained spread, and no pasted-on or floating appearance.`
       : `Render the final canvas in the approved warm tone ${BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX} with a refined natural contact/drop shadow: local grounding, soft feathered falloff, restrained spread, and no pasted-on or floating appearance.`,
-    "Do not copy the secondary reference's silhouette, bottle family, closure, applicator, color, scale, crop, geometry, composition, or components.",
+    "Do not copy the secondary reference's silhouette, bottle family, closure, applicator, scale, crop, geometry, composition, component design, label, typography, brand, or scene.",
     "The primary Product Reference is the sole authority for product identity, geometry, component count, closure state, scale relationships, centerline, and baseline.",
     compositionSafetyForTopology(componentTopology),
   ].join("\n");
+}
+
+function tagsForBestBottlesVisualTarget(target: BestBottlesVisualTargetReference): string[] {
+  return [
+    `visual-target:${BEST_BOTTLES_VISUAL_TARGET_VERSION}`,
+    `style-reference-image:${target.imageId}`,
+    `style-reference-sha256:${target.exportSha256}`,
+    `style-transfer:${target.transferMode}`,
+    `material-profile:${target.material}`,
+    `style-surface:${target.surface}`,
+    ...(target.fallbackApplied ? ["style-surface-fallback:clear"] : []),
+  ];
+}
+
+const BEST_BOTTLES_OPTICAL_MATERIAL_AUTHORITY = `MATERIAL AUTHORITY SPLIT (overrides every earlier instruction to preserve Image 1's glass color or finish):
+Image 2 is the sole authority for the glass-body material appearance: hue, chroma, optical density, light transmission, refraction, edge saturation, thin-section glow, and specular/highlight behavior. The model must alter the glass material from Image 1 as needed to match Image 2 visibly and faithfully.
+Image 1 remains the sole authority for product geometry and component identity. Material transfer must not alter silhouette, dimensions, proportions, wall boundaries, neck, threads, base, hardware, closure, or component topology. Hardware and closure colors and finishes come only from Image 1.
+The exact original glass-body spatial envelope and silhouette from Image 1 are immutable. Do not redraw, widen, shorten, reshape, or resynthesize the bottle outline. Apply Image 2 optics only inside those exact Image 1 glass boundaries.
+The bottle remains empty. Transfer glass optics only; do not add liquid, labels, props, slab geometry, or any object from Image 2.`;
+
+const BEST_BOTTLES_PRIMARY_COMPONENT_RECOLOR_LOCK =
+  "Do not redesign, recolor, resize, reposition, duplicate, remove, or add any product component.";
+const BEST_BOTTLES_STUDIO_COLOR_MATERIAL_LOCK =
+  "The catalog contract remains absolute: preserve the exact 2080x2288 canvas, product fill-height target, shared baseline, centerline, crop, product scale, detached-cap sidecar position, geometry, color, material, and component placement.";
+
+export function getBestBottlesProductReferenceDescription(
+  bodyMaterialLabel: string,
+  binding: BestBottlesVisualTargetBinding,
+): string {
+  if (binding.reference.transferMode === "optical-material") {
+    return [
+      "Canonical bottle geometry and component reference (PSD-rendered PNG).",
+      `Use this image as an exact product-identity lock: preserve bottle geometry, camera angle, scale relationships, body substrate (${bodyMaterialLabel}), cap texture, fitment, applicator, hose/bulb/tassel color, collar/ring details, reducer finish, trim metal, and every non-glass surface detail.`,
+      "The exact glass-body spatial mask, outer contour, wall boundaries, and proportions from Image 1 are immutable. Image 2 controls glass hue, transmission, refraction, and specular behavior only inside those exact boundaries.",
+      "Do not redesign, rotate, resize, reposition, duplicate, remove, or add any product component. Do not recolor hardware, closures, fitments, or applicators. Allow only the authorized Image 2 glass-optics transfer and the server-directed staging, lighting, background, shadow, and PDP placement.",
+    ].join(" ");
+  }
+  return [
+    "Canonical bottle reference (PSD-rendered PNG).",
+    `Use this image as an exact product-identity lock: preserve the bottle geometry, camera angle, scale relationships, body material/substrate (${bodyMaterialLabel}), cap texture, fitment, applicator, body color, hose/bulb/tassel color, collar/ring details, reducer finish, trim metal, and all surface details.`,
+    "Do not redesign, restyle, recolor, rotate, or reinterpret the product components.",
+    "Do allow luxury catalog staging, lighting, background replacement, shadow, and refined PDP canvas placement as instructed by the server prompt.",
+  ].join(" ");
+}
+
+function applyOpticalMaterialAuthority(
+  prompt: string,
+  binding: BestBottlesVisualTargetBinding,
+): string {
+  if (binding.reference.transferMode !== "optical-material") return prompt;
+  const materialPrompt = prompt.includes(KEEP_MATERIAL)
+    ? prompt.replace(KEEP_MATERIAL, BEST_BOTTLES_OPTICAL_MATERIAL_AUTHORITY)
+    : `${prompt.trim()}\n\n${BEST_BOTTLES_OPTICAL_MATERIAL_AUTHORITY}`;
+  return materialPrompt
+    .replace(
+      BEST_BOTTLES_PRIMARY_COMPONENT_RECOLOR_LOCK,
+      "Do not redesign, resize, reposition, duplicate, remove, or add any product component. Do not recolor hardware, closures, fitments, or applicators. The glass body is the sole recolor/material exception and follows MATERIAL AUTHORITY SPLIT.",
+    )
+    .replace(
+      BEST_BOTTLES_STUDIO_COLOR_MATERIAL_LOCK,
+      "The catalog contract remains absolute: preserve the exact 2080x2288 canvas, product fill-height target, shared baseline, centerline, crop, product scale, detached-cap sidecar position, geometry, and component placement. Preserve every non-glass component color and material from Image 1; the glass-body appearance follows MATERIAL AUTHORITY SPLIT.",
+    );
+}
+
+export function resolveBestBottlesVisualTargetBinding(
+  bodyMaterial?: string | null,
+  hints?: BestBottlesVisualTargetSurfaceHints | null,
+  componentTopology: BestBottlesVisualComponentTopology = "assembled",
+): BestBottlesVisualTargetBinding {
+  const reference = getBestBottlesVisualTargetReference(bodyMaterial, hints);
+  return {
+    reference,
+    componentTopology,
+    promptBlock: buildBestBottlesVisualTargetPromptBlockFromReference(reference, componentTopology),
+    tags: tagsForBestBottlesVisualTarget(reference),
+  };
+}
+
+export function buildBestBottlesVisualTargetPromptBlock(
+  bodyMaterial?: string | null,
+  componentTopology: BestBottlesVisualComponentTopology = "assembled",
+): string {
+  return resolveBestBottlesVisualTargetBinding(
+    bodyMaterial,
+    null,
+    componentTopology,
+  ).promptBlock;
+}
+
+export function applyResolvedBestBottlesVisualTargetPrompt(
+  prompt: string,
+  binding: BestBottlesVisualTargetBinding,
+): string {
+  const materialAuthorizedPrompt = applyOpticalMaterialAuthority(prompt, binding);
+  const safety = compositionSafetyForTopology(
+    binding.componentTopology,
+  );
+  if (!materialAuthorizedPrompt.includes(`VISUAL CALIBRATION TARGET — ${BEST_BOTTLES_VISUAL_TARGET_VERSION}`)) {
+    return `${materialAuthorizedPrompt.trim()}\n\n${binding.promptBlock}`;
+  }
+  if (materialAuthorizedPrompt.includes(safety)) return materialAuthorizedPrompt;
+  if (materialAuthorizedPrompt.includes(BEST_BOTTLES_SINGLE_PRODUCT_COMPOSITION_SAFETY)) {
+    return materialAuthorizedPrompt.replace(BEST_BOTTLES_SINGLE_PRODUCT_COMPOSITION_SAFETY, safety);
+  }
+  if (materialAuthorizedPrompt.includes(BEST_BOTTLES_SIDECAR_COMPOSITION_SAFETY)) {
+    return materialAuthorizedPrompt.replace(BEST_BOTTLES_SIDECAR_COMPOSITION_SAFETY, safety);
+  }
+  return `${materialAuthorizedPrompt.trim()}\n${safety}`;
 }
 
 export function applyBestBottlesVisualTargetPrompt(
   prompt: string,
   bodyMaterial?: string | null,
   componentTopology: BestBottlesVisualComponentTopology = "assembled",
+  hints?: BestBottlesVisualTargetSurfaceHints | null,
 ): string {
-  const safety = compositionSafetyForTopology(componentTopology);
-  const block = buildBestBottlesVisualTargetPromptBlock(bodyMaterial, componentTopology);
-  if (!prompt.includes(`VISUAL CALIBRATION TARGET — ${BEST_BOTTLES_VISUAL_TARGET_VERSION}`)) {
-    return `${prompt.trim()}\n\n${block}`;
-  }
-  // Existing v1 prompts were emitted before the composition-safety guard existed.
-  // Preserve their precompiled authority while adding this non-negotiable repair.
-  if (prompt.includes(safety)) return prompt;
-  if (prompt.includes(BEST_BOTTLES_SINGLE_PRODUCT_COMPOSITION_SAFETY)) {
-    return prompt.replace(BEST_BOTTLES_SINGLE_PRODUCT_COMPOSITION_SAFETY, safety);
-  }
-  if (prompt.includes(BEST_BOTTLES_SIDECAR_COMPOSITION_SAFETY)) {
-    return prompt.replace(BEST_BOTTLES_SIDECAR_COMPOSITION_SAFETY, safety);
-  }
-  return `${prompt.trim()}\n${safety}`;
+  return applyResolvedBestBottlesVisualTargetPrompt(
+    prompt,
+    resolveBestBottlesVisualTargetBinding(bodyMaterial, hints, componentTopology),
+  );
 }
 
-export function getBestBottlesVisualTargetTags(bodyMaterial?: string | null): string[] {
-  const target = getBestBottlesVisualTargetReference(bodyMaterial);
-  return [
-    `visual-target:${BEST_BOTTLES_VISUAL_TARGET_VERSION}`,
-    `style-reference-image:${target.imageId}`,
-    `material-profile:${target.material}`,
-    `style-surface:${target.surface}`,
-    ...(target.fallbackApplied ? ["style-surface-fallback:clear"] : []),
-  ];
+export function getBestBottlesVisualTargetTags(
+  bodyMaterial?: string | null,
+  hints?: BestBottlesVisualTargetSurfaceHints | null,
+): string[] {
+  return tagsForBestBottlesVisualTarget(getBestBottlesVisualTargetReference(bodyMaterial, hints));
+}
+
+export function getBestBottlesVisualTargetBindingIssue(input: {
+  binding: BestBottlesVisualTargetBinding;
+  attachedStyleReferenceUrl: string;
+  prompt: string;
+  tags: readonly string[];
+}): string | null {
+  const { reference } = input.binding;
+  if (input.attachedStyleReferenceUrl.trim() !== reference.imageUrl) {
+    return "Style reference URL does not match the resolved material target.";
+  }
+  if (
+    !reference.imageUrl.includes(reference.exportSha256)
+    || !/^[a-f0-9]{64}$/.test(reference.exportSha256)
+  ) {
+    return "Style reference hash does not match the resolved material target URL.";
+  }
+  if (!input.prompt.includes(`Secondary reference image ${reference.imageId} is STYLE-ONLY.`)) {
+    return "Style reference prompt does not match the resolved material target.";
+  }
+  if (
+    reference.transferMode === "optical-material"
+    && (
+      !input.prompt.includes("MATERIAL AUTHORITY SPLIT")
+      || /preserve the glass's exact color/i.test(input.prompt)
+      || /preserve the exact hue and chroma shown in the reference/i.test(input.prompt)
+    )
+  ) {
+    return "Optical material authority conflicts with the primary-reference color lock.";
+  }
+  const expectedTags = tagsForBestBottlesVisualTarget(reference);
+  if (expectedTags.some((tag) => !input.tags.includes(tag))) {
+    return "Style reference tags do not match the resolved material target.";
+  }
+  return null;
 }

@@ -68,6 +68,7 @@ export interface BestBottlesContractProduct {
 
 export interface BestBottlesCategorizedReferences {
   product: Array<{ url: string; description?: string; label?: string }>;
+  component?: Array<{ url: string; description?: string; label?: string }>;
   background: Array<{ url: string; description?: string; label?: string }>;
   style: Array<{ url: string; description?: string; label?: string }>;
 }
@@ -349,6 +350,11 @@ const CALLER_ROLE_TOPOLOGY_FIELDS = [
   "topologyReferenceId",
   "referenceRoleId",
   "roleId",
+  "capIdentityReferenceSku",
+  "styleReferenceSurface",
+  "styleReferenceImageId",
+  "styleReferenceImageUrl",
+  "styleReferenceExportSha256",
 ] as const;
 
 function callerRoleTopologyContext(
@@ -532,6 +538,19 @@ function getReferenceCountIssue(input: BestBottlesRenderingContractInput): strin
   if (refs.background.length > 0 || refs.style.length > 1) {
     return "Best Bottles master generation accepts exactly one product reference, no background references, and at most one Cylinder-only style calibration reference.";
   }
+  if ((refs.component?.length ?? 0) > 1) {
+    return "Best Bottles master generation accepts at most one dedicated cap identity reference.";
+  }
+  if ((refs.component?.length ?? 0) === 1) {
+    const expectedSku = textValue(input.productContext?.capIdentityReferenceSku).toUpperCase();
+    const componentUrl = normalizeReferenceValue(refs.component?.[0]?.url).toUpperCase();
+    if (
+      !/^CMP-ROC-(?:BLK|PNK|SLV)-(?:13415|17415)-DOT$/.test(expectedSku) ||
+      !componentUrl.includes(expectedSku)
+    ) {
+      return "Best Bottles dedicated cap identity reference must exactly match capIdentityReferenceSku.";
+    }
+  }
   return null;
 }
 
@@ -544,6 +563,69 @@ function normalizeReferenceValue(value: unknown): string {
     // Keep undecodable values as-is.
   }
   return normalized.replace(/\s+/g, " ");
+}
+
+function expectedBestBottlesStyleSurface(product: BestBottlesContractProduct): string {
+  const sku = textValue(product.graceSku).toUpperCase();
+  const text = [
+    product.bodyMaterial,
+    product.color,
+    product.itemName,
+    product.itemDescription,
+  ].map(textValue).join(" ").toLowerCase();
+  if (/alumin(?:um|ium)|metal atomizer/.test(text)) return "aluminum";
+  if (/-AMB-/.test(sku) || /\bamber\b/.test(text)) return "amber";
+  if (/-(?:BLU|CBL)-/.test(sku) || /\b(?:cobalt|cobalt blue|blue glass)\b/.test(text)) return "cobalt";
+  if (/-GRN-/.test(sku) || /\b(?:green|emerald)\b/.test(text)) return "green";
+  if (/-FRS-/.test(sku) || /\bfrost(?:ed)?\b/.test(text)) return "frosted";
+  if (/-SWL-/.test(sku) || /\b(?:swirl|fluted?)\b/.test(text)) return "swirl";
+  return "clear";
+}
+
+function getBestBottlesStyleReferenceBindingIssue(
+  input: BestBottlesRenderingContractInput,
+  product: BestBottlesContractProduct,
+  family: string | null,
+): string | null {
+  if (!isCylinderFamilyAlias(family) || input.categorizedRefs.style.length === 0) return null;
+  const context = input.productContext ?? {};
+  const surface = textValue(context.styleReferenceSurface).toLowerCase();
+  const imageId = textValue(context.styleReferenceImageId);
+  const imageUrl = textValue(context.styleReferenceImageUrl);
+  const exportSha256 = textValue(context.styleReferenceExportSha256).toLowerCase();
+  if (!surface || !imageId || !imageUrl || !exportSha256) {
+    return "Cylinder style reference requires one complete resolved material binding.";
+  }
+  const expectedSurface = expectedBestBottlesStyleSurface(product);
+  if (surface !== expectedSurface) {
+    return `Cylinder style surface ${surface} does not match product truth ${expectedSurface}.`;
+  }
+  const attachedUrl = textValue(input.categorizedRefs.style[0]?.url);
+  if (attachedUrl !== imageUrl) {
+    return "Cylinder style reference URL does not match its resolved material binding.";
+  }
+  if (!/^[a-f0-9]{64}$/.test(exportSha256) || !imageUrl.includes(exportSha256)) {
+    return "Cylinder style reference hash does not match its resolved material binding URL.";
+  }
+  const precompiled = readRecord(input.precompiledPromptRecord);
+  if (precompiled) {
+    const prompt = textValue(precompiled.final_prompt);
+    if (!prompt.includes(`Secondary reference image ${imageId} is STYLE-ONLY.`)) {
+      return "Cylinder style reference prompt does not match its resolved material binding.";
+    }
+    const qaChecklist = Array.isArray(precompiled.qa_checklist)
+      ? precompiled.qa_checklist.filter((tag): tag is string => typeof tag === "string")
+      : [];
+    const expectedTags = [
+      `style-reference-image:${imageId}`,
+      `style-reference-sha256:${exportSha256}`,
+      `style-surface:${surface}`,
+    ];
+    if (expectedTags.some((tag) => !qaChecklist.includes(tag))) {
+      return "Cylinder style reference tags do not match its resolved material binding.";
+    }
+  }
+  return null;
 }
 
 function collectReferenceValues(value: unknown, seen = new WeakSet<object>(), depth = 0): unknown[] {
@@ -565,6 +647,7 @@ function getRetiredReferenceIssue(input: BestBottlesRenderingContractInput): str
   // every reference role—product, style, and background—not just geometry.
   const values = [
     ...input.categorizedRefs.product,
+    ...(input.categorizedRefs.component ?? []),
     ...input.categorizedRefs.style,
     ...input.categorizedRefs.background,
     ...(input.referenceAuditValues ?? []),
@@ -659,6 +742,12 @@ export async function resolveBestBottlesRenderingContract(
   if (sealedCanonical.error) return blockedContract(sealedCanonical.error);
   const product = sealedCanonical.product;
   const family = product.family ?? product.bottleCollection ?? null;
+  const styleReferenceBindingIssue = getBestBottlesStyleReferenceBindingIssue(
+    input,
+    product,
+    family,
+  );
+  if (styleReferenceBindingIssue) return blockedContract(styleReferenceBindingIssue);
   const definition = getFamilyLaneDefinition(family ?? "");
   if (definition.renderingLane === "blocked_unknown") {
     return {

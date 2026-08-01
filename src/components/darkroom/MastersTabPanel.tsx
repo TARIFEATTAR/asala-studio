@@ -318,6 +318,7 @@ import {
 } from "@/lib/bestBottlesGenerationIdentity";
 import { updatePipelineSkuJobReference } from "@/lib/bestBottlesPipeline";
 import { resolveBestBottlesShadowPolicy } from "@/lib/bestBottlesShadowPolicy";
+import { resolveBestBottlesDottedCapComponentSku } from "@/lib/bestBottlesDottedCapReference";
 import { RigReviewPanel } from "@/components/bestbottles/RigReviewPanel";
 import { ShadowSmokeComparisonPanel } from "@/components/bestbottles/ShadowSmokeComparisonPanel";
 import { useBestBottlesApprovedComparison } from "@/hooks/useBestBottlesApprovedComparison";
@@ -2949,6 +2950,43 @@ export function MastersTabPanel({
       });
       return null;
     }
+    const capIdentityReferenceSku = resolveBestBottlesDottedCapComponentSku({
+      graceSku: sku.graceSku,
+      websiteSku: sku.websiteSku,
+      applicator: sku.applicator,
+      neckThreadSize: sku.neckThreadSize,
+      capColor: generationIdentity.capColor,
+    });
+    let capIdentityReferenceUrl: string | null = null;
+    if (capIdentityReferenceSku) {
+      const { data: capReferenceRows, error: capReferenceError } = await (supabase as any)
+        .from("best_bottles_pipeline_sku_jobs")
+        .select("grace_sku,website_sku,reference_issue")
+        .eq("organization_id", currentOrganizationId)
+        .eq("grace_sku", capIdentityReferenceSku)
+        .limit(2);
+      const exactRows = Array.isArray(capReferenceRows)
+        ? capReferenceRows.filter((row) =>
+            row?.grace_sku === capIdentityReferenceSku &&
+            typeof row?.website_sku === "string" &&
+            row.website_sku.trim().length > 0 &&
+            !row.reference_issue
+          )
+        : [];
+      if (capReferenceError || exactRows.length !== 1) {
+        toast({
+          title: "Exact dotted-cap reference required",
+          description: `${sku.graceSku}: expected one unambiguous ${capIdentityReferenceSku} component-truth row; generation was blocked.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+      const canonicalFilename = `${capIdentityReferenceSku}__${exactRows[0].website_sku}__pdp-main__v001.png`;
+      capIdentityReferenceUrl = supabase.storage
+        .from("generated-images")
+        .getPublicUrl(`${currentOrganizationId}/best-bottles/reference-images/${canonicalFilename}`)
+        .data.publicUrl;
+    }
     const promptPreflight = buildPromptPreflightForSku(sku, referenceUrl ?? null);
     if (promptPreflight.status === "error" || !promptPreflight.record || !promptPreflight.sku) {
       await requireLiveTruthVerification(
@@ -2971,6 +3009,7 @@ export function MastersTabPanel({
       // legacy .gif imageUrl — the latter is silently dropped by the
       // unsupported-format filter in useAssembledPromptGeneration.
       referenceImageUrl: cylinderPreparation?.verifiedReference.dataUrl ?? referenceUrl ?? sku.imageUrl,
+      capIdentityReferenceImageUrl: capIdentityReferenceUrl,
       glassSpecularityReferenceImageUrl: secondaryReferenceForGeneration,
       productContext: {
         name: sku.itemName,
@@ -3049,6 +3088,7 @@ export function MastersTabPanel({
         qaStatus: generationIdentity.qaStatus,
         canvas: generationIdentity.canvas,
         canonicalGeometryContract: cylinderPreparation?.canonicalGeometryContract ?? null,
+        capIdentityReferenceSku,
       },
       sceneOverlay,
       // Human-readable identifiers live on library tags. sessionId is a uuid

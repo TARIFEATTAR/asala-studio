@@ -9,6 +9,7 @@ import {
   applyRigForegroundMatte,
   computeRigFrameTransform,
   detectAlphaControlBounds,
+  detectControlledRigBounds,
   getMaskControlledBoundsQaIssues,
   getMaskControlledVisualContinuityQaIssues,
   getVisibleMatteArtifactQaIssues,
@@ -16,13 +17,16 @@ import {
   detectModelGeometryBaseline,
   detectModelShadowContactBounds,
   detectPrimaryBottleBounds,
+  evaluateDetachedCapGeometryQa,
   finalizeRigShadow,
   flattenBackgroundLikePixels,
   clampModelShadowGeometryToControlEnvelope,
   maskOutModelShadowGeometry,
+  measureDetachedSidecarCapMetricsFromPixels,
   prepareUnmaskedRigRecanvasPixels,
   resolveRigShadowOwner,
 } from "./rigPostprocess";
+import * as rigPostprocess from "./rigPostprocess";
 import { analyzeModelOwnedShadow } from "./shadowQa";
 
 describe("primary bottle transform authority", () => {
@@ -54,6 +58,48 @@ describe("primary bottle transform authority", () => {
       detectPrimaryBottleBounds(pixels, width, height, bone),
       { top: 20, bottom: 70, left: 40, right: 60 },
     );
+
+    // Final recanvas remeasurement must use the governed control width so a
+    // narrow pale sprayer actuator is not dropped after it was detected in the
+    // primary lane before transformation.
+    const controlledWidth = 1000;
+    const controlledHeight = 500;
+    const controlledPixels = new Uint8ClampedArray(controlledWidth * controlledHeight * 4);
+    for (let index = 0; index < controlledPixels.length; index += 4) {
+      controlledPixels[index] = bone.r;
+      controlledPixels[index + 1] = bone.g;
+      controlledPixels[index + 2] = bone.b;
+      controlledPixels[index + 3] = 255;
+    }
+    const paintControlled = (
+      left: number,
+      top: number,
+      right: number,
+      bottom: number,
+      color: { r: number; g: number; b: number },
+    ) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * controlledWidth + x) * 4;
+          controlledPixels[index] = color.r;
+          controlledPixels[index + 1] = color.g;
+          controlledPixels[index + 2] = color.b;
+        }
+      }
+    };
+    paintControlled(420, 150, 580, 450, { r: 70, g: 65, b: 55 });
+    paintControlled(494, 40, 506, 100, { r: 255, g: 255, b: 255 });
+
+    assert.deepEqual(
+      detectControlledRigBounds(
+        controlledPixels,
+        controlledWidth,
+        controlledHeight,
+        bone,
+        { left: 350, top: 40, right: 650, bottom: 450 },
+      ),
+      { left: 420, top: 40, right: 580, bottom: 450 },
+    );
   });
 
   it("ignores detached sidecar width while sizing the full primary product", () => {
@@ -75,7 +121,100 @@ describe("primary bottle transform authority", () => {
     const expectedScale = (2288 * 0.79) / 1600;
     assert.ok(Math.abs(transform.scale - expectedScale) < 1e-6);
     assert.notEqual(transform.shiftXPx, 0, "primary bottle should be centered independently");
+
+    // The same geometry authority now grades the detached cap independently;
+    // it never relies on the bottle-only framing pass to imply cap fidelity.
+    const width = 120;
+    const height = 160;
+    const bone = { r: 245, g: 243, b: 239 };
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let index = 0; index < pixels.length; index += 4) {
+      pixels[index] = bone.r;
+      pixels[index + 1] = bone.g;
+      pixels[index + 2] = bone.b;
+      pixels[index + 3] = 255;
+    }
+    const paint = (left: number, top: number, right: number, bottom: number) => {
+      for (let y = top; y <= bottom; y += 1) {
+        for (let x = left; x <= right; x += 1) {
+          const index = (y * width + x) * 4;
+          pixels[index] = 35;
+          pixels[index + 1] = 35;
+          pixels[index + 2] = 35;
+        }
+      }
+    };
+    paint(30, 20, 59, 139); // bottle: 120 x 30
+    paint(82, 110, 101, 139); // cap: 30 x 20
+
+    const measured = measureDetachedSidecarCapMetricsFromPixels(
+      pixels,
+      width,
+      height,
+      bone,
+      139,
+    );
+    assert.deepEqual(measured, {
+      capAspectRatio: 1.5,
+      capHeightPctOfBottle: 25,
+    });
+
+    const pass = evaluateDetachedCapGeometryQa({
+      expected: measured,
+      observed: { capAspectRatio: 1.56, capHeightPctOfBottle: 26.5 },
+    });
+    assert.equal(pass.status, "pass");
+    assert.deepEqual(pass.failures, []);
+
+    const stretched = evaluateDetachedCapGeometryQa({
+      expected: measured,
+      observed: { capAspectRatio: 1.8, capHeightPctOfBottle: 30 },
+    });
+    assert.equal(stretched.status, "fail");
+    assert.equal(stretched.enforcement, "strict");
+    assert.match(stretched.failures.join(" "), /aspect ratio.*drift/i);
+    assert.match(stretched.failures.join(" "), /height.*bottle/i);
+    assert.deepEqual(stretched.blockingFailures, stretched.failures);
+
+    const translucent = evaluateDetachedCapGeometryQa({
+      expected: measured,
+      observed: { capAspectRatio: 3, capHeightPctOfBottle: 45 },
+      enforcement: "advisory",
+    });
+    assert.equal(translucent.status, "fail");
+    assert.equal(translucent.enforcement, "advisory");
+    assert.match(translucent.failures.join(" "), /aspect ratio.*drift/i);
+    assert.deepEqual(translucent.blockingFailures, []);
+
+    const unresolved = evaluateDetachedCapGeometryQa({
+      expected: measured,
+      observed: null,
+    });
+    assert.equal(unresolved.status, "fail");
+    assert.match(unresolved.failures.join(" "), /could not be measured/i);
+
+    const resolveEnforcement = (
+      rigPostprocess as typeof rigPostprocess & {
+        resolveDetachedCapGeometryEnforcement?: (input: {
+          family?: string | null;
+          capState?: string | null;
+          applicator?: string | null;
+        }) => "strict" | "advisory";
+      }
+    ).resolveDetachedCapGeometryEnforcement;
+    assert.equal(typeof resolveEnforcement, "function");
+    assert.equal(resolveEnforcement?.({
+      family: "Cylinder",
+      capState: "detached",
+      applicator: "Fine Mist Sprayer",
+    }), "advisory");
+    assert.equal(resolveEnforcement?.({
+      family: "Cylinder",
+      capState: "detached",
+      applicator: "Metal Roller Ball",
+    }), "strict");
   });
+
 });
 
 describe("shadow ownership", () => {
@@ -1623,6 +1762,118 @@ describe("detectTallestComponentBounds", () => {
     assert.equal(bounds?.right, 59);
     assert.equal(bounds?.top, 10);
     assert.equal(bounds?.bottom, 89);
+  });
+});
+
+describe("resolveWholeVesselBounds — clear-glass sliver fix", () => {
+  const width = 600;
+  const height = 1000;
+  const bg = { r: 246, g: 239, b: 232 };
+
+  /**
+   * Synthetic bare clear-glass cap-off frame reproducing the production
+   * failure: strong side walls, an interior whose glass evidence sits BELOW
+   * the silver-proof occupancy threshold (delta 14) but ABOVE the interior
+   * evidence threshold (delta 12), and a detached cap on the right.
+   */
+  function makeClearBottleFrame(options?: { interiorEvidence?: boolean }) {
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      pixels[i * 4] = bg.r; pixels[i * 4 + 1] = bg.g; pixels[i * 4 + 2] = bg.b; pixels[i * 4 + 3] = 255;
+    }
+    const paint = (x0: number, x1: number, y0: number, y1: number, delta: number) => {
+      for (let y = y0; y <= y1; y += 1) for (let x = x0; x <= x1; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = bg.r - delta; pixels[i + 1] = bg.g - delta; pixels[i + 2] = bg.b - delta;
+      }
+    };
+    // Bottle walls: strong refractive edges (delta 60), 800 px tall.
+    paint(100, 115, 100, 899, 60); // left wall
+    paint(385, 400, 100, 899, 60); // right wall
+    if (options?.interiorEvidence !== false) {
+      // Interior glass: shoulder gradient + base thickness band at delta 14 —
+      // fails the occupancy scan (> 14 required) so the detector still splits
+      // the bottle, but carries interior evidence (> 12) for the resolver.
+      paint(116, 384, 100, 140, 14); // shoulder band
+      paint(116, 384, 860, 899, 14); // base band
+    }
+    // Detached sidecar cap to the right: 200 px tall (25% of bottle) — must
+    // never merge into the vessel (extent alignment fails by construction).
+    paint(470, 530, 700, 899, 60);
+    return pixels;
+  }
+
+  it("reunites the two wall slivers of one transparent vessel", () => {
+    const pixels = makeClearBottleFrame();
+    // Prove the production failure exists: the raw tallest silver-proof
+    // component is a wall sliver, not the vessel.
+    const sliver = rigPostprocess.tallestSilverProofBounds(pixels, width, height, bg);
+    assert.ok(sliver);
+    assert.ok((sliver!.right - sliver!.left + 1) <= 20, "expected raw detector to see a wall sliver");
+
+    const vessel = rigPostprocess.resolveWholeVesselBounds(pixels, width, height, bg);
+    assert.ok(vessel);
+    assert.equal(vessel?.left, 100);
+    assert.equal(vessel?.right, 400);
+    assert.equal(vessel?.top, 100);
+    assert.equal(vessel?.bottom, 899);
+    const aspect = (vessel!.bottom - vessel!.top + 1) / (vessel!.right - vessel!.left + 1);
+    assert.ok(aspect > 2.5 && aspect < 2.8, `vessel aspect ${aspect} should be ~2.66, not a sliver ratio`);
+  });
+
+  it("never merges the detached sidecar cap into the vessel", () => {
+    const vessel = rigPostprocess.resolveWholeVesselBounds(makeClearBottleFrame(), width, height, bg);
+    assert.ok(vessel);
+    assert.ok(vessel!.right < 470, "cap must stay outside the vessel bounds");
+  });
+
+  it("reunites walls with a taller closure-bearing center column (capped morphology)", () => {
+    // Production case GB-CYL-CLR-50ML-RDC-MSLV-T: wall / center / wall, where
+    // the center column carries the reducer cap and tops out ~12% of frame
+    // height above the walls. Base-aligned, height ratio 0.86.
+    const pixels = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      pixels[i * 4] = bg.r; pixels[i * 4 + 1] = bg.g; pixels[i * 4 + 2] = bg.b; pixels[i * 4 + 3] = 255;
+    }
+    const paint = (x0: number, x1: number, y0: number, y1: number, delta: number) => {
+      for (let y = y0; y <= y1; y += 1) for (let x = x0; x <= x1; x += 1) {
+        const i = (y * width + x) * 4;
+        pixels[i] = bg.r - delta; pixels[i + 1] = bg.g - delta; pixels[i + 2] = bg.b - delta;
+      }
+    };
+    paint(100, 115, 220, 899, 60);  // left wall (body only)
+    paint(230, 270, 100, 899, 60);  // center column incl. cap above shoulder
+    paint(385, 400, 222, 899, 60);  // right wall
+    paint(116, 384, 860, 899, 14);  // base band evidence across the interior
+    paint(470, 530, 700, 899, 60);  // detached sidecar cap (25% height)
+
+    const vessel = rigPostprocess.resolveWholeVesselBounds(pixels, width, height, bg);
+    assert.ok(vessel);
+    assert.equal(vessel?.left, 100);
+    assert.equal(vessel?.right, 400);
+    assert.equal(vessel?.top, 100, "vessel top must include the closure");
+    assert.equal(vessel?.bottom, 899);
+    assert.ok(vessel!.right < 470, "sidecar cap must stay excluded");
+  });
+
+  it("refuses to fuse aligned objects with clean background between them", () => {
+    const pixels = makeClearBottleFrame({ interiorEvidence: false });
+    const vessel = rigPostprocess.resolveWholeVesselBounds(pixels, width, height, bg);
+    assert.ok(vessel);
+    // Without interior glass evidence the walls stay separate objects.
+    assert.ok((vessel!.right - vessel!.left + 1) <= 20, "no-evidence gap must not merge");
+  });
+
+  it("measures the real detached cap against the whole vessel, not a wall sliver", () => {
+    const metrics = rigPostprocess.measureDetachedSidecarCapMetricsFromPixels(
+      makeClearBottleFrame(), width, height, bg,
+    );
+    assert.ok(metrics);
+    // Cap: 200 px of an 800 px bottle = 25%; a wall-sliver bottle would have
+    // reported the right wall (~100%) or graded the cap against 800/16.
+    assert.ok(Math.abs(metrics!.capHeightPctOfBottle - 25) < 2, `capHeightPct ${metrics!.capHeightPctOfBottle} should be ~25`);
+    const expectedCapAspect = 200 / 61;
+    assert.ok(Math.abs(metrics!.capAspectRatio - expectedCapAspect) < 0.2, `capAspect ${metrics!.capAspectRatio} should be ~${expectedCapAspect.toFixed(2)}`);
   });
 });
 

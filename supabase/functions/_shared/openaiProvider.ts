@@ -86,6 +86,13 @@ export interface OpenAIReferenceImage {
   mimeType: string;
 }
 
+export interface OpenAIEditMask {
+  /** Raw base64 PNG bytes (no data-URL prefix). */
+  data: string;
+  /** The Images edit API requires a PNG mask with alpha. */
+  mimeType: "image/png";
+}
+
 function numericAspectRatio(aspectRatio: string | undefined): number | null {
   const match = aspectRatio?.trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)$/);
   if (!match) return null;
@@ -122,6 +129,8 @@ export interface OpenAIImageParams {
    * ignored with a warning.
    */
   referenceImages?: OpenAIReferenceImage[];
+  /** Optional reviewed edit mask. Used only by dedicated masked-edit lanes. */
+  editMask?: OpenAIEditMask;
   /** Optional — passed through to OpenAI for output telemetry / abuse. */
   user?: string;
 }
@@ -435,9 +444,14 @@ async function generateViaEdits(
     const ext = (mime.split("/")[1] || "png").replace("jpeg", "jpg");
     form.append("image[]", blob, `reference-${idx}.${ext}`);
   });
+  if (params.editMask) {
+    const bytes = Uint8Array.from(atob(params.editMask.data), (c) => c.charCodeAt(0));
+    const blob = new Blob([bytes], { type: "image/png" });
+    form.append("mask", blob, "reviewed-cavity-mask.png");
+  }
 
   console.log(`[OpenAI] ${model} edits request:`, {
-    size, quality, refs: references.length,
+    size, quality, refs: references.length, masked: Boolean(params.editMask),
     promptLength: params.prompt.length,
   });
 

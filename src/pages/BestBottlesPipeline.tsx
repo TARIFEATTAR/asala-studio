@@ -95,6 +95,8 @@ import {
   buildBulkCreateQueuedHandoffRows,
   getBestBottlesApprovalStatus,
   getSkuJobNextAction,
+  hasSkuJobGeneratedOrApprovedImage,
+  hasSkuJobShopifyDestination,
   selectBulkCreateBatchRows,
   summarizeBulkCreateSelection,
   shouldShowInNeedsWork,
@@ -471,6 +473,9 @@ interface NeedsWorkRow {
 
 interface PdpReadinessCounts {
   total: number;
+  generated: number;
+  shopifyPublished: number;
+  remainingGeneration: number;
   pdpLive: number;
   shopifyAwaitingConvex: number;
   approvedPendingPush: number;
@@ -885,6 +890,9 @@ function matchesSkuKeySet(row: NeedsWorkRow, keys: Set<string>): boolean {
 function emptyPdpReadinessCounts(): PdpReadinessCounts {
   return {
     total: 0,
+    generated: 0,
+    shopifyPublished: 0,
+    remainingGeneration: 0,
     pdpLive: 0,
     shopifyAwaitingConvex: 0,
     approvedPendingPush: 0,
@@ -922,6 +930,9 @@ function capacitySortValue(value: number | null): number {
 
 function classifyPdpReadiness(input: SkuJobCoverageInput): {
   nextAction: BestBottlesNeedsWorkAction;
+  generated: boolean;
+  shopifyPublished: boolean;
+  remainingGeneration: boolean;
   pdpLive: boolean;
   shopifyAwaitingConvex: boolean;
   approvedPendingPush: boolean;
@@ -936,13 +947,13 @@ function classifyPdpReadiness(input: SkuJobCoverageInput): {
   // so it no longer counts as PDP-live — it falls into the review bucket below.
   const isComplete = nextAction === "complete";
   const hasConvexSync = input.status === "synced" || Boolean(input.convexSyncedAt);
-  const hasShopifyPush =
-    hasConvexSync ||
-    input.status === "shopify-pushed" ||
-    Boolean(input.shopifyPushedAt || input.shopifyImageUrl || input.shopifyMediaId);
+  const hasShopifyPush = hasSkuJobShopifyDestination(input);
 
   return {
     nextAction,
+    generated: hasSkuJobGeneratedOrApprovedImage(input),
+    shopifyPublished: hasShopifyPush,
+    remainingGeneration: !hasSkuJobGeneratedOrApprovedImage(input),
     pdpLive: isComplete,
     shopifyAwaitingConvex: !isComplete && hasShopifyPush && !hasConvexSync,
     approvedPendingPush: nextAction === "push-to-shopify",
@@ -958,6 +969,9 @@ function addPdpReadinessCounts(
   classification: ReturnType<typeof classifyPdpReadiness>,
 ): void {
   counts.total += 1;
+  if (classification.generated) counts.generated += 1;
+  if (classification.shopifyPublished) counts.shopifyPublished += 1;
+  if (classification.remainingGeneration) counts.remainingGeneration += 1;
   if (classification.pdpLive) counts.pdpLive += 1;
   if (classification.shopifyAwaitingConvex) counts.shopifyAwaitingConvex += 1;
   if (classification.approvedPendingPush) counts.approvedPendingPush += 1;
@@ -4547,8 +4561,6 @@ function PdpReadinessByFamily({
   const selectedFamily = activeFamily === "all" ? null : families[0] ?? null;
   const notLive = Math.max(summary.total - summary.pdpLive, 0);
   const referenceWork = summary.sourceNeeded + summary.sourceBlocked;
-  const generationWork = summary.readyToGenerate + summary.reviewGenerated;
-  const destinationWork = summary.approvedPendingPush + summary.shopifyAwaitingConvex;
   const activeFamilyLabel = activeFamily === "all" ? "All families" : activeFamily;
 
   const [zenIndex, setZenIndex] = useState(0);
@@ -4656,12 +4668,13 @@ function PdpReadinessByFamily({
             </div>
           </div>
         ) : (
-          <div className="mt-4 grid gap-2 md:grid-cols-5">
+          <div className="mt-4 grid gap-2 md:grid-cols-3 xl:grid-cols-6">
             <PdpMetricTile label="Bottles tracked" value={summary.total} total={summary.total} tone="info" detail="SKU rows in scope" />
+            <PdpMetricTile label="Generated" value={summary.generated} total={summary.total} tone="info" detail="linked Madison image" />
+            <PdpMetricTile label="In Shopify" value={summary.shopifyPublished} total={summary.total} tone="info" detail="media, URL, or push evidence" />
+            <PdpMetricTile label="Still to generate" value={summary.remainingGeneration} total={summary.total} tone={summary.remainingGeneration > 0 ? "warn" : "ok"} detail="no linked image evidence" />
             <PdpMetricTile label="Need renamed refs" value={referenceWork} total={summary.total} tone={referenceWork > 0 ? "warn" : "ok"} detail="source, rename, or match" />
-            <PdpMetricTile label="Generate/review" value={generationWork} total={summary.total} tone={generationWork > 0 ? "warn" : "ok"} detail="ready or waiting QA" />
-            <PdpMetricTile label="Push/sync" value={destinationWork} total={summary.total} tone={destinationWork > 0 ? "info" : "ok"} detail="Shopify or Convex work" />
-            <PdpMetricTile label="PDP live" value={summary.pdpLive} total={summary.total} tone="ok" detail={`approved-keep · ${notLive} not yet`} />
+            <PdpMetricTile label="Quality approved" value={summary.pdpLive} total={summary.total} tone="ok" detail={`approved-keep · ${notLive} not yet`} />
           </div>
         )}
       </div>
@@ -4997,7 +5010,10 @@ function PdpReadinessByFamily({
                     <tr>
                       <th className="px-3 py-2 font-medium">Size</th>
                       <th className="px-3 py-2 font-medium">Product group</th>
-                      <th className="px-3 py-2 font-medium">PDP live</th>
+                      <th className="px-3 py-2 font-medium">Generated</th>
+                      <th className="px-3 py-2 font-medium">Shopify</th>
+                      <th className="px-3 py-2 font-medium">Still to generate</th>
+                      <th className="px-3 py-2 font-medium">Quality approved</th>
                       <th className="px-3 py-2 font-medium">Reference / image work</th>
                       <th className="px-3 py-2 font-medium">Open</th>
                     </tr>
@@ -5013,8 +5029,17 @@ function PdpReadinessByFamily({
                           <div className="mt-0.5 font-mono text-[10px] text-white/35">{group.productGroupSlug}</div>
                           <div className="mt-1 font-mono text-[10px] text-white/35">{group.sampleSkus.join(" · ")}</div>
                         </td>
+                        <td className="px-3 py-2 align-top font-mono text-[11px] text-sky-200">
+                          {group.generated}/{group.total}
+                        </td>
+                        <td className="px-3 py-2 align-top font-mono text-[11px] text-violet-200">
+                          {group.shopifyPublished}/{group.total}
+                        </td>
+                        <td className="px-3 py-2 align-top font-mono text-[11px] text-amber-200">
+                          {group.remainingGeneration}
+                        </td>
                         <td className="min-w-[160px] px-3 py-2 align-top">
-                          <div className="font-mono text-[11px] text-white/70">
+                          <div className="font-mono text-[11px] text-emerald-200">
                             {group.pdpLive}/{group.total}
                           </div>
                           <PdpReadinessStackedBar counts={group} compact />

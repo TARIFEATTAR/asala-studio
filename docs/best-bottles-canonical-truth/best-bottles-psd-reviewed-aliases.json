@@ -1908,22 +1908,6 @@
       "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
     },
     {
-      "sourceToken": "GBCyl30AnSpGl",
-      "websiteSku": "GBSpry1ozGl",
-      "graceSku": "GB-SPR-CLR-30ML-GLD",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
-      "sourceToken": "GBCyl30AnSpIvyGl",
-      "websiteSku": "GBSpry1ozGl",
-      "graceSku": "GB-SPR-CLR-30ML-GLD",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
       "sourceToken": "GBCyl30AnSpIvySl",
       "websiteSku": "GBDiva30RdcrMtSl",
       "graceSku": "GB-DVA-CLR-30ML-RDC-MSLV-01",
@@ -2096,37 +2080,21 @@
       "websiteSku": "GBSpry1ozGl",
       "graceSku": "GB-SPR-CLR-30ML-GLD",
       "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
+      "reviewedAt": "2026-07-22T06:40:31.510Z",
+      "review": "Jordan 2026-07-21 identity review + live PDP confirm: authoritative classic-perfume 1oz source (GBCyl30SpryMtGl/MtSl only). Prior 18-415 matching-sheet duplicates voided."
     },
     {
       "sourceToken": "GBCyl30SpryMtSl",
       "websiteSku": "GBSpry1ozSl",
       "graceSku": "GB-SPR-CLR-30ML-SLV",
       "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
+      "reviewedAt": "2026-07-22T06:40:31.510Z",
+      "review": "Jordan 2026-07-21 identity review + live PDP confirm: authoritative classic-perfume 1oz source (GBCyl30SpryMtGl/MtSl only). Prior 18-415 matching-sheet duplicates voided."
     },
     {
       "sourceToken": "GBCyl30SpryShnBlk",
       "websiteSku": "GBDiva30AnSpBlk",
       "graceSku": "GB-DVA-CLR-30ML-ASP-BLK",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
-      "sourceToken": "GBCyl30SpryShnGl",
-      "websiteSku": "GBSpry1ozGl",
-      "graceSku": "GB-SPR-CLR-30ML-GLD",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
-      "sourceToken": "GBCyl30SpryShnSl",
-      "websiteSku": "GBSpry1ozSl",
-      "graceSku": "GB-SPR-CLR-30ML-SLV",
       "reviewedBy": "Jordan Richter",
       "reviewedAt": "2026-07-17T01:22:54.430Z",
       "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
@@ -6394,22 +6362,6 @@
       "sourceToken": "LBCyl30LtnCu",
       "websiteSku": "LBDiva30LtnCu",
       "graceSku": "LB-DVA-CLR-30ML-LPM-CPR",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
-      "sourceToken": "LBCyl30LtnMtGl",
-      "websiteSku": "GBSpry1ozGl",
-      "graceSku": "GB-SPR-CLR-30ML-GLD",
-      "reviewedBy": "Jordan Richter",
-      "reviewedAt": "2026-07-17T01:22:54.430Z",
-      "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"
-    },
-    {
-      "sourceToken": "LBCyl30LtnShnGl",
-      "websiteSku": "GBSpry1ozGl",
-      "graceSku": "GB-SPR-CLR-30ML-GLD",
       "reviewedBy": "Jordan Richter",
       "reviewedAt": "2026-07-17T01:22:54.430Z",
       "review": "18-415 matching sheet approved as proposed minus component shots (2026-07-16)"

@@ -71,6 +71,26 @@ const regular9ml = {
   diameter: "20 ±0.5 mm",
 };
 
+const amber9ml = {
+  ...regular9ml,
+  graceSku: "GB-CYL-AMB-9ML-SPR-BLK",
+  websiteSku: "GBCylAmb9SpryBlk",
+  itemName: "Cylinder design 9ml amber glass bottle with black sprayer.",
+  itemDescription: "9 ml amber cylinder sprayer",
+  color: "Amber",
+  applicator: "Fine Mist Sprayer",
+};
+
+const cobalt9ml = {
+  ...regular9ml,
+  graceSku: "GB-CYL-BLU-9ML-SPR-BLK",
+  websiteSku: "GBCylBlu9SpryBlk",
+  itemName: "Cylinder design 9ml cobalt blue glass bottle with black sprayer.",
+  itemDescription: "9 ml cobalt blue cylinder sprayer",
+  color: "Cobalt Blue",
+  applicator: "Fine Mist Sprayer",
+};
+
 const dropper = {
   graceSku: "CMP-DRP-BKGD-18400-66",
   websiteSku: "DropperBlackGold18400",
@@ -96,11 +116,20 @@ const giftBox = {
   diameter: "23.7 mm",
 };
 
+const clearStyleTarget = {
+  styleReferenceSurface: "clear",
+  styleReferenceImageId: "clear-v3-e2bdaaa1",
+  styleReferenceImageUrl: "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/clear/v3/clear-cylinder__e2bdaaa1ac56c55d7133cbc64180560677ce3ed3fdf5c6dcc50c61a865bc6733.png",
+  styleReferenceExportSha256: "e2bdaaa1ac56c55d7133cbc64180560677ce3ed3fdf5c6dcc50c61a865bc6733",
+};
+
 const bySku = new Map([
   [cylinder3ml.graceSku, cylinder3ml],
   [slim9ml.graceSku, slim9ml],
   [tallCylinderAlias9ml.graceSku, tallCylinderAlias9ml],
   [regular9ml.graceSku, regular9ml],
+  [amber9ml.graceSku, amber9ml],
+  [cobalt9ml.graceSku, cobalt9ml],
   [dropper.graceSku, dropper],
   [giftBox.graceSku, giftBox],
 ]);
@@ -120,9 +149,21 @@ function refsWithStyle(styleCount = 1) {
   return {
     ...refs(),
     style: Array.from({ length: styleCount }, (_, index) => ({
-      url: `https://cdn.example.test/style-${index}.png`,
+      url: index === 0
+        ? clearStyleTarget.styleReferenceImageUrl
+        : `https://cdn.example.test/style-${index}.png`,
       label: "Metal Lighting-Only Style Reference",
     })),
+  };
+}
+
+function refsWithDottedCapComponent() {
+  return {
+    ...refsWithStyle(),
+    component: [{
+      url: "https://cdn.example.test/CMP-ROC-BLK-13415-DOT.png",
+      label: "Dotted Cap Identity Reference",
+    }],
   };
 }
 
@@ -165,10 +206,95 @@ function cylinderContext(product: typeof cylinder3ml | typeof slim9ml | typeof r
     sku: product.graceSku,
     websiteSku: product.websiteSku,
     canonicalGeometryContract: canonicalGeometryContract(product),
+    ...clearStyleTarget,
   };
 }
 
 describe("BestBottlesRenderingContract", () => {
+  const amberTarget = {
+    styleReferenceSurface: "amber",
+    styleReferenceImageId: "amber-v2-d4295a25",
+    styleReferenceImageUrl: "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/amber/v2/amber__d4295a25e32fe5cacb470dd117ea4f9da1fad75ff46ad60c20973d48653fdc30.png",
+    styleReferenceExportSha256: "d4295a25e32fe5cacb470dd117ea4f9da1fad75ff46ad60c20973d48653fdc30",
+  };
+
+  function amberRefs() {
+    return {
+      ...refs(),
+      style: [{
+        url: amberTarget.styleReferenceImageUrl,
+        label: "Glass Specularity Style Reference",
+      }],
+    };
+  }
+
+  function amberPromptRecord(overrides: Record<string, unknown> = {}) {
+    return {
+      sku: amber9ml.graceSku,
+      final_prompt: `Secondary reference image ${amberTarget.styleReferenceImageId} is STYLE-ONLY. Match warm amber transmitted depth and glass-body hue.`,
+      qa_checklist: [
+        `style-reference-image:${amberTarget.styleReferenceImageId}`,
+        `style-reference-sha256:${amberTarget.styleReferenceExportSha256}`,
+        `style-surface:${amberTarget.styleReferenceSurface}`,
+      ],
+      ...overrides,
+    };
+  }
+
+  it("preserves and accepts one exact amber material binding", async () => {
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(amber9ml),
+        ...amberTarget,
+      },
+      categorizedRefs: amberRefs(),
+      precompiledPromptRecord: amberPromptRecord(),
+    }, resolver());
+
+    assert.equal(contract.status, "ready");
+    assert.equal(contract.productContext.styleReferenceSurface, "amber");
+    assert.equal(contract.productContext.styleReferenceImageId, amberTarget.styleReferenceImageId);
+    assert.equal(contract.productContext.styleReferenceImageUrl, amberTarget.styleReferenceImageUrl);
+    assert.equal(contract.productContext.styleReferenceExportSha256, amberTarget.styleReferenceExportSha256);
+  });
+
+  it("blocks a colored-glass reference whose URL disagrees with its resolved binding", async () => {
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(amber9ml),
+        ...amberTarget,
+      },
+      categorizedRefs: {
+        ...amberRefs(),
+        style: [{
+          url: "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/visual-targets/clear/v3/clear-cylinder__e2bdaaa1ac56c55d7133cbc64180560677ce3ed3fdf5c6dcc50c61a865bc6733.png",
+          label: "Glass Specularity Style Reference",
+        }],
+      },
+      precompiledPromptRecord: amberPromptRecord(),
+    }, resolver());
+
+    assert.equal(contract.status, "blocked");
+    assert.match(contract.error ?? "", /style reference URL.*material binding/i);
+  });
+
+  it("blocks amber product truth declared as a clear style surface", async () => {
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(amber9ml),
+        ...amberTarget,
+        styleReferenceSurface: "clear",
+      },
+      categorizedRefs: amberRefs(),
+      precompiledPromptRecord: amberPromptRecord(),
+    }, resolver());
+
+    assert.equal(contract.status, "blocked");
+    assert.match(contract.error ?? "", /style surface.*product truth/i);
+  });
   it("accepts one optional Cylinder style-only calibration reference beside product truth", async () => {
     const contract = await resolveBestBottlesRenderingContract({
       isBestBottlesStudioMasterRequest: true,
@@ -177,6 +303,55 @@ describe("BestBottlesRenderingContract", () => {
     }, resolver());
 
     assert.equal(contract.status, "ready");
+  });
+
+  it("accepts exactly one dedicated dotted-cap identity reference beside product truth and style", async () => {
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(regular9ml),
+        capIdentityReferenceSku: "CMP-ROC-BLK-13415-DOT",
+      },
+      categorizedRefs: refsWithDottedCapComponent(),
+    }, resolver());
+
+    assert.equal(contract.status, "ready");
+    assert.equal(contract.productContext.capIdentityReferenceSku, "CMP-ROC-BLK-13415-DOT");
+  });
+
+  it("blocks more than one dedicated cap identity reference", async () => {
+    const refs = refsWithDottedCapComponent();
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(regular9ml),
+        capIdentityReferenceSku: "CMP-ROC-BLK-13415-DOT",
+      },
+      categorizedRefs: {
+        ...refs,
+        component: [...refs.component, {
+          url: "https://cdn.example.test/second-cap.png",
+          label: "Dotted Cap Identity Reference",
+        }],
+      },
+    }, resolver());
+
+    assert.equal(contract.status, "blocked");
+    assert.match(contract.error ?? "", /at most one dedicated cap identity reference/i);
+  });
+
+  it("blocks a cap URL that does not match the declared component SKU", async () => {
+    const contract = await resolveBestBottlesRenderingContract({
+      isBestBottlesStudioMasterRequest: true,
+      productContext: {
+        ...cylinderContext(regular9ml),
+        capIdentityReferenceSku: "CMP-ROC-PNK-13415-DOT",
+      },
+      categorizedRefs: refsWithDottedCapComponent(),
+    }, resolver());
+
+    assert.equal(contract.status, "blocked");
+    assert.match(contract.error ?? "", /exactly match capIdentityReferenceSku/i);
   });
 
   it("preserves the prior non-Cylinder style-reference path", async () => {
@@ -329,6 +504,7 @@ describe("BestBottlesRenderingContract", () => {
         sku: tallCylinderAlias9ml.graceSku,
         websiteSku: tallCylinderAlias9ml.websiteSku,
         canonicalGeometryContract: geometry,
+        ...clearStyleTarget,
       },
       categorizedRefs: refsWithStyle(),
     }, resolver());

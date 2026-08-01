@@ -27,7 +27,7 @@ import {
   normalizeBestBottlesRigBaseline,
   type RigBaselineNormalizeResult,
 } from "@/lib/product-image/rigPostprocess";
-import { getFamilyRigForProduct } from "@/lib/product-image/familyRig";
+import { getFamilyRigForProduct, isCylinderFamilyAlias } from "@/lib/product-image/familyRig";
 import {
   getBestBottlesImageAssetRoleForPreset,
   recordBestBottlesRawImage,
@@ -50,10 +50,11 @@ import {
 } from "@/lib/bestBottlesShadowPolicy";
 import { resolveBestBottlesShadowTopology } from "@/lib/bestBottlesShadowTopology";
 import {
-  applyBestBottlesVisualTargetPrompt,
+  applyResolvedBestBottlesVisualTargetPrompt,
   BEST_BOTTLES_VISUAL_TARGET_CANVAS_HEX,
-  getBestBottlesVisualTargetReference,
-  getBestBottlesVisualTargetTags,
+  getBestBottlesProductReferenceDescription,
+  getBestBottlesVisualTargetBindingIssue,
+  resolveBestBottlesVisualTargetBinding,
   type BestBottlesVisualComponentTopology,
 } from "@/config/bestBottlesVisualTarget";
 import type { RigReviewEvidence } from "@/lib/product-image/rigReview";
@@ -86,6 +87,8 @@ export interface AssembledGenerateOptions {
   aiProvider?: string;
   /** Optional geometry reference image (e.g. product.imageUrl from Convex). */
   referenceImageUrl?: string | null;
+  /** Exact dotted-cap component truth, resolved fail-closed by thread and finish. */
+  capIdentityReferenceImageUrl?: string | null;
   /** Optional style-only reference for realistic glass, specularity, and shadow behavior. */
   glassSpecularityReferenceImageUrl?: string | null;
   /**
@@ -147,6 +150,7 @@ export interface AssembledGenerateOptions {
     qaStatus?: "pending" | string;
     canvas?: "2080x2288" | string;
     canonicalGeometryContract?: CylinderCanonicalGeometryContract | null;
+    capIdentityReferenceSku?: string | null;
   };
   /** JSON-driven Best Bottles prompt compiler output, used as the authoritative prompt for Studio masters. */
   precompiledPromptRecord?: PromptRecord | null;
@@ -248,10 +252,11 @@ export function useAssembledPromptGeneration() {
     // downstream (`processReferenceImage(undefined)`), so the model never
     // actually sees the reference. Always pass objects.
     const rawRef = options.referenceImageUrl?.trim() || "";
+    const rawCapIdentityRef = options.capIdentityReferenceImageUrl?.trim() || "";
     const isBestBottlesStudioMasterRequest =
       Boolean(options.extraLibraryTags?.includes("brand:best-bottles")) &&
       Boolean(options.extraLibraryTags?.includes("studio-master"));
-    const visualTargetReference = getBestBottlesVisualTargetReference(
+    const visualTargetBinding = resolveBestBottlesVisualTargetBinding(
       options.productContext?.bodyMaterial,
       // Body-color evidence: catalog color field + grace SKU body segment.
       // Without these, every colored-glass bottle fell back to the clear
@@ -260,15 +265,25 @@ export function useAssembledPromptGeneration() {
         color: options.productContext?.color ?? null,
         graceSku: options.productContext?.sku ?? null,
       },
+      options.productContext?.componentTopology,
     );
     const rawGlassRef = resolveBestBottlesStyleReferenceUrl({
       explicitStyleReferenceUrl: options.glassSpecularityReferenceImageUrl,
-      fallbackCylinderStyleReferenceUrl: visualTargetReference.imageUrl,
+      fallbackCylinderStyleReferenceUrl: visualTargetBinding.reference.imageUrl,
       isBestBottlesStudioMasterRequest,
       family: options.productContext?.family,
     });
     const rawMaskRef = options.productContext?.maskReference?.trim() || "";
+    const usesRegistryMaterialBinding =
+      isBestBottlesStudioMasterRequest &&
+      isCylinderFamilyAlias(options.productContext?.family);
     const productReferenceIssue = getBestBottlesReferenceUrlIssue(rawRef);
+    const expectedCapReferenceSku = options.productContext?.capIdentityReferenceSku?.trim().toUpperCase() || "";
+    const capIdentityReferenceIssue = rawCapIdentityRef && (
+      !/^CMP-ROC-(?:BLK|PNK|SLV)-(?:13415|17415)-DOT$/.test(expectedCapReferenceSku) ||
+      !decodeURIComponent(rawCapIdentityRef).toUpperCase().includes(expectedCapReferenceSku) ||
+      /\.(gif|heic|bmp)(\?|$)/i.test(rawCapIdentityRef)
+    );
     const retiredReferenceIssue =
       isBestBottlesStudioMasterRequest
         ? getRetiredTransparentBestBottlesReferenceIssue([
@@ -281,6 +296,10 @@ export function useAssembledPromptGeneration() {
             {
               url: rawGlassRef,
               role: "style-reference",
+            },
+            {
+              url: rawCapIdentityRef,
+              role: "cap-identity-reference",
             },
             {
               url: rawMaskRef,
@@ -310,6 +329,23 @@ export function useAssembledPromptGeneration() {
       });
       return null;
     }
+    if (isBestBottlesStudioMasterRequest && capIdentityReferenceIssue) {
+      const message = "The dotted-cap reference does not exactly match its approved component SKU or uses an unsupported image format.";
+      setError(message);
+      setIsGenerating(false);
+      toast({ title: "Exact cap identity required", description: message, variant: "destructive" });
+      return null;
+    }
+    if (
+      usesRegistryMaterialBinding &&
+      rawGlassRef !== visualTargetBinding.reference.imageUrl
+    ) {
+      const message = "The attached style reference URL does not match the resolved Best Bottles material target.";
+      setError(message);
+      setIsGenerating(false);
+      toast({ title: "Material reference mismatch", description: message, variant: "destructive" });
+      return null;
+    }
     if (isBestBottlesStudioMasterRequest && rawMaskRef) {
       const message =
         "Best Bottles generation does not accept mask/control references. Use one approved opaque flattened-white product reference and, only when approved, one opaque style-only reference.";
@@ -332,17 +368,25 @@ export function useAssembledPromptGeneration() {
     const styleReferenceLabel = isMetalBody
       ? "Metal Lighting-Only Style Reference"
       : "Glass Specularity Style Reference";
+    const isColoredGlassStyle =
+      visualTargetBinding.reference.material === "glass" &&
+      ["amber", "cobalt", "green"].includes(visualTargetBinding.reference.surface);
     if (refIsSupported) {
       referenceImagesList.push({
         url: rawRef,
         label: "Product Reference",
+        description: getBestBottlesProductReferenceDescription(
+          bodyMaterialLabel,
+          visualTargetBinding,
+        ),
+      });
+    }
+    if (rawCapIdentityRef) {
+      referenceImagesList.push({
+        url: rawCapIdentityRef,
+        label: "Dotted Cap Identity Reference",
         description:
-          [
-            "Canonical bottle reference (PSD-rendered PNG).",
-            `Use this image as an exact product-identity lock: preserve the bottle geometry, camera angle, scale relationships, body material/substrate (${bodyMaterialLabel}), cap texture, fitment, applicator, body color, hose/bulb/tassel color, collar/ring details, reducer finish, trim metal, and all surface details.`,
-            "Do not redesign, restyle, recolor, rotate, or reinterpret the product components.",
-            "Do allow luxury catalog staging, lighting, background replacement, shadow, and refined PDP canvas placement as instructed by the server prompt.",
-          ].join(" "),
+          "Exact component truth for this detached dotted roll-on cap. Copy its finish and alternating staggered 3/2 stud-column topology exactly; do not use it to change bottle geometry, placement, or scale.",
       });
     }
     if (glassRefIsSupported) {
@@ -354,8 +398,10 @@ export function useAssembledPromptGeneration() {
             "Secondary style-only reference.",
             isMetalBody
               ? `Use only for lighting direction, reflection-card rhythm, opaque metal edge glints, contact shadow, ambient occlusion, and premium studio polish. Do not use this image to change the product material: the body must remain ${bodyMaterialLabel}.`
-              : "Use only for realistic glass transparency, refraction, edge glints, specular highlight rhythm, contact shadow, ambient occlusion, and premium studio polish.",
-            "Do not copy or infer this reference's product silhouette, cap, label, colors, geometry, camera angle, composition, background, props, brand, or scene.",
+              : isColoredGlassStyle
+                ? "Use for realistic glass-body hue, transmitted color, density, thin-section glow, refraction, edge glints, specular highlight rhythm, contact shadow, ambient occlusion, and premium studio polish. Do not copy hardware or closure colors."
+                : "Use only for realistic glass transparency, refraction, edge glints, specular highlight rhythm, contact shadow, ambient occlusion, and premium studio polish. Do not use it to recolor the product or components.",
+            "Do not copy or infer this reference's product silhouette, cap, label, geometry, camera angle, composition, background, props, brand, or scene.",
             "Image 1 Product Reference remains the only product identity and placement source.",
           ].join(" "),
       });
@@ -377,7 +423,7 @@ export function useAssembledPromptGeneration() {
       `canvas:${assembled.canvas.widthPx}x${assembled.canvas.heightPx}`,
     ];
     const visualTargetTags = isBestBottlesStudioMasterRequest
-      ? getBestBottlesVisualTargetTags(options.productContext?.bodyMaterial)
+      ? visualTargetBinding.tags
       : [];
     const shadowPolicy = resolveBestBottlesShadowPolicy({
       graceSku: options.productContext?.sku,
@@ -452,6 +498,9 @@ export function useAssembledPromptGeneration() {
     // Without this the model applies its own roll-on prior to the cap: on the
     // tall 13-415 bottle (cap ≈21% of bottle height vs ≈31% on the standard
     // 9 ml) it stretched the cap and grew an extra row of dots.
+    // Cap metrics are best-effort. Clear/translucent sidecars often fail
+    // component detection against bone; blocking those lanes regresses spray
+    // generation. Opaque dotted roll-ons usually measure and get the lock.
     const referenceCapMetrics =
       isBestBottlesStudioMaster &&
       options.productContext?.capState === "detached" &&
@@ -519,10 +568,9 @@ export function useAssembledPromptGeneration() {
     const requestPrompt = isBestBottlesStudioMaster
       ? appendSceneEnvironmentOverride(
           appendMeasuredProportionLock(
-            applyBestBottlesVisualTargetPrompt(
+            applyResolvedBestBottlesVisualTargetPrompt(
               uncalibratedRequestPrompt,
-              options.productContext?.bodyMaterial,
-              options.productContext?.componentTopology,
+              visualTargetBinding,
             ),
           ),
         )
@@ -539,10 +587,9 @@ export function useAssembledPromptGeneration() {
             shadow_owner: resolvedShadowPolicy.owner,
             final_prompt: appendSceneEnvironmentOverride(
               appendMeasuredProportionLock(
-                applyBestBottlesVisualTargetPrompt(
+                applyResolvedBestBottlesVisualTargetPrompt(
                   options.precompiledPromptRecord.final_prompt,
-                  options.productContext?.bodyMaterial,
-                  options.productContext?.componentTopology,
+                  visualTargetBinding,
                 ),
               ),
             ),
@@ -563,6 +610,25 @@ export function useAssembledPromptGeneration() {
             ),
           }
         : options.precompiledPromptRecord;
+
+    const materialBindingIssue = usesRegistryMaterialBinding
+      ? getBestBottlesVisualTargetBindingIssue({
+          binding: visualTargetBinding,
+          attachedStyleReferenceUrl: rawGlassRef,
+          prompt: requestPrompt,
+          tags: visualTargetTags,
+        })
+      : null;
+    if (materialBindingIssue) {
+      setError(materialBindingIssue);
+      setIsGenerating(false);
+      toast({
+        title: "Material reference contract blocked",
+        description: materialBindingIssue,
+        variant: "destructive",
+      });
+      return null;
+    }
 
     try {
       const generationStartedAtMs = Date.now();
@@ -626,6 +692,10 @@ export function useAssembledPromptGeneration() {
                         promptVersion: resolvedShadowPolicy.promptVersion,
                         shadowOwner: resolvedShadowPolicy.owner,
                         shadowContract: resolvedShadowPolicy.contract,
+                        styleReferenceSurface: visualTargetBinding.reference.surface,
+                        styleReferenceImageId: visualTargetBinding.reference.imageId,
+                        styleReferenceImageUrl: visualTargetBinding.reference.imageUrl,
+                        styleReferenceExportSha256: visualTargetBinding.reference.exportSha256,
                       }
                     : {}),
                 }
@@ -863,6 +933,7 @@ export function useAssembledPromptGeneration() {
             maskReferenceUrl: null,
             requireMaskControl: false,
             expectedPrimaryAspectRatio: referenceAspectRatio,
+            expectedDetachedCapMetrics: referenceCapMetrics,
           });
           riggedSnapshot = rigged;
           const finalMeasurements = rigged.framingQa?.measurements ?? null;
