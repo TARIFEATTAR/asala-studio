@@ -78,6 +78,7 @@
     "paperdoll:export-doll": "tsx scripts/paper-doll/export-doll-layers.ts",
     "paperdoll:pilot": "tsx scripts/paper-doll/pilot.ts",
     "paperdoll:pilot-closure-materials": "tsx scripts/paper-doll/closure-material-pilot.ts",
+    "paperdoll:build-cyl9-release": "tsx scripts/paper-doll/build-cyl9-family-release.ts",
     "paperdoll:extract-bodies": "tsx scripts/paper-doll/extract-bodies.ts",
     "paperdoll:stage-bodies": "tsx scripts/paper-doll/stage-bodies.ts",
     "paperdoll:generate-plate": "tsx scripts/paper-doll/generate-plate.ts",
