@@ -1,0 +1,65 @@
+MATERIAL PASS v2 — clear glass, external image model (Nano Banana / Gemini UI).
+Iteration on v1 (2026-08-01): v1 successfully killed the barcode rails and held
+position with no drift, but over-corrected into a matte/flat surface — it removed
+the bad speculars and the good ones together. v2 adds a CRISPNESS AND POLISH block
+that places brilliance where real glass puts it (one soft gleam just inside each
+wall edge + tack-sharp structural micro-detail) rather than spreading it across the
+body, which is what produced rails in the GPT-generated v2 plate.
+Attach: the v1 Nano Banana output (best geometry AND material starting point).
+Output is a MATERIAL REFERENCE only — GPT Image 2 Pass 2 re-locks canvas, geometry,
+and the 58.5% scale arch afterward.
+
+Re-render this clear glass bottle as a real studio photograph, correcting a
+rendering defect in the reference image.
+
+THE DEFECT TO FIX:
+The reference has artificial vertical stripes — repeating hard-edged bands
+running the full height of the bottle body, like painted rails or a barcode.
+Real glass never looks like this. Remove them completely.
+
+HOW CLEAR GLASS ACTUALLY READS — build the material this way:
+- The two vertical WALL EDGES (far left and far right of the body) are where
+  the cylinder curves away from the camera. These are dense, crisp, and
+  slightly darker — the strongest optical feature of the bottle.
+- Between those edges the MID-BODY IS QUIET AND NEARLY INVISIBLE: you see the
+  warm background straight through it with gentle refraction and a slight
+  optical displacement. Almost nothing happens in the middle of the glass.
+- Continuous gradients only — no repeating bands, no hard-edged vertical
+  lines, no parallel rails anywhere across the body.
+
+CRISPNESS AND POLISH — this glass must look brilliant, not matte:
+- This is fire-polished, high-gloss optical glass: wet-looking, luminous, and
+  precise. Never chalky, sandblasted, dull, or flat.
+- Raise the optical contrast. The wall edges are denser and darker; the
+  highlights are brighter and cleaner. The glass should read dimensional and
+  substantial, not like an even grey tone.
+- Add ONE crisp, narrow, bright specular gleam running vertically just inside
+  each wall edge — soft-edged, continuous, and luminous, the way a large
+  softbox reflects off curved polished glass. One clean gleam per side, never
+  a series of bands.
+- Tack-sharp micro-definition wherever the object has real structure: each
+  thread ridge crisply separated with a bright fine edge, a clean highlight
+  along the top rim, a clearly defined shoulder step.
+- The base carries the most optical density in the bottle: thick, heavy solid
+  glass with a crisp bright arc where it curves and a clean base ring seen
+  through the floor.
+
+MATERIAL AND MOOD:
+Premium apothecary product photography — polished luxury. Warm, precise,
+expensive. The optical brilliance and craft of fine perfume glass with the
+warm, composed restraint of a modern apothecary catalogue. Refined, never
+gaudy: no dramatic contrast, no blown-out hotspots, no colored reflections,
+no rainbow dispersion, no plastic CGI sheen.
+
+GLASS: empty, colorless, optically clean. No liquid, tint, haze, cloudy fill,
+bubbles, frosting, or milky interior.
+
+LIGHTING: one large soft key from the RIGHT, gentle fill from the left. Clean,
+brilliant speculars — soft-edged but genuinely bright.
+
+BACKGROUND: seamless warm cream (#F5F3EF), no horizon line, no props, no text,
+no cast shadow.
+
+KEEP EXACTLY AS SHOWN: the bottle's shape, proportions, height-to-width ratio,
+neck width, thread count and spacing, shoulder line, and base. This is the
+correct product — only the glass material rendering changes.

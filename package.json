@@ -71,7 +71,18 @@
     "bestbottles:images:audit-surfacing": "tsx scripts/audit-bestbottles-generated-shopify-surfacing.ts",
     "bestbottles:images:audit-reconciliation": "tsx scripts/audit-bestbottles-image-reconciliation.ts",
     "bestbottles:images:backfill-reconciliation": "tsx scripts/backfill-bestbottles-image-reconciliation.ts",
-    "bestbottles:gap-worklist:index": "tsx scripts/build-bestbottles-gap-worklist-index.ts"
+    "bestbottles:gap-worklist:index": "tsx scripts/build-bestbottles-gap-worklist-index.ts",
+    "paperdoll:intake": "tsx scripts/paper-doll/intake-component.ts",
+    "paperdoll:compose": "tsx scripts/paper-doll/compose.ts",
+    "paperdoll:weld": "tsx scripts/paper-doll/weld.ts",
+    "paperdoll:export-doll": "tsx scripts/paper-doll/export-doll-layers.ts",
+    "paperdoll:pilot": "tsx scripts/paper-doll/pilot.ts",
+    "paperdoll:extract-bodies": "tsx scripts/paper-doll/extract-bodies.ts",
+    "paperdoll:stage-bodies": "tsx scripts/paper-doll/stage-bodies.ts",
+    "paperdoll:generate-plate": "tsx scripts/paper-doll/generate-plate.ts",
+    "paperdoll:normalize-plate": "tsx scripts/paper-doll/normalize-plate.ts",
+    "paperdoll:regen-closures": "tsx scripts/paper-doll/regenerate-closures.ts",
+    "test:paperdoll": "tsx --test src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/qaGates.test.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

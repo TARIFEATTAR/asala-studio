@@ -7,6 +7,11 @@ import { callGeminiImage } from "../_shared/aiProviders.ts";
 import { enhancePromptWithOntology } from "../_shared/photographyOntology.ts";
 import { generateImage as generateFreepikImage, type FreepikImageModel, type FreepikResolution, IMAGE_MODELS } from "../_shared/freepikProvider.ts";
 import { generateImage as generateOpenAIImage, type OpenAIImageModel, type OpenAIImageSize, type OpenAIOutputFormat } from "../_shared/openaiProvider.ts";
+import {
+  beginGenerationAttempt,
+  completeGenerationAttempt,
+  type GenerationAttemptTracker,
+} from "../_shared/generationAttemptLedger.ts";
 import { getVisualStyleDirective, type VisualSquad } from "../_shared/visualMasters.ts";
 import { buildBestBottlesFamilyRigPromptAdjustment } from "../_shared/bestBottlesFamilyRigPrompt.ts";
 import { buildInlineRefinementStabilizerBlock } from "../_shared/inlineRefinementPrompt.ts";
@@ -309,6 +314,23 @@ function textField(record: Record<string, unknown> | null | undefined, key: stri
   return typeof value === "string" ? value.trim() : "";
 }
 
+/**
+ * Dedicated cap-identity reference scope, shared by the bottle and non-bottle
+ * reference-locked prompt builders. Empty string when no component reference
+ * is attached (callers render it as `scope || null`).
+ */
+function buildComponentIdentityScopeBlock(categorizedRefs: CategorizedReferences): string {
+  if (categorizedRefs.component.length === 0) return "";
+  return [
+    "DEDICATED CAP IDENTITY REFERENCE SCOPE:",
+    "- Image 1 remains the product and placement truth. The dedicated cap image controls only the detached cap's identity, finish, and decoration topology.",
+    "- For dotted caps, reproduce alternating staggered columns of three and two studs. Never make every column the same count and never add or extrapolate another row.",
+    ...categorizedRefs.component
+      .map((ref, idx) => ref.description ? `Cap Identity Reference ${idx + 1}: ${ref.description}` : null)
+      .filter((line): line is string => Boolean(line)),
+  ].join("\n");
+}
+
 function buildReferenceLockedBestBottlesNonBottlePrompt(
   categorizedRefs: CategorizedReferences,
   aspectRatio: string | undefined,
@@ -322,6 +344,7 @@ function buildReferenceLockedBestBottlesNonBottlePrompt(
     .map((ref, idx) => ref.description ? `Reference ${idx + 1}: ${ref.description}` : null)
     .filter((line): line is string => Boolean(line))
     .join("\n");
+  const componentIdentityScope = buildComponentIdentityScopeBlock(categorizedRefs);
   const cleanOperatorRefinement =
     typeof operatorRefinement === "string" && operatorRefinement.trim()
       ? operatorRefinement.trim().slice(0, 900)
@@ -405,7 +428,7 @@ function buildReferenceLockedBestBottlesPrompt(
   const secondaryStyleScope = categorizedRefs.style.length > 0
     ? [
         "SECONDARY STYLE REFERENCE SCOPE:",
-        "- Image 1 remains the only product identity, geometry, placement, color, cap, applicator, and camera-angle source.",
+        "- Image 1 remains the only bottle identity, geometry, placement, color, applicator, and camera-angle source. The dedicated cap identity reference is the sole exception for the detached cap's finish and decoration topology.",
         bodyMaterialRules.styleReferenceScopeLine,
         "- Do not copy the secondary reference's product silhouette, cap, label, typography, brand, colorway, camera angle, composition, background, props, tabletop, flowers, curtains, or scene.",
         ...categorizedRefs.style
@@ -466,6 +489,7 @@ function buildReferenceLockedBestBottlesPrompt(
   const operatorConflictScope = familyRigPrompt.rigImposed
     ? "reference identity lock and imposed studio rig"
     : "reference lock";
+  const componentIdentityScope = buildComponentIdentityScopeBlock(categorizedRefs);
 
   return [
     "REFERENCE-LOCKED BEST BOTTLES LUXURY PRODUCT PHOTOGRAPHY V5.1.",
@@ -478,6 +502,7 @@ function buildReferenceLockedBestBottlesPrompt(
     "",
     "SOURCE OF TRUTH:",
     `- Use Image 1 only as the product reference: ${sourceTruth}`,
+    componentIdentityScope || null,
     secondaryStyleScope || null,
     ...familyRigPrompt.sourceTruthLines,
     capStateLine,
@@ -717,6 +742,7 @@ function isCylinderBestBottlesProductContext(productContext?: Record<string, unk
 
 interface CategorizedReferences {
   product: Array<{ url: string; description?: string; label?: string }>;
+  component: Array<{ url: string; description?: string; label?: string }>;
   background: Array<{ url: string; description?: string; label?: string }>;
   style: Array<{ url: string; description?: string; label?: string }>;
 }
@@ -726,13 +752,16 @@ function categorizeReferences(
 ): CategorizedReferences {
   const categorized: CategorizedReferences = {
     product: [],
+    component: [],
     background: [],
     style: [],
   };
 
   for (const ref of references || []) {
     const label = (ref.label || "").toLowerCase();
-    if (label.includes("product") || label.includes("subject")) {
+    if (label.includes("cap identity") || label.includes("component identity")) {
+      categorized.component.push(ref);
+    } else if (label.includes("product") || label.includes("subject")) {
       categorized.product.push(ref);
     } else if (label.includes("background") || label.includes("scene")) {
       categorized.background.push(ref);
@@ -1351,6 +1380,13 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Attempt-ledger handle, declared outside the try so the catch can mark the
+  // attempt failed. Populated at provider dispatch; ledger writes never throw.
+  const attemptLedgerRef: {
+    client: Parameters<typeof completeGenerationAttempt>[0] | null;
+    tracker: GenerationAttemptTracker | null;
+  } = { client: null, tracker: null };
+
   try {
     /**
      * 1. Parse incoming request
@@ -1920,19 +1956,30 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
     if (isCylinderBestBottlesStudioMasterRequest) {
       const totalReferences =
         categorizedRefs.product.length +
+        categorizedRefs.component.length +
         categorizedRefs.background.length +
         categorizedRefs.style.length;
+      const expectedCapReferenceSku = typeof contractProductContext?.capIdentityReferenceSku === "string"
+        ? contractProductContext.capIdentityReferenceSku.trim().toUpperCase()
+        : "";
+      const hasValidCapIdentityReference = categorizedRefs.component.length === 0 || (
+        categorizedRefs.component.length === 1 &&
+        /^CMP-ROC-(?:BLK|PNK|SLV)-(?:13415|17415)-DOT$/.test(expectedCapReferenceSku) &&
+        decodeURIComponent(categorizedRefs.component[0].url).toUpperCase().includes(expectedCapReferenceSku)
+      );
       const hasValidCylinderReferenceSet =
         categorizedRefs.product.length === 1 &&
+        categorizedRefs.component.length <= 1 &&
+        hasValidCapIdentityReference &&
         categorizedRefs.background.length === 0 &&
         categorizedRefs.style.length <= 1 &&
         totalReferences >= 1 &&
-        totalReferences <= 2;
+        totalReferences <= 3;
       if (!hasValidCylinderReferenceSet) {
         return new Response(
           JSON.stringify({
             error:
-              "Cylinder master generation accepts exactly one flattened product-truth reference and optionally one style-only reference. Background, mask/control, paper-doll, and additional product references are blocked.",
+              "Cylinder master generation accepts exactly one flattened product-truth reference, optionally one style-only reference, and at most one exact dotted-cap identity reference whose URL matches capIdentityReferenceSku. Background, mask/control, paper-doll, arbitrary component, and additional product references are blocked.",
           }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
@@ -2258,6 +2305,13 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
       }
     }
 
+    // Exact component identity reference follows Image 1 product truth and
+    // precedes style direction. It is admitted only by the fail-closed guard.
+    for (const ref of categorizedRefs.component) {
+      const processed = await processReferenceImage(ref.url);
+      if (processed) referenceImagesPayload.push(processed);
+    }
+
     if (
       bestBottlesTagSet.has("brand:best-bottles") &&
       bestBottlesTagSet.has("studio-master") &&
@@ -2291,6 +2345,7 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
 
     console.log(`📸 Reference Images Prepared:`, {
       product: categorizedRefs.product.length,
+      component: categorizedRefs.component.length,
       background: categorizedRefs.background.length,
       style: categorizedRefs.style.length,
       total: referenceImagesPayload.length,
@@ -2501,6 +2556,49 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
     let imageUrl: string;
     let usedProvider: string = selectedProvider;
     let didFallback = false;
+    let providerRevisedPrompt: string | null = null;
+
+    // ── Attempt ledger (Paper-Doll Rig task 0): record the attempt BEFORE the
+    // provider call so failures and timeouts are counted, not just successes.
+    attemptLedgerRef.client = supabase;
+    attemptLedgerRef.tracker = await beginGenerationAttempt(supabase, {
+      organizationId: resolvedOrgId ?? null,
+      userId: userId ?? null,
+      sessionId: typeof sessionId === "string" ? sessionId : null,
+      lane: isBestBottlesReferenceLocked ? "best-bottles-reference-locked" : "darkroom",
+      provider: selectedProvider,
+      model: selectedProvider === "openai"
+        ? effectiveOpenAIModel
+        : selectedProvider === "freepik"
+          ? (effectiveFreepikModel || "mystic")
+          : "gemini",
+      endpoint: selectedProvider === "openai"
+        ? (referenceImagesPayload.length > 0 ? "edits" : "generations")
+        : null,
+      requestSize: isBestBottlesReferenceLocked ? "2080x2288" : null,
+      requestResolution: effectiveMadisonResolution ?? null,
+      prompt: enhancedPrompt,
+      referenceFingerprintSources: referenceImagesPayload.map((ref) => ref.data),
+      referenceUrls: Array.isArray(actualReferenceImages)
+        ? actualReferenceImages.filter((u): u is string => typeof u === "string")
+        : undefined,
+      graceSku: typeof (productContext as Record<string, unknown> | null | undefined)?.sku === "string"
+        ? String((productContext as Record<string, unknown>).sku)
+        : null,
+      websiteSku: typeof (productContext as Record<string, unknown> | null | undefined)?.websiteSku === "string"
+        ? String((productContext as Record<string, unknown>).websiteSku)
+        : null,
+      productGroupSlug: typeof (productContext as Record<string, unknown> | null | undefined)?.productGroupSlug === "string"
+        ? String((productContext as Record<string, unknown>).productGroupSlug)
+        : null,
+      seed: randomSeed,
+      codeCommit: Deno.env.get("MADISON_GIT_COMMIT") ?? null,
+      requestParams: {
+        aspectRatio: generationAspectRatio,
+        outputFormat,
+        isDirectorMode: Boolean(isDirectorMode),
+      },
+    });
 
     if (selectedProvider === "freepik") {
       /**
@@ -2719,6 +2817,7 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
 
         imageUrl = openaiUrlData.publicUrl;
         usedProvider = `openai-${openaiResult.model}`;
+        providerRevisedPrompt = openaiResult.revisedPrompt ?? null;
 
         console.log(`✅ OpenAI Image Generated & Uploaded to Storage:`, {
           model: openaiResult.model,
@@ -3026,6 +3125,17 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
     console.log(`[generate-madison-image] ✅ Image saved to generated_images table: ${savedImage?.id}`);
     console.log(`[generate-madison-image] Image will appear in Image Library via generated_images table`);
 
+    // ── Attempt ledger: mark succeeded with final provider (fallbacks change
+    // it mid-request), output linkage, and provider-revised prompt if any.
+    const savedImageIdForLedger = (savedImage as { id?: unknown } | null | undefined)?.id;
+    await completeGenerationAttempt(supabase, attemptLedgerRef.tracker, {
+      status: "succeeded",
+      generatedImageId: typeof savedImageIdForLedger === "string" ? savedImageIdForLedger : null,
+      outputUrl: imageUrl!,
+      revisedPrompt: providerRevisedPrompt,
+      finalProvider: didFallback ? usedProvider : null,
+    });
+
     /**
      * -------------------------
      * 12. Return response
@@ -3087,6 +3197,15 @@ const handleGenerateMadisonImage = async (req: Request): Promise<Response> => {
         }
       }
       if (typeof obj.stack === "string") stack = obj.stack;
+    }
+
+    // ── Attempt ledger: count the failure (this is the data full-regeneration
+    // never had — failed attempts were previously invisible).
+    if (attemptLedgerRef.client && attemptLedgerRef.tracker) {
+      await completeGenerationAttempt(attemptLedgerRef.client, attemptLedgerRef.tracker, {
+        status: "failed",
+        errorMessage: errMsg,
+      });
     }
 
     // Log the FULL raw error too so dashboard logs always have the original

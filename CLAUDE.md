@@ -18,6 +18,14 @@ Before touching the Best Bottles image / library / pipeline / coverage surface, 
 worklist), and the two-agent lane split (this repo owns the app + Supabase +
 generation; Cowork owns reference prep + Shopify + QA via reviewed artifacts).
 
+**Paper-Doll Rig (decided 2026-07-30, pre-build):** the forward architecture —
+generate each body once, composite closures/colors/cap-states deterministically, weld
+only the junction under a reviewed mask, clamp outside it — is specified in
+**`docs/superpowers/specs/2026-07-30-paper-doll-rig-design.md`**. Read it before
+building anything on the generation surface; its locked decisions (Bone canvas,
+ambient-contact shadow, light contract, ±2px registration, geometry-gated color
+transfer) override older per-SKU full-regeneration assumptions.
+
 The **Gap worklist** surface (per-family lists of variants still missing a clean
 reference, lane-segmented by Cowork) is documented in
 **`docs/best-bottles-gap-worklist.md`**: Cowork drops
