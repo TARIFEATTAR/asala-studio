@@ -11,7 +11,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "test:paper-doll-production": "node --import tsx --test src/lib/paperDoll/assetStorage.test.ts src/lib/paperDoll/releaseRepository.test.ts src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/releaseContract.test.ts src/lib/paperDoll/rollonRequirements.test.ts src/lib/paperDoll/candidateJobContract.test.ts src/lib/paperDoll/candidateClamp.node.test.ts supabase/functions/_shared/paperDollCandidateContract.test.ts supabase/functions/_shared/generationAttemptLedger.test.ts src/lib/paperDoll/corePort.test.ts",
+    "test:paper-doll-production": "node --import tsx --test src/components/paper-doll/assemblyEditModel.test.ts src/lib/paperDoll/assetStorage.test.ts src/lib/paperDoll/releaseRepository.test.ts src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/releaseContract.test.ts src/lib/paperDoll/rollonRequirements.test.ts src/lib/paperDoll/candidateJobContract.test.ts src/lib/paperDoll/candidateClamp.node.test.ts supabase/functions/_shared/paperDollCandidateContract.test.ts supabase/functions/_shared/generationAttemptLedger.test.ts src/lib/paperDoll/corePort.test.ts",
     "paper-doll:storage:provision": "tsx scripts/paper-doll/provision-storage.ts",
     "paper-doll:cyl9:upload-bodies": "tsx scripts/paper-doll/upload-cyl9-body-release.ts",
     "paper-doll:cyl9:requirements": "tsx scripts/paper-doll/build-cyl9-rollon-requirements.ts",

@@ -8,7 +8,6 @@ import {
   loadPaperDollReleaseWorkbench,
   type PaperDollReleaseRpcClient,
 } from "@/lib/paperDoll/releaseRepository";
-import { getLocalPaperDollPreview } from "@/lib/paperDoll/releasePreview";
 import { summarizePaperDollWorkbench } from "@/lib/paperDoll/workbenchSummary";
 
 interface StorageBackedReleasePanelProps {
@@ -35,15 +34,6 @@ function Stat({ label, value, tone = "neutral" }: {
 }
 
 export function StorageBackedReleasePanel({ organizationId, familyKey }: StorageBackedReleasePanelProps) {
-  const localPreview = useMemo(
-    () => familyKey ? getLocalPaperDollPreview({
-      familyKey,
-      isDevelopment: import.meta.env.DEV,
-      search: typeof window === "undefined" ? "" : window.location.search,
-      assetBaseUrl: import.meta.env.VITE_PAPER_DOLL_PREVIEW_ASSET_BASE_URL,
-    }) : null,
-    [familyKey],
-  );
   const query = useQuery({
     queryKey: ["paper-doll-release-workbench", organizationId, familyKey],
     queryFn: () => loadPaperDollReleaseWorkbench(
@@ -51,11 +41,11 @@ export function StorageBackedReleasePanel({ organizationId, familyKey }: Storage
       organizationId!,
       familyKey!,
     ),
-    enabled: Boolean(organizationId && familyKey && !localPreview),
+    enabled: Boolean(organizationId && familyKey),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-  const workbench = query.data ?? localPreview;
+  const workbench = query.data;
   const summary = useMemo(
     () => workbench ? summarizePaperDollWorkbench(workbench) : null,
     [workbench],
@@ -69,7 +59,7 @@ export function StorageBackedReleasePanel({ organizationId, familyKey }: Storage
     );
   }
 
-  if (query.isLoading && !localPreview) {
+  if (query.isLoading) {
     return (
       <div className="flex min-h-64 items-center justify-center gap-3 text-sm" style={{ color: "var(--darkroom-text-muted)" }}>
         <LEDIndicator state="processing" />
@@ -78,7 +68,7 @@ export function StorageBackedReleasePanel({ organizationId, familyKey }: Storage
     );
   }
 
-  if (query.error && !localPreview) {
+  if (query.error) {
     return (
       <div className="rounded border p-4 text-sm" style={{ borderColor: "var(--darkroom-error)", background: "rgba(239,68,68,0.05)", color: "var(--darkroom-error)" }}>
         <div className="flex items-center gap-2 font-semibold"><AlertTriangle className="h-4 w-4" />Release ledger unavailable</div>
@@ -117,11 +107,6 @@ export function StorageBackedReleasePanel({ organizationId, familyKey }: Storage
           <div className="mt-2 font-mono text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>
             {release.canvasWidthPx}×{release.canvasHeightPx} · manifest {release.manifestSha256.slice(0, 12)}…
           </div>
-          {localPreview && (
-            <div className="mt-2 text-[9px] uppercase tracking-[0.16em]" style={{ color: "#f2c078" }}>
-              Local preview · five locked body plates only · no writes
-            </div>
-          )}
         </div>
         <div className="flex items-center gap-2 rounded border px-3 py-2 text-[10px] uppercase tracking-wider" style={{ borderColor: "rgba(242,192,120,0.35)", color: "#f2c078", background: "rgba(242,192,120,0.05)" }}>
           <LockKeyhole className="h-3.5 w-3.5" />Sanity publication locked

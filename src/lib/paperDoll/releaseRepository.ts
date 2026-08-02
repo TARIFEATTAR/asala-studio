@@ -1,6 +1,7 @@
 import {
   PAPER_DOLL_STORAGE_BUCKETS,
   resolvePaperDollAssetUrls,
+  validatePaperDollAssetReference,
   type PaperDollAssetReference,
   type PaperDollStorageClient,
   type PaperDollStorageBucket,
@@ -39,6 +40,7 @@ export interface PaperDollReleaseWorkbenchData {
     materialVariant: string;
     approvalStatus: ApprovalStatus;
     imageUrl: string;
+    geometryMaskUrl: string | null;
     reference: PaperDollAssetReference;
     widthPx: number;
     heightPx: number;
@@ -134,6 +136,15 @@ export async function loadPaperDollReleaseWorkbench(
       contentType: string(version.content_type, `release asset ${index} content type`),
       byteSize: number(version.byte_size, `release asset ${index} byte size`),
     };
+    const geometryMaskPath = version.geometry_mask_path == null
+      ? null
+      : string(version.geometry_mask_path, `release asset ${index} geometry mask path`);
+    const geometryMaskSha256 = version.geometry_mask_sha256 == null
+      ? null
+      : string(version.geometry_mask_sha256, `release asset ${index} geometry mask checksum`);
+    if ((geometryMaskPath === null) !== (geometryMaskSha256 === null)) {
+      throw new Error(`Malformed release asset ${index} geometry mask pair.`);
+    }
     const qaRows = Array.isArray(asset.qa) ? asset.qa : [];
     return {
       componentVersionId: string(version.id, `release asset ${index} version id`),
@@ -146,6 +157,8 @@ export async function loadPaperDollReleaseWorkbench(
       materialVariant: string(version.material_variant, `release asset ${index} material variant`),
       approvalStatus: oneOf(version.approval_status, APPROVAL_STATUSES, `release asset ${index} approval`),
       reference,
+      geometryMaskPath,
+      geometryMaskSha256,
       widthPx: number(version.width_px, `release asset ${index} width`),
       heightPx: number(version.height_px, `release asset ${index} height`),
       alphaBounds: parseBounds(version.alpha_bounds),
@@ -168,6 +181,26 @@ export async function loadPaperDollReleaseWorkbench(
     parsedAssets.map((asset) => [asset.componentVersionId, asset.reference]),
   );
   const imageUrls = await resolvePaperDollAssetUrls(client, references, organizationId);
+  const maskUrls = Object.fromEntries(await Promise.all(parsedAssets.map(async (asset) => {
+    if (!asset.geometryMaskPath || !asset.geometryMaskSha256) {
+      return [asset.componentVersionId, null] as const;
+    }
+    const validationReference: PaperDollAssetReference = {
+      storageBucket: asset.reference.storageBucket,
+      objectPath: asset.geometryMaskPath,
+      sha256: asset.geometryMaskSha256,
+      contentType: "image/png",
+      byteSize: 1,
+    };
+    validatePaperDollAssetReference(validationReference, organizationId);
+    const { data, error } = await client.storage
+      .from(validationReference.storageBucket)
+      .createSignedUrl(validationReference.objectPath, 300);
+    if (error || !data?.signedUrl) {
+      throw new Error(`Unable to resolve geometry mask: ${error?.message ?? "Storage returned no signed URL"}`);
+    }
+    return [asset.componentVersionId, data.signedUrl] as const;
+  })));
 
   return {
     release: {
@@ -184,6 +217,7 @@ export async function loadPaperDollReleaseWorkbench(
     assets: parsedAssets.map((asset) => ({
       ...asset,
       imageUrl: imageUrls[asset.componentVersionId],
+      geometryMaskUrl: maskUrls[asset.componentVersionId],
     })),
   };
 }

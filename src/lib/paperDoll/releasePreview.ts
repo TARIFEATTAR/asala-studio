@@ -52,6 +52,7 @@ export function getLocalPaperDollPreview({
         materialVariant: `${plate.key}-glass`,
         approvalStatus: "approved" as const,
         imageUrl: `${normalizedAssetBaseUrl}/body__cylinder__9ml__${plate.key}__70.0x20.0mm.png`,
+        geometryMaskUrl: null,
         reference: {
           storageBucket: "paper-doll-approved" as const,
           objectPath: `${PREVIEW_ORGANIZATION_ID}/${familyKey}/body-${plate.key}/${checksum}.png`,

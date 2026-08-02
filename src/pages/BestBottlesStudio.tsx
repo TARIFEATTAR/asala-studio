@@ -33,7 +33,7 @@ import {
 } from "@/components/darkroom/LEDIndicator";
 import { MastersTabPanel } from "@/components/darkroom/MastersTabPanel";
 import { ComponentsTabPanel } from "@/components/darkroom/ComponentsTabPanel";
-import { StorageBackedReleasePanel } from "@/components/paper-doll/StorageBackedReleasePanel";
+import { ProductionCandidateWorkbench } from "@/components/paper-doll/ProductionCandidateWorkbench";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -70,6 +70,17 @@ const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
 
 function applicatorCategoryKey(applicator: string): string {
   return applicator.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+function resolvePaperDollFamilyKey(group: {
+  paperDollFamilyKey?: string | null;
+  family?: string | null;
+  capacity?: string | null;
+}): string | null {
+  if (group.paperDollFamilyKey) return group.paperDollFamilyKey;
+  const family = group.family?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  const capacity = group.capacity?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  return family.includes("cylinder") && capacity === "9ml" ? "CYL-9ML" : null;
 }
 
 export default function BestBottlesStudio() {
@@ -114,6 +125,10 @@ export default function BestBottlesStudio() {
   const selectedVariant = useMemo(
     () => data?.variants.find((v) => v.graceSku === selectedSku) ?? null,
     [data?.variants, selectedSku],
+  );
+  const paperDollFamilyKey = useMemo(
+    () => data ? resolvePaperDollFamilyKey(data.group) : null,
+    [data],
   );
 
   const [collapsedBuckets, setCollapsedBuckets] = useState<Set<string>>(new Set());
@@ -191,7 +206,7 @@ export default function BestBottlesStudio() {
       {data && (
         <div className="grid grid-cols-12 gap-4 p-4">
           {/* LEFT RAIL — SKU list + family metadata */}
-          <aside className="camera-panel col-span-3 min-h-[600px]">
+          <aside className="camera-panel col-span-3 min-h-[600px] min-w-0">
             <CameraPanelHeader
               title="Variants"
               icon={<Grid3x3 className="w-3.5 h-3.5" />}
@@ -277,7 +292,7 @@ export default function BestBottlesStudio() {
           </aside>
 
           {/* MAIN — tab switcher + content */}
-          <main className="camera-panel col-span-6 min-h-[600px]">
+          <main className={`camera-panel min-h-[600px] min-w-0 ${activeTab === "compose" ? "col-span-9" : "col-span-6"}`}>
             <CameraPanelHeader
               title={TABS.find((t) => t.id === activeTab)?.label ?? "Studio"}
               icon={
@@ -305,7 +320,7 @@ export default function BestBottlesStudio() {
               </div>
 
               <div
-                className="rounded p-6 border min-h-[400px] max-h-[calc(100vh-260px)] overflow-y-auto"
+                className={`rounded border min-h-[400px] overflow-y-auto ${activeTab === "compose" ? "p-3 max-h-none" : "p-6 max-h-[calc(100vh-260px)]"}`}
                 style={{
                   borderColor: "var(--darkroom-border-subtle)",
                   background: "var(--darkroom-surface)",
@@ -374,9 +389,9 @@ export default function BestBottlesStudio() {
                 )}
 
                 {activeTab === "compose" && (
-                  <StorageBackedReleasePanel
+                  <ProductionCandidateWorkbench
                     organizationId={currentOrganizationId}
-                    familyKey={data.group.paperDollFamilyKey ?? groupSlug ?? null}
+                    familyKey={paperDollFamilyKey}
                   />
                 )}
               </div>
@@ -384,7 +399,7 @@ export default function BestBottlesStudio() {
           </main>
 
           {/* RIGHT RAIL — library of approved assets */}
-          <aside className="camera-panel col-span-3 min-h-[600px]">
+          {activeTab !== "compose" && <aside className="camera-panel col-span-3 min-h-[600px]">
             <CameraPanelHeader
               title="Library"
               icon={<ImageIcon className="w-3.5 h-3.5" />}
@@ -423,7 +438,7 @@ export default function BestBottlesStudio() {
                 </div>
               )}
             </div>
-          </aside>
+          </aside>}
         </div>
       )}
     </div>

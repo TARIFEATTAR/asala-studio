@@ -5,6 +5,7 @@ import { loadPaperDollReleaseWorkbench } from "./releaseRepository";
 
 const ORGANIZATION_ID = "10000000-0000-4000-8000-000000000001";
 const SHA256 = "a".repeat(64);
+const MASK_SHA256 = "c".repeat(64);
 
 function releasePayload() {
   return {
@@ -35,6 +36,8 @@ function releasePayload() {
         storage_bucket: "paper-doll-approved",
         image_path: `${ORGANIZATION_ID}/CYL-9ML/body/${SHA256}.png`,
         image_sha256: SHA256,
+        geometry_mask_path: `${ORGANIZATION_ID}/CYL-9ML/body-mask/${MASK_SHA256}.png`,
+        geometry_mask_sha256: MASK_SHA256,
         content_type: "image/png",
         byte_size: 1234,
         width_px: 2080,
@@ -82,6 +85,7 @@ test("loadPaperDollReleaseWorkbench reads the RLS API and resolves private image
   assert.equal(result?.release.status, "blocked");
   assert.equal(result?.assets[0].displayName, "Clear body");
   assert.match(result?.assets[0].imageUrl ?? "", /^https:\/\/signed\.example\/paper-doll-approved\//);
+  assert.match(result?.assets[0].geometryMaskUrl ?? "", /body-mask/);
   assert.equal(result?.assets[0].qa[0].status, "passed");
 });
 
