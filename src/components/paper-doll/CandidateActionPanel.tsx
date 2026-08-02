@@ -1,0 +1,293 @@
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, CheckCircle2, CloudUpload, Cpu, Play, RefreshCw, ShieldCheck } from "lucide-react";
+
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  CandidateProviderModels,
+  type CandidateJobRequest,
+  type CandidateProvider,
+  type PrivateAssetRef,
+} from "@/lib/paperDoll/candidateJobContract";
+import {
+  approveCandidate,
+  createCandidateJob,
+  loadCandidateWorkbench,
+  uploadCandidateSource,
+  verifySignedPrivateAsset,
+  type CandidateHistoryEntry,
+} from "@/lib/paperDoll/candidateRepository";
+import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
+import type { CandidateInspection } from "./CandidateInspector";
+import type { CandidateSelectionKind } from "./assemblyEditModel";
+
+type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
+
+interface CandidateActionPanelProps {
+  organizationId: string;
+  familyKey: "CYL-9ML";
+  asset: ReleaseAsset | null;
+  assemblyContext: ReleaseAsset | null;
+  selectionKind: CandidateSelectionKind;
+  transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number };
+  candidateEditingEnabled: boolean;
+  selectionReady: boolean;
+  serializeMask: () => Promise<string>;
+  onInspectionChange: (inspection: CandidateInspection | null) => void;
+}
+
+const PROVIDERS: Array<{ id: CandidateProvider; label: string; detail: string }> = [
+  { id: "blender", label: "Blender", detail: "canonical render" },
+  { id: "openai", label: "GPT Image", detail: "gpt-image-2" },
+  { id: "google", label: "Nano Banana", detail: "Gemini image" },
+  { id: "manual", label: "Upload", detail: "versioned source" },
+];
+const OVERCAP_VARIANTS = new Set(["SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL", "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT"]);
+const ROLLER_VARIANTS = new Set(["PLASTIC", "METAL"]);
+
+function dataUrlBytes(dataUrl: string): Uint8Array {
+  const encoded = dataUrl.split(",")[1];
+  if (!encoded) throw new Error("Edit mask could not be serialized.");
+  const binary = atob(encoded);
+  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+}
+
+function assetRef(asset: ReleaseAsset): PrivateAssetRef {
+  return {
+    bucket: asset.reference.storageBucket,
+    path: asset.reference.objectPath,
+    sha256: asset.reference.sha256,
+    contentType: asset.reference.contentType,
+    byteSize: asset.reference.byteSize,
+  };
+}
+
+function inspectionFrom(entry: CandidateHistoryEntry | null): CandidateInspection | null {
+  if (!entry) return null;
+  const metadata = entry.job.outputMetadata;
+  const blocking = entry.qa.filter((row) => row.blocking === true);
+  const failed = blocking.some((row) => row.qa_status !== "passed");
+  return {
+    imageUrl: entry.candidateImageUrl,
+    differenceUrl: null,
+    provider: entry.job.provider,
+    model: entry.job.model,
+    estimatedCostUsd: null,
+    promptHash: entry.job.promptSha256,
+    changedPixels: typeof metadata.changedPixelCount === "number" ? metadata.changedPixelCount : null,
+    geometryLocked: metadata.geometryLocked === true,
+    geometryGate: typeof metadata.geometryGate === "string" ? metadata.geometryGate : null,
+    qaStatus: blocking.length === 0 ? "not-run" : failed ? "failed" : "passed",
+  };
+}
+
+export function CandidateActionPanel({
+  organizationId,
+  familyKey,
+  asset,
+  assemblyContext,
+  selectionKind,
+  transform,
+  candidateEditingEnabled,
+  selectionReady,
+  serializeMask,
+  onInspectionChange,
+}: CandidateActionPanelProps) {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const [provider, setProvider] = useState<CandidateProvider>("blender");
+  const [model, setModel] = useState<string>(CandidateProviderModels.blender[0]);
+  const [instruction, setInstruction] = useState("Preserve the exact moulded phenolic plastic closure geometry. Change only the specified surface finish and retain the catalog lighting direction.");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const history = useQuery({
+    queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
+    queryFn: () => loadCandidateWorkbench(supabase, organizationId, familyKey),
+    refetchInterval: 5_000,
+    refetchOnWindowFocus: false,
+  });
+  const selectedHistory = useMemo(
+    () => history.data?.jobs.filter((entry) => entry.job.componentId === asset?.componentId) ?? [],
+    [asset?.componentId, history.data?.jobs],
+  );
+  const latest = selectedHistory[0] ?? null;
+
+  useEffect(() => onInspectionChange(inspectionFrom(latest)), [latest, onInspectionChange]);
+
+  const requirement = useMemo(() => {
+    if (!asset) return null;
+    if (asset.slot === "roller" && ROLLER_VARIANTS.has(asset.variantKey)) return `CYL-9ML:ROLLER:${asset.variantKey}`;
+    if ((asset.slot === "overcap" || asset.slot === "cap") && OVERCAP_VARIANTS.has(asset.variantKey)) return `CYL-9ML:OVERCAP:${asset.variantKey}`;
+    return null;
+  }, [asset]);
+
+  const chooseProvider = (next: CandidateProvider) => {
+    setProvider(next);
+    setModel(CandidateProviderModels[next][0]);
+    setMessage(null);
+    setError(null);
+  };
+
+  const buildRequest = async (manualOutput?: PrivateAssetRef): Promise<CandidateJobRequest> => {
+    if (!asset || !requirement || !asset.geometryMaskUrl || !asset.geometryMaskReference) {
+      throw new Error("A registered component requirement and authority mask are required.");
+    }
+    const editMaskBytes = dataUrlBytes(await serializeMask());
+    const editMask = await uploadCandidateSource(supabase, {
+      organizationId,
+      familyKey,
+      assetId: `edit-mask-${asset.componentVersionId}-${selectionKind}`,
+      bytes: editMaskBytes,
+      contentType: "image/png",
+      extension: "png",
+    });
+    const authoritativeMask = await verifySignedPrivateAsset(asset.geometryMaskUrl, {
+      bucket: asset.geometryMaskReference.storageBucket,
+      path: asset.geometryMaskReference.objectPath,
+      sha256: asset.geometryMaskReference.sha256,
+      contentType: "image/png",
+    });
+    return {
+      organizationId,
+      requirementKey: requirement,
+      componentId: asset.componentId,
+      parentComponentVersionId: asset.componentVersionId,
+      parentSha256: asset.reference.sha256,
+      provider,
+      model,
+      instruction,
+      source: assetRef(asset),
+      authoritativeMask,
+      editMask,
+      assemblyContext: assemblyContext ? assetRef(assemblyContext) : undefined,
+      manualOutput,
+      transform,
+      selectionKind,
+    };
+  };
+
+  const queue = async (manualFile?: File) => {
+    if (!candidateEditingEnabled || !selectionReady) return;
+    setBusy(true);
+    setMessage(null);
+    setError(null);
+    try {
+      let manualOutput: PrivateAssetRef | undefined;
+      if (provider === "manual") {
+        if (!manualFile) throw new Error("Choose one PNG manual candidate to upload.");
+        manualOutput = await uploadCandidateSource(supabase, {
+          organizationId,
+          familyKey,
+          assetId: `manual-output-${asset?.componentVersionId ?? "unknown"}`,
+          bytes: new Uint8Array(await manualFile.arrayBuffer()),
+          contentType: manualFile.type || "image/png",
+          extension: "png",
+        });
+      }
+      const queued = await createCandidateJob(supabase, await buildRequest(manualOutput));
+      setMessage(`Queued ${queued.provider} / ${queued.model}. The worker has not claimed it yet.`);
+      await queryClient.invalidateQueries({ queryKey: ["paper-doll-candidate-history", organizationId, familyKey] });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const decide = async (decision: "approved" | "rejected") => {
+    if (!latest?.candidateVersion) return;
+    const candidateSha = latest.candidateVersion.image_sha256;
+    if (typeof candidateSha !== "string") return;
+    const evidenceIds = latest.qa.map((row) => row.id).filter((id): id is string => typeof id === "string");
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await approveCandidate(supabase, {
+        organizationId,
+        candidateComponentVersionId: latest.job.candidateComponentVersionId!,
+        expectedCandidateSha256: candidateSha,
+        decision,
+        approverDisplayName,
+        evidenceIds,
+      });
+      setMessage(`${decision === "approved" ? "Approved child created" : "Rejection recorded"}. Active release unchanged.`);
+      await queryClient.invalidateQueries({ queryKey: ["paper-doll-candidate-history", organizationId, familyKey] });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const blockingQa = latest?.qa.filter((row) => row.blocking === true) ?? [];
+  const approverDisplayName = typeof user?.user_metadata?.full_name === "string"
+    ? user.user_metadata.full_name
+    : typeof user?.user_metadata?.name === "string"
+      ? user.user_metadata.name
+      : user?.email ?? "";
+  const canApprove = latest?.job.status === "candidate_ready"
+    && !latest.approval
+    && blockingQa.length > 0
+    && blockingQa.every((row) => row.qa_status === "passed")
+    && Boolean(approverDisplayName);
+
+  return (
+    <div className="space-y-3 rounded border p-3" style={{ borderColor: candidateEditingEnabled ? "rgba(97,214,200,0.36)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.17em]" style={{ color: "#61d6c8" }}><Cpu className="h-3.5 w-3.5" />Candidate actions</div>
+          <div className="mt-1 text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>Worker: <span style={{ color: history.data?.worker.status === "ready" ? "#6ee7a8" : history.data?.worker.status === "error" ? "#ef8d7d" : "#f2c078" }}>{history.data?.worker.status ?? "checking"}</span></div>
+        </div>
+        <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+        {PROVIDERS.map((item) => (
+          <button key={item.id} type="button" onClick={() => chooseProvider(item.id)} className="rounded border px-2 py-2 text-left" style={{ borderColor: provider === item.id ? "rgba(97,214,200,0.52)" : "var(--darkroom-border-subtle)", background: provider === item.id ? "rgba(97,214,200,0.06)" : "transparent" }}>
+            <div className="text-[9px]" style={{ color: provider === item.id ? "#61d6c8" : "var(--darkroom-text-muted)" }}>{item.label}</div>
+            <div className="mt-0.5 text-[7px]" style={{ color: "var(--darkroom-text-dim)" }}>{item.detail}</div>
+          </button>
+        ))}
+      </div>
+
+      {provider === "google" && (
+        <select value={model} onChange={(event) => setModel(event.target.value)} className="w-full rounded border bg-black/20 px-2 py-2 font-mono text-[9px]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-muted)" }}>
+          {CandidateProviderModels.google.map((item) => <option key={item} value={item}>{item}</option>)}
+        </select>
+      )}
+      <textarea value={instruction} onChange={(event) => setInstruction(event.target.value)} disabled={provider === "blender"} rows={3} className="w-full resize-y rounded border bg-black/20 p-2 text-[9px] leading-4 disabled:opacity-45" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-muted)" }} aria-label="Candidate instruction" />
+
+      <div className="flex flex-wrap gap-2">
+        {provider === "manual" ? (
+          <label className={`inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] ${!candidateEditingEnabled || !selectionReady || busy ? "pointer-events-none opacity-35" : ""}`} style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
+            <CloudUpload className="h-3.5 w-3.5" />Upload and queue
+            <input type="file" accept="image/png" className="hidden" disabled={!candidateEditingEnabled || !selectionReady || busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void queue(file); event.target.value = ""; }} />
+          </label>
+        ) : (
+          <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !instruction.trim()} onClick={() => void queue()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}><Play className="h-3.5 w-3.5" />{busy ? "Queuing…" : "Queue candidate"}</button>
+        )}
+        <button type="button" disabled={!canApprove || busy} onClick={() => void decide("approved")} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.42)", color: "#6ee7a8" }}><ShieldCheck className="h-3.5 w-3.5" />Approve child</button>
+        <button type="button" disabled={latest?.job.status !== "candidate_ready" || Boolean(latest.approval) || busy} onClick={() => void decide("rejected")} className="rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}>Reject</button>
+      </div>
+
+      {!candidateEditingEnabled && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#f2c078" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />Select a non-body component with a registered authority mask. Locked plates cannot become generation sources.</div>}
+      {candidateEditingEnabled && !selectionReady && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#f2c078" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />Draw the selected rectangle or brush mask before queuing.</div>}
+      {message && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#6ee7a8" }}><CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0" />{message}</div>}
+      {error && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#ef8d7d" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />{error}</div>}
+
+      <div className="border-t pt-2" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+        <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Immutable history · {selectedHistory.length}</div>
+        {selectedHistory.length === 0 ? <div className="text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>No attempts for this component.</div> : selectedHistory.slice(0, 4).map((entry) => (
+          <div key={entry.job.id} className="flex items-center justify-between gap-2 border-t py-1.5 text-[8px]" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+            <span className="truncate font-mono" style={{ color: "var(--darkroom-text-muted)" }}>{entry.job.provider} · {entry.job.model}</span>
+            <span className="uppercase tracking-wider" style={{ color: entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{entry.job.status.replace("_", " ")}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

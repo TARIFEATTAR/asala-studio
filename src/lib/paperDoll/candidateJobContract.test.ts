@@ -81,6 +81,18 @@ test("overcap prompts reject aluminium-part fabrication language", () => {
   }).success, false);
 });
 
+test("manual uploads are explicit provider outputs and never replace the immutable source", () => {
+  const manual = {
+    ...validRequest(),
+    provider: "manual",
+    model: "manual-v1",
+    manualOutput: asset("paper-doll-sources"),
+  };
+  assert.equal(CandidateJobRequestSchema.safeParse(manual).success, true);
+  assert.equal(CandidateJobRequestSchema.safeParse({ ...manual, manualOutput: undefined }).success, false);
+  assert.equal(CandidateJobRequestSchema.safeParse({ ...validRequest(), manualOutput: asset("paper-doll-sources") }).success, false);
+});
+
 test("named approval binds a decision to candidate SHA and QA evidence", () => {
   assert.equal(CandidateApprovalRequestSchema.safeParse({
     organizationId: ORGANIZATION_ID,

@@ -30,6 +30,7 @@ export interface PaperDollReleaseWorkbenchData {
     createdAt: string;
   };
   assets: Array<{
+    componentId: string;
     componentVersionId: string;
     componentKey: string;
     displayName: string;
@@ -41,6 +42,7 @@ export interface PaperDollReleaseWorkbenchData {
     approvalStatus: ApprovalStatus;
     imageUrl: string;
     geometryMaskUrl: string | null;
+    geometryMaskReference: Pick<PaperDollAssetReference, "storageBucket" | "objectPath" | "sha256"> | null;
     reference: PaperDollAssetReference;
     widthPx: number;
     heightPx: number;
@@ -147,6 +149,7 @@ export async function loadPaperDollReleaseWorkbench(
     }
     const qaRows = Array.isArray(asset.qa) ? asset.qa : [];
     return {
+      componentId: string(component.id, `release asset ${index} component id`),
       componentVersionId: string(version.id, `release asset ${index} version id`),
       componentKey: string(component.component_key, `release asset ${index} component key`),
       displayName: string(component.display_name, `release asset ${index} display name`),
@@ -218,6 +221,11 @@ export async function loadPaperDollReleaseWorkbench(
       ...asset,
       imageUrl: imageUrls[asset.componentVersionId],
       geometryMaskUrl: maskUrls[asset.componentVersionId],
+      geometryMaskReference: asset.geometryMaskPath && asset.geometryMaskSha256 ? {
+        storageBucket: asset.reference.storageBucket,
+        objectPath: asset.geometryMaskPath,
+        sha256: asset.geometryMaskSha256,
+      } : null,
     })),
   };
 }

@@ -83,6 +83,7 @@ Deno.serve(async (request) => {
       authoritative_mask_ref: candidate.authoritativeMask,
       edit_mask_ref: candidate.editMask,
       assembly_context_ref: candidate.assemblyContext ?? null,
+      manual_output_ref: candidate.manualOutput ?? null,
       transform: candidate.transform,
       selection_kind: candidate.selectionKind,
       initiated_by: user.id,

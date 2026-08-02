@@ -32,6 +32,7 @@ export interface PaperDollCandidateRequest {
   authoritativeMask: PaperDollPrivateAssetRef;
   editMask: PaperDollPrivateAssetRef;
   assemblyContext?: PaperDollPrivateAssetRef;
+  manualOutput?: PaperDollPrivateAssetRef;
   transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number };
   selectionKind: "whole-layer" | "rectangle" | "brush";
 }
@@ -146,6 +147,11 @@ export function parsePaperDollCandidateRequest(value: unknown): PaperDollCandida
   if (!(["whole-layer", "rectangle", "brush"] as unknown[]).includes(selectionKind)) {
     throw new Error("selectionKind is unsupported.");
   }
+  const manualOutput = raw.manualOutput == null
+    ? undefined
+    : asset(raw.manualOutput, "manualOutput", organizationId);
+  if (provider === "manual" && !manualOutput) throw new Error("manualOutput is required for manual jobs.");
+  if (provider !== "manual" && manualOutput) throw new Error("manualOutput is only valid for manual jobs.");
   return {
     organizationId,
     requirementKey,
@@ -161,6 +167,7 @@ export function parsePaperDollCandidateRequest(value: unknown): PaperDollCandida
     assemblyContext: raw.assemblyContext == null
       ? undefined
       : asset(raw.assemblyContext, "assemblyContext", organizationId),
+    manualOutput,
     transform: {
       translateXPx: translateXPx as number,
       translateYPx: translateYPx as number,

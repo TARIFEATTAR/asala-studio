@@ -75,6 +75,17 @@ test("candidate request parser rejects cross-organization assets and asymmetric 
   }), /phenolic plastic/i);
 });
 
+test("manual candidate bytes use a separate immutable output reference", () => {
+  assert.throws(() => parsePaperDollCandidateRequest({
+    ...request, provider: "manual", model: "manual-v1",
+  }), /manualOutput/i);
+  const parsed = parsePaperDollCandidateRequest({
+    ...request, provider: "manual", model: "manual-v1", manualOutput: asset("manual-output"),
+  });
+  assert.equal(parsed.source.path, request.source.path);
+  assert.match(parsed.manualOutput?.path ?? "", /manual-output/);
+});
+
 test("candidate finalization is transactional and unavailable to browser roles", () => {
   const sql = readFileSync(new URL(
     "../../migrations/20260802055156_finalize_paper_doll_candidate_job.sql",
@@ -108,4 +119,5 @@ test("worker records attempts before dispatch and verifies bytes before transact
   assert.match(source, /upsert:\s*false/);
   assert.match(source, /downloadVerified\(client, reference\)/);
   assert.match(source, /finalize_paper_doll_candidate_job/);
+  assert.match(source, /paper_doll_worker_heartbeats/);
 });

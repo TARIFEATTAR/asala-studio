@@ -42,6 +42,7 @@ export function getLocalPaperDollPreview({
     assets: BODY_PLATES.map((plate, index) => {
       const checksum = String(index + 1).repeat(64);
       return {
+        componentId: `local-preview-component-${plate.key}`,
         componentVersionId: `local-preview-body-${plate.key}`,
         componentKey: `body__cylinder__9ml__${plate.key}`,
         displayName: plate.label,
@@ -53,6 +54,7 @@ export function getLocalPaperDollPreview({
         approvalStatus: "approved" as const,
         imageUrl: `${normalizedAssetBaseUrl}/body__cylinder__9ml__${plate.key}__70.0x20.0mm.png`,
         geometryMaskUrl: null,
+        geometryMaskReference: null,
         reference: {
           storageBucket: "paper-doll-approved" as const,
           objectPath: `${PREVIEW_ORGANIZATION_ID}/${familyKey}/body-${plate.key}/${checksum}.png`,

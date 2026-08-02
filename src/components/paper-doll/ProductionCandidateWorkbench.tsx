@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Boxes,
   Brush,
-  Check,
   Eye,
   EyeOff,
-  Frame,
   Layers3,
   LockKeyhole,
   MousePointer2,
@@ -25,7 +23,8 @@ import {
   type PaperDollReleaseWorkbenchData,
 } from "@/lib/paperDoll/releaseRepository";
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
-import { CandidateInspector } from "./CandidateInspector";
+import { CandidateActionPanel } from "./CandidateActionPanel";
+import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
 import {
   type AssemblyEditMode,
   type CandidateSelectionKind,
@@ -77,9 +76,9 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [transform, setTransform] = useState(IDENTITY_TRANSFORM);
-  const [preparedAt, setPreparedAt] = useState<string | null>(null);
-  const [preparing, setPreparing] = useState(false);
+  const [inspection, setInspection] = useState<CandidateInspection | null>(null);
   const mask = useCandidateMask();
+  const handleInspectionChange = useCallback((next: CandidateInspection | null) => setInspection(next), []);
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
@@ -103,7 +102,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   useEffect(() => {
     setTransform(IDENTITY_TRANSFORM);
-    setPreparedAt(null);
+    setInspection(null);
     mask.reset();
     // Resetting candidate-local state is intentional when the immutable source layer changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,24 +124,12 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     return <Unavailable title="No registered CYL‑9ML release">The workbench never fabricates a release from bundled or public files. Register the five locked plates in the private ledger first.</Unavailable>;
   }
 
-  const canPrepare = mode === "edit-lab"
-    && selectedAsset?.slot !== "body"
-    && Boolean(selectedAsset?.geometryMaskUrl)
-    && (selectionKind === "whole-layer" || (selectionKind === "rectangle" && Boolean(mask.rectangle)) || (selectionKind === "brush" && mask.brushStrokes.length > 0));
   const candidateEditingEnabled = mode === "edit-lab"
     && selectedAsset?.slot !== "body"
     && Boolean(selectedAsset?.geometryMaskUrl);
-
-  const prepareCandidate = async () => {
-    if (!canPrepare) return;
-    setPreparing(true);
-    try {
-      await mask.serializeMask(selectionKind);
-      setPreparedAt(new Date().toISOString());
-    } finally {
-      setPreparing(false);
-    }
-  };
+  const selectionReady = selectionKind === "whole-layer"
+    || (selectionKind === "rectangle" && Boolean(mask.rectangle))
+    || (selectionKind === "brush" && mask.brushStrokes.length > 0);
 
   const toggleVisibility = (id: string) => {
     setHiddenIds((current) => {
@@ -215,12 +202,12 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
                 ["rectangle", RectangleHorizontal, "Rectangle"],
                 ["brush", Brush, "Brush mask"],
               ] as const).map(([kind, Icon, label]) => (
-                <button key={kind} type="button" disabled={!candidateEditingEnabled} onClick={() => { setSelectionKind(kind); mask.reset(); setPreparedAt(null); }} className="flex w-full items-center gap-2 rounded border px-2 py-1.5 text-[9px] disabled:opacity-35" style={{ borderColor: selectionKind === kind ? "rgba(97,214,200,0.48)" : "var(--darkroom-border-subtle)", color: selectionKind === kind ? "#61d6c8" : "var(--darkroom-text-dim)" }}><Icon className="h-3 w-3" />{label}</button>
+                <button key={kind} type="button" disabled={!candidateEditingEnabled} onClick={() => { setSelectionKind(kind); mask.reset(); }} className="flex w-full items-center gap-2 rounded border px-2 py-1.5 text-[9px] disabled:opacity-35" style={{ borderColor: selectionKind === kind ? "rgba(97,214,200,0.48)" : "var(--darkroom-border-subtle)", color: selectionKind === kind ? "#61d6c8" : "var(--darkroom-text-dim)" }}><Icon className="h-3 w-3" />{label}</button>
               ))}
             </div>
           </div>
 
-          <button type="button" onClick={() => { setTransform(IDENTITY_TRANSFORM); mask.reset(); setPreparedAt(null); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset candidate edit</button>
+          <button type="button" onClick={() => { setTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset candidate edit</button>
         </aside>
 
         <div className="rounded border p-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "rgba(0,0,0,0.12)" }}>
@@ -233,28 +220,31 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             showMaskOverlay
             candidateEditingEnabled={candidateEditingEnabled}
             onSelectLayer={setSelectedLayerId}
-            onTransformChange={(next) => { setTransform(next); setPreparedAt(null); }}
-            onRectangleChange={(next) => { mask.setRectangle(next); setPreparedAt(null); }}
-            onBrushStroke={(next) => { mask.addBrushStroke(next); setPreparedAt(null); }}
+            onTransformChange={setTransform}
+            onRectangleChange={mask.setRectangle}
+            onBrushStroke={mask.addBrushStroke}
           />
-          <div className="mt-3 rounded border p-3" style={{ borderColor: canPrepare ? "rgba(97,214,200,0.36)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-[9px] uppercase tracking-[0.16em]" style={{ color: canPrepare ? "#61d6c8" : "var(--darkroom-text-dim)" }}>Generation handoff</div>
-                <p className="mt-1 text-[9px] leading-4" style={{ color: "var(--darkroom-text-muted)" }}>
-                  {selectedAsset?.slot === "body" ? "Locked body plates are assembly references, not editable generation sources." : !selectedAsset?.geometryMaskUrl ? "A registered authority mask is required before candidate preparation." : "This checkpoint serializes the edit selection only. Provider dispatch remains disconnected until the next verified milestone."}
-                </p>
-              </div>
-              <button type="button" disabled={!canPrepare || preparing} onClick={() => void prepareCandidate()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.15em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8", background: "rgba(97,214,200,0.05)" }}>{preparedAt ? <Check className="h-3.5 w-3.5" /> : <Frame className="h-3.5 w-3.5" />}{preparing ? "Preparing…" : preparedAt ? "Selection prepared" : "Prepare candidate"}</button>
-            </div>
+          <div className="mt-3">
+            <CandidateActionPanel
+              organizationId={organizationId}
+              familyKey="CYL-9ML"
+              asset={selectedAsset}
+              assemblyContext={bodies.find((asset) => asset.componentVersionId === selectedBodyId) ?? null}
+              selectionKind={selectionKind}
+              transform={transform}
+              candidateEditingEnabled={candidateEditingEnabled}
+              selectionReady={selectionReady}
+              serializeMask={() => mask.serializeMask(selectionKind)}
+              onInspectionChange={handleInspectionChange}
+            />
           </div>
         </div>
 
-        <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={transform} inspection={null} />
+        <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={transform} inspection={inspection} />
       </div>
 
       <footer className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(242,192,120,0.25)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
-        <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />No generation dispatch · no approval mutation · no Sanity publication</span>
+        <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />Candidate-only writes · active release unchanged · no Sanity publication</span>
         <span>{components.length} components registered · {bodies.length}/5 locked plates</span>
       </footer>
     </section>

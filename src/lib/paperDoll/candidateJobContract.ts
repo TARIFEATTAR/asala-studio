@@ -65,6 +65,7 @@ export const CandidateJobRequestSchema = z.object({
   authoritativeMask: PrivateAssetRefSchema,
   editMask: PrivateAssetRefSchema,
   assemblyContext: PrivateAssetRefSchema.optional(),
+  manualOutput: PrivateAssetRefSchema.optional(),
   transform: CandidateTransformSchema,
   selectionKind: z.enum(["whole-layer", "rectangle", "brush"]).default("whole-layer"),
 }).superRefine((value, context) => {
@@ -90,6 +91,7 @@ export const CandidateJobRequestSchema = z.object({
     ["authoritativeMask", value.authoritativeMask],
     ["editMask", value.editMask],
     ["assemblyContext", value.assemblyContext],
+    ["manualOutput", value.manualOutput],
   ] as const) {
     if (asset && asset.path.split("/", 1)[0] !== value.organizationId) {
       context.addIssue({
@@ -98,6 +100,12 @@ export const CandidateJobRequestSchema = z.object({
         message: "Asset organization must match the job organization.",
       });
     }
+  }
+  if (value.provider === "manual" && !value.manualOutput) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["manualOutput"], message: "Manual jobs require an immutable manualOutput." });
+  }
+  if (value.provider !== "manual" && value.manualOutput) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["manualOutput"], message: "manualOutput is only valid for the manual provider." });
   }
 });
 
@@ -115,6 +123,7 @@ export const CandidateJobRecordSchema = z.object({
   generationAttemptId: z.string().uuid().nullable(),
   candidateComponentVersionId: z.string().uuid().nullable(),
   output: PrivateAssetRefSchema.nullable(),
+  outputMetadata: z.record(z.string(), z.unknown()),
   initiatedBy: z.string().uuid(),
   errorMessage: z.string().nullable(),
   createdAt: z.string().datetime(),

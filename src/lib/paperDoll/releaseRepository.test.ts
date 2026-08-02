@@ -84,8 +84,10 @@ test("loadPaperDollReleaseWorkbench reads the RLS API and resolves private image
   }]);
   assert.equal(result?.release.status, "blocked");
   assert.equal(result?.assets[0].displayName, "Clear body");
+  assert.equal(result?.assets[0].componentId, "20000000-0000-4000-8000-000000000001");
   assert.match(result?.assets[0].imageUrl ?? "", /^https:\/\/signed\.example\/paper-doll-approved\//);
   assert.match(result?.assets[0].geometryMaskUrl ?? "", /body-mask/);
+  assert.equal(result?.assets[0].geometryMaskReference?.sha256, MASK_SHA256);
   assert.equal(result?.assets[0].qa[0].status, "passed");
 });
 

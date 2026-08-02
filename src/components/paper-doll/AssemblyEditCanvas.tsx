@@ -294,7 +294,7 @@ export function AssemblyEditCanvas({
           name: `asset-${asset.componentVersionId}`,
           data: { assetId: asset.componentVersionId, baseScale },
         });
-        image.setControlsVisibility({ mtr: false });
+        image.setControlsVisibility({ mtr: false, mt: false, mb: false, ml: false, mr: false });
         canvas.add(image);
         resolve();
       }, { crossOrigin: "anonymous" });

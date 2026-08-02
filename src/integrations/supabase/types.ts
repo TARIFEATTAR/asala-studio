@@ -4064,6 +4064,7 @@ export type Database = {
           generation_attempt_id: string | null
           id: string
           initiated_by: string
+          manual_output_ref: Json | null
           model: string
           organization_id: string
           output_metadata: Json
@@ -4092,6 +4093,7 @@ export type Database = {
           generation_attempt_id?: string | null
           id?: string
           initiated_by: string
+          manual_output_ref?: Json | null
           model: string
           organization_id: string
           output_metadata?: Json
@@ -4120,6 +4122,7 @@ export type Database = {
           generation_attempt_id?: string | null
           id?: string
           initiated_by?: string
+          manual_output_ref?: Json | null
           model?: string
           organization_id?: string
           output_metadata?: Json
@@ -4245,6 +4248,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "paper_doll_component_versions"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      paper_doll_worker_heartbeats: {
+        Row: {
+          current_job_id: string | null
+          error_message: string | null
+          id: string
+          last_seen_at: string
+          organization_id: string
+          worker_key: string
+          worker_status: string
+        }
+        Insert: {
+          current_job_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_seen_at?: string
+          organization_id: string
+          worker_key: string
+          worker_status: string
+        }
+        Update: {
+          current_job_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_seen_at?: string
+          organization_id?: string
+          worker_key?: string
+          worker_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_doll_worker_heartbeats_job_org_fk"
+            columns: ["current_job_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "paper_doll_candidate_jobs"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "paper_doll_worker_heartbeats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7557,6 +7605,19 @@ export type Database = {
           p_pipeline_sku_job_id: string
         }
         Returns: undefined
+      }
+      approve_paper_doll_candidate: {
+        Args: {
+          p_approved_ref?: Json
+          p_approver_display_name: string
+          p_approver_user_id: string
+          p_candidate_component_version_id: string
+          p_decision: string
+          p_evidence_ids: string[]
+          p_expected_candidate_sha256: string
+          p_organization_id: string
+        }
+        Returns: Json
       }
       bb_has_role: {
         Args: { p_org_id: string; p_roles: string[]; p_user_id: string }

@@ -39,6 +39,7 @@ interface CandidateJobRow {
   authoritative_mask_ref: PaperDollPrivateAssetRef;
   edit_mask_ref: PaperDollPrivateAssetRef;
   assembly_context_ref: PaperDollPrivateAssetRef | null;
+  manual_output_ref: PaperDollPrivateAssetRef | null;
   transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number };
   selection_kind: "whole-layer" | "rectangle" | "brush";
   initiated_by: string;
@@ -49,6 +50,28 @@ interface ProviderResult {
   contentType: string;
   endpoint: string;
   revisedPrompt?: string;
+}
+
+type WorkerState = "offline" | "ready" | "busy" | "error";
+
+async function setWorkerHeartbeat(
+  client: ServiceClient,
+  input: { organizationId: string; status: WorkerState; currentJobId: string | null; errorMessage?: string | null },
+) {
+  const heartbeatClient = client as unknown as {
+    from(table: "paper_doll_worker_heartbeats"): {
+      upsert(values: Record<string, unknown>, options: { onConflict: string }): Promise<{ error: { message: string } | null }>;
+    };
+  };
+  const { error } = await heartbeatClient.from("paper_doll_worker_heartbeats").upsert({
+    organization_id: input.organizationId,
+    worker_key: "paper-doll-candidate-worker-v1",
+    worker_status: input.status,
+    current_job_id: input.currentJobId,
+    error_message: input.errorMessage ?? null,
+    last_seen_at: new Date().toISOString(),
+  }, { onConflict: "organization_id,worker_key" });
+  if (error) throw new Error(`Worker heartbeat failed: ${error.message}`);
 }
 
 function cliArg(name: string): string | undefined {
@@ -183,15 +206,27 @@ async function dispatchGoogle(job: CandidateJobRow, references: ProviderReferenc
   return { bytes: Buffer.from(image.data, "base64"), contentType: image.mimeType, endpoint: dispatch.endpoint };
 }
 
-async function providerResult(job: CandidateJobRow, references: ProviderReference[]): Promise<ProviderResult> {
+async function providerResult(
+  job: CandidateJobRow,
+  references: ProviderReference[],
+  manualOutput?: Buffer,
+): Promise<ProviderResult> {
   if (job.provider === "openai") return dispatchOpenAI(job, references);
   if (job.provider === "google") return dispatchGoogle(job, references);
+  if (job.provider === "manual") {
+    if (!manualOutput) throw new Error("Manual job is missing its immutable uploaded output.");
+    return {
+      bytes: manualOutput,
+      contentType: job.manual_output_ref?.contentType ?? "image/png",
+      endpoint: "manual-upload",
+    };
+  }
   const outputPath = cliArg("--provider-output");
   if (!outputPath) throw new Error(`${job.provider} jobs require --provider-output with an explicit rendered/uploaded file.`);
   return {
     bytes: await readFile(path.resolve(outputPath)),
     contentType: "image/png",
-    endpoint: job.provider === "blender" ? "local-blender-render" : "manual-upload",
+    endpoint: "local-blender-render",
   };
 }
 
@@ -256,17 +291,24 @@ export async function processCandidateJob(input: {
     authoritativeMask: job.authoritative_mask_ref,
     editMask: job.edit_mask_ref,
     assemblyContext: job.assembly_context_ref ?? undefined,
+    manualOutput: job.manual_output_ref ?? undefined,
     transform: job.transform,
     selectionKind: job.selection_kind,
   });
 
   let tracker: GenerationAttemptTracker | null = null;
   try {
-    const [source, authority, edit, assembly] = await Promise.all([
+    await setWorkerHeartbeat(input.client, {
+      organizationId: job.organization_id,
+      status: "busy",
+      currentJobId: job.id,
+    });
+    const [source, authority, edit, assembly, manualOutput] = await Promise.all([
       downloadVerified(input.client, job.source_ref),
       downloadVerified(input.client, job.authoritative_mask_ref),
       downloadVerified(input.client, job.edit_mask_ref),
       job.assembly_context_ref ? downloadVerified(input.client, job.assembly_context_ref) : undefined,
+      job.manual_output_ref ? downloadVerified(input.client, job.manual_output_ref) : undefined,
     ]);
     const references = referencesFor(job, { source, authority, edit, assembly });
     tracker = await beginGenerationAttempt(input.client, {
@@ -280,6 +322,7 @@ export async function processCandidateJob(input: {
       referenceSha256s: [
         job.source_ref.sha256,
         ...(job.assembly_context_ref ? [job.assembly_context_ref.sha256] : []),
+        ...(job.manual_output_ref ? [job.manual_output_ref.sha256] : []),
         job.authoritative_mask_ref.sha256,
         job.edit_mask_ref.sha256,
       ],
@@ -288,7 +331,7 @@ export async function processCandidateJob(input: {
     if (!tracker.id) throw new Error("Generation attempt could not be recorded; provider dispatch was withheld.");
     await updateJob(input.client, job, { status: "running", generation_attempt_id: tracker.id });
 
-    const generated = await providerResult(job, references);
+    const generated = await providerResult(job, references, manualOutput);
     await updateJob(input.client, job, { status: "clamping" });
     const clamped = await clampCandidate({ source, provider: generated.bytes, editMask: edit, authoritativeMask: authority });
     const output = await uploadAndVerify(input.client, job, clamped.output);
@@ -359,6 +402,15 @@ export async function processCandidateJob(input: {
       outputUrl: `${output.bucket}/${output.path}`,
       revisedPrompt: generated.revisedPrompt,
     });
+    try {
+      await setWorkerHeartbeat(input.client, {
+        organizationId: job.organization_id,
+        status: "offline",
+        currentJobId: null,
+      });
+    } catch (heartbeatError) {
+      console.error("Unable to mark candidate worker offline:", heartbeatError);
+    }
     return { jobId: job.id, candidateVersionId: String(candidateVersionId), output };
   } catch (error) {
     await completeGenerationAttempt(input.client, tracker, {
@@ -373,6 +425,16 @@ export async function processCandidateJob(input: {
       });
     } catch (statusError) {
       console.error("Unable to mark candidate job failed:", statusError);
+    }
+    try {
+      await setWorkerHeartbeat(input.client, {
+        organizationId: job.organization_id,
+        status: "error",
+        currentJobId: job.id,
+        errorMessage: error instanceof Error ? error.message.slice(0, 2000) : String(error).slice(0, 2000),
+      });
+    } catch (heartbeatError) {
+      console.error("Unable to mark candidate worker error:", heartbeatError);
     }
     throw error;
   }
