@@ -23,10 +23,12 @@ import {
 import { downloadImageLibraryCandidate } from "@/lib/paperDoll/libraryCandidateSource";
 import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
 import {
+  approvedCandidateDetails,
   candidateAuditReason,
   candidateAuthorityBlocker,
   candidatePreviewDetails,
   selectCandidateForReview,
+  type ApprovedCandidateDetails,
 } from "@/lib/paperDoll/candidateReviewPolicy";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
@@ -47,6 +49,7 @@ interface CandidateActionPanelProps {
   selectionReady: boolean;
   serializeMask: () => Promise<string>;
   onInspectionChange: (inspection: CandidateInspection | null) => void;
+  onApprovedChange: (approved: ApprovedCandidateDetails | null) => void;
   reviewOnly?: boolean;
 }
 
@@ -110,6 +113,7 @@ export function CandidateActionPanel({
   selectionReady,
   serializeMask,
   onInspectionChange,
+  onApprovedChange,
   reviewOnly = false,
 }: CandidateActionPanelProps) {
   const queryClient = useQueryClient();
@@ -154,8 +158,10 @@ export function CandidateActionPanel({
   const latest = selectCandidateForReview(selectedHistory);
   const parentMaskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
   const candidateMaskBlocker = candidateAuthorityBlocker(latest);
+  const approved = useMemo(() => approvedCandidateDetails(latest), [latest]);
 
   useEffect(() => onInspectionChange(inspectionFrom(latest, candidateMaskBlocker)), [latest, candidateMaskBlocker, onInspectionChange]);
+  useEffect(() => onApprovedChange(approved), [approved, onApprovedChange]);
 
   const requirement = useMemo(() => {
     if (!asset) return null;
@@ -370,6 +376,7 @@ export function CandidateActionPanel({
         </div>
       )}
       {message && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#6ee7a8" }}><CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0" />{message}</div>}
+      {approved && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#6ee7a8" }}><ShieldCheck className="mt-0.5 h-3 w-3 shrink-0" />Pixels approved · {approved.componentVersionId.slice(0, 8)} · {approved.imageSha256.slice(0, 12)}…</div>}
       {error && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#ef8d7d" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />{error}</div>}
 
       <div className="border-t pt-2" style={{ borderColor: "var(--darkroom-border-subtle)" }}>

@@ -30,6 +30,7 @@ import {
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
+import type { ApprovedCandidateDetails } from "@/lib/paperDoll/candidateReviewPolicy";
 import {
   applyCandidateAssetPreview,
   selectWorkbenchBody,
@@ -50,6 +51,7 @@ import {
   resizePlacementAroundContact,
   type FamilyPlacementTransform,
 } from "./familyPlacementModel";
+import { canEnterFamilyFit } from "./workbenchStageModel";
 
 interface ProductionCandidateWorkbenchProps {
   organizationId: string | null;
@@ -99,9 +101,11 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const [candidateTransform, setCandidateTransform] = useState(IDENTITY_TRANSFORM);
   const [familyTransform, setFamilyTransform] = useState<FamilyPlacementTransform>(IDENTITY_FAMILY_PLACEMENT);
   const [inspection, setInspection] = useState<CandidateInspection | null>(null);
+  const [approvedCandidate, setApprovedCandidate] = useState<ApprovedCandidateDetails | null>(null);
   const initializedReleaseRef = useRef<string | null>(null);
   const mask = useCandidateMask();
   const handleInspectionChange = useCallback((next: CandidateInspection | null) => setInspection(next), []);
+  const handleApprovedChange = useCallback((next: ApprovedCandidateDetails | null) => setApprovedCandidate(next), []);
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
@@ -126,20 +130,26 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     const body = bodies.find((asset) => asset.componentVersionId === selectedBodyId);
     const component = components.find((asset) => asset.componentVersionId === selectedLayerId);
     const layers = [body, component].filter((asset): asset is ReleaseAsset => Boolean(asset && !hiddenIds.has(asset.componentVersionId)));
-    if (!shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)) return layers;
-    return layers.map((asset) => asset.componentVersionId === selectedLayerId && inspection?.alphaBounds
-      ? applyCandidateAssetPreview(asset, { imageUrl: inspection.imageUrl!, alphaBounds: inspection.alphaBounds })
+    const preview = mode === "family-fit" ? approvedCandidate : inspection;
+    if (!shouldMountCandidatePreview(mode, preview?.imageUrl ?? null)) return layers;
+    return layers.map((asset) => asset.componentVersionId === selectedLayerId && preview?.alphaBounds
+      ? applyCandidateAssetPreview(asset, { imageUrl: preview.imageUrl, alphaBounds: preview.alphaBounds })
       : asset,
     );
-  }, [bodies, components, hiddenIds, inspection?.alphaBounds, inspection?.imageUrl, mode, selectedBodyId, selectedLayerId]);
+  }, [approvedCandidate, bodies, components, hiddenIds, inspection, mode, selectedBodyId, selectedLayerId]);
 
   useEffect(() => {
     setCandidateTransform(IDENTITY_TRANSFORM);
     setInspection(null);
+    setApprovedCandidate(null);
     mask.reset();
     // Resetting candidate-local state is intentional when the immutable source layer changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLayerId]);
+
+  useEffect(() => {
+    if (mode === "family-fit" && !canEnterFamilyFit({ approved: approvedCandidate })) setMode("edit-lab");
+  }, [approvedCandidate, mode]);
 
   if (!organizationId) {
     return <Unavailable title="Organization context required">The private release ledger cannot be resolved without an organization. No local images or query-string preview will substitute for it.</Unavailable>;
@@ -160,7 +170,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const candidateEditingEnabled = mode === "edit-lab"
     && selectedAsset?.slot !== "body"
     && Boolean(selectedAsset?.geometryMaskUrl);
-  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot === "roller";
+  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot === "roller" && Boolean(approvedCandidate);
   const activeTransform = mode === "family-fit" ? familyTransform : candidateTransform;
   const selectionReady = selectionKind === "whole-layer"
     || (selectionKind === "rectangle" && Boolean(mask.rectangle))
@@ -176,6 +186,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   };
 
   const enterMode = (nextMode: AssemblyEditMode) => {
+    if (nextMode === "family-fit" && !canEnterFamilyFit({ approved: approvedCandidate })) return;
     setMode(nextMode);
     if (nextMode !== "family-fit") return;
     const amber = bodies.find((asset) => asset.variantKey === "AMB") ?? bodies[0];
@@ -217,7 +228,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         </div>
         <div className="flex overflow-hidden rounded border" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
           {(["release-lock", "family-fit", "edit-lab"] as AssemblyEditMode[]).map((item) => (
-            <button key={item} type="button" onClick={() => enterMode(item)} className="flex items-center gap-1.5 border-r px-3 py-2 text-[9px] uppercase tracking-[0.14em] last:border-0" style={{ borderColor: "var(--darkroom-border-subtle)", background: mode === item ? "rgba(215,168,95,0.12)" : "rgba(0,0,0,0.12)", color: mode === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>
+            <button key={item} type="button" disabled={item === "family-fit" && !approvedCandidate} title={item === "family-fit" && !approvedCandidate ? "Approve pixels in Edit Lab first" : undefined} onClick={() => enterMode(item)} className="flex items-center gap-1.5 border-r px-3 py-2 text-[9px] uppercase tracking-[0.14em] last:border-0 disabled:cursor-not-allowed disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", background: mode === item ? "rgba(215,168,95,0.12)" : "rgba(0,0,0,0.12)", color: mode === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>
               {item === "release-lock" ? <LockKeyhole className="h-3 w-3" /> : item === "family-fit" ? <Move3d className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item === "family-fit" ? "family fit" : item.replace("-", " ")}
             </button>
           ))}
@@ -345,6 +356,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               selectionReady={selectionReady}
               serializeMask={() => mask.serializeMask(selectionKind)}
               onInspectionChange={handleInspectionChange}
+              onApprovedChange={handleApprovedChange}
               reviewOnly={mode === "family-fit"}
             />
           </div>
@@ -356,8 +368,10 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       <RollonLineup
         assets={query.data.assets}
         rollerVariantKey={selectedAsset?.slot === "roller" ? inspection?.variantLabel ?? selectedAsset.variantKey : undefined}
-        rollerImageUrlOverride={selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
-          ? inspection?.imageUrl ?? undefined
+        rollerImageUrlOverride={selectedAsset?.slot === "roller" && mode === "family-fit" && approvedCandidate
+          ? approvedCandidate.imageUrl
+          : selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
+            ? inspection?.imageUrl ?? undefined
           : undefined}
         placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT}
       />
