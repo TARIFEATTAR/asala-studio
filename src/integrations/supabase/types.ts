@@ -4251,51 +4251,6 @@ export type Database = {
           },
         ]
       }
-      paper_doll_worker_heartbeats: {
-        Row: {
-          current_job_id: string | null
-          error_message: string | null
-          id: string
-          last_seen_at: string
-          organization_id: string
-          worker_key: string
-          worker_status: string
-        }
-        Insert: {
-          current_job_id?: string | null
-          error_message?: string | null
-          id?: string
-          last_seen_at?: string
-          organization_id: string
-          worker_key: string
-          worker_status: string
-        }
-        Update: {
-          current_job_id?: string | null
-          error_message?: string | null
-          id?: string
-          last_seen_at?: string
-          organization_id?: string
-          worker_key?: string
-          worker_status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "paper_doll_worker_heartbeats_job_org_fk"
-            columns: ["current_job_id", "organization_id"]
-            isOneToOne: false
-            referencedRelation: "paper_doll_candidate_jobs"
-            referencedColumns: ["id", "organization_id"]
-          },
-          {
-            foreignKeyName: "paper_doll_worker_heartbeats_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       paper_doll_component_versions: {
         Row: {
           alpha_bounds: Json
@@ -4649,6 +4604,51 @@ export type Database = {
           },
           {
             foreignKeyName: "paper_doll_qa_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paper_doll_worker_heartbeats: {
+        Row: {
+          current_job_id: string | null
+          error_message: string | null
+          id: string
+          last_seen_at: string
+          organization_id: string
+          worker_key: string
+          worker_status: string
+        }
+        Insert: {
+          current_job_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_seen_at?: string
+          organization_id: string
+          worker_key: string
+          worker_status: string
+        }
+        Update: {
+          current_job_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_seen_at?: string
+          organization_id?: string
+          worker_key?: string
+          worker_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_doll_worker_heartbeats_job_org_fk"
+            columns: ["current_job_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "paper_doll_candidate_jobs"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "paper_doll_worker_heartbeats_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
