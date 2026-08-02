@@ -6,6 +6,10 @@ import assert from "node:assert/strict";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const appSource = readFileSync(resolve(currentDir, "App.tsx"), "utf8");
+const bestBottlesStudioSource = readFileSync(
+  resolve(currentDir, "pages", "BestBottlesStudio.tsx"),
+  "utf8",
+);
 
 test("Best Bottles Studio deep-link route is registered in both app route tables", () => {
   const studioRouteMatches = appSource.match(
@@ -13,4 +17,12 @@ test("Best Bottles Studio deep-link route is registered in both app route tables
   );
 
   assert.equal(studioRouteMatches?.length, 2);
+});
+
+test("CYL-9ML Studio mounts ReleaseWorkbench without removing legacy Components", () => {
+  assert.match(bestBottlesStudioSource, /isCyl9ReleaseWorkbenchGroup/);
+  assert.match(bestBottlesStudioSource, /<ReleaseWorkbench/);
+  assert.match(bestBottlesStudioSource, /<ComponentsTabPanel/);
+  assert.match(bestBottlesStudioSource, /isReleaseWorkbenchView\s*\?/);
+  assert.match(bestBottlesStudioSource, /RELEASE_TABS/);
 });

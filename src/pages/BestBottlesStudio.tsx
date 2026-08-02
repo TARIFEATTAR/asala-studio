@@ -12,12 +12,8 @@
  * LEDIndicator / LCDDisplay / FirmwarePresetButton — so the Studio feels
  * like another mode of the same instrument, not a foreign surface.
  *
- * Scope of this commit (shell only):
- * - Loads productGroup + variants from Convex
- * - Renders header, sidebar (SKU list + progress), and tab switcher
- * - Three tabs exist but content is skeleton: Masters / Components / Compose
- *
- * Master creation, component generation, and compositor are follow-up commits.
+ * Release-capable families mount the versioned Paper-Doll Release Workbench in
+ * the existing shell. Other families retain the legacy Components/Compose path.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -33,6 +29,12 @@ import {
 } from "@/components/darkroom/LEDIndicator";
 import { MastersTabPanel } from "@/components/darkroom/MastersTabPanel";
 import { ComponentsTabPanel } from "@/components/darkroom/ComponentsTabPanel";
+import { AssemblyView } from "@/components/paper-doll/AssemblyView";
+import { EvidenceView } from "@/components/paper-doll/EvidenceView";
+import { LineupView } from "@/components/paper-doll/LineupView";
+import { MatrixView } from "@/components/paper-doll/MatrixView";
+import { PublishPreviewView } from "@/components/paper-doll/PublishPreviewView";
+import { ReleaseWorkbench } from "@/components/paper-doll/ReleaseWorkbench";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -63,6 +65,13 @@ import {
   buildBestBottlesGenerationIdentity,
   getBestBottlesGenerationIdentityIssue,
 } from "@/lib/bestBottlesGenerationIdentity";
+import {
+  workbenchReleaseAssetUrlsByPath,
+  workbenchReleaseManifest,
+  workbenchReleaseManifestSha256,
+  workbenchReleaseValidation,
+} from "@/generated/paperDoll/cyl9Release.generated";
+import { isCyl9ReleaseWorkbenchGroup } from "@/lib/paperDoll/workbenchModel";
 import "@/styles/darkroom.css";
 
 type StudioTab = "masters" | "components" | "compose";
@@ -82,6 +91,15 @@ const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
     id: "compose",
     label: "Compose",
     description: "Layer preview + variant export",
+  },
+];
+
+const RELEASE_TABS: Array<{ id: StudioTab; label: string; description: string }> = [
+  TABS[0],
+  {
+    id: "components",
+    label: "Release Workbench",
+    description: "Assembly · matrix · lineup · publish",
   },
 ];
 
@@ -194,6 +212,13 @@ export default function BestBottlesStudio() {
 
   const studioData = hydratedData ?? data;
   const studioApplicatorBuckets: ApplicatorBucket[] = studioData?.applicatorBuckets ?? [];
+  const usesReleaseWorkbench = isCyl9ReleaseWorkbenchGroup(studioData?.group.slug ?? groupSlug);
+  const studioTabs = usesReleaseWorkbench ? RELEASE_TABS : TABS;
+  const isReleaseWorkbenchView = usesReleaseWorkbench && activeTab === "components";
+
+  useEffect(() => {
+    if (usesReleaseWorkbench && activeTab === "compose") setActiveTab("components");
+  }, [activeTab, usesReleaseWorkbench]);
 
   useEffect(() => {
     if (!studioData?.variants?.length) return;
@@ -294,7 +319,12 @@ export default function BestBottlesStudio() {
               {data.group.color ? ` · ${data.group.color}` : ""}
               {data.group.neckThreadSize ? ` · ${data.group.neckThreadSize}` : ""}
             </LCDDisplay>
-            <LCDCounter current={0} total={componentTargetCount} />
+            <LCDCounter
+              current={usesReleaseWorkbench
+                ? workbenchReleaseManifest.assets.filter((asset) => asset.approvalStatus === "approved").length
+                : 0}
+              total={usesReleaseWorkbench ? workbenchReleaseManifest.assets.length : componentTargetCount}
+            />
             <span className="text-xs" style={{ color: "var(--darkroom-text-dim)" }}>
               components
             </span>
@@ -329,7 +359,7 @@ export default function BestBottlesStudio() {
       {studioData && (
         <div className="grid grid-cols-12 gap-4 p-4">
           {/* LEFT RAIL — SKU list + family metadata */}
-          <aside className="camera-panel col-span-3 min-h-[600px]">
+          {!isReleaseWorkbenchView && <aside className="camera-panel col-span-3 min-h-[600px]">
             <CameraPanelHeader
               title="Variants"
               icon={<Grid3x3 className="w-3.5 h-3.5" />}
@@ -412,12 +442,12 @@ export default function BestBottlesStudio() {
                 </div>
               </div>
             </div>
-          </aside>
+          </aside>}
 
           {/* MAIN — tab switcher + content */}
-          <main className="camera-panel col-span-9 min-h-[600px]">
+          <main className={isReleaseWorkbenchView ? "camera-panel col-span-12 min-h-[600px]" : "camera-panel col-span-9 min-h-[600px]"}>
             <CameraPanelHeader
-              title={TABS.find((t) => t.id === activeTab)?.label ?? "Studio"}
+              title={studioTabs.find((t) => t.id === activeTab)?.label ?? "Studio"}
               icon={
                 activeTab === "masters" ? (
                   <Beaker className="w-3.5 h-3.5" />
@@ -429,9 +459,9 @@ export default function BestBottlesStudio() {
               }
               ledState="off"
             />
-            <div className="camera-panel__content space-y-4">
+            <div className={isReleaseWorkbenchView ? "camera-panel__content space-y-4 !p-2" : "camera-panel__content space-y-4"}>
               <div className="flex gap-2 flex-wrap">
-                {TABS.map((t) => (
+                {studioTabs.map((t) => (
                   <FirmwarePresetButton
                     key={t.id}
                     label={t.label}
@@ -443,10 +473,12 @@ export default function BestBottlesStudio() {
               </div>
 
               <div
-                className="rounded p-6 border min-h-[400px] max-h-[calc(100vh-260px)] overflow-y-auto"
+                className={isReleaseWorkbenchView
+                  ? "min-h-[400px] overflow-visible"
+                  : "rounded p-6 border min-h-[400px] max-h-[calc(100vh-260px)] overflow-y-auto"}
                 style={{
-                  borderColor: "var(--darkroom-border-subtle)",
-                  background: "var(--darkroom-surface)",
+                  borderColor: isReleaseWorkbenchView ? "transparent" : "var(--darkroom-border-subtle)",
+                  background: isReleaseWorkbenchView ? "transparent" : "var(--darkroom-surface)",
                 }}
               >
                 {activeTab === "masters" && (
@@ -596,15 +628,32 @@ export default function BestBottlesStudio() {
                 )}
 
                 {activeTab === "components" && (
-                  <ComponentsTabPanel
-                    applicatorBuckets={studioApplicatorBuckets}
-                    variants={studioData.variants}
-                    familyName={studioData.group.family}
-                    cohortSlug={studioData.group.slug ?? groupSlug ?? null}
-                  />
+                  usesReleaseWorkbench ? (
+                    <ReleaseWorkbench
+                      manifest={workbenchReleaseManifest}
+                      validation={workbenchReleaseValidation}
+                      manifestSha256={workbenchReleaseManifestSha256}
+                      assetUrlsByPath={workbenchReleaseAssetUrlsByPath}
+                      applicatorBuckets={studioApplicatorBuckets}
+                      renderView={(view, state, setState) => {
+                        if (view === "assembly") return <AssemblyView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
+                        if (view === "matrix") return <MatrixView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} state={state} onStateChange={setState} />;
+                        if (view === "lineup") return <LineupView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
+                        if (view === "evidence") return <EvidenceView manifest={workbenchReleaseManifest} />;
+                        return <PublishPreviewView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} />;
+                      }}
+                    />
+                  ) : (
+                    <ComponentsTabPanel
+                      applicatorBuckets={studioApplicatorBuckets}
+                      variants={studioData.variants}
+                      familyName={studioData.group.family}
+                      cohortSlug={studioData.group.slug ?? groupSlug ?? null}
+                    />
+                  )
                 )}
 
-                {activeTab === "compose" && (
+                {activeTab === "compose" && !usesReleaseWorkbench && (
                   <div
                     className="text-sm space-y-3"
                     style={{ color: "var(--darkroom-text-muted)" }}

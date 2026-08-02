@@ -153,12 +153,12 @@
 - Modify: `src/pages/BestBottlesStudio.tsx`
 - Modify: `src/App.routes.test.ts`
 
-- [ ] Add an integration-level route/source test proving the canonical CYL-9ML slug reaches `ReleaseWorkbench` and non-release groups retain `ComponentsTabPanel` plus the legacy Compose skeleton.
-- [ ] For the canonical CYL-9ML group, change Components to `Release Workbench`, render `ReleaseWorkbench`, and remove Compose from the visible tab list. Preserve Masters exactly.
-- [ ] Leave every non-release family path unchanged.
-- [ ] Confirm the Studio header counter uses the workbench denominator for CYL-9ML and the legacy count elsewhere.
-- [ ] Run the focused paper-doll tests, `npm run build`, and the existing Best Bottles test suite affected by Studio routing.
-- [ ] Commit: `feat(best-bottles): mount CYL-9ML release workbench`
+- [x] Add an integration-level route/source test proving the canonical CYL-9ML slug reaches `ReleaseWorkbench` and non-release groups retain `ComponentsTabPanel` plus the legacy Compose skeleton.
+- [x] For the canonical CYL-9ML group, change Components to `Release Workbench`, render `ReleaseWorkbench`, and remove Compose from the visible tab list. Preserve Masters exactly.
+- [x] Leave every non-release family path unchanged.
+- [x] Confirm the Studio header counter uses the workbench denominator for CYL-9ML and the legacy count elsewhere.
+- [x] Run the focused paper-doll tests, `npm run build`, and the existing Best Bottles test suite affected by Studio routing.
+- [x] Commit: `feat(best-bottles): mount CYL-9ML release workbench`
 
 ## Task 9: Browser verification and evidence
 
