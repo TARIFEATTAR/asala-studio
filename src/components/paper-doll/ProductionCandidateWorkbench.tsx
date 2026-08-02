@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowDown,
@@ -32,11 +32,17 @@ import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
 import type { ApprovedCandidateDetails } from "@/lib/paperDoll/candidateReviewPolicy";
 import {
+  loadSharedPlacement,
+  lockSharedPlacement,
+  type SharedPlacementRecord,
+} from "@/lib/paperDoll/placementRepository";
+import {
   applyCandidateAssetPreview,
   selectWorkbenchBody,
   shouldMountCandidatePreview,
 } from "./candidatePreviewModel";
 import { RollonLineup } from "./RollonLineup";
+import { SharedPlacementPanel } from "./SharedPlacementPanel";
 import {
   type AssemblyEditMode,
   type CandidateSelectionKind,
@@ -46,9 +52,12 @@ import {
   CYL9_ROLLER_CONTACT,
   IDENTITY_FAMILY_PLACEMENT,
   deriveContactPlacement,
+  fromSharedPlacementRecord,
   initialFamilyFitState,
   nudgePlacement,
+  placementTransformsEqual,
   resizePlacementAroundContact,
+  toPlacementLockTransform,
   type FamilyPlacementTransform,
 } from "./familyPlacementModel";
 import { canEnterFamilyFit } from "./workbenchStageModel";
@@ -62,6 +71,7 @@ type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 
 const IDENTITY_TRANSFORM = { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 };
 const CYL9_FAMILY_KEY = "CYL-9ML";
+const CYL9_ROLLER_GEOMETRY_KEY = "fitment__roller-ball__17-415__v1";
 const MEASURED_ROLLER_PLACEMENT = deriveContactPlacement(CYL9_ROLLER_CONTACT);
 
 function ToneBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "warning" }) {
@@ -82,6 +92,7 @@ function Unavailable({ title, children }: { title: string; children: ReactNode }
 }
 
 export function ProductionCandidateWorkbench({ organizationId, familyKey }: ProductionCandidateWorkbenchProps) {
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["paper-doll-production-workbench", organizationId, familyKey],
     queryFn: () => loadPaperDollReleaseWorkbench(
@@ -102,13 +113,64 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const [familyTransform, setFamilyTransform] = useState<FamilyPlacementTransform>(IDENTITY_FAMILY_PLACEMENT);
   const [inspection, setInspection] = useState<CandidateInspection | null>(null);
   const [approvedCandidate, setApprovedCandidate] = useState<ApprovedCandidateDetails | null>(null);
+  const approvedComponentVersionId = approvedCandidate?.componentVersionId ?? null;
+  const [approverDisplayName, setApproverDisplayName] = useState("");
+  const [placementApprovalNote, setPlacementApprovalNote] = useState("");
   const initializedReleaseRef = useRef<string | null>(null);
+  const appliedPlacementRef = useRef<string | null>(null);
   const mask = useCandidateMask();
   const handleInspectionChange = useCallback((next: CandidateInspection | null) => setInspection(next), []);
   const handleApprovedChange = useCallback((next: ApprovedCandidateDetails | null) => setApprovedCandidate(next), []);
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
+  const placementQueryKey = [
+    "paper-doll-shared-placement",
+    organizationId,
+    CYL9_FAMILY_KEY,
+    CYL9_ROLLER_GEOMETRY_KEY,
+    approvedCandidate?.authorityMaskSha256 ?? null,
+  ] as const;
+  const placementQuery = useQuery({
+    queryKey: placementQueryKey,
+    queryFn: () => loadSharedPlacement(
+      supabase as unknown as Parameters<typeof loadSharedPlacement>[0],
+      {
+        organizationId: organizationId!,
+        familyKey: CYL9_FAMILY_KEY,
+        fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+        authorityMaskSha256: approvedCandidate!.authorityMaskSha256,
+      },
+    ),
+    enabled: Boolean(organizationId && approvedCandidate),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const placementMutation = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !approvedCandidate) throw new Error("Approve pixels before locking placement.");
+      return lockSharedPlacement(
+        supabase as unknown as Parameters<typeof lockSharedPlacement>[0],
+        {
+          organizationId,
+          familyKey: CYL9_FAMILY_KEY,
+          fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+          calibrationComponentVersionId: approvedCandidate.componentVersionId,
+          expectedAuthorityMaskSha256: approvedCandidate.authorityMaskSha256,
+          canvas: { widthPx: 2080, heightPx: 2288 },
+          transform: toPlacementLockTransform(familyTransform),
+          compatibleBodyComponentVersionIds: bodies.map((body) => body.componentVersionId),
+          approverDisplayName,
+          approvalNote: placementApprovalNote,
+        },
+      );
+    },
+    onSuccess: (placement) => {
+      queryClient.setQueryData<SharedPlacementRecord>(placementQueryKey, placement);
+      appliedPlacementRef.current = placement.id;
+      setFamilyTransform(fromSharedPlacementRecord(placement));
+    },
+  });
 
   useEffect(() => {
     if (!query.data) return;
@@ -116,7 +178,10 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     if (initializedReleaseRef.current === releaseIdentity) return;
     const initial = initialFamilyFitState({ familyKey, assets: query.data.assets });
     initializedReleaseRef.current = releaseIdentity;
-    setMode(initial.mode);
+    // Family Fit is a gated stage. A release with roller assets may suggest the
+    // measured starting transform, but it must still open in Edit Lab until the
+    // exact immutable approved child has resolved.
+    setMode(initial.mode === "family-fit" ? "edit-lab" : initial.mode);
     setSelectedBodyId(initial.selectedBodyId);
     setSelectedLayerId(initial.selectedLayerId);
     setFamilyTransform(initial.transform);
@@ -148,6 +213,18 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   }, [selectedLayerId]);
 
   useEffect(() => {
+    appliedPlacementRef.current = null;
+    if (approvedComponentVersionId) setFamilyTransform(MEASURED_ROLLER_PLACEMENT);
+  }, [approvedComponentVersionId]);
+
+  useEffect(() => {
+    const placement = placementQuery.data;
+    if (!placement || appliedPlacementRef.current === placement.id) return;
+    appliedPlacementRef.current = placement.id;
+    setFamilyTransform(fromSharedPlacementRecord(placement));
+  }, [placementQuery.data]);
+
+  useEffect(() => {
     if (mode === "family-fit" && !canEnterFamilyFit({ approved: approvedCandidate })) setMode("edit-lab");
   }, [approvedCandidate, mode]);
 
@@ -175,6 +252,14 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const selectionReady = selectionKind === "whole-layer"
     || (selectionKind === "rectangle" && Boolean(mask.rectangle))
     || (selectionKind === "brush" && mask.brushStrokes.length > 0);
+  const lockedPlacement = placementQuery.data ?? null;
+  const placementIsExact = Boolean(lockedPlacement
+    && approvedCandidate
+    && lockedPlacement.authorityMaskSha256 === approvedCandidate.authorityMaskSha256
+    && placementTransformsEqual(familyTransform, lockedPlacement.transform));
+  const inheritedVariantLabels = components
+    .filter((asset) => asset.slot === "roller" && asset.geometryMaskReference?.sha256 === approvedCandidate?.authorityMaskSha256)
+    .map((asset) => asset.materialVariant);
 
   const toggleVisibility = (id: string) => {
     setHiddenIds((current) => {
@@ -190,10 +275,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     setMode(nextMode);
     if (nextMode !== "family-fit") return;
     const amber = bodies.find((asset) => asset.variantKey === "AMB") ?? bodies[0];
-    const roller = components.find((asset) => asset.slot === "roller");
     if (amber) setSelectedBodyId(amber.componentVersionId);
-    if (roller) setSelectedLayerId(roller.componentVersionId);
-    setFamilyTransform(MEASURED_ROLLER_PLACEMENT);
+    setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : MEASURED_ROLLER_PLACEMENT);
   };
 
   const setFamilyAxis = (axis: "translateXPx" | "translateYPx", value: number) => {
@@ -280,7 +363,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             </div>
           </div>
 
-          <button type="button" onClick={() => { if (mode === "family-fit") setFamilyTransform(IDENTITY_FAMILY_PLACEMENT); else setCandidateTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset {mode === "family-fit" ? "family placement" : "candidate edit"}</button>
+          <button type="button" onClick={() => { if (mode === "family-fit") setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : MEASURED_ROLLER_PLACEMENT); else setCandidateTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset {mode === "family-fit" ? "family placement" : "candidate edit"}</button>
         </aside>
 
         <div className="rounded border p-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "rgba(0,0,0,0.12)" }}>
@@ -340,8 +423,27 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
                 <button type="button" onClick={() => setFamilyTransform(MEASURED_ROLLER_PLACEMENT)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>Use calibrated flush · 262 px</button>
-                <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: "#f2c078" }}>Visual candidate only · placement version not written</span>
+                <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: placementIsExact ? "#6ee7a8" : "#f2c078" }}>{placementIsExact ? `Placement ${lockedPlacement?.id.slice(0, 8)}… loaded` : lockedPlacement ? "Draft changes · lock a new immutable version" : "Placement version not written"}</span>
               </div>
+              <SharedPlacementPanel
+                approved={approvedCandidate}
+                expectedAuthorityMaskSha256={selectedAsset?.geometryMaskReference?.sha256 ?? null}
+                bodyPlates={bodies}
+                inheritedVariantLabels={inheritedVariantLabels}
+                transform={familyTransform}
+                lockedPlacement={lockedPlacement}
+                approverDisplayName={approverDisplayName}
+                approvalNote={placementApprovalNote}
+                lockPending={placementMutation.isPending}
+                lockError={placementMutation.error instanceof Error
+                  ? placementMutation.error.message
+                  : placementQuery.error instanceof Error
+                    ? placementQuery.error.message
+                    : null}
+                onApproverDisplayNameChange={setApproverDisplayName}
+                onApprovalNoteChange={setPlacementApprovalNote}
+                onLock={() => placementMutation.mutate()}
+              />
             </div>
           ) : null}
           <div className="mt-3">
@@ -374,6 +476,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             ? inspection?.imageUrl ?? undefined
           : undefined}
         placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT}
+        placementId={mode === "family-fit" && placementIsExact ? lockedPlacement?.id : undefined}
       />
 
       <footer className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(242,192,120,0.25)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>

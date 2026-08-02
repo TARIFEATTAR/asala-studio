@@ -48,6 +48,46 @@ function roundPlacementValue(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
+export interface PlacementLockTransform {
+  translateXPx: number;
+  translateYPx: number;
+  uniformScale: number;
+}
+
+export function toPlacementLockTransform(transform: FamilyPlacementTransform): PlacementLockTransform {
+  const issues = validateFamilyPlacement(transform);
+  if (issues.length > 0) throw new Error(issues.join(" "));
+  if (transform.scaleX <= 0) throw new Error("Family placement scale must be positive.");
+  return {
+    translateXPx: roundPlacementValue(transform.translateXPx),
+    translateYPx: roundPlacementValue(transform.translateYPx),
+    uniformScale: roundPlacementValue(transform.scaleX),
+  };
+}
+
+export function fromSharedPlacementRecord(record: { transform: PlacementLockTransform }): FamilyPlacementTransform {
+  return {
+    translateXPx: roundPlacementValue(record.transform.translateXPx),
+    translateYPx: roundPlacementValue(record.transform.translateYPx),
+    scaleX: roundPlacementValue(record.transform.uniformScale),
+    scaleY: roundPlacementValue(record.transform.uniformScale),
+  };
+}
+
+export function placementTransformsEqual(
+  draft: FamilyPlacementTransform,
+  locked: PlacementLockTransform,
+): boolean {
+  try {
+    const serialized = toPlacementLockTransform(draft);
+    return serialized.translateXPx === roundPlacementValue(locked.translateXPx)
+      && serialized.translateYPx === roundPlacementValue(locked.translateYPx)
+      && serialized.uniformScale === roundPlacementValue(locked.uniformScale);
+  } catch {
+    return false;
+  }
+}
+
 export function deriveContactPlacement(measurement: ContactPlacementMeasurement): FamilyPlacementTransform {
   const scale = roundPlacementValue(measurement.targetOuterWidthPx / measurement.sourceOuterWidthPx);
   return {

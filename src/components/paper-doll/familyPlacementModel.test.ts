@@ -9,9 +9,11 @@ import {
   familyPlacementTargets,
   initialFamilyFitState,
   nudgePlacement,
+  placementTransformsEqual,
   placementObjectOrigin,
   placementTransformFromObject,
   resizePlacementAroundContact,
+  toPlacementLockTransform,
   validateFamilyPlacement,
 } from "./familyPlacementModel";
 
@@ -60,6 +62,31 @@ test("family placement permits translation and uniform scale but rejects geometr
   assert.deepEqual(validateFamilyPlacement({ translateXPx: 0, translateYPx: -158, scaleX: 1.01, scaleY: 0.99 }), [
     "Family placement scale must remain uniform.",
   ]);
+});
+
+test("shared placement serialization preserves release-pixel precision and rejects distortion", () => {
+  const transform = { translateXPx: 27.0664, translateYPx: -134.1316, scaleX: 0.974, scaleY: 0.974 };
+  assert.deepEqual(toPlacementLockTransform(transform), {
+    translateXPx: 27.066,
+    translateYPx: -134.132,
+    uniformScale: 0.974,
+  });
+  assert.throws(
+    () => toPlacementLockTransform({ ...transform, scaleY: 0.975 }),
+    /uniform/i,
+  );
+});
+
+test("dirty-state comparison uses the immutable three-decimal transform", () => {
+  const locked = { translateXPx: 27.066, translateYPx: -134.132, uniformScale: 0.974 };
+  assert.equal(placementTransformsEqual(
+    { translateXPx: 27.0664, translateYPx: -134.1316, scaleX: 0.974, scaleY: 0.974 },
+    locked,
+  ), true);
+  assert.equal(placementTransformsEqual(
+    { translateXPx: 28.066, translateYPx: -134.132, scaleX: 0.974, scaleY: 0.974 },
+    locked,
+  ), false);
 });
 
 test("nudge changes one family transform rather than creating a body-specific adjustment", () => {

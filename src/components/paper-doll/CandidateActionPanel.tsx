@@ -264,6 +264,7 @@ export function CandidateActionPanel({
       });
       setMessage(`${decision === "approved" ? "Approved child created" : "Rejection recorded"}. Active release unchanged.`);
       await queryClient.invalidateQueries({ queryKey: ["paper-doll-candidate-history", organizationId, familyKey] });
+      await queryClient.invalidateQueries({ queryKey: ["paper-doll-shared-placement", organizationId, familyKey] });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {

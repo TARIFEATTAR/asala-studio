@@ -10,6 +10,7 @@ interface RollonLineupProps {
   rollerImageUrlOverride?: string;
   overcapVariantKey?: string;
   placementTransform?: FamilyPlacementTransform;
+  placementId?: string;
 }
 
 const BODY_LABELS: Record<string, string> = {
@@ -26,6 +27,7 @@ export function RollonLineup({
   rollerImageUrlOverride,
   overcapVariantKey = "SHN-SL",
   placementTransform = IDENTITY_FAMILY_PLACEMENT,
+  placementId,
 }: RollonLineupProps) {
   const lineupAssets: RollonLineupAsset[] = assets
     .filter((asset) => asset.slot === "body" || asset.slot === "roller" || asset.slot === "overcap")
@@ -82,6 +84,7 @@ export function RollonLineup({
                 <span className="truncate text-[9px] uppercase tracking-[0.14em]" style={{ color: "var(--darkroom-text-muted)" }}>{BODY_LABELS[item.bodyVariantKey]}</span>
                 <Crosshair className="h-3 w-3 shrink-0" style={{ color: "var(--darkroom-text-dim)" }} />
               </div>
+              {placementId && <div className="mt-1 truncate font-mono text-[7px]" style={{ color: "#6ee7a8" }}>placement {placementId.slice(0, 8)}…</div>}
               {item.status === "blocked" && (
                 <div className="mt-1.5 flex items-start gap-1 text-[7px] leading-3" style={{ color: "#f2c078" }}>
                   <AlertTriangle className="mt-px h-2.5 w-2.5 shrink-0" />
