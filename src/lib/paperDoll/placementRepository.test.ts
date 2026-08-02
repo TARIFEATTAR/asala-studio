@@ -50,6 +50,20 @@ test("placement repository reads one exact geometry fingerprint", async () => {
   assert.deepEqual(result, record);
 });
 
+test("placement repository accepts PostgreSQL UTC timestamp formatting", async () => {
+  const result = await loadSharedPlacement({ rpc: async () => ({
+    data: { ...record, approvedAt: "2026-08-02T23:40:17.701981+00:00" },
+    error: null,
+  }) }, {
+    organizationId: ORG,
+    familyKey: "CYL-9ML",
+    fitmentGeometryKey: "fitment__roller-ball__17-415__v1",
+    authorityMaskSha256: MASK,
+  });
+
+  assert.equal(result?.approvedAt, "2026-08-02T23:40:17.701981Z");
+});
+
 test("placement repository sends one exact named lock request", async () => {
   const request: SharedPlacementLockRequest = {
     organizationId: ORG,

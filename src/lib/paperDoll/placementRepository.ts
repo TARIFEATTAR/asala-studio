@@ -42,7 +42,15 @@ const SharedPlacementRecordSchema = z.object({
 export type SharedPlacementRecord = z.infer<typeof SharedPlacementRecordSchema>;
 
 function parseRecord(value: unknown): SharedPlacementRecord {
-  const parsed = SharedPlacementRecordSchema.safeParse(value);
+  const normalized = value && typeof value === "object" && !Array.isArray(value)
+    ? {
+        ...value,
+        approvedAt: typeof (value as Record<string, unknown>).approvedAt === "string"
+          ? ((value as Record<string, unknown>).approvedAt as string).replace(/\+00(?::00)?$/, "Z")
+          : (value as Record<string, unknown>).approvedAt,
+      }
+    : value;
+  const parsed = SharedPlacementRecordSchema.safeParse(normalized);
   if (!parsed.success) throw new Error(`Malformed shared placement: ${parsed.error.message}`);
   return parsed.data;
 }
