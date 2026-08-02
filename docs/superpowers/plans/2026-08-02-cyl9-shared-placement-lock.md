@@ -137,7 +137,7 @@ Define and test this request shape:
 const request = {
   organizationId,
   familyKey: "CYL-9ML",
-  fitmentGeometryKey: "17-415-roll-on",
+  fitmentGeometryKey: "fitment__roller-ball__17-415__v1",
   calibrationComponentVersionId,
   expectedAuthorityMaskSha256: maskSha,
   canvas: { widthPx: 2080, heightPx: 2288 },
@@ -172,7 +172,7 @@ Export:
 export const SharedPlacementLockRequestSchema = z.object({
   organizationId: z.string().uuid(),
   familyKey: z.literal("CYL-9ML"),
-  fitmentGeometryKey: z.literal("17-415-roll-on"),
+  fitmentGeometryKey: z.literal("fitment__roller-ball__17-415__v1"),
   calibrationComponentVersionId: z.string().uuid(),
   expectedAuthorityMaskSha256: z.string().regex(/^[a-f0-9]{64}$/),
   canvas: z.object({ widthPx: z.literal(2080), heightPx: z.literal(2288) }),
@@ -285,7 +285,7 @@ Export:
 export interface SharedPlacementRecord {
   id: string;
   familyKey: "CYL-9ML";
-  fitmentGeometryKey: "17-415-roll-on";
+  fitmentGeometryKey: "fitment__roller-ball__17-415__v1";
   authorityMaskSha256: string;
   transform: { translateXPx: number; translateYPx: number; uniformScale: number };
   compatibleBodyComponentVersionIds: string[];
