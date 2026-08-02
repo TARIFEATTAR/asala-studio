@@ -1,0 +1,2362 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "sourceGeneratedAt": "2026-08-02T01:32:40.826Z",
+  "sourcePath": "public/data/best-bottles-catalog-lite.json",
+  "sourceSha256": "3e8eef9471bc9b635fdaefb18c0b72165b214efde86a2936f407c6ab569ca331",
+  "snapshotSha256": "99f05a2e4f371ba1bd6e8fa8b84f616056be1d3aa58182c97d4c67184b305d62",
+  "identityPolicy": "websiteSku-exact-token-map",
+  "bodyVariantKeys": [
+    "CLR",
+    "AMB",
+    "BLU",
+    "FRS",
+    "SWL"
+  ],
+  "overcapVariantKeys": [
+    "SHN-SL",
+    "SHN-GL",
+    "MAT-CU",
+    "SHN-BLK",
+    "MAT-SL",
+    "MAT-GL",
+    "WHT",
+    "SL-DOT",
+    "BLK-DOT",
+    "PNK-DOT"
+  ],
+  "rollerVariantKeys": [
+    "PLASTIC",
+    "METAL"
+  ],
+  "requirements": [
+    {
+      "requirementKey": "CYL-9ML:BODY:CLR",
+      "componentKind": "body",
+      "variantKey": "CLR",
+      "displayName": "CYL-9ML Clear glass locked body plate",
+      "geometryFamilyId": "body__cylinder__9ml__70x20__v1",
+      "materialFamily": "clr-glass",
+      "releaseStatus": "approved",
+      "blockers": [],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:BODY:AMB",
+      "componentKind": "body",
+      "variantKey": "AMB",
+      "displayName": "CYL-9ML Amber glass locked body plate",
+      "geometryFamilyId": "body__cylinder__9ml__70x20__v1",
+      "materialFamily": "amb-glass",
+      "releaseStatus": "approved",
+      "blockers": [],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:BODY:BLU",
+      "componentKind": "body",
+      "variantKey": "BLU",
+      "displayName": "CYL-9ML Cobalt glass locked body plate",
+      "geometryFamilyId": "body__cylinder__9ml__70x20__v1",
+      "materialFamily": "blu-glass",
+      "releaseStatus": "approved",
+      "blockers": [],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:BODY:FRS",
+      "componentKind": "body",
+      "variantKey": "FRS",
+      "displayName": "CYL-9ML Frosted glass locked body plate",
+      "geometryFamilyId": "body__cylinder__9ml__70x20__v1",
+      "materialFamily": "frs-glass",
+      "releaseStatus": "approved",
+      "blockers": [],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:BODY:SWL",
+      "componentKind": "body",
+      "variantKey": "SWL",
+      "displayName": "CYL-9ML Swirl glass locked body plate",
+      "geometryFamilyId": "body__cylinder__9ml__70x20__v1",
+      "materialFamily": "swl-glass",
+      "releaseStatus": "approved",
+      "blockers": [],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "componentKind": "overcap",
+      "variantKey": "SHN-SL",
+      "displayName": "Mirror silver phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:vacuum-metallized-mirror",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "componentKind": "overcap",
+      "variantKey": "SHN-GL",
+      "displayName": "Mirror gold phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:vacuum-metallized-mirror",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "componentKind": "overcap",
+      "variantKey": "MAT-CU",
+      "displayName": "Matte copper phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:matte-coating",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "componentKind": "overcap",
+      "variantKey": "SHN-BLK",
+      "displayName": "Glossy black phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:gloss-coating",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "componentKind": "overcap",
+      "variantKey": "MAT-SL",
+      "displayName": "Matte silver phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:matte-coating",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "componentKind": "overcap",
+      "variantKey": "MAT-GL",
+      "displayName": "Matte gold phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:matte-coating",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:WHT",
+      "componentKind": "overcap",
+      "variantKey": "WHT",
+      "displayName": "Glossy white phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:gloss-coating",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "componentKind": "overcap",
+      "variantKey": "SL-DOT",
+      "displayName": "Silver rhinestone phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:deterministic-rhinestone-layout",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": true
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "componentKind": "overcap",
+      "variantKey": "BLK-DOT",
+      "displayName": "Black rhinestone phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:deterministic-rhinestone-layout",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": true
+    },
+    {
+      "requirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "componentKind": "overcap",
+      "variantKey": "PNK-DOT",
+      "displayName": "Pink rhinestone phenolic roll-on overcap",
+      "geometryFamilyId": "closure__cylinder__17-415__rollon-overcap__v1",
+      "materialFamily": "moulded-phenolic-plastic:deterministic-rhinestone-layout",
+      "releaseStatus": "pending",
+      "blockers": [
+        "No mask-and-clamp verified production asset is approved yet."
+      ],
+      "stoneLayoutRequired": true
+    },
+    {
+      "requirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "componentKind": "roller",
+      "variantKey": "PLASTIC",
+      "displayName": "Plastic roller-ball fitment",
+      "geometryFamilyId": "fitment__17-415__roller-ball__v1",
+      "materialFamily": "moulded-plastic",
+      "releaseStatus": "pending",
+      "blockers": [
+        "Assembly-context QA has not passed in the candidate loop."
+      ],
+      "stoneLayoutRequired": false
+    },
+    {
+      "requirementKey": "CYL-9ML:ROLLER:METAL",
+      "componentKind": "roller",
+      "variantKey": "METAL",
+      "displayName": "Steel roller-ball fitment",
+      "geometryFamilyId": "fitment__17-415__roller-ball__v1",
+      "materialFamily": "steel-ball-with-plastic-fitment",
+      "releaseStatus": "blocked",
+      "blockers": [
+        "Frozen source contains 72.8% opaque white junk and must be repaired and requalified."
+      ],
+      "stoneLayoutRequired": false
+    }
+  ],
+  "assemblyMappings": [
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollBlkDot",
+      "websiteSku": "GBCyl9MtlRollBlkDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-02",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollMattCu",
+      "websiteSku": "GBCyl9MtlRollMattCu",
+      "graceSku": "GB-CYL-CLR-9ML-T-03",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollMattGl",
+      "websiteSku": "GBCyl9MtlRollMattGl",
+      "graceSku": "GB-CYL-CLR-9ML-T-04",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollMattSl",
+      "websiteSku": "GBCyl9MtlRollMattSl",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MSLV-01",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollPnkDot",
+      "websiteSku": "GBCyl9MtlRollPnkDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-05",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollShBlk",
+      "websiteSku": "GBCyl9MtlRollShBlk",
+      "graceSku": "GB-CYL-CLR-9ML-T-06",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollShnGl",
+      "websiteSku": "GBCyl9MtlRollShnGl",
+      "graceSku": "GB-CYL-CLR-9ML-T-07",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollShnSl",
+      "websiteSku": "GBCyl9MtlRollShnSl",
+      "graceSku": "GB-CYL-CLR-9ML-T-08",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollSlDot",
+      "websiteSku": "GBCyl9MtlRollSlDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-09",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9MtlRollWht",
+      "websiteSku": "GBCyl9MtlRollWht",
+      "graceSku": "GB-CYL-CLR-9ML-T-10",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollBlkDot",
+      "websiteSku": "GBCyl9RollBlkDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-11",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollMattCu",
+      "websiteSku": "GBCyl9RollMattCu",
+      "graceSku": "GB-CYL-CLR-9ML-T-12",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollMattGl",
+      "websiteSku": "GBCyl9RollMattGl",
+      "graceSku": "GB-CYL-CLR-9ML-T-13",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollMattSl",
+      "websiteSku": "GBCyl9RollMattSl",
+      "graceSku": "GB-CYL-CLR-9ML-T-14",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollPnkDot",
+      "websiteSku": "GBCyl9RollPnkDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-15",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollShBlk",
+      "websiteSku": "GBCyl9RollShBlk",
+      "graceSku": "GB-CYL-CLR-9ML-T-16",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollShnGl",
+      "websiteSku": "GBCyl9RollShnGl",
+      "graceSku": "GB-CYL-CLR-9ML-T-17",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollShnSl",
+      "websiteSku": "GBCyl9RollShnSl",
+      "graceSku": "GB-CYL-CLR-9ML-T-18",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollSlDot",
+      "websiteSku": "GBCyl9RollSlDot",
+      "graceSku": "GB-CYL-CLR-9ML-T-19",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCyl9RollWht",
+      "websiteSku": "GBCyl9RollWht",
+      "graceSku": "GB-CYL-CLR-9ML-T-20",
+      "bodyVariantKey": "CLR",
+      "bodyRequirementKey": "CYL-9ML:BODY:CLR",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with CLR source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollBlkDot",
+      "websiteSku": "GBCylAmb9MtlRollBlkDot",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-BKDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollMattCu",
+      "websiteSku": "GBCylAmb9MtlRollMattCu",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MCPR",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollMattGl",
+      "websiteSku": "GBCylAmb9MtlRollMattGl",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MGLD",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollMattSl",
+      "websiteSku": "GBCylAmb9MtlRollMattSl",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MSLV",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollPnkDot",
+      "websiteSku": "GBCylAmb9MtlRollPnkDot",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-PKDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollShBlk",
+      "websiteSku": "GBCylAmb9MtlRollShBlk",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SBLK",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollShnGl",
+      "websiteSku": "GBCylAmb9MtlRollShnGl",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SGLD",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollShnSl",
+      "websiteSku": "GBCylAmb9MtlRollShnSl",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SSLV",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollSlDot",
+      "websiteSku": "GBCylAmb9MtlRollSlDot",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SLDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9MtlRollWht",
+      "websiteSku": "GBCylAmb9MtlRollWht",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-WHT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollBlkDot",
+      "websiteSku": "GBCylAmb9RollBlkDot",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-BKDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollMattCu",
+      "websiteSku": "GBCylAmb9RollMattCu",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MCPR",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollMattGl",
+      "websiteSku": "GBCylAmb9RollMattGl",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MGLD",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollMattSl",
+      "websiteSku": "GBCylAmb9RollMattSl",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MSLV",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollPnkDot",
+      "websiteSku": "GBCylAmb9RollPnkDot",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-PKDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollShBlk",
+      "websiteSku": "GBCylAmb9RollShBlk",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SBLK",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollShnGl",
+      "websiteSku": "GBCylAmb9RollShnGl",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SGLD",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollShnSl",
+      "websiteSku": "GBCylAmb9RollShnSl",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SSLV",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollSlDot",
+      "websiteSku": "GBCylAmb9RollSlDot",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SLDT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylAmb9RollWht",
+      "websiteSku": "GBCylAmb9RollWht",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-WHT",
+      "bodyVariantKey": "AMB",
+      "bodyRequirementKey": "CYL-9ML:BODY:AMB",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with AMB source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollBlkDot",
+      "websiteSku": "GBCylBlu9MtlRollBlkDot",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-BKDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollMattCu",
+      "websiteSku": "GBCylBlu9MtlRollMattCu",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MCPR",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollMattGl",
+      "websiteSku": "GBCylBlu9MtlRollMattGl",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MGLD",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollMattSl",
+      "websiteSku": "GBCylBlu9MtlRollMattSl",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MSLV",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollPnkDot",
+      "websiteSku": "GBCylBlu9MtlRollPnkDot",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-PKDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollShBlk",
+      "websiteSku": "GBCylBlu9MtlRollShBlk",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SBLK",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollShnGl",
+      "websiteSku": "GBCylBlu9MtlRollShnGl",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SGLD",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollShnSl",
+      "websiteSku": "GBCylBlu9MtlRollShnSl",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SSLV",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollSlDot",
+      "websiteSku": "GBCylBlu9MtlRollSlDot",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SLDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9MtlRollWht",
+      "websiteSku": "GBCylBlu9MtlRollWht",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-WHT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollBlkDot",
+      "websiteSku": "GBCylBlu9RollBlkDot",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-BKDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 70,
+        "diameter": 20
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollMattCu",
+      "websiteSku": "GBCylBlu9RollMattCu",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MCPR",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollMattGl",
+      "websiteSku": "GBCylBlu9RollMattGl",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MGLD",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollMattSl",
+      "websiteSku": "GBCylBlu9RollMattSl",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MSLV",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollPnkDot",
+      "websiteSku": "GBCylBlu9RollPnkDot",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-PKDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollShBlk",
+      "websiteSku": "GBCylBlu9RollShBlk",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SBLK",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollShnGl",
+      "websiteSku": "GBCylBlu9RollShnGl",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SGLD",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollShnSl",
+      "websiteSku": "GBCylBlu9RollShnSl",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SSLV",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollSlDot",
+      "websiteSku": "GBCylBlu9RollSlDot",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SLDT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylBlu9RollWht",
+      "websiteSku": "GBCylBlu9RollWht",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-WHT",
+      "bodyVariantKey": "BLU",
+      "bodyRequirementKey": "CYL-9ML:BODY:BLU",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "70x20",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with BLU source profile 70x20; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollBlkDot",
+      "websiteSku": "GBCylFrst9MtlRollBlkDot",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-BKDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollMattCu",
+      "websiteSku": "GBCylFrst9MtlRollMattCu",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MCPR",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollMattGl",
+      "websiteSku": "GBCylFrst9MtlRollMattGl",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MGLD",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollMattSl",
+      "websiteSku": "GBCylFrst9MtlRollMattSl",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MSLV",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollPnkDot",
+      "websiteSku": "GBCylFrst9MtlRollPnkDot",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-PKDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollShBlk",
+      "websiteSku": "GBCylFrst9MtlRollShBlk",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SBLK",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollShnGl",
+      "websiteSku": "GBCylFrst9MtlRollShnGl",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SGLD",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollShnSl",
+      "websiteSku": "GBCylFrst9MtlRollShnSl",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SSLV",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollSlDot",
+      "websiteSku": "GBCylFrst9MtlRollSlDot",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SLDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9MtlRollWht",
+      "websiteSku": "GBCylFrst9MtlRollWht",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-WHT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollBlkDot",
+      "websiteSku": "GBCylFrst9RollBlkDot",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-BKDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollMattCu",
+      "websiteSku": "GBCylFrst9RollMattCu",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MCPR",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollMattGl",
+      "websiteSku": "GBCylFrst9RollMattGl",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MGLD",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollMattSl",
+      "websiteSku": "GBCylFrst9RollMattSl",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MSLV",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollPnkDot",
+      "websiteSku": "GBCylFrst9RollPnkDot",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-PKDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollShBlk",
+      "websiteSku": "GBCylFrst9RollShBlk",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SBLK",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollShnGl",
+      "websiteSku": "GBCylFrst9RollShnGl",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SGLD",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollShnSl",
+      "websiteSku": "GBCylFrst9RollShnSl",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SSLV",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollSlDot",
+      "websiteSku": "GBCylFrst9RollSlDot",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SLDT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylFrst9RollWht",
+      "websiteSku": "GBCylFrst9RollWht",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-WHT",
+      "bodyVariantKey": "FRS",
+      "bodyRequirementKey": "CYL-9ML:BODY:FRS",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with FRS source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollBlkDot",
+      "websiteSku": "GBCylSwrl9MtlRollBlkDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-BKDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollMattCu",
+      "websiteSku": "GBCylSwrl9MtlRollMattCu",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MCPR-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollMattGl",
+      "websiteSku": "GBCylSwrl9MtlRollMattGl",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MGLD-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollMattSl",
+      "websiteSku": "GBCylSwrl9MtlRollMattSl",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MSLV-02",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollPnkDot",
+      "websiteSku": "GBCylSwrl9MtlRollPnkDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-PKDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollShBlk",
+      "websiteSku": "GBCylSwrl9MtlRollShBlk",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SBLK-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollShnGl",
+      "websiteSku": "GBCylSwrl9MtlRollShnGl",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SGLD-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollShnSl",
+      "websiteSku": "GBCylSwrl9MtlRollShnSl",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SSLV-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollSlDot",
+      "websiteSku": "GBCylSwrl9MtlRollSlDot",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SLDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9MtlRollWht",
+      "websiteSku": "GBCylSwrl9MtlRollWht",
+      "graceSku": "GBCylSwrl9MtlRollWht",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "METAL",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:METAL",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollBlkDot",
+      "websiteSku": "GBCylSwrl9RollBlkDot",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-BKDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "BLK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:BLK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollMattCu",
+      "websiteSku": "GBCylSwrl9RollMattCu",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MCPR-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-CU",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-CU",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollMattGl",
+      "websiteSku": "GBCylSwrl9RollMattGl",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MGLD-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollMattSl",
+      "websiteSku": "GBCylSwrl9RollMattSl",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MSLV-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "MAT-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:MAT-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollPnkDot",
+      "websiteSku": "GBCylSwrl9RollPnkDot",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-PKDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "PNK-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:PNK-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollShBlk",
+      "websiteSku": "GBCylSwrl9RollShBlk",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SBLK-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-BLK",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-BLK",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollShnGl",
+      "websiteSku": "GBCylSwrl9RollShnGl",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SGLD-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-GL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-GL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollShnSl",
+      "websiteSku": "GBCylSwrl9RollShnSl",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SSLV-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SHN-SL",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SHN-SL",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollSlDot",
+      "websiteSku": "GBCylSwrl9RollSlDot",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SLDT-01",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "SL-DOT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:SL-DOT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 74,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "consistent",
+      "evidenceIssues": []
+    },
+    {
+      "mappingKey": "CYL-9ML:GBCylSwrl9RollWht",
+      "websiteSku": "GBCylSwrl9RollWht",
+      "graceSku": "GBCylSwrl9RollWht",
+      "bodyVariantKey": "SWL",
+      "bodyRequirementKey": "CYL-9ML:BODY:SWL",
+      "rollerVariantKey": "PLASTIC",
+      "rollerRequirementKey": "CYL-9ML:ROLLER:PLASTIC",
+      "overcapVariantKey": "WHT",
+      "overcapRequirementKey": "CYL-9ML:OVERCAP:WHT",
+      "identitySource": "websiteSku-exact-token-map",
+      "sourceDimensionsMm": {
+        "heightWithoutCap": 63,
+        "diameter": 21
+      },
+      "sourceGeometryProfile": "74x21",
+      "evidenceStatus": "dimension-conflict",
+      "evidenceIssues": [
+        "Catalog dimensions 63x21 disagree with SWL source profile 74x21; locked body plate remains geometry authority."
+      ]
+    }
+  ],
+  "evidenceSummary": {
+    "sourceRowCount": 3404,
+    "eligibleAssemblyCount": 100,
+    "dimensionConflictCount": 42,
+    "unresolvedIdentityCount": 0
+  },
+  "knownIssues": [
+    {
+      "issueKey": "catalog-dimension-conflicts",
+      "severity": "blocking",
+      "summary": "Source dimensions conflict with the mapped body profile; the locked plate is authoritative and each conflict requires catalog review.",
+      "affectedWebsiteSkus": [
+        "GBCyl9RollMattCu",
+        "GBCyl9RollMattGl",
+        "GBCyl9RollMattSl",
+        "GBCyl9RollPnkDot",
+        "GBCyl9RollShBlk",
+        "GBCyl9RollShnGl",
+        "GBCyl9RollShnSl",
+        "GBCyl9RollSlDot",
+        "GBCyl9RollWht",
+        "GBCylAmb9RollMattCu",
+        "GBCylAmb9RollMattGl",
+        "GBCylAmb9RollMattSl",
+        "GBCylAmb9RollPnkDot",
+        "GBCylAmb9RollShBlk",
+        "GBCylAmb9RollShnGl",
+        "GBCylAmb9RollShnSl",
+        "GBCylAmb9RollSlDot",
+        "GBCylAmb9RollWht",
+        "GBCylBlu9RollMattCu",
+        "GBCylBlu9RollMattGl",
+        "GBCylBlu9RollMattSl",
+        "GBCylBlu9RollPnkDot",
+        "GBCylBlu9RollShBlk",
+        "GBCylBlu9RollShnGl",
+        "GBCylBlu9RollShnSl",
+        "GBCylBlu9RollSlDot",
+        "GBCylBlu9RollWht",
+        "GBCylFrst9RollMattCu",
+        "GBCylFrst9RollMattGl",
+        "GBCylFrst9RollMattSl",
+        "GBCylFrst9RollPnkDot",
+        "GBCylFrst9RollShBlk",
+        "GBCylFrst9RollShnGl",
+        "GBCylFrst9RollShnSl",
+        "GBCylFrst9RollSlDot",
+        "GBCylFrst9RollWht",
+        "GBCylSwrl9RollMattCu",
+        "GBCylSwrl9RollPnkDot",
+        "GBCylSwrl9RollShBlk",
+        "GBCylSwrl9RollShnGl",
+        "GBCylSwrl9RollShnSl",
+        "GBCylSwrl9RollWht"
+      ]
+    },
+    {
+      "issueKey": "metal-roller-white-junk",
+      "severity": "blocking",
+      "summary": "The frozen metal roller asset contains 72.8% opaque white junk and cannot ship until repaired and requalified.",
+      "affectedWebsiteSkus": [
+        "GBCyl9MtlRollBlkDot",
+        "GBCyl9MtlRollMattCu",
+        "GBCyl9MtlRollMattGl",
+        "GBCyl9MtlRollMattSl",
+        "GBCyl9MtlRollPnkDot",
+        "GBCyl9MtlRollShBlk",
+        "GBCyl9MtlRollShnGl",
+        "GBCyl9MtlRollShnSl",
+        "GBCyl9MtlRollSlDot",
+        "GBCyl9MtlRollWht",
+        "GBCylAmb9MtlRollBlkDot",
+        "GBCylAmb9MtlRollMattCu",
+        "GBCylAmb9MtlRollMattGl",
+        "GBCylAmb9MtlRollMattSl",
+        "GBCylAmb9MtlRollPnkDot",
+        "GBCylAmb9MtlRollShBlk",
+        "GBCylAmb9MtlRollShnGl",
+        "GBCylAmb9MtlRollShnSl",
+        "GBCylAmb9MtlRollSlDot",
+        "GBCylAmb9MtlRollWht",
+        "GBCylBlu9MtlRollBlkDot",
+        "GBCylBlu9MtlRollMattCu",
+        "GBCylBlu9MtlRollMattGl",
+        "GBCylBlu9MtlRollMattSl",
+        "GBCylBlu9MtlRollPnkDot",
+        "GBCylBlu9MtlRollShBlk",
+        "GBCylBlu9MtlRollShnGl",
+        "GBCylBlu9MtlRollShnSl",
+        "GBCylBlu9MtlRollSlDot",
+        "GBCylBlu9MtlRollWht",
+        "GBCylFrst9MtlRollBlkDot",
+        "GBCylFrst9MtlRollMattCu",
+        "GBCylFrst9MtlRollMattGl",
+        "GBCylFrst9MtlRollMattSl",
+        "GBCylFrst9MtlRollPnkDot",
+        "GBCylFrst9MtlRollShBlk",
+        "GBCylFrst9MtlRollShnGl",
+        "GBCylFrst9MtlRollShnSl",
+        "GBCylFrst9MtlRollSlDot",
+        "GBCylFrst9MtlRollWht",
+        "GBCylSwrl9MtlRollBlkDot",
+        "GBCylSwrl9MtlRollMattCu",
+        "GBCylSwrl9MtlRollMattGl",
+        "GBCylSwrl9MtlRollMattSl",
+        "GBCylSwrl9MtlRollPnkDot",
+        "GBCylSwrl9MtlRollShBlk",
+        "GBCylSwrl9MtlRollShnGl",
+        "GBCylSwrl9MtlRollShnSl",
+        "GBCylSwrl9MtlRollSlDot",
+        "GBCylSwrl9MtlRollWht"
+      ]
+    },
+    {
+      "issueKey": "copper-finish-identity-correction",
+      "severity": "advisory",
+      "summary": "Catalog truth consistently names matte copper (MAT-CU); the earlier SHN-CU plan token is rejected.",
+      "affectedWebsiteSkus": [
+        "GBCyl9MtlRollMattCu",
+        "GBCyl9RollMattCu",
+        "GBCylAmb9MtlRollMattCu",
+        "GBCylAmb9RollMattCu",
+        "GBCylBlu9MtlRollMattCu",
+        "GBCylBlu9RollMattCu",
+        "GBCylFrst9MtlRollMattCu",
+        "GBCylFrst9RollMattCu",
+        "GBCylSwrl9MtlRollMattCu",
+        "GBCylSwrl9RollMattCu"
+      ]
+    }
+  ]
+}

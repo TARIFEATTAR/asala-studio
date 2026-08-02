@@ -183,7 +183,7 @@ export interface CandidateClampResult {
     const snapshot = loadCyl9RollonRequirements();
     assert.deepEqual(snapshot.bodyVariantKeys, ["CLR", "AMB", "BLU", "FRS", "SWL"]);
     assert.deepEqual(snapshot.overcapVariantKeys, [
-      "SHN-SL", "SHN-GL", "SHN-CU", "SHN-BLK", "MAT-SL",
+      "SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL",
       "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT",
     ]);
     assert.deepEqual(snapshot.rollerVariantKeys, ["PLASTIC", "METAL"]);
@@ -236,6 +236,8 @@ export interface CandidateClampResult {
   ```
 
   Expected: the stored hash recomputes exactly, five bodies and twelve unique roll-on component variants are represented, and every included mapping resolves without fallback.
+
+  Catalog correction: the exact SKU and product-description evidence consistently identifies `MattCu` / matte copper. `MAT-CU` replaces the earlier unsubstantiated `SHN-CU` token. The snapshot preserves this correction as an advisory issue.
 
 - [ ] **Step 6: Commit**
 
