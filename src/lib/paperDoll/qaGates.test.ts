@@ -2,11 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import type { RgbaImage } from "./componentRegistry";
+import { countSignificantForegroundRegions } from "./componentRegistry";
 import {
   measureForegroundMeanRgb,
+  measureFinishSignals,
+  opaqueWhiteFraction,
   plateSilhouette,
   runColorTruthGate,
   runRegistrationGate,
+  runFinishStructureGate,
   runSwatchLockGate,
   silhouetteIoU,
 } from "./qaGates";
@@ -135,6 +139,58 @@ test("foreground mean ignores anti-aliased fringe", () => {
   });
   const mean = measureForegroundMeanRgb(layer);
   assert.ok(mean && Math.abs(mean.r - 100) < 1, `r=${mean?.r}`);
+});
+
+test("opaque-white fraction catches contiguous white junk that region counting misses", () => {
+  const defectiveMetalRoller = makeImage(100, 1, (x) => x < 73
+    ? [255, 255, 255, 255]
+    : [124, 128, 132, 255]);
+
+  assert.equal(countSignificantForegroundRegions(defectiveMetalRoller), 1);
+  const result = opaqueWhiteFraction(defectiveMetalRoller);
+  assert.ok(Math.abs(result.fraction - 0.73) < 0.001, `fraction=${result.fraction}`);
+  assert.equal(result.pass, false);
+});
+
+test("opaque-white fraction accepts the plastic roller calibration range", () => {
+  const plasticRoller = makeImage(100, 1, (x) => x === 0
+    ? [255, 255, 255, 249]
+    : [232, 232, 230, 255]);
+
+  const result = opaqueWhiteFraction(plasticRoller);
+  assert.equal(result.fraction, 0);
+  assert.equal(result.pass, true);
+});
+
+test("finish structure separates crisp mirror bands from a diffuse matte gradient", () => {
+  const mirror = makeImage(120, 80, (x) => {
+    const bands = [18, 145, 52, 188, 76, 156];
+    const value = bands[Math.min(bands.length - 1, Math.floor(x / 20))];
+    return [value, value, value, 255];
+  });
+  const matte = makeImage(120, 80, (x) => {
+    const value = Math.round(78 + (x / 119) * 26);
+    return [value, value, value, 255];
+  });
+
+  assert.equal(runFinishStructureGate(mirror, "mirror").pass, true);
+  assert.equal(runFinishStructureGate(matte, "matte").pass, true);
+  assert.equal(runFinishStructureGate(mirror, "matte").pass, false);
+  assert.ok(measureFinishSignals(mirror).sharpHorizontalGradientMass > measureFinishSignals(matte).sharpHorizontalGradientMass);
+});
+
+test("finish structure preserves readable highlights on glossy black and white", () => {
+  const glossyBlack = makeImage(120, 80, (x) => {
+    const value = x >= 70 && x < 82 ? 105 : 22;
+    return [value, value, value, 255];
+  });
+  const glossyWhite = makeImage(120, 80, (x) => {
+    const value = x >= 70 && x < 82 ? 178 : 142;
+    return [value, value, value, 255];
+  });
+
+  assert.equal(runFinishStructureGate(glossyBlack, "glossy-black").pass, true);
+  assert.equal(runFinishStructureGate(glossyWhite, "glossy-white").pass, true);
 });
 
 // ─── rail detector ───────────────────────────────────────────────────
