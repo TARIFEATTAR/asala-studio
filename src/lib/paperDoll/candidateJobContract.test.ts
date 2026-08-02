@@ -31,7 +31,7 @@ function validRequest() {
     parentComponentVersionId: VERSION_ID,
     parentSha256: SHA256,
     provider: "google",
-    model: "gemini-3-pro-image-preview",
+    model: "gemini-3.1-flash-image",
     instruction: "Change only the phenolic-plastic coating to soft matte gold.",
     source: asset("paper-doll-sources"),
     authoritativeMask: asset("paper-doll-approved"),
@@ -59,6 +59,25 @@ test("auto provider, URLs, and asymmetric stretching fail closed", () => {
   assert.equal(CandidateJobRequestSchema.safeParse({
     ...validRequest(),
     transform: { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1.01 },
+  }).success, false);
+});
+
+test("preview and legacy image models fail closed instead of falling back", () => {
+  assert.equal(CandidateJobRequestSchema.safeParse({
+    ...validRequest(),
+    model: "gemini-3-pro-image-preview",
+  }).success, false);
+  assert.equal(CandidateJobRequestSchema.safeParse({
+    ...validRequest(),
+    provider: "openai",
+    model: "gpt-image-1.5",
+  }).success, false);
+});
+
+test("overcap prompts reject aluminium-part fabrication language", () => {
+  assert.equal(CandidateJobRequestSchema.safeParse({
+    ...validRequest(),
+    instruction: "Make this brushed anodized aluminum.",
   }).success, false);
 });
 

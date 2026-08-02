@@ -415,13 +415,6 @@ async function generateViaEdits(
 
   const form = new FormData();
   form.append("model", model);
-  form.append("prompt", params.prompt);
-  form.append("n", String(params.n ?? 1));
-  form.append("size", size);
-  form.append("quality", quality);
-  form.append("background", background);
-  form.append("output_format", outputFormat);
-  if (params.user) form.append("user", params.user);
 
   // gpt-image-1 /edits accepts multiple `image[]` parts. Order matters —
   // the edge function hands us product refs first, then background, then
@@ -433,6 +426,16 @@ async function generateViaEdits(
     const ext = (mime.split("/")[1] || "png").replace("jpeg", "jpg");
     form.append("image[]", blob, `reference-${idx}.${ext}`);
   });
+
+  // The geometry/source references are deliberately serialized before the
+  // instruction. Paper-Doll never relies on a prompt alone as shape authority.
+  form.append("prompt", params.prompt);
+  form.append("n", String(params.n ?? 1));
+  form.append("size", size);
+  form.append("quality", quality);
+  form.append("background", background);
+  form.append("output_format", outputFormat);
+  if (params.user) form.append("user", params.user);
 
   console.log(`[OpenAI] ${model} edits request:`, {
     size, quality, refs: references.length,

@@ -7598,6 +7598,17 @@ export type Database = {
         Args: { org_id: string; user_id?: string }
         Returns: undefined
       }
+      finalize_paper_doll_candidate_job: {
+        Args: {
+          p_job_id: string
+          p_organization_id: string
+          p_output_metadata: Json
+          p_output_ref: Json
+          p_qa_results: Json
+          p_version: Json
+        }
+        Returns: string
+      }
       get_brand_dna: {
         Args: { p_org_id: string }
         Returns: {

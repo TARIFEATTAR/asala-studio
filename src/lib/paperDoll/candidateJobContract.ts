@@ -1,6 +1,12 @@
 import { z } from "zod";
 
 export const CandidateProviderSchema = z.enum(["blender", "openai", "google", "manual"]);
+export const CandidateProviderModels = {
+  blender: ["cyl9-rollon-blender-v1"],
+  openai: ["gpt-image-2"],
+  google: ["gemini-3.1-flash-image", "gemini-3-pro-image"],
+  manual: ["manual-v1"],
+} as const;
 export const CandidateJobStatusSchema = z.enum([
   "queued",
   "running",
@@ -62,6 +68,23 @@ export const CandidateJobRequestSchema = z.object({
   transform: CandidateTransformSchema,
   selectionKind: z.enum(["whole-layer", "rectangle", "brush"]).default("whole-layer"),
 }).superRefine((value, context) => {
+  if (!(CandidateProviderModels[value.provider] as readonly string[]).includes(value.model)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["model"],
+      message: `Model ${value.model} is not allowed for ${value.provider}; no fallback will run.`,
+    });
+  }
+  if (
+    value.requirementKey.startsWith("CYL-9ML:OVERCAP:")
+    && /\b(aluminium|aluminum|anodised|anodized|brushed|machined)\b/i.test(value.instruction)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["instruction"],
+      message: "Overcap instructions must describe moulded phenolic plastic and may not use metal-part fabrication language.",
+    });
+  }
   for (const [field, asset] of [
     ["source", value.source],
     ["authoritativeMask", value.authoritativeMask],
