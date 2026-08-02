@@ -24,9 +24,11 @@ export function buildRollonLineup(
   assets: RollonLineupAsset[],
   selection: { rollerVariantKey: string; overcapVariantKey: string; rollerImageUrlOverride?: string },
 ): RollonLineupItem[] {
-  const selectedRoller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey) ?? null;
+  const selectedRoller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey)
+    ?? (selection.rollerImageUrlOverride ? assets.find((asset) => asset.slot === "roller") : null)
+    ?? null;
   const roller = selectedRoller && selection.rollerImageUrlOverride
-    ? { ...selectedRoller, imageUrl: selection.rollerImageUrlOverride }
+    ? { ...selectedRoller, variantKey: selection.rollerVariantKey, imageUrl: selection.rollerImageUrlOverride }
     : selectedRoller;
   const overcap = assets.find((asset) => asset.slot === "overcap" && asset.variantKey === selection.overcapVariantKey) ?? null;
   return ROLLON_LINEUP_BODY_VARIANTS.map((bodyVariantKey) => {

@@ -21,6 +21,7 @@ import {
   type FamilyPlacementTransform,
   type ReleaseBounds,
 } from "./familyPlacementModel";
+import { prepareCandidateCanvasSwap } from "./candidateCanvasSwap";
 
 type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 
@@ -265,8 +266,6 @@ export function AssemblyEditCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     let cancelled = false;
-    canvas.clear();
-    canvas.backgroundColor = "#F5F3EF";
     const baseScale = display.width / RELEASE_CANVAS.width;
 
     const addGuides = () => {
@@ -309,9 +308,9 @@ export function AssemblyEditCanvas({
       }
     };
 
-    const addLayer = (asset: ReleaseAsset) => new Promise<void>((resolve) => {
+    const loadLayer = (asset: ReleaseAsset) => new Promise<fabric.Image | null>((resolve) => {
       fabric.Image.fromURL(asset.imageUrl, (image) => {
-        if (cancelled) return resolve();
+        if (cancelled) return resolve(null);
         const editable = asset.slot !== "body"
           && asset.componentVersionId === selectedLayerId
           && ((mode === "edit-lab" && candidateEditingEnabled) || (mode === "family-fit" && placementEditingEnabled));
@@ -347,18 +346,17 @@ export function AssemblyEditCanvas({
           });
         }
         image.setControlsVisibility({ mtr: false, mt: false, mb: false, ml: false, mr: false });
-        canvas.add(image);
-        resolve();
+        resolve(image);
       }, { crossOrigin: "anonymous" });
     });
 
     const render = async () => {
-      for (const layer of layers) await addLayer(layer);
-      if (cancelled) return;
       const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
-      if (maskVisible && selected?.geometryMaskUrl) {
-        await new Promise<void>((resolve) => fabric.Image.fromURL(selected.geometryMaskUrl!, (image) => {
-          if (!cancelled) {
+      const [preparedLayers, preparedMask] = await Promise.all([
+        prepareCandidateCanvasSwap(layers, loadLayer),
+        maskVisible && selected?.geometryMaskUrl
+          ? new Promise<fabric.Image | null>((resolve) => fabric.Image.fromURL(selected.geometryMaskUrl!, (image) => {
+            if (cancelled) return resolve(null);
             const transform = selected.slot === "body" ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 } : layerTransformRef.current;
             const position = releaseToDisplay({ x: transform.translateXPx, y: transform.translateYPx }, display);
             image.set({
@@ -373,12 +371,15 @@ export function AssemblyEditCanvas({
               evented: false,
               name: "authority-mask-overlay",
             });
-            canvas.add(image);
-          }
-          resolve();
-        }, { crossOrigin: "anonymous" }));
-      }
+            resolve(image);
+          }, { crossOrigin: "anonymous" }))
+          : Promise.resolve(null),
+      ]);
       if (cancelled) return;
+      canvas.clear();
+      canvas.backgroundColor = "#F5F3EF";
+      preparedLayers.forEach((image) => { if (image) canvas.add(image); });
+      if (preparedMask) canvas.add(preparedMask);
       addGuides();
       canvas.renderAll();
     };

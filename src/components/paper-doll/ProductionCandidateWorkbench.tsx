@@ -30,7 +30,11 @@ import {
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
-import { shouldMountCandidatePreview } from "./candidatePreviewModel";
+import {
+  applyCandidateAssetPreview,
+  selectWorkbenchBody,
+  shouldMountCandidatePreview,
+} from "./candidatePreviewModel";
 import { RollonLineup } from "./RollonLineup";
 import {
   type AssemblyEditMode,
@@ -123,11 +127,11 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     const component = components.find((asset) => asset.componentVersionId === selectedLayerId);
     const layers = [body, component].filter((asset): asset is ReleaseAsset => Boolean(asset && !hiddenIds.has(asset.componentVersionId)));
     if (!shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)) return layers;
-    return layers.map((asset) => asset.componentVersionId === selectedLayerId
-      ? { ...asset, imageUrl: inspection!.imageUrl! }
+    return layers.map((asset) => asset.componentVersionId === selectedLayerId && inspection?.alphaBounds
+      ? applyCandidateAssetPreview(asset, { imageUrl: inspection.imageUrl!, alphaBounds: inspection.alphaBounds })
       : asset,
     );
-  }, [bodies, components, hiddenIds, inspection?.imageUrl, mode, selectedBodyId, selectedLayerId]);
+  }, [bodies, components, hiddenIds, inspection?.alphaBounds, inspection?.imageUrl, mode, selectedBodyId, selectedLayerId]);
 
   useEffect(() => {
     setCandidateTransform(IDENTITY_TRANSFORM);
@@ -192,6 +196,12 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     setFamilyTransform((current) => resizePlacementAroundContact(current, CYL9_ROLLER_CONTACT, scale));
   };
 
+  const chooseBody = (bodyId: string) => {
+    const next = selectWorkbenchBody(selectedLayerId, bodyId);
+    setSelectedBodyId(next.selectedBodyId);
+    setSelectedLayerId(next.selectedLayerId);
+  };
+
   return (
     <section className="space-y-3">
       <header className="flex flex-wrap items-start justify-between gap-3 rounded border px-4 py-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "linear-gradient(120deg,rgba(215,168,95,0.09),rgba(0,0,0,0.12))" }}>
@@ -218,7 +228,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         <div className="mb-2 flex items-center justify-between text-[9px] uppercase tracking-[0.18em]" style={{ color: "var(--darkroom-text-dim)" }}><span>Five locked body plates</span><span>baseline alignment sequence</span></div>
         <div className="grid grid-cols-5 gap-2">
           {bodies.map((body) => (
-            <button key={body.componentVersionId} type="button" onClick={() => { setSelectedBodyId(body.componentVersionId); if (mode !== "family-fit") setSelectedLayerId(body.componentVersionId); }} className="group overflow-hidden rounded border text-left" style={{ borderColor: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
+            <button key={body.componentVersionId} type="button" onClick={() => chooseBody(body.componentVersionId)} className="group overflow-hidden rounded border text-left" style={{ borderColor: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
               <div className="aspect-[10/11] bg-[#f5f3ef] p-1"><img src={body.imageUrl} alt={body.displayName} className="h-full w-full object-contain" /></div>
               <div className="truncate border-t px-2 py-1.5 text-[8px] uppercase tracking-[0.12em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>{body.materialVariant}</div>
             </button>
@@ -322,7 +332,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
                 <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: "#f2c078" }}>Visual candidate only · placement version not written</span>
               </div>
             </div>
-          ) : <div className="mt-3">
+          ) : null}
+          <div className="mt-3">
             <CandidateActionPanel
               organizationId={organizationId}
               familyKey="CYL-9ML"
@@ -334,8 +345,9 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               selectionReady={selectionReady}
               serializeMask={() => mask.serializeMask(selectionKind)}
               onInspectionChange={handleInspectionChange}
+              reviewOnly={mode === "family-fit"}
             />
-          </div>}
+          </div>
         </div>
 
         <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={activeTransform} inspection={inspection} />
@@ -343,7 +355,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
       <RollonLineup
         assets={query.data.assets}
-        rollerVariantKey={selectedAsset?.slot === "roller" ? selectedAsset.variantKey : undefined}
+        rollerVariantKey={selectedAsset?.slot === "roller" ? inspection?.variantLabel ?? selectedAsset.variantKey : undefined}
         rollerImageUrlOverride={selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
           ? inspection?.imageUrl ?? undefined
           : undefined}

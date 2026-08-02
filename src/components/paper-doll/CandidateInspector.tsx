@@ -14,6 +14,8 @@ type InspectorTab = "source" | "candidate" | "difference";
 
 export interface CandidateInspection {
   imageUrl: string | null;
+  candidateSha256: string | null;
+  alphaBounds: { left: number; top: number; right: number; bottom: number } | null;
   differenceUrl: string | null;
   provider: string;
   model: string;
@@ -50,8 +52,8 @@ export function CandidateInspector({ asset, mode, selectionKind, transform, insp
   const geometryLocked = inspection ? shouldShowGeometryLocked(inspection) : false;
   const sourceRevoked = Boolean(authorityMaskBlocker(asset?.geometryMaskReference?.sha256));
   useEffect(() => {
-    if (inspection?.imageUrl) setTab("candidate");
-  }, [inspection?.imageUrl]);
+    setTab(inspection?.imageUrl && mode !== "release-lock" ? "candidate" : "source");
+  }, [inspection?.candidateSha256, inspection?.imageUrl, mode]);
   const previewUrl = tab === "source" ? (sourceRevoked ? null : asset?.imageUrl) : tab === "candidate" ? inspection?.imageUrl : inspection?.differenceUrl;
 
   return (
@@ -77,7 +79,7 @@ export function CandidateInspector({ asset, mode, selectionKind, transform, insp
               color: tab === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)",
             }}
           >
-            {item}
+            {item === "source" ? "release source" : item}
           </button>
         ))}
       </div>

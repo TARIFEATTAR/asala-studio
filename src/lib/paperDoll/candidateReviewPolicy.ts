@@ -29,3 +29,24 @@ export function candidateAuthorityBlocker(entry: ReviewCandidateLike | null): st
   const sha = entry.candidateVersion.geometry_mask_sha256;
   return authorityMaskBlocker(typeof sha === "string" ? sha : null);
 }
+
+export function candidatePreviewDetails(entry: {
+  candidateVersion: Record<string, unknown> | null;
+  candidateImageUrl: string | null;
+}) {
+  if (!entry.candidateVersion || !entry.candidateImageUrl) return null;
+  const sha = entry.candidateVersion.image_sha256;
+  const rawBounds = entry.candidateVersion.alpha_bounds;
+  if (typeof sha !== "string" || !rawBounds || typeof rawBounds !== "object" || Array.isArray(rawBounds)) return null;
+  const bounds = rawBounds as Record<string, unknown>;
+  const left = Number(bounds.left);
+  const top = Number(bounds.top);
+  const right = Number(bounds.right);
+  const bottom = Number(bounds.bottom);
+  if (![left, top, right, bottom].every(Number.isFinite) || right < left || bottom < top) return null;
+  return {
+    imageUrl: entry.candidateImageUrl,
+    candidateSha256: sha,
+    alphaBounds: { left, top, right, bottom },
+  };
+}

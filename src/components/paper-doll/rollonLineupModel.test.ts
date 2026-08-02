@@ -52,3 +52,21 @@ test("lineup previews the selected roller candidate across all five bodies", () 
   assert.ok(lineup.every((item) => item.layers.roller?.variantKey === "METAL"));
   assert.ok(lineup.every((item) => item.layers.roller?.imageUrl === candidateImageUrl));
 });
+
+test("a staged metal candidate uses the registered roller geometry carrier before release cutover", () => {
+  const assets = [
+    ...["CLR", "AMB", "BLU", "FRS", "SWL"].map((variant) => asset("body", variant)),
+    asset("roller", "PLASTIC"),
+    asset("overcap", "SHN-SL"),
+  ];
+  const candidateImageUrl = "signed://candidate-metal-roller";
+
+  const lineup = buildRollonLineup(assets, {
+    rollerVariantKey: "METAL",
+    overcapVariantKey: "SHN-SL",
+    rollerImageUrlOverride: candidateImageUrl,
+  });
+
+  assert.ok(lineup.every((item) => item.layers.roller?.variantKey === "METAL"));
+  assert.ok(lineup.every((item) => item.layers.roller?.imageUrl === candidateImageUrl));
+});

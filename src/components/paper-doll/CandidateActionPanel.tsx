@@ -25,12 +25,14 @@ import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
 import {
   candidateAuditReason,
   candidateAuthorityBlocker,
+  candidatePreviewDetails,
   selectCandidateForReview,
 } from "@/lib/paperDoll/candidateReviewPolicy";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
 import type { CandidateInspection } from "./CandidateInspector";
 import type { CandidateSelectionKind } from "./assemblyEditModel";
+import { candidateHistoryRefreshInterval } from "./candidatePreviewModel";
 
 type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 
@@ -45,6 +47,7 @@ interface CandidateActionPanelProps {
   selectionReady: boolean;
   serializeMask: () => Promise<string>;
   onInspectionChange: (inspection: CandidateInspection | null) => void;
+  reviewOnly?: boolean;
 }
 
 const PROVIDERS: Array<{ id: CandidateProvider; label: string; detail: string }> = [
@@ -76,10 +79,13 @@ function assetRef(asset: ReleaseAsset): PrivateAssetRef {
 function inspectionFrom(entry: CandidateHistoryEntry | null, maskBlocker: string | null): CandidateInspection | null {
   if (!entry) return null;
   const metadata = entry.job.outputMetadata;
+  const preview = candidatePreviewDetails(entry);
   const blocking = entry.qa.filter((row) => row.blocking === true);
   const failed = blocking.some((row) => row.qa_status !== "passed");
   return {
-    imageUrl: entry.candidateImageUrl,
+    imageUrl: preview?.imageUrl ?? null,
+    candidateSha256: preview?.candidateSha256 ?? null,
+    alphaBounds: preview?.alphaBounds ?? null,
     differenceUrl: null,
     provider: entry.job.provider,
     model: entry.job.model,
@@ -104,6 +110,7 @@ export function CandidateActionPanel({
   selectionReady,
   serializeMask,
   onInspectionChange,
+  reviewOnly = false,
 }: CandidateActionPanelProps) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -121,7 +128,7 @@ export function CandidateActionPanel({
   const history = useQuery({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
     queryFn: () => loadCandidateWorkbench(supabase, organizationId, familyKey),
-    refetchInterval: 5_000,
+    refetchInterval: (candidateQuery) => candidateHistoryRefreshInterval(candidateQuery.state.data?.jobs),
     refetchOnWindowFocus: false,
   });
   const componentHistory = useMemo(
@@ -284,15 +291,20 @@ export function CandidateActionPanel({
     <div className="space-y-3 rounded border p-3" style={{ borderColor: candidateEditingEnabled ? "rgba(97,214,200,0.36)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.17em]" style={{ color: "#61d6c8" }}><Cpu className="h-3.5 w-3.5" />Candidate actions</div>
-          <div className="mt-1 text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>Worker: <span style={{ color: history.data?.worker.status === "ready" ? "#6ee7a8" : history.data?.worker.status === "error" ? "#ef8d7d" : "#f2c078" }}>{history.data?.worker.status ?? "checking"}</span></div>
+          <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.17em]" style={{ color: "#61d6c8" }}><Cpu className="h-3.5 w-3.5" />{reviewOnly ? "Candidate review" : "Candidate actions"}</div>
+          {!reviewOnly && <div className="mt-1 text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>Worker: <span style={{ color: history.data?.worker.status === "ready" ? "#6ee7a8" : history.data?.worker.status === "error" ? "#ef8d7d" : "#f2c078" }}>{history.data?.worker.status ?? "checking"}</span></div>}
         </div>
         <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
       </div>
 
-      {parentMaskBlocker && (
+      {parentMaskBlocker && !reviewOnly && (
         <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(239,141,125,0.42)", color: "#ef8d7d", background: "rgba(239,141,125,0.05)" }}>
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{parentMaskBlocker} A clean staged replacement can still be reviewed and approved below.
+        </div>
+      )}
+      {parentMaskBlocker && reviewOnly && latest && !candidateMaskBlocker && (
+        <div className="rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(242,192,120,0.32)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
+          The revoked release ancestor remains audit-only. This canvas is using the clean, geometry-locked review candidate.
         </div>
       )}
 
@@ -314,6 +326,7 @@ export function CandidateActionPanel({
         </div>
       )}
 
+      {!reviewOnly && <>
       <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
         {PROVIDERS.map((item) => (
           <button key={item.id} type="button" onClick={() => chooseProvider(item.id)} className="rounded border px-2 py-2 text-left" style={{ borderColor: provider === item.id ? "rgba(97,214,200,0.52)" : "var(--darkroom-border-subtle)", background: provider === item.id ? "rgba(97,214,200,0.06)" : "transparent" }}>
@@ -350,6 +363,12 @@ export function CandidateActionPanel({
 
       {!candidateEditingEnabled && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#f2c078" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />Select a non-body component with a registered authority mask. Locked plates cannot become generation sources.</div>}
       {candidateEditingEnabled && !selectionReady && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#f2c078" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />Draw the selected rectangle or brush mask before queuing.</div>}
+      </>}
+      {reviewOnly && (
+        <div className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.13em]" style={{ borderColor: "rgba(97,214,200,0.34)", color: "#61d6c8", background: "rgba(97,214,200,0.035)" }}>
+          Review candidate mounted for family placement · generation and approval remain in Edit Lab
+        </div>
+      )}
       {message && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#6ee7a8" }}><CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0" />{message}</div>}
       {error && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#ef8d7d" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />{error}</div>}
 
