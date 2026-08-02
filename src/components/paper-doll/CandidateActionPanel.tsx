@@ -24,11 +24,14 @@ import { downloadImageLibraryCandidate } from "@/lib/paperDoll/libraryCandidateS
 import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
 import {
   approvedCandidateDetails,
+  approvedCandidateVariants,
   candidateAuditReason,
   candidateAuthorityBlocker,
   candidatePreviewDetails,
+  resolveAncestorNotice,
   selectCandidateForReview,
   type ApprovedCandidateDetails,
+  type ApprovedCandidateVariant,
 } from "@/lib/paperDoll/candidateReviewPolicy";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
@@ -50,6 +53,8 @@ interface CandidateActionPanelProps {
   serializeMask: () => Promise<string>;
   onInspectionChange: (inspection: CandidateInspection | null) => void;
   onApprovedChange: (approved: ApprovedCandidateDetails | null) => void;
+  onApprovedVariantsChange?: (variants: ApprovedCandidateVariant[]) => void;
+  onOpenFamilyFit?: () => void;
   reviewOnly?: boolean;
 }
 
@@ -114,6 +119,8 @@ export function CandidateActionPanel({
   serializeMask,
   onInspectionChange,
   onApprovedChange,
+  onApprovedVariantsChange,
+  onOpenFamilyFit,
   reviewOnly = false,
 }: CandidateActionPanelProps) {
   const queryClient = useQueryClient();
@@ -133,7 +140,7 @@ export function CandidateActionPanel({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
     queryFn: () => loadCandidateWorkbench(supabase, organizationId, familyKey),
     refetchInterval: (candidateQuery) => candidateHistoryRefreshInterval(candidateQuery.state.data?.jobs),
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
   const componentHistory = useMemo(
     () => history.data?.jobs.filter((entry) => entry.job.componentId === asset?.componentId) ?? [],
@@ -148,6 +155,10 @@ export function CandidateActionPanel({
     () => componentHistory.filter((entry) => entry.job.requirementKey.endsWith(`:${reviewVariant}`)),
     [componentHistory, reviewVariant],
   );
+  const approvedVariants = useMemo(
+    () => approvedCandidateVariants(componentHistory),
+    [componentHistory],
+  );
   useEffect(() => {
     if (!availableReviewVariants.includes(reviewVariant) && availableReviewVariants.length > 0) {
       setReviewVariant(availableReviewVariants[0]);
@@ -159,9 +170,15 @@ export function CandidateActionPanel({
   const parentMaskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
   const candidateMaskBlocker = candidateAuthorityBlocker(latest);
   const approved = useMemo(() => approvedCandidateDetails(latest), [latest]);
+  const ancestorNotice = resolveAncestorNotice({
+    parentMaskBlocker,
+    candidateMaskBlocker,
+    hasCandidate: Boolean(latest),
+  });
 
   useEffect(() => onInspectionChange(inspectionFrom(latest, candidateMaskBlocker)), [latest, candidateMaskBlocker, onInspectionChange]);
   useEffect(() => onApprovedChange(approved), [approved, onApprovedChange]);
+  useEffect(() => onApprovedVariantsChange?.(approvedVariants), [approvedVariants, onApprovedVariantsChange]);
 
   const requirement = useMemo(() => {
     if (!asset) return null;
@@ -304,14 +321,14 @@ export function CandidateActionPanel({
         <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
       </div>
 
-      {parentMaskBlocker && !reviewOnly && (
-        <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(239,141,125,0.42)", color: "#ef8d7d", background: "rgba(239,141,125,0.05)" }}>
-          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{parentMaskBlocker} A clean staged replacement can still be reviewed and approved below.
-        </div>
-      )}
-      {parentMaskBlocker && reviewOnly && latest && !candidateMaskBlocker && (
-        <div className="rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(242,192,120,0.32)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
-          The revoked release ancestor remains audit-only. This canvas is using the clean, geometry-locked review candidate.
+      {ancestorNotice && (
+        <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{
+          borderColor: ancestorNotice.tone === "warning" ? "rgba(242,192,120,0.32)" : "rgba(239,141,125,0.42)",
+          color: ancestorNotice.tone === "warning" ? "#f2c078" : "#ef8d7d",
+          background: ancestorNotice.tone === "warning" ? "rgba(242,192,120,0.035)" : "rgba(239,141,125,0.05)",
+        }}>
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>{ancestorNotice.message}{ancestorNotice.tone === "error" && !reviewOnly ? " A clean staged replacement can still be reviewed and approved below." : ""}</span>
         </div>
       )}
 
@@ -364,8 +381,14 @@ export function CandidateActionPanel({
         ) : (
           <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !instruction.trim()} onClick={() => void queue()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}><Play className="h-3.5 w-3.5" />{busy ? "Queuing…" : "Queue candidate"}</button>
         )}
-        <button type="button" disabled={!canApprove || busy} onClick={() => void decide("approved")} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.42)", color: "#6ee7a8" }}><ShieldCheck className="h-3.5 w-3.5" />Approve child</button>
-        <button type="button" disabled={latest?.job.status !== "candidate_ready" || Boolean(latest.approval) || busy} onClick={() => void decide("rejected")} className="rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}>Reject</button>
+        {approved ? (
+          <button type="button" disabled={!onOpenFamilyFit} onClick={onOpenFamilyFit} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.52)", color: "#6ee7a8", background: "rgba(110,231,168,0.05)" }}><ShieldCheck className="h-3.5 w-3.5" />Pixels Approved · Open Family Fit</button>
+        ) : (
+          <>
+            <button type="button" disabled={!canApprove || busy} onClick={() => void decide("approved")} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.42)", color: "#6ee7a8" }}><ShieldCheck className="h-3.5 w-3.5" />Approve Pixels</button>
+            <button type="button" disabled={latest?.job.status !== "candidate_ready" || busy} onClick={() => void decide("rejected")} className="rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}>Reject</button>
+          </>
+        )}
       </div>
 
       {!candidateEditingEnabled && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#f2c078" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />Select a non-body component with a registered authority mask. Locked plates cannot become generation sources.</div>}

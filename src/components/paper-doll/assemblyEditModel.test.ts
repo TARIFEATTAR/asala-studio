@@ -10,6 +10,7 @@ import {
   releaseToDisplay,
   shouldShowGeometryLocked,
   shouldZoomCanvasFromWheel,
+  transformedBoundsToDisplay,
 } from "./assemblyEditModel";
 
 test("display coordinates round-trip to the 2080x2288 release canvas", () => {
@@ -54,4 +55,12 @@ test("plain wheel scrolls the viewport and modifier-wheel zooms the canvas", () 
   assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: false, metaKey: false }), false);
   assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: true, metaKey: false }), true);
   assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: false, metaKey: true }), true);
+});
+
+test("authority-mask bounds follow the component transform without painting over its pixels", () => {
+  assert.deepEqual(transformedBoundsToDisplay(
+    { left: 900, top: 600, right: 1180, bottom: 900 },
+    { translateXPx: 20, translateYPx: -10, scaleX: 0.9, scaleY: 0.9 },
+    { width: 1040, height: 1144 },
+  ), { left: 415, top: 265, width: 126, height: 135 });
 });

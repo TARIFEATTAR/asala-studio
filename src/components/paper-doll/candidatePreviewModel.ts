@@ -1,5 +1,7 @@
 import type { AssemblyEditMode } from "./assemblyEditModel";
 
+export const PRIVATE_ASSET_REFRESH_INTERVAL_MS = 4 * 60 * 1_000;
+
 export function shouldMountCandidatePreview(mode: AssemblyEditMode, candidateImageUrl: string | null): boolean {
   return (mode === "edit-lab" || mode === "family-fit") && Boolean(candidateImageUrl);
 }
@@ -15,7 +17,7 @@ export function candidateHistoryRefreshInterval(
     if (!PENDING_CANDIDATE_STATUSES.has(entry.job.status) || !entry.job.updatedAt) return false;
     const updatedAt = Date.parse(entry.job.updatedAt);
     return Number.isFinite(updatedAt) && nowEpochMs - updatedAt <= activeWindowMs;
-  }) ? 5_000 : false;
+  }) ? 5_000 : PRIVATE_ASSET_REFRESH_INTERVAL_MS;
 }
 
 export function selectWorkbenchBody(currentLayerId: string | null, bodyId: string) {

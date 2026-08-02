@@ -30,7 +30,7 @@ import {
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
-import type { ApprovedCandidateDetails } from "@/lib/paperDoll/candidateReviewPolicy";
+import type { ApprovedCandidateDetails, ApprovedCandidateVariant } from "@/lib/paperDoll/candidateReviewPolicy";
 import {
   loadSharedPlacement,
   lockSharedPlacement,
@@ -38,6 +38,7 @@ import {
 } from "@/lib/paperDoll/placementRepository";
 import {
   applyCandidateAssetPreview,
+  PRIVATE_ASSET_REFRESH_INTERVAL_MS,
   selectWorkbenchBody,
   shouldMountCandidatePreview,
 } from "./candidatePreviewModel";
@@ -102,7 +103,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     ),
     enabled: Boolean(organizationId && familyKey === CYL9_FAMILY_KEY),
     staleTime: 60_000,
-    refetchOnWindowFocus: false,
+    refetchInterval: PRIVATE_ASSET_REFRESH_INTERVAL_MS,
+    refetchOnWindowFocus: true,
   });
   const [mode, setMode] = useState<AssemblyEditMode>("release-lock");
   const [selectionKind, setSelectionKind] = useState<CandidateSelectionKind>("whole-layer");
@@ -113,6 +115,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const [familyTransform, setFamilyTransform] = useState<FamilyPlacementTransform>(IDENTITY_FAMILY_PLACEMENT);
   const [inspection, setInspection] = useState<CandidateInspection | null>(null);
   const [approvedCandidate, setApprovedCandidate] = useState<ApprovedCandidateDetails | null>(null);
+  const [approvedVariants, setApprovedVariants] = useState<ApprovedCandidateVariant[]>([]);
   const approvedComponentVersionId = approvedCandidate?.componentVersionId ?? null;
   const [approverDisplayName, setApproverDisplayName] = useState("");
   const [placementApprovalNote, setPlacementApprovalNote] = useState("");
@@ -121,6 +124,13 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const mask = useCandidateMask();
   const handleInspectionChange = useCallback((next: CandidateInspection | null) => setInspection(next), []);
   const handleApprovedChange = useCallback((next: ApprovedCandidateDetails | null) => setApprovedCandidate(next), []);
+  const handleApprovedVariantsChange = useCallback((next: ApprovedCandidateVariant[]) => setApprovedVariants(next), []);
+  const refreshPrivateAssetUrls = useCallback(() => {
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] }),
+      queryClient.invalidateQueries({ queryKey: ["paper-doll-candidate-history", organizationId, CYL9_FAMILY_KEY] }),
+    ]);
+  }, [familyKey, organizationId, queryClient]);
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
@@ -207,6 +217,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     setCandidateTransform(IDENTITY_TRANSFORM);
     setInspection(null);
     setApprovedCandidate(null);
+    setApprovedVariants([]);
     mask.reset();
     // Resetting candidate-local state is intentional when the immutable source layer changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,9 +268,13 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     && approvedCandidate
     && lockedPlacement.authorityMaskSha256 === approvedCandidate.authorityMaskSha256
     && placementTransformsEqual(familyTransform, lockedPlacement.transform));
-  const inheritedVariantLabels = components
-    .filter((asset) => asset.slot === "roller" && asset.geometryMaskReference?.sha256 === approvedCandidate?.authorityMaskSha256)
-    .map((asset) => asset.materialVariant);
+  const inheritedVariantLabels = approvedVariants
+    .filter((variant) => variant.authorityMaskSha256 === approvedCandidate?.authorityMaskSha256)
+    .map((variant) => variant.variantKey === "PLASTIC"
+      ? "Natural Plastic"
+      : variant.variantKey === "METAL"
+        ? "Metal Ball"
+        : variant.variantKey);
 
   const toggleVisibility = (id: string) => {
     setHiddenIds((current) => {
@@ -384,6 +399,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             onTransformChange={mode === "family-fit" ? setFamilyTransform : setCandidateTransform}
             onRectangleChange={mask.setRectangle}
             onBrushStroke={mask.addBrushStroke}
+            onAssetLoadFailure={refreshPrivateAssetUrls}
           />
           {shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null) && (
             <div className="mt-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(97,214,200,0.42)", color: "#61d6c8", background: "rgba(97,214,200,0.05)" }}>
@@ -429,7 +445,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               </div>
               <SharedPlacementPanel
                 approved={approvedCandidate}
-                expectedAuthorityMaskSha256={selectedAsset?.geometryMaskReference?.sha256 ?? null}
+                expectedAuthorityMaskSha256={approvedCandidate?.authorityMaskSha256 ?? null}
                 bodyPlates={bodies}
                 inheritedVariantLabels={inheritedVariantLabels}
                 transform={familyTransform}
@@ -461,6 +477,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               serializeMask={() => mask.serializeMask(selectionKind)}
               onInspectionChange={handleInspectionChange}
               onApprovedChange={handleApprovedChange}
+              onApprovedVariantsChange={handleApprovedVariantsChange}
+              onOpenFamilyFit={() => enterMode("family-fit")}
               reviewOnly={mode === "family-fit"}
             />
           </div>
@@ -477,6 +495,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
           : selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
             ? inspection?.imageUrl ?? undefined
           : undefined}
+        overcapVariantKey={null}
         placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT}
         placementId={mode === "family-fit" && placementIsExact ? lockedPlacement?.id : undefined}
       />

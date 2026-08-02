@@ -22,7 +22,7 @@ export interface RollonLineupItem {
 
 export function buildRollonLineup(
   assets: RollonLineupAsset[],
-  selection: { rollerVariantKey: string; overcapVariantKey: string; rollerImageUrlOverride?: string },
+  selection: { rollerVariantKey: string; overcapVariantKey?: string | null; rollerImageUrlOverride?: string },
 ): RollonLineupItem[] {
   const selectedRoller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey)
     ?? (selection.rollerImageUrlOverride ? assets.find((asset) => asset.slot === "roller") : null)
@@ -30,13 +30,15 @@ export function buildRollonLineup(
   const roller = selectedRoller && selection.rollerImageUrlOverride
     ? { ...selectedRoller, variantKey: selection.rollerVariantKey, imageUrl: selection.rollerImageUrlOverride }
     : selectedRoller;
-  const overcap = assets.find((asset) => asset.slot === "overcap" && asset.variantKey === selection.overcapVariantKey) ?? null;
+  const overcap = selection.overcapVariantKey
+    ? assets.find((asset) => asset.slot === "overcap" && asset.variantKey === selection.overcapVariantKey) ?? null
+    : null;
   return ROLLON_LINEUP_BODY_VARIANTS.map((bodyVariantKey) => {
     const body = assets.find((asset) => asset.slot === "body" && asset.variantKey === bodyVariantKey) ?? null;
     const issues = [
       ...(body ? [] : [`Missing exact body ${bodyVariantKey}`]),
       ...(roller ? [] : [`Missing exact roller ${selection.rollerVariantKey}`]),
-      ...(overcap ? [] : [`Missing exact overcap ${selection.overcapVariantKey}`]),
+      ...(selection.overcapVariantKey && !overcap ? [`Missing exact overcap ${selection.overcapVariantKey}`] : []),
     ];
     return {
       bodyVariantKey,

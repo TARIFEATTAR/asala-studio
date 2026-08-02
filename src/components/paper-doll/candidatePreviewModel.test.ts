@@ -18,7 +18,7 @@ test("keeps the selected review candidate mounted while fitting it to the five b
   assert.equal(shouldMountCandidatePreview("family-fit", "https://private.example/candidate.png"), true);
 });
 
-test("terminal candidate history stops polling so signed URLs do not blank and reload the canvas", () => {
+test("terminal candidate history renews private URLs before their five-minute expiry", () => {
   const refreshInterval = (previewModel as typeof previewModel & {
     candidateHistoryRefreshInterval?: (
       jobs: Array<{ job: { status: string; updatedAt?: string } }> | undefined,
@@ -29,13 +29,13 @@ test("terminal candidate history stops polling so signed URLs do not blank and r
   assert.equal(refreshInterval?.([
     { job: { status: "candidate_ready" } },
     { job: { status: "failed" } },
-  ]), false);
+  ]), 240_000);
   assert.equal(refreshInterval?.([
     { job: { status: "running", updatedAt: "2026-08-02T20:00:00.000Z" } },
   ], Date.parse("2026-08-02T20:00:30.000Z")), 5_000);
   assert.equal(refreshInterval?.([
     { job: { status: "queued", updatedAt: "2026-08-02T12:00:00.000Z" } },
-  ], Date.parse("2026-08-02T20:00:30.000Z")), false);
+  ], Date.parse("2026-08-02T20:00:30.000Z")), 240_000);
 });
 
 test("changing the inspected bottle preserves the selected roller layer", () => {

@@ -60,6 +60,27 @@ export function releaseToDisplay(point: Point, display: DisplaySize): Point {
   };
 }
 
+export function transformedBoundsToDisplay(
+  bounds: ReleaseRect,
+  transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number },
+  display: DisplaySize,
+): { left: number; top: number; width: number; height: number } {
+  const first = releaseToDisplay({
+    x: bounds.left * transform.scaleX + transform.translateXPx,
+    y: bounds.top * transform.scaleY + transform.translateYPx,
+  }, display);
+  const second = releaseToDisplay({
+    x: bounds.right * transform.scaleX + transform.translateXPx,
+    y: bounds.bottom * transform.scaleY + transform.translateYPx,
+  }, display);
+  return {
+    left: Math.min(first.x, second.x),
+    top: Math.min(first.y, second.y),
+    width: Math.abs(second.x - first.x),
+    height: Math.abs(second.y - first.y),
+  };
+}
+
 export function displayRectToRelease(
   rect: { left: number; top: number; right: number; bottom: number },
   display: DisplaySize,

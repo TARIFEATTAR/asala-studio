@@ -22,3 +22,14 @@ test("a canvas swap becomes ready only after every replacement layer has loaded"
   resolvers.get("body")?.("body-image");
   assert.deepEqual(await pending, ["body-image", "roller-image"]);
 });
+
+test("an incomplete private-image swap fails without authorizing a canvas clear", async () => {
+  const { prepareCandidateCanvasSwap } = await import("./candidateCanvasSwap");
+
+  await assert.rejects(
+    prepareCandidateCanvasSwap(["body", "roller"], async (item) => (
+      item === "body" ? "body-image" : null
+    )),
+    /private layer failed to load/i,
+  );
+});

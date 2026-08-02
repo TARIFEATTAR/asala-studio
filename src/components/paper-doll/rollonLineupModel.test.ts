@@ -33,6 +33,18 @@ test("lineup never substitutes a fallback when a selected component is missing",
   assert.ok(lineup.every((item) => item.status === "blocked"));
 });
 
+test("roller Family Fit reaches five of five without requiring an overcap", () => {
+  const assets = [
+    ...["CLR", "AMB", "BLU", "FRS", "SWL"].map((variant) => asset("body", variant)),
+    asset("roller", "PLASTIC"),
+  ];
+  const lineup = buildRollonLineup(assets, { rollerVariantKey: "PLASTIC" });
+
+  assert.ok(lineup.every((item) => item.status === "complete"));
+  assert.ok(lineup.every((item) => item.layers.overcap === null));
+  assert.ok(lineup.every((item) => item.issues.length === 0));
+});
+
 test("lineup previews the selected roller candidate across all five bodies", () => {
   const assets = [
     ...["CLR", "AMB", "BLU", "FRS", "SWL"].map((variant) => asset("body", variant)),

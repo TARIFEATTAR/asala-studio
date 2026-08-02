@@ -38,6 +38,22 @@ test("a clean authority replacement remains reviewable when its parent mask was 
   assert.equal(selected?.job.id, "replacement");
 });
 
+test("a clean selected candidate downgrades a revoked ancestor to an audit notice", () => {
+  assert.deepEqual(reviewPolicy.resolveAncestorNotice({
+    parentMaskBlocker: "revoked ancestor",
+    candidateMaskBlocker: null,
+    hasCandidate: true,
+  }), {
+    tone: "warning",
+    message: "Old release ancestor is audit-only. Clean geometry authority active.",
+  });
+  assert.deepEqual(reviewPolicy.resolveAncestorNotice({
+    parentMaskBlocker: "revoked ancestor",
+    candidateMaskBlocker: "revoked candidate",
+    hasCandidate: true,
+  }), { tone: "error", message: "revoked ancestor" });
+});
+
 test("review details expose candidate identity and measured alpha bounds", () => {
   const details = (reviewPolicy as typeof reviewPolicy & {
     candidatePreviewDetails?: (candidate: {
@@ -83,6 +99,34 @@ test("approved details require the exact immutable approved child", () => {
     authorityMaskSha256: cleanMask,
     alphaBounds: { left: 907, top: 668, right: 1175, bottom: 918 },
   });
+});
+
+test("plastic and metal approvals sharing one exact mask are both placement inheritors", () => {
+  const approvedEntry = (variantKey: "PLASTIC" | "METAL", id: string, imageSha: string) => ({
+    job: { status: "candidate_ready", requirementKey: `CYL-9ML:ROLLER:${variantKey}` },
+    candidateVersion: { image_sha256: imageSha, geometry_mask_sha256: cleanMask },
+    approvedVersion: {
+      id,
+      approval_status: "approved",
+      image_sha256: imageSha,
+      geometry_mask_sha256: cleanMask,
+      alpha_bounds: { left: 907, top: 668, right: 1175, bottom: 918 },
+    },
+    approvedImageUrl: `signed://${variantKey.toLowerCase()}`,
+    approval: { decision: "approved", resulting_approved_component_version_id: id },
+    qa: [{ blocking: true, qa_status: "passed" }],
+  });
+
+  assert.deepEqual(reviewPolicy.approvedCandidateVariants([
+    approvedEntry("PLASTIC", "02161d6f-fb7c-4b44-ba98-a61500181529", "b".repeat(64)),
+    approvedEntry("METAL", "e7a6636a-b2db-4bfe-bbb9-fde0458fe407", "c".repeat(64)),
+  ]).map((variant) => ({
+    variantKey: variant.variantKey,
+    authorityMaskSha256: variant.authorityMaskSha256,
+  })), [
+    { variantKey: "PLASTIC", authorityMaskSha256: cleanMask },
+    { variantKey: "METAL", authorityMaskSha256: cleanMask },
+  ]);
 });
 
 test("rejected and SHA-drifted approvals cannot unlock Family Fit", () => {

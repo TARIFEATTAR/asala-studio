@@ -30,6 +30,26 @@ export function candidateAuthorityBlocker(entry: ReviewCandidateLike | null): st
   return authorityMaskBlocker(typeof sha === "string" ? sha : null);
 }
 
+export interface CandidateAncestorNotice {
+  tone: "warning" | "error";
+  message: string;
+}
+
+export function resolveAncestorNotice(input: {
+  parentMaskBlocker: string | null;
+  candidateMaskBlocker: string | null;
+  hasCandidate: boolean;
+}): CandidateAncestorNotice | null {
+  if (!input.parentMaskBlocker) return null;
+  if (input.hasCandidate && !input.candidateMaskBlocker) {
+    return {
+      tone: "warning",
+      message: "Old release ancestor is audit-only. Clean geometry authority active.",
+    };
+  }
+  return { tone: "error", message: input.parentMaskBlocker };
+}
+
 export function candidatePreviewDetails(entry: {
   candidateVersion: Record<string, unknown> | null;
   candidateImageUrl: string | null;
@@ -57,6 +77,10 @@ export interface ApprovedCandidateDetails {
   imageSha256: string;
   authorityMaskSha256: string;
   alphaBounds: { left: number; top: number; right: number; bottom: number };
+}
+
+export interface ApprovedCandidateVariant extends ApprovedCandidateDetails {
+  variantKey: string;
 }
 
 export function approvedCandidateDetails(entry: {
@@ -98,4 +122,25 @@ export function approvedCandidateDetails(entry: {
     authorityMaskSha256: authorityMaskSha,
     alphaBounds: { left, top, right, bottom },
   };
+}
+
+export function approvedCandidateVariants(entries: readonly Array<{
+  job: { status: string; requirementKey: string };
+  candidateVersion: Record<string, unknown> | null;
+  approvedVersion: Record<string, unknown> | null;
+  approvedImageUrl: string | null;
+  approval: Record<string, unknown> | null;
+  qa: Array<Record<string, unknown>>;
+}>): ApprovedCandidateVariant[] {
+  const variants = Array.from(new Set(entries
+    .map((entry) => entry.job.requirementKey.split(":").at(-1))
+    .filter((variantKey): variantKey is string => Boolean(variantKey))));
+
+  return variants.flatMap((variantKey) => {
+    const selected = selectCandidateForReview(entries.filter(
+      (entry) => entry.job.requirementKey.endsWith(`:${variantKey}`),
+    ));
+    const approved = approvedCandidateDetails(selected);
+    return approved ? [{ variantKey, ...approved }] : [];
+  });
 }

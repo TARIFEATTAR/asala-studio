@@ -10,6 +10,7 @@ import {
   displayToRelease,
   releaseToDisplay,
   shouldZoomCanvasFromWheel,
+  transformedBoundsToDisplay,
   type AssemblyEditMode,
   type CandidateSelectionKind,
   type ReleaseRect,
@@ -40,6 +41,7 @@ interface AssemblyEditCanvasProps {
   onTransformChange: (transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number }) => void;
   onRectangleChange: (rectangle: ReleaseRect) => void;
   onBrushStroke: (stroke: CandidateBrushStroke) => void;
+  onAssetLoadFailure?: () => void;
 }
 
 const GUIDE_COLOR = "#d7a85f";
@@ -60,13 +62,15 @@ export function AssemblyEditCanvas({
   onTransformChange,
   onRectangleChange,
   onBrushStroke,
+  onAssetLoadFailure,
 }: AssemblyEditCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const interactionRef = useRef({ mode, selectionKind, selectedLayerId, candidateEditingEnabled, placementEditingEnabled });
   const layerTransformRef = useRef(layerTransform);
-  const callbacksRef = useRef({ onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke });
+  const callbacksRef = useRef({ onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke, onAssetLoadFailure });
+  const failedSwapRef = useRef<string | null>(null);
   const [display, setDisplay] = useState({ width: 520, height: 572 });
   const [zoom, setZoom] = useState(1);
   const [guidesVisible, setGuidesVisible] = useState(showGuides);
@@ -74,7 +78,7 @@ export function AssemblyEditCanvas({
 
   interactionRef.current = { mode, selectionKind, selectedLayerId, candidateEditingEnabled, placementEditingEnabled };
   layerTransformRef.current = layerTransform;
-  callbacksRef.current = { onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke };
+  callbacksRef.current = { onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke, onAssetLoadFailure };
 
   useEffect(() => setGuidesVisible(showGuides), [showGuides]);
   useEffect(() => setMaskVisible(showMaskOverlay), [showMaskOverlay]);
@@ -308,9 +312,29 @@ export function AssemblyEditCanvas({
       }
     };
 
+    const addMaskBounds = () => {
+      if (!maskVisible) return;
+      const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
+      if (!selected?.geometryMaskUrl) return;
+      const selectedTransform = selected.slot === "body"
+        ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 }
+        : layerTransformRef.current;
+      canvas.add(new fabric.Rect({
+        ...transformedBoundsToDisplay(selected.alphaBounds, selectedTransform, display),
+        fill: "rgba(0,0,0,0)",
+        stroke: MASK_COLOR,
+        strokeWidth: 1,
+        strokeDashArray: [3, 3],
+        selectable: false,
+        evented: false,
+        name: "authority-mask-bounds",
+      }));
+    };
+
     const loadLayer = (asset: ReleaseAsset) => new Promise<fabric.Image | null>((resolve) => {
       fabric.Image.fromURL(asset.imageUrl, (image) => {
         if (cancelled) return resolve(null);
+        if (!image || !image.width || !image.height) return resolve(null);
         const editable = asset.slot !== "body"
           && asset.componentVersionId === selectedLayerId
           && ((mode === "edit-lab" && candidateEditingEnabled) || (mode === "family-fit" && placementEditingEnabled));
@@ -351,35 +375,23 @@ export function AssemblyEditCanvas({
     });
 
     const render = async () => {
-      const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
-      const [preparedLayers, preparedMask] = await Promise.all([
-        prepareCandidateCanvasSwap(layers, loadLayer),
-        maskVisible && selected?.geometryMaskUrl
-          ? new Promise<fabric.Image | null>((resolve) => fabric.Image.fromURL(selected.geometryMaskUrl!, (image) => {
-            if (cancelled) return resolve(null);
-            const transform = selected.slot === "body" ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 } : layerTransformRef.current;
-            const position = releaseToDisplay({ x: transform.translateXPx, y: transform.translateYPx }, display);
-            image.set({
-              left: position.x,
-              top: position.y,
-              originX: "left",
-              originY: "top",
-              scaleX: baseScale * transform.scaleX,
-              scaleY: baseScale * transform.scaleY,
-              opacity: 0.2,
-              selectable: false,
-              evented: false,
-              name: "authority-mask-overlay",
-            });
-            resolve(image);
-          }, { crossOrigin: "anonymous" }))
-          : Promise.resolve(null),
-      ]);
+      const swapKey = layers.map((asset) => asset.componentVersionId).join(":");
+      let preparedLayers: fabric.Image[];
+      try {
+        preparedLayers = await prepareCandidateCanvasSwap(layers, loadLayer);
+      } catch {
+        if (!cancelled && failedSwapRef.current !== swapKey) {
+          failedSwapRef.current = swapKey;
+          callbacksRef.current.onAssetLoadFailure?.();
+        }
+        return;
+      }
       if (cancelled) return;
+      failedSwapRef.current = null;
       canvas.clear();
       canvas.backgroundColor = "#F5F3EF";
       preparedLayers.forEach((image) => { if (image) canvas.add(image); });
-      if (preparedMask) canvas.add(preparedMask);
+      addMaskBounds();
       addGuides();
       canvas.renderAll();
     };
@@ -406,30 +418,15 @@ export function AssemblyEditCanvas({
       });
       object.setCoords();
     }
-    const maskOverlay = canvas.getObjects().find((item) => item.name === "authority-mask-overlay");
-    if (maskOverlay) {
-      const maskPosition = releaseToDisplay({ x: layerTransform.translateXPx, y: layerTransform.translateYPx }, display);
-      maskOverlay.set({
-        left: maskPosition.x,
-        top: maskPosition.y,
-        scaleX: baseScale * layerTransform.scaleX,
-        scaleY: baseScale * layerTransform.scaleY,
-      });
-      maskOverlay.setCoords();
-    }
     const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
-    const boundsGuide = canvas.getObjects().find((item) => item.name === "guide-alpha-bounds");
-    if (selected && selected.slot !== "body" && boundsGuide) {
-      const start = releaseToDisplay({
-        x: selected.alphaBounds.left * layerTransform.scaleX + layerTransform.translateXPx,
-        y: selected.alphaBounds.top * layerTransform.scaleY + layerTransform.translateYPx,
-      }, display);
-      const end = releaseToDisplay({
-        x: selected.alphaBounds.right * layerTransform.scaleX + layerTransform.translateXPx,
-        y: selected.alphaBounds.bottom * layerTransform.scaleY + layerTransform.translateYPx,
-      }, display);
-      boundsGuide.set({ left: start.x, top: start.y, width: end.x - start.x, height: end.y - start.y });
-      boundsGuide.setCoords();
+    if (selected && selected.slot !== "body") {
+      const displayBounds = transformedBoundsToDisplay(selected.alphaBounds, layerTransform, display);
+      canvas.getObjects()
+        .filter((item) => item.name === "guide-alpha-bounds" || item.name === "authority-mask-bounds")
+        .forEach((bounds) => {
+          bounds.set(displayBounds);
+          bounds.setCoords();
+        });
     }
     canvas.requestRenderAll();
   }, [display, layerTransform, layers, selectedLayerId]);

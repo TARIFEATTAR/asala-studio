@@ -25,7 +25,7 @@ export function RollonLineup({
   assets,
   rollerVariantKey = "PLASTIC",
   rollerImageUrlOverride,
-  overcapVariantKey = "SHN-SL",
+  overcapVariantKey = null,
   placementTransform = IDENTITY_FAMILY_PLACEMENT,
   placementId,
 }: RollonLineupProps) {
@@ -52,7 +52,7 @@ export function RollonLineup({
           <p className="mt-1 text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>{placementPreviewActive ? "One roller placement candidate · identical X/Y/scale across every locked body" : "Exact full-canvas layers · shared centerline, seat and baseline · no fallback assets"}</p>
         </div>
         <div className="text-right font-mono text-[8px] uppercase tracking-[0.12em]" style={{ color: complete === 5 ? "#6ee7a8" : "#f2c078" }}>
-          {complete}/5 complete · {rollerVariantKey} + {overcapVariantKey}
+          {complete}/5 complete · {overcapVariantKey ? `${rollerVariantKey} + ${overcapVariantKey}` : `${rollerVariantKey} roller fit`}
         </div>
       </div>
 
