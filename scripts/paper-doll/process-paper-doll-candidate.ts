@@ -333,7 +333,13 @@ export async function processCandidateJob(input: {
 
     const generated = await providerResult(job, references, manualOutput);
     await updateJob(input.client, job, { status: "clamping" });
-    const clamped = await clampCandidate({ source, provider: generated.bytes, editMask: edit, authoritativeMask: authority });
+    const clamped = await clampCandidate({
+      source,
+      provider: generated.bytes,
+      editMask: edit,
+      authoritativeMask: authority,
+      manualPlacement: job.provider === "manual",
+    });
     const output = await uploadAndVerify(input.client, job, clamped.output);
     await updateJob(input.client, job, { status: "qa" });
 

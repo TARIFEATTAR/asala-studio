@@ -19,9 +19,10 @@ export interface CandidateClampResult {
   geometryLocked: true;
   canvas: { widthPx: number; heightPx: number };
   normalization: {
-    mode: "contain";
+    mode: "contain" | "authority-bounds-contain";
     sourceWidthPx: number;
     sourceHeightPx: number;
+    sourceVisibleBounds: { left: number; top: number; right: number; bottom: number } | null;
     outputWidthPx: number;
     outputHeightPx: number;
     offsetXPx: number;
@@ -77,10 +78,101 @@ async function normalizedProviderRaw(input: Buffer, width: number, height: numbe
       mode: "contain" as const,
       sourceWidthPx: metadata.width,
       sourceHeightPx: metadata.height,
+      sourceVisibleBounds: null,
       outputWidthPx,
       outputHeightPx,
       offsetXPx,
       offsetYPx,
+      scaleX: scale,
+      scaleY: scale,
+    },
+  };
+}
+
+function visibleAlphaBounds(
+  data: Buffer,
+  width: number,
+  height: number,
+  channels: number,
+): { left: number; top: number; right: number; bottom: number } {
+  let left = width;
+  let top = height;
+  let right = -1;
+  let bottom = -1;
+  for (let pixel = 0; pixel < width * height; pixel += 1) {
+    if (data[pixel * channels + 3] === 0) continue;
+    const x = pixel % width;
+    const y = Math.floor(pixel / width);
+    left = Math.min(left, x);
+    top = Math.min(top, y);
+    right = Math.max(right, x);
+    bottom = Math.max(bottom, y);
+  }
+  if (right < 0) throw new Error("Manual output has no non-transparent pixels.");
+  return { left, top, right, bottom };
+}
+
+async function manualProviderRaw(
+  input: Buffer,
+  width: number,
+  height: number,
+  authorityBounds: { left: number; top: number; right: number; bottom: number },
+) {
+  const decoded = await sharp(input)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const sourceWidthPx = decoded.info.width;
+  const sourceHeightPx = decoded.info.height;
+  if (!sourceWidthPx || !sourceHeightPx) throw new Error("Manual output has no measurable canvas.");
+  const sourceVisibleBounds = visibleAlphaBounds(
+    decoded.data,
+    sourceWidthPx,
+    sourceHeightPx,
+    decoded.info.channels,
+  );
+  const visibleWidthPx = sourceVisibleBounds.right - sourceVisibleBounds.left + 1;
+  const visibleHeightPx = sourceVisibleBounds.bottom - sourceVisibleBounds.top + 1;
+  const targetWidthPx = authorityBounds.right - authorityBounds.left + 1;
+  const targetHeightPx = authorityBounds.bottom - authorityBounds.top + 1;
+  const scale = Math.min(targetWidthPx / visibleWidthPx, targetHeightPx / visibleHeightPx);
+  const outputWidthPx = Math.max(1, Math.round(visibleWidthPx * scale));
+  const outputHeightPx = Math.max(1, Math.round(visibleHeightPx * scale));
+  const left = authorityBounds.left + Math.floor((targetWidthPx - outputWidthPx) / 2);
+  const top = authorityBounds.top + Math.floor((targetHeightPx - outputHeightPx) / 2);
+  const fitted = await sharp(decoded.data, {
+    raw: {
+      width: sourceWidthPx,
+      height: sourceHeightPx,
+      channels: decoded.info.channels,
+    },
+  })
+    .extract({
+      left: sourceVisibleBounds.left,
+      top: sourceVisibleBounds.top,
+      width: visibleWidthPx,
+      height: visibleHeightPx,
+    })
+    .resize({ width: outputWidthPx, height: outputHeightPx, fit: "fill" })
+    .png()
+    .toBuffer();
+  const normalized = await sharp({
+    create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  })
+    .composite([{ input: fitted, left, top }])
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return {
+    ...normalized,
+    normalization: {
+      mode: "authority-bounds-contain" as const,
+      sourceWidthPx,
+      sourceHeightPx,
+      sourceVisibleBounds,
+      outputWidthPx,
+      outputHeightPx,
+      offsetXPx: left,
+      offsetYPx: top,
       scaleX: scale,
       scaleY: scale,
     },
@@ -96,6 +188,8 @@ export async function clampCandidate(input: {
   provider: Buffer;
   editMask: Buffer;
   authoritativeMask: Buffer;
+  /** Raw desktop component assets are fitted to the registered component mask. */
+  manualPlacement?: boolean;
   canvas?: { widthPx: number; heightPx: number };
 }): Promise<CandidateClampResult> {
   const canvas = input.canvas ?? PAPER_DOLL_CANDIDATE_CANVAS;
@@ -104,29 +198,19 @@ export async function clampCandidate(input: {
     throw new Error("Candidate canvas dimensions must be positive integers.");
   }
 
-  const [source, provider, authority, edit] = await Promise.all([
+  const [source, authority, edit] = await Promise.all([
     exactCanvasRaw(input.source, "Source", width, height, true),
-    normalizedProviderRaw(input.provider, width, height),
     exactCanvasRaw(input.authoritativeMask, "Authority mask", width, height),
     exactCanvasRaw(input.editMask, "Edit mask", width, height),
   ]);
 
-  const output = Buffer.alloc(width * height * 4);
-  let changedPixelCount = 0;
-  let left = width;
-  let top = height;
-  let right = -1;
-  let bottom = -1;
   let authorityLeft = width;
   let authorityTop = height;
   let authorityRight = -1;
   let authorityBottom = -1;
-
   for (let pixel = 0; pixel < width * height; pixel += 1) {
     const objectAlpha = channelValue(authority.data, authority.info.channels, pixel);
-    if (objectAlpha !== 0 && objectAlpha !== 255) {
-      throw new Error("Authority mask must be binary before it can earn geometry lock.");
-    }
+    if (objectAlpha !== 0 && objectAlpha !== 255) throw new Error("Authority mask must be binary before it can earn geometry lock.");
     if (objectAlpha === 255) {
       const x = pixel % width;
       const y = Math.floor(pixel / width);
@@ -135,6 +219,21 @@ export async function clampCandidate(input: {
       authorityRight = Math.max(authorityRight, x);
       authorityBottom = Math.max(authorityBottom, y);
     }
+  }
+  if (authorityRight < 0) throw new Error("Authority mask cannot be empty.");
+  const provider = input.manualPlacement
+    ? await manualProviderRaw(input.provider, width, height, { left: authorityLeft, top: authorityTop, right: authorityRight, bottom: authorityBottom })
+    : await normalizedProviderRaw(input.provider, width, height);
+
+  const output = Buffer.alloc(width * height * 4);
+  let changedPixelCount = 0;
+  let left = width;
+  let top = height;
+  let right = -1;
+  let bottom = -1;
+
+  for (let pixel = 0; pixel < width * height; pixel += 1) {
+    const objectAlpha = channelValue(authority.data, authority.info.channels, pixel);
     const editAlpha = channelValue(edit.data, edit.info.channels, pixel) / 255;
     const sourceOffset = pixel * source.info.channels;
     const providerOffset = pixel * provider.info.channels;
@@ -174,8 +273,6 @@ export async function clampCandidate(input: {
   const outputPng = await sharp(output, {
     raw: { width, height, channels: 4 },
   }).png({ compressionLevel: 9 }).toBuffer();
-  if (authorityRight < 0) throw new Error("Authority mask cannot be empty.");
-
   return {
     output: outputPng,
     sourceSha256: sha256(input.source),
