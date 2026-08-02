@@ -139,12 +139,12 @@
 - Create: `src/components/paper-doll/publishPreviewModel.ts`
 - Create: `src/components/paper-doll/publishPreviewModel.test.ts`
 
-- [ ] Write failing tests for gate ordering, blocker preservation, unconfigured target state, zero-write proof, round-trip verdict, and disabled approval/publish controls.
-- [ ] Render all nine QA phases from the approved design with passed/blocked/not-yet-run states derived from actual evidence and catalog gaps.
-- [ ] Render the Sanity projection target, manifest/payload hashes, document identity, stable array keys, additions/changes/removals summary, asset upload/reuse plan, round-trip result, and `0 writes performed` evidence.
-- [ ] Show named approval and live publication as disabled future gates with exact blocker reasons. Do not bind click handlers that mutate data.
-- [ ] Run `npx tsx --test src/components/paper-doll/publishPreviewModel.test.ts src/lib/paperDoll/sanityProjection.test.ts` and `npm run build`.
-- [ ] Commit: `feat(paper-doll): expose truthful QA publish preview`
+- [x] Write failing tests for gate ordering, blocker preservation, unconfigured target state, zero-write proof, round-trip verdict, and disabled approval/publish controls.
+- [x] Render all nine QA phases from the approved design with passed/blocked/not-yet-run states derived from actual evidence and catalog gaps.
+- [x] Render the Sanity projection target, manifest/payload hashes, document identity, stable array keys, additions/changes/removals summary, asset upload/reuse plan, round-trip result, and `0 writes performed` evidence.
+- [x] Show named approval and live publication as disabled future gates with exact blocker reasons. Do not bind click handlers that mutate data.
+- [x] Run `npx tsx --test src/components/paper-doll/publishPreviewModel.test.ts src/lib/paperDoll/sanityProjection.test.ts` and `npm run build`.
+- [x] Commit: `feat(paper-doll): expose truthful QA publish preview`
 
 ## Task 8: Integrate CYL-9ML into the existing Studio
 
