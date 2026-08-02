@@ -49,6 +49,21 @@ function blockedComponent(requirementKey: string, slot: "overcap" | "roller", va
   };
 }
 
+function approvedPlasticRoller(): RollonReleaseInventoryVersion {
+  return {
+    ...approvedBody("PLASTIC"),
+    requirementKey: "CYL-9ML:ROLLER:PLASTIC",
+    componentVersionId: "version-plastic-roller",
+    componentKey: "closure__17-415__plastic-roller-ball__natural",
+    geometryFamilyId: "fitment__roller-ball__17-415__v1",
+    slot: "roller",
+    variantKey: "PLASTIC",
+    materialVariant: "matte-white-plastic",
+    geometryMaskPath: `org/CYL-9ML/plastic-mask/${"b".repeat(64)}.png`,
+    geometryMaskSha256: "b".repeat(64),
+  };
+}
+
 test("release contains no missing requirement disguised as complete", () => {
   const requirements = loadCyl9RollonRequirements();
   const inventory = [
@@ -87,4 +102,23 @@ test("unknown or blocked component prevents ready status", () => {
   assert.equal(draft.releaseStatus, "blocked");
   assert.ok(draft.blockers.some((blocker) => blocker.includes("CYL-9ML:ROLLER:METAL")));
   assert.ok(draft.manifestSha256.match(/^[a-f0-9]{64}$/));
+});
+
+test("approved plastic roller becomes the sixth exact release asset without clearing unrelated blockers", () => {
+  const requirements = loadCyl9RollonRequirements();
+  const draft = buildRollonReleaseDraft({
+    requirements,
+    inventory: [
+      ...requirements.bodyVariantKeys.map(approvedBody),
+      approvedPlasticRoller(),
+    ],
+    releaseVersion: "1.0.0-rollon-plastic-roller.1",
+    sourceGitCommit: "test-commit",
+    rendererVersion: "cyl9-rollon-blender-v1",
+  });
+
+  assert.deepEqual(draft.counts, { required: 17, approved: 6, blocked: 1, missing: 10 });
+  assert.equal(draft.releaseStatus, "blocked");
+  assert.equal(draft.manifest.assets.filter((asset) => asset.slot === "roller").length, 1);
+  assert.equal(draft.manifest.assets.find((asset) => asset.slot === "roller")?.variantKey, "PLASTIC");
 });
