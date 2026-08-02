@@ -7,6 +7,7 @@ import { IDENTITY_FAMILY_PLACEMENT, type FamilyPlacementTransform } from "./fami
 interface RollonLineupProps {
   assets: PaperDollReleaseWorkbenchData["assets"];
   rollerVariantKey?: string;
+  rollerImageUrlOverride?: string;
   overcapVariantKey?: string;
   placementTransform?: FamilyPlacementTransform;
 }
@@ -22,6 +23,7 @@ const BODY_LABELS: Record<string, string> = {
 export function RollonLineup({
   assets,
   rollerVariantKey = "PLASTIC",
+  rollerImageUrlOverride,
   overcapVariantKey = "SHN-SL",
   placementTransform = IDENTITY_FAMILY_PLACEMENT,
 }: RollonLineupProps) {
@@ -34,7 +36,7 @@ export function RollonLineup({
       variantKey: asset.variantKey,
       imageUrl: asset.imageUrl,
     }));
-  const lineup = buildRollonLineup(lineupAssets, { rollerVariantKey, overcapVariantKey });
+  const lineup = buildRollonLineup(lineupAssets, { rollerVariantKey, overcapVariantKey, rollerImageUrlOverride });
   const complete = lineup.filter((item) => item.status === "complete").length;
   const placementPreviewActive = placementTransform.translateXPx !== 0
     || placementTransform.translateYPx !== 0

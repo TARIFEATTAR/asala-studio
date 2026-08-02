@@ -3,10 +3,12 @@ import {
   CandidateApprovalRequestSchema,
   CandidateJobRecordSchema,
   CandidateJobRequestSchema,
+  ManualCandidateAssetRefSchema,
   PrivateAssetRefSchema,
   type CandidateApprovalRequest,
   type CandidateJobRecord,
   type CandidateJobRequest,
+  type ManualCandidateAssetRef,
   type PrivateAssetRef,
 } from "./candidateJobContract";
 
@@ -72,6 +74,12 @@ function nullableString(value: unknown, label: string): string | null {
 
 function parseJob(value: unknown): CandidateJobRecord {
   const job = asRecord(value, "candidate job");
+  // Supabase returns PostgreSQL timestamptz values with a `+00:00` offset.
+  // Zod's `datetime()` accepts the equivalent RFC 3339 `Z` form, so normalize
+  // the transport detail before validating the immutable job record.
+  const normalizeTimestamp = (timestamp: unknown) => typeof timestamp === "string"
+    ? timestamp.replace(/\+00(?::00)?$/, "Z")
+    : timestamp;
   return CandidateJobRecordSchema.parse({
     id: job.id,
     organizationId: job.organization_id,
@@ -85,13 +93,14 @@ function parseJob(value: unknown): CandidateJobRecord {
     promptSha256: job.prompt_sha256,
     generationAttemptId: job.generation_attempt_id,
     candidateComponentVersionId: job.candidate_component_version_id,
+    manualOutput: job.manual_output_ref ?? null,
     output: job.output_ref,
     outputMetadata: job.output_metadata ?? {},
     initiatedBy: job.initiated_by,
     errorMessage: job.error_message,
-    createdAt: job.created_at,
-    updatedAt: job.updated_at,
-    completedAt: job.completed_at,
+    createdAt: normalizeTimestamp(job.created_at),
+    updatedAt: normalizeTimestamp(job.updated_at),
+    completedAt: normalizeTimestamp(job.completed_at),
   });
 }
 
@@ -156,6 +165,22 @@ export async function uploadCandidateSource(client: SourceStorageClient, input: 
   });
 }
 
+export async function uploadManualCandidateSource(client: SourceStorageClient, input: {
+  organizationId: string;
+  familyKey: string;
+  assetId: string;
+  bytes: Uint8Array;
+  contentType: string;
+  extension: string;
+  originalFilename: string;
+}): Promise<ManualCandidateAssetRef> {
+  const uploaded = await uploadCandidateSource(client, input);
+  return ManualCandidateAssetRefSchema.parse({
+    ...uploaded,
+    originalFilename: input.originalFilename,
+  });
+}
+
 export async function verifySignedPrivateAsset(
   signedUrl: string,
   identity: Omit<PrivateAssetRef, "byteSize">,
@@ -208,8 +233,9 @@ export async function loadCandidateWorkbench(
       const output = entry.job.output;
       if (!output) return;
       const signed = await client.storage!.from(output.bucket).createSignedUrl(output.path, 300);
-      if (signed.error || !signed.data?.signedUrl) throw new Error(`Unable to sign candidate output: ${signed.error?.message ?? "no URL"}`);
-      entry.candidateImageUrl = signed.data.signedUrl;
+      if (!signed.error && signed.data?.signedUrl) {
+        entry.candidateImageUrl = signed.data.signedUrl;
+      }
     }));
   }
   return {

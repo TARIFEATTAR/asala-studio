@@ -56,6 +56,10 @@ export const ManualCandidateAssetRefSchema = PrivateAssetRefSchema.and(z.object(
   originalFilename: OriginalFilenameSchema,
 }));
 
+const HistoricalManualCandidateAssetRefSchema = PrivateAssetRefSchema.and(z.object({
+  originalFilename: OriginalFilenameSchema.optional(),
+}));
+
 const CandidateTransformSchema = z.object({
   translateXPx: z.number().int().min(-2080).max(2080),
   translateYPx: z.number().int().min(-2288).max(2288),
@@ -136,7 +140,7 @@ export const CandidateJobRecordSchema = z.object({
   promptSha256: SHA256Schema,
   generationAttemptId: z.string().uuid().nullable(),
   candidateComponentVersionId: z.string().uuid().nullable(),
-  manualOutput: ManualCandidateAssetRefSchema.nullable(),
+  manualOutput: HistoricalManualCandidateAssetRefSchema.nullable(),
   output: PrivateAssetRefSchema.nullable(),
   outputMetadata: z.record(z.string(), z.unknown()),
   initiatedBy: z.string().uuid(),

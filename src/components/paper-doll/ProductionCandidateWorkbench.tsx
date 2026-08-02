@@ -30,6 +30,7 @@ import {
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
+import { shouldMountCandidatePreview } from "./candidatePreviewModel";
 import { RollonLineup } from "./RollonLineup";
 import {
   type AssemblyEditMode,
@@ -120,8 +121,13 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const visibleLayers = useMemo(() => {
     const body = bodies.find((asset) => asset.componentVersionId === selectedBodyId);
     const component = components.find((asset) => asset.componentVersionId === selectedLayerId);
-    return [body, component].filter((asset): asset is ReleaseAsset => Boolean(asset && !hiddenIds.has(asset.componentVersionId)));
-  }, [bodies, components, hiddenIds, selectedBodyId, selectedLayerId]);
+    const layers = [body, component].filter((asset): asset is ReleaseAsset => Boolean(asset && !hiddenIds.has(asset.componentVersionId)));
+    if (!shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)) return layers;
+    return layers.map((asset) => asset.componentVersionId === selectedLayerId
+      ? { ...asset, imageUrl: inspection!.imageUrl! }
+      : asset,
+    );
+  }, [bodies, components, hiddenIds, inspection?.imageUrl, mode, selectedBodyId, selectedLayerId]);
 
   useEffect(() => {
     setCandidateTransform(IDENTITY_TRANSFORM);
@@ -273,6 +279,11 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             onRectangleChange={mask.setRectangle}
             onBrushStroke={mask.addBrushStroke}
           />
+          {shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null) && (
+            <div className="mt-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(97,214,200,0.42)", color: "#61d6c8", background: "rgba(97,214,200,0.05)" }}>
+              Candidate preview mounted · review before approval · active release unchanged
+            </div>
+          )}
           {mode === "family-fit" ? (
             <div className="mt-3 rounded border p-3" style={{ borderColor: "rgba(97,214,200,0.35)", background: "rgba(97,214,200,0.035)" }}>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -330,7 +341,14 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={activeTransform} inspection={inspection} />
       </div>
 
-      <RollonLineup assets={query.data.assets} placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT} />
+      <RollonLineup
+        assets={query.data.assets}
+        rollerVariantKey={selectedAsset?.slot === "roller" ? selectedAsset.variantKey : undefined}
+        rollerImageUrlOverride={selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
+          ? inspection?.imageUrl ?? undefined
+          : undefined}
+        placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT}
+      />
 
       <footer className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(242,192,120,0.25)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
         <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />{mode === "family-fit" ? "Visual placement candidate · active release unchanged · no ledger or Sanity write" : "Candidate-only writes · active release unchanged · no Sanity publication"}</span>

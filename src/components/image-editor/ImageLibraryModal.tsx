@@ -33,6 +33,8 @@ interface ImageLibraryModalProps {
     libraryTagFilter?: string;
     /** OR filter: any of these tags. If set, takes precedence over `libraryTagFilter`. */
     libraryTagContainsAny?: string[];
+    /** Hide desktop upload when a calling surface owns its own fallback. */
+    allowDesktopUpload?: boolean;
 }
 
 const STORAGE_KEY = "madison-image-library";
@@ -64,6 +66,7 @@ export function ImageLibraryModal({
     title = "Select Image",
     libraryTagFilter,
     libraryTagContainsAny,
+    allowDesktopUpload = true,
 }: ImageLibraryModalProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [localImages, setLocalImages] = useState<LibraryImage[]>(() => getStoredImages());
@@ -172,7 +175,7 @@ export function ImageLibraryModal({
                 </DialogHeader>
 
                 {/* Upload Area */}
-                <div
+                {allowDesktopUpload && <div
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={handleDrop}
@@ -195,7 +198,7 @@ export function ImageLibraryModal({
                         onChange={handleFileChange}
                         className="hidden"
                     />
-                </div>
+                </div>}
 
                 {/* Image Grid */}
                 <ScrollArea className="h-[300px] mt-4">

@@ -32,3 +32,23 @@ test("lineup never substitutes a fallback when a selected component is missing",
   assert.ok(lineup.every((item) => item.layers.roller === null));
   assert.ok(lineup.every((item) => item.status === "blocked"));
 });
+
+test("lineup previews the selected roller candidate across all five bodies", () => {
+  const assets = [
+    ...["CLR", "AMB", "BLU", "FRS", "SWL"].map((variant) => asset("body", variant)),
+    asset("roller", "PLASTIC"),
+    asset("roller", "METAL"),
+    asset("overcap", "SHN-SL"),
+  ];
+  const candidateImageUrl = "signed://candidate-metal-roller";
+
+  const lineup = buildRollonLineup(assets, {
+    rollerVariantKey: "METAL",
+    overcapVariantKey: "SHN-SL",
+    rollerImageUrlOverride: candidateImageUrl,
+  });
+
+  assert.equal(lineup.length, 5);
+  assert.ok(lineup.every((item) => item.layers.roller?.variantKey === "METAL"));
+  assert.ok(lineup.every((item) => item.layers.roller?.imageUrl === candidateImageUrl));
+});

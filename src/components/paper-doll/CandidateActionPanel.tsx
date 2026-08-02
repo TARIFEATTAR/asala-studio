@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, CloudUpload, Cpu, Play, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CloudUpload, Cpu, FolderOpen, Play, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ import {
   CandidateProviderModels,
   type CandidateJobRequest,
   type CandidateProvider,
+  type ManualCandidateAssetRef,
   type PrivateAssetRef,
 } from "@/lib/paperDoll/candidateJobContract";
 import {
@@ -15,10 +16,13 @@ import {
   createCandidateJob,
   loadCandidateWorkbench,
   uploadCandidateSource,
+  uploadManualCandidateSource,
   verifySignedPrivateAsset,
   type CandidateHistoryEntry,
 } from "@/lib/paperDoll/candidateRepository";
+import { downloadImageLibraryCandidate } from "@/lib/paperDoll/libraryCandidateSource";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
+import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
 import type { CandidateInspection } from "./CandidateInspector";
 import type { CandidateSelectionKind } from "./assemblyEditModel";
 
@@ -102,6 +106,7 @@ export function CandidateActionPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   const history = useQuery({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
@@ -113,7 +118,10 @@ export function CandidateActionPanel({
     () => history.data?.jobs.filter((entry) => entry.job.componentId === asset?.componentId) ?? [],
     [asset?.componentId, history.data?.jobs],
   );
-  const latest = selectedHistory[0] ?? null;
+  // A later queued generation must not displace a completed manual candidate
+  // from review. Prefer the newest verifiable candidate, then fall back to the
+  // newest attempt when no candidate has completed yet.
+  const latest = selectedHistory.find((entry) => entry.job.status === "candidate_ready" && entry.candidateVersion) ?? selectedHistory[0] ?? null;
 
   useEffect(() => onInspectionChange(inspectionFrom(latest)), [latest, onInspectionChange]);
 
@@ -131,7 +139,7 @@ export function CandidateActionPanel({
     setError(null);
   };
 
-  const buildRequest = async (manualOutput?: PrivateAssetRef): Promise<CandidateJobRequest> => {
+  const buildRequest = async (manualOutput?: ManualCandidateAssetRef): Promise<CandidateJobRequest> => {
     if (!asset || !requirement || !asset.geometryMaskUrl || !asset.geometryMaskReference) {
       throw new Error("A registered component requirement and authority mask are required.");
     }
@@ -175,16 +183,17 @@ export function CandidateActionPanel({
     setMessage(null);
     setError(null);
     try {
-      let manualOutput: PrivateAssetRef | undefined;
+      let manualOutput: ManualCandidateAssetRef | undefined;
       if (provider === "manual") {
         if (!manualFile) throw new Error("Choose one PNG manual candidate to upload.");
-        manualOutput = await uploadCandidateSource(supabase, {
+        manualOutput = await uploadManualCandidateSource(supabase, {
           organizationId,
           familyKey,
           assetId: `manual-output-${asset?.componentVersionId ?? "unknown"}`,
           bytes: new Uint8Array(await manualFile.arrayBuffer()),
           contentType: manualFile.type || "image/png",
           extension: "png",
+          originalFilename: manualFile.name,
         });
       }
       const queued = await createCandidateJob(supabase, await buildRequest(manualOutput));
@@ -220,6 +229,15 @@ export function CandidateActionPanel({
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const queueImageLibraryAsset = async (selection: { url: string; name?: string }) => {
+    setLibraryOpen(false);
+    try {
+      await queue(await downloadImageLibraryCandidate(selection));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
     }
   };
 
@@ -263,10 +281,15 @@ export function CandidateActionPanel({
 
       <div className="flex flex-wrap gap-2">
         {provider === "manual" ? (
-          <label className={`inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] ${!candidateEditingEnabled || !selectionReady || busy ? "pointer-events-none opacity-35" : ""}`} style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
-            <CloudUpload className="h-3.5 w-3.5" />Upload and queue
-            <input type="file" accept="image/png" className="hidden" disabled={!candidateEditingEnabled || !selectionReady || busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void queue(file); event.target.value = ""; }} />
-          </label>
+          <>
+            <label className={`inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] ${!candidateEditingEnabled || !selectionReady || busy ? "pointer-events-none opacity-35" : ""}`} style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
+              <CloudUpload className="h-3.5 w-3.5" />Upload from computer
+              <input type="file" accept="image/png" className="hidden" disabled={!candidateEditingEnabled || !selectionReady || busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void queue(file); event.target.value = ""; }} />
+            </label>
+            <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy} onClick={() => setLibraryOpen(true)} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
+              <FolderOpen className="h-3.5 w-3.5" />Choose from Image Library
+            </button>
+          </>
         ) : (
           <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !instruction.trim()} onClick={() => void queue()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}><Play className="h-3.5 w-3.5" />{busy ? "Queuing…" : "Queue candidate"}</button>
         )}
@@ -283,11 +306,21 @@ export function CandidateActionPanel({
         <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Immutable history · {selectedHistory.length}</div>
         {selectedHistory.length === 0 ? <div className="text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>No attempts for this component.</div> : selectedHistory.slice(0, 4).map((entry) => (
           <div key={entry.job.id} className="flex items-center justify-between gap-2 border-t py-1.5 text-[8px]" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-            <span className="truncate font-mono" style={{ color: "var(--darkroom-text-muted)" }}>{entry.job.provider} · {entry.job.model}</span>
+            <span className="min-w-0 font-mono" style={{ color: "var(--darkroom-text-muted)" }}>
+              <span className="block truncate">{entry.job.provider} · {entry.job.model}</span>
+              {entry.job.manualOutput?.originalFilename && <span className="mt-0.5 block truncate" title={entry.job.manualOutput.originalFilename} style={{ color: "var(--darkroom-text-dim)" }}>{entry.job.manualOutput.originalFilename}</span>}
+            </span>
             <span className="uppercase tracking-wider" style={{ color: entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{entry.job.status.replace("_", " ")}</span>
           </div>
         ))}
       </div>
+      <ImageLibraryModal
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onSelectImage={(selection) => void queueImageLibraryAsset(selection)}
+        title={`Choose a candidate for ${asset?.displayName ?? "the selected component"}`}
+        allowDesktopUpload={false}
+      />
     </div>
   );
 }

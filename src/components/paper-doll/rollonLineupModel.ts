@@ -22,9 +22,12 @@ export interface RollonLineupItem {
 
 export function buildRollonLineup(
   assets: RollonLineupAsset[],
-  selection: { rollerVariantKey: string; overcapVariantKey: string },
+  selection: { rollerVariantKey: string; overcapVariantKey: string; rollerImageUrlOverride?: string },
 ): RollonLineupItem[] {
-  const roller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey) ?? null;
+  const selectedRoller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey) ?? null;
+  const roller = selectedRoller && selection.rollerImageUrlOverride
+    ? { ...selectedRoller, imageUrl: selection.rollerImageUrlOverride }
+    : selectedRoller;
   const overcap = assets.find((asset) => asset.slot === "overcap" && asset.variantKey === selection.overcapVariantKey) ?? null;
   return ROLLON_LINEUP_BODY_VARIANTS.map((bodyVariantKey) => {
     const body = assets.find((asset) => asset.slot === "body" && asset.variantKey === bodyVariantKey) ?? null;
