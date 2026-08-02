@@ -127,7 +127,7 @@
 - [x] Render five explicit approved assembly mappings side by side on one locked baseline and fixed canvas scale, with SKU/mapping IDs and per-card layer identity.
 - [x] Add baseline, centerline, bounds, and geometry-mask overlays across the entire lineup; blocked or missing items must not be substituted.
 - [x] Show the family-level registration verdict and the exact reason when it is not yet a publishable catalog lineup.
-- [ ] Run `npm run build` and exercise responsive widths at desktop and tablet breakpoints. (`npm run build` passed; viewport exercise follows the Task 8 route mount.)
+- [x] Run `npm run build` and exercise responsive widths at desktop and tablet breakpoints.
 - [x] Commit: `feat(paper-doll): add lifecycle matrix and lineup`
 
 ## Task 7: Implement QA & Publish preview
@@ -170,22 +170,22 @@
 - Create: `docs/paper-doll-rig/evidence/cyl-9ml-workbench-lineup.png`
 - Create: `docs/paper-doll-rig/evidence/cyl-9ml-workbench-publish-preview.png`
 
-- [ ] Start the app with the existing local configuration and open `/best-bottles/studio/cylinder-9ml-frosted-17-415-rollon`.
-- [ ] Verify Masters still loads; then verify Assembly, Matrix, Lineup, Evidence, and QA & Publish preview with no console errors or failed asset requests.
-- [ ] Capture screenshots at a desktop viewport and check responsive behavior at a tablet viewport.
-- [ ] Verify all five body plates and all three approved opaque caps render from the manifest, the translucent cap is visibly blocked, the metal roller defect is called out, and fifteen approved mappings resolve without fallback.
-- [ ] Verify the lineup baseline/centerline overlays align across five products and the publish surface reports a blocked release, unconfigured target, and zero writes.
-- [ ] Record exact commands, test results, current manifest hash, known blockers, and what remains for Edit Lab/catalog completion/live publication in the evidence document.
-- [ ] Run `git status --short`, scan for `TODO|placeholder|mock|coming soon`, and remove any misleading production claim.
-- [ ] Commit: `test(paper-doll): verify CYL-9ML workbench control plane`
+- [x] Start the app with the existing local configuration and open `/best-bottles/studio/cylinder-9ml-frosted-17-415-rollon`.
+- [x] Verify Masters still loads; then verify Assembly, Matrix, Lineup, Evidence, and QA & Publish preview with no workbench-origin console errors or failed asset requests.
+- [x] Capture screenshots at a desktop viewport and check responsive behavior at a tablet viewport.
+- [x] Verify all five body plates and all three approved opaque caps render from the manifest, the translucent cap is visibly blocked, the metal roller defect is called out, and fifteen approved mappings resolve without fallback.
+- [x] Verify the lineup baseline/centerline overlays align across five products and the publish surface reports a blocked release, unconfigured target, and zero writes.
+- [x] Record exact commands, test results, current manifest hash, known blockers, and what remains for Edit Lab/catalog completion/live publication in the evidence document.
+- [x] Run `git status --short`, scan for `TODO|placeholder|mock|coming soon`, and remove any misleading production claim.
+- [x] Commit: `test(paper-doll): verify CYL-9ML workbench control plane`
 
 ## Completion Gate
 
-- [ ] The browser renders the actual Release v1 assets and data, not recreated sample cards.
-- [ ] The five frozen body plates are reused byte-for-byte.
-- [ ] The three opaque caps resolve through explicit mappings and the translucent cap remains blocked.
-- [ ] Matrix and header counts include truthful denominators and unresolved catalog gaps.
-- [ ] The Lineup shows five manifest-resolved products on one locked baseline.
-- [ ] The no-write Sanity projection round-trips and performs zero mutations.
-- [ ] Existing Masters and all non-CYL-9ML Studio flows still build and test.
-- [ ] No UI control can overwrite an approved asset, write the ledger, grant approval, or publish to Sanity in this slice.
+- [x] The browser renders the actual Release v1 assets and data, not recreated sample cards.
+- [x] The five frozen body plates are reused byte-for-byte.
+- [x] The three opaque caps resolve through explicit mappings and the translucent cap remains blocked.
+- [x] Matrix and header counts include truthful denominators and unresolved catalog gaps.
+- [x] The Lineup shows five manifest-resolved products on one locked baseline.
+- [x] The no-write Sanity projection round-trips and performs zero mutations.
+- [x] Existing Masters and all non-CYL-9ML Studio flows still build and test.
+- [x] No UI control can overwrite an approved asset, write the ledger, grant approval, or publish to Sanity in this slice.

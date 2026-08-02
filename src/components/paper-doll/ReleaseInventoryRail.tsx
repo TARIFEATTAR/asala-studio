@@ -25,7 +25,7 @@ export function ReleaseInventoryRail({
   applicatorBuckets,
 }: ReleaseInventoryRailProps) {
   const inventory = buildReleaseInventory(manifest);
-  const releaseCountsBySystem = new Map(
+  const releaseCountsBySystem = new Map<string, number>(
     inventory.systems.map((system) => [system.key, system.components.length]),
   );
 

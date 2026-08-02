@@ -370,7 +370,7 @@ export default function BestBottlesStudio() {
                 <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
                   Variant count
                 </div>
-                <LCDDisplay variant="large">{data.group.variantCount}</LCDDisplay>
+                <LCDDisplay variant="large">{studioData.group.variantCount}</LCDDisplay>
               </div>
 
               <div
