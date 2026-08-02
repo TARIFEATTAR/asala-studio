@@ -50,3 +50,52 @@ export function candidatePreviewDetails(entry: {
     alphaBounds: { left, top, right, bottom },
   };
 }
+
+export interface ApprovedCandidateDetails {
+  componentVersionId: string;
+  imageUrl: string;
+  imageSha256: string;
+  authorityMaskSha256: string;
+  alphaBounds: { left: number; top: number; right: number; bottom: number };
+}
+
+export function approvedCandidateDetails(entry: {
+  candidateVersion: Record<string, unknown> | null;
+  approvedVersion: Record<string, unknown> | null;
+  approvedImageUrl: string | null;
+  approval: Record<string, unknown> | null;
+} | null): ApprovedCandidateDetails | null {
+  if (!entry?.candidateVersion || !entry.approvedVersion || !entry.approvedImageUrl || !entry.approval) return null;
+  const approvedId = entry.approvedVersion.id;
+  const approvedSha = entry.approvedVersion.image_sha256;
+  const candidateSha = entry.candidateVersion.image_sha256;
+  const authorityMaskSha = entry.approvedVersion.geometry_mask_sha256;
+  const approvalResultId = entry.approval.resulting_approved_component_version_id;
+  const rawBounds = entry.approvedVersion.alpha_bounds;
+  if (
+    entry.approval.decision !== "approved"
+    || entry.approvedVersion.approval_status !== "approved"
+    || typeof approvedId !== "string"
+    || approvalResultId !== approvedId
+    || typeof approvedSha !== "string"
+    || candidateSha !== approvedSha
+    || typeof authorityMaskSha !== "string"
+    || !/^[a-f0-9]{64}$/.test(authorityMaskSha)
+    || !rawBounds
+    || typeof rawBounds !== "object"
+    || Array.isArray(rawBounds)
+  ) return null;
+  const bounds = rawBounds as Record<string, unknown>;
+  const left = Number(bounds.left);
+  const top = Number(bounds.top);
+  const right = Number(bounds.right);
+  const bottom = Number(bounds.bottom);
+  if (![left, top, right, bottom].every(Number.isFinite) || right < left || bottom < top) return null;
+  return {
+    componentVersionId: approvedId,
+    imageUrl: entry.approvedImageUrl,
+    imageSha256: approvedSha,
+    authorityMaskSha256: authorityMaskSha,
+    alphaBounds: { left, top, right, bottom },
+  };
+}

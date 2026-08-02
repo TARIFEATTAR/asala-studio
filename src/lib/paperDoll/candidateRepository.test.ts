@@ -16,6 +16,7 @@ const PARENT_SHA = "b".repeat(64);
 const ORG = "11111111-1111-4111-8111-111111111111";
 const COMPONENT = "22222222-2222-4222-8222-222222222222";
 const VERSION = "33333333-3333-4333-8333-333333333333";
+const APPROVED_VERSION = "44444444-4444-4444-8444-444444444444";
 
 const selection: CandidateJobRequest = {
   organizationId: ORG,
@@ -214,6 +215,88 @@ test("candidate workbench accepts PostgreSQL UTC timestamp formatting", async ()
   assert.equal(result.jobs.length, 1);
   assert.equal(result.jobs[0].job.createdAt, "2026-08-02T18:03:42.422743Z");
   assert.equal(result.jobs[0].job.manualOutput?.originalFilename, undefined, "legacy immutable jobs remain readable");
+});
+
+test("candidate workbench resolves and signs the immutable approved child", async () => {
+  const approvedPath = `${ORG}/CYL-9ML/approved-${VERSION}/${SHA}.png`;
+  const client = {
+    rpc: async () => ({
+      data: {
+        jobs: [{
+          job: {
+            id: VERSION, organization_id: ORG, requirement_key: "CYL-9ML:ROLLER:PLASTIC",
+            component_id: COMPONENT, parent_component_version_id: VERSION, parent_sha256: PARENT_SHA,
+            provider: "manual", model: "manual-v1", status: "candidate_ready", prompt_sha256: SHA,
+            generation_attempt_id: VERSION, candidate_component_version_id: VERSION,
+            manual_output_ref: null,
+            output_ref: { bucket: "paper-doll-candidates", path: `${ORG}/CYL-9ML/candidate/${SHA}.png`, sha256: SHA, contentType: "image/png", byteSize: 40 },
+            output_metadata: { geometryLocked: true }, initiated_by: COMPONENT, error_message: null,
+            created_at: "2026-08-02T00:00:00.000Z", updated_at: "2026-08-02T00:00:00.000Z", completed_at: "2026-08-02T00:00:01.000Z",
+          },
+          component: { id: COMPONENT, display_name: "17-415 plastic roller", slot: "roller" },
+          parentVersion: { id: VERSION, image_sha256: PARENT_SHA },
+          candidateVersion: { id: VERSION, image_sha256: SHA, geometry_mask_sha256: PARENT_SHA },
+          approvedVersion: {
+            id: APPROVED_VERSION,
+            approval_status: "approved",
+            storage_bucket: "paper-doll-approved",
+            image_path: approvedPath,
+            image_sha256: SHA,
+            geometry_mask_sha256: PARENT_SHA,
+            alpha_bounds: { left: 907, top: 668, right: 1175, bottom: 918 },
+          },
+          qa: [],
+          approval: { decision: "approved", resulting_approved_component_version_id: APPROVED_VERSION },
+        }],
+        approvals: [],
+        worker: {},
+      },
+      error: null,
+    }),
+    storage: {
+      from: (bucket: string) => ({
+        createSignedUrl: async (path: string) => ({ data: { signedUrl: `signed://${bucket}/${path}` }, error: null }),
+      }),
+    },
+  };
+
+  const result = await loadCandidateWorkbench(client, ORG, "CYL-9ML");
+
+  assert.equal(result.jobs[0].approvedVersion?.approval_status, "approved");
+  assert.equal(result.jobs[0].approvedVersion?.image_sha256, SHA);
+  assert.equal(result.jobs[0].approvedImageUrl, `signed://paper-doll-approved/${approvedPath}`);
+});
+
+test("candidate workbench does not invent an approved child for rejected or incomplete approvals", async () => {
+  const client = {
+    rpc: async () => ({
+      data: {
+        jobs: [{
+          job: {
+            id: VERSION, organization_id: ORG, requirement_key: "CYL-9ML:ROLLER:PLASTIC",
+            component_id: COMPONENT, parent_component_version_id: VERSION, parent_sha256: PARENT_SHA,
+            provider: "manual", model: "manual-v1", status: "candidate_ready", prompt_sha256: SHA,
+            generation_attempt_id: VERSION, candidate_component_version_id: VERSION,
+            manual_output_ref: null, output_ref: null, output_metadata: {}, initiated_by: COMPONENT, error_message: null,
+            created_at: "2026-08-02T00:00:00.000Z", updated_at: "2026-08-02T00:00:00.000Z", completed_at: "2026-08-02T00:00:01.000Z",
+          },
+          component: { id: COMPONENT, display_name: "17-415 plastic roller", slot: "roller" },
+          parentVersion: { id: VERSION, image_sha256: PARENT_SHA },
+          candidateVersion: { id: VERSION, image_sha256: SHA },
+          approvedVersion: null,
+          qa: [],
+          approval: { decision: "rejected", resulting_approved_component_version_id: null },
+        }],
+        approvals: [], worker: {},
+      },
+      error: null,
+    }),
+  };
+
+  const result = await loadCandidateWorkbench(client, ORG, "CYL-9ML");
+
+  assert.equal(result.jobs[0].approvedVersion, null);
+  assert.equal(result.jobs[0].approvedImageUrl, null);
 });
 
 test("approval request remains SHA-bound and evidence-bound", async () => {

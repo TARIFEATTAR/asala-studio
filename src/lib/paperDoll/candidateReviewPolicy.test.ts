@@ -58,3 +58,53 @@ test("review details expose candidate identity and measured alpha bounds", () =>
     alphaBounds: { left: 907, top: 668, right: 1175, bottom: 918 },
   });
 });
+
+test("approved details require the exact immutable approved child", () => {
+  const details = (reviewPolicy as typeof reviewPolicy & {
+    approvedCandidateDetails?: (candidate: Record<string, unknown> | null) => unknown;
+  }).approvedCandidateDetails;
+  const approvedVersion = {
+    id: "44444444-4444-4444-8444-444444444444",
+    approval_status: "approved",
+    image_sha256: "b".repeat(64),
+    geometry_mask_sha256: cleanMask,
+    alpha_bounds: { left: 907, top: 668, right: 1175, bottom: 918 },
+  };
+
+  assert.deepEqual(details?.({
+    candidateVersion: { image_sha256: "b".repeat(64) },
+    approvedVersion,
+    approvedImageUrl: "signed://approved-roller",
+    approval: { decision: "approved", resulting_approved_component_version_id: approvedVersion.id },
+  }), {
+    componentVersionId: approvedVersion.id,
+    imageUrl: "signed://approved-roller",
+    imageSha256: "b".repeat(64),
+    authorityMaskSha256: cleanMask,
+    alphaBounds: { left: 907, top: 668, right: 1175, bottom: 918 },
+  });
+});
+
+test("rejected and SHA-drifted approvals cannot unlock Family Fit", () => {
+  const details = (reviewPolicy as typeof reviewPolicy & {
+    approvedCandidateDetails?: (candidate: Record<string, unknown> | null) => unknown;
+  }).approvedCandidateDetails;
+  const base = {
+    candidateVersion: { image_sha256: "b".repeat(64) },
+    approvedVersion: {
+      id: "44444444-4444-4444-8444-444444444444",
+      approval_status: "approved",
+      image_sha256: "c".repeat(64),
+      geometry_mask_sha256: cleanMask,
+      alpha_bounds: { left: 907, top: 668, right: 1175, bottom: 918 },
+    },
+    approvedImageUrl: "signed://approved-roller",
+  };
+
+  assert.equal(details?.({ ...base, approval: { decision: "approved" } }), null);
+  assert.equal(details?.({
+    ...base,
+    candidateVersion: { image_sha256: "c".repeat(64) },
+    approval: { decision: "rejected" },
+  }), null);
+});

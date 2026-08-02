@@ -41,9 +41,11 @@ export interface CandidateHistoryEntry {
   component: { id: string; displayName: string; slot: string };
   parentVersion: Record<string, unknown>;
   candidateVersion: Record<string, unknown> | null;
+  approvedVersion: Record<string, unknown> | null;
   qa: Array<Record<string, unknown>>;
   approval: Record<string, unknown> | null;
   candidateImageUrl: string | null;
+  approvedImageUrl: string | null;
 }
 
 export interface CandidateWorkbenchData {
@@ -223,9 +225,11 @@ export async function loadCandidateWorkbench(
         },
         parentVersion: asRecord(entry.parentVersion, "candidate parent version"),
         candidateVersion: entry.candidateVersion == null ? null : asRecord(entry.candidateVersion, "candidate version"),
+        approvedVersion: entry.approvedVersion == null ? null : asRecord(entry.approvedVersion, "approved version"),
         qa: Array.isArray(entry.qa) ? entry.qa.map((row) => asRecord(row, "candidate QA")) : [],
         approval: entry.approval == null ? null : asRecord(entry.approval, "candidate approval"),
         candidateImageUrl: null,
+        approvedImageUrl: null,
       };
     });
   if (client.storage) {
@@ -235,6 +239,13 @@ export async function loadCandidateWorkbench(
       const signed = await client.storage!.from(output.bucket).createSignedUrl(output.path, 300);
       if (!signed.error && signed.data?.signedUrl) {
         entry.candidateImageUrl = signed.data.signedUrl;
+      }
+      if (!entry.approvedVersion) return;
+      const approvedBucket = requiredString(entry.approvedVersion.storage_bucket, "approved Storage bucket");
+      const approvedPath = requiredString(entry.approvedVersion.image_path, "approved Storage path");
+      const approvedSigned = await client.storage!.from(approvedBucket).createSignedUrl(approvedPath, 300);
+      if (!approvedSigned.error && approvedSigned.data?.signedUrl) {
+        entry.approvedImageUrl = approvedSigned.data.signedUrl;
       }
     }));
   }
