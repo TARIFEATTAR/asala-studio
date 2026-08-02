@@ -35,15 +35,15 @@
 - Create: `assets/paper-doll/release-components/CYL-9ML/1.0.0-draft.1/geometry/*.png`
 - Modify: `package.json`
 
-- [ ] Write a failing exporter test that builds a minimal temporary release and requires the exporter to parse it with `parsePaperDollReleaseManifest`, re-run `validatePaperDollRelease`, reject a validation mismatch, compute the canonical manifest hash, copy only non-body release images, and generate stable TypeScript data.
-- [ ] Run `npx tsx --test scripts/paper-doll/export-workbench-release.test.ts` and confirm the missing exporter failure.
-- [ ] Implement an exporter with explicit `--release-dir`, `--output-ts`, and `--component-asset-dir` arguments. It must fail closed on missing files, SHA mismatch, validation mismatch, or an unknown body asset SHA.
-- [ ] Map body assets to the existing tracked canonical files in `assets/paper-doll/body-plates/` by SHA rather than copying their ~20 MB bytes.
-- [ ] Copy cap/mask assets into the tracked release-component directory only after their SHA-256 values match the manifest.
-- [ ] Generate a stable TypeScript snapshot containing the full parsed manifest, validation result, canonical manifest hash, source paths, and an exhaustive asset-key-to-Vite-URL mapping. Include a generated-file warning and source release identity.
-- [ ] Add `paperdoll:export-workbench-release` to `package.json`.
-- [ ] Run the exporter against `outputs/paper-doll-family-releases/CYL-9ML/1.0.0-draft.1`, then re-run the test and inspect `git diff --stat` to confirm that only four caps, one geometry mask, and the TypeScript snapshot were promoted.
-- [ ] Commit: `feat(paper-doll): export verified release for workbench`
+- [x] Write a failing exporter test that builds a minimal temporary release and requires the exporter to parse it with `parsePaperDollReleaseManifest`, re-run `validatePaperDollRelease`, reject a validation mismatch, compute the canonical manifest hash, copy only non-body release images, and generate stable TypeScript data.
+- [x] Run `npx tsx --test scripts/paper-doll/export-workbench-release.test.ts` and confirm the missing exporter failure.
+- [x] Implement an exporter with explicit `--release-dir`, `--output-ts`, and `--component-asset-dir` arguments. It must fail closed on missing files, SHA mismatch, validation mismatch, or an unknown body asset SHA.
+- [x] Map body assets to the existing tracked canonical files in `assets/paper-doll/body-plates/` by SHA rather than copying their ~20 MB bytes.
+- [x] Copy cap/mask assets into the tracked release-component directory only after their SHA-256 values match the manifest.
+- [x] Generate a stable TypeScript snapshot containing the full parsed manifest, validation result, canonical manifest hash, source paths, and an exhaustive asset-key-to-Vite-URL mapping. Include a generated-file warning and source release identity.
+- [x] Add `paperdoll:export-workbench-release` to `package.json`.
+- [x] Run the exporter against `outputs/paper-doll-family-releases/CYL-9ML/1.0.0-draft.1`, then re-run the test and inspect `git diff --stat` to confirm that only four caps, one geometry mask, and the TypeScript snapshot were promoted.
+- [x] Commit: `feat(paper-doll): export verified release for workbench`
 
 ## Task 2: Build the pure workbench domain model
 
@@ -189,4 +189,3 @@
 - [ ] The no-write Sanity projection round-trips and performs zero mutations.
 - [ ] Existing Masters and all non-CYL-9ML Studio flows still build and test.
 - [ ] No UI control can overwrite an approved asset, write the ledger, grant approval, or publish to Sanity in this slice.
-

@@ -79,6 +79,7 @@
     "paperdoll:pilot": "tsx scripts/paper-doll/pilot.ts",
     "paperdoll:pilot-closure-materials": "tsx scripts/paper-doll/closure-material-pilot.ts",
     "paperdoll:build-cyl9-release": "tsx scripts/paper-doll/build-cyl9-family-release.ts",
+    "paperdoll:export-workbench-release": "tsx scripts/paper-doll/export-workbench-release.ts --release-dir outputs/paper-doll-family-releases/CYL-9ML/1.0.0-draft.1 --output-ts src/generated/paperDoll/cyl9Release.generated.ts --component-asset-dir assets/paper-doll/release-components/CYL-9ML/1.0.0-draft.1",
     "paperdoll:verify-release": "tsx scripts/paper-doll/verify-family-release.ts",
     "paperdoll:extract-bodies": "tsx scripts/paper-doll/extract-bodies.ts",
     "paperdoll:stage-bodies": "tsx scripts/paper-doll/stage-bodies.ts",
