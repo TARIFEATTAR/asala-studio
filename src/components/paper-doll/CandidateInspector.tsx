@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Fingerprint, ShieldCheck } from "lucide-react";
 
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
+import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
 import {
   shouldShowGeometryLocked,
   type AssemblyEditMode,
@@ -22,6 +23,7 @@ export interface CandidateInspection {
   geometryLocked: boolean;
   geometryGate: string | null;
   qaStatus: "not-run" | "passed" | "failed";
+  variantLabel: string | null;
 }
 
 interface CandidateInspectorProps {
@@ -46,14 +48,18 @@ function Metric({ label, value }: { label: string; value: string }) {
 export function CandidateInspector({ asset, mode, selectionKind, transform, inspection }: CandidateInspectorProps) {
   const [tab, setTab] = useState<InspectorTab>("source");
   const geometryLocked = inspection ? shouldShowGeometryLocked(inspection) : false;
-  const previewUrl = tab === "source" ? asset?.imageUrl : tab === "candidate" ? inspection?.imageUrl : inspection?.differenceUrl;
+  const sourceRevoked = Boolean(authorityMaskBlocker(asset?.geometryMaskReference?.sha256));
+  useEffect(() => {
+    if (inspection?.imageUrl) setTab("candidate");
+  }, [inspection?.imageUrl]);
+  const previewUrl = tab === "source" ? (sourceRevoked ? null : asset?.imageUrl) : tab === "candidate" ? inspection?.imageUrl : inspection?.differenceUrl;
 
   return (
     <aside className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <div className="text-[9px] uppercase tracking-[0.22em]" style={{ color: "var(--darkroom-accent)" }}>Candidate inspector</div>
-          <div className="mt-1 font-serif text-base" style={{ color: "var(--darkroom-text-primary)" }}>{asset?.displayName ?? "No layer selected"}</div>
+          <div className="mt-1 font-serif text-base" style={{ color: "var(--darkroom-text-primary)" }}>{asset?.displayName ?? "No layer selected"}{inspection?.variantLabel ? ` · ${inspection.variantLabel}` : ""}</div>
         </div>
         <Fingerprint className="h-4 w-4" style={{ color: "var(--darkroom-text-dim)" }} />
       </div>
@@ -81,7 +87,9 @@ export function CandidateInspector({ asset, mode, selectionKind, transform, insp
           <img src={previewUrl} alt={`${tab} preview`} className="h-full w-full object-contain" />
         ) : (
           <div className="max-w-[180px] px-4 text-center text-[10px] leading-5" style={{ color: "#716d67" }}>
-            {tab === "source" ? "Select a registered release layer." : `${tab} appears only after a candidate job is processed and verified.`}
+            {tab === "source" && sourceRevoked
+              ? "Revoked ancestor — audit only. Its defective pixels are not mounted in the working canvas."
+              : tab === "source" ? "Select a registered release layer." : `${tab} appears only after a candidate job is processed and verified.`}
           </div>
         )}
       </div>

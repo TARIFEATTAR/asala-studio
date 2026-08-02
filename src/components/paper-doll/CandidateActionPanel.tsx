@@ -22,6 +22,11 @@ import {
 } from "@/lib/paperDoll/candidateRepository";
 import { downloadImageLibraryCandidate } from "@/lib/paperDoll/libraryCandidateSource";
 import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
+import {
+  candidateAuditReason,
+  candidateAuthorityBlocker,
+  selectCandidateForReview,
+} from "@/lib/paperDoll/candidateReviewPolicy";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
 import type { CandidateInspection } from "./CandidateInspector";
@@ -84,6 +89,7 @@ function inspectionFrom(entry: CandidateHistoryEntry | null, maskBlocker: string
     geometryLocked: metadata.geometryLocked === true && !maskBlocker,
     geometryGate: typeof metadata.geometryGate === "string" ? metadata.geometryGate : null,
     qaStatus: maskBlocker ? "failed" : blocking.length === 0 ? "not-run" : failed ? "failed" : "passed",
+    variantLabel: entry.job.requirementKey.split(":").at(-1) ?? null,
   };
 }
 
@@ -108,6 +114,9 @@ export function CandidateActionPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [reviewVariant, setReviewVariant] = useState<"PLASTIC" | "METAL">(
+    asset?.variantKey === "METAL" ? "METAL" : "PLASTIC",
+  );
 
   const history = useQuery({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
@@ -115,24 +124,38 @@ export function CandidateActionPanel({
     refetchInterval: 5_000,
     refetchOnWindowFocus: false,
   });
-  const selectedHistory = useMemo(
+  const componentHistory = useMemo(
     () => history.data?.jobs.filter((entry) => entry.job.componentId === asset?.componentId) ?? [],
     [asset?.componentId, history.data?.jobs],
   );
-  // A later queued generation must not displace a completed manual candidate
-  // from review. Prefer the newest verifiable candidate, then fall back to the
-  // newest attempt when no candidate has completed yet.
-  const latest = selectedHistory.find((entry) => entry.job.status === "candidate_ready" && entry.candidateVersion) ?? selectedHistory[0] ?? null;
-  const maskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
+  const availableReviewVariants = useMemo(() => Array.from(new Set(
+    componentHistory
+      .map((entry) => entry.job.requirementKey.split(":").at(-1))
+      .filter((variant): variant is "PLASTIC" | "METAL" => variant === "PLASTIC" || variant === "METAL"),
+  )), [componentHistory]);
+  const selectedHistory = useMemo(
+    () => componentHistory.filter((entry) => entry.job.requirementKey.endsWith(`:${reviewVariant}`)),
+    [componentHistory, reviewVariant],
+  );
+  useEffect(() => {
+    if (!availableReviewVariants.includes(reviewVariant) && availableReviewVariants.length > 0) {
+      setReviewVariant(availableReviewVariants[0]);
+    }
+  }, [availableReviewVariants, reviewVariant]);
+  // Failed and revoked outputs remain immutable audit records, but they cannot
+  // displace a clean candidate in the working inspector.
+  const latest = selectCandidateForReview(selectedHistory);
+  const parentMaskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
+  const candidateMaskBlocker = candidateAuthorityBlocker(latest);
 
-  useEffect(() => onInspectionChange(inspectionFrom(latest, maskBlocker)), [latest, maskBlocker, onInspectionChange]);
+  useEffect(() => onInspectionChange(inspectionFrom(latest, candidateMaskBlocker)), [latest, candidateMaskBlocker, onInspectionChange]);
 
   const requirement = useMemo(() => {
     if (!asset) return null;
-    if (asset.slot === "roller" && ROLLER_VARIANTS.has(asset.variantKey)) return `CYL-9ML:ROLLER:${asset.variantKey}`;
+    if (asset.slot === "roller" && ROLLER_VARIANTS.has(reviewVariant)) return `CYL-9ML:ROLLER:${reviewVariant}`;
     if ((asset.slot === "overcap" || asset.slot === "cap") && OVERCAP_VARIANTS.has(asset.variantKey)) return `CYL-9ML:OVERCAP:${asset.variantKey}`;
     return null;
-  }, [asset]);
+  }, [asset, reviewVariant]);
 
   const chooseProvider = (next: CandidateProvider) => {
     setProvider(next);
@@ -142,7 +165,7 @@ export function CandidateActionPanel({
   };
 
   const buildRequest = async (manualOutput?: ManualCandidateAssetRef): Promise<CandidateJobRequest> => {
-    if (maskBlocker) throw new Error(maskBlocker);
+    if (parentMaskBlocker) throw new Error(parentMaskBlocker);
     if (!asset || !requirement || !asset.geometryMaskUrl || !asset.geometryMaskReference) {
       throw new Error("A registered component requirement and authority mask are required.");
     }
@@ -252,7 +275,7 @@ export function CandidateActionPanel({
       : user?.email ?? "";
   const canApprove = latest?.job.status === "candidate_ready"
     && !latest.approval
-    && !maskBlocker
+    && !candidateMaskBlocker
     && blockingQa.length > 0
     && blockingQa.every((row) => row.qa_status === "passed")
     && Boolean(approverDisplayName);
@@ -267,9 +290,27 @@ export function CandidateActionPanel({
         <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
       </div>
 
-      {maskBlocker && (
+      {parentMaskBlocker && (
         <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(239,141,125,0.42)", color: "#ef8d7d", background: "rgba(239,141,125,0.05)" }}>
-          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{maskBlocker}
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{parentMaskBlocker} A clean staged replacement can still be reviewed and approved below.
+        </div>
+      )}
+
+      {asset?.slot === "roller" && availableReviewVariants.length > 0 && (
+        <div>
+          <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Review roller variant</div>
+          <div className="grid grid-cols-2 gap-1">
+            {(["PLASTIC", "METAL"] as const).map((variant) => (
+              <button
+                key={variant}
+                type="button"
+                disabled={!availableReviewVariants.includes(variant)}
+                onClick={() => setReviewVariant(variant)}
+                className="rounded border px-2 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-30"
+                style={{ borderColor: reviewVariant === variant ? "rgba(97,214,200,0.52)" : "var(--darkroom-border-subtle)", color: reviewVariant === variant ? "#61d6c8" : "var(--darkroom-text-dim)" }}
+              >{variant === "PLASTIC" ? "Natural plastic" : "Metal ball"}</button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -313,14 +354,14 @@ export function CandidateActionPanel({
       {error && <div className="flex items-start gap-2 text-[9px] leading-4" style={{ color: "#ef8d7d" }}><AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />{error}</div>}
 
       <div className="border-t pt-2" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-        <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Immutable history · {selectedHistory.length}</div>
+        <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Immutable {reviewVariant.toLowerCase()} history · {selectedHistory.length}</div>
         {selectedHistory.length === 0 ? <div className="text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>No attempts for this component.</div> : selectedHistory.slice(0, 4).map((entry) => (
           <div key={entry.job.id} className="flex items-center justify-between gap-2 border-t py-1.5 text-[8px]" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
             <span className="min-w-0 font-mono" style={{ color: "var(--darkroom-text-muted)" }}>
               <span className="block truncate">{entry.job.provider} · {entry.job.model}</span>
               {entry.job.manualOutput?.originalFilename && <span className="mt-0.5 block truncate" title={entry.job.manualOutput.originalFilename} style={{ color: "var(--darkroom-text-dim)" }}>{entry.job.manualOutput.originalFilename}</span>}
             </span>
-            <span className="uppercase tracking-wider" style={{ color: entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{entry.job.status.replace("_", " ")}</span>
+            <span className="text-right uppercase tracking-wider" style={{ color: candidateAuditReason(entry) ? "#ef8d7d" : entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{candidateAuditReason(entry) ?? entry.job.status.replace("_", " ")}</span>
           </div>
         ))}
       </div>

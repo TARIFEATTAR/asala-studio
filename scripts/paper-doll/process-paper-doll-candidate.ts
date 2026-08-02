@@ -9,6 +9,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "../../src/integrations/supabase/types";
 import { buildPaperDollObjectPath } from "../../src/lib/paperDoll/assetStorage";
 import { clampCandidate } from "../../src/lib/paperDoll/candidateClamp.node";
+import { buildCandidateQaEvidence } from "../../src/lib/paperDoll/candidateQaEvidence.node";
 import {
   beginGenerationAttempt,
   completeGenerationAttempt,
@@ -380,26 +381,13 @@ export async function processCandidateJob(input: {
             parentSha256: job.parent_sha256,
           },
         },
-        p_qa_results: [
-          {
-            gateKey: "geometry-mask-identity",
-            gateVersion: "mask-clamp-v1",
-            qaStatus: "passed",
-            blocking: true,
-            calibratedWith: ["cyl9-rollon-real-render-2026-08-01", "frame-vs-object-regression"],
-            measurements: { expectedMaskSha256: job.authoritative_mask_ref.sha256, actualMaskSha256: clamped.maskSha256 },
-            issues: [],
-          },
-          {
-            gateKey: "provider-normalization",
-            gateVersion: "contain-v1",
-            qaStatus: "passed",
-            blocking: true,
-            calibratedWith: ["square-provider-output", "canonical-2080x2288-canvas"],
-            measurements: clamped.normalization,
-            issues: [],
-          },
-        ],
+        p_qa_results: await buildCandidateQaEvidence({
+          requirementKey: job.requirement_key,
+          output: clamped.output,
+          expectedMaskSha256: job.authoritative_mask_ref.sha256,
+          actualMaskSha256: clamped.maskSha256,
+          normalization: clamped.normalization,
+        }),
       },
     );
     if (finalizeError || !candidateVersionId) throw new Error(`Candidate finalization failed: ${finalizeError?.message}`);
