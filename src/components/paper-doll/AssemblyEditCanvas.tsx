@@ -5,9 +5,11 @@ import { Crosshair, Eye, EyeOff, Maximize2, Minus, Plus } from "lucide-react";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import {
   RELEASE_CANVAS,
+  canvasStageSize,
   displayRectToRelease,
   displayToRelease,
   releaseToDisplay,
+  shouldZoomCanvasFromWheel,
   type AssemblyEditMode,
   type CandidateSelectionKind,
   type ReleaseRect,
@@ -98,9 +100,8 @@ export function AssemblyEditCanvas({
 
     canvas.on("mouse:wheel", (event) => {
       const native = event.e as WheelEvent;
-      const next = Math.min(4, Math.max(0.5, canvas.getZoom() * 0.999 ** native.deltaY));
-      canvas.zoomToPoint(new fabric.Point(native.offsetX, native.offsetY), next);
-      setZoom(next);
+      if (!shouldZoomCanvasFromWheel(native)) return;
+      setZoom((current) => Math.min(4, Math.max(0.5, current * 0.999 ** native.deltaY)));
       native.preventDefault();
       native.stopPropagation();
     });
@@ -152,11 +153,10 @@ export function AssemblyEditCanvas({
     canvas.on("mouse:move", (event) => {
       const native = event.e as MouseEvent;
       if (panning) {
-        const transform = canvas.viewportTransform;
-        if (transform) {
-          transform[4] += native.clientX - lastX;
-          transform[5] += native.clientY - lastY;
-          canvas.requestRenderAll();
+        const viewport = wrapperRef.current;
+        if (viewport) {
+          viewport.scrollLeft -= native.clientX - lastX;
+          viewport.scrollTop -= native.clientY - lastY;
         }
         lastX = native.clientX;
         lastY = native.clientY;
@@ -336,20 +336,18 @@ export function AssemblyEditCanvas({
     () => layers.find((asset) => asset.componentVersionId === selectedLayerId) ?? null,
     [layers, selectedLayerId],
   );
+  const stageSize = useMemo(() => canvasStageSize(display, zoom), [display, zoom]);
 
   const setCanvasZoom = (next: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const clamped = Math.max(0.5, Math.min(4, next));
-    canvas.zoomToPoint(new fabric.Point(display.width / 2, display.height / 2), clamped);
     setZoom(clamped);
   };
 
   const resetView = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
     setZoom(1);
+    wrapperRef.current?.scrollTo({ left: 0, top: 0 });
   };
 
   return (
@@ -370,10 +368,21 @@ export function AssemblyEditCanvas({
           </button>
         </div>
       </div>
-      <div ref={wrapperRef} className="relative mx-auto w-full overflow-hidden rounded border shadow-[0_24px_80px_rgba(0,0,0,0.28)]" style={{ borderColor: "rgba(215,168,95,0.32)", maxWidth: 760, aspectRatio: "10 / 11" }}>
-        <canvas ref={canvasElementRef} aria-label="Paper-Doll assembly edit canvas" />
-        <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/65 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.16em] text-white/60">
-          Alt-drag to pan · wheel to zoom · {RELEASE_CANVAS.width}×{RELEASE_CANVAS.height}
+      <div
+        ref={wrapperRef}
+        role="region"
+        aria-label="Scrollable Paper-Doll canvas viewport"
+        tabIndex={0}
+        className="relative mx-auto w-full overflow-auto overscroll-contain rounded border shadow-[0_24px_80px_rgba(0,0,0,0.28)] focus:outline-none focus:ring-1 focus:ring-[#d7a85f]/50"
+        style={{ borderColor: "rgba(215,168,95,0.32)", maxWidth: 760, maxHeight: "min(70vh, 760px)", scrollbarGutter: "stable" }}
+      >
+        <div className="relative mx-auto" style={{ width: stageSize.width, height: stageSize.height }}>
+          <div className="relative origin-top-left" style={{ width: display.width, height: display.height, transform: `scale(${zoom})` }}>
+            <canvas ref={canvasElementRef} aria-label="Paper-Doll assembly edit canvas" />
+            <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/65 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.16em] text-white/60">
+              Scroll to move · ⌘/Ctrl-wheel to zoom · Alt-drag to pan · {RELEASE_CANVAS.width}×{RELEASE_CANVAS.height}
+            </div>
+          </div>
         </div>
       </div>
     </div>

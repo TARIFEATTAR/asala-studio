@@ -91,3 +91,13 @@ export function shouldShowGeometryLocked(input: {
 }): boolean {
   return input.geometryLocked && input.geometryGate === "exact-authoritative-mask-alpha";
 }
+
+export function canvasStageSize(display: DisplaySize, zoom: number): DisplaySize {
+  assertDisplay(display);
+  if (!Number.isFinite(zoom) || zoom <= 0) throw new Error("Canvas zoom must be positive.");
+  return { width: Math.round(display.width * zoom), height: Math.round(display.height * zoom) };
+}
+
+export function shouldZoomCanvasFromWheel(input: { ctrlKey: boolean; metaKey: boolean }): boolean {
+  return input.ctrlKey || input.metaKey;
+}

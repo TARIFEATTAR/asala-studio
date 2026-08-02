@@ -4,10 +4,12 @@ import test from "node:test";
 import {
   canPaintSelection,
   canPersistTransform,
+  canvasStageSize,
   displayRectToRelease,
   displayToRelease,
   releaseToDisplay,
   shouldShowGeometryLocked,
+  shouldZoomCanvasFromWheel,
 } from "./assemblyEditModel";
 
 test("display coordinates round-trip to the 2080x2288 release canvas", () => {
@@ -39,4 +41,15 @@ test("geometry locked label requires exact server mask identity", () => {
   assert.equal(shouldShowGeometryLocked({ geometryLocked: true, geometryGate: "exact-authoritative-mask-alpha" }), true);
   assert.equal(shouldShowGeometryLocked({ geometryLocked: true, geometryGate: "reference-anchored" }), false);
   assert.equal(shouldShowGeometryLocked({ geometryLocked: false, geometryGate: "exact-authoritative-mask-alpha" }), false);
+});
+
+test("zoom creates a larger scroll stage without changing release coordinates", () => {
+  assert.deepEqual(canvasStageSize({ width: 520, height: 572 }, 2), { width: 1040, height: 1144 });
+  assert.deepEqual(canvasStageSize({ width: 520, height: 572 }, 0.5), { width: 260, height: 286 });
+});
+
+test("plain wheel scrolls the viewport and modifier-wheel zooms the canvas", () => {
+  assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: false, metaKey: false }), false);
+  assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: true, metaKey: false }), true);
+  assert.equal(shouldZoomCanvasFromWheel({ ctrlKey: false, metaKey: true }), true);
 });
