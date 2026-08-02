@@ -69,13 +69,13 @@
 - Create: `src/lib/paperDoll/sanityProjection.ts`
 - Create: `src/lib/paperDoll/sanityProjection.test.ts`
 
-- [ ] Write failing tests for stable `_key` values, release/schema versions, manifest hash, canvas, assets, QA evidence, mappings, recipe layer order, blockers, and explicit target metadata.
-- [ ] Write a failing round-trip test that parses the projection back into an equivalent Release v1 manifest without losing component IDs, hashes, geometry, mappings, or layer order.
-- [ ] Write a failing test proving blocked releases produce a preview but `publishEligible: false`, `writeCount: 0`, and no mutation payload or credential-bearing field.
-- [ ] Implement `buildPaperDollSanityProjection` as a pure function. Use a caller-supplied target descriptor; default UI data must use `unconfigured` project/dataset/document values rather than guessing production.
-- [ ] Implement the reverse parser used by the round-trip gate and expose canonical payload hashing.
-- [ ] Run `npx tsx --test src/lib/paperDoll/sanityProjection.test.ts`.
-- [ ] Commit: `feat(paper-doll): add no-write Sanity projection`
+- [x] Write failing tests for stable `_key` values, release/schema versions, manifest hash, canvas, assets, QA evidence, mappings, recipe layer order, blockers, and explicit target metadata.
+- [x] Write a failing round-trip test that parses the projection back into an equivalent Release v1 manifest without losing component IDs, hashes, geometry, mappings, or layer order.
+- [x] Write a failing test proving blocked releases produce a preview but `publishEligible: false`, `writeCount: 0`, and no mutation payload or credential-bearing field.
+- [x] Implement `buildPaperDollSanityProjection` as a pure function. Use a caller-supplied target descriptor; default UI data must use `unconfigured` project/dataset/document values rather than guessing production.
+- [x] Implement the reverse parser used by the round-trip gate and expose canonical payload hashing.
+- [x] Run `npx tsx --test src/lib/paperDoll/sanityProjection.test.ts`.
+- [x] Commit: `feat(paper-doll): add no-write Sanity projection`
 
 ## Task 4: Build the Precision Bench shell and navigation
 
