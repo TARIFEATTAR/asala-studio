@@ -88,13 +88,13 @@
 - Create: `src/components/paper-doll/releaseWorkbenchState.test.ts`
 - Create: `src/styles/paper-doll-workbench.css`
 
-- [ ] Write failing pure-state tests for `view=assembly|matrix|lineup|evidence|publish`, filter/query serialization, invalid-query fallback, and release-lock mode.
-- [ ] Implement the persistent header with family/geometry identity, release/schema versions, short manifest hash, lifecycle counts with denominators, blocker/advisory counts, target state, and an explicit `READ ONLY` mode badge.
-- [ ] Implement internal view navigation and a responsive inventory rail with separate Bodies and Compatible Systems sections. Populate it only from domain selectors.
-- [ ] Surface absent 17-415 systems (rollers, sprayers, pumps, reducers/plugs) as catalog gaps, not as generated assets. Label the defective metal roller blocker explicitly.
-- [ ] Ensure keyboard focus, selected state, and reduced-motion behavior work without changing the existing Studio shell.
-- [ ] Run `npx tsx --test src/components/paper-doll/releaseWorkbenchState.test.ts` and `npm run build`.
-- [ ] Commit: `feat(paper-doll): add Precision Bench shell`
+- [x] Write failing pure-state tests for `view=assembly|matrix|lineup|evidence|publish`, filter/query serialization, invalid-query fallback, and release-lock mode.
+- [x] Implement the persistent header with family/geometry identity, release/schema versions, short manifest hash, lifecycle counts with denominators, blocker/advisory counts, target state, and an explicit `READ ONLY` mode badge.
+- [x] Implement internal view navigation and a responsive inventory rail with separate Bodies and Compatible Systems sections. Populate it only from domain selectors.
+- [x] Surface absent 17-415 systems (rollers, sprayers, pumps, reducers/plugs) as catalog gaps, not as generated assets. Label the defective metal roller blocker explicitly.
+- [x] Ensure keyboard focus, selected state, and reduced-motion behavior work without changing the existing Studio shell.
+- [x] Run `npx tsx --test src/components/paper-doll/releaseWorkbenchState.test.ts` and `npm run build`.
+- [x] Commit: `feat(paper-doll): add Precision Bench shell`
 
 ## Task 5: Implement the Assembly and Evidence views
 
