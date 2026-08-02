@@ -122,13 +122,13 @@
 - Create: `src/components/paper-doll/LineupView.tsx`
 - Create: `src/components/paper-doll/LineupCard.tsx`
 
-- [ ] Render matrix rows from the domain lifecycle model, never from hand-authored completion labels. Include requirement identity, latest component version, material, QA, release, publication, blockers, and next action.
-- [ ] Add family/system/role/finish/status filters whose counts remain tied to the unfiltered denominator.
-- [ ] Render five explicit approved assembly mappings side by side on one locked baseline and fixed canvas scale, with SKU/mapping IDs and per-card layer identity.
-- [ ] Add baseline, centerline, bounds, and geometry-mask overlays across the entire lineup; blocked or missing items must not be substituted.
-- [ ] Show the family-level registration verdict and the exact reason when it is not yet a publishable catalog lineup.
-- [ ] Run `npm run build` and exercise responsive widths at desktop and tablet breakpoints.
-- [ ] Commit: `feat(paper-doll): add lifecycle matrix and lineup`
+- [x] Render matrix rows from the domain lifecycle model, never from hand-authored completion labels. Include requirement identity, latest component version, material, QA, release, publication, blockers, and next action.
+- [x] Add family/system/role/finish/status filters whose counts remain tied to the unfiltered denominator.
+- [x] Render five explicit approved assembly mappings side by side on one locked baseline and fixed canvas scale, with SKU/mapping IDs and per-card layer identity.
+- [x] Add baseline, centerline, bounds, and geometry-mask overlays across the entire lineup; blocked or missing items must not be substituted.
+- [x] Show the family-level registration verdict and the exact reason when it is not yet a publishable catalog lineup.
+- [ ] Run `npm run build` and exercise responsive widths at desktop and tablet breakpoints. (`npm run build` passed; viewport exercise follows the Task 8 route mount.)
+- [x] Commit: `feat(paper-doll): add lifecycle matrix and lineup`
 
 ## Task 7: Implement QA & Publish preview
 

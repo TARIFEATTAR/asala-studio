@@ -28,7 +28,11 @@ interface ReleaseWorkbenchProps {
   manifestSha256: string;
   assetUrlsByPath: Readonly<Record<string, string>>;
   applicatorBuckets: ApplicatorBucket[];
-  renderView: (view: ReleaseWorkbenchView, state: ReleaseWorkbenchState) => ReactNode;
+  renderView: (
+    view: ReleaseWorkbenchView,
+    state: ReleaseWorkbenchState,
+    setState: (state: ReleaseWorkbenchState) => void,
+  ) => ReactNode;
 }
 
 const VIEW_ITEMS: Array<{
@@ -56,6 +60,9 @@ export function ReleaseWorkbench({
   const state = useMemo(() => parseReleaseWorkbenchState(searchParams), [searchParams]);
   const selectView = (view: ReleaseWorkbenchView) => {
     setSearchParams(serializeReleaseWorkbenchState({ ...state, view }, searchParams), { replace: true });
+  };
+  const setState = (nextState: ReleaseWorkbenchState) => {
+    setSearchParams(serializeReleaseWorkbenchState(nextState, searchParams), { replace: true });
   };
 
   return (
@@ -89,7 +96,7 @@ export function ReleaseWorkbench({
           applicatorBuckets={applicatorBuckets}
         />
         <section className="pdw-view-surface" role="tabpanel" aria-label={state.view}>
-          {renderView(state.view, state)}
+          {renderView(state.view, state, setState)}
         </section>
       </div>
     </div>
