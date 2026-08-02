@@ -365,7 +365,7 @@ export interface CandidateClampResult {
 - [ ] **Step 4: Implement material families without geometry changes**
 
   - `SHN-SL` is the mirror master.
-  - `SHN-GL` and `SHN-CU` use deterministic hue/material parameters while retaining the mirror room-band structure.
+  - `SHN-GL` uses deterministic hue/material parameters while retaining the mirror room-band structure; catalog-truth `MAT-CU` uses the matte material family.
   - `SHN-BLK`, `MAT-SL`, `MAT-GL`, and `WHT` use distinct roughness/specular response on the same mesh.
   - No material function may add a displacement, bevel, modifier, camera change, or mesh transform.
 

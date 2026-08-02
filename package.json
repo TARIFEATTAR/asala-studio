@@ -15,6 +15,7 @@
     "paper-doll:storage:provision": "tsx scripts/paper-doll/provision-storage.ts",
     "paper-doll:cyl9:upload-bodies": "tsx scripts/paper-doll/upload-cyl9-body-release.ts",
     "paper-doll:cyl9:requirements": "tsx scripts/paper-doll/build-cyl9-rollon-requirements.ts",
+    "paper-doll:cyl9:render-pack": "tsx scripts/paper-doll/render-cyl9-rollon-pack.ts",
     "bestbottles:catalog:reconcile": "tsx scripts/build-bestbottles-catalog-lite.ts",
     "preview": "vite preview"
   },

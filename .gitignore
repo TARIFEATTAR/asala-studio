@@ -13,6 +13,10 @@
 # Logs
 *.log
 
+# Python/Blender bytecode
+__pycache__/
+*.py[cod]
+
 # Playwright MCP traces (local debug output)
 .playwright-mcp/
 
