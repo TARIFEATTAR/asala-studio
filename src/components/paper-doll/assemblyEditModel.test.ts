@@ -29,7 +29,7 @@ test("rectangle selection is normalized and clamped to the release canvas", () =
   );
 });
 
-test("release-lock cannot paint or persist transforms", () => {
+test("Current Release remains internally release-lock and cannot paint or persist transforms", () => {
   assert.equal(canPaintSelection("release-lock"), false);
   assert.equal(canPaintSelection("family-fit"), false);
   assert.equal(canPersistTransform({ mode: "release-lock", createsCandidate: true }), false);

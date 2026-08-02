@@ -45,7 +45,10 @@ export const PrivateAssetRefSchema = z.object({
 export const OriginalFilenameSchema = z.string()
   .min(1)
   .max(255)
-  .refine((name) => !/[\u0000-\u001f\u007f]/.test(name), {
+  .refine((name) => Array.from(name).every((character) => {
+    const codePoint = character.codePointAt(0) ?? 0;
+    return codePoint > 31 && codePoint !== 127;
+  }), {
     message: "Filename contains control characters.",
   });
 

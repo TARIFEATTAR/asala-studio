@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { SharedPlacementLockRequest } from "./placementContract";
+import { loadSharedPlacement, lockSharedPlacement } from "./placementRepository";
 
 const ORG = "11111111-1111-4111-8111-111111111111";
 const MASK = "a".repeat(64);
@@ -27,11 +28,8 @@ const record = {
 };
 
 test("placement repository reads one exact geometry fingerprint", async () => {
-  const repository = await import("./placementRepository").catch(() => ({}));
-  const load = (repository as { loadSharedPlacement?: Function }).loadSharedPlacement;
-  assert.ok(load, "loadSharedPlacement must exist");
   let called: { name: string; args: Record<string, unknown> } | null = null;
-  const result = await load({ rpc: async (name: string, args: Record<string, unknown>) => {
+  const result = await loadSharedPlacement({ rpc: async (name: string, args: Record<string, unknown>) => {
     called = { name, args };
     return { data: record, error: null };
   } }, {
@@ -53,9 +51,6 @@ test("placement repository reads one exact geometry fingerprint", async () => {
 });
 
 test("placement repository sends one exact named lock request", async () => {
-  const repository = await import("./placementRepository").catch(() => ({}));
-  const lock = (repository as { lockSharedPlacement?: Function }).lockSharedPlacement;
-  assert.ok(lock, "lockSharedPlacement must exist");
   const request: SharedPlacementLockRequest = {
     organizationId: ORG,
     familyKey: "CYL-9ML",
@@ -69,7 +64,7 @@ test("placement repository sends one exact named lock request", async () => {
     approvalNote: "Flush",
   };
   let call: { name: string; body: unknown } | null = null;
-  const result = await lock({ functions: { invoke: async (name: string, options: { body: unknown }) => {
+  const result = await lockSharedPlacement({ functions: { invoke: async (name: string, options: { body: unknown }) => {
     call = { name, body: options.body };
     return { data: record, error: null };
   } } }, request);
@@ -78,10 +73,7 @@ test("placement repository sends one exact named lock request", async () => {
 });
 
 test("placement repository rejects malformed ledger output", async () => {
-  const repository = await import("./placementRepository").catch(() => ({}));
-  const load = (repository as { loadSharedPlacement?: Function }).loadSharedPlacement;
-  assert.ok(load, "loadSharedPlacement must exist");
-  await assert.rejects(() => load({ rpc: async () => ({ data: { ...record, compatibleBodyComponentVersionIds: [] }, error: null }) }, {
+  await assert.rejects(() => loadSharedPlacement({ rpc: async () => ({ data: { ...record, compatibleBodyComponentVersionIds: [] }, error: null }) }, {
     organizationId: ORG,
     familyKey: "CYL-9ML",
     fitmentGeometryKey: "fitment__roller-ball__17-415__v1",

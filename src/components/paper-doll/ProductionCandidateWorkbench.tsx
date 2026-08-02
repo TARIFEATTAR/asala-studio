@@ -312,11 +312,13 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         <div className="flex overflow-hidden rounded border" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
           {(["release-lock", "family-fit", "edit-lab"] as AssemblyEditMode[]).map((item) => (
             <button key={item} type="button" disabled={item === "family-fit" && !approvedCandidate} title={item === "family-fit" && !approvedCandidate ? "Approve pixels in Edit Lab first" : undefined} onClick={() => enterMode(item)} className="flex items-center gap-1.5 border-r px-3 py-2 text-[9px] uppercase tracking-[0.14em] last:border-0 disabled:cursor-not-allowed disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", background: mode === item ? "rgba(215,168,95,0.12)" : "rgba(0,0,0,0.12)", color: mode === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>
-              {item === "release-lock" ? <LockKeyhole className="h-3 w-3" /> : item === "family-fit" ? <Move3d className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item === "family-fit" ? "family fit" : item.replace("-", " ")}
+              {item === "release-lock" ? <LockKeyhole className="h-3 w-3" /> : item === "family-fit" ? <Move3d className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item === "release-lock" ? "Current Release" : item === "family-fit" ? "Family Fit" : "Edit Lab"}
             </button>
           ))}
         </div>
       </header>
+
+      {mode === "release-lock" && <div className="rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(215,168,95,0.3)", color: "var(--darkroom-text-muted)", background: "rgba(215,168,95,0.035)" }}><strong style={{ color: "var(--darkroom-accent)" }}>Current Release.</strong> Read-only active ledger snapshot. Approved pixels and placement drafts are not released until a separate release cut. Sanity publication requires its own dry-run and named approval.</div>}
 
       <div>
         <div className="mb-2 flex items-center justify-between text-[9px] uppercase tracking-[0.18em]" style={{ color: "var(--darkroom-text-dim)" }}><span>Five locked body plates</span><span>baseline alignment sequence</span></div>
