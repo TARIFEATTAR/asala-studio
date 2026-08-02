@@ -11,7 +11,10 @@ interface RpcClient {
 
 interface FunctionClient {
   functions: {
-    invoke(name: string, options: { body: unknown }): Promise<{ data: unknown; error: { message: string } | null }>;
+    invoke(name: string, options: { body: unknown }): Promise<{
+      data: unknown;
+      error: { message: string; context?: { json?: () => Promise<unknown> } } | null;
+    }>;
   };
 }
 
@@ -44,6 +47,17 @@ function parseRecord(value: unknown): SharedPlacementRecord {
   return parsed.data;
 }
 
+async function readFunctionError(error: NonNullable<Awaited<ReturnType<FunctionClient["functions"]["invoke"]>>["error"]>) {
+  try {
+    const body = await error.context?.json?.();
+    const parsed = z.object({ error: z.string().min(1) }).safeParse(body);
+    if (parsed.success) return parsed.data.error;
+  } catch {
+    // Fall back to the SDK message when the response body is unavailable.
+  }
+  return error.message;
+}
+
 export async function loadSharedPlacement(client: RpcClient, input: {
   organizationId: string;
   familyKey: string;
@@ -66,6 +80,6 @@ export async function lockSharedPlacement(
 ): Promise<SharedPlacementRecord> {
   const exactRequest = SharedPlacementLockRequestSchema.parse(request);
   const { data, error } = await client.functions.invoke("lock-paper-doll-placement", { body: exactRequest });
-  if (error) throw new Error(`Unable to lock shared placement: ${error.message}`);
+  if (error) throw new Error(`Unable to lock shared placement: ${await readFunctionError(error)}`);
   return parseRecord(data);
 }
