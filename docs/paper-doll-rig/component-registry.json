@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-31T15:15:19.129Z",
+  "entries": [
+    {
+      "id": "closure__13-415__fine-mist-sprayer__matte-gold",
+      "role": "closure",
+      "closureKey": {
+        "neckThreadSize": "13-415",
+        "applicator": "Fine Mist Sprayer",
+        "colorway": "Matte Gold"
+      },
+      "asset": {
+        "path": "assets/paper-doll/components/closure__13-415__fine-mist-sprayer__matte-gold.png",
+        "sha256": "b683f66491b93e3e84ca6751141ce2ad6850c83217879137778364aa2e754d11",
+        "widthPx": 530,
+        "heightPx": 1002,
+        "hasAlpha": true,
+        "storageUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/paper-doll/components/closure__13-415__fine-mist-sprayer__matte-gold__b683f66491b9.png"
+      },
+      "provenance": {
+        "source": "psd-layer-export",
+        "sourcePsd": "20. Closures/18. 13-415 Sprayers/6. Spry13-415GlMt.psd",
+        "sourcePsdScenes": "2",
+        "sourceSha256": null,
+        "intakeDate": "2026-07-31T14:28:30.640Z",
+        "intakeBy": "claude-code"
+      },
+      "qa": {
+        "alphaCoverageRatio": 0.7929235867886868,
+        "edgeHaloDelta": 25.637173623954588,
+        "keySide": "right",
+        "backgroundBoneDelta": null,
+        "minEdgePaddingPx": 7,
+        "issues": [],
+        "passed": true
+      },
+      "status": "approved",
+      "notes": null,
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-07-31T14:37:31.426Z"
+    },
+    {
+      "id": "closure__17-415__plastic-roller-ball__natural",
+      "role": "closure",
+      "closureKey": {
+        "neckThreadSize": "17-415",
+        "applicator": "Plastic Roller Ball",
+        "colorway": "Natural",
+        "heightMm": 11.5
+      },
+      "asset": {
+        "path": "assets/paper-doll/components/closure__17-415__plastic-roller-ball__natural.png",
+        "storageUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/paper-doll/components/closure__17-415__plastic-roller-ball__natural__442e94e1e1b5.png",
+        "sha256": "442e94e1e1b5c034648d40a06950642eaf770ab9d51d717d7be59adc4511d11c",
+        "widthPx": 198,
+        "heightPx": 330,
+        "hasAlpha": true
+      },
+      "provenance": {
+        "source": "psd-layer-export",
+        "sourcePsd": "17-415 Bottles/9. Clear (Uncapped)/17. GBCyl9RollShnSl.psd",
+        "sourcePsdScenes": "2",
+        "sourceSha256": null,
+        "intakeDate": "2026-07-31T14:50:10.185Z",
+        "intakeBy": "claude-code"
+      },
+      "qa": {
+        "alphaCoverageRatio": 0.2534129170492807,
+        "edgeHaloDelta": 25.02130247986297,
+        "keySide": "ambiguous",
+        "backgroundBoneDelta": null,
+        "minEdgePaddingPx": 11,
+        "warnings": [
+          "resolution_upscaled: 138px for 11.5mm is 0.55× master density — usable, will soften at master scale"
+        ],
+        "issues": [],
+        "passed": true
+      },
+      "status": "approved",
+      "notes": "Re-keyed 13-415→17-415 per Jordan 2026-07-31: source photography is the standard 9ml (17-415 neck, full color range); 13-415 = 5ml + tall 9ml lane. Bytes unchanged (sha frozen).",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-07-31T14:57:23.371Z"
+    },
+    {
+      "id": "closure__17-415__metal-roller-ball__natural",
+      "role": "closure",
+      "closureKey": {
+        "neckThreadSize": "17-415",
+        "applicator": "Metal Roller Ball",
+        "colorway": "Natural",
+        "heightMm": 11.5
+      },
+      "asset": {
+        "path": "assets/paper-doll/components/closure__17-415__metal-roller-ball__natural.png",
+        "storageUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/paper-doll/components/closure__17-415__metal-roller-ball__natural__db65f5072e97.png",
+        "sha256": "db65f5072e978a369f3011a63a9f51acd5aed36899a583ca014d85fc67d9fce1",
+        "widthPx": 365,
+        "heightPx": 331,
+        "hasAlpha": true
+      },
+      "provenance": {
+        "source": "psd-layer-export",
+        "sourcePsd": "17-415 Bottles/9. Clear (Uncapped)/7. GBCyl9MtlRollShnSl.psd",
+        "sourcePsdScenes": "2",
+        "sourceSha256": null,
+        "intakeDate": "2026-07-31T14:50:09.410Z",
+        "intakeBy": "claude-code"
+      },
+      "qa": {
+        "alphaCoverageRatio": 0.5324918263460663,
+        "edgeHaloDelta": 12.403029299542293,
+        "keySide": "ambiguous",
+        "backgroundBoneDelta": null,
+        "minEdgePaddingPx": 6,
+        "warnings": [],
+        "issues": [],
+        "passed": true
+      },
+      "status": "approved",
+      "notes": "Re-keyed 13-415→17-415 per Jordan 2026-07-31: source photography is the standard 9ml (17-415 neck, full color range); 13-415 = 5ml + tall 9ml lane. Bytes unchanged (sha frozen).",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-07-31T14:57:22.963Z"
+    },
+    {
+      "id": "closure__17-415__roll-on-over-cap__shiny-silver",
+      "role": "closure",
+      "closureKey": {
+        "neckThreadSize": "17-415",
+        "applicator": "Roll-On Over-Cap",
+        "colorway": "Shiny Silver",
+        "heightMm": 21
+      },
+      "asset": {
+        "path": "assets/paper-doll/components/closure__17-415__roll-on-over-cap__shiny-silver.png",
+        "storageUrl": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/reference-images/best-bottles/paper-doll/components/closure__17-415__roll-on-over-cap__shiny-silver__21266c665a68.png",
+        "sha256": "21266c665a688572c4d0384295bd2978ecbb540ed33e6d64b15f6f27e7d20ff9",
+        "widthPx": 236,
+        "heightPx": 338,
+        "hasAlpha": true
+      },
+      "provenance": {
+        "source": "psd-layer-export",
+        "sourcePsd": "17-415 Bottles/9. Clear (Uncapped)/7. GBCyl9MtlRollShnSl.psd (alpha-level defringed)",
+        "sourcePsdScenes": "4",
+        "sourceSha256": null,
+        "intakeDate": "2026-07-31T14:59:25.120Z",
+        "intakeBy": "claude-code"
+      },
+      "qa": {
+        "alphaCoverageRatio": 0.8874360645873032,
+        "edgeHaloDelta": 46.38140272379493,
+        "keySide": "left",
+        "backgroundBoneDelta": null,
+        "minEdgePaddingPx": 6,
+        "warnings": [
+          "resolution_upscaled: 324px for 21mm is 0.70× master density — usable, will soften at master scale",
+          "edge_halo_specular_tolerance: Δ46.4 accepted under mirror-finish tolerance (foreground σ 107)"
+        ],
+        "issues": [],
+        "passed": true
+      },
+      "status": "approved",
+      "notes": "Re-keyed 13-415→17-415 per Jordan 2026-07-31: source photography is the standard 9ml (17-415 neck, full color range); 13-415 = 5ml + tall 9ml lane. Bytes unchanged (sha frozen).",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-07-31T15:00:57.512Z"
+    }
+  ]
+}

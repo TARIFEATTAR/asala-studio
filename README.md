@@ -60,6 +60,25 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Best Bottles product image prompt compiler
+
+The JSON-driven Best Bottles prompt-generation system lives in:
+
+- `README.product-image-prompts.md`
+- `docs/product-image-prd.md`
+- `docs/qa-checklist.md`
+- `config/product_families.json`
+- `config/material_modules.json`
+- `config/closure_modules.json`
+- `config/frame_classes.json`
+- `config/negative_rules.json`
+- `schema/sku.schema.json`
+- `prompts/master_pdp_prompt.md`
+- `examples/sample_skus.json`
+- `scripts/generate-prompts.ts`
+
+It generates SKU-specific JSONL prompt records only. It does not generate images, upload references, mutate Supabase, or publish to Shopify.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/9538b836-3686-456d-baa2-51b9bfd827f0) and click on Share -> Publish.
@@ -71,4 +90,3 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-

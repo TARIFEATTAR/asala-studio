@@ -5,9 +5,9 @@
  * that mimic darkroom photography processes.
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { madison } from "@/lib/madisonToast";
 import { v4 as uuidv4 } from "uuid";
 import { Bookmark, Sparkles } from "lucide-react";
@@ -15,12 +15,42 @@ import { Button } from "@/components/ui/button";
 import { LibrarianTrigger } from "@/components/librarian";
 import { SavePromptDialog } from "@/components/prompt-library/SavePromptDialog";
 import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
+import { useGridPipelineFeatureFlag } from "@/hooks/useGridPipelineFeatureFlag";
 import {
   BACKGROUND_SCENE_TAG,
   LIBRARY_ROLE_PRODUCT,
   LIBRARY_ROLE_BACKGROUND_SCENE,
   LIBRARY_ROLE_STYLE_REFERENCE,
 } from "@/lib/imageLibraryTags";
+import {
+  BEST_BOTTLES_DARKROOM_UNASSIGNED_TAGS,
+} from "@/lib/bestBottlesDarkroomAssetWorkflow";
+import { readPreserveCanvasGenerationMetadata } from "@/lib/imageCanvasMetadata";
+import { prepareImageReferenceForGeneration } from "@/lib/generationReferenceImages";
+import {
+  buildDarkroomSchematicPrompt,
+  type DarkroomSchematicPromptMode,
+} from "@/lib/darkroomSchematicPrompts";
+import {
+  BEST_BOTTLES_STONE_HERO_PRESETS,
+  buildBestBottlesStoneHeroPrompt,
+  type BestBottlesStoneHeroArrangement,
+} from "@/lib/darkroomHeroPrompts";
+import {
+  resolveDarkroomGenerationCanvas,
+  type DarkroomGenerationCanvasMode,
+} from "@/lib/darkroomGenerationCanvas";
+import {
+  getSupabaseFunctionErrorMessage,
+  resolveEdgeSafeImageSettings,
+} from "@/lib/imageGenerationEdgeSafety";
+import {
+  buildDarkroomProductContext,
+  loadBestBottlesMeasurementOverrides,
+  summarizeDarkroomProductContext,
+  type DarkroomImageStatus,
+} from "@/lib/darkroomProductContext";
+import { resolveDarkroomProductReferenceImage } from "@/lib/darkroomProductReference";
 
 /** Prepended in background-plate mode so models do not invent products on the set. */
 const BACKGROUND_PLATE_PROMPT_PREFIX =
@@ -68,6 +98,13 @@ import "@/styles/darkroom.css";
 // Constants
 const MAX_IMAGES_PER_SESSION = 10;
 
+/** Human-readable toast copy per resolved Product Reference Image source. */
+const REFERENCE_SOURCE_TOAST: Record<"product-hub" | "pipeline-reference" | "best-bottles-catalog", string> = {
+  "product-hub": "Loaded from the Product Hub / DAM hero image.",
+  "pipeline-reference": "Loaded the clean pipeline reference for this SKU.",
+  "best-bottles-catalog": "Loaded the Best Bottles catalog photo.",
+};
+
 // Types
 interface UploadedImage {
   url: string;
@@ -83,6 +120,8 @@ interface GeneratedImage {
   isSaved: boolean;
   isHero?: boolean;
 }
+
+type DarkRoomGenerationMode = "standard" | "missing-variant-asset" | "finish-correct-revision";
 
 interface HistoryItem {
   id: string;
@@ -157,6 +196,7 @@ export default function DarkRoom() {
   const location = useLocation();
   const { user } = useAuth();
   const { orgId, loading: orgLoading } = useCurrentOrganizationId();
+  const { enabled: isBestBottlesOrg } = useGridPipelineFeatureFlag();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
 
@@ -173,9 +213,18 @@ export default function DarkRoom() {
   // Inputs
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productImage, setProductImage] = useState<UploadedImage | null>(null);
+  /** Where the current Product Reference Image came from (for the context card). */
+  const [productImageSource, setProductImageSource] = useState<DarkroomImageStatus | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<UploadedImage | null>(null);
   const [styleReference, setStyleReference] = useState<UploadedImage | null>(null);
-  const [proSettings, setProSettings] = useState<ProModeSettings>({});
+  const [navigationLibraryTags, setNavigationLibraryTags] = useState<string[]>([]);
+  const [navigationGenerationMode, setNavigationGenerationMode] = useState<DarkRoomGenerationMode>("standard");
+  const [bestBottlesHeroStoneIndex, setBestBottlesHeroStoneIndex] = useState(0);
+  const [generationCanvasMode, setGenerationCanvasMode] =
+    useState<DarkroomGenerationCanvasMode>("preserve-source");
+  const [proSettings, setProSettings] = useState<ProModeSettings>({
+    aiProvider: DEFAULT_IMAGE_AI_PROVIDER,
+  });
 
   // Multi-product slots for compositing
   const [productSlots, setProductSlots] = useState<{ id: string; imageUrl: string | null; name?: string }[]>([
@@ -285,6 +334,87 @@ export default function DarkRoom() {
     [backgroundImage, productImage, styleReference]
   );
 
+  // Best Bottles measurement overrides (static asset) — used to hydrate the
+  // selected product's generation-readiness dimensions before sending context.
+  const { data: measurementOverrides = [] } = useQuery({
+    queryKey: ["best-bottles-measurement-overrides"],
+    queryFn: loadBestBottlesMeasurementOverrides,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Enriched productContext payload sent to generate-madison-image. Carries the
+  // full Product Hub context plus any Best Bottles measurement/identity fields.
+  const enrichedProductContext = useMemo(
+    () => (selectedProduct ? buildDarkroomProductContext(selectedProduct, measurementOverrides) : null),
+    [selectedProduct, measurementOverrides],
+  );
+
+  // Compact summary for the Product Context card in the left rail.
+  const productContextSummary = useMemo(
+    () =>
+      selectedProduct
+        ? summarizeDarkroomProductContext(
+            selectedProduct,
+            enrichedProductContext,
+            productImage,
+            productImageSource,
+          )
+        : null,
+    [selectedProduct, enrichedProductContext, productImage, productImageSource],
+  );
+
+  // Manual product-image changes (upload / library pick / remove) flow through
+  // here so the context card can label the reference source correctly.
+  const handleProductImageUpload = useCallback((image: UploadedImage | null) => {
+    setProductImage(image);
+    setProductImageSource(image ? "manual" : null);
+  }, []);
+
+  // Refs let the async auto-loader read the latest state without re-subscribing.
+  const selectedProductRef = useRef<Product | null>(null);
+  const productImageRef = useRef<UploadedImage | null>(null);
+  const autoLoadAttemptRef = useRef<string | null>(null);
+  useEffect(() => {
+    selectedProductRef.current = selectedProduct;
+  }, [selectedProduct]);
+  useEffect(() => {
+    productImageRef.current = productImage;
+  }, [productImage]);
+
+  // Auto-load the Product Reference Image when a product is selected and the
+  // operator hasn't already loaded one. Resolves Product Hub hero → pipeline
+  // clean reference → Best Bottles catalog photo. Existing images (manual,
+  // library, navigation) are preserved — never silently replaced. Retries once
+  // when the org id resolves (the pipeline lookup needs it).
+  useEffect(() => {
+    const product = selectedProduct;
+    if (!product) {
+      autoLoadAttemptRef.current = null;
+      return;
+    }
+    if (productImageRef.current) return;
+
+    const attemptKey = `${product.id}:${orgId ?? "no-org"}`;
+    if (autoLoadAttemptRef.current === attemptKey) return;
+    autoLoadAttemptRef.current = attemptKey;
+
+    let cancelled = false;
+    void (async () => {
+      const resolved = await resolveDarkroomProductReferenceImage(product, orgId);
+      if (cancelled || !resolved) return;
+      // Bail if the selection changed or an image landed while we resolved.
+      if (selectedProductRef.current?.id !== product.id) return;
+      if (productImageRef.current) return;
+      setProductImage({ url: resolved.url, name: resolved.name });
+      setProductImageSource(resolved.source);
+      madison.success("Product reference loaded", REFERENCE_SOURCE_TOAST[resolved.source]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedProduct, orgId]);
+
   const madisonSessionContext = useMemo(
     () => ({
       sessionId,
@@ -328,11 +458,40 @@ export default function DarkRoom() {
     // Check for initial data from navigation (product or background image)
     const state = location.state as {
       product?: Product;
+      productImage?: { url: string; name: string };
       backgroundImage?: { url: string; name: string };
+      extraLibraryTags?: string[];
+      generationMode?: DarkRoomGenerationMode;
     } | undefined;
 
     if (state?.product) {
       setSelectedProduct(state.product);
+    }
+
+    if (state?.productImage) {
+      // Explicit reference passed via navigation — treat it as operator-provided
+      // so the auto-loader below leaves it untouched.
+      setProductImage({
+        url: state.productImage.url,
+        name: state.productImage.name,
+      });
+      setProductImageSource("manual");
+      madison.success(
+        "Product reference loaded",
+        state.generationMode === "missing-variant-asset"
+          ? "Target-SKU-first mode loaded. The reference is only for layout and bottle geometry."
+          : "Use the prompt to revise the finish while preserving composition.",
+      );
+    }
+    // When no explicit reference image is passed, the auto-loader effect resolves
+    // the product's reference (Product Hub hero → pipeline → Best Bottles catalog).
+
+    if (state?.extraLibraryTags?.length) {
+      setNavigationLibraryTags(state.extraLibraryTags);
+    }
+
+    if (state?.generationMode) {
+      setNavigationGenerationMode(state.generationMode);
     }
 
     // If coming from Light Table with a background image, set it
@@ -411,6 +570,31 @@ export default function DarkRoom() {
       extraLibraryTags = [LIBRARY_ROLE_PRODUCT];
     }
 
+    if (navigationLibraryTags.length > 0) {
+      extraLibraryTags = Array.from(new Set([...(extraLibraryTags ?? []), ...navigationLibraryTags]));
+    }
+
+    const hasCommercialSkuTag = (extraLibraryTags ?? []).some((tag) =>
+      /^(?:sku|websiteSku|website-sku|graceSku|grace-sku|shopifySku|shopify-sku):/i.test(tag),
+    );
+    const hasDarkroomWorkflowTag = (extraLibraryTags ?? []).some((tag) =>
+      /^(?:source:darkroom-generated|asset-status:|identity-status:|push-blocked:)/i.test(tag),
+    );
+    if (
+      isBestBottlesOrg &&
+      goalType === "product_photography" &&
+      !hasCommercialSkuTag &&
+      !hasDarkroomWorkflowTag
+    ) {
+      extraLibraryTags = Array.from(
+        new Set([
+          ...(extraLibraryTags ?? []),
+          "brand:best-bottles",
+          ...BEST_BOTTLES_DARKROOM_UNASSIGNED_TAGS,
+        ]),
+      );
+    }
+
     // Trigger camera feedback (sound + flash) immediately on capture
     triggerCameraFeedback();
 
@@ -418,36 +602,56 @@ export default function DarkRoom() {
 
     try {
       const referenceImages: Array<{ url: string; description: string; label: string }> = [];
+      let preparedReferenceCount = 0;
+      const prepareReferenceUrl = async (url: string, label: string) => {
+        const prepared = await prepareImageReferenceForGeneration(url);
+        if (prepared.wasPrepared) {
+          preparedReferenceCount += 1;
+          console.info("[DarkRoom] Prepared large reference image for edge generation", {
+            label,
+            originalBytes: prepared.originalBytes,
+            preparedBytes: prepared.preparedBytes,
+            dimensions: prepared.width && prepared.height
+              ? `${prepared.width}×${prepared.height}`
+              : undefined,
+            mimeType: prepared.mimeType,
+          });
+        }
+        return prepared.url;
+      };
 
       if (!backgroundPlateMode) {
         if (productImage) {
           referenceImages.push({
-            url: productImage.url,
+            url: await prepareReferenceUrl(productImage.url, "Product"),
             label: "Product",
-            description: "User-uploaded product for enhancement",
+            description:
+              navigationGenerationMode === "missing-variant-asset"
+                ? "Layout and bottle-geometry reference only. Ignore its finish, SKU, and visual identity."
+                : "User-uploaded product for enhancement",
           });
         }
 
         if (backgroundImage) {
           referenceImages.push({
-            url: backgroundImage.url,
+            url: await prepareReferenceUrl(backgroundImage.url, "Background"),
             label: "Background",
             description: "Background scene for composition",
           });
         }
 
-        activeProductSlots.forEach((slot, index) => {
+        for (const [index, slot] of activeProductSlots.entries()) {
           referenceImages.push({
-            url: slot.imageUrl!,
+            url: await prepareReferenceUrl(slot.imageUrl!, `Product ${index + 1}`),
             label: `Product ${index + 1}`,
             description: `Additional product ${index + 1} to composite into the scene`,
           });
-        });
+        }
       }
 
       if (styleReference) {
         referenceImages.push({
-          url: styleReference.url,
+          url: await prepareReferenceUrl(styleReference.url, "Style Reference"),
           label: "Style Reference",
           description: backgroundPlateMode
             ? "Style and lighting reference for the empty scene"
@@ -461,6 +665,29 @@ export default function DarkRoom() {
         lighting: proSettings.lighting,
         environment: proSettings.environment,
       } : undefined;
+      const preserveCanvasSourceUrl = !backgroundPlateMode
+        ? productImage?.url || activeProductSlots[0]?.imageUrl || backgroundImage?.url || null
+        : null;
+      const preserveCanvasMetadata = await readPreserveCanvasGenerationMetadata(preserveCanvasSourceUrl);
+      const resolvedGenerationCanvas = resolveDarkroomGenerationCanvas({
+        mode: generationCanvasMode,
+        sourceAspectRatio: preserveCanvasMetadata.aspectRatio,
+        sourceImageConstraints: preserveCanvasMetadata.imageConstraints,
+        selectedAspectRatio: proSettings.aspectRatio,
+        fallbackAspectRatio: "1:1",
+        backgroundPlateMode,
+      });
+      const generationAspectRatio = resolvedGenerationCanvas.aspectRatio;
+      const generationImageConstraints = resolvedGenerationCanvas.imageConstraints;
+      const requestedAiProvider = proSettings.aiProvider || DEFAULT_IMAGE_AI_PROVIDER;
+      const edgeSafeSettings = resolveEdgeSafeImageSettings({
+        aiProvider: requestedAiProvider,
+        resolution: proSettings.resolution || "standard",
+        outputFormat: "png",
+        hasReferenceImages: referenceImages.length > 0,
+        surface: "darkroom",
+        goalType,
+      });
 
       console.log("🌑 Dark Room Generate:", {
         prompt: effectivePrompt,
@@ -470,13 +697,21 @@ export default function DarkRoom() {
         product: selectedProduct?.name,
         organizationId: orgId,
         userId: user.id,
-        aiProvider: proSettings.aiProvider || DEFAULT_IMAGE_AI_PROVIDER,
-        resolution: proSettings.resolution || "standard",
+        aiProvider: requestedAiProvider,
+        resolution: edgeSafeSettings.resolution,
+        outputFormat: edgeSafeSettings.outputFormat,
+        edgeSafeAdjusted: edgeSafeSettings.adjusted ? edgeSafeSettings.reasons : undefined,
         visualSquad: proSettings.visualSquad || "auto",
         backgroundPreset: selectedBackgroundPreset,
         compositionPreset: selectedCompositionPreset,
         backgroundPlateMode,
+        navigationGenerationMode,
         goalType,
+        preparedReferenceCount,
+        canvasMode: resolvedGenerationCanvas.modeApplied,
+        sourceCanvas: preserveCanvasMetadata.canvas
+          ? `${preserveCanvasMetadata.canvas.width}×${preserveCanvasMetadata.canvas.height}`
+          : undefined,
       });
       console.log("🌑 Full payload being sent:", JSON.stringify({
         prompt: effectivePrompt,
@@ -484,9 +719,11 @@ export default function DarkRoom() {
         organizationId: orgId,
         sessionId,
         goalType,
-        aspectRatio: proSettings.aspectRatio || "1:1",
-        aiProvider: proSettings.aiProvider || DEFAULT_IMAGE_AI_PROVIDER,
-        resolution: proSettings.resolution || "standard",
+        aspectRatio: generationAspectRatio,
+        aiProvider: requestedAiProvider,
+        resolution: edgeSafeSettings.resolution,
+        outputFormat: edgeSafeSettings.outputFormat,
+        edgeSafeAdjusted: edgeSafeSettings.adjusted ? edgeSafeSettings.reasons : undefined,
         visualSquad: proSettings.visualSquad,
         backgroundPresetId: selectedBackgroundPreset,
         backgroundPrompt: appliedBackgroundPrompt,
@@ -503,27 +740,24 @@ export default function DarkRoom() {
           organizationId: orgId,
           sessionId,
           goalType,
-          aspectRatio: proSettings.aspectRatio || "1:1",
-          outputFormat: "png",
+          aspectRatio: generationAspectRatio,
+          outputFormat: edgeSafeSettings.outputFormat,
           referenceImages,
+          imageConstraints: generationImageConstraints,
           proModeControls: proModePayload,
           product_id: backgroundPlateMode ? undefined : selectedProduct?.id,
-          aiProvider: proSettings.aiProvider || DEFAULT_IMAGE_AI_PROVIDER,
-          resolution: proSettings.resolution || "standard",
+          aiProvider: requestedAiProvider,
+          resolution: edgeSafeSettings.resolution,
           visualSquad: proSettings.visualSquad,
           backgroundPresetId: selectedBackgroundPreset,
           backgroundPrompt: appliedBackgroundPrompt || undefined,
           compositionPresetId: backgroundPlateMode ? undefined : selectedCompositionPreset,
           compositionPrompt: backgroundPlateMode ? undefined : appliedCompositionPrompt || undefined,
           extraLibraryTags,
+          generationMode: navigationGenerationMode,
           productContext:
             !backgroundPlateMode && selectedProduct
-              ? {
-                  name: selectedProduct.name,
-                  collection: selectedProduct.collection || "Unknown",
-                  scent_family: selectedProduct.scentFamily || "Unspecified",
-                  category: selectedProduct.category,
-                }
+              ? enrichedProductContext ?? undefined
               : undefined,
         },
       });
@@ -531,16 +765,7 @@ export default function DarkRoom() {
       if (error) {
         console.error("❌ Generation error:", error);
         console.error("❌ Error details:", JSON.stringify(error, null, 2));
-        let errorMsg = error.message || error.toString();
-        // Extract actual error from edge function response body (FunctionsHttpError)
-        try {
-          if (typeof (error as any)?.context?.json === "function") {
-            const body = await (error as any).context.json();
-            if (body?.error) errorMsg = body.error;
-          }
-        } catch (_) {
-          // Fall back to error.message
-        }
+        const errorMsg = await getSupabaseFunctionErrorMessage(error);
 
         if (errorMsg.includes("Rate limit") || (error as any).status === 429) {
           madison.error("Rate limit reached", "Please wait a moment before generating another image.");
@@ -616,6 +841,7 @@ export default function DarkRoom() {
     proSettings,
     proSettingsCount,
     selectedProduct,
+    enrichedProductContext,
     orgId,
     sessionId,
     queryClient,
@@ -624,7 +850,28 @@ export default function DarkRoom() {
     selectedBackgroundPreset,
     selectedCompositionPreset,
     styleReferenceLibraryOutput,
+    navigationLibraryTags,
+    navigationGenerationMode,
+    isBestBottlesOrg,
+    generationCanvasMode,
   ]);
+
+  // Explicit operator action to load (or replace with) the selected product's
+  // reference image. Used by the Product Context card so the operator can pull
+  // the canonical reference without it ever being swapped in silently.
+  const handleLoadProductReference = useCallback(async () => {
+    const product = selectedProduct;
+    if (!product) return;
+    const resolved = await resolveDarkroomProductReferenceImage(product, orgId);
+    if (!resolved) {
+      madison.info("No reference image available for this product");
+      return;
+    }
+    if (selectedProductRef.current?.id !== product.id) return;
+    setProductImage({ url: resolved.url, name: resolved.name });
+    setProductImageSource(resolved.source);
+    madison.success("Product reference image loaded", REFERENCE_SOURCE_TOAST[resolved.source]);
+  }, [selectedProduct, orgId]);
 
   const handleSaveImage = useCallback(async (id: string) => {
     setIsSaving(true);
@@ -687,6 +934,54 @@ export default function DarkRoom() {
     setPrompt((prev) => (prev ? `${prev}, ${preset.toLowerCase()}` : preset));
     madison.success(`Applied: ${preset}`);
   }, []);
+
+  const handleUseSchematicPrompt = useCallback((mode: DarkroomSchematicPromptMode) => {
+    if (!productImage) {
+      madison.info("Load a product reference image first");
+      return;
+    }
+
+    setGenerationCanvasMode("preserve-source");
+    setPrompt(buildDarkroomSchematicPrompt(mode));
+    madison.success(
+      mode === "exploded" ? "Exploded schematic prompt loaded" : "Whole schematic prompt loaded",
+    );
+  }, [productImage]);
+
+  const handleUseBestBottlesHeroPrompt = useCallback((arrangement: BestBottlesStoneHeroArrangement) => {
+    if (!productImage) {
+      madison.info("Load a product reference image first");
+      return;
+    }
+
+    const selectedHeroAspectRatio =
+      proSettings.aspectRatio && proSettings.aspectRatio !== "1:1"
+        ? proSettings.aspectRatio
+        : "16:9";
+    const stonePreset =
+      BEST_BOTTLES_STONE_HERO_PRESETS[
+        bestBottlesHeroStoneIndex % BEST_BOTTLES_STONE_HERO_PRESETS.length
+      ];
+
+    setGenerationCanvasMode("selected-aspect");
+    if (proSettings.aspectRatio !== selectedHeroAspectRatio) {
+      setProSettings((prev) => ({
+        ...prev,
+        aspectRatio: selectedHeroAspectRatio,
+      }));
+    }
+    setPrompt(buildBestBottlesStoneHeroPrompt({
+      stoneId: stonePreset.id,
+      arrangement,
+    }));
+    setBestBottlesHeroStoneIndex(
+      (bestBottlesHeroStoneIndex + 1) % BEST_BOTTLES_STONE_HERO_PRESETS.length,
+    );
+    madison.success(
+      "Best Bottles hero prompt loaded",
+      `${stonePreset.label} · ${arrangement.replace("-", " ")} · ${selectedHeroAspectRatio}`,
+    );
+  }, [bestBottlesHeroStoneIndex, productImage, proSettings.aspectRatio]);
 
   const handleRestoreFromHistory = useCallback((item: HistoryItem) => {
     setPrompt(item.prompt);
@@ -760,7 +1055,7 @@ export default function DarkRoom() {
           selectedProduct={selectedProduct}
           onProductSelect={setSelectedProduct}
           productImage={productImage}
-          onProductImageUpload={setProductImage}
+          onProductImageUpload={handleProductImageUpload}
           backgroundImage={backgroundImage}
           onBackgroundImageUpload={setBackgroundImage}
           styleReference={styleReference}
@@ -855,8 +1150,10 @@ export default function DarkRoom() {
         <LeftRail
           selectedProduct={selectedProduct}
           onProductSelect={setSelectedProduct}
+          productContextSummary={productContextSummary}
+          onLoadReferenceImage={handleLoadProductReference}
           productImage={productImage}
-          onProductImageUpload={setProductImage}
+          onProductImageUpload={handleProductImageUpload}
           backgroundImage={backgroundImage}
           onBackgroundImageUpload={setBackgroundImage}
           styleReference={styleReference}
@@ -866,6 +1163,8 @@ export default function DarkRoom() {
           isGenerating={isGenerating}
           canGenerate={canGenerate}
           onGenerate={handleGenerate}
+          onUseSchematicPrompt={handleUseSchematicPrompt}
+          onUseBestBottlesHeroPrompt={handleUseBestBottlesHeroPrompt}
           sessionCount={images.length}
           maxImages={MAX_IMAGES_PER_SESSION}
           backgroundPlateMode={backgroundPlateMode}

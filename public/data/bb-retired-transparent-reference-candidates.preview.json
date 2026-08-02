@@ -1,0 +1,876 @@
+{
+  "generatedAt": "2026-06-22T09:07:56.846Z",
+  "mode": "preview-readonly",
+  "orgId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "totalGeneratedImageRows": 3161,
+  "candidateCount": 0,
+  "skippedOutputCount": 12,
+  "rejectedPreliminaryCount": 18,
+  "byReason": {},
+  "candidates": [],
+  "skippedOutput": [
+    {
+      "id": "f9634b09-6877-4923-9c73-276c996c756e",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782105286339_vwk9dm.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-CYL-CLR-5ML-SPR-MBLK",
+        "websiteSku:GBCyl5SpryBlkMatt",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:132169a9",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T05:14:44.655318+00:00"
+    },
+    {
+      "id": "8b868cd8-df31-46b4-92cd-64ccd335b7f2",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782104123042-cbde1a5a-994a-4cbd-9036-c92a9a537543.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-WHT",
+        "websiteSku:GBSpry3mlClWht",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:6a687d00",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T04:55:23.791893+00:00"
+    },
+    {
+      "id": "581d589b-f798-4820-a74e-c1db44d60539",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782103260395-9599f8ed-a072-460b-b74c-04856629ec54.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-WHT",
+        "websiteSku:GBSpry3mlClWht",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:d2155555",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T04:41:01.225857+00:00"
+    },
+    {
+      "id": "4194788d-27a7-4ea1-b52b-5f76bd5313c6",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782102836611_uwp42a.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:655eca95",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T04:33:55.156383+00:00"
+    },
+    {
+      "id": "188fb124-2816-4ef9-bad9-796fbfe4cd63",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782102100694-e0a8ab33-a14d-42ff-bfc2-1f6437d4572c.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:497658b7",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T04:21:41.660905+00:00"
+    },
+    {
+      "id": "8bde4f5f-0f1a-4e00-8372-95b49598d4af",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782101718544_gpdzhb.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:751f4801",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T04:15:16.95018+00:00"
+    },
+    {
+      "id": "0f73b940-ed7a-4fee-b1f6-a82c451d3415",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782099064061_rpkzze.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:bc55593b",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T03:31:02.384751+00:00"
+    },
+    {
+      "id": "3aa06fed-e033-4152-bb48-ba04af35171f",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782098703574_g5pmj9.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:de9219cd",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T03:25:01.922558+00:00"
+    },
+    {
+      "id": "72b6b17a-0405-411c-bb85-1487a22361ee",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782097974379-ee281be4-9226-4e47-8d3c-3a98056c1005.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:31323dab",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T03:12:55.213697+00:00"
+    },
+    {
+      "id": "aaeef9c6-8cda-4212-a24d-ceff875315f3",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782097612609_9ee38j.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:1a8cf55e",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T03:06:50.839187+00:00"
+    },
+    {
+      "id": "042b41cf-9d72-4bc1-9a2e-3a7a964c763e",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782093965294_uihagz.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:cc85c17c",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T02:06:02.932498+00:00"
+    },
+    {
+      "id": "44700e3b-393f-44dd-b33e-408593956d22",
+      "url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/d4cd4ae9-a9a8-4ea6-ab6f-fd1e19078e5e/paper-doll/master_rigged_1782090298652_vqxp3p.png",
+      "tags": [
+        "sku-preset",
+        "preset:grid-card-2000x2200",
+        "canvas:2080x2288",
+        "brand:best-bottles",
+        "studio-master",
+        "family:cylinder",
+        "sku:GB-SPR-CLR-3ML-BLK",
+        "websiteSku:GBSpry3mlClBlk",
+        "reference-lineage:two-source",
+        "truth-ref:flattened-png",
+        "mask-ref:transparent-png",
+        "mask-qc:passed",
+        "model:openai-image-2",
+        "prompt:best-bottles-reference-locked-v5.2",
+        "rig:uniform-fit-box-2080x2288-v1",
+        "identity:24984405",
+        "qa:pending"
+      ],
+      "reasons": [
+        "tag:mask-ref:transparent-png"
+      ],
+      "created_at": "2026-06-22T01:04:56.999538+00:00"
+    }
+  ],
+  "rejected": [
+    {
+      "id": "1bfc4b3e-f8ad-45ac-a9c3-af3b96f16e2c",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782111681409-30840bfa-131b-44e0-a583-15779a85c632.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1782111681409-30840bfa-131b-44e0-a583-15779a85c632.png",
+      "created_at": "2026-06-22T07:01:21.941765+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1000x1300",
+        "canvas:1000x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "component-kind:body",
+        "body-variant:with-tube",
+        "family:cylinder",
+        "slot:body-Cylinder-3-Clear-withtube"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": true,
+        "width": 1024,
+        "height": 1331,
+        "transparentRatio": 0,
+        "nonOpaqueRatio": 0
+      }
+    },
+    {
+      "id": "955c18d4-c01a-42cb-83a4-b1a5153c66d8",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1779318001874-91e42550-c197-4f3f-9a87-36c2e29a26ca.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1779318001874-91e42550-c197-4f3f-9a87-36c2e29a26ca.png",
+      "created_at": "2026-05-20T23:00:02.817337+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "component-kind:fitment",
+        "applicator:perfume-spray-pump",
+        "cap-color:matte-silver",
+        "family:empire",
+        "slot:fitment-Perfume Spray Pump-Matte Silver",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": true,
+        "width": 1182,
+        "height": 1024,
+        "transparentRatio": 0,
+        "nonOpaqueRatio": 0
+      }
+    },
+    {
+      "id": "bdaf29b3-cc68-4457-ad4d-8a5125dd578e",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777164615968-e4e58198-eacc-4cda-ad0c-235ac0658226.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777164615968-e4e58198-eacc-4cda-ad0c-235ac0658226.png",
+      "created_at": "2026-04-26T00:50:16.363605+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:black",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Black",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "a4a57a94-73b1-4ca3-8d1c-863250f61efb",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096667120-16baccdf-4a33-4771-8194-79ae304f829f.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096667120-16baccdf-4a33-4771-8194-79ae304f829f.png",
+      "created_at": "2026-04-25T05:57:48.02531+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:black",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Black",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "89e9f661-2d1b-4a62-88ae-944b9aa0b66a",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096647750-2b1953fb-1a4b-4601-9cb2-57ac46e112c2.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096647750-2b1953fb-1a4b-4601-9cb2-57ac46e112c2.png",
+      "created_at": "2026-04-25T05:57:28.355253+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:gold",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Gold",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "2f3e2fc6-1a5f-46c6-a74b-06d2dc96a9d4",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096614378-2a014372-f698-460c-a262-c2cc3733d030.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777096614378-2a014372-f698-460c-a262-c2cc3733d030.png",
+      "created_at": "2026-04-25T05:56:54.898138+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:black",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Black",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "c4715752-63d1-403c-995d-ca5482472898",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777082847164-861b907c-3c74-45ee-a4b2-ef8a30e6c94c.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777082847164-861b907c-3c74-45ee-a4b2-ef8a30e6c94c.png",
+      "created_at": "2026-04-25T02:07:27.874934+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:dropper",
+        "cap-color:copper",
+        "family:empire",
+        "slot:fitment-Dropper-Copper",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "67407ac5-6f33-4e94-99ab-99d1f3279967",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777082627456-b4508e70-33a1-415f-adbe-e383bc3df614.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777082627456-b4508e70-33a1-415f-adbe-e383bc3df614.png",
+      "created_at": "2026-04-25T02:03:47.793662+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:black",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Black",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "75de9a68-e624-48cb-86bd-984a9477f73f",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777081208290-a1dfbd4d-fbef-4e11-aac3-2347bc580774.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777081208290-a1dfbd4d-fbef-4e11-aac3-2347bc580774.png",
+      "created_at": "2026-04-25T01:40:09.018031+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:fitment",
+        "applicator:vintage-bulb-sprayer",
+        "cap-color:black",
+        "family:empire",
+        "slot:fitment-Vintage Bulb Sprayer-Black",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "dec141c0-107d-44dc-80d3-85e608f91f9c",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777081080041-58bdbd07-8552-43c7-b355-f2779390a26e.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777081080041-58bdbd07-8552-43c7-b355-f2779390a26e.png",
+      "created_at": "2026-04-25T01:38:00.648877+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "948a8d35-b1a8-4543-9a41-8ee9bb6a0d69",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777080346640-24b06146-0f51-464c-b838-8931794c63d1.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777080346640-24b06146-0f51-464c-b838-8931794c63d1.png",
+      "created_at": "2026-04-25T01:25:47.277109+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "889418ac-9f28-411d-be98-94af208f476c",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777080008807-0c0641e2-de0f-4c25-a505-fa24e29d8a60.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777080008807-0c0641e2-de0f-4c25-a505-fa24e29d8a60.png",
+      "created_at": "2026-04-25T01:20:09.135218+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "0d448d05-a50f-4e50-a40a-c3e90995988a",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777079625278-64cf8aee-8c2b-46c9-bdf6-f91c77162527.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777079625278-64cf8aee-8c2b-46c9-bdf6-f91c77162527.png",
+      "created_at": "2026-04-25T01:13:46.113578+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "e98e3a86-de7a-4950-b203-1ef1878c6b7a",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777079040796-91ff7b05-a2e6-4fd9-bfd6-1d2660d05430.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777079040796-91ff7b05-a2e6-4fd9-bfd6-1d2660d05430.png",
+      "created_at": "2026-04-25T01:04:01.254978+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "cb5eb712-e9ab-45a5-b967-b3a4f32c07d8",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777078310704-47e32bba-a8fb-41a0-83a8-2e6e97a068af.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777078310704-47e32bba-a8fb-41a0-83a8-2e6e97a068af.png",
+      "created_at": "2026-04-25T00:51:51.362873+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "e4b3625f-4264-4aee-ab97-cf533d849dd9",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077382804-c62aaaf4-1895-473e-85cd-3dfdbdc81d8d.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077382804-c62aaaf4-1895-473e-85cd-3dfdbdc81d8d.png",
+      "created_at": "2026-04-25T00:36:23.431311+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "f2de48ae-fc13-48ba-ad06-3ccfb54dcdba",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077294782-606516eb-46c0-4c86-93c5-3f96eb560d96.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077294782-606516eb-46c0-4c86-93c5-3f96eb560d96.png",
+      "created_at": "2026-04-25T00:34:55.329964+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    {
+      "id": "b266e644-3b31-469a-97fd-cccf20488a69",
+      "image_url": "https://likkskifwsrvszxdvufw.supabase.co/storage/v1/object/public/generated-images/4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077242622-77e54f00-0107-48a0-8e99-e28eb0e0ea58.png",
+      "objectPath": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/1777077242622-77e54f00-0107-48a0-8e99-e28eb0e0ea58.png",
+      "created_at": "2026-04-25T00:34:03.440304+00:00",
+      "session_name": null,
+      "goal_type": "product_photography",
+      "library_tags": [
+        "sku-preset",
+        "preset:paper-doll-component-1500x1300",
+        "canvas:1500x1300",
+        "brand:best-bottles",
+        "paper-doll-component",
+        "paper-doll-enhanced",
+        "component-kind:body",
+        "family:empire",
+        "slot:body-Empire-50-Clear",
+        "reference-lineage:legacy"
+      ],
+      "reasons": [
+        "tag:paper-doll-component"
+      ],
+      "alpha": {
+        "ok": true,
+        "hasAlpha": false,
+        "width": 1024,
+        "height": 1024
+      }
+    }
+  ]
+}

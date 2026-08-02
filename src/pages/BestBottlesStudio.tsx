@@ -12,15 +12,11 @@
  * LEDIndicator / LCDDisplay / FirmwarePresetButton — so the Studio feels
  * like another mode of the same instrument, not a foreign surface.
  *
- * Scope of this commit (shell only):
- * - Loads productGroup + variants from Convex
- * - Renders header, sidebar (SKU list + progress), tab switcher, library rail
- * - Three tabs exist but content is skeleton: Masters / Components / Compose
- *
- * Master creation, component generation, and compositor are follow-up commits.
+ * Release-capable families mount the versioned Paper-Doll Release Workbench in
+ * the existing shell. Other families retain the legacy Components/Compose path.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Beaker, Layers, Grid3x3, ImageIcon } from "lucide-react";
@@ -33,6 +29,12 @@ import {
 } from "@/components/darkroom/LEDIndicator";
 import { MastersTabPanel } from "@/components/darkroom/MastersTabPanel";
 import { ComponentsTabPanel } from "@/components/darkroom/ComponentsTabPanel";
+import { AssemblyView } from "@/components/paper-doll/AssemblyView";
+import { EvidenceView } from "@/components/paper-doll/EvidenceView";
+import { LineupView } from "@/components/paper-doll/LineupView";
+import { MatrixView } from "@/components/paper-doll/MatrixView";
+import { PublishPreviewView } from "@/components/paper-doll/PublishPreviewView";
+import { ReleaseWorkbench } from "@/components/paper-doll/ReleaseWorkbench";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -41,10 +43,35 @@ import {
   type ApplicatorBucket,
   type Product,
 } from "@/integrations/convex/bestBottles";
+import { getBestBottlesCatalogPresetIdForProduct } from "@/config/imagePresets";
 import {
+  findPipelineSkuJobForProductIdentity,
   findPipelineGroupByConvexSlug,
+  listPipelineSkuJobs,
+  shouldRecordGeneratedImageForSkuJob,
+  updatePipelineSkuJob,
   updatePipelineGroupStatus,
 } from "@/lib/bestBottlesPipeline";
+import {
+  BEST_BOTTLES_RECONCILIATION_QUERY_KEY,
+  recordBestBottlesGeneratedImageForSkuJob,
+} from "@/lib/bestBottlesImageReconciliation";
+import { approveBestBottlesGeneratedMaster } from "@/lib/bestBottlesMasterApproval";
+import {
+  applyBestBottlesMeasurementOverrides,
+  type BestBottlesMeasurementOverridesPayload,
+} from "@/lib/bestBottlesMeasurementOverrides";
+import {
+  buildBestBottlesGenerationIdentity,
+  getBestBottlesGenerationIdentityIssue,
+} from "@/lib/bestBottlesGenerationIdentity";
+import {
+  workbenchReleaseAssetUrlsByPath,
+  workbenchReleaseManifest,
+  workbenchReleaseManifestSha256,
+  workbenchReleaseValidation,
+} from "@/generated/paperDoll/cyl9Release.generated";
+import { isCyl9ReleaseWorkbenchGroup } from "@/lib/paperDoll/workbenchModel";
 import "@/styles/darkroom.css";
 
 type StudioTab = "masters" | "components" | "compose";
@@ -67,8 +94,41 @@ const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
   },
 ];
 
+const RELEASE_TABS: Array<{ id: StudioTab; label: string; description: string }> = [
+  TABS[0],
+  {
+    id: "components",
+    label: "Release Workbench",
+    description: "Assembly · matrix · lineup · publish",
+  },
+];
+
 function applicatorCategoryKey(applicator: string): string {
   return applicator.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+function isCylinderFamilyName(family?: string | null): boolean {
+  const normalized = (family ?? "").trim().toLowerCase();
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
+function variantIdentityLabel(variant: Product): string {
+  const identity = buildBestBottlesGenerationIdentity(variant);
+  const issue = getBestBottlesGenerationIdentityIssue(identity);
+  if (issue) return "Needs cap identity";
+  if (identity.capColor) return `Cap: ${identity.capColor}`;
+  if (identity.websiteSku) return `Website: ${identity.websiteSku}`;
+  return "Unspecified cap";
+}
+
+async function loadMeasurementOverrides() {
+  const response = await fetch("/data/best-bottles-measurement-overrides.json");
+  if (response.status === 404) return [];
+  if (!response.ok) {
+    throw new Error(`Unable to load measurement overrides (${response.status})`);
+  }
+  const payload = (await response.json()) as BestBottlesMeasurementOverridesPayload;
+  return payload.overrides ?? [];
 }
 
 export default function BestBottlesStudio() {
@@ -98,21 +158,125 @@ export default function BestBottlesStudio() {
     enabled: Boolean(groupSlug),
   });
 
-  const applicatorBuckets: ApplicatorBucket[] = data?.applicatorBuckets ?? [];
+  const { data: measurementOverrides = [] } = useQuery({
+    queryKey: ["best-bottles-measurement-overrides"],
+    queryFn: loadMeasurementOverrides,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: persistedSkuJobs = [], isFetched: hasFetchedPersistedSkuJobs } = useQuery({
+    queryKey: ["best-bottles-studio-sku-job-references", currentOrganizationId, data?.group.family],
+    queryFn: () =>
+      listPipelineSkuJobs(currentOrganizationId!, {
+        family: data!.group.family,
+      }),
+    enabled: Boolean(currentOrganizationId && data?.group.family),
+    staleTime: 30 * 1000,
+  });
+
+  const persistedReferenceImagesBySku = useMemo(() => {
+    return Object.fromEntries(
+      persistedSkuJobs
+        .filter((job) => Boolean(job.best_reference_candidate_path))
+        .map((job) => [
+          job.grace_sku,
+          {
+            url: job.best_reference_candidate_path!,
+            name: job.expected_canonical_filename ?? job.grace_sku,
+            referenceSource: job.reference_source,
+            referenceSourcePath: job.reference_source_path,
+            referenceSourceUrl: job.reference_source_url,
+            referenceIssue: job.reference_issue,
+          },
+        ]),
+    );
+  }, [persistedSkuJobs]);
+
+  const hydratedData = useMemo(() => {
+    if (!data) return null;
+    const hydratedVariants = applyBestBottlesMeasurementOverrides(data.variants, measurementOverrides);
+    const hydratedAllFamilyProducts = applyBestBottlesMeasurementOverrides(
+      data.allFamilyProducts,
+      measurementOverrides,
+    );
+    return {
+      ...data,
+      variants: hydratedVariants,
+      allFamilyProducts: hydratedAllFamilyProducts,
+      applicatorBuckets: data.applicatorBuckets.map((bucket) => ({
+        ...bucket,
+        variants: applyBestBottlesMeasurementOverrides(bucket.variants, measurementOverrides),
+      })),
+    };
+  }, [data, measurementOverrides]);
+
+  const studioData = hydratedData ?? data;
+  const studioApplicatorBuckets: ApplicatorBucket[] = studioData?.applicatorBuckets ?? [];
+  const usesReleaseWorkbench = isCyl9ReleaseWorkbenchGroup(studioData?.group.slug ?? groupSlug);
+  const studioTabs = usesReleaseWorkbench ? RELEASE_TABS : TABS;
+  const isReleaseWorkbenchView = usesReleaseWorkbench && activeTab === "components";
+
+  useEffect(() => {
+    if (usesReleaseWorkbench && activeTab === "compose") setActiveTab("components");
+  }, [activeTab, usesReleaseWorkbench]);
+
+  useEffect(() => {
+    if (!studioData?.variants?.length) return;
+    const shouldWaitForPersistedRefs = Boolean(currentOrganizationId && studioData?.group.family);
+    if (shouldWaitForPersistedRefs && !hasFetchedPersistedSkuJobs) return;
+
+    const isPrimaryGroupVariant = (variant: (typeof studioData.variants)[number]) => {
+      if (variant.productGroupId && variant.productGroupId === studioData.group._id) return true;
+      if (variant.productGroupSlug && variant.productGroupSlug === studioData.group.slug) return true;
+      return false;
+    };
+    const primaryGroupVariants = studioData.variants.filter(isPrimaryGroupVariant);
+    const selectionPool = primaryGroupVariants.length > 0 ? primaryGroupVariants : studioData.variants;
+
+    // Guard against the FULL variant list, not just the primary-group pool:
+    // the sidebar renders every variant as clickable, so a click outside the
+    // pool (e.g. when the pool holds a single stale/corrupt pipeline row) must
+    // stick instead of being auto-reverted. The pool only seeds the initial pick.
+    if (selectedSku && studioData.variants.some((variant) => variant.graceSku === selectedSku)) {
+      return;
+    }
+
+    const shouldUsePersistedReferenceSelection = !isCylinderFamilyName(studioData.group.family);
+    const firstReferencedVariant = shouldUsePersistedReferenceSelection
+      ? selectionPool.find((variant) => Boolean(persistedReferenceImagesBySku[variant.graceSku])) ??
+        selectionPool[0]
+      : selectionPool[0];
+    setSelectedSku(firstReferencedVariant.graceSku);
+  }, [
+    currentOrganizationId,
+    studioData?.group.family,
+    studioData?.group._id,
+    studioData?.group.slug,
+    studioData?.variants,
+    hasFetchedPersistedSkuJobs,
+    persistedReferenceImagesBySku,
+    selectedSku,
+  ]);
 
   // Component target math — paper-doll asset inventory for this family.
   // 1 body PNG + one fitment PNG per unique applicator-colorway combo.
   const componentTargetCount = useMemo(() => {
-    if (!data?.variants) return 0;
+    if (!studioData?.variants) return 0;
     const uniqueCombos = new Set(
-      data.variants.map((v) => `${v.applicator ?? "?"}||${v.capColor ?? "?"}`),
+      studioData.variants.map((v) => {
+        const identity = buildBestBottlesGenerationIdentity(v);
+        const capKey = identity.identityStatus === "blocked"
+          ? "needs-cap-identity"
+          : identity.capColor ?? v.capColor ?? "?";
+        return `${v.applicator ?? "?"}||${capKey}`;
+      }),
     );
     return 1 + uniqueCombos.size;
-  }, [data?.variants]);
+  }, [studioData?.variants]);
 
   const selectedVariant = useMemo(
-    () => data?.variants.find((v) => v.graceSku === selectedSku) ?? null,
-    [data?.variants, selectedSku],
+    () => studioData?.variants.find((v) => v.graceSku === selectedSku) ?? null,
+    [studioData?.variants, selectedSku],
   );
 
   const [collapsedBuckets, setCollapsedBuckets] = useState<Set<string>>(new Set());
@@ -155,7 +319,12 @@ export default function BestBottlesStudio() {
               {data.group.color ? ` · ${data.group.color}` : ""}
               {data.group.neckThreadSize ? ` · ${data.group.neckThreadSize}` : ""}
             </LCDDisplay>
-            <LCDCounter current={0} total={componentTargetCount} />
+            <LCDCounter
+              current={usesReleaseWorkbench
+                ? workbenchReleaseManifest.assets.filter((asset) => asset.approvalStatus === "approved").length
+                : 0}
+              total={usesReleaseWorkbench ? workbenchReleaseManifest.assets.length : componentTargetCount}
+            />
             <span className="text-xs" style={{ color: "var(--darkroom-text-dim)" }}>
               components
             </span>
@@ -187,10 +356,10 @@ export default function BestBottlesStudio() {
         </div>
       )}
 
-      {data && (
+      {studioData && (
         <div className="grid grid-cols-12 gap-4 p-4">
           {/* LEFT RAIL — SKU list + family metadata */}
-          <aside className="camera-panel col-span-3 min-h-[600px]">
+          {!isReleaseWorkbenchView && <aside className="camera-panel col-span-3 min-h-[600px]">
             <CameraPanelHeader
               title="Variants"
               icon={<Grid3x3 className="w-3.5 h-3.5" />}
@@ -201,7 +370,7 @@ export default function BestBottlesStudio() {
                 <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--darkroom-text-dim)" }}>
                   Variant count
                 </div>
-                <LCDDisplay variant="large">{data.group.variantCount}</LCDDisplay>
+                <LCDDisplay variant="large">{studioData.group.variantCount}</LCDDisplay>
               </div>
 
               <div
@@ -213,10 +382,10 @@ export default function BestBottlesStudio() {
                   style={{ color: "var(--darkroom-text-dim)" }}
                 >
                   <span>Variants by applicator</span>
-                  <span>{data.variants.length} total</span>
+                  <span>{studioData.variants.length} total</span>
                 </div>
                 <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-                  {applicatorBuckets.map((bucket) => {
+                  {studioApplicatorBuckets.map((bucket) => {
                     const key = applicatorCategoryKey(bucket.applicator);
                     const collapsed = collapsedBuckets.has(key);
                     return (
@@ -261,7 +430,7 @@ export default function BestBottlesStudio() {
                                     fontSize: "10px",
                                   }}
                                 >
-                                  {v.capColor ?? "Unspecified cap"}
+                                  {variantIdentityLabel(v)}
                                 </div>
                               </button>
                             ))}
@@ -273,12 +442,12 @@ export default function BestBottlesStudio() {
                 </div>
               </div>
             </div>
-          </aside>
+          </aside>}
 
           {/* MAIN — tab switcher + content */}
-          <main className="camera-panel col-span-6 min-h-[600px]">
+          <main className={isReleaseWorkbenchView ? "camera-panel col-span-12 min-h-[600px]" : "camera-panel col-span-9 min-h-[600px]"}>
             <CameraPanelHeader
-              title={TABS.find((t) => t.id === activeTab)?.label ?? "Studio"}
+              title={studioTabs.find((t) => t.id === activeTab)?.label ?? "Studio"}
               icon={
                 activeTab === "masters" ? (
                   <Beaker className="w-3.5 h-3.5" />
@@ -290,9 +459,9 @@ export default function BestBottlesStudio() {
               }
               ledState="off"
             />
-            <div className="camera-panel__content space-y-4">
+            <div className={isReleaseWorkbenchView ? "camera-panel__content space-y-4 !p-2" : "camera-panel__content space-y-4"}>
               <div className="flex gap-2 flex-wrap">
-                {TABS.map((t) => (
+                {studioTabs.map((t) => (
                   <FirmwarePresetButton
                     key={t.id}
                     label={t.label}
@@ -304,36 +473,125 @@ export default function BestBottlesStudio() {
               </div>
 
               <div
-                className="rounded p-6 border min-h-[400px] max-h-[calc(100vh-260px)] overflow-y-auto"
+                className={isReleaseWorkbenchView
+                  ? "min-h-[400px] overflow-visible"
+                  : "rounded p-6 border min-h-[400px] max-h-[calc(100vh-260px)] overflow-y-auto"}
                 style={{
-                  borderColor: "var(--darkroom-border-subtle)",
-                  background: "var(--darkroom-surface)",
+                  borderColor: isReleaseWorkbenchView ? "transparent" : "var(--darkroom-border-subtle)",
+                  background: isReleaseWorkbenchView ? "transparent" : "var(--darkroom-surface)",
                 }}
               >
                 {activeTab === "masters" && (
                   <MastersTabPanel
                     selectedProduct={selectedVariant}
-                    familyVariants={data.variants}
-                    allFamilyProducts={data.allFamilyProducts}
-                    familyName={data.group.family}
+                    familyVariants={studioData.variants}
+                    allFamilyProducts={studioData.allFamilyProducts}
+                    familyName={studioData.group.family}
+                    persistedReferenceImagesBySku={persistedReferenceImagesBySku}
+                    onMasterGenerated={async (result, product) => {
+                      if (!currentOrganizationId || !result.savedImageId || !result.imageUrl) {
+                        return;
+                      }
+                      const canonicalPresetId = getBestBottlesCatalogPresetIdForProduct(
+                        product,
+                        product.family,
+                      );
+                      if (result.presetId !== canonicalPresetId) {
+                        return;
+                      }
+                      const skuJob = findPipelineSkuJobForProductIdentity(persistedSkuJobs, product);
+                      if (!skuJob) {
+                        toast({
+                          title: "Generated image saved",
+                          description: `${product.graceSku} is tagged in Library, but no matching SKU queue row was found to update.`,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      if (!shouldRecordGeneratedImageForSkuJob(skuJob)) {
+                        return;
+                      }
+                      await recordBestBottlesGeneratedImageForSkuJob({
+                        organizationId: currentOrganizationId,
+                        pipelineSkuJobId: skuJob.id,
+                        imageId: result.savedImageId,
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: ["best-bottles-pipeline-sku-jobs"],
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY],
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: ["best-bottles-studio-sku-job-references"],
+                      });
+                    }}
+                    onMasterGenerationFailed={async (errorMessage, product) => {
+                      if (!currentOrganizationId) {
+                        return;
+                      }
+                      const skuJob = findPipelineSkuJobForProductIdentity(persistedSkuJobs, product);
+                      if (!skuJob || !shouldRecordGeneratedImageForSkuJob(skuJob)) {
+                        return;
+                      }
+                      const isReferenceFailure = /reference|transparent|background-removed|mask|flattened/i.test(errorMessage);
+                      await updatePipelineSkuJob(skuJob.id, {
+                        status: isReferenceFailure ? "needs-reference" : skuJob.status,
+                        last_error: errorMessage,
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: ["best-bottles-pipeline-sku-jobs"],
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: ["best-bottles-studio-sku-job-references"],
+                      });
+                    }}
                     onApproveMaster={async (result, product) => {
-                      if (!currentOrganizationId || !groupSlug) {
+                      if (!currentOrganizationId || !groupSlug || !result.savedImageId || !result.imageUrl) {
                         toast({
                           title: "Cannot record approval",
-                          description: "Missing organization or group context.",
+                          description: "Missing organization, image, or group context.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const canonicalPresetId = getBestBottlesCatalogPresetIdForProduct(
+                        product,
+                        product.family,
+                      );
+                      if (result.presetId !== canonicalPresetId) {
+                        toast({
+                          title: "Library asset saved",
+                          description: "Only the canonical PDP preset can advance the SKU approval ledger.",
+                        });
+                        return;
+                      }
+                      const skuJob = findPipelineSkuJobForProductIdentity(persistedSkuJobs, product);
+                      if (!skuJob) {
+                        toast({
+                          title: "Cannot record approval",
+                          description: `${product.graceSku} has no matching SKU queue row.`,
                           variant: "destructive",
                         });
                         return;
                       }
                       try {
+                        await approveBestBottlesGeneratedMaster(
+                          {
+                            organizationId: currentOrganizationId,
+                            pipelineSkuJobId: skuJob.id,
+                            imageId: result.savedImageId,
+                          },
+                        );
                         const pipelineRow = await findPipelineGroupByConvexSlug(
                           currentOrganizationId,
                           groupSlug,
                         );
                         if (!pipelineRow) {
                           toast({
-                            title: "Saved to Library — Pipeline row not found",
-                            description: `No Pipeline row with convex_slug "${groupSlug}". Image is tagged in Library but status won't propagate to the tracker.`,
+                            title: "SKU approved — group rollup not found",
+                            description: `The measured image and SKU job are approved, but no group row matched convex_slug "${groupSlug}".`,
+                            variant: "destructive",
                           });
                           return;
                         }
@@ -342,6 +600,12 @@ export default function BestBottlesStudio() {
                           madison_approved_image_id: result.savedImageId,
                           madison_approved_at: new Date().toISOString(),
                           madison_approved_by: user?.id ?? null,
+                        });
+                        await queryClient.invalidateQueries({
+                          queryKey: ["best-bottles-pipeline-sku-jobs"],
+                        });
+                        await queryClient.invalidateQueries({
+                          queryKey: [BEST_BOTTLES_RECONCILIATION_QUERY_KEY],
                         });
                         await queryClient.invalidateQueries({
                           queryKey: ["best-bottles-pipeline-groups"],
@@ -364,15 +628,32 @@ export default function BestBottlesStudio() {
                 )}
 
                 {activeTab === "components" && (
-                  <ComponentsTabPanel
-                    applicatorBuckets={applicatorBuckets}
-                    variants={data.variants}
-                    familyName={data.group.family}
-                    cohortSlug={data.group.slug ?? groupSlug ?? null}
-                  />
+                  usesReleaseWorkbench ? (
+                    <ReleaseWorkbench
+                      manifest={workbenchReleaseManifest}
+                      validation={workbenchReleaseValidation}
+                      manifestSha256={workbenchReleaseManifestSha256}
+                      assetUrlsByPath={workbenchReleaseAssetUrlsByPath}
+                      applicatorBuckets={studioApplicatorBuckets}
+                      renderView={(view, state, setState) => {
+                        if (view === "assembly") return <AssemblyView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
+                        if (view === "matrix") return <MatrixView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} state={state} onStateChange={setState} />;
+                        if (view === "lineup") return <LineupView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
+                        if (view === "evidence") return <EvidenceView manifest={workbenchReleaseManifest} />;
+                        return <PublishPreviewView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} />;
+                      }}
+                    />
+                  ) : (
+                    <ComponentsTabPanel
+                      applicatorBuckets={studioApplicatorBuckets}
+                      variants={studioData.variants}
+                      familyName={studioData.group.family}
+                      cohortSlug={studioData.group.slug ?? groupSlug ?? null}
+                    />
+                  )
                 )}
 
-                {activeTab === "compose" && (
+                {activeTab === "compose" && !usesReleaseWorkbench && (
                   <div
                     className="text-sm space-y-3"
                     style={{ color: "var(--darkroom-text-muted)" }}
@@ -394,47 +675,6 @@ export default function BestBottlesStudio() {
             </div>
           </main>
 
-          {/* RIGHT RAIL — library of approved assets */}
-          <aside className="camera-panel col-span-3 min-h-[600px]">
-            <CameraPanelHeader
-              title="Library"
-              icon={<ImageIcon className="w-3.5 h-3.5" />}
-              ledState="off"
-            />
-            <div className="camera-panel__content space-y-3">
-              <div className="text-xs" style={{ color: "var(--darkroom-text-muted)" }}>
-                Approved masters, component PNGs, and composites for this family
-                will appear here once generated.
-              </div>
-              {data.group.heroImageUrl && (
-                <div className="space-y-1">
-                  <div
-                    className="text-[10px] uppercase tracking-wider"
-                    style={{ color: "var(--darkroom-text-dim)" }}
-                  >
-                    Current hero (Sanity)
-                  </div>
-                  <img
-                    src={data.group.heroImageUrl}
-                    alt={data.group.displayName}
-                    className="w-full rounded border"
-                    style={{ borderColor: "var(--darkroom-border-subtle)" }}
-                  />
-                </div>
-              )}
-              {data.group.paperDollFamilyKey && (
-                <div className="space-y-1">
-                  <div
-                    className="text-[10px] uppercase tracking-wider"
-                    style={{ color: "var(--darkroom-text-dim)" }}
-                  >
-                    Paper-doll family key
-                  </div>
-                  <LCDDisplay>{data.group.paperDollFamilyKey}</LCDDisplay>
-                </div>
-              )}
-            </div>
-          </aside>
         </div>
       )}
     </div>

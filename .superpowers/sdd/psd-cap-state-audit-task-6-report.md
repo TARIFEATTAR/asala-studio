@@ -1,0 +1,51 @@
+# Task 6 — Human Review Decision Validation and Local Merge
+
+## Status
+
+Implemented and verified.
+
+## Scope
+
+- Added strict validation for the seven PSD cap-state taxonomy decisions plus `blocked`.
+- Required a named human reviewer and valid ISO date-time for every completed decision.
+- Normalized accepted offset timestamps to canonical UTC ISO provenance required by Task 1.
+- Allowed approvals only for the five concrete visual states and only with exact website SKU, exact Grace SKU, or reviewed-alias identity status.
+- Kept ambiguous/conflicting identities and the two unresolved taxonomy values non-exportable.
+- Rejected duplicate decision rows, unknown review-unit keys, source-hash mismatches, machine reviewers, unsupported decisions, invalid dates, and approval of ambiguous/conflicting identities.
+- Applied decisions only by full review-unit key with an exact source-hash check; no hash-only propagation exists.
+- Added the local-only CLI and nine required manifest/worklist/summary artifacts.
+- Added `bestbottles:references:apply-psd-review` without altering any other package script.
+
+## TDD evidence
+
+Initial focused test run failed with `ERR_MODULE_NOT_FOUND` for both Task 6 modules. After implementation, the focused suite passed 10/10 tests. A self-review regression for `2026-02-31T20:00:00Z` was then observed failing before calendar validation was added and passing afterward.
+
+## Verification
+
+- `npx tsx --test src/lib/bestBottlesPsdReviewDecisions.test.ts scripts/best-bottles/apply-psd-cap-state-review.test.ts` — 10 tests passed, 0 failed.
+- `npx tsc --noEmit --pretty false` — exited 0.
+- `npm run test:bestbottles:psd-audit` — 59 tests passed, 0 failed.
+- `npm run bestbottles:references:apply-psd-review` — untouched template produced 2 pending units, 0 decisions, 0 approvals, 0 blocked reviews, and 0 external writes.
+- Approval CSVs were header-only; `pending-human-review.csv` contained both review units.
+
+## Self-review
+
+No correctness or scope concerns remain. The CLI reads `review-decisions.csv` when present and intentionally falls back to the untouched Task 4 template for the required empty-decision smoke. All writes are confined to the selected local output directory; there are no export, upload, pipeline, network, or external-write paths.
+
+## Review follow-up — required completed-decision source hash
+
+The public validator now makes `sourceSha256` required in `PsdReviewDecision` and rejects missing, blank, or non-64-hex values directly. The regression was observed failing before the validator change and passing afterward. Empty template rows remain safe because the CSV parser filters rows with no decision before completed-decision validation.
+
+- Focused Task 6 tests: 11 passed, 0 failed.
+- Full PSD audit suite: 60 passed, 0 failed.
+- TypeScript: `npx tsc --noEmit --pretty false` exited 0.
+- Empty-template smoke: 2 pending units, 0 decisions, 0 approvals, and 0 external writes.
+
+## Post-Task 7 type-test correction
+
+The reviewer/timestamp negative fixture intentionally omits the now-required `sourceSha256`. A narrow `@ts-expect-error` documents that deliberate compile-time violation while preserving the runtime negative test and the required production type.
+
+- Focused strict Task 6 typecheck passed with no diagnostics.
+- Focused Task 6 tests: 11 passed, 0 failed.
+- Full PSD audit suite: 60 passed, 0 failed.
+- `npx tsc -p tsconfig.app.json --noEmit --pretty false` was captured at `/tmp/task6-tsconfig-app-after.log`; it retained 1,289 unrelated baseline diagnostics and contained no reference to `bestBottlesPsdReviewDecisions.test.ts`.

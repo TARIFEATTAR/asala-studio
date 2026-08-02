@@ -1,0 +1,32 @@
+--- a/src/lib/bestBottlesPromptPreflight.ts	2026-07-10 01:45:16.342732918 +0000
++++ b/src/lib/bestBottlesPromptPreflight.ts	2026-07-10 01:45:16.359381138 +0000
+@@ -458,6 +458,7 @@
+   return [
+     `${label} FRAMING PROFILE (CANVAS COMPOSITION AUTHORITY):`,
+     `- Canvas is fixed at ${profile.canvas.widthPx} × ${profile.canvas.heightPx}. Do not change aspect ratio, crop, or canvas size.`,
++    "- Paint the product on a seamless, flat, perfectly even Best Bottles Bone background of exact color #F5F3EF (a warm cream, NOT pure white): smooth and uniform edge-to-edge, with no texture, grain, gradient, vignette, tabletop edge, horizon line, second background color, props, labels, or text. Render this bone background natively in-scene, and the transparent glass shows this same bone tone through it. Do NOT output a white or neutral background intended to be recolored later.",
+     "- The reference image is product truth, not framing truth. Preserve the product identity and proportions, but do not inherit the reference image's tiny source scale, source crop, source padding, or off-center placement.",
+     `- Relative scale zone: ${profile.relativeScaleZoneLabel} (${profile.relativeScaleZoneId}). Use this zone to communicate realistic size differences within the family.`,
+     `- Approved fill-height range: ${profile.targetProductHeightRangePct.min}-${profile.targetProductHeightRangePct.max}% of the canvas height for this family profile.`,
+--- a/scripts/best-bottles/generate-family-batch.ts	2026-07-10 01:45:16.346271777 +0000
++++ b/scripts/best-bottles/generate-family-batch.ts	2026-07-10 01:45:16.360359978 +0000
+@@ -304,12 +304,13 @@
+ }): Promise<{ imageUrl: string; qaIssues: string[] }> {
+   const rigged = await input.page.evaluate(
+     async ({ imageUrl, product }) => {
+-      const [{ colorCorrectToTarget }, { normalizeBestBottlesRigBaseline }] = await Promise.all([
+-        import("/src/lib/product-image/colorCorrect.ts"),
+-        import("/src/lib/product-image/rigPostprocess.ts"),
+-      ]);
+-      const correctedDataUrl = await colorCorrectToTarget(imageUrl, "#F5F3EF");
+-      return normalizeBestBottlesRigBaseline(correctedDataUrl, {
++      // PAINT-AFTER REMOVED (2026-07-10): the global corner-sampled colorCorrectToTarget
++      // shift tinted the whole image and washed out clear glass. The bone background is
++      // now painted by the model in-scene (framing-profile directive), so the rig runs
++      // GEOMETRY ONLY. normalizeBestBottlesRigBaseline still fills bone behind the masked
++      // product as a deterministic backstop and resizes to the exact 2080x2288 canvas.
++      const { normalizeBestBottlesRigBaseline } = await import("/src/lib/product-image/rigPostprocess.ts");
++      return normalizeBestBottlesRigBaseline(imageUrl, {
+         family: product.family,
+         bottleCollection: product.bottleCollection,
+         graceSku: product.graceSku,

@@ -98,27 +98,30 @@ export interface BackgroundPreset {
   label: string;
   icon: string; // Emoji for quick visual recognition
   description: string;
+  useLabel: string;
   variations: string[]; // Multiple prompt variations for diversity
 }
 
 export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   {
     id: "studio-clean",
-    label: "Studio Clean",
+    label: "Bone Studio",
     icon: "⬜",
-    description: "Pure white/neutral backdrop",
+    description: "Flat #F5F3EF PDP canvas",
+    useLabel: "PDP base",
     variations: [
-      "clean white studio backdrop, professional product photography, soft even lighting, no shadows",
-      "pure white infinity curve background, commercial studio setup, diffused overhead lighting",
-      "minimalist white cyclorama, high-key photography, clean and bright, professional e-commerce",
-      "crisp white seamless paper backdrop, soft natural light from windows, no distractions",
+      "flat Best Bottles Bone #F5F3EF seamless studio background, premium product photography, soft upper-front-left key light, controlled contact shadow, no props",
+      "clean bone #F5F3EF editorial studio canvas, uncluttered commercial product setup, subtle warm bounce, realistic soft shadow falling back-right",
+      "minimal Best Bottles bone backdrop, high-end ecommerce product photography, refined glass highlights, no texture, no vignette, no extra objects",
+      "warm Bone #F5F3EF seamless studio background, luxury studio lighting, clean centered product presentation, no labels, no props, no decorative scene elements",
     ],
   },
   {
     id: "natural-stone",
     label: "Natural Stone",
     icon: "🪨",
-    description: "Sandstone, marble, slate textures",
+    description: "Stone slab or plinth set",
+    useLabel: "Hero",
     variations: [
       "warm sandstone surface with natural texture, soft directional light casting gentle shadow",
       "polished white marble surface with subtle grey veining, elegant and minimal",
@@ -130,9 +133,10 @@ export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   },
   {
     id: "organic-props",
-    label: "Organic Props",
+    label: "Botanical Accent",
     icon: "🌿",
-    description: "Plants, botanicals, natural elements",
+    description: "Plants or natural accents",
+    useLabel: "Scene only",
     variations: [
       "neutral backdrop with single eucalyptus branch, soft shadow play, minimal elegant styling",
       "dried pampas grass arrangement on cream background, soft natural light, bohemian refined",
@@ -144,9 +148,10 @@ export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   },
   {
     id: "luxury-material",
-    label: "Luxury Surface",
+    label: "Material Surface",
     icon: "✨",
-    description: "Velvet, silk, premium textures",
+    description: "Fabric, leather, satin texture",
+    useLabel: "Scene only",
     variations: [
       "deep charcoal velvet fabric surface, luxurious texture, dramatic side lighting",
       "cream silk fabric backdrop with gentle folds, soft diffused lighting, romantic",
@@ -158,9 +163,10 @@ export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   },
   {
     id: "warm-wood",
-    label: "Warm Wood",
+    label: "Wood Set",
     icon: "🪵",
-    description: "Natural wood grains and textures",
+    description: "Wood tabletop scene",
+    useLabel: "Scene only",
     variations: [
       "light oak wood surface with natural grain, warm Scandinavian aesthetic, soft lighting",
       "rich walnut wood backdrop, dark luxurious grain, warm directional light",
@@ -172,9 +178,10 @@ export const BACKGROUND_PRESETS: BackgroundPreset[] = [
   },
   {
     id: "shadow-play",
-    label: "Shadow Play",
+    label: "Patterned Light",
     icon: "🌤️",
-    description: "Dramatic window light & shadows",
+    description: "Window or leaf shadow scene",
+    useLabel: "Scene only",
     variations: [
       "white surface with dramatic window blind shadows, golden hour light streaming in",
       "neutral backdrop with plant leaf shadows cast across, dappled natural light",
@@ -205,6 +212,7 @@ export interface CompositionPreset {
   label: string;
   icon: string;
   description: string;
+  useLabel: string;
   // Prompt instructions for the AI - describes arrangement style
   singleProduct: string; // For 1 product
   multiProduct: string;  // For 2-6 products
@@ -213,17 +221,19 @@ export interface CompositionPreset {
 export const COMPOSITION_PRESETS: CompositionPreset[] = [
   {
     id: "hero-center",
-    label: "Hero Center",
+    label: "Centered Hero",
     icon: "🎯",
-    description: "Product as the star, front & center",
+    description: "Centered subject, clear margins",
+    useLabel: "PDP safe",
     singleProduct: "Place the product prominently in the center of the frame as the hero subject. The product should dominate the composition, perfectly centered with the background scene framing it. Create visual focus on the product with professional product photography composition.",
     multiProduct: "Arrange all products in a centered hero composition. The largest or primary product should be in the center-front, with other products artistically grouped around it. Create a cohesive product family shot with all items clearly visible and the group centered in the frame.",
   },
   {
     id: "rule-of-thirds",
-    label: "Rule of Thirds",
+    label: "Thirds Offset",
     icon: "📐",
-    description: "Classic photography composition",
+    description: "Offset subject, copy space",
+    useLabel: "Hero",
     singleProduct: "Position the product at one of the rule-of-thirds intersection points, allowing the background to breathe and create visual interest. Use negative space intentionally for an editorial, magazine-quality composition.",
     multiProduct: "Arrange products along the rule-of-thirds grid lines. Place the primary product at a power point intersection, with supporting products creating visual flow across the frame. Balance the composition with intentional negative space.",
   },
@@ -231,31 +241,35 @@ export const COMPOSITION_PRESETS: CompositionPreset[] = [
     id: "diagonal-flow",
     label: "Dynamic Diagonal",
     icon: "↗️",
-    description: "Energetic, flowing arrangement",
-    singleProduct: "Position the product along a diagonal line from corner to corner, creating dynamic visual energy. Angle the product slightly to follow the diagonal, suggesting movement and sophistication.",
+    description: "Scene flow without tilting SKU",
+    useLabel: "Hero",
+    singleProduct: "Position supporting scene elements along a diagonal line from corner to corner while keeping the product upright, accurate, and visually stable. Create dynamic energy through the set and lighting, not by distorting or tilting the product identity.",
     multiProduct: "Arrange products along a diagonal line flowing from one corner toward the opposite. Vary heights and sizes to create a cascading effect. Products should overlap slightly where natural, creating depth and visual rhythm along the diagonal.",
   },
   {
     id: "pyramid",
-    label: "Pyramid Stack",
+    label: "Tiered Pyramid",
     icon: "🔺",
-    description: "Tiered height arrangement",
+    description: "Tiered product heights",
+    useLabel: "Group",
     singleProduct: "Place the product on an elevated surface or use camera angle to create a sense of importance and hierarchy. The product should feel elevated and prestigious.",
     multiProduct: "Arrange products in a pyramid formation - tallest in the back-center, medium heights on the sides, smallest in front. Create depth with overlapping products and varying distances from camera. This classic still-life arrangement showcases the entire product range.",
   },
   {
     id: "scattered-organic",
-    label: "Organic Scatter",
+    label: "Loose Scatter",
     icon: "🍃",
-    description: "Natural, effortless arrangement",
+    description: "Casual lifestyle placement",
+    useLabel: "Scene only",
     singleProduct: "Place the product in a natural, slightly off-center position that feels discovered rather than staged. Let it interact organically with the background elements, as if photographed in its natural habitat.",
     multiProduct: "Scatter products organically across the scene in a natural, unstaged arrangement. Products should feel casually but intentionally placed, as if discovered in a lifestyle moment. Vary angles and orientations for authenticity. Some products can be lying down, others upright.",
   },
   {
     id: "tight-group",
-    label: "Intimate Group",
+    label: "Tight Group",
     icon: "🤝",
-    description: "Products close together, touching",
+    description: "Close product family shot",
+    useLabel: "Group",
     singleProduct: "Frame the product tightly in the composition, filling more of the frame for an intimate, detailed view. The background becomes secondary, with focus on product details.",
     multiProduct: "Group all products closely together, allowing them to touch or nearly touch. Create an intimate product family portrait where the products relate to each other. This tight composition emphasizes that they belong together as a collection or set.",
   },
@@ -887,7 +901,7 @@ export function RightPanel({
                   </div>
                   <button
                     onClick={() => onProSettingsChange({
-                      aiProvider: "auto",
+                      aiProvider: DEFAULT_IMAGE_AI_PROVIDER,
                       resolution: "standard",
                       aspectRatio: "1:1",
                       camera: undefined,
@@ -1287,9 +1301,9 @@ export function RightPanel({
                       size="sm"
                     />
                     <Sparkles className="w-3 h-3 text-[var(--darkroom-accent)]" />
-                    <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Background Style</span>
+                    <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Set Prompt</span>
                     <InlineHelp>
-                      Background Style adds a generated set direction. Use Background Scene on the left when you already have a specific set image to reuse.
+                      Set Prompt is a baked scene modifier. Selecting one does not generate by itself; it is appended to the next Capture payload.
                     </InlineHelp>
                   </div>
                   {selectedBackgroundPreset && (
@@ -1311,9 +1325,10 @@ export function RightPanel({
                         key={preset.id}
                         onClick={() => onBackgroundPresetChange?.(isSelected ? null : preset.id)}
                         disabled={isGenerating}
-                        title={`${preset.label}: ${preset.description}`}
+                        aria-pressed={isSelected}
+                        title={`${preset.label}: ${preset.description}. Applies a baked background prompt on the next Capture.`}
                         className={cn(
-                          "p-2 rounded text-left transition-all border group relative overflow-hidden",
+                          "min-h-[78px] p-2 rounded text-left transition-all border group relative overflow-hidden",
                           isSelected
                             ? "bg-[var(--led-active)]/10 border-[var(--led-active)]/30"
                             : "bg-[var(--camera-body-deep)] border-white/[0.04] hover:border-white/[0.12] hover:bg-white/[0.03]"
@@ -1330,14 +1345,25 @@ export function RightPanel({
                           />
                         )}
 
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-sm">{preset.icon}</span>
-                          <span className={cn(
-                            "text-[10px] font-medium",
-                            isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text)]"
-                          )}>
-                            {preset.label}
-                          </span>
+                        <div className="mb-1 flex items-start justify-between gap-1.5">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="text-sm">{preset.icon}</span>
+                            <span className={cn(
+                              "min-w-0 text-[10px] font-medium leading-tight",
+                              isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text)]"
+                            )}>
+                              {preset.label}
+                            </span>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "h-4 shrink-0 border-white/[0.08] bg-transparent px-1 text-[8px] font-medium leading-none",
+                              isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text-dim)]",
+                            )}
+                          >
+                            {preset.useLabel}
+                          </Badge>
                         </div>
                         <p className={cn(
                           "text-[9px] leading-tight",
@@ -1352,7 +1378,7 @@ export function RightPanel({
 
                 {/* Helper text */}
                 <p className="text-[9px] text-[var(--darkroom-text-dim)] pt-1 border-t border-white/[0.04]">
-                  Auto-varies each generation for diversity.
+                  Adds a baked background prompt on Capture. Leave off for SKU-locked PDP masters unless the set is intentional.
                 </p>
               </div>
 
@@ -1365,9 +1391,9 @@ export function RightPanel({
                       size="sm"
                     />
                     <Layers className="w-3 h-3 text-[var(--darkroom-accent)]" />
-                    <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Arrangement</span>
+                    <span className="text-[11px] font-medium text-[var(--darkroom-text)]">Placement Prompt</span>
                     <InlineHelp>
-                      Arrangement controls where products sit in the frame. It is most useful when product references or product slots are attached.
+                      Placement Prompt is a baked composition modifier. It is appended on Capture and only applies when a product reference or product slots are attached.
                     </InlineHelp>
                   </div>
                   {selectedCompositionPreset && (
@@ -1389,9 +1415,10 @@ export function RightPanel({
                         key={preset.id}
                         onClick={() => onCompositionPresetChange?.(isSelected ? null : preset.id)}
                         disabled={isGenerating}
-                        title={`${preset.label}: ${preset.description}`}
+                        aria-pressed={isSelected}
+                        title={`${preset.label}: ${preset.description}. Applies a baked placement prompt on the next Capture.`}
                         className={cn(
-                          "p-2 rounded text-left transition-all border group relative overflow-hidden",
+                          "min-h-[78px] p-2 rounded text-left transition-all border group relative overflow-hidden",
                           isSelected
                             ? "bg-[var(--led-active)]/10 border-[var(--led-active)]/30"
                             : "bg-[var(--camera-body-deep)] border-white/[0.04] hover:border-white/[0.12] hover:bg-white/[0.03]"
@@ -1408,14 +1435,25 @@ export function RightPanel({
                           />
                         )}
 
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-sm">{preset.icon}</span>
-                          <span className={cn(
-                            "text-[10px] font-medium",
-                            isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text)]"
-                          )}>
-                            {preset.label}
-                          </span>
+                        <div className="mb-1 flex items-start justify-between gap-1.5">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="text-sm">{preset.icon}</span>
+                            <span className={cn(
+                              "min-w-0 text-[10px] font-medium leading-tight",
+                              isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text)]"
+                            )}>
+                              {preset.label}
+                            </span>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "h-4 shrink-0 border-white/[0.08] bg-transparent px-1 text-[8px] font-medium leading-none",
+                              isSelected ? "text-[var(--led-active)]" : "text-[var(--darkroom-text-dim)]",
+                            )}
+                          >
+                            {preset.useLabel}
+                          </Badge>
                         </div>
                         <p className={cn(
                           "text-[9px] leading-tight",
@@ -1430,7 +1468,7 @@ export function RightPanel({
 
                 {/* Helper text */}
                 <p className="text-[9px] text-[var(--darkroom-text-dim)] pt-1 border-t border-white/[0.04]">
-                  Tells AI how to place products in the scene.
+                  Adds a baked placement prompt on Capture. Centered Hero is the safest PDP starting point.
                 </p>
               </div>
             </div>

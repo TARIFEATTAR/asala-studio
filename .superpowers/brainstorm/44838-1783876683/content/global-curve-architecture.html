@@ -1,0 +1,46 @@
+<h2>Global catalog curve + bounded family corrections</h2>
+<p class="subtitle">Architecture preview — positions are illustrative until measurement-verified anchors are loaded.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Catalog-relative product height</div>
+  <div class="mockup-body">
+    <div style="height:300px;display:flex;align-items:flex-end;gap:14px;padding:18px 12px 4px;border-bottom:2px solid #8b8178;background:linear-gradient(#faf7f2,#f6efe8)">
+      <div style="height:42%;flex:1;background:#6f7b75;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:45%;flex:1;background:#6f7b75;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:48%;flex:1;background:#6f7b75;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:52%;flex:1;background:#75847e;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:61%;flex:1;background:#75847e;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:68%;flex:1;background:#8a7667;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:69%;flex:1;background:#8a7667;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:73%;flex:1;background:#8a7667;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:76%;flex:1;background:#9a745f;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:79%;flex:1;background:#9a745f;border-radius:8px 8px 2px 2px"></div>
+      <div style="height:82%;flex:1;background:#9a745f;border-radius:8px 8px 2px 2px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(11,1fr);gap:14px;padding:8px 12px;text-align:center;font-size:12px">
+      <span>1</span><span>3</span><span>4</span><span>5</span><span>9</span><span>28</span><span>30</span><span>50</span><span>118</span><span>227</span><span>454 ml</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Guardrails</h3>
+  <ul>
+    <li>One compressed global hierarchy across the catalog.</li>
+    <li>Family correction is bounded to a small rail and cannot reverse size order.</li>
+    <li>Body scale persists between cap-on and cap-off images.</li>
+    <li>Assembled height affects cap-on headroom, not the underlying body scale.</li>
+    <li>Wide silhouettes primarily adjust width and breathing room instead of becoming artificially short.</li>
+  </ul>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-bounded" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>Approve bounded architecture</h3><p>Proceed to verified anchor selection and derive the actual curve from reconciled measurements.</p></div>
+  </div>
+  <div class="option" data-choice="revise-architecture" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>Revise architecture</h3><p>Change how global scale, family corrections, or cap states interact before loading anchors.</p></div>
+  </div>
+</div>

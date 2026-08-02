@@ -1,5 +1,39 @@
 # Madison app — agent notes
 
+## Best Bottles measurements & geometry — READ FIRST
+Before touching anything measurement- or geometry-related for Best Bottles, read
+**`docs/best-bottles-canonical-truth/BEST-BOTTLES-CANONICAL-TRUTH.md`** (canonical
+reconciliation of live site / live Convex / master catalog / catalog PDF, 2026-07-12)
+and follow **`docs/best-bottles-canonical-truth/AGENT-HANDOFF.md`**. Consume only the
+`canon_*` columns of `best-bottles-master-truth.csv`; never raw `diameter` for flat
+families; never Convex `widthMm`/`depthMm` (diameter copies). Madison never writes to
+Convex — the 839-SKU measurement sync-back belongs to the Best-Bottles-Website repo lane.
+
+## Best Bottles image pipeline — READ FIRST
+Before touching the Best Bottles image / library / pipeline / coverage surface, read
+**`docs/BEST-BOTTLES-IMAGE-PIPELINE-BRIEF.md`**. It defines the two-axis model
+(lineage vs quality), why "done" = `status:approved-keep` (NOT "has any image"), the
+`library_tags` vocabulary, the `coverageStatus` state machine, the UI build targets
+(provenance-gated completeness, the legacy/clean library filter, the from-zero
+worklist), and the two-agent lane split (this repo owns the app + Supabase +
+generation; Cowork owns reference prep + Shopify + QA via reviewed artifacts).
+
+**Paper-Doll Rig (decided 2026-07-30, pre-build):** the forward architecture —
+generate each body once, composite closures/colors/cap-states deterministically, weld
+only the junction under a reviewed mask, clamp outside it — is specified in
+**`docs/superpowers/specs/2026-07-30-paper-doll-rig-design.md`**. Read it before
+building anything on the generation surface; its locked decisions (Bone canvas,
+ambient-contact shadow, light contract, ±2px registration, geometry-gated color
+transfer) override older per-SKU full-regeneration assumptions.
+
+The **Gap worklist** surface (per-family lists of variants still missing a clean
+reference, lane-segmented by Cowork) is documented in
+**`docs/best-bottles-gap-worklist.md`**: Cowork drops
+`public/data/audits/<family>-gap-worklist-<date>.csv`, Madison re-indexes with
+`npm run bestbottles:gap-worklist:index` and displays it — **never re-deriving the
+lanes**. Lib: `src/lib/bestBottlesGapWorklist.ts`. View:
+`src/components/bestbottles/GapWorklistView.tsx`.
+
 ## Product image pipeline — pixel sizes
 
 | Stage | Dimensions | Ratio |

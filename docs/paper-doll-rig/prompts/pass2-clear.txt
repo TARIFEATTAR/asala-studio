@@ -1,0 +1,41 @@
+REFERENCE-LOCKED TRUE-NORTH BODY PLATE — BEST BOTTLES CLEAR CYLINDER 9ML.
+
+SOURCE OF TRUTH:
+- Image 1 is the product and optical truth: a real clear glass cylinder bottle,
+  70.0mm body height, 20.0mm diameter, cap off, exposed 17-415 neck threads.
+  Preserve its exact geometry, proportions, thread detail, glass wall behavior,
+  reflections, and refraction. Do not redesign, restyle, thicken, taper, or
+  re-proportion the bottle.
+- Image 2 is optical reference only — maintain the same premium clear-glass
+  standard. Never copy its shape.
+
+TASK:
+Place this exact bottle on the Best Bottles catalog canvas: seamless Bone
+(#F5F3EF) environment, single bottle, perfectly upright and centered, full
+bottle visible with generous margin above the rim and below the base.
+
+BACKGROUND AND ENVIRONMENT:
+- Seamless Bone #F5F3EF — it must visibly read as warm cream, not white — with
+  no horizon line, tabletop edge, vignette, props, labels, or frame.
+- The Bone environment must be visible THROUGH the glass with natural
+  refraction and slight optical displacement: the bottle's interior reads as
+  displaced warm cream, never white, never gray, never empty paper.
+- The glass picks up the warm environment in its reflections; keep the wall
+  highlight on the right side, consistent with one large soft key from the
+  right.
+
+GEOMETRY LOCK:
+- Body height-to-width relationship is exactly 70:20 — a slender cylinder
+  three and a half times taller than wide. The neck thread outer width is
+  slightly narrower than the body. Flat shoulder, flat base.
+- Bottle perfectly vertical, centered on the canvas.
+
+SHADOW:
+NONE. No cast shadow, no contact shadow, no reflection pool beneath the base.
+The bottle sits clean on Bone; grounding is added later by our system.
+
+FORBIDDEN:
+No barcode stripes, painted rails, etched lines, or hard full-height bands.
+No liquid, cap, roller, dip tube, label, or props. No white or gray interior —
+Bone shows through the glass. No frame, no border, no text.
+

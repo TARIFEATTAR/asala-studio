@@ -1,0 +1,18 @@
+Add a very subtle contact shadow beneath this bottle. Change absolutely nothing else.
+
+THE SHADOW — extremely subtle, restrained apothecary style:
+The bottle rests on a smooth surface lit by one large soft light. Add only the
+quiet shadow where the bottle meets that surface: soft, close to the base,
+low in contrast, fading away within a short distance. It should barely
+register — just enough that the bottle reads as grounded rather than floating.
+Softest possible edges. No hard outline, no long cast shadow, no dark pool, no
+heavy pooling beneath the glass. The darkest point is immediately beneath the
+base edge and it lightens quickly outward.
+
+CHANGE NOTHING ELSE — this is critical:
+The bottle itself is completely untouched. Identical glass, identical colour,
+identical material, identical highlights and reflections, identical position on
+the canvas, identical size, width, height, outline, neck, thread rings, and
+base. The background stays exactly the same seamless warm cream. Do not move,
+resize, re-center, re-crop, re-frame, re-light, or re-render the bottle in any
+way. Only the shadow is added beneath it.

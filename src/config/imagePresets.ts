@@ -5,7 +5,8 @@
  * canvas size, background, studio lighting language, shadow language,
  * composition rules, quality language, and negative constraints.
  *
- * Four presets share the parchment-cream lineage (#EEE6D4) so the same
+ * The strict product presets share the Best Bottles Bone background (#F5F3EF)
+ * so the same
  * SKU rendered through any of them produces a matched set across catalog,
  * hero, marketplace, and Sanity-delivery surfaces. One preset is a
  * transparent paper-doll component layer for the configurator.
@@ -13,6 +14,15 @@
  * Used by the SKU-driven prompt assembler:
  *   [GLOBAL] + [PRESET] + [SKU DATA] + [CHIPS] + [CONSTRAINTS]
  */
+
+import {
+  BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER,
+  BEST_BOTTLES_TALL_NARROW_CANVAS_TIER,
+  BEST_BOTTLES_WIDE_LOW_CANVAS_TIER,
+  type BestBottlesCanvasTierProductInput,
+  getBestBottlesCanvasTierForProduct,
+  getBestBottlesCanvasTierForFamily,
+} from "./productImageCanvasTiers";
 
 export type ImagePresetKind = "final_render" | "paper_doll_layer";
 
@@ -80,7 +90,7 @@ const SHARED_QUALITY_LANGUAGE =
   "brand-approved solid backdrop, single soft directional key light, single-subject composition, gallery-like restraint, slow editorial pace, considered and contemplative; " +
   "MATCH THE PHOTOGRAPHIC STYLE ONLY — the subject is the Best Bottles glass bottle from the reference image; do not invent or substitute product designs from those brands; " +
   "enhanced glass clarity with realistic refraction; believable base thickness visible through the bottom of the glass; crisp readable neck threads where exposed; " +
-  "glass must have premium fragrance-campaign realism: visible internal wall separation, back-wall distortion, optical thickness, refracted Bone background, tiny bevel flashes, base caustics, " +
+  "glass must have premium fragrance-campaign realism: visible internal wall separation, back-wall distortion, optical thickness, refracted Bone background, tiny bevel flashes, clean base rim/refraction highlights, " +
   "subtle surface waviness, dust-free but organic micro-texture, and tonal density inside transparent areas so the bottle never reads as a silhouette or blank cut-out; " +
   "faint mould seam and subtle tooling marks at the base allowed — real pressed-glass micro-imperfections, not CGI-perfect";
 
@@ -88,7 +98,7 @@ const SHARED_NEGATIVE_LANGUAGE =
   "no label, no text, no badge, no watermark, no brand name, no props, no secondary product, " +
   "no hands, no spray mist, no flowers; no chrome-CGI sheen on plastic caps; " +
   "no transparent or checkerboard background; no broad central reflection stripe on the glass body; " +
-  "no blown-out highlights, no washed-out glass, no milky white glass body, no broad white glare patch; " +
+  "no blown-out highlights, no washed-out glass, no milky white glass body, no cloudy internal fill, no chalky base blob, no broad white glare patch; " +
   "no surface texture, no stone, no wood, no fabric, no horizon line, no implied tabletop edge; " +
   "no overhead-flat shadow directly beneath the bottle, no shadow cast to the left or back-left; " +
   "no cool/blue light, no daylight-noon flat lighting, no rim light, no backlight haze; " +
@@ -97,9 +107,9 @@ const SHARED_NEGATIVE_LANGUAGE =
   "no Kinfolk magazine page chrome (no titles, captions, page edges, fold lines, magazine bindings) — Kinfolk is a STYLE reference only; " +
   "no other brand's bottle shapes — the subject is the Best Bottles bottle from the reference image only";
 
-const PARCHMENT_BACKGROUND_DESCRIPTION =
-  "flat seamless parchment-cream backdrop (#EEE6D4), completely uncluttered, " +
-  "no gradient, no paper grain, no texture pattern, no vignette, no banding";
+const BONE_BACKGROUND_DESCRIPTION =
+  `flat seamless Best Bottles Bone backdrop (${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}), completely uncluttered, ` +
+  "single consistent solid cream color across the entire canvas; no gradient, no paper grain, no texture pattern, no vignette, no banding";
 
 const GRID_BONE_BACKGROUND_DESCRIPTION =
   `flat seamless Best Bottles Bone backdrop (${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}), completely uncluttered, ` +
@@ -109,8 +119,8 @@ const GRID_BONE_BACKGROUND_DESCRIPTION =
 function framingLanguage(productHeightPercent: [number, number]): string {
   const [lo, hi] = productHeightPercent;
   return (
-    `product perfectly centered horizontally on the fixed grid centerline; base resting at the canonical anchor line with a natural contact shadow; ` +
-    `product fills approximately ${lo}–${hi}% of the vertical canvas height; generous padding on all sides so nothing ` +
+    `product stays in the exact placement, scale, centerline, baseline, side margins, top air, and bottom padding shown in the attached reference image; ` +
+    `the ${lo}–${hi}% height range is a fallback only when no reference image exists and must be ignored whenever it conflicts with the reference; ` +
     `feels cramped and the full product assembly (including any bulb, tassel, or sprayer extending beyond the body) ` +
     `remains visible inside the frame; do not drift, zoom, crop, or re-place the product after the canvas is set`
   );
@@ -174,7 +184,7 @@ export const GRID_CARD_2000X2200: ImagePreset = {
   // OpenAI can generate at a supported native size, then Madison re-canvases
   // the returned image to this exact Best Bottles grid/hero contract.
   id: "grid-card-2000x2200",
-  label: "Grid Card · 2080 × 2288",
+  label: "Grid Card · Cap-On · 2080 × 2288",
   purpose:
     "Catalog grid tile for bestbottles.com. Matches the current image-gen pipeline output dimensions.",
   kind: "final_render",
@@ -190,6 +200,63 @@ export const GRID_CARD_2000X2200: ImagePreset = {
   negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
 };
 
+export const GRID_CARD_TALL_NARROW_1024X1536: ImagePreset = {
+  id: "grid-card-tall-narrow-1024x1536",
+  label: "Grid Card · Tall/Narrow · 1024 × 1536",
+  purpose:
+    "Legacy/manual tall-narrow catalog tile. Production Best Bottles Cylinder masters use the fixed 2080 x 2288 studio canvas with family-profile framing.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_TALL_NARROW_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "tall, slender product centered on the legacy 1024 x 1536 portrait canvas with the complete assembly fully visible; preserve the exact reference centerline, baseline, cap, collar, tube, base, and grounding shadow; use the vertical frame naturally so the bottle does not feel compressed, but do not zoom, crop, stretch, square-recanvas, or add extra negative space beyond the product-truth reference",
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
+export const GRID_CARD_SQUARE_ROUND_2048X2048: ImagePreset = {
+  id: "grid-card-square-round-2048x2048",
+  label: "Grid Card · Square/Round · 2048 × 2048",
+  purpose:
+    "Catalog grid tile for Best Bottles round, square, atomizer, cap/closure, and squat vial families. Same brand language as the canonical grid card, with a square canvas for wide shoulders and round bodies.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_SQUARE_ROUND_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "product centered on the square canvas with a stable front-facing PDP catalog read; keep the complete assembly fully visible, including any cap, collar, atomizer, or applicator; product fills approximately 72–82% of the canvas height or width, whichever protects the full silhouette with comfortable margins; do not crop shoulders, sides, cap, base, or grounding shadow",
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
+export const GRID_CARD_WIDE_LOW_1536X1024: ImagePreset = {
+  id: "grid-card-wide-low-1536x1024",
+  label: "Grid Card · Wide/Low · 1536 × 1024",
+  purpose:
+    "Catalog grid tile for Best Bottles low, wide products such as cream jars and heart bottles. Same brand language as the canonical grid card, with a landscape canvas so squat products do not float in portrait negative space.",
+  kind: "final_render",
+  canvas: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.canvas,
+  aspectRatio: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.aspectRatio,
+  orientation: BEST_BOTTLES_WIDE_LOW_CANVAS_TIER.orientation,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: GRID_BONE_BACKGROUND_DESCRIPTION,
+  lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
+  shadowLanguage: GRID_CHIAROSCURO_SHADOW_LANGUAGE,
+  compositionLanguage:
+    "low/wide product centered on the landscape canvas with a grounded PDP catalog read; product fills approximately 70–84% of the canvas width while keeping 22–30% vertical breathing room above and below the silhouette; base sits naturally on the same implied studio floor with a back-right contact shadow; do not make the product tiny, and do not stretch, crop, or add props to fill the landscape frame",
+  qualityLanguage: SHARED_QUALITY_LANGUAGE,
+  negativeLanguage: SHARED_NEGATIVE_LANGUAGE,
+};
+
 export const SANITY_HERO_928X1152: ImagePreset = {
   id: "sanity-hero-928x1152",
   label: "Sanity Hero · 928 × 1152",
@@ -199,8 +266,8 @@ export const SANITY_HERO_928X1152: ImagePreset = {
   canvas: { widthPx: 928, heightPx: 1152 },
   aspectRatio: "4:5",
   orientation: "portrait",
-  backgroundHex: "#EEE6D4",
-  backgroundDescription: PARCHMENT_BACKGROUND_DESCRIPTION,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: BONE_BACKGROUND_DESCRIPTION,
   lightingLanguage: GRID_CHIAROSCURO_LIGHTING_LANGUAGE,
   shadowLanguage: SHARED_SHADOW_LANGUAGE,
   compositionLanguage: framingLanguage([74, 80]),
@@ -211,7 +278,7 @@ export const SANITY_HERO_928X1152: ImagePreset = {
 /**
  * Wider paper-doll variant for families with horizontally-extending fitment
  * assemblies (Empire bulb-sprayer + tassel mass extends ~500px left of the
- * bottle axis). Same lighting / material / cream-background language as the
+ * bottle axis). Same lighting / material / Bone-background language as the
  * 1000×1300 variant — only the canvas width changes. Bottle center anchored
  * at x=1000 so the extra 500px lands on the LEFT where the bulb hangs.
  *
@@ -227,9 +294,9 @@ export const PAPER_DOLL_COMPONENT_1500X1300: ImagePreset = {
   canvas: { widthPx: 1500, heightPx: 1300 },
   aspectRatio: "15:13",
   orientation: "portrait",
-  backgroundHex: "#EEE6D4",
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
   backgroundDescription:
-    "seamless parchment-cream backdrop (#EEE6D4), matching the fixed paper-doll canvas color on bestbottles.com so glass refraction through the bottle body reads as a coherent photograph once composited",
+    `seamless Best Bottles Bone backdrop (${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}), matching the fixed paper-doll canvas color on bestbottles.com so glass refraction through the bottle body reads as a coherent photograph once composited`,
   lightingLanguage:
     "single soft key light from upper-front-left at ~45° elevation (clock position 7:30–8:00 relative to the bottle base), " +
     "with gentle bounce-fill from the right at matched color temperature; " +
@@ -257,7 +324,7 @@ export const PAPER_DOLL_COMPONENT_1500X1300: ImagePreset = {
   negativeLanguage:
     "no secondary components (render only the targeted body, fitment, or cap — never combine); no label, no text, no badge, no watermark; " +
     "no shadow directly underneath the component (the directional 2:00–2:30 cast is the brand standard); no broad central CGI stripe on glass; " +
-    "no color variation in the cream background — must be exactly #EEE6D4; no checkerboard alpha visualization; " +
+    `no color variation in the Bone background — must be exactly ${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}; no checkerboard alpha visualization; ` +
     "no Aesop bottles, no Aesop labels, no Aesop product silhouettes — Aesop is a STYLE reference only; " +
     "no Kinfolk magazine page chrome (no titles, captions, page edges, fold lines, magazine bindings) — Kinfolk is a STYLE reference only; " +
     "no other brand's bottle shapes — the subject is the Best Bottles component from the reference image only",
@@ -279,9 +346,9 @@ export const PAPER_DOLL_COMPONENT_1000X1300: ImagePreset = {
   // strips only the background *outside* the bottle silhouette — the
   // cream-through-glass inside the body stays baked in and matches the final
   // website canvas perfectly.
-  backgroundHex: "#EEE6D4",
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
   backgroundDescription:
-    "seamless parchment-cream backdrop (#EEE6D4), matching the fixed paper-doll canvas color on bestbottles.com so glass refraction through the bottle body reads as a coherent photograph once composited",
+    `seamless Best Bottles Bone backdrop (${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}), matching the fixed paper-doll canvas color on bestbottles.com so glass refraction through the bottle body reads as a coherent photograph once composited`,
   lightingLanguage:
     "single soft key light from upper-front-left at ~45° elevation (clock position 7:30–8:00 relative to the bottle base), " +
     "with gentle bounce-fill from the right at matched color temperature; " +
@@ -308,7 +375,7 @@ export const PAPER_DOLL_COMPONENT_1000X1300: ImagePreset = {
   negativeLanguage:
     "no secondary components (render only the targeted body, fitment, or cap — never combine); no label, no text, no badge, no watermark; " +
     "no shadow directly underneath the component (the directional 2:00–2:30 cast is the brand standard); no broad central CGI stripe on glass; " +
-    "no color variation in the cream background — must be exactly #EEE6D4; no checkerboard alpha visualization; " +
+    `no color variation in the Bone background — must be exactly ${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}; no checkerboard alpha visualization; ` +
     "no Aesop bottles, no Aesop labels, no Aesop product silhouettes — Aesop is a STYLE reference only; " +
     "no Kinfolk magazine page chrome (no titles, captions, page edges, fold lines, magazine bindings) — Kinfolk is a STYLE reference only; " +
     "no other brand's bottle shapes — the subject is the Best Bottles component from the reference image only",
@@ -327,8 +394,8 @@ export const LANDSCAPE_HERO_2400X1350: ImagePreset = {
   canvas: { widthPx: 2560, heightPx: 1440 },
   aspectRatio: "16:9",
   orientation: "landscape",
-  backgroundHex: "#EEE6D4",
-  backgroundDescription: PARCHMENT_BACKGROUND_DESCRIPTION,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: BONE_BACKGROUND_DESCRIPTION,
   lightingLanguage: SHARED_LIGHTING_LANGUAGE,
   shadowLanguage: SHARED_SHADOW_LANGUAGE,
   compositionLanguage:
@@ -354,7 +421,7 @@ export const GRID_CARD_EXPLODED_2000X2200: ImagePreset = {
   // ID stable for tag continuity; canvas follows the canonical 2080×2288
   // Best Bottles grid/hero contract.
   id: "grid-card-exploded-2000x2200",
-  label: "Grid Card · Exploded (cap beside) · 2080 × 2288",
+  label: "Grid Card · Cap-Off Sidecar (cap beside) · 2080 × 2288",
   purpose:
     "Catalog grid tile for SKUs where the over-cap is shown removed and standing beside the bottle (e.g. Lotion Pump · Clear Overcap, decorative stopper variants). Same canvas, lighting, and background as the standard Grid Card — composition is the only change.",
   kind: "final_render",
@@ -382,7 +449,7 @@ export const GRID_CARD_EXPLODED_2000X2200: ImagePreset = {
 
 /**
  * Scene-flexible variant of the Grid Card. Same canvas + same product spec
- * pipeline + same MANDATORY DIMENSIONS, but the parchment background and
+ * pipeline + same MANDATORY DIMENSIONS, but the fixed Bone background and
  * surface-texture negatives are deliberately omitted so the operator can
  * supply a custom scene (natural stone, warm wood, dramatic shadow play,
  * etc.) without fighting the prompt.
@@ -452,8 +519,8 @@ export const MASTER_ANGLE_2080X2288: ImagePreset = {
   canvas: BEST_BOTTLES_HERO_GRID_CANVAS,
   aspectRatio: BEST_BOTTLES_HERO_GRID_ASPECT_RATIO,
   orientation: "portrait",
-  backgroundHex: "#EEE6D4",
-  backgroundDescription: PARCHMENT_BACKGROUND_DESCRIPTION,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: BONE_BACKGROUND_DESCRIPTION,
   lightingLanguage: SHARED_LIGHTING_LANGUAGE,
   shadowLanguage:
     "soft contact shadow whose direction is dictated by the chosen camera angle's implied key-light position; 25–30% opacity at the densest point closest to the bottle base, fading to ~5% at the tip; soft penumbra throughout; no overhead-flat shadow directly beneath the bottle, no double shadow, no harsh edge",
@@ -492,9 +559,9 @@ export const MASTER_MARKETING_2080X2288: ImagePreset = {
   canvas: BEST_BOTTLES_HERO_GRID_CANVAS,
   aspectRatio: BEST_BOTTLES_HERO_GRID_ASPECT_RATIO,
   orientation: "portrait",
-  backgroundHex: "#EEE6D4",
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
   backgroundDescription:
-    "background dictated by the operator's marketing layout block — defaults to the parchment-cream plate (#EEE6D4) when no scene override is set, otherwise honors the BACKGROUND STYLE block",
+    `background dictated by the operator's marketing layout block — defaults to the Best Bottles Bone plate (${BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX}) when no scene override is set, otherwise honors the BACKGROUND STYLE block`,
   lightingLanguage: SHARED_LIGHTING_LANGUAGE,
   shadowLanguage: SHARED_SHADOW_LANGUAGE,
   compositionLanguage:
@@ -515,13 +582,13 @@ export const SQUARE_MARKETPLACE_1800X1800: ImagePreset = {
   id: "square-marketplace-1800x1800",
   label: "Square Marketplace · 1792 × 1792",
   purpose:
-    "Shopify / Amazon / Etsy square product tile. Derived from the same parchment lineage so it matches the Grid Card visually.",
+    "Shopify / Amazon / Etsy square product tile. Derived from the same Best Bottles Bone background so it matches the Grid Card visually.",
   kind: "final_render",
   canvas: { widthPx: 1792, heightPx: 1792 },
   aspectRatio: "1:1",
   orientation: "square",
-  backgroundHex: "#EEE6D4",
-  backgroundDescription: PARCHMENT_BACKGROUND_DESCRIPTION,
+  backgroundHex: BEST_BOTTLES_GRID_BONE_BACKGROUND_HEX,
+  backgroundDescription: BONE_BACKGROUND_DESCRIPTION,
   lightingLanguage: SHARED_LIGHTING_LANGUAGE,
   shadowLanguage: SHARED_SHADOW_LANGUAGE,
   compositionLanguage: framingLanguage([72, 80]),
@@ -531,6 +598,9 @@ export const SQUARE_MARKETPLACE_1800X1800: ImagePreset = {
 
 export const IMAGE_PRESETS: Record<string, ImagePreset> = {
   [GRID_CARD_2000X2200.id]: GRID_CARD_2000X2200,
+  [GRID_CARD_TALL_NARROW_1024X1536.id]: GRID_CARD_TALL_NARROW_1024X1536,
+  [GRID_CARD_SQUARE_ROUND_2048X2048.id]: GRID_CARD_SQUARE_ROUND_2048X2048,
+  [GRID_CARD_WIDE_LOW_1536X1024.id]: GRID_CARD_WIDE_LOW_1536X1024,
   [GRID_CARD_EXPLODED_2000X2200.id]: GRID_CARD_EXPLODED_2000X2200,
   [MASTER_SCENE_FLEXIBLE_2000X2200.id]: MASTER_SCENE_FLEXIBLE_2000X2200,
   [MASTER_ANGLE_2080X2288.id]: MASTER_ANGLE_2080X2288,
@@ -544,6 +614,9 @@ export const IMAGE_PRESETS: Record<string, ImagePreset> = {
 
 export const IMAGE_PRESET_LIST: ImagePreset[] = [
   GRID_CARD_2000X2200,
+  GRID_CARD_TALL_NARROW_1024X1536,
+  GRID_CARD_SQUARE_ROUND_2048X2048,
+  GRID_CARD_WIDE_LOW_1536X1024,
   GRID_CARD_EXPLODED_2000X2200,
   MASTER_SCENE_FLEXIBLE_2000X2200,
   MASTER_ANGLE_2080X2288,
@@ -576,6 +649,44 @@ export function getPaperDollPresetIdForFamily(family: string | null | undefined)
     return PAPER_DOLL_FAMILY_PRESETS[family];
   }
   return PAPER_DOLL_COMPONENT_1000X1300.id;
+}
+
+function isCylinderCatalogFamily(family: string | null | undefined): boolean {
+  const normalized = String(family ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+  return normalized === "cylinder" || normalized === "tall cylinder";
+}
+
+export function getBestBottlesCatalogPresetIdForFamily(
+  family: string | null | undefined,
+): string {
+  if (isCylinderCatalogFamily(family)) return GRID_CARD_EXPLODED_2000X2200.id;
+  const tier = getBestBottlesCanvasTierForFamily(family);
+  if (tier.id === "tall-narrow") return GRID_CARD_TALL_NARROW_1024X1536.id;
+  if (tier.id === "square-round") return GRID_CARD_SQUARE_ROUND_2048X2048.id;
+  if (tier.id === "wide-low") return GRID_CARD_WIDE_LOW_1536X1024.id;
+  return GRID_CARD_2000X2200.id;
+}
+
+export function getBestBottlesCatalogPresetIdForProduct(
+  product: BestBottlesCanvasTierProductInput | null | undefined,
+  familyFallback?: string | null,
+): string {
+  if (!product) return getBestBottlesCatalogPresetIdForFamily(familyFallback);
+  const resolvedFamily = [product.family, product.bottleCollection, familyFallback]
+    .find((value) => Boolean(value?.trim()));
+  if (isCylinderCatalogFamily(resolvedFamily)) return GRID_CARD_EXPLODED_2000X2200.id;
+  const tier = getBestBottlesCanvasTierForProduct({
+    ...product,
+    family: resolvedFamily,
+  });
+  if (tier.id === "tall-narrow") return GRID_CARD_TALL_NARROW_1024X1536.id;
+  if (tier.id === "square-round") return GRID_CARD_SQUARE_ROUND_2048X2048.id;
+  if (tier.id === "wide-low") return GRID_CARD_WIDE_LOW_1536X1024.id;
+  return GRID_CARD_2000X2200.id;
 }
 
 export function getImagePreset(id: string): ImagePreset {

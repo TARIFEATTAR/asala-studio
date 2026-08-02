@@ -1,0 +1,103 @@
+{
+  "id": "classic-perfume-1oz-cyl30-identity-closeout-2026-07-21",
+  "status": "closed",
+  "closedAt": "2026-07-22T06:40:31.510Z",
+  "decidedBy": "Jordan Richter",
+  "summary": "Only GBCyl30SpryMtGl → GBSpry1ozGl and GBCyl30SpryMtSl → GBSpry1ozSl are applicable classic-perfume 1oz identity sources. Six duplicate/wrong aliases into this cluster were voided. Live Best Bottles PDPs confirmed. Pipeline references uploaded as opaque 2080×2288 pdp-main v001 and jobs marked covered_canonical.",
+  "keep": [
+    {
+      "sourceToken": "GBCyl30SpryMtGl",
+      "websiteSku": "GBSpry1ozGl",
+      "graceSku": "GB-SPR-CLR-30ML-GLD",
+      "liveUrl": "https://www.bestbottles.com/product/Tube-Glass-Bottle-Sprayer-atomizer-Gold-1oz",
+      "pipelineFilename": "GB-SPR-CLR-30ML-GLD__GBSpry1ozGl__pdp-main__v001.png"
+    },
+    {
+      "sourceToken": "GBCyl30SpryMtSl",
+      "websiteSku": "GBSpry1ozSl",
+      "graceSku": "GB-SPR-CLR-30ML-SLV",
+      "liveUrl": "https://www.bestbottles.com/product/Tube-Glass-Bottle-Sprayer-atomizer-Matte-Silver-1oz",
+      "pipelineFilename": "GB-SPR-CLR-30ML-SLV__GBSpry1ozSl__pdp-main__v001.png"
+    }
+  ],
+  "voidedDuplicates": [
+    {
+      "sourceToken": "GBCyl30AnSpGl",
+      "duplicateOf": "GBCyl30SpryMtGl"
+    },
+    {
+      "sourceToken": "GBCyl30AnSpIvyGl",
+      "duplicateOf": "GBCyl30SpryMtGl"
+    },
+    {
+      "sourceToken": "GBCyl30SpryShnGl",
+      "duplicateOf": "GBCyl30SpryMtGl"
+    },
+    {
+      "sourceToken": "LBCyl30LtnMtGl",
+      "duplicateOf": "GBCyl30SpryMtGl",
+      "note": "lotion filename wrongly aliased to perfume"
+    },
+    {
+      "sourceToken": "LBCyl30LtnShnGl",
+      "duplicateOf": "GBCyl30SpryMtGl",
+      "note": "lotion filename wrongly aliased to perfume"
+    },
+    {
+      "sourceToken": "GBCyl30SpryShnSl",
+      "duplicateOf": "GBCyl30SpryMtSl"
+    }
+  ],
+  "aliasFileMutation": {
+    "path": "docs/best-bottles-canonical-truth/best-bottles-psd-reviewed-aliases.json",
+    "aliasesBefore": 873,
+    "aliasesAfter": 867,
+    "removed": [
+      {
+        "sourceToken": "GBCyl30AnSpGl",
+        "websiteSku": "GBSpry1ozGl",
+        "graceSku": "GB-SPR-CLR-30ML-GLD"
+      },
+      {
+        "sourceToken": "GBCyl30AnSpIvyGl",
+        "websiteSku": "GBSpry1ozGl",
+        "graceSku": "GB-SPR-CLR-30ML-GLD"
+      },
+      {
+        "sourceToken": "GBCyl30SpryShnGl",
+        "websiteSku": "GBSpry1ozGl",
+        "graceSku": "GB-SPR-CLR-30ML-GLD"
+      },
+      {
+        "sourceToken": "GBCyl30SpryShnSl",
+        "websiteSku": "GBSpry1ozSl",
+        "graceSku": "GB-SPR-CLR-30ML-SLV"
+      },
+      {
+        "sourceToken": "LBCyl30LtnMtGl",
+        "websiteSku": "GBSpry1ozGl",
+        "graceSku": "GB-SPR-CLR-30ML-GLD"
+      },
+      {
+        "sourceToken": "LBCyl30LtnShnGl",
+        "websiteSku": "GBSpry1ozGl",
+        "graceSku": "GB-SPR-CLR-30ML-GLD"
+      }
+    ],
+    "keptUpdated": [
+      "GBCyl30SpryMtGl",
+      "GBCyl30SpryMtSl"
+    ]
+  },
+  "reviewArtifacts": {
+    "html": "tmp/best-bottles-reference-production/cylinder-25-30-identity-review-v1/identity-review.html",
+    "manifest": "tmp/best-bottles-reference-production/cylinder-25-30-identity-review-v1/identity-review-manifest.json",
+    "decisions": "tmp/best-bottles-reference-production/cylinder-25-30-identity-review-v1/decisions-classic-perfume-1oz.json",
+    "uploadReport": "tmp/best-bottles-reference-production/cylinder-25-30-identity-review-v1/pipeline-closeout/upload-report.json"
+  },
+  "openFollowups": [
+    "Catalog 25ml lotion (LBCyl25*) still lacks a clean PSD set — separate lane.",
+    "Remaining unaliased LBCyl30Ltn* / other *Cyl30* tokens outside perfume cluster still need identity review when prioritized.",
+    "Gold pipeline ref was composited from BBUAT capped export onto 2080×2288 bone; replace with a true PSD flatten of GBCyl30SpryMtGl when available."
+  ]
+}

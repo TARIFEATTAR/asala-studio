@@ -1,5 +1,11 @@
 # QC — Product Image System (Paper-Doll Lane)
 
+> **⛔ DEPRECATED (2026-07).** The paper-doll lane is not used for Best Bottles catalog
+> images; `src/lib/product-image/promptBuilders.ts` and `prompt-pack.md` have been removed.
+> Authoritative catalog prompt: vendored canon `src/config/bestBottlesCatalogCanon.ts` +
+> per-family framing `src/config/bestBottlesFamilyProfiles.ts` via `buildFinalPrompt()`
+> in `src/lib/bestBottlesPromptPreflight.ts`. Historical reference only.
+
 QC checks run after each `gpt-image-2` generation and before the operator's
 Approve button becomes live. They produce a `QcResult` with a `checks` array
 and a `passed` boolean that is true iff every `hard_fail` check passed.
@@ -23,7 +29,7 @@ this stage.
 
 | Check id | Severity | What it checks |
 |---|---|---|
-| `background_exact_hex` | hard_fail | Samples 9 points in the 50px-from-edge border region. Each sampled pixel must be within a small tolerance of `#EEE6D4` (sRGB). Rejects anything that came back with transparency, a white background, a mismatched tint, or an image crop. |
+| `background_exact_hex` | hard_fail | Samples 9 points in the 50px-from-edge border region. Each sampled pixel must be within a small tolerance of `#F5F3EF` (sRGB). Rejects anything that came back with transparency, a white background, a mismatched tint, or an image crop. |
 | `canvas_size_matches_family` | hard_fail | Image dimensions must equal the family's `geometry_spec.canonicalCanvas`. A mismatch means the generator returned the wrong size. |
 | `center_alignment` | hard_fail | Horizontal centroid of the non-background foreground pixels must fall within a small `±tolerancePx` window of canvas center. Rejects off-center outputs. |
 | `bottom_anchor_locked` | hard_fail | Bottom-most foreground pixel row must match `geometry_spec.bottomAnchor.y` within `toleranceY` (typically ±6 px). Catches geometry drift. |
@@ -57,7 +63,7 @@ this stage.
 
 | Check id | Severity | What it checks |
 |---|---|---|
-| `component_on_plate` | hard_fail | Same as `background_exact_hex` — fitments and caps in this lane also render on parchment cream. |
+| `component_on_plate` | hard_fail | Same as `background_exact_hex` — fitments and caps in this lane also render on Best Bottles Bone. |
 | `component_centered` | hard_fail | Fitments and caps are also centered horizontally on the canvas. |
 
 ### Assembly preview

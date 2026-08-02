@@ -1,0 +1,3623 @@
+{
+  "version": "best-bottles-cylinder-live-pointer-approval-v1",
+  "reviewer": "Jordan Richter",
+  "reviewedAt": "2026-07-14",
+  "recordCount": 40,
+  "sha256": "71fb9d0d76ca72be6398fe867ca1f3f10d456c8521f29b31ec4f9b9804611e1a",
+  "guardrails": {
+    "exactDualIdentityOnly": true,
+    "canonicalColumnsOnly": true,
+    "substitutionsAllowed": false,
+    "sourceUpscalingAllowed": false,
+    "aiReconstructionPerformed": false,
+    "automaticPromotionAllowed": false,
+    "shopifyPublishAllowed": false
+  },
+  "decisions": [
+    {
+      "canonicalIdentityKey": "GBCYL5SL|GBCYLCLR5MLSLVT",
+      "websiteSku": "GBCyl5Sl",
+      "graceSku": "GB-CYL-CLR-5ML-SLV-T",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-clear-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 53,
+        "widthAxisMm": 17,
+        "secondAxisMm": 17,
+        "heightWithCapMm": 65,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 453
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Cap/Closure",
+        "capStyle": "Tall",
+        "capColor": "Shiny Silver",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCyl5Sl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13301,
+        "sha256": "2ac179ab7005c29d646c81c9393f1e003824e045c36190dc5bce631d94425956",
+        "relativePath": "evidence/01-GB-CYL-CLR-5ML-SLV-T-GBCyl5Sl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCyl5Sl.gif",
+        "contentType": "image/gif",
+        "bytes": 24576,
+        "sha256": "3360d5ed4f99c3072e478b16c2b811fca723a6d30266e6fcf444c5d42843725d",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/01-GB-CYL-CLR-5ML-SLV-T-GBCyl5Sl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 38392,
+        "sha256": "8d0ddb1c231ac041b780665ce40b4d17354bc1e3c60f8471482c7e665aa03a6b",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/01-GB-CYL-CLR-5ML-SLV-T-GBCyl5Sl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBCYL5SPRYCUMATT|GBCYLCLR5MLSPRMCPR",
+      "websiteSku": "GBCyl5SpryCuMatt",
+      "graceSku": "GB-CYL-CLR-5ML-SPR-MCPR",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-clear-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 54.2,
+        "widthAxisMm": 17,
+        "secondAxisMm": 17,
+        "heightWithCapMm": 66.8,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 458
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Spray",
+        "capColor": "Matte Copper",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-matte-copper-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCyl5SpryCuMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-glass-bottle-matte-copper-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 12990,
+        "sha256": "1e8312103b7079e01d1d5600f34d9a06bc4127b2c0e521d81499ac59f113583c",
+        "relativePath": "evidence/02-GB-CYL-CLR-5ML-SPR-MCPR-GBCyl5SpryCuMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCyl5SpryCuMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 35252,
+        "sha256": "8c4e56d56d2858af80c703d916e0473398694e4ad065681946b9030b9c8a3bb9",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/02-GB-CYL-CLR-5ML-SPR-MCPR-GBCyl5SpryCuMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 58905,
+        "sha256": "d22c744a34bf4716b34fcceb39ab07ab183e390eed2fdf17a3a218540da1d216",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/02-GB-CYL-CLR-5ML-SPR-MCPR-GBCyl5SpryCuMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBCYLBLU5BLKSHSHT|GBCYLBLU5MLCAPSBLK",
+      "websiteSku": "GBCylBlu5BlkShSht",
+      "graceSku": "GB-CYL-BLU-5ML-CAP-SBLK",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-cobalt-blue-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 53,
+        "widthAxisMm": 18.4,
+        "secondAxisMm": 18.4,
+        "heightWithCapMm": 65,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [
+          "h:missing_filled_from_group"
+        ],
+        "provenance": {
+          "bodyHeightSource": "group-consensus(fill)+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 502
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Cobalt",
+        "applicator": "N/A",
+        "capStyle": "Short",
+        "capColor": "Shiny Black",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": null
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-short-shiny-black-cap",
+      "sourceImageUrl": "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/master_corrected_1781864576868_8lyyml_3c216231-cdee-41c3-91b8-e6b68d45aa42.png?v=1781865331",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-short-shiny-black-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13859,
+        "sha256": "81d24e58b22a7faaaee17ddb3ffa7f1851c3d2a7d9ef4ba0762e3eee3bb7d806",
+        "relativePath": "evidence/03-GB-CYL-BLU-5ML-CAP-SBLK-GBCylBlu5BlkShSht/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/master_corrected_1781864576868_8lyyml_3c216231-cdee-41c3-91b8-e6b68d45aa42.png?v=1781865331",
+        "contentType": "image/png",
+        "bytes": 1511700,
+        "sha256": "23062760e050b95746e8bd9e4268180b7a1d798af1e1ca6e917ae04430262036",
+        "format": "png",
+        "width": 1197,
+        "height": 1315,
+        "pages": 1,
+        "hasAlpha": true,
+        "relativePath": "evidence/03-GB-CYL-BLU-5ML-CAP-SBLK-GBCylBlu5BlkShSht/original.png"
+      },
+      "approvedReference": {
+        "bytes": 1645399,
+        "sha256": "e857c581c6f1f2e00ba3ee59c37697e7b1a4905d3997bc0cda2d9cf0dce225d9",
+        "width": 1197,
+        "height": 1315,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/03-GB-CYL-BLU-5ML-CAP-SBLK-GBCylBlu5BlkShSht/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "high-resolution",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBCYLBLU5GL|GBCYLBLU5MLGLDT",
+      "websiteSku": "GBCylBlu5Gl",
+      "graceSku": "GB-CYL-BLU-5ML-GLD-T",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-cobalt-blue-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 53,
+        "widthAxisMm": 17,
+        "secondAxisMm": 17,
+        "heightWithCapMm": 65,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 482
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Cobalt",
+        "applicator": "Cap/Closure",
+        "capStyle": "Tall",
+        "capColor": "Shiny Gold",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-shiny-gold-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5Gl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-shiny-gold-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13352,
+        "sha256": "394c130b7e772f6d5bff16ee6328c46ce04f60b31c04ab089f8561431dad9fc1",
+        "relativePath": "evidence/04-GB-CYL-BLU-5ML-GLD-T-GBCylBlu5Gl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5Gl.gif",
+        "contentType": "image/gif",
+        "bytes": 41984,
+        "sha256": "4318ee54900dd6dffeb85a58b8f3096733313d169dc69b9e1f01a4919ee7887e",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/04-GB-CYL-BLU-5ML-GLD-T-GBCylBlu5Gl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 63951,
+        "sha256": "b15108244cb5f614c9a9c57331f8c6ab89c477ad6b25cb613afc134af5957782",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/04-GB-CYL-BLU-5ML-GLD-T-GBCylBlu5Gl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBCYLBLU5SL|GBCYLBLU5MLSLVT",
+      "websiteSku": "GBCylBlu5Sl",
+      "graceSku": "GB-CYL-BLU-5ML-SLV-T",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-cobalt-blue-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 53,
+        "widthAxisMm": 17,
+        "secondAxisMm": 17,
+        "heightWithCapMm": 65,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 483
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Cobalt",
+        "applicator": "Cap/Closure",
+        "capStyle": "Tall",
+        "capColor": "Shiny Silver",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5Sl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13378,
+        "sha256": "7d18bf2aa55af8ce7c71ecc8cdf2f4f8ff554594d0707bc054bd3cd756387583",
+        "relativePath": "evidence/05-GB-CYL-BLU-5ML-SLV-T-GBCylBlu5Sl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5Sl.gif",
+        "contentType": "image/gif",
+        "bytes": 42334,
+        "sha256": "f9bb33a843636a7c638b1e6c533a4e0ac28d7212bce866c553230a29c42e9c98",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/05-GB-CYL-BLU-5ML-SLV-T-GBCylBlu5Sl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 65469,
+        "sha256": "72c93188ef2548a93b6c59831e2c52496320301297aca95750c24d4a3f076a0d",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/05-GB-CYL-BLU-5ML-SLV-T-GBCylBlu5Sl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBCYLBLU5SPRYCUMATT|GBCYLBLU5MLSPRMCPR",
+      "websiteSku": "GBCylBlu5SpryCuMatt",
+      "graceSku": "GB-CYL-BLU-5ML-SPR-MCPR",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-5ml-cobalt-blue-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 5,
+        "bodyHeightMm": 53,
+        "widthAxisMm": 17,
+        "secondAxisMm": 17,
+        "heightWithCapMm": 72,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 487
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Cobalt",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Spray",
+        "capColor": "Matte Copper",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-matte-copper-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5SpryCuMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-5-ml-blue-glass-bottle-matte-copper-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13057,
+        "sha256": "7e4286920cd4816bd229fabfe5140abff452eab8025eaa1ec4aa284312261b84",
+        "relativePath": "evidence/06-GB-CYL-BLU-5ML-SPR-MCPR-GBCylBlu5SpryCuMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBCylBlu5SpryCuMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 32552,
+        "sha256": "5bf9b4221299a3ce87eb774bfa4e540192fa8d5734e058fb81128e57ba2de5d7",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/06-GB-CYL-BLU-5ML-SPR-MCPR-GBCylBlu5SpryCuMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 51070,
+        "sha256": "6168ddee1c7c44fd438c14347e7dbcb0bf5eb18d0111d85a579edee84da52df0",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/06-GB-CYL-BLU-5ML-SPR-MCPR-GBCylBlu5SpryCuMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYL9SL|GBCYLCLR9MLSLVT",
+      "websiteSku": "GBTallCyl9Sl",
+      "graceSku": "GB-CYL-CLR-9ML-SLV-T",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-clear-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 544
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": null,
+        "capStyle": "Tall",
+        "capColor": "Silver",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-glass-bottle-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCyl9Sl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-glass-bottle-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13860,
+        "sha256": "0d1552496523a4931d94c6cf70e8eba37ee66ff4b53b9ae278f9b956c31f8344",
+        "relativePath": "evidence/07-GB-CYL-CLR-9ML-SLV-T-GBTallCyl9Sl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCyl9Sl.gif",
+        "contentType": "image/gif",
+        "bytes": 11953,
+        "sha256": "63f9c869ba3d53bd6ed8be4ba09109a800e17afb80393fbd1bf8547ca71c4fcb",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/07-GB-CYL-CLR-9ML-SLV-T-GBTallCyl9Sl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 21334,
+        "sha256": "e48fcac0339ad4ba9d0031bc659aba8c347b9cd66c78571dd88f4ab28d4ed06e",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/07-GB-CYL-CLR-9ML-SLV-T-GBTallCyl9Sl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9BLKSHT|GBCYLFRS9MLS01",
+      "websiteSku": "GBTallCylFrst9BlkSht",
+      "graceSku": "GB-CYL-FRS-9ML-S-01",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 111,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 633
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": null,
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-short-black-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9BlkSht.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-short-black-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13592,
+        "sha256": "a7fc210c6053307b220d901dffdd9923352226d00046f0067802e5a3c8d32b76",
+        "relativePath": "evidence/08-GB-CYL-FRS-9ML-S-01-GBTallCylFrst9BlkSht/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9BlkSht.gif",
+        "contentType": "image/gif",
+        "bytes": 9737,
+        "sha256": "0ded256bb85e068d933cc4cbd3c24cd303b206c5d13ea296cf3bced471581c62",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/08-GB-CYL-FRS-9ML-S-01-GBTallCylFrst9BlkSht/original.png"
+      },
+      "approvedReference": {
+        "bytes": 16193,
+        "sha256": "4a633f4257d5f5905fc68dd1c4eebedd90e7d21c493c0008b7aad465394e3dcb",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/08-GB-CYL-FRS-9ML-S-01-GBTallCylFrst9BlkSht/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9GL|GBCYLFRS9MLT01",
+      "websiteSku": "GBTallCylFrst9Gl",
+      "graceSku": "GB-CYL-FRS-9ML-T-01",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 111,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 635
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": null,
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-gold-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9Gl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-gold-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13505,
+        "sha256": "b5d305d1bae3c7627d641cc485cbcf69c39e703ea9f745f74a70aa0d49d22c56",
+        "relativePath": "evidence/09-GB-CYL-FRS-9ML-T-01-GBTallCylFrst9Gl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9Gl.gif",
+        "contentType": "image/gif",
+        "bytes": 13633,
+        "sha256": "fc65f336378543922856e981ff63e0e8f3fa9b4f15a09ac4a0182cd806f87e75",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/09-GB-CYL-FRS-9ML-T-01-GBTallCylFrst9Gl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22914,
+        "sha256": "c9de76edc15f7a435a15448b2aa40c9bb0fa8a53ac2a415eca5449f66696295e",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/09-GB-CYL-FRS-9ML-T-01-GBTallCylFrst9Gl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLBLKDOT|GBCYLFRS9MLT02",
+      "websiteSku": "GBTallCylFrst9MtlRollBlkDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-02",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 655
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-black-shiny-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollBlkDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-black-shiny-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13529,
+        "sha256": "646a907337e3d8134d84e3ba43858400111be8c085447ef38579028a582d90b1",
+        "relativePath": "evidence/10-GB-CYL-FRS-9ML-T-02-GBTallCylFrst9MtlRollBlkDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollBlkDot.gif",
+        "contentType": "image/gif",
+        "bytes": 10164,
+        "sha256": "cf4d35b2fb05e5a8d502cbc75135841fdfc1c43f9b5442d837206bc8e68143ce",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/10-GB-CYL-FRS-9ML-T-02-GBTallCylFrst9MtlRollBlkDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17513,
+        "sha256": "3924da4ce5a8e3dad5f8854a027aed81597c42239a68cf93be87a317abb19d17",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/10-GB-CYL-FRS-9ML-T-02-GBTallCylFrst9MtlRollBlkDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLBLKSH|GBCYLFRS9MLT03",
+      "websiteSku": "GBTallCylFrst9MtlRollBlkSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-03",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 656
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-black-shiny-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollBlkSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-black-shiny-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14040,
+        "sha256": "e57392b81f811da5c12a53f37ad6a4ece3007477464023840807439dfced3391",
+        "relativePath": "evidence/11-GB-CYL-FRS-9ML-T-03-GBTallCylFrst9MtlRollBlkSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollBlkSh.gif",
+        "contentType": "image/gif",
+        "bytes": 10202,
+        "sha256": "96710248173b50a2a401310621ab87d8780efc6230e859964ef592de60f0dadb",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/11-GB-CYL-FRS-9ML-T-03-GBTallCylFrst9MtlRollBlkSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17163,
+        "sha256": "74dc26f56736117d3ee8220449f6240345f4657bfb7931317a9fd5e86e44305d",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/11-GB-CYL-FRS-9ML-T-03-GBTallCylFrst9MtlRollBlkSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLCUMATT|GBCYLFRS9MLT04",
+      "websiteSku": "GBTallCylFrst9MtlRollCuMatt",
+      "graceSku": "GB-CYL-FRS-9ML-T-04",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 657
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-matte-copper-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollCuMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-matte-copper-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14061,
+        "sha256": "c6803cb8698000df51f785b693f25deb8c20e5b7c7c5da0bcac4d1bd901f916f",
+        "relativePath": "evidence/12-GB-CYL-FRS-9ML-T-04-GBTallCylFrst9MtlRollCuMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollCuMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 12851,
+        "sha256": "e24534ac5616960479f3eddc301f98352b3237b788be7ce7e92158d890c10977",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/12-GB-CYL-FRS-9ML-T-04-GBTallCylFrst9MtlRollCuMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22435,
+        "sha256": "cc41f9edec9001868125087a506e71c4391426791a49063e504937bcaee91d70",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/12-GB-CYL-FRS-9ML-T-04-GBTallCylFrst9MtlRollCuMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLGLSH|GBCYLFRS9MLT06",
+      "websiteSku": "GBTallCylFrst9MtlRollGlSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-06",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 659
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-shiny-gold-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollGlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-shiny-gold-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14019,
+        "sha256": "68f1f89119d3ac6868598a8408e3e9fb4b29c4a38036130394145129d6258f35",
+        "relativePath": "evidence/13-GB-CYL-FRS-9ML-T-06-GBTallCylFrst9MtlRollGlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollGlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 12980,
+        "sha256": "291fdda8c20a75f9e0992f161a3e765de13121e04b68460628de6665a4d0ee87",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/13-GB-CYL-FRS-9ML-T-06-GBTallCylFrst9MtlRollGlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22515,
+        "sha256": "96a295b3902acf03d9eee84ec2c42d98ccca274b3b5f342d40a5a71bdda2bbd2",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/13-GB-CYL-FRS-9ML-T-06-GBTallCylFrst9MtlRollGlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLPINKDOT|GBCYLFRS9MLT07",
+      "websiteSku": "GBTallCylFrst9MtlRollPinkDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-07",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 660
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-pink-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollPinkDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-pink-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14091,
+        "sha256": "3d43004854a9bbf5668507a6ef3bd73998f1b90fb553fa8a7b912041e7a2a4cd",
+        "relativePath": "evidence/14-GB-CYL-FRS-9ML-T-07-GBTallCylFrst9MtlRollPinkDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollPinkDot.gif",
+        "contentType": "image/gif",
+        "bytes": 11881,
+        "sha256": "05fcbf4f8a781c3a58fbba0217e5fd052347a6c06d912558959636165263bf96",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/14-GB-CYL-FRS-9ML-T-07-GBTallCylFrst9MtlRollPinkDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 20727,
+        "sha256": "c1d27e7db21660f99586c0db62e08af2a803c9e24c172c01d7cd196e761c6990",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/14-GB-CYL-FRS-9ML-T-07-GBTallCylFrst9MtlRollPinkDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLSLDOT|GBCYLFRS9MLT08",
+      "websiteSku": "GBTallCylFrst9MtlRollSlDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-08",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 661
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-silver-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-silver-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14095,
+        "sha256": "649f4d0a124932bfba93c836bb344efc3a3f616895669085b13d68e4e5f10a84",
+        "relativePath": "evidence/15-GB-CYL-FRS-9ML-T-08-GBTallCylFrst9MtlRollSlDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlDot.gif",
+        "contentType": "image/gif",
+        "bytes": 11204,
+        "sha256": "b6ea5ac8ca1be562f093da2d3c454de2ff2f164491a35f58d707fed0324914d2",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/15-GB-CYL-FRS-9ML-T-08-GBTallCylFrst9MtlRollSlDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 18997,
+        "sha256": "9a31809d1f3954b4dc6299587fb3e85f50b432cffa3dd4d796f2176056ac511f",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/15-GB-CYL-FRS-9ML-T-08-GBTallCylFrst9MtlRollSlDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLSLMATT|GBCYLFRS9MLT09",
+      "websiteSku": "GBTallCylFrst9MtlRollSlMatt",
+      "graceSku": "GB-CYL-FRS-9ML-T-09",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 662
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-matte-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-matte-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14061,
+        "sha256": "cf65585235ac4d9c8756714f0038991acba13ed58ed7e14eaf18cde1988153a3",
+        "relativePath": "evidence/16-GB-CYL-FRS-9ML-T-09-GBTallCylFrst9MtlRollSlMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 10006,
+        "sha256": "9c969ce0875b6b9e6a97d1b7419cd14b56cbbb6b12a0cf8c358110c39a9271d2",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/16-GB-CYL-FRS-9ML-T-09-GBTallCylFrst9MtlRollSlMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17109,
+        "sha256": "2da460e351ea0956f9cebe7a2154a346a32245f3e494a2fa0bb0c1538f115b3c",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/16-GB-CYL-FRS-9ML-T-09-GBTallCylFrst9MtlRollSlMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLSLSH|GBCYLFRS9MLT10",
+      "websiteSku": "GBTallCylFrst9MtlRollSlSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-10",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 663
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Metal Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Metal",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-metal-roller-ball-plug-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14045,
+        "sha256": "784af98c71329a1390052fe052f3d20f7f506f9cf7946e710e638805dfc7385b",
+        "relativePath": "evidence/17-GB-CYL-FRS-9ML-T-10-GBTallCylFrst9MtlRollSlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9MtlRollSlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 10573,
+        "sha256": "b2fa06c14f7134427de23ba1d9281fe650cac60d5bbfc8c8d420808acabe5e38",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/17-GB-CYL-FRS-9ML-T-10-GBTallCylFrst9MtlRollSlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 18054,
+        "sha256": "426c63915c3620fa994d8074262664b26994324208e7177dcb2208f1257be0fd",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/17-GB-CYL-FRS-9ML-T-10-GBTallCylFrst9MtlRollSlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLBLKDOT|GBCYLFRS9MLT11",
+      "websiteSku": "GBTallCylFrst9RollBlkDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-11",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 674
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-black-shiny-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollBlkDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-black-shiny-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14154,
+        "sha256": "c46de583674f6a9f3ca1cd6cfff90dc3e17880be2932b2b7c84a4c76d5b156cc",
+        "relativePath": "evidence/18-GB-CYL-FRS-9ML-T-11-GBTallCylFrst9RollBlkDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollBlkDot.gif",
+        "contentType": "image/gif",
+        "bytes": 9950,
+        "sha256": "07fc43be97544f9a1afc2f822c4baf222203dbda2a39f303a54fc266f28a8754",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/18-GB-CYL-FRS-9ML-T-11-GBTallCylFrst9RollBlkDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17069,
+        "sha256": "655fe500efdec67150af9f7edb2b5f8c8ee38ec2f787c121dc9bb690ae51584c",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/18-GB-CYL-FRS-9ML-T-11-GBTallCylFrst9RollBlkDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLBLKSH|GBCYLFRS9MLT12",
+      "websiteSku": "GBTallCylFrst9RollBlkSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-12",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 675
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-black-shiny-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollBlkSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-black-shiny-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14036,
+        "sha256": "1e2e81817df924721004514abc60dad9a9a99e770af218d9ac217c77a64aefdb",
+        "relativePath": "evidence/19-GB-CYL-FRS-9ML-T-12-GBTallCylFrst9RollBlkSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollBlkSh.gif",
+        "contentType": "image/gif",
+        "bytes": 10027,
+        "sha256": "09201638e967dbb6c51f95abd30bff52ff70db3fbee9cc31f8ac77f432eb36ea",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/19-GB-CYL-FRS-9ML-T-12-GBTallCylFrst9RollBlkSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 16772,
+        "sha256": "e9cb66723b6521adb1dbc7623c25ac5b8383ffba4556c535d529d1e9eb57291d",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/19-GB-CYL-FRS-9ML-T-12-GBTallCylFrst9RollBlkSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLCUMATT|GBCYLFRS9MLT13",
+      "websiteSku": "GBTallCylFrst9RollCuMatt",
+      "graceSku": "GB-CYL-FRS-9ML-T-13",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 676
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-copper-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollCuMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-copper-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14055,
+        "sha256": "284f91260abc24cf662cd3429d4142f0c4d841b1f3daf2c47f0acc187f3ecda2",
+        "relativePath": "evidence/20-GB-CYL-FRS-9ML-T-13-GBTallCylFrst9RollCuMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollCuMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 12936,
+        "sha256": "a7ec2d82bc72245dd8533d40e4aef430a7401bf1ca3397603ccc7a917e116dff",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/20-GB-CYL-FRS-9ML-T-13-GBTallCylFrst9RollCuMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22139,
+        "sha256": "3ba3c718bf08f3cf4e18c17d800e58f3df7582f7332b803a69da92f352acb963",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/20-GB-CYL-FRS-9ML-T-13-GBTallCylFrst9RollCuMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLGLMATT|GBCYLFRS9MLT14",
+      "websiteSku": "GBTallCylFrst9RollGlMatt",
+      "graceSku": "GB-CYL-FRS-9ML-T-14",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 677
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-gold-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollGlMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-gold-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14033,
+        "sha256": "01aef6b99a4ebee6e2374e7d183c7ab71041dc543db60cae982f946e30a84dde",
+        "relativePath": "evidence/21-GB-CYL-FRS-9ML-T-14-GBTallCylFrst9RollGlMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollGlMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 11686,
+        "sha256": "b4aa6472bfc897a6e964622c34ddb69932e5bc70cce043a653eaf038d7c8a801",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/21-GB-CYL-FRS-9ML-T-14-GBTallCylFrst9RollGlMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 20011,
+        "sha256": "2bce24ea39eb253f7abff3406dee682a43f0e4f8ed79285ed6733f20835c8f97",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/21-GB-CYL-FRS-9ML-T-14-GBTallCylFrst9RollGlMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLGLSH|GBCYLFRS9MLT15",
+      "websiteSku": "GBTallCylFrst9RollGlSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-15",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 678
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-shiny-gold-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollGlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-shiny-gold-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14017,
+        "sha256": "af5911f0434173b2f9dfc7fc1ba3626f3d970e7df725eb18632f9f4c9230474f",
+        "relativePath": "evidence/22-GB-CYL-FRS-9ML-T-15-GBTallCylFrst9RollGlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollGlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 12653,
+        "sha256": "839556d0ec394cb2225f3bda55ad3945500104b9fdc0ae4df7ec0099158cb467",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/22-GB-CYL-FRS-9ML-T-15-GBTallCylFrst9RollGlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22191,
+        "sha256": "9b7a7331037c81deca9542943597ca8a23fba13ddf13d4ab4a4e2e160a471f09",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/22-GB-CYL-FRS-9ML-T-15-GBTallCylFrst9RollGlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLPINKDOT|GBCYLFRS9MLT16",
+      "websiteSku": "GBTallCylFrst9RollPinkDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-16",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 679
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-pink-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollPinkDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-pink-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14083,
+        "sha256": "7b74c88a35297d6f4d7cd6a37c32b5bf699d2cf6f17a52da4e24dd67503834c3",
+        "relativePath": "evidence/23-GB-CYL-FRS-9ML-T-16-GBTallCylFrst9RollPinkDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollPinkDot.gif",
+        "contentType": "image/gif",
+        "bytes": 12105,
+        "sha256": "cd5bfd60959b263c6b9eb7e0e52df64fe666088a8bcc4e9a2ca146f48dbfb260",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/23-GB-CYL-FRS-9ML-T-16-GBTallCylFrst9RollPinkDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 21079,
+        "sha256": "4cbb50ebfec88470e3438d65a3a4107eb225fd7bcd8cdf1188d211054a7d5d13",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/23-GB-CYL-FRS-9ML-T-16-GBTallCylFrst9RollPinkDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLSLDOT|GBCYLFRS9MLT17",
+      "websiteSku": "GBTallCylFrst9RollSlDot",
+      "graceSku": "GB-CYL-FRS-9ML-T-17",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 680
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-silver-cap-with-dots",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlDot.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-silver-cap-with-dots",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14091,
+        "sha256": "a02ecebaa0de7f7a12892a0085652dbe25f246bb1095a3d2ca43d300cd913c35",
+        "relativePath": "evidence/24-GB-CYL-FRS-9ML-T-17-GBTallCylFrst9RollSlDot/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlDot.gif",
+        "contentType": "image/gif",
+        "bytes": 10575,
+        "sha256": "3188780678a26a4969ea5fed5c4bc9ca025deb001d2834ba7acb6e0c9413f3de",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/24-GB-CYL-FRS-9ML-T-17-GBTallCylFrst9RollSlDot/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17964,
+        "sha256": "7d0432c02d2a806a3253baf81239e8e6f90020f580483012555b7cf370803b09",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/24-GB-CYL-FRS-9ML-T-17-GBTallCylFrst9RollSlDot/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLSLMATT|GBCYLFRS9MLT18",
+      "websiteSku": "GBTallCylFrst9RollSlMatt",
+      "graceSku": "GB-CYL-FRS-9ML-T-18",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 681
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-matte-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14055,
+        "sha256": "2f5452cb416cb09b43264d734dd83e99ccc7f2cd81d6b42fdaedbdf473814288",
+        "relativePath": "evidence/25-GB-CYL-FRS-9ML-T-18-GBTallCylFrst9RollSlMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 9853,
+        "sha256": "33d31762716e76203bd4f3cfe63e16fa35db9b52358ffd497a3d132b5883365a",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/25-GB-CYL-FRS-9ML-T-18-GBTallCylFrst9RollSlMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 16604,
+        "sha256": "2b9769764a0b8ea81ac0c7ab3c209dfa449b52de49adf373d4eb8557d6b8c46f",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/25-GB-CYL-FRS-9ML-T-18-GBTallCylFrst9RollSlMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9ROLLSLSH|GBCYLFRS9MLT19",
+      "websiteSku": "GBTallCylFrst9RollSlSh",
+      "graceSku": "GB-CYL-FRS-9ML-T-19",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-rollon",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 88,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [
+          "convex_height_corrected_by_site(was=76.0)",
+          "h:group_outlier_unresolved"
+        ],
+        "provenance": {
+          "bodyHeightSource": "live-site-pdp",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 682
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Plastic Roller Ball",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": "Plastic",
+        "assemblyType": "3-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-plastic-roller-ball-plug-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 14039,
+        "sha256": "d8102150c892b30cfda2cd175a6aab9e32d882e98ae1eed94d9ed9700e1be92e",
+        "relativePath": "evidence/26-GB-CYL-FRS-9ML-T-19-GBTallCylFrst9RollSlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9RollSlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 10635,
+        "sha256": "a2cf2fe613f1142231af67de84fd8e6583116dd20a994891cf644416472ea7e4",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/26-GB-CYL-FRS-9ML-T-19-GBTallCylFrst9RollSlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 18111,
+        "sha256": "5f12333de4248adf42ae518613c6b62013e72218664336dac1cf93c0931bdea6",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/26-GB-CYL-FRS-9ML-T-19-GBTallCylFrst9RollSlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SL|GBCYLFRS9MLT20",
+      "websiteSku": "GBTallCylFrst9Sl",
+      "graceSku": "GB-CYL-FRS-9ML-T-20",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 118,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 636
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": null,
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-silver-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9Sl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-silver-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13531,
+        "sha256": "a3c08ca9cd28a8c20553eb90d7e75b507b3d37d720269047235f05cea8139417",
+        "relativePath": "evidence/27-GB-CYL-FRS-9ML-T-20-GBTallCylFrst9Sl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9Sl.gif",
+        "contentType": "image/gif",
+        "bytes": 10913,
+        "sha256": "7bf441ec91ef61a0f2f0755eab64b1eb4d23112b9098370d98ba561dd9043174",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/27-GB-CYL-FRS-9ML-T-20-GBTallCylFrst9Sl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 18253,
+        "sha256": "ff8587ef8973bf96e7a73201bf8f69634f8ed7edef211e0f36da29afe589e789",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/27-GB-CYL-FRS-9ML-T-20-GBTallCylFrst9Sl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYBLKMATT|GBCYLFRS9ML01",
+      "websiteSku": "GBTallCylFrst9SpryBlkMatt",
+      "graceSku": "GB-CYL-FRS-9ML-01",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 638
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-black-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBlkMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-black-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13175,
+        "sha256": "b906ab3de73c141ff310587b9cbe8118bcee2af6ba34bf506e2e3542a52be04d",
+        "relativePath": "evidence/28-GB-CYL-FRS-9ML-01-GBTallCylFrst9SpryBlkMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBlkMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 9023,
+        "sha256": "d78ec4b71e0f3fb8fbe44deca75cb7217a5e4db42ec62efb102d0d78614df646",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/28-GB-CYL-FRS-9ML-01-GBTallCylFrst9SpryBlkMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 14940,
+        "sha256": "e9683aea4f4c20b840a00261403b88eef170208c38510f2384c8b31e26b31a8f",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/28-GB-CYL-FRS-9ML-01-GBTallCylFrst9SpryBlkMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYBLKSH|GBCYLFRS9ML02",
+      "websiteSku": "GBTallCylFrst9SpryBlkSh",
+      "graceSku": "GB-CYL-FRS-9ML-02",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 639
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-black-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBlkSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-black-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13159,
+        "sha256": "068d6801f8471c7cba3faae9a0de2bdb5152720e38f2854b78c08dd09c1b4ffe",
+        "relativePath": "evidence/29-GB-CYL-FRS-9ML-02-GBTallCylFrst9SpryBlkSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBlkSh.gif",
+        "contentType": "image/gif",
+        "bytes": 9361,
+        "sha256": "d7e837fe2bf4e7ea1e8d586b6e4fd128633f94a85075a96825e54c814177af1b",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/29-GB-CYL-FRS-9ML-02-GBTallCylFrst9SpryBlkSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 15662,
+        "sha256": "ccb139b87d152fa0cfd5314492913a0111fc85db336f00e04e46019bd2b6a279",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/29-GB-CYL-FRS-9ML-02-GBTallCylFrst9SpryBlkSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYBLUMATT|GBCYLFRS9ML03",
+      "websiteSku": "GBTallCylFrst9SpryBluMatt",
+      "graceSku": "GB-CYL-FRS-9ML-03",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 640
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-blue-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBluMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-blue-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13162,
+        "sha256": "27a7bfbafc80bcac873d12a15d89b5e595ed59ff34880923c3266facad1fad6c",
+        "relativePath": "evidence/30-GB-CYL-FRS-9ML-03-GBTallCylFrst9SpryBluMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryBluMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 14529,
+        "sha256": "0208d275703bc3f2d57d7c2ccd77bfe78d3f71cd8ad75b75a5a41c0d8b3e7e20",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/30-GB-CYL-FRS-9ML-03-GBTallCylFrst9SpryBluMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 25075,
+        "sha256": "47539c197c1096a6244e060f361b1ff2bbc97eecfe112f8d9d989de00e520e4c",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/30-GB-CYL-FRS-9ML-03-GBTallCylFrst9SpryBluMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYCUMATT|GBCYLFRS9ML04",
+      "websiteSku": "GBTallCylFrst9SpryCuMatt",
+      "graceSku": "GB-CYL-FRS-9ML-04",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 641
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-copper-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryCuMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-copper-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13206,
+        "sha256": "c5b2cc79623cbda4ca01a1c1c1f99305adb3016bc6a8181a53c69eb5a2f3dc9a",
+        "relativePath": "evidence/31-GB-CYL-FRS-9ML-04-GBTallCylFrst9SpryCuMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryCuMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 12745,
+        "sha256": "8bfe9652bcf82d0641df4ef17b035ea80564387043799b2c0c8bc6b9497081d4",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/31-GB-CYL-FRS-9ML-04-GBTallCylFrst9SpryCuMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 22383,
+        "sha256": "3e83fb42c2b20f559cd48f18bbb8412fa3ffa4010f2f594755c7451b5a3cf111",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/31-GB-CYL-FRS-9ML-04-GBTallCylFrst9SpryCuMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYGLSH|GBCYLFRS9ML06",
+      "websiteSku": "GBTallCylFrst9SpryGlSh",
+      "graceSku": "GB-CYL-FRS-9ML-06",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 643
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-gold-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryGlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-gold-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13138,
+        "sha256": "9142b201205638220c8384c62f0ebf9eb51848c298930b745d49d314fc55bbbb",
+        "relativePath": "evidence/32-GB-CYL-FRS-9ML-06-GBTallCylFrst9SpryGlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SpryGlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 15064,
+        "sha256": "1acde6fcd0cab8c8509bd9f2e019a23acc8d1b9193523c8625f9760203aeacd8",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/32-GB-CYL-FRS-9ML-06-GBTallCylFrst9SpryGlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 26498,
+        "sha256": "95f01b88c48e27063e481f97c2e140af8fe8978a5e28a16875e5550ca25db31a",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/32-GB-CYL-FRS-9ML-06-GBTallCylFrst9SpryGlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYSLMATT|GBCYLFRS9ML07",
+      "websiteSku": "GBTallCylFrst9SprySlMatt",
+      "graceSku": "GB-CYL-FRS-9ML-07",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 644
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-silver-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SprySlMatt.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-matte-silver-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13180,
+        "sha256": "6bf3e0fb8f14a640b6b7d13be1936015f90c19d29e5c570c4bb89d058357def4",
+        "relativePath": "evidence/33-GB-CYL-FRS-9ML-07-GBTallCylFrst9SprySlMatt/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SprySlMatt.gif",
+        "contentType": "image/gif",
+        "bytes": 9571,
+        "sha256": "0efc184bcc1679a4d5cd787e3bf6f3c328cfbdd61f882d2d680989fb4752e396",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/33-GB-CYL-FRS-9ML-07-GBTallCylFrst9SprySlMatt/original.png"
+      },
+      "approvedReference": {
+        "bytes": 16457,
+        "sha256": "ca91b17cbf683e7fb8a6fe4bca6dd73c1feef4b0804fa8f72fedb80b8d16021e",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/33-GB-CYL-FRS-9ML-07-GBTallCylFrst9SprySlMatt/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9SPRYSLSH|GBCYLFRS9ML08",
+      "websiteSku": "GBTallCylFrst9SprySlSh",
+      "graceSku": "GB-CYL-FRS-9ML-08",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415-finemist",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 126,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 645
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": "Fine Mist Sprayer",
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-silver-spray",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SprySlSh.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-shiny-silver-spray",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13164,
+        "sha256": "4c3938aa30f2c600e6239404c004e10abda60633e079959880d66cf987d85418",
+        "relativePath": "evidence/34-GB-CYL-FRS-9ML-08-GBTallCylFrst9SprySlSh/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9SprySlSh.gif",
+        "contentType": "image/gif",
+        "bytes": 10622,
+        "sha256": "97977d18cc959c445b744ef6def9d4ba51d84501590793bfb86d084f2ff38ec1",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/34-GB-CYL-FRS-9ML-08-GBTallCylFrst9SprySlSh/original.png"
+      },
+      "approvedReference": {
+        "bytes": 17932,
+        "sha256": "35b3238c65e83e1537054368937192a8c433d9997314c403a9722f7f77a35bdb",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/34-GB-CYL-FRS-9ML-08-GBTallCylFrst9SprySlSh/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "GBTALLCYLFRST9WHTSHT|GBCYLFRS9MLS02",
+      "websiteSku": "GBTallCylFrst9WhtSht",
+      "graceSku": "GB-CYL-FRS-9ML-S-02",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-9ml-frosted-13-415",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "widthAxisMm": 18,
+        "secondAxisMm": 18,
+        "heightWithCapMm": 109,
+        "axisSemantics": "round",
+        "neckThreadSize": "13-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 634
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Frosted",
+        "applicator": null,
+        "capStyle": "Tall",
+        "capColor": "Frosted",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-short-white-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9WhtSht.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/tall-cylinder-design-9-ml-frosted-glass-bottle-short-white-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 13550,
+        "sha256": "852fa1045bf003e83757f63e923209708a83ba3d87eda6b30dda97431919bb3c",
+        "relativePath": "evidence/35-GB-CYL-FRS-9ML-S-02-GBTallCylFrst9WhtSht/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/GBTallCylFrst9WhtSht.gif",
+        "contentType": "image/gif",
+        "bytes": 8990,
+        "sha256": "526c31d2fec4ab6dd3ce8b2ef9731641bc9033732862abe1a62c3d4459d00a55",
+        "format": "png",
+        "width": 360,
+        "height": 480,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/35-GB-CYL-FRS-9ML-S-02-GBTallCylFrst9WhtSht/original.png"
+      },
+      "approvedReference": {
+        "bytes": 15115,
+        "sha256": "966bc3fbb8bbe4f0048e255190d8e1b728c689ca8b14bcea49e8c9cc05007644",
+        "width": 360,
+        "height": 480,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/35-GB-CYL-FRS-9ML-S-02-GBTallCylFrst9WhtSht/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "LBCYL25LTNCU|LBCYLCLR25MLLPMCPR",
+      "websiteSku": "LBCyl25LtnCu",
+      "graceSku": "LB-CYL-CLR-25ML-LPM-CPR",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-25ml-clear-18-415-lotionpump",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "widthAxisMm": 32,
+        "secondAxisMm": 32,
+        "heightWithCapMm": 108,
+        "axisSemantics": "round",
+        "neckThreadSize": "18-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 722
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Lotion Pump",
+        "capStyle": "Pump",
+        "capColor": "Copper",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-copper-lotion-pump-and-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnCu.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-copper-lotion-pump-and-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2649,
+        "sha256": "8e72401a4a107185601743d7ce9dc70994bcc137c7a55e6f0991b95b2baf85fb",
+        "relativePath": "evidence/36-LB-CYL-CLR-25ML-LPM-CPR-LBCyl25LtnCu/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnCu.gif",
+        "contentType": "image/gif",
+        "bytes": 65965,
+        "sha256": "80ab698c03090ee0781b6d22e9ba7faf28627cfe5782e5ef15250daf1e1ee897",
+        "format": "png",
+        "width": 600,
+        "height": 800,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/36-LB-CYL-CLR-25ML-LPM-CPR-LBCyl25LtnCu/original.png"
+      },
+      "approvedReference": {
+        "bytes": 109759,
+        "sha256": "9a264607c41eed255ec7a6384c2d5deab0e0cdfc584b5057c9ba891804ab0337",
+        "width": 600,
+        "height": 800,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/36-LB-CYL-CLR-25ML-LPM-CPR-LBCyl25LtnCu/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "LBCYL25LTNMTSL|LBCYLCLR25MLLPMMSLV",
+      "websiteSku": "LBCyl25LtnMtSl",
+      "graceSku": "LB-CYL-CLR-25ML-LPM-MSLV",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-25ml-clear-18-415-lotionpump",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "widthAxisMm": 32,
+        "secondAxisMm": 32,
+        "heightWithCapMm": 108,
+        "axisSemantics": "round",
+        "neckThreadSize": "18-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 724
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Lotion Pump",
+        "capStyle": "Pump",
+        "capColor": "Matte Silver",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-silver-lotion-pump-and-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnMtSl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-silver-lotion-pump-and-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2657,
+        "sha256": "72bd504408c8a14121cb2c1992e2a970070cbf99ea90b0f98472693cbd70a5a7",
+        "relativePath": "evidence/37-LB-CYL-CLR-25ML-LPM-MSLV-LBCyl25LtnMtSl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnMtSl.gif",
+        "contentType": "image/gif",
+        "bytes": 42391,
+        "sha256": "b7083749162436fd202ec7e0bd549e97b6de22a31733fd25f6f06703b9943327",
+        "format": "png",
+        "width": 600,
+        "height": 800,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/37-LB-CYL-CLR-25ML-LPM-MSLV-LBCyl25LtnMtSl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 66190,
+        "sha256": "9da20cf5903b2e24fad96857cda393f90e7955e61b2f101df874c0e71798615f",
+        "width": 600,
+        "height": 800,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/37-LB-CYL-CLR-25ML-LPM-MSLV-LBCyl25LtnMtSl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "LBCYL25LTNSHNBLK|LBCYLCLR25MLLPMSBLK",
+      "websiteSku": "LBCyl25LtnShnBlk",
+      "graceSku": "LB-CYL-CLR-25ML-LPM-SBLK",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-25ml-clear-18-415-lotionpump",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "widthAxisMm": 32,
+        "secondAxisMm": 32,
+        "heightWithCapMm": 108,
+        "axisSemantics": "round",
+        "neckThreadSize": "18-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 725
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Lotion Pump",
+        "capStyle": "Pump",
+        "capColor": "Shiny Black",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-black-lotion-pump-and-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnBlk.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-black-lotion-pump-and-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2674,
+        "sha256": "26d65df79c3226cfba82c4e8fd00fc5b2e53acec73ee2ffe3ad6499a5509b29d",
+        "relativePath": "evidence/38-LB-CYL-CLR-25ML-LPM-SBLK-LBCyl25LtnShnBlk/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnBlk.gif",
+        "contentType": "image/gif",
+        "bytes": 40787,
+        "sha256": "07fd07570a6a6d7f2064b0d7899eea7e04e977509e945f53d84cf36f3b574703",
+        "format": "png",
+        "width": 600,
+        "height": 800,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/38-LB-CYL-CLR-25ML-LPM-SBLK-LBCyl25LtnShnBlk/original.png"
+      },
+      "approvedReference": {
+        "bytes": 63548,
+        "sha256": "7f30a83e2ca88aa64aca38e7ecd7de2e2d15d46d482271983d8cc54c372380f1",
+        "width": 600,
+        "height": 800,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/38-LB-CYL-CLR-25ML-LPM-SBLK-LBCyl25LtnShnBlk/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "LBCYL25LTNSHNGL|LBCYLCLR25MLLPMSGLD",
+      "websiteSku": "LBCyl25LtnShnGl",
+      "graceSku": "LB-CYL-CLR-25ML-LPM-SGLD",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-25ml-clear-18-415-lotionpump",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "widthAxisMm": 32,
+        "secondAxisMm": 32,
+        "heightWithCapMm": 108,
+        "axisSemantics": "round",
+        "neckThreadSize": "18-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 726
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Lotion Pump",
+        "capStyle": "Screw Cap",
+        "capColor": "Shiny Gold",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-gold-lotion-pump-and-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnGl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-gold-lotion-pump-and-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2645,
+        "sha256": "eef806968db432220cde7422b470133d66635aa1b67baca13e64e0048fac58df",
+        "relativePath": "evidence/39-LB-CYL-CLR-25ML-LPM-SGLD-LBCyl25LtnShnGl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnGl.gif",
+        "contentType": "image/gif",
+        "bytes": 60880,
+        "sha256": "25ef06833b1a8810a13928ea38113e0155b256eb12b0ca6981bf2b1927ad8e76",
+        "format": "png",
+        "width": 600,
+        "height": 800,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/39-LB-CYL-CLR-25ML-LPM-SGLD-LBCyl25LtnShnGl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 101786,
+        "sha256": "7b65d2f430b8027d62deb3cbc3a093396aadbb65cf82458c44f6d3878885d04d",
+        "width": 600,
+        "height": 800,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/39-LB-CYL-CLR-25ML-LPM-SGLD-LBCyl25LtnShnGl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    },
+    {
+      "canonicalIdentityKey": "LBCYL25LTNSHNSL|LBCYLCLR25MLLPMSSLV",
+      "websiteSku": "LBCyl25LtnShnSl",
+      "graceSku": "LB-CYL-CLR-25ML-LPM-SSLV",
+      "canonicalFamily": "Cylinder",
+      "productGroupSlug": "cylinder-25ml-clear-18-415-lotionpump",
+      "identityDecision": "approved-exact-live-pointer-reference",
+      "reviewer": "Jordan Richter",
+      "reviewedAt": "2026-07-14",
+      "reviewEvidence": "User approved all 40 surfaced images in the Codex review sheet and explicitly confirmed the tall and frosted 9 mL identities, sprays, and 25 mL references.",
+      "canonicalGeometry": {
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "widthAxisMm": 32,
+        "secondAxisMm": 32,
+        "heightWithCapMm": 108,
+        "axisSemantics": "round",
+        "neckThreadSize": "18-415",
+        "conflictFlags": [],
+        "provenance": {
+          "bodyHeightSource": "catalog+site-confirmed",
+          "bodyHeightConfidence": "high",
+          "widthAxisSource": "catalog+site-confirmed",
+          "widthAxisConfidence": "high",
+          "secondAxisStatus": "equal-to-diameter(circular)",
+          "sourceColumns": [
+            "canon_bodyHeightMm",
+            "canon_widthAxisMm",
+            "canon_secondAxisMm",
+            "canon_heightWithCapMm"
+          ],
+          "masterTruthCsvRow": 727
+        }
+      },
+      "productAttributes": {
+        "glassFinish": "Clear",
+        "applicator": "Lotion Pump",
+        "capStyle": "Pump",
+        "capColor": "Shiny Silver",
+        "trimColor": null,
+        "ballMaterial": null,
+        "assemblyType": "2-part"
+      },
+      "componentTopology": "bottle-primary-with-detached-cap-or-overcap-sidecar",
+      "sourcePdpUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-silver-lotion-pump-and-cap",
+      "sourceImageUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnSl.gif",
+      "pdpEvidence": {
+        "readerUrl": "https://r.jina.ai/https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-shiny-silver-lotion-pump-and-cap",
+        "httpStatus": 200,
+        "contentType": "text/plain; charset=utf-8",
+        "bytes": 2675,
+        "sha256": "ef459f5c96b687a37b6955b86b0ab175ca4201e15420fb7a00dd331084bb869b",
+        "relativePath": "evidence/40-LB-CYL-CLR-25ML-LPM-SSLV-LBCyl25LtnShnSl/pdp-jina.md",
+        "containsWebsiteSku": true,
+        "containsGraceSku": false
+      },
+      "originalEvidence": {
+        "httpStatus": 200,
+        "responseUrl": "https://www.bestbottles.com/images/store/enlarged_pics/LBcyl25LtnShnSl.gif",
+        "contentType": "image/gif",
+        "bytes": 43187,
+        "sha256": "edb09f9541db7a9271f30d0f8a6a30a1469c397980680c7527a42b1f8f11f8e9",
+        "format": "png",
+        "width": 600,
+        "height": 800,
+        "pages": 1,
+        "hasAlpha": false,
+        "relativePath": "evidence/40-LB-CYL-CLR-25ML-LPM-SSLV-LBCyl25LtnShnSl/original.png"
+      },
+      "approvedReference": {
+        "bytes": 68200,
+        "sha256": "ccb9626e3a6d315e111995dfc605e04bf49980425481b53c0a49356b59116147",
+        "width": 600,
+        "height": 800,
+        "hasAlpha": false,
+        "backgroundHex": "#F5F3EF",
+        "resized": false,
+        "aiReconstruction": false,
+        "relativePath": "evidence/40-LB-CYL-CLR-25ML-LPM-SSLV-LBCyl25LtnShnSl/reference-native-opaque-v001.png"
+      },
+      "resolutionStatus": "low-resolution-generation-reference",
+      "productionDisposition": "generation-reference-approved-remediation-required",
+      "targetCanvas": {
+        "widthPx": 2080,
+        "heightPx": 2288
+      },
+      "resizePolicy": "Do not upscale as source truth; provide natively to the generator and enforce canonical geometry on the 2080x2288 output canvas.",
+      "promotedToFlattenedProductTruth": false,
+      "shopifyPublished": false
+    }
+  ]
+}

@@ -4,7 +4,11 @@
 
 # Editor temp
 .cursor/
-.claude/
+# Ignore .claude/ contents (settings, worktrees, etc.) but keep shared project
+# skills under version control. Use .claude/* (not .claude/) so git can descend
+# into the directory — a negation can't re-include a path under an excluded dir.
+.claude/*
+!.claude/skills/
 
 # macOS
 .DS_Store
@@ -17,9 +21,13 @@
 .playwright-mcp/
 
 # Local research/generation artifacts
+.hermes/
 .firecrawl/
 /remotion/
 /tmp/
+/outputs/
+/my-agent/
+public/data/bb-generated-images-export.json
 scripts/local-generate.ts
 tsconfig.scripts.tmp.json
 

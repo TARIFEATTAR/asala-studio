@@ -428,6 +428,7 @@ const AppContent = () => {
                 <Route path="/darkroom" element={<ProtectedRoute><RouteErrorBoundary routeName="Dark Room"><DarkRoom /></RouteErrorBoundary></ProtectedRoute>} />
                 <Route path="/dark-room" element={<Navigate to="/darkroom" replace />} />
                 <Route path="/best-bottles/pipeline" element={<ProtectedRoute><RouteErrorBoundary routeName="Best Bottles Pipeline"><BestBottlesPipeline /></RouteErrorBoundary></ProtectedRoute>} />
+                <Route path="/best-bottles/studio/:groupSlug" element={<ProtectedRoute><RouteErrorBoundary routeName="Best Bottles Studio"><BestBottlesStudio /></RouteErrorBoundary></ProtectedRoute>} />
                 <Route path="/light-table" element={<ProtectedRoute><RouteErrorBoundary routeName="Light Table"><LightTable /></RouteErrorBoundary></ProtectedRoute>} />
                 <Route path="/image-library" element={<ProtectedRoute><RouteErrorBoundary routeName="Image Library"><ImageLibrary /></RouteErrorBoundary></ProtectedRoute>} />
                 <Route path="/dam" element={<ProtectedRoute><RouteErrorBoundary routeName="Asset Library"><DAMLibrary /></RouteErrorBoundary></ProtectedRoute>} />

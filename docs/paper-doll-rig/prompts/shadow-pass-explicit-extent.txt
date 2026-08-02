@@ -1,0 +1,28 @@
+Add a soft contact shadow beneath this bottle. Change absolutely nothing else.
+
+THE SHADOW — subtle, but clearly present:
+The bottle rests on a smooth surface lit by one large soft light from above and
+slightly to the right. Add the quiet shadow it casts where it meets that
+surface.
+
+Size and spread, precisely:
+- The shadow extends outward roughly ONE FULL BOTTLE-WIDTH to the left and to
+  the right of the base — so the total shadow is about three times as wide as
+  the bottle itself.
+- It reaches downward and fades to nothing over a distance of about ONE SIXTH
+  of the bottle's height.
+- It is darkest immediately beneath the base where the glass meets the surface,
+  and lightens smoothly and continuously outward in every direction.
+
+Character: soft-edged and low in contrast throughout. No hard outline, no
+crisp ellipse, no dark pool, no long dramatic cast. Restrained and elegant —
+the bottle should read as grounded and sitting on a real surface, never
+floating, but the shadow must stay gentle.
+
+CHANGE NOTHING ELSE — this is critical:
+The bottle itself is completely untouched. Identical glass, identical colour,
+identical material and surface texture, identical highlights and reflections,
+identical position on the canvas, identical size, width, height, outline, neck,
+thread rings, and base. The background stays exactly the same seamless warm
+cream. Do not move, resize, re-center, re-crop, re-frame, re-light, or
+re-render the bottle in any way. Only the shadow is added beneath it.

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-01T14:13:22.446Z",
+  "entries": [
+    {
+      "id": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "role": "body-plate",
+      "bodyKey": {
+        "family": "Cylinder",
+        "capacityMl": 9,
+        "colorway": "clear",
+        "heightMm": 70,
+        "diameterMm": 20,
+        "neckThreadSize": "17-415"
+      },
+      "asset": {
+        "path": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+        "sha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+        "widthPx": 2080,
+        "heightPx": 2288,
+        "hasAlpha": false
+      },
+      "registration": {
+        "canvas": "2080x2288",
+        "background": "#F5F3EF",
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2086,
+        "centerX": 1041,
+        "threadCrestPx": 269,
+        "threadCrestMm": 17,
+        "$comment": "baselineY is this plate MEASURED base, not a normalized target — the five span 2086..2092 (6px). Plates are locked AS GENERATED: running them through normalize-plate would measure the contact shadow as part of the body and rescale them. Neck registration (the number closures depend on) agrees to 4px."
+      },
+      "provenance": {
+        "source": "gpt-image-2 shadow pass over Nano-Banana material lock",
+        "intakeDate": "2026-08-01T00:00:00.000Z",
+        "intakeBy": "claude-code"
+      },
+      "status": "approved",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-08-01T00:00:00.000Z",
+      "notes": "Shadowed true-north body. Supersedes the shadow-less plate of the same id. Verified 2026-08-01: across all five colorways the neck silhouette agrees to a mean 4px over the 211px strip y=760..971, centerline within 3px, so ONE closure recipe seats on every plate without per-bottle tuning."
+    },
+    {
+      "id": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "role": "body-plate",
+      "bodyKey": {
+        "family": "Cylinder",
+        "capacityMl": 9,
+        "colorway": "frosted",
+        "heightMm": 70,
+        "diameterMm": 20,
+        "neckThreadSize": "17-415"
+      },
+      "asset": {
+        "path": "assets/paper-doll/body-plates/body__cylinder__9ml__frosted__70.0x20.0mm.png",
+        "sha256": "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956",
+        "widthPx": 2080,
+        "heightPx": 2288,
+        "hasAlpha": false
+      },
+      "registration": {
+        "canvas": "2080x2288",
+        "background": "#F5F3EF",
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2092,
+        "centerX": 1041,
+        "threadCrestPx": 269,
+        "threadCrestMm": 17,
+        "$comment": "baselineY is this plate MEASURED base, not a normalized target — the five span 2086..2092 (6px). Plates are locked AS GENERATED: running them through normalize-plate would measure the contact shadow as part of the body and rescale them. Neck registration (the number closures depend on) agrees to 4px."
+      },
+      "provenance": {
+        "source": "gpt-image-2 shadow pass over Nano-Banana material lock",
+        "intakeDate": "2026-08-01T00:00:00.000Z",
+        "intakeBy": "claude-code"
+      },
+      "status": "approved",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-08-01T00:00:00.000Z",
+      "notes": "Shadowed true-north body. Supersedes the shadow-less plate of the same id. Verified 2026-08-01: across all five colorways the neck silhouette agrees to a mean 4px over the 211px strip y=760..971, centerline within 3px, so ONE closure recipe seats on every plate without per-bottle tuning."
+    },
+    {
+      "id": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "role": "body-plate",
+      "bodyKey": {
+        "family": "Cylinder",
+        "capacityMl": 9,
+        "colorway": "swirl",
+        "heightMm": 70,
+        "diameterMm": 20,
+        "neckThreadSize": "17-415"
+      },
+      "asset": {
+        "path": "assets/paper-doll/body-plates/body__cylinder__9ml__swirl__70.0x20.0mm.png",
+        "sha256": "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68",
+        "widthPx": 2080,
+        "heightPx": 2288,
+        "hasAlpha": false
+      },
+      "registration": {
+        "canvas": "2080x2288",
+        "background": "#F5F3EF",
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2091,
+        "centerX": 1041,
+        "threadCrestPx": 269,
+        "threadCrestMm": 17,
+        "$comment": "baselineY is this plate MEASURED base, not a normalized target — the five span 2086..2092 (6px). Plates are locked AS GENERATED: running them through normalize-plate would measure the contact shadow as part of the body and rescale them. Neck registration (the number closures depend on) agrees to 4px."
+      },
+      "provenance": {
+        "source": "gpt-image-2 shadow pass over Nano-Banana material lock",
+        "intakeDate": "2026-08-01T00:00:00.000Z",
+        "intakeBy": "claude-code"
+      },
+      "status": "approved",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-08-01T00:00:00.000Z",
+      "notes": "Shadowed true-north body. Supersedes the shadow-less plate of the same id. Verified 2026-08-01: across all five colorways the neck silhouette agrees to a mean 4px over the 211px strip y=760..971, centerline within 3px, so ONE closure recipe seats on every plate without per-bottle tuning."
+    },
+    {
+      "id": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "role": "body-plate",
+      "bodyKey": {
+        "family": "Cylinder",
+        "capacityMl": 9,
+        "colorway": "amber",
+        "heightMm": 70,
+        "diameterMm": 20,
+        "neckThreadSize": "17-415"
+      },
+      "asset": {
+        "path": "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png",
+        "sha256": "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3",
+        "widthPx": 2080,
+        "heightPx": 2288,
+        "hasAlpha": false
+      },
+      "registration": {
+        "canvas": "2080x2288",
+        "background": "#F5F3EF",
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "centerX": 1041,
+        "threadCrestPx": 269,
+        "threadCrestMm": 17,
+        "$comment": "baselineY is this plate MEASURED base, not a normalized target — the five span 2086..2092 (6px). Plates are locked AS GENERATED: running them through normalize-plate would measure the contact shadow as part of the body and rescale them. Neck registration (the number closures depend on) agrees to 4px."
+      },
+      "provenance": {
+        "source": "gpt-image-2 shadow pass over Nano-Banana material lock",
+        "intakeDate": "2026-08-01T00:00:00.000Z",
+        "intakeBy": "claude-code"
+      },
+      "status": "approved",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-08-01T00:00:00.000Z",
+      "notes": "Shadowed true-north body. Supersedes the shadow-less plate of the same id. Verified 2026-08-01: across all five colorways the neck silhouette agrees to a mean 4px over the 211px strip y=760..971, centerline within 3px, so ONE closure recipe seats on every plate without per-bottle tuning."
+    },
+    {
+      "id": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "role": "body-plate",
+      "bodyKey": {
+        "family": "Cylinder",
+        "capacityMl": 9,
+        "colorway": "cobalt",
+        "heightMm": 70,
+        "diameterMm": 20,
+        "neckThreadSize": "17-415"
+      },
+      "asset": {
+        "path": "assets/paper-doll/body-plates/body__cylinder__9ml__cobalt__70.0x20.0mm.png",
+        "sha256": "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c",
+        "widthPx": 2080,
+        "heightPx": 2288,
+        "hasAlpha": false
+      },
+      "registration": {
+        "canvas": "2080x2288",
+        "background": "#F5F3EF",
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "centerX": 1041,
+        "threadCrestPx": 269,
+        "threadCrestMm": 17,
+        "$comment": "baselineY is this plate MEASURED base, not a normalized target — the five span 2086..2092 (6px). Plates are locked AS GENERATED: running them through normalize-plate would measure the contact shadow as part of the body and rescale them. Neck registration (the number closures depend on) agrees to 4px."
+      },
+      "provenance": {
+        "source": "gpt-image-2 shadow pass over Nano-Banana material lock",
+        "intakeDate": "2026-08-01T00:00:00.000Z",
+        "intakeBy": "claude-code"
+      },
+      "status": "approved",
+      "reviewedBy": "jordan",
+      "reviewedAt": "2026-08-01T00:00:00.000Z",
+      "notes": "Shadowed true-north body. Supersedes the shadow-less plate of the same id. Verified 2026-08-01: across all five colorways the neck silhouette agrees to a mean 4px over the 211px strip y=760..971, centerline within 3px, so ONE closure recipe seats on every plate without per-bottle tuning."
+    }
+  ]
+}

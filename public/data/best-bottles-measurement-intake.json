@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-06-16T05:37:57.869Z",
+  "sources": {
+    "readiness": "/Users/jordanrichter/Projects/Madison Studio/madison-app/public/data/best-bottles-generation-readiness.json",
+    "measurementOverrides": "/Users/jordanrichter/Projects/Madison Studio/madison-app/public/data/best-bottles-measurement-overrides.json",
+    "liveProductsCsv": "/Users/jordanrichter/Projects/Madison Studio/madison-app/tmp/best-bottles-convex-live-products.csv"
+  },
+  "summary": {
+    "readinessRows": 2483,
+    "measurementBlockedRows": 0,
+    "productUrlsFromLiveProductsCsv": 4805,
+    "targeted": 0,
+    "attempted": 0,
+    "sourced": 0,
+    "skippedNoApiKey": false,
+    "errors": 0
+  },
+  "candidates": []
+}

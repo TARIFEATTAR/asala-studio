@@ -47,7 +47,16 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrganizationId } from "@/hooks/useIndustryConfig";
+import { DEFAULT_IMAGE_AI_PROVIDER } from "@/config/imageSettings";
 import { ImageEditorModal, type ImageEditorImage } from "@/components/image-editor/ImageEditorModal";
+import {
+  readPreserveCanvasGenerationMetadata,
+  resolveGenerationCanvasMetadata,
+} from "@/lib/imageCanvasMetadata";
+import {
+  getSupabaseFunctionErrorMessage,
+  resolveEdgeSafeImageSettings,
+} from "@/lib/imageGenerationEdgeSafety";
 
 // Ad Overlay components
 import { AdOverlay, AdPresetSelector, type AdOverlayConfig } from "@/components/ad-overlay";
@@ -341,6 +350,23 @@ export default function LightTable() {
     });
 
     try {
+      const preserveCanvasMetadata = await readPreserveCanvasGenerationMetadata(selectedImage.imageUrl);
+      const generationCanvasMetadata = resolveGenerationCanvasMetadata(
+        preserveCanvasMetadata,
+        {
+          prompt: selectedImage.prompt,
+        },
+      );
+      const refinementAspectRatio = generationCanvasMetadata.aspectRatio || "1:1";
+      const edgeSafeSettings = resolveEdgeSafeImageSettings({
+        aiProvider: DEFAULT_IMAGE_AI_PROVIDER,
+        resolution: "standard",
+        outputFormat: "png",
+        hasReferenceImages: true,
+        surface: "light-table",
+        goalType: "refinement",
+      });
+
       const { data, error } = await supabase.functions.invoke("generate-madison-image", {
         body: {
           prompt: refinementPrompt,
@@ -354,7 +380,11 @@ export default function LightTable() {
           userId: user.id,
           organizationId: orgId,
           goalType: "refinement",
-          aspectRatio: "1:1",
+          aspectRatio: refinementAspectRatio,
+          outputFormat: edgeSafeSettings.outputFormat,
+          aiProvider: edgeSafeSettings.aiProvider,
+          resolution: edgeSafeSettings.resolution,
+          imageConstraints: generationCanvasMetadata.imageConstraints,
         },
       });
 
@@ -362,10 +392,9 @@ export default function LightTable() {
 
       if (error) {
         console.error("❌ Refinement API error:", error);
-        // Try to get more details from the error
-        const errorDetails = error?.context?.body || error?.message || JSON.stringify(error);
+        const errorDetails = await getSupabaseFunctionErrorMessage(error);
         console.error("❌ Error details:", errorDetails);
-        throw new Error(typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails));
+        throw new Error(errorDetails);
       }
 
       // Check if data contains an error
@@ -457,11 +486,28 @@ export default function LightTable() {
       ];
 
       console.log("📸 Generating 3 variations...");
+      const preserveCanvasMetadata = await readPreserveCanvasGenerationMetadata(selectedImage.imageUrl);
+      const generationCanvasMetadata = resolveGenerationCanvasMetadata(
+        preserveCanvasMetadata,
+        {
+          prompt: selectedImage.prompt,
+        },
+      );
+      const variationAspectRatio = generationCanvasMetadata.aspectRatio || "1:1";
+      const edgeSafeSettings = resolveEdgeSafeImageSettings({
+        aiProvider: DEFAULT_IMAGE_AI_PROVIDER,
+        resolution: "standard",
+        outputFormat: "png",
+        hasReferenceImages: true,
+        surface: "light-table",
+        goalType: "variation",
+      });
 
-      const results = await Promise.allSettled(
-        variationPrompts.map(async (prompt, index) => {
-          console.log(`  → Variation ${index + 1} starting...`);
+      const newVariations: Variation[] = [];
+      for (const [index, prompt] of variationPrompts.entries()) {
+        console.log(`  → Variation ${index + 1} starting...`);
 
+        try {
           const { data, error } = await supabase.functions.invoke("generate-madison-image", {
             body: {
               prompt,
@@ -475,34 +521,45 @@ export default function LightTable() {
               userId: user.id,
               organizationId: orgId,
               goalType: "variation",
-              aspectRatio: "1:1",
+              aspectRatio: variationAspectRatio,
+              outputFormat: edgeSafeSettings.outputFormat,
+              aiProvider: edgeSafeSettings.aiProvider,
+              resolution: edgeSafeSettings.resolution,
+              imageConstraints: generationCanvasMetadata.imageConstraints,
             },
           });
 
           if (error) {
-            console.error(`  ❌ Variation ${index + 1} error:`, error);
-            throw error;
+            throw new Error(await getSupabaseFunctionErrorMessage(error));
           }
 
-          console.log(`  ✅ Variation ${index + 1} complete:`, data?.imageUrl?.substring(0, 50));
-
-          return {
+          const nextVariation = {
             id: placeholders[index].id,
             imageUrl: data?.imageUrl || "",
             isGenerating: false,
           };
-        })
-      );
 
-      const newVariations = results
-        .map((result, index) => {
-          if (result.status === "fulfilled" && result.value.imageUrl) {
-            return result.value;
+          if (nextVariation.imageUrl) {
+            console.log(`  ✅ Variation ${index + 1} complete:`, nextVariation.imageUrl.substring(0, 50));
+            newVariations.push(nextVariation);
+          } else {
+            console.warn(`  ⚠️ Variation ${index + 1} returned no image`);
           }
-          console.warn(`  ⚠️ Variation ${index + 1} failed or empty`);
-          return { id: placeholders[index].id, imageUrl: "", isGenerating: false };
-        })
-        .filter((v) => v.imageUrl);
+
+          setVariations((prev) =>
+            prev.map((variation, variationIndex) =>
+              variationIndex === index ? nextVariation : variation
+            )
+          );
+        } catch (variationError) {
+          console.error(`  ❌ Variation ${index + 1} error:`, variationError);
+          setVariations((prev) =>
+            prev.map((variation, variationIndex) =>
+              variationIndex === index ? { ...variation, isGenerating: false } : variation
+            )
+          );
+        }
+      }
 
       setVariations(newVariations);
 
@@ -1558,7 +1615,7 @@ Generate a polished, publication-ready advertisement image where the product and
             // Add new image to session
             const newSessionImage: SessionImage = {
               id: newImage.id,
-              imageUrl: newImage.url,
+              imageUrl: newImage.imageUrl,
               prompt: newImage.prompt || selectedImage.prompt,
               timestamp: Date.now(),
               isSaved: true,

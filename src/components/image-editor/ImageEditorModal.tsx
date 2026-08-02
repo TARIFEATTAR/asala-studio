@@ -52,7 +52,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { LIBRARY_ROLE_PRODUCT } from "@/lib/imageLibraryTags";
+import {
+  readPreserveCanvasGenerationMetadata,
+  resolveGenerationCanvasMetadata,
+} from "@/lib/imageCanvasMetadata";
+import {
+  getInlineRefinementRequestPrompt,
+  IMAGE_REFINEMENT_QUICK_EDITS,
+  mergeRefinementLibraryTags,
+} from "@/lib/imageRefinementQuickEdits";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrganizationId } from "@/hooks/useIndustryConfig";
 
@@ -233,23 +241,39 @@ export function ImageEditorModal({
   const hasAdContent = adConfig.headline || adConfig.subtext || adConfig.ctaText;
 
   // Generate a variation/refinement
-  const handleRefine = useCallback(async () => {
-    if (!image || !user || !orgId || !refinementPrompt.trim()) {
+  const handleRefine = useCallback(async (instructionOverride?: string) => {
+    const instruction = (instructionOverride ?? refinementPrompt).trim();
+
+    if (!image || !user || !orgId || !instruction) {
       toast.error("Please enter a refinement prompt");
       return;
     }
-    if (isLikelyPromptBlock(refinementPrompt)) {
+    if (isLikelyPromptBlock(instruction)) {
       toast.error("Use a short edit instruction, not a full prompt block.");
       return;
     }
 
     setIsGenerating(true);
     const inheritedTags = Array.isArray(image.libraryTags) ? image.libraryTags : [];
+    const refinementTags = mergeRefinementLibraryTags(inheritedTags);
 
     try {
+      const preserveCanvasMetadata = await readPreserveCanvasGenerationMetadata(image.imageUrl);
+      const generationCanvasMetadata = resolveGenerationCanvasMetadata(
+        preserveCanvasMetadata,
+        {
+          prompt: image.prompt,
+          libraryTags: inheritedTags,
+          aspectRatio: image.aspectRatio,
+          goalType: image.goalType,
+        },
+      );
+      const refinementAspectRatio =
+        generationCanvasMetadata.aspectRatio || image.aspectRatio || "1:1";
+
       const { data, error } = await supabase.functions.invoke("generate-madison-image", {
         body: {
-          prompt: refinementPrompt,
+          prompt: getInlineRefinementRequestPrompt(image.prompt, instruction),
           // Pass as referenceImages array (correct format for edge function)
           referenceImages: [{
             url: image.imageUrl,
@@ -259,12 +283,13 @@ export function ImageEditorModal({
           userId: user.id,
           organizationId: orgId,
           goalType: "refinement",
-          aspectRatio: image.aspectRatio || "1:1",
+          aspectRatio: refinementAspectRatio,
+          imageConstraints: generationCanvasMetadata.imageConstraints,
           parentImageId: image.id,
           isRefinement: true,
-          refinementInstruction: refinementPrompt,
+          refinementInstruction: instruction,
           parentPrompt: image.prompt,
-          extraLibraryTags: Array.from(new Set([LIBRARY_ROLE_PRODUCT, ...inheritedTags])),
+          extraLibraryTags: refinementTags,
         },
       });
 
@@ -274,10 +299,13 @@ export function ImageEditorModal({
         const newImage: ImageEditorImage = {
           id: data.savedImageId || uuidv4(),
           imageUrl: data.imageUrl,
-          prompt: refinementPrompt,
+          prompt: image.prompt || data.finalPrompt || instruction,
           isSaved: true,
-          aspectRatio: image.aspectRatio,
-          libraryTags: inheritedTags,
+          goalType: "refinement",
+          aspectRatio: refinementAspectRatio,
+          createdAt: new Date().toISOString(),
+          sessionName: image.sessionName,
+          libraryTags: refinementTags,
         };
 
         // Add to variations
@@ -320,6 +348,19 @@ export function ImageEditorModal({
     setVariations(placeholders);
 
     try {
+      const preserveCanvasMetadata = await readPreserveCanvasGenerationMetadata(image.imageUrl);
+      const generationCanvasMetadata = resolveGenerationCanvasMetadata(
+        preserveCanvasMetadata,
+        {
+          prompt: image.prompt,
+          libraryTags: inheritedTags,
+          aspectRatio: image.aspectRatio,
+          goalType: image.goalType,
+        },
+      );
+      const variationAspectRatio =
+        generationCanvasMetadata.aspectRatio || image.aspectRatio || "1:1";
+
       // Generate 3 variations with slightly different prompts
       const variationPrompts = [
         `${image.prompt}. Alternative angle with dramatic lighting.`,
@@ -341,9 +382,10 @@ export function ImageEditorModal({
               userId: user.id,
               organizationId: orgId,
               goalType: "variation",
-              aspectRatio: image.aspectRatio || "1:1",
+              aspectRatio: variationAspectRatio,
+              imageConstraints: generationCanvasMetadata.imageConstraints,
               parentImageId: image.id,
-              extraLibraryTags: Array.from(new Set([LIBRARY_ROLE_PRODUCT, ...inheritedTags])),
+              extraLibraryTags: mergeRefinementLibraryTags(inheritedTags),
             },
           });
 
@@ -449,6 +491,7 @@ export function ImageEditorModal({
   const displayedImage = selectedVariationId
     ? variations.find((v) => v.id === selectedVariationId)?.imageUrl || image?.imageUrl
     : image?.imageUrl;
+  const duplicateCapQuickEdit = IMAGE_REFINEMENT_QUICK_EDITS[0];
 
   // Always render Dialog for proper state management, but only open when image exists
   const refinePromptLooksBlocked =
@@ -672,13 +715,30 @@ export function ImageEditorModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                    <label className="text-sm font-medium text-[rgba(245,240,230,0.7)]">
-                    Describe what you'd like to change
-                  </label>
+                    <div className="flex items-center justify-between gap-2">
+                      <label className="text-sm font-medium text-[rgba(245,240,230,0.7)]">
+                        Describe what you'd like to change
+                      </label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={isGenerating}
+                        onClick={() => {
+                          setRefinementPrompt(duplicateCapQuickEdit.instruction);
+                          void handleRefine(duplicateCapQuickEdit.instruction);
+                        }}
+                        title="Run a short edit that removes duplicate loose cap artifacts"
+                        className="h-7 shrink-0 border border-[rgba(184,149,106,0.25)] px-2 text-[10px] text-[var(--darkroom-accent)] hover:bg-[rgba(184,149,106,0.1)]"
+                      >
+                        <Wand2 className="mr-1 h-3 w-3" />
+                        {duplicateCapQuickEdit.label}
+                      </Button>
+                    </div>
                   <Textarea
                     value={refinementPrompt}
                     onChange={(e) => setRefinementPrompt(e.target.value)}
-                    placeholder="Short edit only, e.g. soften the contact shadow and clean the cream background"
+                    placeholder="Short edit only, e.g. remove the duplicate cap, keep one loose cap beside the bottle, and preserve the exposed sprayer top"
                       className="bg-[rgba(26,24,22,0.8)] border-[rgba(184,149,106,0.2)] text-[var(--darkroom-text)] placeholder:text-[rgba(245,240,230,0.4)] focus:border-[var(--darkroom-accent)] focus:ring-1 focus:ring-[rgba(184,149,106,0.2)] resize-none"
                     rows={4}
                   />
@@ -689,16 +749,29 @@ export function ImageEditorModal({
                   )}
                   <Button
                     variant="brass"
-                    onClick={handleRefine}
+                    onClick={() => void handleRefine()}
                     disabled={isGenerating || !refinementPrompt.trim() || refinePromptLooksBlocked}
                       className="w-full"
+                      title={
+                        refinePromptLooksBlocked
+                          ? "Use a short edit instruction instead of the full original prompt"
+                          : !refinementPrompt.trim()
+                            ? "Enter a short edit instruction first"
+                            : "Generate a refined image"
+                      }
                   >
                     {isGenerating ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
                       <Wand2 className="w-4 h-4 mr-2" />
                     )}
-                    {isGenerating ? "Generating..." : "Refine Image"}
+                    {isGenerating
+                      ? "Generating..."
+                      : refinePromptLooksBlocked
+                        ? "Use Short Edit"
+                        : refinementPrompt.trim()
+                          ? "Refine Image"
+                          : "Enter Edit"}
                   </Button>
 
                   {/* Original Prompt Display */}

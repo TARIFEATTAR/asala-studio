@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "updatedAt": "2026-07-31T14:02:50.639Z",
+  "entries": [
+    {
+      "id": "welded__fitment-png__on__plate-clear-png",
+      "componentRegistryId": "file:/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-pilot/fixtures/fitment.png",
+      "bodyRegistryId": "file:/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-pilot/fixtures/plate-clear.png",
+      "bodySha256": "83959670d47a4bd467a603f5cdc7d60323eee0e6063bed832a6d25b1c8fa6af0",
+      "asset": {
+        "path": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-pilot/clear-sprayer-weld.layer.png",
+        "sha256": "aa2d681f826c2cdddb6d55e457c4b292f6db95fbb9d94e13d336ad58c9587af9",
+        "widthPx": 800,
+        "heightPx": 1040,
+        "hasAlpha": true
+      },
+      "weld": {
+        "maskSha256": "ea4ce75f420cb85950fcd5aff807facaff2cb14c3668b0c9c6198569a7725990",
+        "regions": {
+          "collarBand": {
+            "left": 363,
+            "right": 437,
+            "top": 195,
+            "bottom": 237
+          },
+          "tubeColumn": {
+            "left": 381,
+            "right": 419,
+            "top": 238,
+            "bottom": 782
+          }
+        },
+        "prompt": "Seat the fine mist sprayer collar naturally on the bottle neck inside the editable band: blend the junction, keep the collar's material, color, and finish exactly as shown.\nInside the vertical editable column, draw the fine mist sprayer's dip tube visible through the clear glass: a straight translucent plastic tube about 4.4 mm wide descending 64 mm from the collar to just above the interior base, rendered BEHIND the front glass wall with natural refraction, slight optical displacement, and the glass wall highlights passing in front of it.\nMatch the existing studio lighting exactly. Change nothing outside the editable regions. Do not add liquid, labels, props, reflections of new objects, or any other elements.",
+        "provider": "supplied",
+        "calledAt": "2026-07-31T14:02:50.639Z"
+      },
+      "qa": {
+        "tubeColumnDelta": 20.21367521367668,
+        "tubePresent": true,
+        "outsideIdentical": true,
+        "issues": [],
+        "passed": true
+      },
+      "status": "pending-review"
+    }
+  ]
+}

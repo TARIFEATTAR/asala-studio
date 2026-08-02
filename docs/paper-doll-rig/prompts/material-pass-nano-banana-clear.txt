@@ -1,0 +1,50 @@
+MATERIAL PASS — clear glass, external image model (Nano Banana / Gemini UI).
+Purpose: produce a rail-free MATERIAL REFERENCE only. Geometry, canvas, and the
+58.5% scale arch are re-locked afterward by GPT Image 2 Pass 2, which consumes
+this as Image 2 (material authority) alongside the PSD cutout (identity).
+Attach: outputs/paper-doll-plates/clear-9ml-17415-v2-normalized.png
+Context: v2 (locked baseline, sha c03714ddce12) exhibits the recurrent
+"barcode rail" defect — GPT Image 2 produced it despite an explicit FORBIDDEN
+clause, so the material pass moves to a different model (Jordan, 2026-08-01).
+
+Re-render this clear glass bottle as a real studio photograph, correcting a
+rendering defect in the reference image.
+
+THE DEFECT TO FIX:
+The reference has artificial vertical stripes — repeating hard-edged bands
+running the full height of the bottle body, like painted rails or a barcode.
+Real glass never looks like this. Remove them completely.
+
+HOW CLEAR GLASS ACTUALLY READS — build the material this way:
+- The two vertical WALL EDGES (far left and far right of the body) are where
+  the cylinder curves away from the camera. These are dense, crisp, and
+  slightly darker — the strongest optical feature of the bottle.
+- Between those edges the MID-BODY IS QUIET AND NEARLY INVISIBLE: you see the
+  warm background straight through it with gentle refraction and a slight
+  optical displacement. Almost nothing happens in the middle of the glass.
+- ONE broad, soft highlight from a large softbox on the right, fading smoothly
+  to nothing. Continuous gradients only — no repeating bands, no hard-edged
+  vertical lines, no parallel rails anywhere across the body.
+- Put the crispness where the object actually has structure: the flat rim, the
+  threaded neck rings, the shoulder step, the thick glass base and the subtle
+  base ring seen through the floor. Visible glass wall thickness at rim and base.
+
+MATERIAL AND MOOD:
+Premium apothecary product photography — restrained luxury. Warm, quiet,
+expensive. The optical depth and craft of fine perfume glass combined with the
+calm, understated warmth of a modern apothecary catalogue. Clean, never flashy:
+no dramatic contrast, no hard hotspots, no colored reflections, no rainbow
+dispersion, no CGI sheen.
+
+GLASS: empty, colorless, optically clean. No liquid, tint, haze, cloudy fill,
+bubbles, frosting, or milky interior.
+
+LIGHTING: one large soft key from the RIGHT, gentle fill from the left, quiet
+speculars.
+
+BACKGROUND: seamless warm cream (#F5F3EF), no horizon line, no props, no text,
+no cast shadow.
+
+KEEP EXACTLY AS SHOWN: the bottle's shape, proportions, height-to-width ratio,
+neck width, thread count and spacing, shoulder line, and base. This is the
+correct product — only the glass material rendering changes.

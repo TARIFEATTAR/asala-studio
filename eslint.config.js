@@ -20,7 +20,7 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       
       // ═══════════════════════════════════════════════════════════════
       // MADISON STUDIO - BRAND CONSISTENCY RULES
@@ -28,14 +28,13 @@ export default tseslint.config(
       // ═══════════════════════════════════════════════════════════════
       
       // Warn on hardcoded hex colors (use Tailwind classes with design tokens)
-      // Note: Set to 'off' during migration, enable later for strict enforcement
-      // 'no-restricted-syntax': [
-      //   'warn',
-      //   {
-      //     selector: 'Literal[value=/#[0-9A-Fa-f]{6}/]',
-      //     message: '🎨 Use design tokens from tailwind.config instead of hardcoded hex colors',
-      //   },
-      // ],
+      "no-restricted-syntax": [
+        "warn",
+        {
+          "selector": "Literal[value=/#[0-9A-Fa-f]{6}/]",
+          "message": "🎨 Use design tokens from tailwind.config instead of hardcoded hex colors"
+        }
+      ]
     },
   },
 );

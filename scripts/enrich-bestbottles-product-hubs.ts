@@ -1,0 +1,959 @@
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { createClient } from "@supabase/supabase-js";
+import { auditProductSeo, normalizeProductSeoName } from "../src/lib/productSeoAudit.ts";
+
+type PipelineProduct = {
+  productGroupSlug?: string;
+  productGroupDisplayName?: string;
+  family?: string;
+  catalogReferencePages?: string;
+  category?: string;
+  capacityMl?: string | number | null;
+  applicator?: string;
+  canonicalColor?: string;
+  color?: string;
+  capStyle?: string;
+  capColor?: string;
+  graceSku?: string;
+  websiteSku?: string;
+  shopifySku?: string | null;
+  productId?: string;
+  sourceId?: string;
+  productGroupId?: string;
+  expectedCanonicalFilename?: string;
+  bestReferenceCandidatePath?: string;
+  heightWithoutCap?: string | number | null;
+  diameter?: string | number | null;
+  catalogHeightWithoutCap?: string | number | null;
+  catalogDiameter?: string | number | null;
+  measurementSource?: string | null;
+  measurementOverrideSource?: string | null;
+  measurementOverrideUrl?: string | null;
+  measurementOverrideNote?: string | null;
+  neckThreadSize?: string | null;
+};
+
+type ExistingProductHub = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  sku: string | null;
+  category: string | null;
+  product_type: string | null;
+  product_line?: string | null;
+  short_description: string | null;
+  long_description: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_keywords: string[] | null;
+  tags: string[] | null;
+  metadata: Record<string, unknown> | null;
+  external_ids: Record<string, unknown> | null;
+  hero_image_id?: string | null;
+  hero_image_external_url?: string | null;
+};
+
+type Group = {
+  slug: string;
+  displayName: string;
+  family: string;
+  category: string | null;
+  capacityMl: number | null;
+  canonicalColor: string | null;
+  catalogReferencePages: string | null;
+  neckThread: string | null;
+  material: string | null;
+  containerType: string;
+  isComponentException: boolean;
+  products: PipelineProduct[];
+  missingSpecFields: string[];
+  specsComplete: boolean;
+};
+
+const ROOT = process.cwd();
+const DEFAULT_PIPELINE_DATA = path.join(ROOT, "public/data/best-bottles-madison-pipeline-ui.json");
+const DEFAULT_READINESS_DATA = path.join(ROOT, "public/data/best-bottles-generation-readiness.json");
+const OUT_SQL = path.join(ROOT, "tmp/best-bottles-product-hub-enrichment.sql");
+const OUT_REVIEW = path.join(ROOT, "tmp/best-bottles-product-hub-enrichment-preview.csv");
+
+const COMPONENT_FAMILIES = new Set([
+  "Cap/Closure",
+  "Cap/Component",
+  "Decorative",
+  "Dropper",
+  "Gift Bag",
+  "Gift Box",
+  "Lotion Pump",
+  "Packaging Supply",
+  "Roll-On Cap",
+  "Sprayer",
+  "Tool",
+]);
+const COMPONENT_CATEGORIES = new Set(["Accessory", "Cap/Closure", "Component", "Packaging"]);
+const GLASS_FAMILIES = new Set([
+  "Apothecary",
+  "Bell",
+  "Boston Round",
+  "Circle",
+  "Cream Jar",
+  "Cylinder",
+  "Diamond",
+  "Diva",
+  "Elegant",
+  "Empire",
+  "Flair",
+  "Grace",
+  "Pillar",
+  "Rectangle",
+  "Round",
+  "Royal",
+  "Sleek",
+  "Slim",
+  "Square",
+  "Tall Cylinder",
+  "Teardrop",
+  "Tulip",
+  "Vial",
+]);
+
+function argValue(name: string): string | null {
+  const prefix = `--${name}=`;
+  const found = process.argv.slice(2).find((arg) => arg.startsWith(prefix));
+  return found ? found.slice(prefix.length) : null;
+}
+
+function clean(value: unknown): string {
+  return String(value ?? "").trim();
+}
+
+function csvEscape(value: unknown): string {
+  const text = Array.isArray(value) ? value.join("; ") : clean(value);
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, "\"\"")}"` : text;
+}
+
+function sqlString(value: unknown): string {
+  const text = clean(value);
+  return text ? `'${text.replace(/'/g, "''")}'` : "NULL";
+}
+
+function sqlJson(value: unknown): string {
+  return `'${JSON.stringify(value).replace(/'/g, "''")}'::jsonb`;
+}
+
+function toInt(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toNumber(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const parsed = Number.parseFloat(String(value));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const clipped = text.slice(0, max).trimEnd();
+  const lastSpace = clipped.lastIndexOf(" ");
+  return lastSpace > max * 0.75 ? clipped.slice(0, lastSpace).trimEnd() : clipped;
+}
+
+function unique(values: Array<string | null | undefined>): string[] {
+  return [...new Set(values.map(clean).filter(Boolean))];
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function firstText(values: unknown[]): string | null {
+  return values.map(clean).find(Boolean) ?? null;
+}
+
+function firstInt(values: unknown[]): number | null {
+  for (const value of values) {
+    const parsed = toInt(value);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
+function normalizeKey(value: unknown): string {
+  return clean(value).toUpperCase();
+}
+
+function inferThreadSize(...values: unknown[]): string | null {
+  for (const value of values) {
+    const normalized = clean(value);
+    const finish = normalized.match(/\b\d{1,2}[-/]\d{3}\b/i);
+    if (finish) return finish[0].replace("/", "-");
+    const millimeter = normalized.match(/\b\d{1,2}\s*mm\b/i);
+    if (millimeter) return millimeter[0].replace(/\s+/g, "").toUpperCase();
+    if (/\bground\b/i.test(normalized)) return "Ground";
+    if (/\bplug\b/i.test(normalized)) return "Plug";
+  }
+  return null;
+}
+
+function isComponentGroup(family: string, category: string | null, displayName: string): boolean {
+  if (/\b(bottle|jar|vial)\b/i.test(`${family} ${category ?? ""}`)) return false;
+  if (COMPONENT_FAMILIES.has(family)) return true;
+  if (category && COMPONENT_CATEGORIES.has(category)) return true;
+  return /\b(cap|closure|sprayer|pump|dropper|fitment|component|accessory|bag|box|tool)\b/i.test(displayName);
+}
+
+function inferMaterial(family: string, category: string | null, displayName: string): string | null {
+  const searchable = `${family} ${category ?? ""} ${displayName}`.toLowerCase();
+  if (searchable.includes("aluminum")) return "Aluminum";
+  if (searchable.includes("plastic")) return "Plastic";
+  if (searchable.includes("metal atomizer") || searchable.includes("atomizer")) return "Metal";
+  if (searchable.includes("gift bag")) return "Paper";
+  if (searchable.includes("gift box")) return "Paperboard";
+  if (searchable.includes("packaging")) return "Packaging";
+  if (GLASS_FAMILIES.has(family) || searchable.includes("glass")) return "Glass";
+  if (/\b(cap|closure|sprayer|pump|dropper|fitment|component|accessory|tool)\b/i.test(searchable)) {
+    return "Component";
+  }
+  return null;
+}
+
+function inferContainerType(group: Pick<Group, "family" | "category" | "displayName" | "isComponentException">): string {
+  const searchable = `${group.family} ${group.category ?? ""} ${group.displayName}`.toLowerCase();
+  if (searchable.includes("jar")) return "Jar";
+  if (searchable.includes("bag")) return "Bag";
+  if (searchable.includes("box")) return "Box";
+  if (searchable.includes("pump")) return "Pump";
+  if (searchable.includes("sprayer")) return "Sprayer";
+  if (searchable.includes("dropper")) return "Dropper";
+  if (searchable.includes("cap") || searchable.includes("closure")) return "Closure";
+  if (group.isComponentException) return "Component";
+  return "Bottle";
+}
+
+function componentRequiresThread(family: string, category: string | null, displayName: string): boolean {
+  if (!isComponentGroup(family, category, displayName)) return true;
+  return /\b(cap|closure|sprayer|pump|dropper|fitment)\b/i.test(`${family} ${category ?? ""} ${displayName}`);
+}
+
+function mergePipelineAndReadinessProducts(pipelineProducts: PipelineProduct[], readinessRows: PipelineProduct[]): PipelineProduct[] {
+  if (readinessRows.length === 0) return pipelineProducts;
+  const pipelineByGrace = new Map(pipelineProducts.map((product) => [normalizeKey(product.graceSku), product]));
+  const pipelineByWebsite = new Map(pipelineProducts.map((product) => [normalizeKey(product.websiteSku), product]));
+
+  return readinessRows.map((row) => {
+    const pipeline =
+      pipelineByGrace.get(normalizeKey(row.graceSku)) ??
+      pipelineByWebsite.get(normalizeKey(row.websiteSku)) ??
+      {};
+    return {
+      ...pipeline,
+      ...row,
+      canonicalColor: clean(row.color) || clean(row.canonicalColor) || clean(pipeline.canonicalColor) || undefined,
+      shopifySku: clean(pipeline.shopifySku) || clean(row.shopifySku) || null,
+    };
+  });
+}
+
+function sentenceList(values: string[]): string {
+  if (values.length <= 1) return values[0] ?? "";
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(", ")}, and ${values[values.length - 1]}`;
+}
+
+function lowerFirst(value: string): string {
+  return value ? `${value[0].toLowerCase()}${value.slice(1)}` : value;
+}
+
+function titleCase(value: string): string {
+  return value.replace(/\b[a-z]/g, (match) => match.toUpperCase());
+}
+
+function inferCircleComponentPhrase(group: Group): string {
+  const searchable = `${group.slug} ${group.displayName} ${group.products.map((product) => product.applicator).join(" ")}`.toLowerCase();
+
+  if (searchable.includes("antiquespray") || searchable.includes("antique spray") || searchable.includes("vintage bulb")) {
+    return searchable.includes("tassel") ? "vintage bulb sprayer with tassel" : "vintage bulb sprayer";
+  }
+  if (searchable.includes("perfumespray") || searchable.includes("perfume spray") || searchable.includes("fine mist") || searchable.includes("finemist")) {
+    return "perfume spray";
+  }
+  if (searchable.includes("lotionpump") || searchable.includes("lotion pump") || searchable.includes("treatment pump")) {
+    return "lotion pump";
+  }
+  if (searchable.includes("reducer") || searchable.includes("rdc")) {
+    return "reducer or short cap";
+  }
+  if (searchable.includes("dropper") || searchable.includes("drp")) {
+    return "dropper";
+  }
+  if (searchable.includes("rollon") || searchable.includes("roll-on") || searchable.includes("roller")) {
+    return "roll-on";
+  }
+
+  return "component";
+}
+
+function buildCircleDescription(group: Group): { short: string; long: string; seoTitle: string; seoDescription: string } | null {
+  if (group.family !== "Circle" || group.isComponentException) return null;
+
+  const colors = unique(group.products.map((product) => clean(product.canonicalColor) || clean(product.color)));
+  const glassColor = group.canonicalColor || colors[0] || "Clear";
+  const capacity = group.capacityMl ? `${group.capacityMl} ml` : "multi-capacity";
+  const neckFinish = group.neckThread || inferThreadSize(group.slug, group.displayName) || null;
+  const componentPhrase = inferCircleComponentPhrase(group);
+  const lowerComponent = lowerFirst(componentPhrase);
+  const componentSet = unique(group.products.map((product) => product.capStyle || product.applicator)).slice(0, 4);
+  const componentSummary = componentSet.length > 0 ? sentenceList(componentSet.map((value) => value.toLowerCase())) : lowerComponent;
+  const neckPhrase = neckFinish ? `${neckFinish} ` : "";
+  const neckDescription = neckFinish ? `an ${neckFinish} neck finish` : "a verified neck finish";
+  const slugPhrase = group.slug.includes("frosted") ? "frosted glass" : `${glassColor.toLowerCase()} glass`;
+
+  const short = `${group.displayName} pairs a rounded ${slugPhrase} profile with ${lowerComponent} options for polished fragrance, beauty, and specialty packaging programs.`;
+  const long = [
+    `The ${group.displayName} family is built around a rounded ${slugPhrase} silhouette with ${neckDescription} and SKU-level component options.`,
+    `This group supports refined perfume, fragrance, beauty, and specialty packaging presentations where the bottle shape, closure finish, and applicator style need to feel consistent across a collection.`,
+    `Use this product group to compare canonical SKUs, product imagery, and customer-facing copy for ${componentSummary} variants.`,
+    `Each purchasable variant should keep its own Grace SKU, website SKU, and resolved visual identity so the product detail page reflects the exact component shown.`,
+    `Avoid unverified claims about leakproof performance, formula compatibility, regulatory compliance, or dispensing behavior unless those details are confirmed in the product database.`,
+  ].join(" ");
+  const seoTitle = truncate(`${capacity} ${glassColor} Circle Bottle with ${titleCase(componentPhrase)} | Best Bottles`, 70);
+  const seoDescription = truncate(
+    `Shop the ${capacity} ${glassColor} Circle ${neckPhrase}bottle with ${lowerComponent} options for fragrance, beauty, and specialty packaging.`,
+    160,
+  );
+
+  return { short, long, seoTitle, seoDescription };
+}
+
+function buildDescription(group: Group): { short: string; long: string; seoTitle: string; seoDescription: string } {
+  const circleDescription = buildCircleDescription(group);
+  if (circleDescription) return circleDescription;
+
+  const displayName = normalizeProductSeoName(group.displayName);
+  const applicators = unique(group.products.map((product) => product.applicator));
+  const colors = unique(group.products.map((product) => clean(product.canonicalColor) || clean(product.color)));
+  const skuCount = group.products.length;
+  const capacity = group.capacityMl ? `${group.capacityMl} ml` : group.isComponentException ? "component" : "multi-capacity";
+  const material = group.material ? `${group.material.toLowerCase()} ` : "";
+  const color = group.canonicalColor || colors[0] || "mixed";
+  const applicatorPhrase = applicators.length > 0 ? ` with ${applicators.join(", ")}` : "";
+  const threadPhrase = group.neckThread ? ` Thread/finish: ${group.neckThread}.` : "";
+  const dimension = firstDimensions(group.products);
+  const dimensionPhrase =
+    dimension?.heightWithoutCap && dimension?.diameter
+      ? ` Body dimensions: ${dimension.heightWithoutCap} mm height without cap x ${dimension.diameter} mm diameter.`
+      : "";
+
+  const useCase = group.isComponentException ? "beauty and fragrance packaging programs" : "fragrance, beauty, and personal care packaging programs";
+  const short = `${displayName} is a Best Bottles ${group.family} option for ${capacity} ${color.toLowerCase()} ${material}packaging${applicatorPhrase}.`;
+  const long = [
+    short,
+    `Use it for ${useCase} where capacity, finish, material, and component fit need to stay consistent across product variants.`,
+    `This group includes ${skuCount} SKU${skuCount === 1 ? "" : "s"} with product-level specs for merchandising and catalog management.`,
+    threadPhrase.trim(),
+    dimensionPhrase.trim(),
+    group.catalogReferencePages ? `Catalog reference pages: ${group.catalogReferencePages}.` : "",
+  ].filter(Boolean).join(" ");
+  const seoTitle = truncate(`${displayName} | Best Bottles`, 70);
+  const seoDescription = truncate(
+    `Shop ${displayName} for ${capacity} ${group.family.toLowerCase()} packaging${applicatorPhrase}. Review specs, finish, material, and SKU options.`,
+    160,
+  );
+
+  return { short, long, seoTitle, seoDescription };
+}
+
+function firstDimensions(products: PipelineProduct[]): {
+  heightWithoutCap: number | null;
+  diameter: number | null;
+  source: string | null;
+  sourceUrl: string | null;
+  note: string | null;
+} | null {
+  const row = products.find((product) => toNumber(product.heightWithoutCap) || toNumber(product.diameter));
+  if (!row) return null;
+  return {
+    heightWithoutCap: toNumber(row.heightWithoutCap),
+    diameter: toNumber(row.diameter),
+    source: firstText([row.measurementOverrideSource, row.measurementSource]),
+    sourceUrl: clean(row.measurementOverrideUrl) || null,
+    note: clean(row.measurementOverrideNote) || null,
+  };
+}
+
+function buildBottleSpecs(group: Group): Record<string, unknown> {
+  const dimensions = firstDimensions(group.products);
+  const colors = unique(group.products.map((product) => clean(product.canonicalColor) || clean(product.color)));
+  const applicators = unique(group.products.map((product) => product.applicator));
+  const capStyles = unique(group.products.map((product) => product.capStyle));
+  const capColors = unique(group.products.map((product) => product.capColor));
+
+  return {
+    source: {
+      name: "best_bottles_generation_readiness",
+      generatedAt: new Date().toISOString(),
+      note: "Backfilled from Convex/pipeline readiness data; safe to refresh from canonical Best Bottles sources.",
+    },
+    productGroup: {
+      slug: group.slug,
+      displayName: group.displayName,
+      family: group.family,
+      category: group.category,
+      componentException: group.isComponentException,
+    },
+    capacity: {
+      ml: group.capacityMl,
+      display: group.capacityMl ? `${group.capacityMl} ml` : null,
+      required: !group.isComponentException,
+    },
+    neck: {
+      finish_code: group.neckThread,
+      thread_size: group.neckThread,
+    },
+    material: {
+      primary: group.material,
+      body: group.material,
+    },
+    container: {
+      type: group.containerType,
+      applicators,
+      capStyles,
+      capColors,
+    },
+    color: {
+      canonical: group.canonicalColor,
+      variants: colors,
+    },
+    dimensions: {
+      unit: "mm",
+      height_without_cap: dimensions?.heightWithoutCap ?? null,
+      diameter: dimensions?.diameter ?? null,
+      required: !group.isComponentException,
+      source: dimensions?.source ?? null,
+      source_url: dimensions?.sourceUrl ?? null,
+      note: dimensions?.note ?? null,
+      variants: group.products.map((product) => ({
+        graceSku: clean(product.graceSku) || null,
+        websiteSku: clean(product.websiteSku) || null,
+        height_without_cap: toNumber(product.heightWithoutCap),
+        diameter: toNumber(product.diameter),
+        measurementSource: clean(product.measurementOverrideSource) || clean(product.measurementSource) || null,
+      })),
+    },
+    catalog: {
+      referencePages: group.catalogReferencePages,
+    },
+    completeness: {
+      complete: group.specsComplete,
+      missingFields: group.missingSpecFields,
+    },
+  };
+}
+
+function missingSpecFieldsForGroup(group: Omit<Group, "missingSpecFields" | "specsComplete" | "containerType">): string[] {
+  const missing: string[] = [];
+  const hasDimensions = Boolean(firstDimensions(group.products)?.heightWithoutCap && firstDimensions(group.products)?.diameter);
+
+  if (!group.family) missing.push("family");
+  if (!group.category) missing.push("category");
+  if (!group.isComponentException && !group.capacityMl) missing.push("capacity");
+  if (componentRequiresThread(group.family, group.category, group.displayName) && !group.neckThread) {
+    missing.push("thread/finish");
+  }
+  if (!group.material) missing.push("material");
+  if (!group.isComponentException && !group.canonicalColor) missing.push("color");
+  if (!group.isComponentException && !hasDimensions) missing.push("dimensions");
+  if (!group.catalogReferencePages) missing.push("catalog pages");
+
+  return missing;
+}
+
+function buildBestBottlesMetadata(group: Group): Record<string, unknown> {
+  const first = group.products[0];
+  return {
+    family: group.family,
+    productGroupSlug: group.slug,
+    productGroupDisplayName: group.displayName,
+    graceSku: clean(first.graceSku) || null,
+    websiteSku: clean(first.websiteSku) || null,
+    shopifySku: clean(first.shopifySku) || null,
+    capacityMl: group.capacityMl,
+    neckThread: group.neckThread,
+    applicator: unique(group.products.map((product) => product.applicator)).join(", ") || null,
+    canonicalColor: group.canonicalColor,
+    material: group.material,
+    convexProductId: clean(first.productId) || null,
+    convexProductGroupId: clean(first.productGroupId) || null,
+    convexSourceId: clean(first.sourceId) || null,
+    catalogReferencePages: group.catalogReferencePages,
+    componentException: group.isComponentException,
+    specsComplete: group.specsComplete,
+    missingSpecFields: group.missingSpecFields,
+    skuCount: group.products.length,
+    skus: group.products.map((product) => ({
+      graceSku: clean(product.graceSku) || null,
+      websiteSku: clean(product.websiteSku) || null,
+      shopifySku: clean(product.shopifySku) || null,
+      capacityMl: toInt(product.capacityMl),
+      applicator: clean(product.applicator) || null,
+      canonicalColor: clean(product.canonicalColor) || clean(product.color) || null,
+      capStyle: clean(product.capStyle) || null,
+      capColor: clean(product.capColor) || null,
+      heightWithoutCap: toNumber(product.heightWithoutCap),
+      diameter: toNumber(product.diameter),
+    })),
+  };
+}
+
+function mergeMetadata(existing: Record<string, unknown> | null | undefined, group: Group): Record<string, unknown> {
+  const current = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
+  const currentBestBottles =
+    current.best_bottles && typeof current.best_bottles === "object" && !Array.isArray(current.best_bottles)
+      ? (current.best_bottles as Record<string, unknown>)
+      : {};
+  const currentBottleSpecs =
+    current.bottle_specs && typeof current.bottle_specs === "object" && !Array.isArray(current.bottle_specs)
+      ? (current.bottle_specs as Record<string, unknown>)
+      : {};
+
+  return {
+    ...current,
+    best_bottles: {
+      ...currentBestBottles,
+      ...buildBestBottlesMetadata(group),
+    },
+    bottle_specs: {
+      ...currentBottleSpecs,
+      ...buildBottleSpecs(group),
+    },
+    seo: {
+      ...asRecord(current.seo),
+      ...buildSeoMetadata(group, buildDescription(group)),
+    },
+  };
+}
+
+function buildGroups(products: PipelineProduct[]): Group[] {
+  const groupMap = new Map<string, PipelineProduct[]>();
+  for (const product of products) {
+    const slug = clean(product.productGroupSlug);
+    if (!slug) continue;
+    groupMap.set(slug, [...(groupMap.get(slug) ?? []), product]);
+  }
+
+  return [...groupMap.entries()]
+    .map(([slug, rows]) => {
+      const first = rows[0];
+      const displayName = clean(first.productGroupDisplayName) || slug;
+      const family = clean(first.family) || "Unknown";
+      const category = clean(first.category) || null;
+      const isComponentException = isComponentGroup(family, category, displayName);
+      const partial = {
+        slug,
+        displayName,
+        family,
+        category,
+        capacityMl: firstInt(rows.map((product) => product.capacityMl)),
+        canonicalColor: firstText(rows.map((product) => clean(product.canonicalColor) || clean(product.color))),
+        catalogReferencePages: firstText(rows.map((product) => product.catalogReferencePages)),
+        neckThread: firstText(rows.map((product) => product.neckThreadSize)) || inferThreadSize(slug, displayName, ...rows.map((product) => product.category)),
+        material: inferMaterial(family, category, displayName),
+        isComponentException,
+        products: rows,
+      };
+      const missingSpecFields = missingSpecFieldsForGroup(partial);
+      const containerType = inferContainerType(partial);
+
+      return {
+        ...partial,
+        containerType,
+        missingSpecFields,
+        specsComplete: missingSpecFields.length === 0,
+      };
+    })
+    .sort((a, b) => a.family.localeCompare(b.family) || a.displayName.localeCompare(b.displayName));
+}
+
+function buildTags(group: Group, existing: string[] | null | undefined): string[] {
+  return unique([...(existing ?? []), "best-bottles", group.family, group.slug, group.material, group.containerType]);
+}
+
+function buildSeoKeywords(group: Group): string[] {
+  const displayName = normalizeProductSeoName(group.displayName);
+  return unique([
+    displayName.toLowerCase(),
+    group.capacityMl ? `${group.capacityMl} ml ${group.family}`.toLowerCase() : null,
+    group.neckThread ? `${group.neckThread} ${group.family}`.toLowerCase() : null,
+    group.material ? `${group.material} packaging`.toLowerCase() : null,
+    group.canonicalColor ? `${group.canonicalColor} ${group.family}`.toLowerCase() : null,
+    ...group.products.map((product) => product.applicator ? `${product.applicator} packaging`.toLowerCase() : null),
+    "best bottles",
+  ]).slice(0, 10);
+}
+
+function buildHeroAlt(group: Group): string {
+  return unique([
+    normalizeProductSeoName(group.displayName),
+    group.capacityMl ? `${group.capacityMl} ml` : null,
+    group.canonicalColor,
+    group.material,
+    group.neckThread ? `${group.neckThread} neck finish` : null,
+  ]).join(", ");
+}
+
+function buildSeoMetadata(group: Group, copy: ReturnType<typeof buildDescription>): Record<string, unknown> {
+  return {
+    generation_version: "best-bottles-seo-audit-v1",
+    public_copy_source: "generated_from_pipeline_specs",
+    copy_review_status: "draft",
+    hero_alt: buildHeroAlt(group),
+    keywords: buildSeoKeywords(group),
+    faqs: [
+      {
+        question: `What size is ${normalizeProductSeoName(group.displayName)}?`,
+        answer: group.capacityMl ? `This product group is ${group.capacityMl} ml.` : "Capacity varies by SKU in this product group.",
+      },
+      {
+        question: "What finish or closure does this product use?",
+        answer: group.neckThread ? `The stored finish is ${group.neckThread}.` : "The finish should be verified before publishing.",
+      },
+    ],
+    structured_data: {
+      "@type": "Product",
+      name: normalizeProductSeoName(group.displayName),
+      description: copy.seoDescription,
+      brand: "Best Bottles",
+      category: group.category ?? group.family,
+      material: group.material,
+      color: group.canonicalColor,
+      sku: clean(group.products[0]?.graceSku) || clean(group.products[0]?.websiteSku) || null,
+      additionalProperty: [
+        group.capacityMl ? { name: "Capacity", value: `${group.capacityMl} ml` } : null,
+        group.neckThread ? { name: "Neck finish", value: group.neckThread } : null,
+        group.material ? { name: "Material", value: group.material } : null,
+        group.catalogReferencePages ? { name: "Catalog reference pages", value: group.catalogReferencePages } : null,
+      ].filter(Boolean),
+    },
+  };
+}
+
+function nonEmptyOr(value: string | null | undefined, fallback: string, overwrite: boolean): string {
+  if (overwrite) return fallback;
+  return clean(value) || fallback;
+}
+
+function buildUpdatePayload(group: Group, existing: ExistingProductHub | null, overwriteCopy: boolean): Record<string, unknown> {
+  const first = group.products[0];
+  const copy = buildDescription(group);
+  const seoKeywords = buildSeoKeywords(group);
+  return {
+    sku: clean(existing?.sku) || clean(first.graceSku) || null,
+    category: clean(existing?.category) || group.category || "Packaging",
+    product_type: clean(existing?.product_type) || group.family,
+    product_line: clean(existing?.product_line) || group.family,
+    tags: buildTags(group, existing?.tags),
+    short_description: nonEmptyOr(existing?.short_description, copy.short, overwriteCopy),
+    long_description: nonEmptyOr(existing?.long_description, copy.long, overwriteCopy),
+    seo_title: nonEmptyOr(existing?.seo_title, copy.seoTitle, overwriteCopy),
+    seo_description: nonEmptyOr(existing?.seo_description, copy.seoDescription, overwriteCopy),
+    seo_keywords: existing?.seo_keywords?.length ? existing.seo_keywords : seoKeywords,
+    external_ids: {
+      ...(existing?.external_ids ?? {}),
+      best_bottles_product_group_slug: group.slug,
+      best_bottles_product_group_id: clean(first.productGroupId) || null,
+      best_bottles_source_id: clean(first.sourceId) || null,
+    },
+    metadata: mergeMetadata(existing?.metadata, group),
+  };
+}
+
+function buildInsertPayload(group: Group, organizationId: string, _overwriteCopy: boolean): Record<string, unknown> {
+  const first = group.products[0];
+  const copy = buildDescription(group);
+  return {
+    organization_id: organizationId,
+    name: group.displayName,
+    slug: group.slug,
+    sku: clean(first.graceSku) || null,
+    category: group.category ?? "Packaging",
+    product_type: group.family,
+    product_line: group.family,
+    status: "active",
+    visibility: "internal",
+    development_stage: "launched",
+    short_description: copy.short,
+    long_description: copy.long,
+    seo_title: copy.seoTitle,
+    seo_description: copy.seoDescription,
+    seo_keywords: buildSeoKeywords(group),
+    tags: buildTags(group, null),
+    external_ids: {
+      best_bottles_product_group_slug: group.slug,
+      best_bottles_product_group_id: clean(first.productGroupId) || null,
+      best_bottles_source_id: clean(first.sourceId) || null,
+    },
+    metadata: mergeMetadata({}, group),
+  };
+}
+
+async function applyEnrichment(groups: Group[], organizationId: string, overwriteCopy: boolean): Promise<{ inserted: number; updated: number }> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for --apply.");
+  }
+  const supabase = createClient(supabaseUrl, serviceRoleKey);
+  const slugs = groups.map((group) => group.slug);
+  const { data: existingRows, error: existingError } = await supabase
+    .from("product_hubs")
+    .select("id,name,slug,sku,category,product_type,product_line,short_description,long_description,seo_title,seo_description,seo_keywords,tags,metadata,external_ids,hero_image_id,hero_image_external_url")
+    .eq("organization_id", organizationId)
+    .in("slug", slugs);
+
+  if (existingError) throw existingError;
+  const existingBySlug = new Map((existingRows ?? []).map((row) => [clean(row.slug), row as ExistingProductHub]));
+
+  let inserted = 0;
+  let updated = 0;
+  for (const group of groups) {
+    const existing = existingBySlug.get(group.slug) ?? null;
+    if (existing) {
+      const { error } = await supabase
+        .from("product_hubs")
+        .update(buildUpdatePayload(group, existing, overwriteCopy))
+        .eq("id", existing.id);
+      if (error) throw new Error(`${group.slug}: ${error.message}`);
+      updated += 1;
+    } else {
+      const { error } = await supabase
+        .from("product_hubs")
+        .insert(buildInsertPayload(group, organizationId, overwriteCopy));
+      if (error) throw new Error(`${group.slug}: ${error.message}`);
+      inserted += 1;
+    }
+  }
+
+  return { inserted, updated };
+}
+
+function writePreview(groups: Group[]): void {
+  fs.mkdirSync(path.join(ROOT, "tmp"), { recursive: true });
+  fs.writeFileSync(
+    OUT_REVIEW,
+    [
+      [
+        "slug",
+        "displayName",
+        "family",
+        "skuCount",
+        "specsComplete",
+        "missingSpecFields",
+        "material",
+        "containerType",
+        "capacityMl",
+        "neckThread",
+        "heightWithoutCapMm",
+        "diameterMm",
+        "seoScore",
+        "seoGrade",
+        "publicCopyUnsafe",
+        "missingSeoFields",
+        "seoWarnings",
+        "generatedSeoTitle",
+        "generatedSeoDescription",
+        "generatedSeoKeywords",
+        "generatedHeroAlt",
+        "primaryGraceSku",
+        "primaryWebsiteSku",
+        "primaryShopifySku",
+      ].join(","),
+      ...groups.map((group) => {
+        const first = group.products[0];
+        const dimensions = firstDimensions(group.products);
+        const copy = buildDescription(group);
+        const seoKeywords = buildSeoKeywords(group);
+        const heroAlt = buildHeroAlt(group);
+        const audit = auditProductSeo({
+          name: normalizeProductSeoName(group.displayName),
+          slug: group.slug,
+          category: group.category,
+          productType: group.family,
+          seoTitle: copy.seoTitle,
+          seoDescription: copy.seoDescription,
+          seoKeywords,
+          shortDescription: copy.short,
+          longDescription: copy.long,
+          heroAltText: heroAlt,
+          metadata: { seo: buildSeoMetadata(group, copy) },
+        });
+        return [
+          group.slug,
+          group.displayName,
+          group.family,
+          group.products.length,
+          group.specsComplete ? "yes" : "no",
+          group.missingSpecFields,
+          group.material,
+          group.containerType,
+          group.capacityMl,
+          group.neckThread,
+          dimensions?.heightWithoutCap,
+          dimensions?.diameter,
+          audit.score,
+          audit.grade,
+          audit.publicCopyUnsafe ? "yes" : "no",
+          audit.missingFields,
+          audit.warnings,
+          copy.seoTitle,
+          copy.seoDescription,
+          seoKeywords,
+          heroAlt,
+          clean(first.graceSku),
+          clean(first.websiteSku),
+          clean(first.shopifySku),
+        ].map(csvEscape).join(",");
+      }),
+    ].join("\n") + "\n",
+  );
+}
+
+function writeReviewSql(groups: Group[], organizationId: string, overwriteCopy: boolean): void {
+  const sql: string[] = [
+    "-- Best Bottles Product Hub enrichment.",
+    "-- Review-only SQL mirror of the direct --apply path.",
+    "-- Default behavior fills blank copy fields and preserves manual Product Hub edits.",
+    "BEGIN;",
+  ];
+
+  for (const group of groups) {
+    const first = group.products[0];
+    const copy = buildDescription(group);
+    const tags = buildTags(group, null);
+    const seoKeywords = buildSeoKeywords(group);
+    const seoKeywordsSql = `ARRAY[${seoKeywords.map(sqlString).join(", ")}]::text[]`;
+    const copyAssignments = overwriteCopy
+      ? [
+          `short_description = ${sqlString(copy.short)}`,
+          `long_description = ${sqlString(copy.long)}`,
+          `seo_title = ${sqlString(copy.seoTitle)}`,
+          `seo_description = ${sqlString(copy.seoDescription)}`,
+          `seo_keywords = ${seoKeywordsSql}`,
+        ]
+      : [
+          `short_description = COALESCE(NULLIF(short_description, ''), ${sqlString(copy.short)})`,
+          `long_description = COALESCE(NULLIF(long_description, ''), ${sqlString(copy.long)})`,
+          `seo_title = COALESCE(NULLIF(seo_title, ''), ${sqlString(copy.seoTitle)})`,
+          `seo_description = COALESCE(NULLIF(seo_description, ''), ${sqlString(copy.seoDescription)})`,
+          `seo_keywords = CASE WHEN COALESCE(array_length(seo_keywords, 1), 0) = 0 THEN ${seoKeywordsSql} ELSE seo_keywords END`,
+        ];
+    const metadata = mergeMetadata({}, group);
+    const externalIds = {
+      best_bottles_product_group_slug: group.slug,
+      best_bottles_product_group_id: clean(first.productGroupId) || null,
+      best_bottles_source_id: clean(first.sourceId) || null,
+    };
+
+    sql.push(
+      [
+        "WITH updated AS (",
+        "  UPDATE public.product_hubs",
+        "  SET",
+        `    sku = COALESCE(NULLIF(sku, ''), ${sqlString(first.graceSku)}),`,
+        `    category = COALESCE(NULLIF(category, ''), ${sqlString(group.category ?? "Packaging")}),`,
+        `    product_type = COALESCE(NULLIF(product_type, ''), ${sqlString(group.family)}),`,
+        `    product_line = COALESCE(NULLIF(product_line, ''), ${sqlString(group.family)}),`,
+        `    tags = ARRAY(SELECT DISTINCT unnest(COALESCE(tags, ARRAY[]::text[]) || ARRAY[${tags.map(sqlString).join(", ")}]::text[])),`,
+        `    ${copyAssignments.join(",\n    ")},`,
+        `    external_ids = COALESCE(external_ids, '{}'::jsonb) || ${sqlJson(externalIds)},`,
+        `    metadata = COALESCE(metadata, '{}'::jsonb) || ${sqlJson(metadata)},`,
+        "    updated_at = now()",
+        `  WHERE organization_id = ${sqlString(organizationId)}::uuid`,
+        `    AND slug = ${sqlString(group.slug)}`,
+        "  RETURNING id",
+        ")",
+        "INSERT INTO public.product_hubs (",
+        "  organization_id, name, slug, sku, category, product_type, product_line, status, visibility, development_stage,",
+        "  short_description, long_description, seo_title, seo_description, seo_keywords, tags, external_ids, metadata",
+        ")",
+        "SELECT",
+        `  ${sqlString(organizationId)}::uuid,`,
+        `  ${sqlString(group.displayName)},`,
+        `  ${sqlString(group.slug)},`,
+        `  ${sqlString(first.graceSku)},`,
+        `  ${sqlString(group.category ?? "Packaging")},`,
+        `  ${sqlString(group.family)},`,
+        `  ${sqlString(group.family)},`,
+        "  'active',",
+        "  'internal',",
+        "  'launched',",
+        `  ${sqlString(copy.short)},`,
+        `  ${sqlString(copy.long)},`,
+        `  ${sqlString(copy.seoTitle)},`,
+        `  ${sqlString(copy.seoDescription)},`,
+        `  ${seoKeywordsSql},`,
+        `  ARRAY[${tags.map(sqlString).join(", ")}]::text[],`,
+        `  ${sqlJson(externalIds)},`,
+        `  ${sqlJson(metadata)}`,
+        "WHERE NOT EXISTS (SELECT 1 FROM updated);",
+      ].join("\n"),
+    );
+  }
+
+  sql.push("COMMIT;", "");
+  fs.writeFileSync(OUT_SQL, sql.join("\n\n"));
+}
+
+const pipelinePath = argValue("pipeline") ?? DEFAULT_PIPELINE_DATA;
+const readinessPath = argValue("readiness") ?? DEFAULT_READINESS_DATA;
+const organizationId = argValue("organization") ?? "__ORGANIZATION_ID__";
+const overwriteCopy = process.argv.includes("--overwrite-copy");
+const apply = process.argv.includes("--apply");
+
+if (!fs.existsSync(pipelinePath)) {
+  throw new Error(`Pipeline data not found: ${pipelinePath}`);
+}
+
+const pipelineData = JSON.parse(fs.readFileSync(pipelinePath, "utf8")) as { products?: PipelineProduct[] };
+const readinessData = fs.existsSync(readinessPath)
+  ? JSON.parse(fs.readFileSync(readinessPath, "utf8")) as { rows?: PipelineProduct[] }
+  : { rows: [] };
+const products = mergePipelineAndReadinessProducts(pipelineData.products ?? [], readinessData.rows ?? []);
+const groups = buildGroups(products);
+
+writePreview(groups);
+writeReviewSql(groups, organizationId, overwriteCopy);
+
+const baseResult = {
+  pipelinePath,
+  readinessPath: fs.existsSync(readinessPath) ? readinessPath : null,
+  organizationId,
+  overwriteCopy,
+  apply,
+  groups: groups.length,
+  products: products.length,
+  specsCompleteGroups: groups.filter((group) => group.specsComplete).length,
+  groupsMissingSpecs: groups.filter((group) => !group.specsComplete).length,
+  missingSpecFieldCounts: groups.reduce<Record<string, number>>((counts, group) => {
+    for (const field of group.missingSpecFields) counts[field] = (counts[field] ?? 0) + 1;
+    return counts;
+  }, {}),
+  outputs: [
+    path.relative(ROOT, OUT_SQL),
+    path.relative(ROOT, OUT_REVIEW),
+  ],
+};
+
+if (apply) {
+  if (organizationId === "__ORGANIZATION_ID__") {
+    throw new Error("Pass --organization=<uuid> when using --apply.");
+  }
+  const applied = await applyEnrichment(groups, organizationId, overwriteCopy);
+  console.log(JSON.stringify({ ...baseResult, ...applied }, null, 2));
+} else {
+  console.log(JSON.stringify(baseResult, null, 2));
+}

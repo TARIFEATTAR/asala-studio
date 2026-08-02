@@ -16,10 +16,10 @@
 
 /**
  * A governed presentation environment for bottle bodies and components. For
- * the pilot, exactly one plate is registered: `parchment_cream_v1` at
- * `#EEE6D4`. `useAsFinalBackground: true` means renders happen ON the plate
- * (Option A) rather than on transparency — this is why we do not generate
- * clear glass on a transparent canvas.
+ * production, the default plate is Best Bottles Bone `#F5F3EF`.
+ * `useAsFinalBackground: true` means renders happen ON the plate (Option A)
+ * rather than on transparency — this is why we do not generate clear glass on
+ * a transparent canvas.
  */
 export interface EnvironmentPlate {
   id: string;

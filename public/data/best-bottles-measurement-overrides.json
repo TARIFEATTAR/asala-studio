@@ -1,0 +1,85 @@
+{
+  "notes": "Temporary generation-readiness measurements for Convex-backed rows with incomplete catalog dimensions. These should be synced back into the canonical Convex/catalog data before removing the measurement_override_pending_convex_sync issue.",
+  "overrides": [
+    {
+      "graceSku": "GB-BEL-CLR-10ML-SPR-SBLK",
+      "heightWithoutCap": "55",
+      "diameter": "27",
+      "source": "BestBottles product page",
+      "sourceUrl": "https://www.bestbottles.com/product/bell-design-10-ml-glass-bottle-shiny-black-spray",
+      "note": "Exact website SKU page lists 55 mm body height and 27 mm diameter."
+    },
+    {
+      "graceSku": "GB-BLL-CLR-10ML-MRL-BDOT",
+      "heightWithoutCap": "55",
+      "diameter": "27",
+      "source": "Catalog duplicate and body-equivalent BestBottles Bell metal roll-on rows",
+      "sourceUrl": "https://www.bestbottles.com/product/bell-design-10-ml-glass-bottle-metal-roller-ball-plug-shiny-gold-cap",
+      "note": "The exact websiteSku appears in a catalog duplicate with 55 mm height and 27 mm diameter; equivalent Bell 10 ml metal roll-on pages match those body dimensions."
+    },
+    {
+      "graceSku": "GB-BLL-CLR-10ML-RBL-BDOT",
+      "heightWithoutCap": "55",
+      "diameter": "27",
+      "source": "Catalog duplicate and body-equivalent BestBottles Bell plastic roll-on rows",
+      "sourceUrl": "https://www.bestbottles.com/product/bell-design-10-ml-glass-bottle-plastic-roller-ball-plug-black-shiny-cap",
+      "note": "The exact websiteSku appears in a catalog duplicate with 55 mm height and 27 mm diameter; equivalent Bell 10 ml plastic roll-on pages match those body dimensions."
+    },
+    {
+      "graceSku": "GB-BSR-CLR-15ML-DRP-BLK",
+      "heightWithoutCap": "68",
+      "diameter": "25",
+      "source": "BestBottles product page",
+      "sourceUrl": "https://www.bestbottles.com/product/boston-round-design-15-ml-clear-glass-bottle-black-dropper",
+      "note": "Exact website SKU page lists 68 mm body height and 25 mm diameter."
+    },
+    {
+      "graceSku": "GB-ELG-FRS-15ML-CAP-SBLK",
+      "heightWithoutCap": "61",
+      "diameter": "35",
+      "source": "Catalog sibling rows in elegant-15ml-frosted-13-415 product group",
+      "sourceUrl": null,
+      "note": "Same product group rows with matching 61 mm body height list 35 mm diameter."
+    },
+    {
+      "graceSku": "GB-PIL-CLR-9ML-MRL-BDOT",
+      "heightWithoutCap": "57",
+      "diameter": "21",
+      "source": "BestBottles equivalent Pillar 9 ml metal roll-on product page",
+      "sourceUrl": "https://www.bestbottles.com/product/pillar-design-5-ml-glass-bottle-metal-roller-ball-plug-matte-gold-cap",
+      "note": "Equivalent Pillar 9 ml metal roll-on body page lists 57 mm body height and 21 mm diameter."
+    },
+    {
+      "graceSku": "GB-PIL-CLR-9ML-SPR-MBLK",
+      "heightWithoutCap": "57",
+      "diameter": "21",
+      "source": "BestBottles Pillar 9 ml sprayer page plus Pillar 9 ml sibling height",
+      "sourceUrl": "https://www.bestbottles.com/product/pillar-design-5-ml-glass-bottle-matte-black-spray",
+      "note": "Exact sprayer page lists 21 mm diameter; same Pillar 9 ml body family consistently lists 57 mm body height."
+    },
+    {
+      "graceSku": "GB-VIA-BLU-3ML-BLK-S",
+      "heightWithoutCap": "27",
+      "diameter": "15",
+      "source": "BestBottles product page",
+      "sourceUrl": "https://www.bestbottles.com/product/Vial-design-half-dram-blue-glass-black-short-cap",
+      "note": "Exact website SKU page lists 27 mm body height and 15 mm diameter; this replaces a stale catalog diameter value."
+    },
+    {
+      "graceSku": "AB-ALU-CLR-250ML-SPR-BLK",
+      "heightWithoutCap": "127.8",
+      "diameter": "60",
+      "source": "Local Convex live products export",
+      "sourceUrl": "https://www.bestbottles.com/product/Cylinder-shaped-matte-aluminum-250ml-bottle-black-sprayer",
+      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU AB-ALU-CLR-250ML-SPR-BLK lists 127.8 mm body height and 60 mm diameter."
+    },
+    {
+      "graceSku": "CJ-JAR-AMB-5ML-SLV",
+      "heightWithoutCap": "24",
+      "diameter": "31",
+      "source": "Local Convex live products export",
+      "sourceUrl": "https://www.bestbottles.com/product/cream-jar-style-5-ml-amber-glass-bottle-silver-cap",
+      "note": "tmp/best-bottles-convex-live-products.csv row for exact Grace SKU CJ-JAR-AMB-5ML-SLV lists 24 mm body height and 31 mm diameter."
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "modules": {
+    "tall_narrow": {
+      "display_name": "Tall narrow PDP frame",
+      "centerline": "vertical product centerline locked to canvas center",
+      "baseline": "base sits on shared family shelf line",
+      "safe_zone": "leave consistent top air and side margins; no cap, base, detached cap, or shadow may touch the canvas edge",
+      "detached_components": "detached over-caps sit upright to the right on the same baseline with consistent gap and scale",
+      "scale_logic": "use consistent visual height envelope for sibling tall SKUs",
+      "prompt_lines": [
+        "Frame as a tall narrow product on a 2080 x 2288 portrait canvas.",
+        "Maintain locked centerline, shared baseline, stable top air, and safe margins."
+      ]
+    },
+    "medium_upright": {
+      "display_name": "Medium upright PDP frame",
+      "centerline": "body centerline locked to canvas center",
+      "baseline": "body base sits on shared shelf line",
+      "safe_zone": "balanced top air and side air for medium upright bottles",
+      "detached_components": "detached components stay close and aligned to the same floor line",
+      "scale_logic": "consistent medium product magnification across family",
+      "prompt_lines": [
+        "Frame as a medium upright ecommerce product with balanced negative space.",
+        "Preserve centerline, baseline, and product scale for family grid consistency."
+      ]
+    },
+    "wide_bottle": {
+      "display_name": "Wide bottle PDP frame",
+      "centerline": "visual mass centered, not necessarily neck-only center",
+      "baseline": "widest base sits on shared shelf line",
+      "safe_zone": "allow wider side margins without cropping the shoulders",
+      "detached_components": "detached components remain inside side safe zone",
+      "scale_logic": "scale by width first, then height",
+      "prompt_lines": [
+        "Frame wide bottles by visual mass so the body reads centered and stable.",
+        "Do not crop shoulders, wide bases, or detached components."
+      ]
+    },
+    "low_wide_jar": {
+      "display_name": "Low wide jar PDP frame",
+      "centerline": "jar centerline locked to canvas center",
+      "baseline": "jar bottom sits on low shared shelf line",
+      "safe_zone": "generous side room for wide lid and body",
+      "detached_components": "loose lids remain on same floor line if present",
+      "scale_logic": "scale by jar width and keep low height honest",
+      "prompt_lines": [
+        "Frame low wide jars with width-first scale logic and a stable low baseline.",
+        "Do not stretch the jar vertically or make it read as a bottle."
+      ]
+    },
+    "grouped_accessory": {
+      "display_name": "Grouped accessory PDP frame",
+      "centerline": "group visual center locked to canvas center",
+      "baseline": "all components share one studio floor line unless reference shows stacked layout",
+      "safe_zone": "every component and shadow remains inside safe margins",
+      "detached_components": "preserve count, spacing, order, and relative scale",
+      "scale_logic": "scale by full group bounding box",
+      "prompt_lines": [
+        "Frame grouped accessories as one coherent SKU assembly, not separate products.",
+        "Preserve component count, order, spacing, and relative scale."
+      ]
+    },
+    "box_or_bag": {
+      "display_name": "Box or bag PDP frame",
+      "centerline": "package visual center locked to canvas center",
+      "baseline": "bottom edge or fabric contact area sits on shared shelf line",
+      "safe_zone": "keep package edges, drawstrings, folds, and shadows inside safe zone",
+      "detached_components": "attached strings, handles, or folds remain connected and uncropped",
+      "scale_logic": "scale by package silhouette and front-face readability",
+      "prompt_lines": [
+        "Frame boxes and bags as inspectable ecommerce package objects.",
+        "Keep front face, folds, handles, drawstrings, and bottom contact readable."
+      ]
+    },
+    "decorative_silhouette": {
+      "display_name": "Decorative silhouette PDP frame",
+      "centerline": "dominant silhouette centered while preserving asymmetric details",
+      "baseline": "base and detached decorative components share one floor line",
+      "safe_zone": "extra room for ornamental edges, tassels, bulbs, or decorative caps",
+      "detached_components": "ornamental detached components preserve exact reference placement relationship",
+      "scale_logic": "scale by full ornamental silhouette, not simple body rectangle",
+      "prompt_lines": [
+        "Frame decorative silhouettes by the full ornamental outline, including bulbs, tassels, facets, and decorative caps.",
+        "Do not simplify or crop ornamental geometry."
+      ]
+    }
+  }
+}

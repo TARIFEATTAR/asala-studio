@@ -1,0 +1,248 @@
+{
+  "version": "1.0.0",
+  "_note": "VALIDATION-ONLY. These module definitions validate a SKU and seed its qa_checklist (buildPromptForSku in src/lib/bestBottlesPromptCompiler.ts). The prompt text they would assemble is DISCARDED and NOT shipped: the prompt that actually reaches the image model is the vendored canon (src/config/bestBottlesCatalogCanon.ts) + the per-family framing profile (src/config/bestBottlesFamilyProfiles.ts), assembled by buildFinalPrompt() in src/lib/bestBottlesPromptPreflight.ts. Do not treat this file as the source of the catalog image prompt.",
+  "modules": {
+    "roll_on": {
+      "display_name": "Roll-on bottle",
+      "default_frame_class": "tall_narrow",
+      "preserve": ["cylindrical body", "roller ball plug", "over-cap state", "neck proportions", "cap color"],
+      "do_not_change": ["roller ball into sprayer", "attached cap into detached cap", "body diameter", "camera angle"],
+      "prompt_lines": [
+        "Preserve the roll-on bottle as a compact cylindrical fragrance package with exact roller plug geometry and cap state.",
+        "If the over-cap is detached in the reference, keep exactly one upright over-cap on the shared baseline."
+      ],
+      "qa": ["roller_ball_present", "cap_state_preserved"]
+    },
+    "cylinder": {
+      "display_name": "Cylinder bottle",
+      "default_frame_class": "tall_narrow",
+      "preserve": ["straight vertical sidewalls", "circular base", "swirl or molded body texture", "neck thread", "applicator scale"],
+      "do_not_change": ["tube diameter", "baseline", "centerline", "swirl direction", "cap height"],
+      "prompt_lines": [
+        "Preserve the Cylinder bottle's exact tube geometry, circular base, vertical sidewalls, shoulder and neck proportions, and SKU-specific applicator identity.",
+        "Keep sibling Cylinder SKUs aligned on one consistent family baseline and centerline."
+      ],
+      "qa": ["cylinder_sidewalls_straight", "family_baseline_consistent"]
+    },
+    "boston_round": {
+      "display_name": "Boston round bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["rounded shoulders", "cylindrical body", "neck finish", "body color", "closure relationship"],
+      "do_not_change": ["round shoulder into square shoulder", "neck thread", "body height"],
+      "prompt_lines": [
+        "Preserve the Boston Round shoulder curve, cylindrical body, neck finish, and exact closure/applicator relationship.",
+        "Do not sharpen the shoulders or turn the bottle into a Cylinder family shape."
+      ],
+      "qa": ["rounded_shoulder_preserved"]
+    },
+    "circle": {
+      "display_name": "Circle bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["round flattened body", "short neck finish", "wide circular shoulders", "cap color", "closure relationship"],
+      "do_not_change": ["circle body into cylinder", "flattened round footprint", "neck thread", "body width"],
+      "prompt_lines": [
+        "Preserve the Circle bottle's flattened round body, broad circular shoulders, short neck finish, and exact closure/applicator relationship.",
+        "Do not turn the Circle family silhouette into a tall Cylinder or Boston Round profile."
+      ],
+      "qa": ["circle_body_preserved", "wide_shoulders_preserved"]
+    },
+    "rectangular": {
+      "display_name": "Rectangular bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["front face width", "flat panels", "corner radius", "shoulder break", "cap alignment"],
+      "do_not_change": ["rectangular body into cylinder", "panel proportions", "edge radius"],
+      "prompt_lines": [
+        "Preserve flat front and side panels, rectangular footprint, panel proportions, and exact corner radius.",
+        "Keep vertical edges crisp without adding fake bevels or faceted geometry."
+      ],
+      "qa": ["rectangular_panels_preserved"]
+    },
+    "empire": {
+      "display_name": "Empire bottle",
+      "default_frame_class": "decorative_silhouette",
+      "preserve": ["decorative shoulder", "body silhouette", "neck height", "base footprint", "cap state"],
+      "do_not_change": ["decorative silhouette", "shoulder geometry", "ornamental body proportions"],
+      "prompt_lines": [
+        "Preserve the Empire bottle's decorative silhouette, shoulder geometry, base footprint, and neck proportions.",
+        "Improve lighting and material separation without simplifying the ornamental outline."
+      ],
+      "qa": ["decorative_silhouette_preserved"]
+    },
+    "classic_spray": {
+      "display_name": "Classic spray bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["spray pump", "actuator", "collar", "dip tube if visible", "cap state"],
+      "do_not_change": ["sprayer into roller", "pump height", "nozzle direction"],
+      "prompt_lines": [
+        "Preserve classic spray pump geometry, actuator/nozzle, collar stack, and cap state exactly from the reference.",
+        "The sprayer must remain seated on the bottle centerline."
+      ],
+      "qa": ["sprayer_present", "nozzle_visible"]
+    },
+    "fine_mist_sprayer": {
+      "display_name": "Fine mist sprayer",
+      "default_frame_class": "tall_narrow",
+      "preserve": ["fine mist actuator", "nozzle face", "collar", "over-cap if present", "internal dip tube if visible"],
+      "do_not_change": ["fine mist into pump", "missing actuator", "washed-out cap", "cap count"],
+      "prompt_lines": [
+        "Preserve the fine mist sprayer actuator, nozzle face, collar, cap state, trim finish, and any visible dip tube.",
+        "Pale or clear cap surfaces must stay readable against the Bone background."
+      ],
+      "qa": ["white_caps_visible", "sprayer_present", "cap_count_correct"]
+    },
+    "atomizer": {
+      "display_name": "Refillable atomizer",
+      "default_frame_class": "tall_narrow",
+      "preserve": ["opaque colored/anodized metal shell", "sprayer top", "cap sleeve", "slim proportions"],
+      "do_not_change": ["metal shell into glass", "transparent body", "added bottle interior"],
+      "prompt_lines": [
+        "Preserve the refillable atomizer as an opaque colored/anodized metal shell with exact sleeve proportions and sprayer/cap transitions.",
+        "Do not render glass wall thickness, refraction, liquid, or an internal dip tube through the metal shell."
+      ],
+      "qa": ["opaque_metal_preserved"]
+    },
+    "dropper": {
+      "display_name": "Dropper bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["dropper collar", "rubber bulb", "glass pipette if visible", "cap color", "body shape"],
+      "do_not_change": ["dropper into sprayer", "bulb color", "pipette length"],
+      "prompt_lines": [
+        "Preserve the dropper assembly, collar, rubber bulb, pipette geometry if visible, and exact body proportions.",
+        "Do not add spray actuators, hoses, tassels, or extra caps."
+      ],
+      "qa": ["dropper_preserved"]
+    },
+    "vial": {
+      "display_name": "Vial",
+      "default_frame_class": "tall_narrow",
+      "preserve": ["small vial scale", "thin cylindrical body", "neck finish", "closure type"],
+      "do_not_change": ["vial into large bottle", "diameter", "closure identity"],
+      "prompt_lines": [
+        "Preserve the vial's small scale, narrow cylindrical proportions, neck finish, and closure identity.",
+        "Keep glass or plastic wall thickness appropriate to the SKU material."
+      ],
+      "qa": ["vial_scale_preserved"]
+    },
+    "orifice_reducer": {
+      "display_name": "Orifice reducer bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["reducer insert", "neck finish", "drop-control opening", "closure state"],
+      "do_not_change": ["reducer into dropper", "missing insert", "wrong closure"],
+      "prompt_lines": [
+        "Preserve the reducer insert and drop-control opening as the product identity.",
+        "Do not replace the reducer with a dropper, sprayer, or roller assembly."
+      ],
+      "qa": ["reducer_visible"]
+    },
+    "splash_bottle": {
+      "display_name": "Splash bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["open neck or splash closure", "body geometry", "cap state", "thread finish"],
+      "do_not_change": ["splash neck into sprayer", "added applicator"],
+      "prompt_lines": [
+        "Preserve the splash bottle neck/closure state exactly and do not add a pump, sprayer, roller, or dropper.",
+        "Keep the neck thread and bottle mouth readable."
+      ],
+      "qa": ["splash_neck_preserved"]
+    },
+    "vintage_bulb_sprayer": {
+      "display_name": "Vintage bulb sprayer",
+      "default_frame_class": "decorative_silhouette",
+      "preserve": ["bulb", "hose", "tassel if present", "collar", "dip tube if visible"],
+      "do_not_change": ["missing bulb", "missing hose", "tassel color", "added modern actuator"],
+      "prompt_lines": [
+        "Preserve the vintage bulb sprayer assembly, hose path, collar, tassel if present, and all textile color relationships.",
+        "Keep bulb, hose, and tassel fully visible inside the safe zone."
+      ],
+      "qa": ["bulb_visible", "hose_visible", "tassel_preserved"]
+    },
+    "decorative_bottle": {
+      "display_name": "Decorative bottle",
+      "default_frame_class": "decorative_silhouette",
+      "preserve": ["ornamental silhouette", "facets", "embossing", "closure relationship"],
+      "do_not_change": ["simplified shape", "lost facets", "invented label"],
+      "prompt_lines": [
+        "Preserve decorative contours, facets, embossing, and exact closure relationship.",
+        "Enhance edge definition without redesigning the ornamental form."
+      ],
+      "qa": ["decorative_details_preserved"]
+    },
+    "apothecary_bottle": {
+      "display_name": "Apothecary bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["apothecary silhouette", "shoulder curve", "neck finish", "closure"],
+      "do_not_change": ["modern pump unless present", "label", "changed shoulder"],
+      "prompt_lines": [
+        "Preserve the apothecary silhouette, shoulder curve, neck finish, closure state, and material identity.",
+        "Do not add labels, text, or pharmaceutical markings."
+      ],
+      "qa": ["apothecary_shape_preserved"]
+    },
+    "lotion_pump": {
+      "display_name": "Lotion pump bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["pump head", "stem", "collar", "dip tube if visible", "body proportions"],
+      "do_not_change": ["pump into fine mist sprayer", "pump head direction", "missing stem"],
+      "prompt_lines": [
+        "Preserve lotion pump head geometry, stem, collar, and exact pump orientation.",
+        "Keep pump parts crisp and readable, including pale plastic edges."
+      ],
+      "qa": ["pump_present"]
+    },
+    "aluminum_bottle": {
+      "display_name": "Aluminum bottle",
+      "default_frame_class": "medium_upright",
+      "preserve": ["opaque metal body", "brushed/satin grain", "shoulder highlight", "closure"],
+      "do_not_change": ["transparent body", "glass refraction", "liquid interior"],
+      "prompt_lines": [
+        "Preserve opaque aluminum material, satin/brushed grain direction, body shape, and closure relationship.",
+        "Do not use transparent glass, liquid, caustics, or refraction language for the body."
+      ],
+      "qa": ["opaque_aluminum_preserved"]
+    },
+    "cream_jar": {
+      "display_name": "Cream jar",
+      "default_frame_class": "low_wide_jar",
+      "preserve": ["low wide body", "lid height", "thread relationship", "jar wall"],
+      "do_not_change": ["jar into bottle", "lid diameter", "wide stance"],
+      "prompt_lines": [
+        "Preserve the cream jar's low wide stance, lid diameter, lid height, and body wall geometry.",
+        "Use the low-wide frame class; do not stretch it into a tall bottle."
+      ],
+      "qa": ["jar_stance_preserved"]
+    },
+    "bag": {
+      "display_name": "Bag",
+      "default_frame_class": "box_or_bag",
+      "preserve": ["fabric silhouette", "drawstring or seam", "material texture", "folds"],
+      "do_not_change": ["bag into box", "fabric into plastic", "invented print"],
+      "prompt_lines": [
+        "Preserve bag silhouette, fabric texture, seams, drawstring details, and folded volume.",
+        "Do not make fabric glossy, glassy, metallic, or plastic."
+      ],
+      "qa": ["fabric_material_preserved"]
+    },
+    "box": {
+      "display_name": "Box",
+      "default_frame_class": "box_or_bag",
+      "preserve": ["carton panels", "edges", "fold lines", "front face proportions"],
+      "do_not_change": ["box into bottle", "added labels", "warped panels"],
+      "prompt_lines": [
+        "Preserve box panel proportions, folding carton edges, flap lines, and exact front-face geometry.",
+        "Do not add branding, labels, text, windows, or decorative graphics unless present in the reference."
+      ],
+      "qa": ["carton_panels_preserved"]
+    },
+    "accessory": {
+      "display_name": "Accessory",
+      "default_frame_class": "grouped_accessory",
+      "preserve": ["component count", "relative scale", "material", "orientation"],
+      "do_not_change": ["missing components", "extra props", "wrong scale"],
+      "prompt_lines": [
+        "Preserve every accessory component, material, orientation, count, and relative scale exactly.",
+        "Use grouped accessory framing only when multiple components belong to the SKU."
+      ],
+      "qa": ["component_count_preserved"]
+    }
+  }
+}

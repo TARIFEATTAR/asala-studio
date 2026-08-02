@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#F5F3EF"/>
+  <style>
+    .h{font:700 34px Arial,sans-serif;fill:#171717}.sh{font:700 22px Arial,sans-serif;fill:#171717}
+    .t{font:16px Arial,sans-serif;fill:#343434}.small{font:14px Arial,sans-serif;fill:#555}
+    .box{fill:#fff;stroke:#B7B0A4;stroke-width:2;rx:16}.current{stroke:#B84B3D}.target{stroke:#167758}
+    .arrow{stroke:#555;stroke-width:3;fill:none;marker-end:url(#a)}
+  </style>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#555"/></marker></defs>
+  <text x="60" y="62" class="h">Madison Studio — current vs target product-image control</text>
+  <text x="60" y="105" class="small">Implementation evidence as of 2026-07-15 · target is a recommendation, not current production behavior</text>
+
+  <text x="80" y="165" class="sh">CURRENT PRODUCTION MASTER</text>
+  <rect x="70" y="190" width="250" height="105" class="box current"/><text x="90" y="225" class="t">Canonical product metadata</text><text x="90" y="252" class="small">SKU, family, dimensions, role</text><text x="90" y="275" class="small">+ approved flattened reference</text>
+  <rect x="380" y="190" width="250" height="105" class="box current"/><text x="400" y="225" class="t">Prompt compiler</text><text x="400" y="252" class="small">identity + material + framing</text><text x="400" y="275" class="small">+ optional style-only image</text>
+  <rect x="690" y="190" width="250" height="105" class="box current"/><text x="710" y="225" class="t">GPT Image 2 edit</text><text x="710" y="252" class="small">whole product regenerated</text><text x="710" y="275" class="small">no mask / no depth / no seed</text>
+  <rect x="1000" y="190" width="250" height="105" class="box current"/><text x="1020" y="225" class="t">Browser rig pass</text><text x="1020" y="252" class="small">detect, recanvas, scale/shift</text><text x="1020" y="275" class="small">background + shadow handling</text>
+  <rect x="1310" y="190" width="220" height="105" class="box current"/><text x="1330" y="225" class="t">Approval / publish</text><text x="1330" y="252" class="small">framing + shadow evidence</text><text x="1330" y="275" class="small">+ human identity review</text>
+  <path d="M320 242 H380" class="arrow"/><path d="M630 242 H690" class="arrow"/><path d="M940 242 H1000" class="arrow"/><path d="M1250 242 H1310" class="arrow"/>
+  <text x="70" y="330" class="small" fill="#B84B3D">Risk concentration: the model owns silhouette details, clear-glass optics, closure geometry, fitment visibility, component count, and shadow pixels at once.</text>
+
+  <text x="80" y="430" class="sh">TARGET ROLE-CLEAN, RENDERER-AGNOSTIC LANE</text>
+  <rect x="70" y="455" width="250" height="115" class="box target"/><text x="90" y="490" class="t">Immutable role package</text><text x="90" y="517" class="small">cap-on OR sidecar truth</text><text x="90" y="540" class="small">hashes + canonical body contract</text>
+  <rect x="380" y="455" width="250" height="115" class="box target"/><text x="400" y="490" class="t">Renderer adapter</text><text x="400" y="517" class="small">GPT Image 2 now</text><text x="400" y="540" class="small">Google / Higgsfield later</text>
+  <rect x="690" y="455" width="250" height="115" class="box target"/><text x="710" y="490" class="t">Native Bone output</text><text x="710" y="517" class="small">2080×2288 exact or</text><text x="710" y="540" class="small">whole-raster crop/resize only</text>
+  <rect x="1000" y="455" width="250" height="115" class="box target"/><text x="1020" y="490" class="t">Role-semantic QA</text><text x="1020" y="517" class="small">body bounds + closure + fitment</text><text x="1020" y="540" class="small">component count + shared baseline</text>
+  <rect x="1310" y="455" width="220" height="115" class="box target"/><text x="1330" y="490" class="t">Blinded benchmark</text><text x="1330" y="517" class="small">attempt, time, cost, failures</text><text x="1330" y="540" class="small">then existing approval lane</text>
+  <path d="M320 512 H380" class="arrow"/><path d="M630 512 H690" class="arrow"/><path d="M940 512 H1000" class="arrow"/><path d="M1250 512 H1310" class="arrow"/>
+
+  <rect x="70" y="635" width="1460" height="185" fill="#fff" stroke="#B7B0A4" stroke-width="2" rx="18"/>
+  <text x="100" y="680" class="sh">What stays unchanged</text>
+  <text x="100" y="715" class="t">Canonical catalog truth · approved reference identities · framing/baseline contracts · reconciliation · human approval · Shopify/Sanity publish controls</text>
+  <text x="100" y="765" class="sh">What must become explicit before scale-up</text>
+  <text x="100" y="800" class="t">Body-only measurement extraction, semantic role evaluation, non-zero price cards, provider usage capture, and a measured approval cohort.</text>
+</svg>

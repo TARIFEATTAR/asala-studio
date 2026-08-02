@@ -1,0 +1,57 @@
+{
+  "$comment": "Paper-Doll Rig — closure placement contract for the 17-415 9ml Cylinder family. Verified 2026-08-01 against all five locked body plates (clear, amber, cobalt, frosted, swirl). ONE recipe seats every closure on every plate with no per-bottle tuning; that invariance IS the paper-doll architecture.",
+  "bodyGroup": "cylinder__9ml__17-415",
+  "appliesToPlates": [
+    "body__cylinder__9ml__clear__70.0x20.0mm",
+    "body__cylinder__9ml__amber__70.0x20.0mm",
+    "body__cylinder__9ml__cobalt__70.0x20.0mm",
+    "body__cylinder__9ml__frosted__70.0x20.0mm",
+    "body__cylinder__9ml__swirl__70.0x20.0mm"
+  ],
+  "canvas": { "widthPx": 2080, "heightPx": 2288, "background": "#F5F3EF" },
+  "sharedNeckGeometry": {
+    "neckTopY": 760,
+    "neckBaseY": 968,
+    "centerX": 1041,
+    "threadCrestPx": 269,
+    "threadCrestMm": 17.0,
+    "$comment": "Measured on all five plates. Divergence across the strip y=760..971: mean 4px, worst 12px on a single row, centerline within 3px. Below y=971 the shoulder flare diverges by up to 84px — that is real per-colorway glass, NOT a registration error, and no closure skirt may descend past it under a shared recipe."
+  },
+  "sharedStripBottomY": 971,
+  "fullBodyWidthY": 1002,
+  "bodyScale": { "bodyWidthPx": 363, "bodyDiameterMm": 20.0, "pxPerMm": 18.15 },
+  "toneContract": {
+    "blackPoint": 26,
+    "whitePoint": 244,
+    "$comment": "Bone-born plates span 34..210 luminance and clip at neither end. The harvested over-cap spans the full 0..255 with BOTH ends clipped — that foreign transfer curve, not key direction, is what reads as pasted-on. Its key highlight sits at 75% across vs 74-86% for amber/cobalt/frosted/swirl, so direction already agrees. Rung 1 of the lighting ladder is therefore sufficient here; see harmonizeToneRange() in compositeEngine.ts."
+  },
+  "placements": {
+    "roll-on-over-cap": {
+      "componentId": "closure__17-415__roll-on-over-cap__shiny-silver",
+      "widthPx": 363,
+      "anchor": { "bottomY": 1002, "centerX": 1041 },
+      "toneHarmonizeStrength": 0.7,
+      "sizing": {
+        "rule": "flush to bodyWidthPx — the cap edge aligns with the bottle edge",
+        "$comment": "NEVER size a closure off the thread crest. Doing so imports the canon-vs-photography neck discrepancy: the crest measures 269px, which at body scale (363px = 20mm, 18.15 px/mm) is 14.8mm, NOT the canon 17mm. Sizing from the crest built the cap ~13% too small twice (309px, then 345px) before Jordan called it — the body is the trustworthy scale."
+      }
+    },
+    "metal-roller-ball": {
+      "componentId": "closure__17-415__metal-roller-ball__natural",
+      "widthPx": 269,
+      "anchor": { "topY": 675, "centerX": 1041 },
+      "sizing": { "rule": "flush to threadCrestPx — the roller housing seats INSIDE the neck bore" }
+    },
+    "plastic-roller-ball": {
+      "componentId": "closure__17-415__plastic-roller-ball__natural",
+      "widthPx": 269,
+      "anchor": { "topY": 675, "centerX": 1041 },
+      "sizing": { "rule": "flush to threadCrestPx — the roller housing seats INSIDE the neck bore" }
+    }
+  },
+  "capStates": {
+    "capped": ["roll-on-over-cap"],
+    "cap-off": ["metal-roller-ball"],
+    "cap-off-plastic": ["plastic-roller-ball"]
+  }
+}

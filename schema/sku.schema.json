@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://madison.studio/schema/best-bottles/sku.schema.json",
+  "title": "Best Bottles Product Image Prompt SKU",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sku",
+    "filename",
+    "product_family",
+    "frame_class",
+    "body_shape",
+    "body_material",
+    "body_color",
+    "closure_type",
+    "closure_material",
+    "cap_color",
+    "collar_material",
+    "applicator_type",
+    "detached_components",
+    "orientation",
+    "transparency_type",
+    "special_geometry_notes",
+    "reference_image_path",
+    "output_canvas_width",
+    "output_canvas_height"
+  ],
+  "properties": {
+    "sku": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical Grace SKU, for example GB-CYL-CLR-9ML-SPR-GLD."
+    },
+    "filename": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Source reference filename. Should usually match the SKU."
+    },
+    "product_family": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Key from config/product_families.json."
+    },
+    "frame_class": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Key from config/frame_classes.json."
+    },
+    "body_shape": {
+      "type": "string",
+      "minLength": 1
+    },
+    "body_material": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Key from config/material_modules.json."
+    },
+    "body_color": {
+      "type": "string"
+    },
+    "closure_type": {
+      "type": "string",
+      "description": "Key from config/closure_modules.json."
+    },
+    "closure_material": {
+      "type": "string",
+      "description": "Plain material label or key-like descriptor for the closure."
+    },
+    "cap_color": {
+      "type": "string"
+    },
+    "collar_material": {
+      "type": "string"
+    },
+    "applicator_type": {
+      "type": "string"
+    },
+    "detached_components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Detached objects visible in the reference, for example over_cap."
+    },
+    "orientation": {
+      "type": "string",
+      "enum": ["front", "front_slight_right", "front_slight_left", "side", "grouped", "other"]
+    },
+    "transparency_type": {
+      "type": "string",
+      "enum": ["transparent", "translucent", "opaque", "fabric", "paperboard", "mixed"]
+    },
+    "special_geometry_notes": {
+      "type": "string"
+    },
+    "reference_image_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output_canvas_width": {
+      "type": "integer",
+      "minimum": 16
+    },
+    "output_canvas_height": {
+      "type": "integer",
+      "minimum": 16
+    }
+  }
+}

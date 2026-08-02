@@ -15,24 +15,32 @@ import { Upload, FolderOpen, Check, Plus, Image as ImageIcon, Loader2 } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useImageLibrary } from "@/hooks/useImageLibrary";
+import { isRetiredTransparentBestBottlesReferenceCandidate } from "@/lib/bestBottlesReferenceFilters";
 
 interface LibraryImage {
     id: string;
     url: string;
     name: string;
     timestamp?: number;
+    libraryTags?: string[];
 }
 
 interface ImageLibraryModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSelectImage: (image: { url: string; file?: File; name?: string }) => void;
+    onSelectImage: (image: { url: string; file?: File; name?: string; libraryTags?: string[] }) => void;
     libraryImages?: LibraryImage[];
     title?: string;
     /** When set, only loads generated_images rows whose library_tags include this token. */
     libraryTagFilter?: string;
     /** OR filter: any of these tags. If set, takes precedence over `libraryTagFilter`. */
     libraryTagContainsAny?: string[];
+    /** Exclude rows whose library_tags include any of these exact tokens. */
+    libraryTagExcludeAny?: string[];
+    /** Exclude rows whose URL contains any of these case-insensitive fragments. */
+    imageUrlExcludeContainsAny?: string[];
+    /** Exclude retired Best Bottles transparent/background-removed references from this picker. */
+    excludeRetiredBestBottlesTransparentReferences?: boolean;
 }
 
 const STORAGE_KEY = "madison-image-library";
@@ -64,6 +72,9 @@ export function ImageLibraryModal({
     title = "Select Image",
     libraryTagFilter,
     libraryTagContainsAny,
+    libraryTagExcludeAny,
+    imageUrlExcludeContainsAny,
+    excludeRetiredBestBottlesTransparentReferences = false,
 }: ImageLibraryModalProps) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [localImages, setLocalImages] = useState<LibraryImage[]>(() => getStoredImages());
@@ -74,16 +85,48 @@ export function ImageLibraryModal({
     // Fetch from Supabase
     const { data: supabaseImages = [], isLoading } = useImageLibrary(
         libraryTagContainsAny?.length
-            ? { libraryTagContainsAny }
+            ? {
+                libraryTagContainsAny,
+                libraryTagExcludeAny,
+                imageUrlExcludeContainsAny,
+                excludeRetiredBestBottlesTransparentReferences,
+            }
             : libraryTagFilter
-              ? { libraryTagContains: libraryTagFilter }
-              : {},
+              ? {
+                  libraryTagContains: libraryTagFilter,
+                  libraryTagExcludeAny,
+                  imageUrlExcludeContainsAny,
+                  excludeRetiredBestBottlesTransparentReferences,
+                }
+              : {
+                  libraryTagExcludeAny,
+                  imageUrlExcludeContainsAny,
+                  excludeRetiredBestBottlesTransparentReferences,
+                },
     );
+
+    const excludedUrlTokens = (imageUrlExcludeContainsAny ?? [])
+        .map((token) => token.trim().toLowerCase())
+        .filter(Boolean);
+    const isAllowedImageUrl = (url: string) =>
+        excludedUrlTokens.length === 0 ||
+        !excludedUrlTokens.some((token) => url.toLowerCase().includes(token));
+    const isRetiredReferenceImage = (image: LibraryImage) =>
+        excludeRetiredBestBottlesTransparentReferences &&
+        isRetiredTransparentBestBottlesReferenceCandidate([
+            {
+                url: image.url,
+                name: image.name,
+                libraryTags: image.libraryTags ?? [],
+            },
+        ]);
 
     // Merge: external prop → supabase → localStorage (dedup by id)
     const seen = new Set<string>();
     const allImages = [...(externalImages || []), ...supabaseImages, ...localImages].filter(img => {
         if (seen.has(img.id)) return false;
+        if (!isAllowedImageUrl(img.url)) return false;
+        if (isRetiredReferenceImage(img)) return false;
         seen.add(img.id);
         return true;
     });
@@ -102,6 +145,26 @@ export function ImageLibraryModal({
             toast({
                 title: "File too large",
                 description: "Maximum file size is 20MB",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (
+            excludeRetiredBestBottlesTransparentReferences &&
+            isRetiredTransparentBestBottlesReferenceCandidate([
+                {
+                    name: file.name,
+                    fileName: file.name,
+                    type: file.type,
+                    webkitRelativePath: (file as File & { webkitRelativePath?: string }).webkitRelativePath,
+                },
+            ])
+        ) {
+            toast({
+                title: "Flattened product truth required",
+                description:
+                    "Transparent/background-removed references are retired for Cylinder masters. Use the flattened Photoshop export with the source background.",
                 variant: "destructive",
             });
             return;
@@ -149,7 +212,8 @@ export function ImageLibraryModal({
         if (selected) {
             onSelectImage({
                 url: selected.url,
-                name: selected.name
+                name: selected.name,
+                libraryTags: selected.libraryTags,
             });
             onOpenChange(false);
             setSelectedId(null);

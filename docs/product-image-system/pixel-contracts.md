@@ -8,9 +8,20 @@ Single reference for **actual pixel sizes** at each stage. When `geometry_spec` 
 | Sample CDN hero (Sanity) from a live paper-doll group | **928 × 1152** | ≈ **4:5** |
 | Paper-doll composition canvas (local script → `manifest.json` → `geometry_spec`) | **2080 × 2288** | **10:11** |
 
+## Best Bottles Canvas Tiers
+
+Best Bottles PDP/catalog generations now have three routed production canvas tiers so low/wide products do not float inside the portrait master, and round/square products do not crowd the side margins.
+
+| Tier | Dimensions (W×H) | Ratio | Primary families |
+|------|-------------------|--------|------------------|
+| Tall Portrait | **2080 × 2288** | **10:11** | Cylinder, Sleek, Slim, Empire, Elegant, Diva, Dropper, Vial, rectangular/tall families |
+| Square / Round | **2048 × 2048** | **1:1** | Circle, Round, Square, Atomizer, Cap/Closure, Royal, Flair, Tulip |
+| Wide / Low | **1536 × 1024** | **3:2** | Cream Jar, Heart 4ml, other low/wide products |
+
 ## Code
 
 - Constants: `src/config/productImageDimensions.ts` (`PIPELINE_OPENAI_RAW_PX`, `SANITY_HERO_SAMPLE_PX`, `PAPER_DOLL_CANVAS_PX`).
+- Best Bottles canvas-tier resolver: `src/config/productImageCanvasTiers.ts`.
 - Handoff spec: `docs/product-image-system/local-script-handoff.md` (manifest `canonicalCanvas` must match exported PNGs).
 
 ## Notes

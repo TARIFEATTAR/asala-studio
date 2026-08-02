@@ -1,0 +1,59 @@
+{
+  "reviewedAt": "2026-07-11T14:50:40.092Z",
+  "reviewSource": "best-bottles-reconciliation-review-sheet-2026-07-11",
+  "visualTarget": {
+    "status": "approved-reference-target",
+    "imageIds": [
+      "1ba6d970-c499-44de-a15c-12496fa30238",
+      "3c8acc66-73ac-4c70-b7bd-bd925625ede1",
+      "66bcb944-30e3-4df5-9fd0-c00d1db8aaba",
+      "6a1631e1-a17e-418d-b5ae-e4cd40050f78",
+      "dfd9927a-4b6d-4ed7-b60a-c91223f87fa3",
+      "d14626f5-1a98-493d-b2c0-6d2ba9579db1",
+      "250b520b-be07-4c78-abd7-7ab63933c495",
+      "786107e6-0ecf-4292-90f1-f92467d862dc",
+      "73af0441-099d-439f-bcbd-1a10bbf3f827",
+      "56d94056-f678-4939-a891-d4272b03a66e",
+      "fdfdd81b-617a-46c5-a26a-899b72f80f0f"
+    ],
+    "direction": "Use this reviewed image set as the ideal visual target for future generated Best Bottles images. Preserve its slightly different canvas color, high-quality material rendering, and refined drop-shadow treatment. Aim for this presentation standard consistently across every generated image while preserving exact product identity, geometry, closure state, scale, centerline, and baseline.",
+    "approvedQualities": [
+      "canvas color and tonal character",
+      "material definition and perceived quality",
+      "refined contact/drop shadow",
+      "clean premium ecommerce presentation"
+    ],
+    "calibrationProfile": {
+      "version": "best-bottles-pdp-v1",
+      "canvasTargetHex": "#F6EFE8",
+      "canvasDerivation": "median corner RGB across the seven approved aluminum references",
+      "glassStyleReferenceImageId": "66bcb944-30e3-4df5-9fd0-c00d1db8aaba",
+      "aluminumStyleReferenceImageId": "d14626f5-1a98-493d-b2c0-6d2ba9579db1",
+      "referenceRole": "style-only; product identity remains locked to the primary SKU reference"
+    }
+  },
+  "approvedSharedImages": [
+    {"imageId":"1ba6d970-c499-44de-a15c-12496fa30238","eligibleGraceSkus":["GB-EMP-CLR-50ML-RDC-MSLV","GB-EMP-CLR-50ML-RDC-MSLV-01"]},
+    {"imageId":"3c8acc66-73ac-4c70-b7bd-bd925625ede1","eligibleGraceSkus":["GB-EMP-CLR-100ML-RDC-SBLK","GB-EMP-CLR-100ML-RDC-SBLK-01"]},
+    {"imageId":"66bcb944-30e3-4df5-9fd0-c00d1db8aaba","eligibleGraceSkus":["GB-EMP-CLR-100ML-RDC-MSLV","GB-EMP-CLR-100ML-RDC-MSLV-01"]},
+    {"imageId":"6a1631e1-a17e-418d-b5ae-e4cd40050f78","eligibleGraceSkus":["GB-EMP-CLR-50ML-RDC-SBLK","GB-EMP-CLR-50ML-RDC-SBLK-01"]}
+  ],
+  "preservedHistoricalImages": [
+    {"imageId":"dfd9927a-4b6d-4ed7-b60a-c91223f87fa3","graceSku":"AB-ALU-CLR-100ML-SPR-BLK"},
+    {"imageId":"d14626f5-1a98-493d-b2c0-6d2ba9579db1","graceSku":"AB-ALU-CLR-120ML-LPM-BLK"},
+    {"imageId":"250b520b-be07-4c78-abd7-7ab63933c495","graceSku":"AB-ALU-CLR-120ML-LPM-WHT"},
+    {"imageId":"786107e6-0ecf-4292-90f1-f92467d862dc","graceSku":"AB-ALU-CLR-250ML-SPR-BLK"},
+    {"imageId":"73af0441-099d-439f-bcbd-1a10bbf3f827","graceSku":"AB-ALU-CLR-500ML"},
+    {"imageId":"56d94056-f678-4939-a891-d4272b03a66e","graceSku":"AB-ALU-CLR-65ML-LPM-BLK"},
+    {"imageId":"fdfdd81b-617a-46c5-a26a-899b72f80f0f","graceSku":"AB-CYL-WHT-65ML-LPM-WHT"}
+  ],
+  "rejectedImages": [
+    {"imageId":"ca87201a-4f91-41d3-8246-e38292dfe089","graceSku":"GB-CYL-BLK-9ML-SPR-BLK","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"2b8a4f59-5925-48af-b2cf-e48911ea116f","graceSku":"GB-CYL-CLR-9ML-SPR-GLD","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"3945628f-aa5d-493e-9366-a771d68ac452","graceSku":"GB-CYL-CLR-9ML-SPR-MSLV-01","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"28a50eba-0e39-4b5a-bb1a-3792be702a51","graceSku":"GB-CYL-CLR-9ML-SPR-RED","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"ad3fb5c5-252e-47a1-aee7-6d4adfa6ebce","graceSku":"GB-CYL-CLR-9ML-SPR-SSLV-01","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"f1f93858-f6bf-4d11-b08a-8ffda56587c1","graceSku":"GB-CYL-CLR-9ML-T-27","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."},
+    {"imageId":"de7da60d-6001-460a-a138-1c0c9c3ee6f5","graceSku":"LB-CYL-CLR-9ML-LPM-MSLV","reason":"Rejected by Jordan: obsolete post-generation paint-on workflow produced destructive masking/paint artifacts."}
+  ]
+}

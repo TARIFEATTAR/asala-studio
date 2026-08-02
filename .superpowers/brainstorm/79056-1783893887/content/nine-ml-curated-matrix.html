@@ -1,0 +1,78 @@
+<style>
+  .bb-nine { color:#1d1d1f; font-family:Inter,system-ui,sans-serif; }
+  .bb-nine h2,.bb-nine h3 { font-family:Georgia,'Times New Roman',serif; font-weight:500; }
+  .bb-kicker { color:#8b6f42; font-size:12px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; }
+  .bb-sub { max-width:880px; color:#637588; }
+  .bb-lineup { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; align-items:end; margin:22px 0 30px; }
+  .bb-tile { min-width:0; padding:14px 8px 12px; text-align:center; background:linear-gradient(155deg,#f7f1e7,#dfd0bc); border-radius:10px; box-shadow:inset 0 0 0 1px rgba(106,80,50,.12); }
+  .bb-bottle-wrap { height:160px; display:flex; align-items:flex-end; justify-content:center; }
+  .bb-bottle { position:relative; width:34px; height:115px; border:2px solid rgba(40,43,45,.58); border-radius:5px 5px 9px 9px; box-shadow:inset 6px 0 7px rgba(255,255,255,.50),inset -4px 0 6px rgba(45,40,35,.15),8px 10px 14px rgba(80,60,40,.15); }
+  .bb-bottle:after { content:''; position:absolute; left:3px; right:3px; bottom:5px; height:7px; border-radius:50%; background:rgba(255,255,255,.28); border-bottom:1px solid rgba(45,45,45,.22); }
+  .clear { background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.78),rgba(255,255,255,.18)); }
+  .amber { background:linear-gradient(90deg,rgba(91,46,10,.68),rgba(170,92,20,.68),rgba(70,35,7,.76)); }
+  .cobalt { background:linear-gradient(90deg,#08206f,#163cb6,#06165b); }
+  .frosted { background:linear-gradient(90deg,rgba(230,231,228,.88),rgba(255,255,255,.96),rgba(202,205,203,.90)); }
+  .swirl { background:repeating-linear-gradient(100deg,rgba(255,255,255,.78) 0 7px,rgba(155,170,176,.42) 8px 11px,rgba(255,255,255,.72) 12px 19px); }
+  .bb-fitment { position:absolute; left:50%; transform:translateX(-50%); bottom:111px; }
+  .bb-fitment.roller { width:23px; height:18px; border-radius:8px 8px 2px 2px; background:#ece9e1; border:1px solid #a69c8d; }
+  .bb-fitment.roller:before { content:''; position:absolute; left:5px; top:-10px; width:11px; height:11px; border-radius:50%; border:1px solid #777; }
+  .bb-fitment.metal:before { background:radial-gradient(circle at 35% 30%,#fff,#999 45%,#555 80%); }
+  .bb-fitment.plastic:before { background:radial-gradient(circle at 35% 30%,#fff,#e7e3da 45%,#b7afa2 80%); }
+  .bb-fitment.spray { width:24px; height:25px; border-radius:3px 3px 1px 1px; background:#18191a; }
+  .bb-fitment.spray:before { content:''; position:absolute; left:4px; top:-13px; width:16px; height:15px; border-radius:3px 3px 0 0; background:#151617; }
+  .bb-cap { position:absolute; width:18px; height:46px; right:-30px; bottom:0; border-radius:4px 4px 2px 2px; background:linear-gradient(90deg,#9f7e40,#d3ac5b,#87682f); box-shadow:5px 6px 10px rgba(70,50,30,.13); }
+  .bb-tile strong { display:block; margin-top:10px; font-size:12px; }
+  .bb-tile span { display:block; min-height:30px; margin-top:4px; color:#637588; font-size:10px; line-height:1.4; }
+  .bb-approaches { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:18px; }
+  .bb-approach { padding:18px; background:#faf8f5; border-top:3px solid #d4c5a9; }
+  .bb-approach.rec { background:#f4ede2; border-top-color:#c5a065; }
+  .bb-approach h3 { margin:4px 0 8px; }
+  .bb-badge { display:inline-block; padding:5px 8px; border-radius:999px; background:#c5a065; color:#1d1d1f; font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+  .bb-approach p { color:#637588; font-size:12px; line-height:1.5; }
+  .bb-count { font-family:Georgia,'Times New Roman',serif; font-size:30px; color:#1d1d1f; }
+  .bb-rule { margin-top:22px; padding:17px 19px; border-radius:10px; color:#f5f3ef; background:#1d1d1f; }
+  .bb-rule strong { color:#d4c5a9; }
+  @media(max-width:780px){
+    .bb-lineup { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .bb-lineup .bb-tile:last-child { grid-column:span 2; }
+    .bb-approaches { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="bb-nine">
+  <div class="bb-kicker">Recommended 9 ml hero curation</div>
+  <h2>Show every important difference once—not every permutation</h2>
+  <p class="bb-sub">The seven-image set below covers all five glass finishes, both roller technologies, one high-recognition fine-mist sprayer, and one universal matte-gold sidecar cap treatment.</p>
+
+  <div class="bb-lineup" role="img" aria-label="Recommended seven-image 9 milliliter set: clear metal roller, clear plastic roller, amber metal roller, cobalt plastic roller, frosted metal roller, swirl plastic roller, and clear black sprayer">
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle clear"><div class="bb-fitment roller metal"></div><div class="bb-cap"></div></div></div><strong>Clear</strong><span>Metal roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle clear"><div class="bb-fitment roller plastic"></div><div class="bb-cap"></div></div></div><strong>Clear</strong><span>Plastic roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle amber"><div class="bb-fitment roller metal"></div><div class="bb-cap"></div></div></div><strong>Amber</strong><span>Metal roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle cobalt"><div class="bb-fitment roller plastic"></div><div class="bb-cap"></div></div></div><strong>Cobalt</strong><span>Plastic roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle frosted"><div class="bb-fitment roller metal"></div><div class="bb-cap"></div></div></div><strong>Frosted</strong><span>Metal roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle swirl"><div class="bb-fitment roller plastic"></div><div class="bb-cap"></div></div></div><strong>Swirl</strong><span>Plastic roller<br>matte-gold sidecar</span></div>
+    <div class="bb-tile"><div class="bb-bottle-wrap"><div class="bb-bottle clear"><div class="bb-fitment spray"></div></div></div><strong>Clear</strong><span>Black fine-mist<br>single spray representative</span></div>
+  </div>
+
+  <h3>Three possible production models</h3>
+  <div class="bb-approaches">
+    <div class="bb-approach">
+      <div class="bb-count">11 images</div>
+      <h3>Full roller matrix</h3>
+      <p>Five finishes × metal and plastic rollers, plus one sprayer. Most complete, but repetitive and unnecessarily expensive for editorial hero use.</p>
+    </div>
+    <div class="bb-approach rec">
+      <span class="bb-badge">Recommended</span>
+      <div class="bb-count">7 images</div>
+      <h3>Curated coverage</h3>
+      <p>Clear proves both roller types. The four remaining finishes alternate metal and plastic. One clear black sprayer represents fine mist.</p>
+    </div>
+    <div class="bb-approach">
+      <div class="bb-count">5 images</div>
+      <h3>Editorial minimum</h3>
+      <p>One image per finish with applicators mixed across the set. Elegant, but it cannot clearly compare metal versus plastic rollers in clear glass.</p>
+    </div>
+  </div>
+
+  <div class="bb-rule"><strong>Repeatable rule for every family:</strong> add an image only when it introduces a new physical body, glass finish, or visibly different applicator topology. Do not add images for cap color, trim finish, or minor closure styling alone.</div>
+</div>
