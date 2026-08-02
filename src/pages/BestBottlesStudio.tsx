@@ -143,7 +143,7 @@ export default function BestBottlesStudio() {
   };
 
   return (
-    <div className="dark-room-container min-h-screen overflow-y-auto">
+    <div className="dark-room-container best-bottles-studio-container">
       <header className="dark-room-header">
         <div className="dark-room-header__title flex items-center gap-3">
           <button
