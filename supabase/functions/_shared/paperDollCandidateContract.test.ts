@@ -79,11 +79,24 @@ test("manual candidate bytes use a separate immutable output reference", () => {
   assert.throws(() => parsePaperDollCandidateRequest({
     ...request, provider: "manual", model: "manual-v1",
   }), /manualOutput/i);
+  const originalFilename = "Natural Roller 17-415 FINAL.png";
   const parsed = parsePaperDollCandidateRequest({
-    ...request, provider: "manual", model: "manual-v1", manualOutput: asset("manual-output"),
+    ...request,
+    provider: "manual",
+    model: "manual-v1",
+    manualOutput: { ...asset("manual-output"), originalFilename },
   });
   assert.equal(parsed.source.path, request.source.path);
   assert.match(parsed.manualOutput?.path ?? "", /manual-output/);
+  assert.equal(parsed.manualOutput?.originalFilename, originalFilename);
+  for (const invalidName of ["", "roller\u0000.png", "folder/roller.png", "folder\\roller.png", `${"x".repeat(252)}.png`]) {
+    assert.throws(() => parsePaperDollCandidateRequest({
+      ...request,
+      provider: "manual",
+      model: "manual-v1",
+      manualOutput: { ...asset("manual-output"), originalFilename: invalidName },
+    }), /filename/i);
+  }
 });
 
 test("candidate finalization is transactional and unavailable to browser roles", () => {

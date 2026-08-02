@@ -82,15 +82,30 @@ test("overcap prompts reject aluminium-part fabrication language", () => {
 });
 
 test("manual uploads are explicit provider outputs and never replace the immutable source", () => {
+  const manualOutput = {
+    ...asset("paper-doll-sources"),
+    originalFilename: "17-415 Natural Roller FINAL.png",
+  };
   const manual = {
     ...validRequest(),
     provider: "manual",
     model: "manual-v1",
-    manualOutput: asset("paper-doll-sources"),
+    manualOutput,
   };
-  assert.equal(CandidateJobRequestSchema.safeParse(manual).success, true);
+  const parsed = CandidateJobRequestSchema.parse(manual);
+  assert.equal(parsed.manualOutput?.originalFilename, manualOutput.originalFilename);
   assert.equal(CandidateJobRequestSchema.safeParse({ ...manual, manualOutput: undefined }).success, false);
   assert.equal(CandidateJobRequestSchema.safeParse({ ...validRequest(), manualOutput: asset("paper-doll-sources") }).success, false);
+  assert.equal(CandidateJobRequestSchema.safeParse({
+    ...manual,
+    manualOutput: asset("paper-doll-sources"),
+  }).success, false, "manual references require immutable filename provenance");
+  for (const originalFilename of ["", "roller\n.png", "folder/roller.png", "folder\\roller.png", `${"x".repeat(252)}.png`]) {
+    assert.equal(CandidateJobRequestSchema.safeParse({
+      ...manual,
+      manualOutput: { ...manualOutput, originalFilename },
+    }).success, false, JSON.stringify(originalFilename));
+  }
 });
 
 test("named approval binds a decision to candidate SHA and QA evidence", () => {

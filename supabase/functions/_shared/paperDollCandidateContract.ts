@@ -19,6 +19,10 @@ export interface PaperDollPrivateAssetRef {
   byteSize: number;
 }
 
+export interface PaperDollManualAssetRef extends PaperDollPrivateAssetRef {
+  originalFilename: string;
+}
+
 export interface PaperDollCandidateRequest {
   organizationId: string;
   requirementKey: string;
@@ -32,7 +36,7 @@ export interface PaperDollCandidateRequest {
   authoritativeMask: PaperDollPrivateAssetRef;
   editMask: PaperDollPrivateAssetRef;
   assemblyContext?: PaperDollPrivateAssetRef;
-  manualOutput?: PaperDollPrivateAssetRef;
+  manualOutput?: PaperDollManualAssetRef;
   transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number };
   selectionKind: "whole-layer" | "rectangle" | "brush";
 }
@@ -86,6 +90,15 @@ function sha(value: unknown, label: string): string {
   return parsed;
 }
 
+function originalFilename(value: unknown, label: string): string {
+  if (typeof value !== "string" || value.length < 1 || value.length > 255) {
+    throw new Error(`${label} must be between 1 and 255 characters.`);
+  }
+  if (/[\u0000-\u001f\u007f]/.test(value)) throw new Error(`${label} contains control characters.`);
+  if (/[\\/]/.test(value)) throw new Error(`${label} must not contain path separators.`);
+  return value;
+}
+
 function asset(value: unknown, label: string, organizationId: string): PaperDollPrivateAssetRef {
   const parsed = record(value, label);
   const bucket = string(parsed.bucket, `${label}.bucket`) as PaperDollAssetBucket;
@@ -108,6 +121,14 @@ function asset(value: unknown, label: string, organizationId: string): PaperDoll
     sha256: digest,
     contentType: string(parsed.contentType, `${label}.contentType`),
     byteSize: byteSize as number,
+  };
+}
+
+function manualAsset(value: unknown, label: string, organizationId: string): PaperDollManualAssetRef {
+  const parsed = record(value, label);
+  return {
+    ...asset(parsed, label, organizationId),
+    originalFilename: originalFilename(parsed.originalFilename, `${label}.originalFilename`),
   };
 }
 
@@ -149,7 +170,7 @@ export function parsePaperDollCandidateRequest(value: unknown): PaperDollCandida
   }
   const manualOutput = raw.manualOutput == null
     ? undefined
-    : asset(raw.manualOutput, "manualOutput", organizationId);
+    : manualAsset(raw.manualOutput, "manualOutput", organizationId);
   if (provider === "manual" && !manualOutput) throw new Error("manualOutput is required for manual jobs.");
   if (provider !== "manual" && manualOutput) throw new Error("manualOutput is only valid for manual jobs.");
   return {

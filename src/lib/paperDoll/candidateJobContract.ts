@@ -42,6 +42,20 @@ export const PrivateAssetRefSchema = z.object({
   }
 });
 
+export const OriginalFilenameSchema = z.string()
+  .min(1)
+  .max(255)
+  .refine((name) => !/[\u0000-\u001f\u007f]/.test(name), {
+    message: "Filename contains control characters.",
+  })
+  .refine((name) => !/[\\/]/.test(name), {
+    message: "Filename must not contain path separators.",
+  });
+
+export const ManualCandidateAssetRefSchema = PrivateAssetRefSchema.and(z.object({
+  originalFilename: OriginalFilenameSchema,
+}));
+
 const CandidateTransformSchema = z.object({
   translateXPx: z.number().int().min(-2080).max(2080),
   translateYPx: z.number().int().min(-2288).max(2288),
@@ -65,7 +79,7 @@ export const CandidateJobRequestSchema = z.object({
   authoritativeMask: PrivateAssetRefSchema,
   editMask: PrivateAssetRefSchema,
   assemblyContext: PrivateAssetRefSchema.optional(),
-  manualOutput: PrivateAssetRefSchema.optional(),
+  manualOutput: ManualCandidateAssetRefSchema.optional(),
   transform: CandidateTransformSchema,
   selectionKind: z.enum(["whole-layer", "rectangle", "brush"]).default("whole-layer"),
 }).superRefine((value, context) => {
@@ -122,6 +136,7 @@ export const CandidateJobRecordSchema = z.object({
   promptSha256: SHA256Schema,
   generationAttemptId: z.string().uuid().nullable(),
   candidateComponentVersionId: z.string().uuid().nullable(),
+  manualOutput: ManualCandidateAssetRefSchema.nullable(),
   output: PrivateAssetRefSchema.nullable(),
   outputMetadata: z.record(z.string(), z.unknown()),
   initiatedBy: z.string().uuid(),
@@ -142,6 +157,7 @@ export const CandidateApprovalRequestSchema = z.object({
 
 export type CandidateProvider = z.infer<typeof CandidateProviderSchema>;
 export type PrivateAssetRef = z.infer<typeof PrivateAssetRefSchema>;
+export type ManualCandidateAssetRef = z.infer<typeof ManualCandidateAssetRefSchema>;
 export type CandidateJobRequest = z.infer<typeof CandidateJobRequestSchema>;
 export type CandidateJobRecord = z.infer<typeof CandidateJobRecordSchema>;
 export type CandidateApprovalRequest = z.infer<typeof CandidateApprovalRequestSchema>;
