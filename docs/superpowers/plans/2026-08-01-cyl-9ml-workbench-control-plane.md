@@ -106,13 +106,13 @@
 - Create: `src/components/paper-doll/assemblyCanvasModel.ts`
 - Create: `src/components/paper-doll/assemblyCanvasModel.test.ts`
 
-- [ ] Write failing canvas-model tests for explicit mapping selection, layer URL resolution, canvas-to-display scaling, alpha bounds, centerline, seat, geometry-mask overlays, and an error state for missing URLs.
-- [ ] Implement a release-lock canvas that composes the selected manifest layers at their authoritative full-canvas coordinates. Add zoom, pan, layer visibility, bounds, centerline, seat, and mask toggles; do not add persistent drag or editing behavior in this slice.
-- [ ] Display top-to-bottom layer order, exact component-version IDs, SHA prefixes, material/approval states, bounds, mount axis, and seat coordinates.
-- [ ] Implement before/difference affordances only where evidence exists; otherwise render an explicit unavailable state.
-- [ ] Implement Evidence as a searchable list of real `qaEvidence`, including gate version, blocking status, fixtures in `calibratedWith`, measurements, issues, and subject ID.
-- [ ] Run the canvas-model test and `npm run build`.
-- [ ] Commit: `feat(paper-doll): render locked assemblies and evidence`
+- [x] Write failing canvas-model tests for explicit mapping selection, layer URL resolution, canvas-to-display scaling, alpha bounds, centerline, seat, geometry-mask overlays, and an error state for missing URLs.
+- [x] Implement a release-lock canvas that composes the selected manifest layers at their authoritative full-canvas coordinates. Add zoom, pan, layer visibility, bounds, centerline, seat, and mask toggles; do not add persistent drag or editing behavior in this slice.
+- [x] Display top-to-bottom layer order, exact component-version IDs, SHA prefixes, material/approval states, bounds, mount axis, and seat coordinates.
+- [x] Implement before/difference affordances only where evidence exists; otherwise render an explicit unavailable state.
+- [x] Implement Evidence as a searchable list of real `qaEvidence`, including gate version, blocking status, fixtures in `calibratedWith`, measurements, issues, and subject ID.
+- [x] Run the canvas-model test and `npm run build`.
+- [x] Commit: `feat(paper-doll): render locked assemblies and evidence`
 
 ## Task 6: Implement Matrix and five-product Lineup
 
