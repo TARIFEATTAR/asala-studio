@@ -11,11 +11,12 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "test:paper-doll-production": "node --import tsx --test src/components/paper-doll/assemblyEditModel.test.ts scripts/paper-doll/repair-cyl9-metal-roller.test.ts src/lib/paperDoll/assetStorage.test.ts src/lib/paperDoll/releaseRepository.test.ts src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/releaseContract.test.ts src/lib/paperDoll/rollonRequirements.test.ts src/lib/paperDoll/candidateJobContract.test.ts src/lib/paperDoll/candidateRepository.test.ts src/lib/paperDoll/candidateClamp.node.test.ts supabase/functions/_shared/paperDollCandidateContract.test.ts supabase/functions/_shared/paperDollApprovalContract.test.ts supabase/functions/_shared/generationAttemptLedger.test.ts src/lib/paperDoll/corePort.test.ts",
+    "test:paper-doll-production": "node --import tsx --test src/components/paper-doll/assemblyEditModel.test.ts src/components/paper-doll/rollonLineupModel.test.ts scripts/paper-doll/repair-cyl9-metal-roller.test.ts src/lib/paperDoll/assetStorage.test.ts src/lib/paperDoll/releaseRepository.test.ts src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/releaseContract.test.ts src/lib/paperDoll/rollonRequirements.test.ts src/lib/paperDoll/rollonReleaseDraft.node.test.ts src/lib/paperDoll/candidateJobContract.test.ts src/lib/paperDoll/candidateRepository.test.ts src/lib/paperDoll/candidateClamp.node.test.ts supabase/functions/_shared/paperDollCandidateContract.test.ts supabase/functions/_shared/paperDollApprovalContract.test.ts supabase/functions/_shared/generationAttemptLedger.test.ts src/lib/paperDoll/corePort.test.ts",
     "paper-doll:storage:provision": "tsx scripts/paper-doll/provision-storage.ts",
     "paper-doll:cyl9:upload-bodies": "tsx scripts/paper-doll/upload-cyl9-body-release.ts",
     "paper-doll:cyl9:requirements": "tsx scripts/paper-doll/build-cyl9-rollon-requirements.ts",
     "paper-doll:cyl9:render-pack": "tsx scripts/paper-doll/render-cyl9-rollon-pack.ts",
+    "paper-doll:cyl9:release": "tsx scripts/paper-doll/build-cyl9-rollon-release.ts",
     "paper-doll:candidate:process": "tsx scripts/paper-doll/process-paper-doll-candidate.ts",
     "bestbottles:catalog:reconcile": "tsx scripts/build-bestbottles-catalog-lite.ts",
     "preview": "vite preview"

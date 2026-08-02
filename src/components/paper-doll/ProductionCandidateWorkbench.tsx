@@ -25,6 +25,7 @@ import {
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
+import { RollonLineup } from "./RollonLineup";
 import {
   type AssemblyEditMode,
   type CandidateSelectionKind,
@@ -242,6 +243,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
         <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={transform} inspection={inspection} />
       </div>
+
+      <RollonLineup assets={query.data.assets} />
 
       <footer className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(242,192,120,0.25)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
         <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />Candidate-only writes · active release unchanged · no Sanity publication</span>

@@ -99,6 +99,8 @@ export const PaperDollReleaseManifestSchema = z.object({
   provenance: z.object({
     sourceGitCommit: z.string().min(1),
     rendererVersion: z.string().min(1),
+    requirementsSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+    rendererRecipeSha256: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   }),
 });
 
