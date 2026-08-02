@@ -4,49 +4,13 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
+
+concurrency:
+  group: production-frontend-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  deploy-edge-functions:
-    name: Deploy Supabase Edge Functions
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Deploy all edge functions
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_ID: likkskifwsrvszxdvufw
-        run: |
-          # Deploy all functions that exist in supabase/functions
-          echo "Deploying Supabase Edge Functions..."
-          
-          # Get list of functions from the directory
-          FUNCTIONS=$(find supabase/functions -maxdepth 1 -type d -not -path supabase/functions -not -path supabase/functions/_shared | sed 's|supabase/functions/||')
-          
-          for func in $FUNCTIONS; do
-            if [ -f "supabase/functions/$func/index.ts" ]; then
-              echo "Deploying function: $func"
-              npx supabase functions deploy "$func" \
-                --project-ref "$SUPABASE_PROJECT_ID" \
-                --no-verify-jwt || echo "Warning: Failed to deploy $func"
-            fi
-          done
-          
-          echo "✅ Edge functions deployment complete!"
-
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
@@ -79,12 +43,8 @@ jobs:
 
       - name: Build summary
         run: |
-          echo "✅ Frontend build complete!"
-          echo "Build artifacts saved. You can deploy these to your hosting provider:"
-          echo "- Vercel: Connect your GitHub repo and it will auto-deploy"
-          echo "- Netlify: Connect your GitHub repo and set build command to 'npm run build'"
-          echo "- Other: Download artifacts and deploy manually"
-
+          echo "Frontend build complete."
+          echo "Supabase Edge Functions are intentionally not deployed by this workflow."
 
 
 

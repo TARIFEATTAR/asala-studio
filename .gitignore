@@ -20,6 +20,8 @@
 .firecrawl/
 /remotion/
 /tmp/
+/assets/paper-doll/
+/paper-doll-workspace/
 scripts/local-generate.ts
 tsconfig.scripts.tmp.json
 

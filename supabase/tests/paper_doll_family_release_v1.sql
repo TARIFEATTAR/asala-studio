@@ -4,7 +4,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(12);
+SELECT plan(17);
 
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
@@ -64,6 +64,44 @@ SELECT ok(
   'each table has one authenticated organization-member read policy'
 );
 
+SELECT ok(
+  (
+    SELECT count(*) = 4 AND bool_and(is_nullable = 'NO')
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'paper_doll_component_versions'
+      AND column_name = ANY (ARRAY['storage_bucket', 'image_path', 'content_type', 'byte_size'])
+  ),
+  'component versions carry a required immutable object-storage contract'
+);
+
+SELECT ok(
+  (
+    SELECT count(*) = 2
+    FROM pg_policies
+    WHERE schemaname = 'storage'
+      AND tablename = 'objects'
+      AND policyname IN (
+        'paper_doll_storage_select_org_members',
+        'paper_doll_storage_insert_org_members'
+      )
+      AND roles = ARRAY['authenticated']::name[]
+  ),
+  'paper-doll storage has explicit authenticated select and append policies'
+);
+
+SELECT ok(
+  NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'storage'
+      AND tablename = 'objects'
+      AND policyname LIKE 'paper_doll_storage_%'
+      AND cmd IN ('UPDATE', 'DELETE')
+  ),
+  'authenticated paper-doll storage has no overwrite or delete policy'
+);
+
 INSERT INTO public.organizations (id, name, slug)
 VALUES
   ('10000000-0000-4000-8000-000000000001', 'Paper Doll Fixture Org', 'paper-doll-fixture-org'),
@@ -102,12 +140,15 @@ RETURNS boolean LANGUAGE plpgsql AS $$
 BEGIN
   INSERT INTO public.paper_doll_component_versions (
     organization_id, component_id, version_key, material_variant,
-    image_path, image_sha256, geometry_mask_path, geometry_mask_sha256,
+    storage_bucket, image_path, image_sha256, geometry_mask_path, geometry_mask_sha256,
+    content_type, byte_size,
     width_px, height_px, alpha_bounds, mount_axis_x_px, seat_y_px, approval_status
   ) VALUES (
     '10000000-0000-4000-8000-000000000002',
     '20000000-0000-4000-8000-000000000001', '1', 'clear-glass',
-    'fixture.png', repeat('a', 64), NULL, NULL,
+    'paper-doll-candidates',
+    '10000000-0000-4000-8000-000000000002/CYL-9ML/fixture/' || repeat('a', 64) || '.png',
+    repeat('a', 64), NULL, NULL, 'image/png', 100,
     2080, 2288, '{"left":1,"top":1,"right":2,"bottom":2}', 1040, 2100, 'candidate'
   );
   RETURN false;
@@ -117,9 +158,31 @@ $$;
 
 SELECT ok(pg_temp.component_org_mismatch_is_rejected(), 'component version organization must match its component');
 
+CREATE OR REPLACE FUNCTION pg_temp.absolute_asset_url_is_rejected()
+RETURNS boolean LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO public.paper_doll_component_versions (
+    organization_id, component_id, version_key, material_variant,
+    storage_bucket, image_path, image_sha256, content_type, byte_size,
+    width_px, height_px, alpha_bounds, mount_axis_x_px, seat_y_px, approval_status
+  ) VALUES (
+    '10000000-0000-4000-8000-000000000001',
+    '20000000-0000-4000-8000-000000000001', 'absolute-url', 'clear-glass',
+    'paper-doll-candidates', 'https://example.com/fixture.png', repeat('a', 64),
+    'image/png', 100, 2080, 2288,
+    '{"left":1,"top":1,"right":2,"bottom":2}', 1040, 2100, 'candidate'
+  );
+  RETURN false;
+EXCEPTION WHEN check_violation THEN RETURN true;
+END;
+$$;
+
+SELECT ok(pg_temp.absolute_asset_url_is_rejected(), 'ledger rejects absolute and signed asset URLs');
+
 INSERT INTO public.paper_doll_component_versions (
   id, organization_id, component_id, version_key, material_variant,
-  image_path, image_sha256, geometry_mask_path, geometry_mask_sha256,
+  storage_bucket, image_path, image_sha256, geometry_mask_path, geometry_mask_sha256,
+  content_type, byte_size,
   width_px, height_px, alpha_bounds, mount_axis_x_px, seat_y_px,
   approval_status, provenance
 )
@@ -130,10 +193,12 @@ SELECT
   '1',
   CASE WHEN n <= 5 THEN 'glass' WHEN n = 6 THEN 'mirror-chrome' WHEN n = 7 THEN 'matte-white'
        WHEN n = 8 THEN 'glossy-black' ELSE 'translucent-frosted' END,
-  'fixture-' || n || '.png',
+  CASE WHEN n = 9 THEN 'paper-doll-candidates' ELSE 'paper-doll-approved' END,
+  '10000000-0000-4000-8000-000000000001/CYL-9ML/fixture-' || n || '/' || repeat(to_hex(n), 64) || '.png',
   repeat(to_hex(n), 64),
-  CASE WHEN n <= 5 THEN NULL ELSE 'closure-mask.png' END,
+  CASE WHEN n <= 5 THEN NULL ELSE '10000000-0000-4000-8000-000000000001/CYL-9ML/closure-mask/' || repeat('f', 64) || '.png' END,
   CASE WHEN n <= 5 THEN NULL ELSE repeat('f', 64) END,
+  'image/png', 100 + n,
   2080, 2288,
   '{"left":860,"top":740,"right":1225,"bottom":2115}'::jsonb,
   1040, 750,
@@ -158,25 +223,28 @@ FROM generate_series(1, 9) AS n;
 INSERT INTO public.paper_doll_family_releases (
   id, organization_id, family_key, release_version, release_status,
   canvas_width_px, canvas_height_px, background_hex,
-  manifest, manifest_sha256, source_git_commit, renderer_version
+  manifest, manifest_sha256, source_git_commit, renderer_version, created_at
 ) VALUES
   (
     '50000000-0000-4000-8000-000000000001',
     '10000000-0000-4000-8000-000000000001',
     'CYL-9ML', '1.0.0-draft.1', 'draft', 2080, 2288, '#F5F3EF',
-    '{"schemaVersion":1,"fixture":true}', repeat('a', 64), 'fixture', 'fixture'
+    '{"schemaVersion":1,"fixture":true}', repeat('a', 64), 'fixture', 'fixture',
+    '2026-08-03T00:00:00Z'
   ),
   (
     '50000000-0000-4000-8000-000000000002',
     '10000000-0000-4000-8000-000000000001',
     'CYL-9ML', '1.0.0-ready.1', 'ready', 2080, 2288, '#F5F3EF',
-    '{"schemaVersion":1,"fixture":"ready"}', repeat('b', 64), 'fixture', 'fixture'
+    '{"schemaVersion":1,"fixture":"ready"}', repeat('b', 64), 'fixture', 'fixture',
+    '2026-08-02T00:00:00Z'
   ),
   (
     '50000000-0000-4000-8000-000000000003',
     '10000000-0000-4000-8000-000000000001',
     'CYL-9ML', '1.0.0', 'published', 2080, 2288, '#F5F3EF',
-    '{"schemaVersion":1,"fixture":"published"}', repeat('c', 64), 'fixture', 'fixture'
+    '{"schemaVersion":1,"fixture":"published"}', repeat('c', 64), 'fixture', 'fixture',
+    '2026-08-01T00:00:00Z'
   );
 
 INSERT INTO public.paper_doll_family_release_assets (
@@ -293,6 +361,20 @@ SELECT ok(
   (SELECT count(*) = 9 FROM public.paper_doll_family_release_assets
     WHERE release_id = '50000000-0000-4000-8000-000000000001'),
   'service role can write five bodies, three approved caps, one blocked cap, QA, and a draft release'
+);
+
+SELECT is(
+  (
+    SELECT jsonb_array_length(payload->'assets')
+    FROM (
+      SELECT public.get_paper_doll_release_workbench(
+        '10000000-0000-4000-8000-000000000001',
+        'CYL-9ML'
+      ) AS payload
+    ) AS workbench
+  ),
+  9,
+  'read-only workbench API returns every exact release asset'
 );
 
 SELECT ok(

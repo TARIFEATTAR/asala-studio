@@ -33,6 +33,7 @@ import {
 } from "@/components/darkroom/LEDIndicator";
 import { MastersTabPanel } from "@/components/darkroom/MastersTabPanel";
 import { ComponentsTabPanel } from "@/components/darkroom/ComponentsTabPanel";
+import { StorageBackedReleasePanel } from "@/components/paper-doll/StorageBackedReleasePanel";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -373,22 +374,10 @@ export default function BestBottlesStudio() {
                 )}
 
                 {activeTab === "compose" && (
-                  <div
-                    className="text-sm space-y-3"
-                    style={{ color: "var(--darkroom-text-muted)" }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <LEDIndicator state="off" />
-                      <span className="uppercase tracking-wider text-xs">
-                        Composite preview — next commit
-                      </span>
-                    </div>
-                    <p>
-                      Overlay the approved body + any fitment + cap layers at
-                      the paper-doll canonical anchor. Export the composite as
-                      a final catalog asset or push to Sanity.
-                    </p>
-                  </div>
+                  <StorageBackedReleasePanel
+                    organizationId={currentOrganizationId}
+                    familyKey={data.group.paperDollFamilyKey ?? groupSlug ?? null}
+                  />
                 )}
               </div>
             </div>
