@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "rendererVersion": "cyl9-rollon-blender-v1",
+  "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF",
+    "transparent": true
+  },
+  "placement": {
+    "targetWidthPx": 363,
+    "mountAxisXPx": 1041,
+    "seatYPx": 1002,
+    "rule": "body-width authority; never size from the photographed thread crest"
+  },
+  "imageContract": {
+    "bodyDiameterMm": 20,
+    "pixelsPerMm": 18.15,
+    "outerDiameterMmEquivalent": 20,
+    "heightMmEquivalent": 28.6440677966,
+    "heightSource": "locked component cutout aspect 236x338 scaled to the 363px body width"
+  },
+  "physicalEvidence": {
+    "catalogReportedOuterDiameterMm": 20,
+    "catalogReportedHeightMm": 21,
+    "verificationStatus": "catalog-reported-unconfirmed",
+    "arReady": false,
+    "note": "Image-contract geometry is authoritative for Paper-Doll pixels only. Vendor CAD or measurement is required before AR dimensional claims."
+  },
+  "geometry": {
+    "radialSegments": 256,
+    "profileMmEquivalent": [
+      [0, 0],
+      [9.4, 0],
+      [9.85, 0.25],
+      [10, 0.65],
+      [9.9, 1.1],
+      [9.82, 27.2],
+      [9.72, 27.8],
+      [9.25, 28.15],
+      [8.2, 28.45],
+      [0, 28.6440677966]
+    ]
+  },
+  "camera": {
+    "type": "ORTHO",
+    "position": [0, -200, 0],
+    "lookAt": [0, 0, 0],
+    "orthoScale": 126.0606060606,
+    "level": true
+  },
+  "lighting": {
+    "worldHex": "#F5F3EF",
+    "worldStrength": 0.35,
+    "key": "large soft area from camera-right",
+    "fill": "gentle area from camera-left",
+    "horizon": false,
+    "groundPlane": false
+  },
+  "variants": [
+    { "variantKey": "SHN-SL", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "mirror-silver", "stoneColor": null },
+    { "variantKey": "SHN-GL", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "mirror-gold", "stoneColor": null },
+    { "variantKey": "MAT-CU", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "matte-copper", "stoneColor": null },
+    { "variantKey": "SHN-BLK", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "glossy-black", "stoneColor": null },
+    { "variantKey": "MAT-SL", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "matte-silver", "stoneColor": null },
+    { "variantKey": "MAT-GL", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "matte-gold", "stoneColor": null },
+    { "variantKey": "WHT", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "glossy-white", "stoneColor": null },
+    { "variantKey": "SL-DOT", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "mirror-silver", "stoneColor": "silver" },
+    { "variantKey": "BLK-DOT", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "mirror-silver", "stoneColor": "black" },
+    { "variantKey": "PNK-DOT", "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1", "materialKey": "mirror-silver", "stoneColor": "pink" }
+  ]
+}

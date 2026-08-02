@@ -13,6 +13,10 @@
 # Logs
 *.log
 
+# Python/Blender bytecode
+__pycache__/
+*.py[cod]
+
 # Playwright MCP traces (local debug output)
 .playwright-mcp/
 
@@ -20,6 +24,8 @@
 .firecrawl/
 /remotion/
 /tmp/
+/assets/paper-doll/
+/paper-doll-workspace/
 scripts/local-generate.ts
 tsconfig.scripts.tmp.json
 
