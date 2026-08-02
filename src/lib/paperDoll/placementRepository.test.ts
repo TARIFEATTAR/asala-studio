@@ -80,3 +80,29 @@ test("placement repository rejects malformed ledger output", async () => {
     authorityMaskSha256: MASK,
   }), /Malformed shared placement/);
 });
+
+test("placement repository surfaces the Edge Function rejection reason", async () => {
+  const request: SharedPlacementLockRequest = {
+    organizationId: ORG,
+    familyKey: "CYL-9ML",
+    fitmentGeometryKey: "fitment__roller-ball__17-415__v1",
+    calibrationComponentVersionId: "22222222-2222-4222-8222-222222222222",
+    expectedAuthorityMaskSha256: MASK,
+    canvas: { widthPx: 2080, heightPx: 2288 },
+    transform: record.transform,
+    compatibleBodyComponentVersionIds: BODY_IDS,
+    approverDisplayName: "Jordan Richter",
+    approvalNote: "Flush",
+  };
+
+  await assert.rejects(
+    () => lockSharedPlacement({ functions: { invoke: async () => ({
+      data: null,
+      error: {
+        message: "Edge Function returned a non-2xx status code",
+        context: { json: async () => ({ error: "Five Current Release body memberships are required" }) },
+      },
+    }) } }, request),
+    /Five Current Release body memberships are required/,
+  );
+});

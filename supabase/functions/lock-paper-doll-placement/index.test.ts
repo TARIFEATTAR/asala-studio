@@ -16,3 +16,18 @@ test("placement lock boundary authenticates and proves organization visibility b
   assert.doesNotMatch(source, /paper_doll_publish_runs/);
   assert.doesNotMatch(source, /\.update\(/);
 });
+
+test("placement lock scopes body membership to the latest non-superseded release", async () => {
+  const source = await readFile(new URL("./index.ts", import.meta.url), "utf8").catch(() => "");
+
+  assert.match(
+    source,
+    /from\("paper_doll_family_releases"\)[\s\S]*?eq\("family_key", placement\.familyKey\)[\s\S]*?neq\("release_status", "superseded"\)[\s\S]*?order\("created_at", \{ ascending: false \}\)[\s\S]*?limit\(1\)/,
+    "the preflight must resolve the same Current Release definition as the database transaction",
+  );
+  assert.match(
+    source,
+    /from\("paper_doll_family_release_assets"\)[\s\S]*?eq\("release_id", currentRelease\.id\)/,
+    "historical releases may reuse the same five plates and must not inflate the membership count",
+  );
+});
