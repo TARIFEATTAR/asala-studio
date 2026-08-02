@@ -47,9 +47,6 @@ export const OriginalFilenameSchema = z.string()
   .max(255)
   .refine((name) => !/[\u0000-\u001f\u007f]/.test(name), {
     message: "Filename contains control characters.",
-  })
-  .refine((name) => !/[\\/]/.test(name), {
-    message: "Filename must not contain path separators.",
   });
 
 export const ManualCandidateAssetRefSchema = PrivateAssetRefSchema.and(z.object({

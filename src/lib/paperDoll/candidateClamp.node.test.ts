@@ -87,6 +87,25 @@ test("dimension mismatch uses contain normalization without asymmetric stretchin
   assert.equal((await sharp(result.output).metadata()).height, 22);
 });
 
+test("authority masks with detached islands fail before geometry lock", async () => {
+  const width = 8;
+  const height = 8;
+  const pixels = new Array(width * height).fill(0);
+  for (let y = 2; y < 6; y += 1) for (let x = 2; x < 6; x += 1) pixels[y * width + x] = 255;
+  pixels[0] = 255;
+
+  await assert.rejects(
+    clampCandidate({
+      source: await rgba(width, height, { r: 60, g: 60, b: 60, alpha: 1 }),
+      provider: await rgba(width, height, { r: 100, g: 100, b: 100, alpha: 1 }),
+      editMask: await mask(width, height, new Array(width * height).fill(255)),
+      authoritativeMask: await mask(width, height, pixels),
+      canvas: { widthPx: width, heightPx: height },
+    }),
+    /single 8-connected silhouette/i,
+  );
+});
+
 test("manual component uploads are fitted into the authority bounds instead of the whole canvas", async () => {
   const source = await rgba(20, 22, { r: 60, g: 60, b: 60, alpha: 1 });
   const providerRaw = Buffer.alloc(10 * 10 * 4);
@@ -142,6 +161,7 @@ test("manual placement ignores transparent padding and records exact non-transpa
   assert.deepEqual(paddedResult.normalization.sourceVisibleBounds, { left: 3, top: 2, right: 6, bottom: 7 });
   assert.deepEqual(tightResult.normalization.sourceVisibleBounds, { left: 0, top: 0, right: 3, bottom: 5 });
   assert.equal(paddedResult.normalization.scaleX, paddedResult.normalization.scaleY);
+  assert.equal(paddedResult.normalization.mode, "authority-bounds-contain");
   assert.equal(paddedResult.normalization.outputWidthPx, 8);
   assert.equal(paddedResult.normalization.outputHeightPx, 12);
   assert.equal(paddedResult.normalization.offsetXPx, 6);

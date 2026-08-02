@@ -14,7 +14,7 @@ Make Desktop upload and Image Library selection two entrances to one determinist
 
 Use server-side alpha-bounds normalization followed by the existing authority-mask clamp.
 
-The browser sends the original bytes and exact source filename. Private storage remains content-addressed by SHA-256. The worker discovers the uploaded image's non-transparent bounds, scales those bounds uniformly to fit inside the selected component's authority-mask bounds, centers the result, and clamps every output pixel to the binary authority mask. The resulting pixels—not a browser-only preview transform—form the immutable candidate.
+The browser sends the original bytes and exact source name. Private storage remains content-addressed by SHA-256. The worker discovers the uploaded image's non-transparent bounds, scales those bounds uniformly to fit inside the selected component's authority-mask bounds, centers the result, and clamps every output pixel to the binary authority mask. The resulting pixels—not a browser-only preview transform—form the immutable candidate.
 
 This is preferred over client-only canvas placement because deterministic server processing produces reproducible pixels, consistent QA evidence, and an auditable candidate regardless of browser size. Re-rendering uploads through Blender is intentionally excluded: these uploads are already visual source assets and only require deterministic normalization and masking.
 
@@ -38,7 +38,7 @@ The manual upload reference stores:
 - SHA-256, content type, and byte size;
 - the exact original `File.name`, including case, spaces, and extension.
 
-The filename is inert metadata. It never participates in an object path, URL, filesystem operation, or lookup. The existing database trigger that prevents updates to `manual_output_ref` protects the filename together with the asset identity. Candidate-history responses expose this reference so the UI can display the filename for queued, failed, ready, approved, and rejected attempts.
+The source name is inert metadata. Desktop filenames and Image Library display names—including names containing `/` or `\\`—are preserved exactly. They never participate in an object path, URL, filesystem operation, or lookup; storage remains SHA-addressed. Control characters and names longer than 255 characters still fail closed. The existing database trigger that prevents updates to `manual_output_ref` protects the name together with the asset identity. Candidate-history responses expose this reference so the UI can display it for queued, failed, ready, approved, and rejected attempts.
 
 Image Library assets use their downloaded file name through the same contract. Desktop uploads preserve the browser-provided `File.name` exactly. The API validates a bounded non-empty string and rejects control characters without rewriting accepted names.
 
@@ -60,6 +60,8 @@ For a manual candidate only:
 9. Record source dimensions, visible bounds, authority bounds, output dimensions, offsets, and equal X/Y scale values in candidate metadata.
 
 The candidate is not described as geometry locked merely because it was fitted to the bounds. Geometry lock is awarded only after the exact server-side authority-mask alpha verification succeeds.
+
+Authority topology is also fail-closed. A closure authority mask must be one 8-connected silhouette before clamping can earn geometry lock. This gate was calibrated against the uploaded v02 plastic roller (one connected component) and the revoked registered mask `d2d1bd4a…` (15 components: the closure plus 14 detached islands). The revoked SHA remains immutable in history but cannot queue another candidate or be approved in the workbench.
 
 ## Component and release boundaries
 

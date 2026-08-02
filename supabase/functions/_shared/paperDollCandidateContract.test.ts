@@ -89,7 +89,14 @@ test("manual candidate bytes use a separate immutable output reference", () => {
   assert.equal(parsed.source.path, request.source.path);
   assert.match(parsed.manualOutput?.path ?? "", /manual-output/);
   assert.equal(parsed.manualOutput?.originalFilename, originalFilename);
-  for (const invalidName of ["", "roller\u0000.png", "folder/roller.png", "folder\\roller.png", `${"x".repeat(252)}.png`]) {
+  const libraryNamed = parsePaperDollCandidateRequest({
+    ...request,
+    provider: "manual",
+    model: "manual-v1",
+    manualOutput: { ...asset("manual-output"), originalFilename: "Rollers / 17-415 Natural.png" },
+  });
+  assert.equal(libraryNamed.manualOutput?.originalFilename, "Rollers / 17-415 Natural.png");
+  for (const invalidName of ["", "roller\u0000.png", `${"x".repeat(252)}.png`]) {
     assert.throws(() => parsePaperDollCandidateRequest({
       ...request,
       provider: "manual",

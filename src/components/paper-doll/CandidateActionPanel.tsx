@@ -21,6 +21,7 @@ import {
   type CandidateHistoryEntry,
 } from "@/lib/paperDoll/candidateRepository";
 import { downloadImageLibraryCandidate } from "@/lib/paperDoll/libraryCandidateSource";
+import { authorityMaskBlocker } from "@/lib/paperDoll/authorityMaskPolicy";
 import type { PaperDollReleaseWorkbenchData } from "@/lib/paperDoll/releaseRepository";
 import { ImageLibraryModal } from "@/components/image-editor/ImageLibraryModal";
 import type { CandidateInspection } from "./CandidateInspector";
@@ -67,7 +68,7 @@ function assetRef(asset: ReleaseAsset): PrivateAssetRef {
   };
 }
 
-function inspectionFrom(entry: CandidateHistoryEntry | null): CandidateInspection | null {
+function inspectionFrom(entry: CandidateHistoryEntry | null, maskBlocker: string | null): CandidateInspection | null {
   if (!entry) return null;
   const metadata = entry.job.outputMetadata;
   const blocking = entry.qa.filter((row) => row.blocking === true);
@@ -80,9 +81,9 @@ function inspectionFrom(entry: CandidateHistoryEntry | null): CandidateInspectio
     estimatedCostUsd: null,
     promptHash: entry.job.promptSha256,
     changedPixels: typeof metadata.changedPixelCount === "number" ? metadata.changedPixelCount : null,
-    geometryLocked: metadata.geometryLocked === true,
+    geometryLocked: metadata.geometryLocked === true && !maskBlocker,
     geometryGate: typeof metadata.geometryGate === "string" ? metadata.geometryGate : null,
-    qaStatus: blocking.length === 0 ? "not-run" : failed ? "failed" : "passed",
+    qaStatus: maskBlocker ? "failed" : blocking.length === 0 ? "not-run" : failed ? "failed" : "passed",
   };
 }
 
@@ -122,8 +123,9 @@ export function CandidateActionPanel({
   // from review. Prefer the newest verifiable candidate, then fall back to the
   // newest attempt when no candidate has completed yet.
   const latest = selectedHistory.find((entry) => entry.job.status === "candidate_ready" && entry.candidateVersion) ?? selectedHistory[0] ?? null;
+  const maskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
 
-  useEffect(() => onInspectionChange(inspectionFrom(latest)), [latest, onInspectionChange]);
+  useEffect(() => onInspectionChange(inspectionFrom(latest, maskBlocker)), [latest, maskBlocker, onInspectionChange]);
 
   const requirement = useMemo(() => {
     if (!asset) return null;
@@ -140,6 +142,7 @@ export function CandidateActionPanel({
   };
 
   const buildRequest = async (manualOutput?: ManualCandidateAssetRef): Promise<CandidateJobRequest> => {
+    if (maskBlocker) throw new Error(maskBlocker);
     if (!asset || !requirement || !asset.geometryMaskUrl || !asset.geometryMaskReference) {
       throw new Error("A registered component requirement and authority mask are required.");
     }
@@ -249,6 +252,7 @@ export function CandidateActionPanel({
       : user?.email ?? "";
   const canApprove = latest?.job.status === "candidate_ready"
     && !latest.approval
+    && !maskBlocker
     && blockingQa.length > 0
     && blockingQa.every((row) => row.qa_status === "passed")
     && Boolean(approverDisplayName);
@@ -262,6 +266,12 @@ export function CandidateActionPanel({
         </div>
         <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
       </div>
+
+      {maskBlocker && (
+        <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(239,141,125,0.42)", color: "#ef8d7d", background: "rgba(239,141,125,0.05)" }}>
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{maskBlocker}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
         {PROVIDERS.map((item) => (

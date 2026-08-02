@@ -18,13 +18,13 @@ test("downloads a selected Image Library image without rewriting its supplied na
 
 test("preserves an Image Library filename that already has the verified extension", async () => {
   const file = await downloadImageLibraryCandidate(
-    { url: "https://images.example/roller.png", name: "17-415 Natural Roller FINAL.png" },
+    { url: "https://images.example/roller.png", name: "Rollers / 17-415 Natural Roller FINAL.png" },
     async () => new Response(new Uint8Array([137, 80, 78, 71]), {
       headers: { "content-type": "image/png" },
     }),
   );
 
-  assert.equal(file.name, "17-415 Natural Roller FINAL.png");
+  assert.equal(file.name, "Rollers / 17-415 Natural Roller FINAL.png");
 });
 
 test("rejects a library selection that does not resolve to an image", async () => {

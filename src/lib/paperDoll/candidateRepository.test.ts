@@ -95,7 +95,7 @@ test("manual source upload preserves the exact filename outside its content-addr
       }),
     },
   };
-  const originalFilename = "17-415 Natural Plastic Roller FINAL.png";
+  const originalFilename = "Rollers / 17-415 Natural Plastic Roller FINAL.png";
 
   const result = await uploadManualCandidateSource(client, {
     organizationId: ORG,

@@ -94,13 +94,18 @@ test("manual uploads are explicit provider outputs and never replace the immutab
   };
   const parsed = CandidateJobRequestSchema.parse(manual);
   assert.equal(parsed.manualOutput?.originalFilename, manualOutput.originalFilename);
+  const libraryNamed = CandidateJobRequestSchema.parse({
+    ...manual,
+    manualOutput: { ...manualOutput, originalFilename: "Rollers / 17-415 Natural.png" },
+  });
+  assert.equal(libraryNamed.manualOutput?.originalFilename, "Rollers / 17-415 Natural.png");
   assert.equal(CandidateJobRequestSchema.safeParse({ ...manual, manualOutput: undefined }).success, false);
   assert.equal(CandidateJobRequestSchema.safeParse({ ...validRequest(), manualOutput: asset("paper-doll-sources") }).success, false);
   assert.equal(CandidateJobRequestSchema.safeParse({
     ...manual,
     manualOutput: asset("paper-doll-sources"),
   }).success, false, "manual references require immutable filename provenance");
-  for (const originalFilename of ["", "roller\n.png", "folder/roller.png", "folder\\roller.png", `${"x".repeat(252)}.png`]) {
+  for (const originalFilename of ["", "roller\n.png", `${"x".repeat(252)}.png`]) {
     assert.equal(CandidateJobRequestSchema.safeParse({
       ...manual,
       manualOutput: { ...manualOutput, originalFilename },

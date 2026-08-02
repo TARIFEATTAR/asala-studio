@@ -95,7 +95,6 @@ function originalFilename(value: unknown, label: string): string {
     throw new Error(`${label} must be between 1 and 255 characters.`);
   }
   if (/[\u0000-\u001f\u007f]/.test(value)) throw new Error(`${label} contains control characters.`);
-  if (/[\\/]/.test(value)) throw new Error(`${label} must not contain path separators.`);
   return value;
 }
 

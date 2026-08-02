@@ -183,6 +183,50 @@ function channelValue(data: Buffer, channels: number, pixel: number): number {
   return data[pixel * channels];
 }
 
+function assertSingleConnectedAuthority(
+  data: Buffer,
+  channels: number,
+  width: number,
+  height: number,
+): void {
+  const pixelCount = width * height;
+  let seed = -1;
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    if (channelValue(data, channels, pixel) === 255) {
+      seed = pixel;
+      break;
+    }
+  }
+  if (seed < 0) throw new Error("Authority mask cannot be empty.");
+
+  const visited = new Uint8Array(pixelCount);
+  const stack = [seed];
+  visited[seed] = 1;
+  while (stack.length > 0) {
+    const pixel = stack.pop()!;
+    const x = pixel % width;
+    const y = Math.floor(pixel / width);
+    for (let yOffset = -1; yOffset <= 1; yOffset += 1) {
+      for (let xOffset = -1; xOffset <= 1; xOffset += 1) {
+        if (xOffset === 0 && yOffset === 0) continue;
+        const nextX = x + xOffset;
+        const nextY = y + yOffset;
+        if (nextX < 0 || nextX >= width || nextY < 0 || nextY >= height) continue;
+        const next = nextY * width + nextX;
+        if (visited[next] || channelValue(data, channels, next) !== 255) continue;
+        visited[next] = 1;
+        stack.push(next);
+      }
+    }
+  }
+
+  for (let pixel = 0; pixel < pixelCount; pixel += 1) {
+    if (channelValue(data, channels, pixel) === 255 && !visited[pixel]) {
+      throw new Error("Authority mask must be a single 8-connected silhouette; detached islands cannot earn geometry lock.");
+    }
+  }
+}
+
 export async function clampCandidate(input: {
   source: Buffer;
   provider: Buffer;
@@ -221,6 +265,7 @@ export async function clampCandidate(input: {
     }
   }
   if (authorityRight < 0) throw new Error("Authority mask cannot be empty.");
+  assertSingleConnectedAuthority(authority.data, authority.info.channels, width, height);
   const provider = input.manualPlacement
     ? await manualProviderRaw(input.provider, width, height, { left: authorityLeft, top: authorityTop, right: authorityRight, bottom: authorityBottom })
     : await normalizedProviderRaw(input.provider, width, height);
