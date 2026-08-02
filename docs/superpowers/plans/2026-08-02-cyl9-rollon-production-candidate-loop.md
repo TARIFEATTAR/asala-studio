@@ -250,7 +250,8 @@ export interface CandidateClampResult {
 
 **Files:**
 
-- Create: `supabase/migrations/20260802050000_paper_doll_candidate_jobs.sql`.
+- Create: `supabase/migrations/20260802052230_paper_doll_candidate_jobs.sql`.
+- Create: `supabase/migrations/20260802052407_paper_doll_candidate_job_fk_indexes.sql` from the post-DDL advisor result.
 - Create: `src/lib/paperDoll/candidateJobContract.ts`
 - Create: `src/lib/paperDoll/candidateJobContract.test.ts`
 - Modify: `src/integrations/supabase/types.ts` only through generated types.
