@@ -52,15 +52,15 @@
 - Create: `src/lib/paperDoll/workbenchModel.ts`
 - Create: `src/lib/paperDoll/workbenchModel.test.ts`
 
-- [ ] Write failing tests for release-family eligibility using the exact slug `cylinder-9ml-frosted-17-415-rollon`, with non-CYL-9ML groups falling back to the legacy Studio.
-- [ ] Write failing tests for an inventory tree that keeps body materials separate from component systems and preserves blocked assets.
-- [ ] Write failing tests for lifecycle counts with explicit denominators and mutually exclusive states. The current snapshot must report five bodies, three approved opaque caps, one blocked translucent cap, fifteen resolvable approved assemblies, and no published items.
-- [ ] Write failing tests proving blocked assets cannot resolve into an assembly and missing mappings remain errors rather than fallback selections.
-- [ ] Write failing tests for geometry labels: the three approved opaque caps may be `geometry locked` only when shared-mask identity and passing release QA evidence are both present; a shared mask without passing evidence is not enough.
-- [ ] Write failing lineup tests that select five explicit assembly mappings, preserve manifest layer order, and compute overlay percentages directly from manifest canvas/bounds/axis/seat metadata.
-- [ ] Implement typed selectors over `PaperDollReleaseManifest` and `PaperDollReleaseValidation` without React or browser dependencies.
-- [ ] Run `npx tsx --test src/lib/paperDoll/workbenchModel.test.ts src/lib/paperDoll/releaseValidator.test.ts`.
-- [ ] Commit: `feat(paper-doll): derive truthful workbench state`
+- [x] Write failing tests for release-family eligibility using the exact slug `cylinder-9ml-frosted-17-415-rollon`, with non-CYL-9ML groups falling back to the legacy Studio.
+- [x] Write failing tests for an inventory tree that keeps body materials separate from component systems and preserves blocked assets.
+- [x] Write failing tests for lifecycle counts with explicit denominators and mutually exclusive states. The current snapshot must report five bodies, three approved opaque caps, one blocked translucent cap, fifteen resolvable approved assemblies, and no published items.
+- [x] Write failing tests proving blocked assets cannot resolve into an assembly and missing mappings remain errors rather than fallback selections.
+- [x] Write failing tests for geometry labels: the three approved opaque caps may be `geometry locked` only when shared-mask identity and passing release QA evidence are both present; a shared mask without passing evidence is not enough.
+- [x] Write failing lineup tests that select five explicit assembly mappings, preserve manifest layer order, and compute overlay percentages directly from manifest canvas/bounds/axis/seat metadata.
+- [x] Implement typed selectors over `PaperDollReleaseManifest` and `PaperDollReleaseValidation` without React or browser dependencies.
+- [x] Run `npx tsx --test src/lib/paperDoll/workbenchModel.test.ts src/lib/paperDoll/releaseValidator.test.ts`.
+- [x] Commit: `feat(paper-doll): derive truthful workbench state`
 
 ## Task 3: Add deterministic no-write Sanity projection
 
