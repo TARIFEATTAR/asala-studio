@@ -1,13 +1,18 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
   Boxes,
   Brush,
   Eye,
   EyeOff,
   Layers3,
   LockKeyhole,
+  Move3d,
   MousePointer2,
   RectangleHorizontal,
   RotateCcw,
@@ -31,6 +36,15 @@ import {
   type CandidateSelectionKind,
 } from "./assemblyEditModel";
 import { useCandidateMask } from "./useCandidateMask";
+import {
+  CYL9_ROLLER_CONTACT,
+  IDENTITY_FAMILY_PLACEMENT,
+  deriveContactPlacement,
+  initialFamilyFitState,
+  nudgePlacement,
+  resizePlacementAroundContact,
+  type FamilyPlacementTransform,
+} from "./familyPlacementModel";
 
 interface ProductionCandidateWorkbenchProps {
   organizationId: string | null;
@@ -41,6 +55,7 @@ type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 
 const IDENTITY_TRANSFORM = { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 };
 const CYL9_FAMILY_KEY = "CYL-9ML";
+const MEASURED_ROLLER_PLACEMENT = deriveContactPlacement(CYL9_ROLLER_CONTACT);
 
 function ToneBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "warning" }) {
   const color = tone === "good" ? "#6ee7a8" : tone === "warning" ? "#f2c078" : "var(--darkroom-text-muted)";
@@ -76,8 +91,10 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const [selectedBodyId, setSelectedBodyId] = useState<string | null>(null);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
-  const [transform, setTransform] = useState(IDENTITY_TRANSFORM);
+  const [candidateTransform, setCandidateTransform] = useState(IDENTITY_TRANSFORM);
+  const [familyTransform, setFamilyTransform] = useState<FamilyPlacementTransform>(IDENTITY_FAMILY_PLACEMENT);
   const [inspection, setInspection] = useState<CandidateInspection | null>(null);
+  const initializedReleaseRef = useRef<string | null>(null);
   const mask = useCandidateMask();
   const handleInspectionChange = useCallback((next: CandidateInspection | null) => setInspection(next), []);
 
@@ -85,11 +102,16 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
 
   useEffect(() => {
-    if (!selectedBodyId && bodies[0]) {
-      setSelectedBodyId(bodies[0].componentVersionId);
-      setSelectedLayerId(bodies[0].componentVersionId);
-    }
-  }, [bodies, selectedBodyId]);
+    if (!query.data) return;
+    const releaseIdentity = `${query.data.release.familyKey}:${query.data.release.version}:${query.data.release.manifestSha256}`;
+    if (initializedReleaseRef.current === releaseIdentity) return;
+    const initial = initialFamilyFitState({ familyKey, assets: query.data.assets });
+    initializedReleaseRef.current = releaseIdentity;
+    setMode(initial.mode);
+    setSelectedBodyId(initial.selectedBodyId);
+    setSelectedLayerId(initial.selectedLayerId);
+    setFamilyTransform(initial.transform);
+  }, [familyKey, query.data]);
 
   const selectedAsset = useMemo(
     () => query.data?.assets.find((asset) => asset.componentVersionId === selectedLayerId) ?? null,
@@ -102,7 +124,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   }, [bodies, components, hiddenIds, selectedBodyId, selectedLayerId]);
 
   useEffect(() => {
-    setTransform(IDENTITY_TRANSFORM);
+    setCandidateTransform(IDENTITY_TRANSFORM);
     setInspection(null);
     mask.reset();
     // Resetting candidate-local state is intentional when the immutable source layer changes.
@@ -128,6 +150,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const candidateEditingEnabled = mode === "edit-lab"
     && selectedAsset?.slot !== "body"
     && Boolean(selectedAsset?.geometryMaskUrl);
+  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot === "roller";
+  const activeTransform = mode === "family-fit" ? familyTransform : candidateTransform;
   const selectionReady = selectionKind === "whole-layer"
     || (selectionKind === "rectangle" && Boolean(mask.rectangle))
     || (selectionKind === "brush" && mask.brushStrokes.length > 0);
@@ -139,6 +163,27 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       else next.add(id);
       return next;
     });
+  };
+
+  const enterMode = (nextMode: AssemblyEditMode) => {
+    setMode(nextMode);
+    if (nextMode !== "family-fit") return;
+    const amber = bodies.find((asset) => asset.variantKey === "AMB") ?? bodies[0];
+    const roller = components.find((asset) => asset.slot === "roller");
+    if (amber) setSelectedBodyId(amber.componentVersionId);
+    if (roller) setSelectedLayerId(roller.componentVersionId);
+    setFamilyTransform(MEASURED_ROLLER_PLACEMENT);
+  };
+
+  const setFamilyAxis = (axis: "translateXPx" | "translateYPx", value: number) => {
+    if (!Number.isFinite(value)) return;
+    setFamilyTransform((current) => ({ ...current, [axis]: Math.round(value) }));
+  };
+
+  const setFamilyScale = (value: number) => {
+    if (!Number.isFinite(value) || value <= 0) return;
+    const scale = Math.round(value * 1000) / 1000;
+    setFamilyTransform((current) => resizePlacementAroundContact(current, CYL9_ROLLER_CONTACT, scale));
   };
 
   return (
@@ -155,9 +200,9 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
           <div className="mt-1 font-mono text-[8px]" style={{ color: "var(--darkroom-text-dim)" }}>manifest {query.data.release.manifestSha256.slice(0, 16)}… · live private ledger</div>
         </div>
         <div className="flex overflow-hidden rounded border" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-          {(["release-lock", "edit-lab"] as AssemblyEditMode[]).map((item) => (
-            <button key={item} type="button" onClick={() => setMode(item)} className="flex items-center gap-1.5 border-r px-3 py-2 text-[9px] uppercase tracking-[0.14em] last:border-0" style={{ borderColor: "var(--darkroom-border-subtle)", background: mode === item ? "rgba(215,168,95,0.12)" : "rgba(0,0,0,0.12)", color: mode === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>
-              {item === "release-lock" ? <LockKeyhole className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item.replace("-", " ")}
+          {(["release-lock", "family-fit", "edit-lab"] as AssemblyEditMode[]).map((item) => (
+            <button key={item} type="button" onClick={() => enterMode(item)} className="flex items-center gap-1.5 border-r px-3 py-2 text-[9px] uppercase tracking-[0.14em] last:border-0" style={{ borderColor: "var(--darkroom-border-subtle)", background: mode === item ? "rgba(215,168,95,0.12)" : "rgba(0,0,0,0.12)", color: mode === item ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>
+              {item === "release-lock" ? <LockKeyhole className="h-3 w-3" /> : item === "family-fit" ? <Move3d className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}{item === "family-fit" ? "family fit" : item.replace("-", " ")}
             </button>
           ))}
         </div>
@@ -167,7 +212,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         <div className="mb-2 flex items-center justify-between text-[9px] uppercase tracking-[0.18em]" style={{ color: "var(--darkroom-text-dim)" }}><span>Five locked body plates</span><span>baseline alignment sequence</span></div>
         <div className="grid grid-cols-5 gap-2">
           {bodies.map((body) => (
-            <button key={body.componentVersionId} type="button" onClick={() => { setSelectedBodyId(body.componentVersionId); setSelectedLayerId(body.componentVersionId); }} className="group overflow-hidden rounded border text-left" style={{ borderColor: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
+            <button key={body.componentVersionId} type="button" onClick={() => { setSelectedBodyId(body.componentVersionId); if (mode !== "family-fit") setSelectedLayerId(body.componentVersionId); }} className="group overflow-hidden rounded border text-left" style={{ borderColor: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-border-subtle)", background: "rgba(255,255,255,0.015)" }}>
               <div className="aspect-[10/11] bg-[#f5f3ef] p-1"><img src={body.imageUrl} alt={body.displayName} className="h-full w-full object-contain" /></div>
               <div className="truncate border-t px-2 py-1.5 text-[8px] uppercase tracking-[0.12em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: selectedBodyId === body.componentVersionId ? "var(--darkroom-accent)" : "var(--darkroom-text-dim)" }}>{body.materialVariant}</div>
             </button>
@@ -208,7 +253,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             </div>
           </div>
 
-          <button type="button" onClick={() => { setTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset candidate edit</button>
+          <button type="button" onClick={() => { if (mode === "family-fit") setFamilyTransform(IDENTITY_FAMILY_PLACEMENT); else setCandidateTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset {mode === "family-fit" ? "family placement" : "candidate edit"}</button>
         </aside>
 
         <div className="rounded border p-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "rgba(0,0,0,0.12)" }}>
@@ -220,34 +265,75 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             showGuides
             showMaskOverlay
             candidateEditingEnabled={candidateEditingEnabled}
+            placementEditingEnabled={placementEditingEnabled}
+            layerTransform={activeTransform}
+            contactGuideYPx={mode === "family-fit" ? CYL9_ROLLER_CONTACT.targetContactYPx : 1002}
             onSelectLayer={setSelectedLayerId}
-            onTransformChange={setTransform}
+            onTransformChange={mode === "family-fit" ? setFamilyTransform : setCandidateTransform}
             onRectangleChange={mask.setRectangle}
             onBrushStroke={mask.addBrushStroke}
           />
-          <div className="mt-3">
+          {mode === "family-fit" ? (
+            <div className="mt-3 rounded border p-3" style={{ borderColor: "rgba(97,214,200,0.35)", background: "rgba(97,214,200,0.035)" }}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]" style={{ color: "#61d6c8" }}><Move3d className="h-3.5 w-3.5" />CYL-9ML roller family placement candidate</div>
+                  <p className="mt-1 max-w-xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>Amber is the calibration reference. Move the complete cropped roller layer; the identical transform cascades to all five locked bodies and every roller material. The hidden insertion plug remains intentionally omitted.</p>
+                </div>
+                <ToneBadge tone="good">5/5 synchronized</ToneBadge>
+              </div>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+                <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+                  <span className="block text-[7px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Family X px</span>
+                  <input aria-label="Family X placement" type="number" value={familyTransform.translateXPx} onChange={(event) => setFamilyAxis("translateXPx", Number(event.target.value))} className="mt-1 w-full bg-transparent font-mono text-[11px] outline-none" />
+                </label>
+                <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+                  <span className="block text-[7px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Family Y px</span>
+                  <input aria-label="Family Y placement" type="number" value={familyTransform.translateYPx} onChange={(event) => setFamilyAxis("translateYPx", Number(event.target.value))} className="mt-1 w-full bg-transparent font-mono text-[11px] outline-none" />
+                </label>
+                <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+                  <span className="block text-[7px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Uniform scale</span>
+                  <input aria-label="Family uniform scale" type="number" min="0.5" max="1.5" step="0.001" value={familyTransform.scaleX} onChange={(event) => setFamilyScale(Number(event.target.value))} className="mt-1 w-full bg-transparent font-mono text-[11px] outline-none" />
+                </label>
+                <div className="grid grid-cols-3 gap-1 self-center">
+                  <span />
+                  <button aria-label="Nudge family up one pixel" type="button" onClick={() => setFamilyTransform((current) => nudgePlacement(current, { x: 0, y: -1 }))} className="rounded border p-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><ArrowUp className="h-3 w-3" /></button>
+                  <span />
+                  <button aria-label="Nudge family left one pixel" type="button" onClick={() => setFamilyTransform((current) => nudgePlacement(current, { x: -1, y: 0 }))} className="rounded border p-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><ArrowLeft className="h-3 w-3" /></button>
+                  <button aria-label="Nudge family down one pixel" type="button" onClick={() => setFamilyTransform((current) => nudgePlacement(current, { x: 0, y: 1 }))} className="rounded border p-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><ArrowDown className="h-3 w-3" /></button>
+                  <button aria-label="Nudge family right one pixel" type="button" onClick={() => setFamilyTransform((current) => nudgePlacement(current, { x: 1, y: 0 }))} className="rounded border p-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><ArrowRight className="h-3 w-3" /></button>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+                <button type="button" onClick={() => setFamilyTransform(MEASURED_ROLLER_PLACEMENT)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>Use calibrated flush · 262 px</button>
+                <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: "#f2c078" }}>Visual candidate only · placement version not written</span>
+              </div>
+            </div>
+          ) : <div className="mt-3">
             <CandidateActionPanel
               organizationId={organizationId}
               familyKey="CYL-9ML"
               asset={selectedAsset}
               assemblyContext={bodies.find((asset) => asset.componentVersionId === selectedBodyId) ?? null}
               selectionKind={selectionKind}
-              transform={transform}
+              transform={candidateTransform}
               candidateEditingEnabled={candidateEditingEnabled}
               selectionReady={selectionReady}
               serializeMask={() => mask.serializeMask(selectionKind)}
               onInspectionChange={handleInspectionChange}
             />
-          </div>
+          </div>}
         </div>
 
-        <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={transform} inspection={inspection} />
+        <CandidateInspector asset={selectedAsset} mode={mode} selectionKind={selectionKind} transform={activeTransform} inspection={inspection} />
       </div>
 
-      <RollonLineup assets={query.data.assets} />
+      <RollonLineup assets={query.data.assets} placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT} />
 
       <footer className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(242,192,120,0.25)", color: "#f2c078", background: "rgba(242,192,120,0.035)" }}>
-        <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />Candidate-only writes · active release unchanged · no Sanity publication</span>
+        <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3" />{mode === "family-fit" ? "Visual placement candidate · active release unchanged · no ledger or Sanity write" : "Candidate-only writes · active release unchanged · no Sanity publication"}</span>
         <span>{components.length} components registered · {bodies.length}/5 locked plates</span>
       </footer>
     </section>

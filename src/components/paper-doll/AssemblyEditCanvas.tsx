@@ -15,6 +15,12 @@ import {
   type ReleaseRect,
 } from "./assemblyEditModel";
 import type { CandidateBrushStroke } from "./useCandidateMask";
+import {
+  placementObjectOrigin,
+  placementTransformFromObject,
+  type FamilyPlacementTransform,
+  type ReleaseBounds,
+} from "./familyPlacementModel";
 
 type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 
@@ -26,6 +32,9 @@ interface AssemblyEditCanvasProps {
   showGuides: boolean;
   showMaskOverlay: boolean;
   candidateEditingEnabled: boolean;
+  placementEditingEnabled: boolean;
+  layerTransform: FamilyPlacementTransform;
+  contactGuideYPx?: number;
   onSelectLayer: (id: string) => void;
   onTransformChange: (transform: { translateXPx: number; translateYPx: number; scaleX: number; scaleY: number }) => void;
   onRectangleChange: (rectangle: ReleaseRect) => void;
@@ -43,6 +52,9 @@ export function AssemblyEditCanvas({
   showGuides,
   showMaskOverlay,
   candidateEditingEnabled,
+  placementEditingEnabled,
+  layerTransform,
+  contactGuideYPx = 1002,
   onSelectLayer,
   onTransformChange,
   onRectangleChange,
@@ -51,14 +63,16 @@ export function AssemblyEditCanvas({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasElementRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<fabric.Canvas | null>(null);
-  const interactionRef = useRef({ mode, selectionKind, selectedLayerId, candidateEditingEnabled });
+  const interactionRef = useRef({ mode, selectionKind, selectedLayerId, candidateEditingEnabled, placementEditingEnabled });
+  const layerTransformRef = useRef(layerTransform);
   const callbacksRef = useRef({ onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke });
   const [display, setDisplay] = useState({ width: 520, height: 572 });
   const [zoom, setZoom] = useState(1);
   const [guidesVisible, setGuidesVisible] = useState(showGuides);
   const [maskVisible, setMaskVisible] = useState(showMaskOverlay);
 
-  interactionRef.current = { mode, selectionKind, selectedLayerId, candidateEditingEnabled };
+  interactionRef.current = { mode, selectionKind, selectedLayerId, candidateEditingEnabled, placementEditingEnabled };
+  layerTransformRef.current = layerTransform;
   callbacksRef.current = { onSelectLayer, onTransformChange, onRectangleChange, onBrushStroke };
 
   useEffect(() => setGuidesVisible(showGuides), [showGuides]);
@@ -211,13 +225,28 @@ export function AssemblyEditCanvas({
       if (id) callbacksRef.current.onSelectLayer(id);
     });
     const emitTransform = (event: fabric.IEvent) => {
-      const object = event.target as fabric.Object & { data?: { assetId?: string; baseScale?: number } };
-      if (!object?.data?.assetId || interactionRef.current.mode !== "edit-lab" || !interactionRef.current.candidateEditingEnabled) return;
+      const object = event.target as fabric.Object & { data?: { assetId?: string; baseScale?: number; placementBounds?: ReleaseBounds } };
+      const interaction = interactionRef.current;
+      const transformEnabled = (interaction.mode === "edit-lab" && interaction.candidateEditingEnabled)
+        || (interaction.mode === "family-fit" && interaction.placementEditingEnabled);
+      if (!object?.data?.assetId || !transformEnabled) return;
       const baseScale = object.data.baseScale ?? 1;
+      const releaseLeft = (object.left ?? 0) * RELEASE_CANVAS.width / display.width;
+      const releaseTop = (object.top ?? 0) * RELEASE_CANVAS.height / display.height;
+      const relativeScale = (object.scaleX ?? baseScale) / baseScale;
+      if (interaction.mode === "family-fit" && object.data.placementBounds) {
+        callbacksRef.current.onTransformChange(placementTransformFromObject({
+          left: releaseLeft,
+          top: releaseTop,
+          scale: relativeScale,
+          bounds: object.data.placementBounds,
+        }));
+        return;
+      }
       callbacksRef.current.onTransformChange({
-        translateXPx: Math.round((object.left ?? 0) * RELEASE_CANVAS.width / display.width),
-        translateYPx: Math.round((object.top ?? 0) * RELEASE_CANVAS.height / display.height),
-        scaleX: (object.scaleX ?? baseScale) / baseScale,
+        translateXPx: Math.round(releaseLeft),
+        translateYPx: Math.round(releaseTop),
+        scaleX: relativeScale,
         scaleY: (object.scaleY ?? baseScale) / baseScale,
       });
     };
@@ -243,7 +272,7 @@ export function AssemblyEditCanvas({
     const addGuides = () => {
       if (!guidesVisible) return;
       const vertical = releaseToDisplay({ x: 1041, y: 0 }, display).x;
-      const seat = releaseToDisplay({ x: 0, y: 1002 }, display).y;
+      const seat = releaseToDisplay({ x: 0, y: contactGuideYPx }, display).y;
       const baseline = releaseToDisplay({ x: 0, y: 2068 }, display).y;
       [
         new fabric.Line([vertical, 0, vertical, display.height], { stroke: GUIDE_COLOR, strokeWidth: 1, opacity: 0.62, strokeDashArray: [4, 5] }),
@@ -255,8 +284,15 @@ export function AssemblyEditCanvas({
       });
       const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
       if (selected) {
-        const start = releaseToDisplay({ x: selected.alphaBounds.left, y: selected.alphaBounds.top }, display);
-        const end = releaseToDisplay({ x: selected.alphaBounds.right, y: selected.alphaBounds.bottom }, display);
+        const selectedTransform = selected.slot === "body" ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 } : layerTransformRef.current;
+        const start = releaseToDisplay({
+          x: selected.alphaBounds.left * selectedTransform.scaleX + selectedTransform.translateXPx,
+          y: selected.alphaBounds.top * selectedTransform.scaleY + selectedTransform.translateYPx,
+        }, display);
+        const end = releaseToDisplay({
+          x: selected.alphaBounds.right * selectedTransform.scaleX + selectedTransform.translateXPx,
+          y: selected.alphaBounds.bottom * selectedTransform.scaleY + selectedTransform.translateYPx,
+        }, display);
         canvas.add(new fabric.Rect({
           left: start.x,
           top: start.y,
@@ -276,14 +312,22 @@ export function AssemblyEditCanvas({
     const addLayer = (asset: ReleaseAsset) => new Promise<void>((resolve) => {
       fabric.Image.fromURL(asset.imageUrl, (image) => {
         if (cancelled) return resolve();
-        const editable = mode === "edit-lab" && candidateEditingEnabled && asset.slot !== "body" && asset.componentVersionId === selectedLayerId;
+        const editable = asset.slot !== "body"
+          && asset.componentVersionId === selectedLayerId
+          && ((mode === "edit-lab" && candidateEditingEnabled) || (mode === "family-fit" && placementEditingEnabled));
+        const transform = asset.slot === "body" ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 } : layerTransformRef.current;
+        const cropForPlacement = mode === "family-fit" && editable;
+        const releasePosition = cropForPlacement
+          ? placementObjectOrigin(asset.alphaBounds, transform)
+          : { x: transform.translateXPx, y: transform.translateYPx };
+        const position = releaseToDisplay(releasePosition, display);
         image.set({
-          left: 0,
-          top: 0,
+          left: position.x,
+          top: position.y,
           originX: "left",
           originY: "top",
-          scaleX: baseScale,
-          scaleY: baseScale,
+          scaleX: baseScale * transform.scaleX,
+          scaleY: baseScale * transform.scaleY,
           selectable: editable,
           evented: editable,
           lockUniScaling: true,
@@ -292,8 +336,16 @@ export function AssemblyEditCanvas({
           cornerColor: GUIDE_COLOR,
           borderColor: GUIDE_COLOR,
           name: `asset-${asset.componentVersionId}`,
-          data: { assetId: asset.componentVersionId, baseScale },
+          data: { assetId: asset.componentVersionId, baseScale, placementBounds: cropForPlacement ? asset.alphaBounds : undefined },
         });
+        if (cropForPlacement) {
+          image.set({
+            cropX: asset.alphaBounds.left,
+            cropY: asset.alphaBounds.top,
+            width: asset.alphaBounds.right - asset.alphaBounds.left + 1,
+            height: asset.alphaBounds.bottom - asset.alphaBounds.top + 1,
+          });
+        }
         image.setControlsVisibility({ mtr: false, mt: false, mb: false, ml: false, mr: false });
         canvas.add(image);
         resolve();
@@ -307,13 +359,15 @@ export function AssemblyEditCanvas({
       if (maskVisible && selected?.geometryMaskUrl) {
         await new Promise<void>((resolve) => fabric.Image.fromURL(selected.geometryMaskUrl!, (image) => {
           if (!cancelled) {
+            const transform = selected.slot === "body" ? { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 } : layerTransformRef.current;
+            const position = releaseToDisplay({ x: transform.translateXPx, y: transform.translateYPx }, display);
             image.set({
-              left: 0,
-              top: 0,
+              left: position.x,
+              top: position.y,
               originX: "left",
               originY: "top",
-              scaleX: baseScale,
-              scaleY: baseScale,
+              scaleX: baseScale * transform.scaleX,
+              scaleY: baseScale * transform.scaleY,
               opacity: 0.2,
               selectable: false,
               evented: false,
@@ -330,7 +384,54 @@ export function AssemblyEditCanvas({
     };
     void render();
     return () => { cancelled = true; };
-  }, [candidateEditingEnabled, display, guidesVisible, layers, maskVisible, mode, selectedLayerId]);
+  }, [candidateEditingEnabled, contactGuideYPx, display, guidesVisible, layers, maskVisible, mode, placementEditingEnabled, selectedLayerId]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !selectedLayerId) return;
+    const object = canvas.getObjects().find((item) => item.name === `asset-${selectedLayerId}`);
+    const objectData = (object as fabric.Object & { data?: { baseScale?: number; placementBounds?: ReleaseBounds } } | undefined)?.data;
+    const releasePosition = objectData?.placementBounds
+      ? placementObjectOrigin(objectData.placementBounds, layerTransform)
+      : { x: layerTransform.translateXPx, y: layerTransform.translateYPx };
+    const position = releaseToDisplay(releasePosition, display);
+    const baseScale = objectData?.baseScale ?? display.width / RELEASE_CANVAS.width;
+    if (object) {
+      object.set({
+        left: position.x,
+        top: position.y,
+        scaleX: baseScale * layerTransform.scaleX,
+        scaleY: baseScale * layerTransform.scaleY,
+      });
+      object.setCoords();
+    }
+    const maskOverlay = canvas.getObjects().find((item) => item.name === "authority-mask-overlay");
+    if (maskOverlay) {
+      const maskPosition = releaseToDisplay({ x: layerTransform.translateXPx, y: layerTransform.translateYPx }, display);
+      maskOverlay.set({
+        left: maskPosition.x,
+        top: maskPosition.y,
+        scaleX: baseScale * layerTransform.scaleX,
+        scaleY: baseScale * layerTransform.scaleY,
+      });
+      maskOverlay.setCoords();
+    }
+    const selected = layers.find((asset) => asset.componentVersionId === selectedLayerId);
+    const boundsGuide = canvas.getObjects().find((item) => item.name === "guide-alpha-bounds");
+    if (selected && selected.slot !== "body" && boundsGuide) {
+      const start = releaseToDisplay({
+        x: selected.alphaBounds.left * layerTransform.scaleX + layerTransform.translateXPx,
+        y: selected.alphaBounds.top * layerTransform.scaleY + layerTransform.translateYPx,
+      }, display);
+      const end = releaseToDisplay({
+        x: selected.alphaBounds.right * layerTransform.scaleX + layerTransform.translateXPx,
+        y: selected.alphaBounds.bottom * layerTransform.scaleY + layerTransform.translateYPx,
+      }, display);
+      boundsGuide.set({ left: start.x, top: start.y, width: end.x - start.x, height: end.y - start.y });
+      boundsGuide.setCoords();
+    }
+    canvas.requestRenderAll();
+  }, [display, layerTransform, layers, selectedLayerId]);
 
   const selected = useMemo(
     () => layers.find((asset) => asset.componentVersionId === selectedLayerId) ?? null,

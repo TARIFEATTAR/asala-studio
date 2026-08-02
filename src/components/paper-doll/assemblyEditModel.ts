@@ -1,7 +1,7 @@
 import type { CandidateProvider, PrivateAssetRef } from "@/lib/paperDoll/candidateJobContract";
 
 export const RELEASE_CANVAS = { width: 2080, height: 2288 } as const;
-export type AssemblyEditMode = "release-lock" | "edit-lab";
+export type AssemblyEditMode = "release-lock" | "family-fit" | "edit-lab";
 export type CandidateSelectionKind = "whole-layer" | "rectangle" | "brush";
 
 export interface Point {

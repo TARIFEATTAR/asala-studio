@@ -21,7 +21,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Beaker, Layers, Grid3x3, ImageIcon } from "lucide-react";
 import {
@@ -47,8 +47,9 @@ import {
   updatePipelineGroupStatus,
 } from "@/lib/bestBottlesPipeline";
 import "@/styles/darkroom.css";
+import { resolveInitialStudioTab, type BestBottlesStudioTab } from "./bestBottlesStudioPreview";
 
-type StudioTab = "masters" | "components" | "compose";
+type StudioTab = BestBottlesStudioTab;
 
 const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
   {
@@ -85,12 +86,13 @@ function resolvePaperDollFamilyKey(group: {
 
 export default function BestBottlesStudio() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { currentOrganizationId } = useOnboarding();
   const { groupSlug } = useParams<{ groupSlug: string }>();
-  const [activeTab, setActiveTab] = useState<StudioTab>("masters");
+  const [activeTab, setActiveTab] = useState<StudioTab>(() => resolveInitialStudioTab(location.search));
   const [selectedSku, setSelectedSku] = useState<string | null>(null);
 
   const {
