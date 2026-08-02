@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "rendererVersion": "cyl9-rollon-blender-v1",
+  "geometryKey": "closure__cylinder__17-415__rollon-overcap__v1",
+  "geometryRecipeSha256": "5ed7917a5d27edb2e95820893be91422dde7ca59fca58e2fd36367f842681550",
+  "stoneLayoutSha256": "78f809de5c94c9d827a099740ea3fad1682dde091a318097182c83a57fe568eb",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF",
+    "transparent": true
+  },
+  "placement": {
+    "targetWidthPx": 363,
+    "mountAxisXPx": 1041,
+    "seatYPx": 1002,
+    "rule": "body-width authority; never size from the photographed thread crest"
+  },
+  "imageContract": {
+    "bodyDiameterMm": 20,
+    "pixelsPerMm": 18.15,
+    "outerDiameterMmEquivalent": 20,
+    "heightMmEquivalent": 28.6440677966,
+    "heightSource": "locked component cutout aspect 236x338 scaled to the 363px body width"
+  },
+  "physicalEvidence": {
+    "catalogReportedOuterDiameterMm": 20,
+    "catalogReportedHeightMm": 21,
+    "verificationStatus": "catalog-reported-unconfirmed",
+    "arReady": false,
+    "note": "Image-contract geometry is authoritative for Paper-Doll pixels only. Vendor CAD or measurement is required before AR dimensional claims."
+  },
+  "qualification": {
+    "geometryLocked": true,
+    "geometryGate": "exact-authoritative-mask-alpha",
+    "visualStatus": "candidate-not-approved",
+    "catalogApproval": false,
+    "assemblyContext": "reviewed against the locked CYL-9ML clear body plate",
+    "findings": [
+      "Fitment, center axis, baseline, shared silhouette, and alpha clamp passed.",
+      "Mirror banding still requires catalog art-direction approval.",
+      "Matte gold is too ochre/flat and glossy white reads gray in assembly context.",
+      "Rhinestone variants currently read as small studs rather than final faceted stones."
+    ]
+  },
+  "mask": {
+    "sha256": "8f03e365ae9cb1673a79056d54ba072eec968974ba707c11e52a83a4d1691aca",
+    "foregroundPixelCount": 184990,
+    "coverageRatio": 0.03887128496503497,
+    "bounds": {
+      "left": 860,
+      "top": 482,
+      "right": 1221,
+      "bottom": 1001
+    },
+    "isBinary": true,
+    "touchesFrame": false
+  },
+  "assets": [
+    {
+      "variantKey": "SHN-SL",
+      "materialKey": "mirror-silver",
+      "beautySha256": "1f8b8faf1cd711d5f9c4f4b5a3b63b47da0ceebc2c17f024a1d5a5aa611a6f53",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "SHN-GL",
+      "materialKey": "mirror-gold",
+      "beautySha256": "02d382e08c4f2ed03c1731f7a4a0b891f82d975dd14a050a5a9e0bab6b97b516",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "MAT-CU",
+      "materialKey": "matte-copper",
+      "beautySha256": "dce356be97fff005000fc3ca5eb0567feb7aa3175e16157c7fbfed801d02f82f",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "SHN-BLK",
+      "materialKey": "glossy-black",
+      "beautySha256": "a9be653115ba9706748da7757a4370c651d19c0062e2a9e4c024d3ee081ca99a",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "MAT-SL",
+      "materialKey": "matte-silver",
+      "beautySha256": "3a97edcc85baa69f55ace5e432ceec0d322aab6b4c83e4566418d47d8268f56f",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "MAT-GL",
+      "materialKey": "matte-gold",
+      "beautySha256": "65c1382af7b4306b7b348b639ab240ce266de04e54429a1d9a5e3b9324d3cb57",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "WHT",
+      "materialKey": "glossy-white",
+      "beautySha256": "757bc4cd2eff2cfe0e1ae0cd0c5e7b4101910821f88f9f5ace190a1215d335f2",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "SL-DOT",
+      "materialKey": "mirror-silver",
+      "beautySha256": "c0f8d78d531e76b7e8fd315dc5b767e7c7cc562c0657ea29448e9efa43d5c34f",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "BLK-DOT",
+      "materialKey": "mirror-silver",
+      "beautySha256": "a1ca35481ffc2e67b0739e5ac2cf964205bb5a54e33d78b0d9c36377eeff0c7a",
+      "clippingMassRatio": 0
+    },
+    {
+      "variantKey": "PNK-DOT",
+      "materialKey": "mirror-silver",
+      "beautySha256": "e0e7779de58da9c8cd292bd5a27cbc3afe99573c441bd478ce1433fc2cc7a7b9",
+      "clippingMassRatio": 0
+    }
+  ]
+}

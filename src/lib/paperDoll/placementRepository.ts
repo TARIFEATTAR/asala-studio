@@ -1,0 +1,71 @@
+import { z } from "zod";
+
+import {
+  SharedPlacementLockRequestSchema,
+  type SharedPlacementLockRequest,
+} from "./placementContract";
+
+interface RpcClient {
+  rpc(name: string, args: Record<string, unknown>): Promise<{ data: unknown; error: { message: string } | null }>;
+}
+
+interface FunctionClient {
+  functions: {
+    invoke(name: string, options: { body: unknown }): Promise<{ data: unknown; error: { message: string } | null }>;
+  };
+}
+
+const SharedPlacementRecordSchema = z.object({
+  id: z.string().uuid(),
+  familyKey: z.literal("CYL-9ML"),
+  fitmentGeometryKey: z.literal("fitment__roller-ball__17-415__v1"),
+  authorityMaskSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  canvas: z.object({ widthPx: z.literal(2080), heightPx: z.literal(2288) }),
+  transform: z.object({
+    translateXPx: z.coerce.number().finite(),
+    translateYPx: z.coerce.number().finite(),
+    uniformScale: z.coerce.number().finite().positive(),
+  }),
+  compatibleBodyComponentVersionIds: z.array(z.string().uuid()).length(5),
+  approverDisplayName: z.string().min(1),
+  approvalNote: z.string().min(1),
+  approvedAt: z.string().datetime(),
+}).superRefine((value, context) => {
+  if (new Set(value.compatibleBodyComponentVersionIds).size !== 5) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "Placement bodies must be unique." });
+  }
+});
+
+export type SharedPlacementRecord = z.infer<typeof SharedPlacementRecordSchema>;
+
+function parseRecord(value: unknown): SharedPlacementRecord {
+  const parsed = SharedPlacementRecordSchema.safeParse(value);
+  if (!parsed.success) throw new Error(`Malformed shared placement: ${parsed.error.message}`);
+  return parsed.data;
+}
+
+export async function loadSharedPlacement(client: RpcClient, input: {
+  organizationId: string;
+  familyKey: string;
+  fitmentGeometryKey: string;
+  authorityMaskSha256: string;
+}): Promise<SharedPlacementRecord | null> {
+  const { data, error } = await client.rpc("get_paper_doll_family_placement", {
+    p_organization_id: input.organizationId,
+    p_family_key: input.familyKey,
+    p_fitment_geometry_key: input.fitmentGeometryKey,
+    p_authority_mask_sha256: input.authorityMaskSha256,
+  });
+  if (error) throw new Error(`Unable to load shared placement: ${error.message}`);
+  return data == null ? null : parseRecord(data);
+}
+
+export async function lockSharedPlacement(
+  client: FunctionClient,
+  request: SharedPlacementLockRequest,
+): Promise<SharedPlacementRecord> {
+  const exactRequest = SharedPlacementLockRequestSchema.parse(request);
+  const { data, error } = await client.functions.invoke("lock-paper-doll-placement", { body: exactRequest });
+  if (error) throw new Error(`Unable to lock shared placement: ${error.message}`);
+  return parseRecord(data);
+}
