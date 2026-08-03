@@ -36,7 +36,11 @@ Multi-part source artwork is evidence, not automatically one production plate. B
 - protective or decorative secondary overcaps;
 - any Photoshop source with multiple large connected responsibilities or multiple catalog-selectable parts.
 
-The machine-readable contract is implemented by `src/lib/paperDoll/componentKitDecomposition.ts`. The first real recipe is `sprayer-15-415-component-kit-decomposition.json`.
+The machine-readable contract is implemented by `src/lib/paperDoll/componentKitDecomposition.ts`. The first real recipe is `sprayer-15-415-component-kit-decomposition.json`. Its SHA-verified source-extraction result and responsibility contact sheets are documented in `SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md`.
+
+Run `npm run paperdoll:extract-component-kit-review` to reproduce that local
+review set. The command writes review-only artifacts and records that production,
+geometry lock, Current Release, and Sanity state remain unchanged.
 
 ## Approval sequence
 

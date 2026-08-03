@@ -64,10 +64,15 @@
     {
       "decisionId": "review-decision__15-415-sprayer__component-kit-decomposition",
       "sourceReviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
-      "status": "decomposition-contract-created-review-required",
+      "status": "source-extraction-review-created-authority-required",
       "evidenceType": "layered-photoshop-archive-plus-reviewed-source-contact-sheet",
       "evidencePaths": [
         "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
+        "docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/manifest.json",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/sprayer-head/contact-sheet.png",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/protective-overcap/contact-sheet.png",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/dip-tube/contact-sheet.png",
         "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
       ],
       "affectedSourceIdentities": [
@@ -80,8 +85,11 @@
       "observation": "Each catalog reference contains three distinct responsibilities: the exposed sprayer head, a detached protective overcap, and a dip tube. The five exact Photoshop sources preserve the exposed head, but their scene structures differ; the matte-silver source contains additional nozzle scenes. Photoshop layers must therefore be recomposed by visual responsibility rather than promoted one-layer-per-plate.",
       "geometryClaim": "none",
       "resolution": {
-        "state": "decomposition-contract-created",
+        "state": "source-extraction-review-created",
         "recipePath": "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
+        "extractionReviewPath": "docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
+        "extractionManifestPath": "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/manifest.json",
+        "extractedReviewAssetCount": 15,
         "reusablePlateResponsibilities": [
           "sprayer-head",
           "protective-overcap"
@@ -93,7 +101,7 @@
         "geometryLocked": false,
         "productionPlateEligible": false
       },
-      "nextGate": "Extract and review the five sprayer-head appearances, isolate the matching protective overcaps, then validate the head and overcap authorities independently. Render or weld the dip tube per bottle cohort and body optics; never approve the flattened three-part source as one reusable plate."
+      "nextGate": "Calibrate and approve the exposed-head and protective-overcap geometry authorities independently, then clamp the five appearances to those exact masks. Render or weld the dip tube per bottle cohort and body optics; never approve the flattened three-part source as one reusable plate."
     },
     {
       "decisionId": "review-decision__20-400-dropper__pipette-length-unproven",
