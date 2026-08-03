@@ -77,7 +77,7 @@
     {
       "decisionId": "review-decision__8-425-short-cap__fluted-profile-required",
       "sourceReviewGroupKey": "geometry-review__cap__8-425__b0a7b8c0cf",
-      "status": "requires-dedicated-parametric-surface-profile",
+      "status": "dedicated-parametric-profile-created-review-required",
       "evidenceType": "reviewed-source-contact-sheet",
       "evidencePaths": [
         "outputs/paper-doll-component-authority-reviews/geometry-review__cap__8-425__b0a7b8c0cf/contact-sheet.png",
@@ -89,7 +89,18 @@
       ],
       "observation": "Both sources show a knurled cylindrical wall and a distinct lower flange. The smooth overcap renderer would erase real molded geometry and must not be used for these two appearances.",
       "geometryClaim": "none",
-      "nextGate": "Add a measured fluted-wall and lower-flange profile to the parametric renderer, then create one exact-alpha review family for black and white."
+      "resolution": {
+        "state": "local-profile-review-candidate-created",
+        "recipePath": "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json",
+        "candidateManifestPath": "outputs/paper-doll-parametric-overcaps/8-425-short-fluted-cap/candidate-v1/candidate-manifest.json",
+        "reviewContactSheetPath": "outputs/paper-doll-parametric-overcaps/8-425-short-fluted-cap/candidate-v1/review-contact-sheet.png",
+        "surfaceParameterEvidence": "source-derived-review-candidate",
+        "exactAlphaIou": 1,
+        "maximumMismatchedAlphaPixels": 0,
+        "geometryLocked": false,
+        "productionPlateEligible": false
+      },
+      "nextGate": "Review and name the 12 × 9 mm fluted/flanged profile authority; verify the source-derived flute parameter and material pixels before family fit."
     }
   ],
   "claimPolicy": {

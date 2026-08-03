@@ -35,6 +35,22 @@ const crystalSchema = z.object({
   scaleRatio: z.number().positive().lt(0.1),
 });
 
+const surfaceProfileSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("smooth"),
+  }),
+  z.object({
+    kind: z.literal("recessed-vertical-flutes"),
+    fluteCount: z.number().int().min(12).max(96),
+    fluteDepthRatio: z.number().positive().max(0.05),
+    startHeightRatio: z.number().min(0.05).max(0.4),
+    endHeightRatio: z.number().min(0.6).max(0.98),
+    fadeRatio: z.number().positive().max(0.1),
+    phaseDeg: z.number().min(-180).max(180),
+    evidenceState: z.literal("source-derived-review-candidate"),
+  }),
+]);
+
 const parametricOvercapFamilyRecipeSchema = z.object({
   schemaVersion: z.literal(1),
   recipeId: z.string().min(1),
@@ -70,6 +86,7 @@ const parametricOvercapFamilyRecipeSchema = z.object({
     derivedFrom: z.string().min(1),
   }),
   profileNormalized: z.array(z.tuple([z.number().min(0).max(0.5), z.number().min(0).max(1)])).min(4),
+  surfaceProfile: surfaceProfileSchema.default({ kind: "smooth" }),
   render: z.object({
     widthPx: z.literal(1400),
     heightPx: z.literal(2050),
@@ -117,6 +134,12 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   const decorated = recipe.variants.some((variant) => variant.decoration === "crystal-v1");
   if (decorated && recipe.crystalLayout.length === 0) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["crystalLayout"], message: "Decorated variants require a deterministic crystal layout." });
+  }
+  if (
+    recipe.surfaceProfile.kind === "recessed-vertical-flutes"
+    && recipe.surfaceProfile.startHeightRatio + recipe.surfaceProfile.fadeRatio * 2 >= recipe.surfaceProfile.endHeightRatio
+  ) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["surfaceProfile"], message: "Flute fade zones must fit between the declared start and end heights." });
   }
 });
 

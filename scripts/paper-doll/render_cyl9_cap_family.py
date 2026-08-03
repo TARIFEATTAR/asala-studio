@@ -68,6 +68,7 @@ DEFAULT_PROFILE_NORMALIZED = [
     [0.0000, 1.0000],
 ]
 PROFILE_NORMALIZED = RECIPE.get("profileNormalized", DEFAULT_PROFILE_NORMALIZED)
+SURFACE_PROFILE = RECIPE.get("surfaceProfile", {"kind": "smooth"})
 
 CAMERA_RECIPE = {
     "type": "orthographic",
@@ -149,20 +150,68 @@ MATERIAL_PRESETS = {
 }
 
 
-def build_cap_mesh(recipe: dict) -> bpy.types.Object:
-    """Return the single v2 over-cap geometry authority."""
-    segments = 256
-    profile = [(radius_ratio * DIAMETER, height_ratio * HEIGHT) for radius_ratio, height_ratio in PROFILE_NORMALIZED]
-    ring_profile = profile[:-1]
+def smoothstep(value: float) -> float:
+    clamped = max(0.0, min(1.0, value))
+    return clamped * clamped * (3.0 - 2.0 * clamped)
+
+
+def profile_radius_at(height_ratio: float) -> float:
+    for index in range(len(PROFILE_NORMALIZED) - 1):
+        left_radius, left_height = PROFILE_NORMALIZED[index]
+        right_radius, right_height = PROFILE_NORMALIZED[index + 1]
+        if left_height <= height_ratio <= right_height:
+            span = right_height - left_height
+            mix = 0.0 if span == 0 else (height_ratio - left_height) / span
+            return (left_radius + (right_radius - left_radius) * mix) * DIAMETER
+    return float(PROFILE_NORMALIZED[-1][0]) * DIAMETER
+
+
+def flute_radial_delta(angle: float, height_ratio: float, base_radius: float) -> float:
+    if SURFACE_PROFILE["kind"] != "recessed-vertical-flutes":
+        return 0.0
+    start = float(SURFACE_PROFILE["startHeightRatio"])
+    end = float(SURFACE_PROFILE["endHeightRatio"])
+    fade = float(SURFACE_PROFILE["fadeRatio"])
+    if height_ratio < start or height_ratio > end:
+        return 0.0
+    envelope = smoothstep((height_ratio - start) / fade) * smoothstep((end - height_ratio) / fade)
+    phase = math.radians(float(SURFACE_PROFILE["phaseDeg"]))
+    flute_count = int(SURFACE_PROFILE["fluteCount"])
+    narrow_recess = ((1.0 - math.cos(flute_count * angle + phase)) * 0.5) ** 4
+    return -base_radius * float(SURFACE_PROFILE["fluteDepthRatio"]) * envelope * narrow_recess
+
+
+def build_cap_mesh(recipe: dict) -> tuple[bpy.types.Object, dict]:
+    """Return one recipe-owned over-cap mesh and measured construction evidence."""
+    flute_count = int(SURFACE_PROFILE.get("fluteCount", 0))
+    segments = max(256, flute_count * 12)
+    axial_ratios = {float(height_ratio) for _, height_ratio in PROFILE_NORMALIZED[:-1]}
+    if SURFACE_PROFILE["kind"] == "recessed-vertical-flutes":
+        start = float(SURFACE_PROFILE["startHeightRatio"])
+        end = float(SURFACE_PROFILE["endHeightRatio"])
+        fade = float(SURFACE_PROFILE["fadeRatio"])
+        axial_ratios.update({start, start + fade, end - fade, end})
+    ring_height_ratios = sorted(axial_ratios)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, ...]] = []
+    recessed_vertex_count = 0
+    minimum_radial_delta = 0.0
+    maximum_radius = 0.0
 
-    for radius, z_value in ring_profile:
+    for height_ratio in ring_height_ratios:
+        base_radius = profile_radius_at(height_ratio)
         for segment in range(segments):
             angle = 2.0 * math.pi * segment / segments
+            radial_delta = flute_radial_delta(angle, height_ratio, base_radius)
+            radius = base_radius + radial_delta
+            if radial_delta < -1e-9:
+                recessed_vertex_count += 1
+            minimum_radial_delta = min(minimum_radial_delta, radial_delta)
+            maximum_radius = max(maximum_radius, radius)
+            z_value = height_ratio * HEIGHT
             vertices.append((radius * math.cos(angle), radius * math.sin(angle), z_value))
 
-    for ring_index in range(len(ring_profile) - 1):
+    for ring_index in range(len(ring_height_ratios) - 1):
         current = ring_index * segments
         following = (ring_index + 1) * segments
         for segment in range(segments):
@@ -176,7 +225,7 @@ def build_cap_mesh(recipe: dict) -> bpy.types.Object:
 
     top_center_index = len(vertices)
     vertices.append((0.0, 0.0, HEIGHT))
-    top_ring = (len(ring_profile) - 1) * segments
+    top_ring = (len(ring_height_ratios) - 1) * segments
     for segment in range(segments):
         next_segment = (segment + 1) % segments
         faces.append((top_ring + segment, top_ring + next_segment, top_center_index))
@@ -189,7 +238,17 @@ def build_cap_mesh(recipe: dict) -> bpy.types.Object:
 
     for polygon in mesh.polygons:
         polygon.use_smooth = True
-    return cap
+    return cap, {
+        "surfaceProfileKind": SURFACE_PROFILE["kind"],
+        "fluteCount": flute_count,
+        "segmentCount": segments,
+        "ringCount": len(ring_height_ratios),
+        "vertexCount": len(vertices),
+        "faceCount": len(faces),
+        "recessedVertexCount": recessed_vertex_count,
+        "minimumRadialDeltaMm": minimum_radial_delta,
+        "maximumRadiusMm": maximum_radius,
+    }
 
 
 def build_camera(recipe: dict) -> bpy.types.Object:
@@ -342,7 +401,7 @@ def render_to(path: Path) -> None:
 
 
 scene = configure_scene()
-cap = build_cap_mesh(RECIPE)
+cap, geometry_stats = build_cap_mesh(RECIPE)
 camera = build_camera(RECIPE)
 scene.camera = camera
 studio = build_studio(RECIPE)
@@ -363,6 +422,7 @@ provenance = {
         "nominalHeight": NOMINAL_HEIGHT,
         "heightScale": HEIGHT_SCALE,
         "calibratedHeight": HEIGHT,
+        "surfaceProfile": SURFACE_PROFILE,
     }),
     "cameraRecipeHash": canonical_hash(CAMERA_RECIPE),
     "studioRecipeHash": canonical_hash(STUDIO_RECIPE),
@@ -396,6 +456,7 @@ manifest = {
     "blenderVersion": bpy.app.version_string,
     "maskPath": str(mask_path.relative_to(OUT_DIR)),
     "sharedProvenance": provenance,
+    "geometryStats": geometry_stats,
     "renders": render_records,
 }
 OUT_DIR.mkdir(parents=True, exist_ok=True)
