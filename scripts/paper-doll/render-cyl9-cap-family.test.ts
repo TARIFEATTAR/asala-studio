@@ -4,6 +4,7 @@ import test from "node:test";
 import sharp from "sharp";
 
 import {
+  buildGeometryLockedMaterialPlate,
   clampRenderToAuthorityMask,
   compareClampedVariantAlpha,
   inspectAuthorityMask,
@@ -76,6 +77,49 @@ test("all clamped variants have IoU 1 and zero mismatched pixels", async () => {
 
   assert.equal(report.minIoU, 1);
   assert.ok(report.pairs.every(({ mismatchedPixels }) => mismatchedPixels === 0));
+});
+
+test("GPT material pixels are normalized into the exact authority silhouette", async () => {
+  const material = await rgbaPng(8, 8, (x, y) => (
+    x >= 1 && x <= 6 && y >= 2 && y <= 5
+      ? [20 + x * 20, 30 + y * 20, 40, 255]
+      : [0, 0, 0, 255]
+  ));
+  const mask = await rgbaPng(10, 10, (x, y) => (
+    x >= 2 && x <= 7 && y >= 1 && y <= 8
+      ? [255, 255, 255, 255]
+      : [0, 0, 0, 0]
+  ));
+
+  const result = await buildGeometryLockedMaterialPlate({
+    materialPng: material,
+    authorityMaskPng: mask,
+    materialBounds: { left: 1, top: 2, width: 6, height: 4 },
+  });
+
+  assert.deepEqual(await alphaBytes(result.png), await alphaBytes(mask));
+  assert.equal(result.qa.geometryLocked, true);
+  assert.equal(result.qa.minIoU, 1);
+  assert.equal(result.qa.mismatchedPixels, 0);
+  assert.deepEqual(result.authorityBounds, { left: 2, top: 1, right: 7, bottom: 8, width: 6, height: 8 });
+});
+
+test("material normalization rejects a crop outside the generated image", async () => {
+  const material = await rgbaPng(8, 8, () => [120, 100, 80, 255]);
+  const mask = await rgbaPng(10, 10, (x, y) => (
+    x >= 2 && x <= 7 && y >= 1 && y <= 8
+      ? [255, 255, 255, 255]
+      : [0, 0, 0, 0]
+  ));
+
+  await assert.rejects(
+    () => buildGeometryLockedMaterialPlate({
+      materialPng: material,
+      authorityMaskPng: mask,
+      materialBounds: { left: 7, top: 7, width: 2, height: 2 },
+    }),
+    /outside the generated material image/i,
+  );
 });
 
 test("mask inspection rejects frame occupancy and detached regions", async () => {
