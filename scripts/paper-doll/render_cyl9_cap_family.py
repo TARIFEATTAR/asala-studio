@@ -42,8 +42,6 @@ VARIANTS = {entry["variantKey"]: entry for entry in RECIPE["variants"]}
 unsupported = [key for key in REQUESTED_VARIANTS if key not in VARIANTS]
 if unsupported:
     raise ValueError(f"Unknown CYL-9ML cap variants: {', '.join(unsupported)}")
-if any(key != "SSLV" for key in REQUESTED_VARIANTS):
-    raise ValueError("The calibrated-master milestone currently renders SSLV only.")
 
 DIAMETER = float(RECIPE["nominalDimensionsMm"]["outsideDiameter"])
 NOMINAL_HEIGHT = float(RECIPE["nominalDimensionsMm"]["height"])
@@ -91,6 +89,57 @@ MASK_RECIPE = {
     "transparentFilm": True,
     "occupiedRgba": [255, 255, 255, 255],
     "backgroundRgba": [0, 0, 0, 0],
+}
+
+MATERIAL_PRESETS = {
+    "mirror-silver": {
+        "baseColor": [0.82, 0.83, 0.86, 1.0],
+        "metallic": 1.0,
+        "roughness": 0.035,
+        "coatWeight": 0.18,
+    },
+    "matte-silver": {
+        "baseColor": [0.60, 0.61, 0.64, 1.0],
+        "metallic": 1.0,
+        "roughness": 0.38,
+        "coatWeight": 0.0,
+    },
+    "mirror-gold": {
+        "baseColor": [0.83, 0.50, 0.12, 1.0],
+        "metallic": 1.0,
+        "roughness": 0.05,
+        "coatWeight": 0.16,
+    },
+    "matte-gold": {
+        "baseColor": [0.68, 0.37, 0.08, 1.0],
+        "metallic": 1.0,
+        "roughness": 0.40,
+        "coatWeight": 0.0,
+    },
+    "glossy-black": {
+        "baseColor": [0.008, 0.009, 0.011, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.12,
+        "coatWeight": 0.42,
+    },
+    "matte-copper": {
+        "baseColor": [0.54, 0.17, 0.055, 1.0],
+        "metallic": 1.0,
+        "roughness": 0.43,
+        "coatWeight": 0.0,
+    },
+    "glossy-white": {
+        "baseColor": [0.93, 0.91, 0.87, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.14,
+        "coatWeight": 0.38,
+    },
+    "matte-pink": {
+        "baseColor": [0.72, 0.26, 0.36, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.38,
+        "coatWeight": 0.0,
+    },
 }
 
 
@@ -181,14 +230,69 @@ def build_studio(recipe: dict) -> dict[str, bpy.types.Object]:
     return {spec["name"]: emission_panel(spec) for spec in STUDIO_RECIPE["panels"]}
 
 
-def create_principled_material(name: str) -> bpy.types.Material:
-    material = bpy.data.materials.new(name)
+def create_finish_material(material_key: str) -> bpy.types.Material:
+    preset = MATERIAL_PRESETS[material_key]
+    material = bpy.data.materials.new(f"cyl9_{material_key}_phenolic_finish")
     bsdf = material.node_tree.nodes.get("Principled BSDF")
-    bsdf.inputs["Base Color"].default_value = (0.92, 0.92, 0.94, 1.0)
-    bsdf.inputs["Metallic"].default_value = 1.0
-    bsdf.inputs["Roughness"].default_value = 0.04
+    bsdf.inputs["Base Color"].default_value = preset["baseColor"]
+    bsdf.inputs["Metallic"].default_value = preset["metallic"]
+    bsdf.inputs["Roughness"].default_value = preset["roughness"]
     bsdf.inputs["IOR"].default_value = 1.5
+    coat = bsdf.inputs.get("Coat Weight")
+    if coat is not None:
+        coat.default_value = preset["coatWeight"]
     return material
+
+
+def create_crystal_material() -> bpy.types.Material:
+    material = bpy.data.materials.new("cyl9_crystal_v1")
+    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Base Color"].default_value = (0.94, 0.98, 1.0, 1.0)
+    bsdf.inputs["Metallic"].default_value = 0.22
+    bsdf.inputs["Roughness"].default_value = 0.045
+    bsdf.inputs["IOR"].default_value = 1.46
+    transmission = bsdf.inputs.get("Transmission Weight")
+    if transmission is not None:
+        transmission.default_value = 0.52
+    coat = bsdf.inputs.get("Coat Weight")
+    if coat is not None:
+        coat.default_value = 0.24
+    return material
+
+
+def build_crystals(recipe: dict) -> list[bpy.types.Object]:
+    material = create_crystal_material()
+    crystals = []
+    for spec in recipe["crystalLayout"]:
+        angle = math.radians(float(spec["angleDeg"]))
+        radius = DIAMETER * float(spec["scaleRatio"])
+        surface_radius = RADIUS + radius * 0.14
+        location = (
+            surface_radius * math.sin(angle),
+            -surface_radius * math.cos(angle),
+            HEIGHT * float(spec["heightRatio"]),
+        )
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=12,
+            radius=radius,
+            depth=radius * 0.42,
+            location=location,
+            rotation=(math.radians(90.0), 0.0, -angle),
+        )
+        crystal = bpy.context.active_object
+        crystal.name = f"crystal_{spec['id']}"
+        crystal.data.materials.append(material)
+        bevel = crystal.modifiers.new(name="shallow_faceted_crown", type="BEVEL")
+        bevel.width = radius * 0.24
+        bevel.segments = 1
+        crystal.hide_render = True
+        crystals.append(crystal)
+    return crystals
+
+
+def set_crystal_visibility(crystals: list[bpy.types.Object], visible: bool) -> None:
+    for crystal in crystals:
+        crystal.hide_render = not visible
 
 
 def create_mask_material() -> bpy.types.Material:
@@ -236,9 +340,13 @@ cap = build_cap_mesh(RECIPE)
 camera = build_camera(RECIPE)
 scene.camera = camera
 studio = build_studio(RECIPE)
+crystals = build_crystals(RECIPE)
 
-mirror_silver = create_principled_material("mirror_silver_phenolic_finish")
-cap.data.materials.append(mirror_silver)
+finish_materials = {
+    material_key: create_finish_material(material_key)
+    for material_key in MATERIAL_PRESETS
+}
+cap.data.materials.append(finish_materials["mirror-silver"])
 
 isolated_dir = OUT_DIR / "isolated"
 render_records = []
@@ -256,18 +364,22 @@ provenance = {
 }
 
 for variant_key in REQUESTED_VARIANTS:
+    variant = VARIANTS[variant_key]
     render_path = isolated_dir / f"{variant_key}.png"
-    cap.data.materials[0] = mirror_silver
+    cap.data.materials[0] = finish_materials[variant["material"]]
+    decorated = variant["decoration"] == "crystal-v1"
+    set_crystal_visibility(crystals, decorated)
     render_to(render_path)
     render_records.append({
         "variantKey": variant_key,
         "path": str(render_path.relative_to(OUT_DIR)),
         "provenance": provenance,
-        "crystals": [],
+        "crystals": [dict(item) for item in RECIPE["crystalLayout"]] if decorated else [],
     })
 
 mask_path = OUT_DIR / "geometry-mask.png"
 cap.data.materials[0] = create_mask_material()
+set_crystal_visibility(crystals, False)
 for panel in studio.values():
     panel.hide_render = True
 render_to(mask_path)
