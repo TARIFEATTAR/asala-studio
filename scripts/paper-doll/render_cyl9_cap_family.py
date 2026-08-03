@@ -51,6 +51,8 @@ HEIGHT_SCALE = float(RECIPE["geometryCalibration"]["heightScale"])
 HEIGHT = NOMINAL_HEIGHT * HEIGHT_SCALE
 RADIUS = DIAMETER / 2.0
 RENDER = RECIPE["render"]
+OUTPUT_ASPECT = float(RENDER["widthPx"]) / float(RENDER["heightPx"])
+FRAMING_VERTICAL_EXTENT = max(HEIGHT, DIAMETER / OUTPUT_ASPECT)
 
 # Normalized revolved half-profile. This is deliberately flatter and less bulbous
 # at the top than the v1 generic beveled cylinder. The small taper and shallow
@@ -71,7 +73,8 @@ CAMERA_RECIPE = {
     "type": "orthographic",
     "topArcRatio": float(RENDER["topArcRatio"]),
     "frameHeightMultiplier": 1.22,
-    "framingHeightMm": NOMINAL_HEIGHT,
+    "outputAspect": OUTPUT_ASPECT,
+    "framingVerticalExtentMm": FRAMING_VERTICAL_EXTENT,
     "targetZRatio": 0.5,
 }
 
@@ -192,7 +195,7 @@ def build_cap_mesh(recipe: dict) -> bpy.types.Object:
 def build_camera(recipe: dict) -> bpy.types.Object:
     camera_data = bpy.data.cameras.new("cyl9_cap_camera")
     camera_data.type = "ORTHO"
-    camera_data.ortho_scale = NOMINAL_HEIGHT * CAMERA_RECIPE["frameHeightMultiplier"]
+    camera_data.ortho_scale = FRAMING_VERTICAL_EXTENT * CAMERA_RECIPE["frameHeightMultiplier"]
     camera = bpy.data.objects.new("cyl9_cap_camera", camera_data)
     bpy.context.collection.objects.link(camera)
 

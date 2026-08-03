@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "short-cap-18-415-family-v1",
+  "familyKey": "SHORT-CAP-18-415",
+  "neckFinish": "18-415",
+  "geometryFamilyId": "closure__18-415__short-overcap__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__cap__18-415__5ef8879454",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "CP18-415ShnSl",
+    "sourceSha256": "e4db5be4699a8d440d9b7c0ea49b8b7ac2d62ebf3c1a2a0eb0a48f5c1c9919a6",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415ShnSl.gif",
+    "localReviewPath": "outputs/paper-doll-component-authority-reviews/geometry-review__cap__18-415__5ef8879454/source/cp18-415shnsl__01.gif",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "CP18-415ShnSl",
+    "fields": {
+      "heightWithCap": "19 ±0.5 mm",
+      "diameter": "21 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 21,
+    "outsideDiameterTolerance": 0.5,
+    "height": 19,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-physical-dimensions-plus-source-medoid-profile-v1"
+  },
+  "profileNormalized": [
+    [0.5, 0],
+    [0.5, 0.9],
+    [0.498, 0.945],
+    [0.492, 0.966],
+    [0.48, 0.982],
+    [0.456, 0.993],
+    [0.41, 0.998],
+    [0, 1]
+  ],
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "MSLV",
+      "sourceIdentity": "CP18-415MtSl",
+      "graceSku": "CMP-CAP-MSLV-18415-S",
+      "material": "matte-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__short-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SGLD",
+      "sourceIdentity": "CP18-415ShnGl",
+      "graceSku": "CMP-CAP-SGLD-18415-S",
+      "material": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__short-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SSLV",
+      "sourceIdentity": "CP18-415ShnSl",
+      "graceSku": "CMP-CAP-SSLV-18415-S",
+      "material": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__short-overcap__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

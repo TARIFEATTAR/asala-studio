@@ -5,6 +5,8 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
+import sharp from "sharp";
+
 const blender = "/Applications/Blender.app/Contents/MacOS/Blender";
 const renderer = path.resolve("scripts/paper-doll/render_cyl9_cap_family.py");
 
@@ -46,4 +48,42 @@ test("Blender mesh provenance changes when the recipe-owned overcap profile chan
     hashes.push(manifest.sharedProvenance.meshRecipeHash);
   }
   assert.notEqual(hashes[0], hashes[1], "Renderer ignored recipe.profileNormalized and reused hard-coded CYL-9ML geometry.");
+});
+
+test("Blender camera preserves transparent side padding for a cap wider than it is tall", async (context) => {
+  try {
+    await readFile(blender);
+  } catch {
+    context.skip("Blender is not installed at the production path.");
+    return;
+  }
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "paper-doll-parametric-short-cap-"));
+  const raw = JSON.parse(await readFile("docs/paper-doll-rig/short-cap-18-415-family-recipe.json", "utf8"));
+  raw.render.widthPx = 128;
+  raw.render.heightPx = 160;
+  raw.render.samples = 1;
+  raw.variants = raw.variants.filter((variant: { variantKey: string }) => variant.variantKey === "SSLV");
+  const recipePath = path.join(temporary, "recipe.json");
+  const outputPath = path.join(temporary, "output");
+  await writeFile(recipePath, `${JSON.stringify(raw)}\n`, "utf8");
+  const result = spawnSync(blender, [
+    "--background",
+    "--python", renderer,
+    "--",
+    "--recipe", recipePath,
+    "--out", outputPath,
+    "--variants", "SSLV",
+    "--samples", "1",
+  ], { encoding: "utf8", timeout: 120_000 });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const { data, info } = await sharp(path.join(outputPath, "geometry-mask.png")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const occupiedX: number[] = [];
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 0; x < info.width; x++) {
+      if (data[(y * info.width + x) * info.channels + 3] > 0) occupiedX.push(x);
+    }
+  }
+  assert.ok(occupiedX.length > 0, "Renderer produced an empty authority mask.");
+  assert.ok(Math.min(...occupiedX) > 0, "Wide cap touches the left frame edge.");
+  assert.ok(Math.max(...occupiedX) < info.width - 1, "Wide cap touches the right frame edge.");
 });
