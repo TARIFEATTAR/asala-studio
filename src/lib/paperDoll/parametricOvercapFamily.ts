@@ -65,6 +65,16 @@ const surfaceProfileSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
+const stemApplicatorSchema = z.object({
+  capHeightMm: z.number().positive(),
+  stemOutsideDiameterMm: z.number().positive(),
+  terminalBulbDiameterMm: z.number().positive(),
+  terminalBulbHeightMm: z.number().positive(),
+  bottomClearanceMm: z.number().nonnegative(),
+  material: z.literal("clear-glass"),
+  evidenceState: z.literal("source-derived-review-candidate"),
+});
+
 const parametricOvercapFamilyRecipeSchema = z.object({
   schemaVersion: z.literal(1),
   recipeId: z.string().min(1),
@@ -101,6 +111,7 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   }),
   profileNormalized: z.array(z.tuple([z.number().min(0).max(0.5), z.number().min(0).max(1)])).min(4),
   surfaceProfile: surfaceProfileSchema.default({ kind: "smooth" }),
+  stemApplicator: stemApplicatorSchema.optional(),
   trimBands: z.array(trimBandSchema).default([]),
   render: z.object({
     widthPx: z.literal(1400),
@@ -172,6 +183,22 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   }
   if (recipe.trimBands.length > 0 && recipe.variants.some((variant) => !variant.trimMaterial)) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Every variant requires a trim material when trim bands are declared." });
+  }
+  if (recipe.stemApplicator) {
+    const stem = recipe.stemApplicator;
+    if (stem.capHeightMm >= recipe.nominalDimensionsMm.height) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["stemApplicator", "capHeightMm"], message: "Compound cap height must be smaller than the measured assembly height." });
+    }
+    if (stem.stemOutsideDiameterMm >= recipe.nominalDimensionsMm.outsideDiameter) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["stemApplicator", "stemOutsideDiameterMm"], message: "Applicator stem must be narrower than the measured cap diameter." });
+    }
+    if (stem.terminalBulbDiameterMm < stem.stemOutsideDiameterMm) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["stemApplicator", "terminalBulbDiameterMm"], message: "Applicator terminal bulb cannot be narrower than the stem." });
+    }
+    const availableStemHeight = recipe.nominalDimensionsMm.height - stem.capHeightMm;
+    if (stem.bottomClearanceMm + stem.terminalBulbHeightMm >= availableStemHeight) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["stemApplicator"], message: "Applicator terminal geometry must fit below the cap within the measured assembly height." });
+    }
   }
 });
 

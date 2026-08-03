@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "applicator-cap-18-400-family-v1",
+  "familyKey": "APPLICATOR-CAP-18-400",
+  "neckFinish": "18-400",
+  "geometryFamilyId": "closure__18-400__applicator-cap-with-glass-rod__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__cap__18-400__7b644a08b3",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "18-400CpAppBlk",
+    "sourceSha256": "32d4d99764de688457e8f3915a336d3f88c9b13bce3c3b869824cb55b61e02e5",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP18-400AppBlk.gif",
+    "localReviewPath": "outputs/paper-doll-component-authority-reviews/geometry-review__cap__18-400__7b644a08b3/source/18-400cpappblk__01.gif",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "18-400CpAppBlk",
+    "fields": {
+      "heightWithCap": "45 ±0.5 mm",
+      "diameter": "21 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 21,
+    "outsideDiameterTolerance": 0.5,
+    "height": 45,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-assembly-dimensions-plus-source-compound-profile-v1"
+  },
+  "profileNormalized": [
+    [0.5, 0],
+    [0.5, 0.04],
+    [0.492, 0.075],
+    [0.478, 0.12],
+    [0.475, 0.81],
+    [0.47, 0.9],
+    [0.455, 0.96],
+    [0.42, 0.99],
+    [0, 1]
+  ],
+  "surfaceProfile": {
+    "kind": "recessed-vertical-flutes",
+    "fluteCount": 32,
+    "fluteDepthRatio": 0.017,
+    "startHeightRatio": 0.14,
+    "endHeightRatio": 0.89,
+    "fadeRatio": 0.04,
+    "phaseDeg": 0,
+    "evidenceState": "source-derived-review-candidate"
+  },
+  "stemApplicator": {
+    "capHeightMm": 11,
+    "stemOutsideDiameterMm": 1.5,
+    "terminalBulbDiameterMm": 2.4,
+    "terminalBulbHeightMm": 2.6,
+    "bottomClearanceMm": 1,
+    "material": "clear-glass",
+    "evidenceState": "source-derived-review-candidate"
+  },
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.018
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "BLK",
+      "sourceIdentity": "18-400CpAppBlk",
+      "graceSku": "CMP-APP-BLK-18-400",
+      "material": "glossy-black",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-400__applicator-cap-with-glass-rod__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}
