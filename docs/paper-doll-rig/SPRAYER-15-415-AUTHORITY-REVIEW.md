@@ -1,6 +1,6 @@
 # 15-415 sprayer authority review candidates
 
-Status: dimension-calibrated review candidates created; named geometry and family-fit approval not claimed.
+Status: dimension-calibrated review candidates created; geometry, compatibility, and family-fit approval not claimed.
 
 ## Result
 
@@ -11,7 +11,7 @@ The 15-415 fine-mist sprayer kit now has two independent five-appearance review 
 
 The dip tube remains a third, body-contextual responsibility. It is not a reusable global overlay and is not included in either exterior authority mask.
 
-The candidates use the locked CYL-9ML calibration:
+The candidates use the locked CYL-9ML canvas and pixel scale as a visual scale context only:
 
 - canonical canvas: 2080 × 2288;
 - verified width scale: 18.15 px/mm;
@@ -19,6 +19,8 @@ The candidates use the locked CYL-9ML calibration:
 - shared target width: 363 px;
 - center axis: x = 1041;
 - mount seat: y = 1002.
+
+Important: these components have a 15-415 neck finish, while the five CYL-9ML context bodies have a 17-415 neck finish. The five-body sheets do **not** prove compatibility or physical fit. They exist only to expose scale, centering, and material-transfer problems in a familiar locked catalog context. Family-fit approval requires a verified compatible 15-415 body cohort.
 
 The protective overcap uses the catalog 41 ±0.5 mm physical envelope and a Blender geometry mask. The exposed head preserves the cleaned shiny-silver source silhouette at the verified 20 mm width. Its source-aspect height is 40.1 ±0.25 mm; that is a recorded review calibration, not a replacement for catalog physical truth.
 
@@ -39,17 +41,17 @@ The Blender mask is resized with Lanczos2 because Lanczos3 introduced 29 detache
 - Five head appearances have byte-exact alpha identity to the head authority candidate.
 - Five overcap appearances have byte-exact alpha identity to the overcap authority candidate.
 - Every candidate reports zero mismatched alpha pixels.
-- Five-body review sheets preserve the clear, frosted, swirl, amber, and cobalt body plates unchanged.
-- The body lineup uses one shared center axis and seat; no per-body production nudge was written.
+- Five-body scale-context sheets preserve the clear, frosted, swirl, amber, and cobalt body plates unchanged.
+- The context lineup uses one shared center axis and visual seat; no per-body production nudge or compatibility mapping was written.
 - Current Release and Sanity state remain unchanged.
 
 Local review artifacts:
 
 - `outputs/paper-doll-sprayer-15-415/authority-review-v1/manifest.json`
 - `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-materials.png`
-- `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-fit.png`
+- `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-scale-context.png`
 - `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-materials.png`
-- `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-fit.png`
+- `outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-scale-context.png`
 
 Rebuild with:
 
@@ -59,7 +61,7 @@ npm run paperdoll:sprayer-15-415-authority-review
 
 ## Approval boundary
 
-These are authority candidates, not approved authorities. Exact alpha proves that every appearance was clamped to its proposed mask; it does not approve the underlying mask. Geometry lock requires named review of the physical profile and five-body assembly fit. Production registration, Current Release changes, and Sanity sync remain separate actions.
+These are authority candidates, not approved authorities. Exact alpha proves that every appearance was clamped to its proposed mask; it does not approve the underlying mask. Geometry lock requires named review of the physical profile. Compatibility and family fit require a verified 15-415 body cohort; the 17-415 CYL-9ML context sheets cannot satisfy that gate. Production registration, Current Release changes, and Sanity sync remain separate actions.
 
 ## Reusable compound-component rule
 

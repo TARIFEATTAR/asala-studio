@@ -51,8 +51,10 @@ uses the physical mount axis and verified seats rather than review-centering
 coordinates.
 
 The next gate has now produced two independent exact-alpha candidate families
-and five-body fit sheets. See `SPRAYER-15-415-AUTHORITY-REVIEW.md`. The output
-remains review-only and does not change Current Release or Sanity.
+and five-body visual scale-context sheets. See
+`SPRAYER-15-415-AUTHORITY-REVIEW.md`. Because the context bodies are 17-415,
+the sheets make no compatibility or family-fit claim. The output remains
+review-only and does not change Current Release or Sanity.
 
 ## Reusable warning
 

@@ -175,7 +175,7 @@ test("builds two five-appearance review families while keeping the dip tube cont
       centerXPx: 50,
       seatYPx: 90,
     },
-    bodyPlates: bodyPaths,
+    scaleContextBodyPlates: bodyPaths,
   });
   const manifest = JSON.parse(await readFile(result.manifestPath, "utf8"));
 
@@ -185,8 +185,12 @@ test("builds two five-appearance review families while keeping the dip tube cont
   assert.ok(manifest.qa.every((value: { exactAlpha: boolean }) => value.exactAlpha));
   assert.equal(manifest.geometryLocked, false);
   assert.equal(manifest.productionEligible, false);
+  assert.equal(manifest.compatibilityClaim, "none");
+  assert.equal(manifest.familyFitApprovalRequired, false);
+  assert.equal(manifest.compatibilityReviewRequired, true);
   assert.equal(manifest.currentReleaseChanged, false);
   assert.equal(manifest.sanityChanged, false);
   assert.equal(result.contactSheetPaths.length, 4);
+  assert.ok(result.contactSheetPaths.filter((value: string) => value.endsWith("five-body-scale-context.png")).length === 2);
   assert.equal(files.length, 10);
 });

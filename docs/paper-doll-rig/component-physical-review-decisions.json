@@ -76,9 +76,9 @@
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/dip-tube/contact-sheet.png",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/manifest.json",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-materials.png",
-        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-fit.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-scale-context.png",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-materials.png",
-        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-fit.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-scale-context.png",
         "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
       ],
       "affectedSourceIdentities": [
@@ -101,6 +101,14 @@
         "exactAlphaCandidateCount": 10,
         "headAuthorityWidthPx": 363,
         "protectiveOvercapAuthorityWidthPx": 363,
+        "compatibilityClaim": "none",
+        "scaleContext": {
+          "bodyFamily": "CYL-9ML",
+          "bodyNeckFinish": "17-415",
+          "componentNeckFinish": "15-415",
+          "purpose": "visual-scale-and-material-context-only",
+          "physicalFitClaim": false
+        },
         "headSourceCleanup": {
           "measuredSourceComponents": 10,
           "retainedComponentPixels": 77022,
@@ -118,7 +126,7 @@
         "geometryLocked": false,
         "productionPlateEligible": false
       },
-      "nextGate": "Obtain named geometry-profile and five-body family-fit approval for the exposed-head and protective-overcap candidates. Keep the dip tube body-contextual, then register only approved exact-alpha plates; never approve the flattened three-part source as one reusable plate."
+      "nextGate": "Obtain named geometry-profile review for the exposed-head and protective-overcap candidates, then evaluate family fit only on a verified compatible 15-415 body cohort. Keep the dip tube body-contextual; never treat the 17-415 CYL-9ML scale-context sheets as compatibility evidence or approve the flattened three-part source as one reusable plate."
     },
     {
       "decisionId": "review-decision__20-400-dropper__pipette-length-unproven",
