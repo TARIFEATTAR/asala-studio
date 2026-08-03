@@ -29,11 +29,6 @@ import {
 } from "@/components/darkroom/LEDIndicator";
 import { MastersTabPanel } from "@/components/darkroom/MastersTabPanel";
 import { ComponentsTabPanel } from "@/components/darkroom/ComponentsTabPanel";
-import { AssemblyView } from "@/components/paper-doll/AssemblyView";
-import { EvidenceView } from "@/components/paper-doll/EvidenceView";
-import { LineupView } from "@/components/paper-doll/LineupView";
-import { MatrixView } from "@/components/paper-doll/MatrixView";
-import { PublishPreviewView } from "@/components/paper-doll/PublishPreviewView";
 import { ReleaseWorkbench } from "@/components/paper-doll/ReleaseWorkbench";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -99,7 +94,7 @@ const RELEASE_TABS: Array<{ id: StudioTab; label: string; description: string }>
   {
     id: "components",
     label: "Release Workbench",
-    description: "Assembly · matrix · lineup · publish",
+    description: "Inventory · candidate · family fit · release",
   },
 ];
 
@@ -635,13 +630,6 @@ export default function BestBottlesStudio() {
                       manifestSha256={workbenchReleaseManifestSha256}
                       assetUrlsByPath={workbenchReleaseAssetUrlsByPath}
                       applicatorBuckets={studioApplicatorBuckets}
-                      renderView={(view, state, setState) => {
-                        if (view === "assembly") return <AssemblyView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
-                        if (view === "matrix") return <MatrixView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} state={state} onStateChange={setState} />;
-                        if (view === "lineup") return <LineupView manifest={workbenchReleaseManifest} assetUrlsByPath={workbenchReleaseAssetUrlsByPath} />;
-                        if (view === "evidence") return <EvidenceView manifest={workbenchReleaseManifest} />;
-                        return <PublishPreviewView manifest={workbenchReleaseManifest} catalogProducts={studioData.variants} />;
-                      }}
                     />
                   ) : (
                     <ComponentsTabPanel

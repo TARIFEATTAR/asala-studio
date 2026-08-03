@@ -1,19 +1,27 @@
-import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  FileSearch,
-  GalleryHorizontalEnd,
-  Layers3,
-  ShieldCheck,
-  TableProperties,
+  Boxes,
+  CloudUpload,
+  FileStack,
+  GitCompare,
+  ScanLine,
+  Workflow,
 } from "lucide-react";
 
 import type { ApplicatorBucket } from "@/integrations/convex/bestBottles";
 import type { PaperDollReleaseManifest } from "@/lib/paperDoll/releaseContract";
 import type { PaperDollReleaseValidation } from "@/lib/paperDoll/releaseValidator";
+import { loadCyl9ComponentFactory } from "@/lib/paperDoll/cyl9ComponentFactory";
+import { buildComponentWorkbenchRows } from "@/lib/paperDoll/componentWorkbenchModel";
+import { ComponentCandidateView } from "./ComponentCandidateView";
+import { ComponentInventoryView } from "./ComponentInventoryView";
+import { ComponentPlateView } from "./ComponentPlateView";
+import { FamilyFitView } from "./FamilyFitView";
+import { ReleaseCutView } from "./ReleaseCutView";
 import { ReleaseInventoryRail } from "./ReleaseInventoryRail";
 import { ReleaseWorkbenchHeader } from "./ReleaseWorkbenchHeader";
+import { SanityProjectionView } from "./SanityProjectionView";
 import {
   parseReleaseWorkbenchState,
   serializeReleaseWorkbenchState,
@@ -28,25 +36,27 @@ interface ReleaseWorkbenchProps {
   manifestSha256: string;
   assetUrlsByPath: Readonly<Record<string, string>>;
   applicatorBuckets: ApplicatorBucket[];
-  renderView: (
-    view: ReleaseWorkbenchView,
-    state: ReleaseWorkbenchState,
-    setState: (state: ReleaseWorkbenchState) => void,
-  ) => ReactNode;
 }
 
 const VIEW_ITEMS: Array<{
   id: ReleaseWorkbenchView;
   label: string;
   description: string;
-  icon: typeof Layers3;
+  icon: typeof Boxes;
 }> = [
-  { id: "assembly", label: "Assembly", description: "Layer inspection", icon: Layers3 },
-  { id: "matrix", label: "Matrix", description: "Lifecycle coverage", icon: TableProperties },
-  { id: "lineup", label: "Lineup", description: "Catalog registration", icon: GalleryHorizontalEnd },
-  { id: "evidence", label: "Evidence", description: "Measured gates", icon: FileSearch },
-  { id: "publish", label: "QA & Publish", description: "No-write projection", icon: ShieldCheck },
+  { id: "inventory", label: "Inventory", description: "23 component plates", icon: Boxes },
+  { id: "plate", label: "Component Plate", description: "Source + four boxes", icon: ScanLine },
+  { id: "candidate", label: "Candidate Review", description: "Pixels + exact QA", icon: GitCompare },
+  { id: "family-fit", label: "Family Fit", description: "Five-body placement", icon: Workflow },
+  { id: "release", label: "Release Cut", description: "Immutable snapshot", icon: FileStack },
+  { id: "sanity", label: "Sanity Projection", description: "Draft then public", icon: CloudUpload },
 ];
+
+const RELEASE_VARIANT_ALIASES: Record<string, string> = {
+  SSLV: "SHN-SL",
+  SBLK: "SHN-BLK",
+  WHT: "WHT",
+};
 
 export function ReleaseWorkbench({
   manifest,
@@ -54,7 +64,6 @@ export function ReleaseWorkbench({
   manifestSha256,
   assetUrlsByPath,
   applicatorBuckets,
-  renderView,
 }: ReleaseWorkbenchProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const state = useMemo(() => parseReleaseWorkbenchState(searchParams), [searchParams]);
@@ -64,6 +73,30 @@ export function ReleaseWorkbench({
   const setState = (nextState: ReleaseWorkbenchState) => {
     setSearchParams(serializeReleaseWorkbenchState(nextState, searchParams), { replace: true });
   };
+  const factory = useMemo(() => loadCyl9ComponentFactory(), []);
+  const rows = useMemo(() => buildComponentWorkbenchRows({
+    manifest: factory,
+    candidates: [],
+    releaseAssets: manifest.assets,
+    sanitySyncs: [],
+  }), [factory, manifest.assets]);
+  const selectedRow = rows.find((row) => row.componentKey === state.componentKey) ?? rows[0] ?? null;
+  const selectedReleaseAsset = selectedRow
+    ? manifest.assets.find((asset) => asset.slot === selectedRow.slot && (
+      asset.variantKey === selectedRow.variantKey ||
+      asset.variantKey === RELEASE_VARIANT_ALIASES[selectedRow.variantKey]
+    )) ?? null
+    : null;
+  const bodies = manifest.assets.filter((asset) => asset.slot === "body");
+
+  const view = (() => {
+    if (state.view === "inventory") return <ComponentInventoryView rows={rows} state={state} onStateChange={setState} />;
+    if (state.view === "plate") return <ComponentPlateView row={selectedRow} />;
+    if (state.view === "candidate") return <ComponentCandidateView row={selectedRow} releaseAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} />;
+    if (state.view === "family-fit") return <FamilyFitView row={selectedRow} bodies={bodies} componentAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} state={state} onStateChange={setState} />;
+    if (state.view === "release") return <ReleaseCutView rows={rows} manifest={manifest} validation={validation} manifestSha256={manifestSha256} />;
+    return <SanityProjectionView factory={factory} release={manifest} manifestSha256={manifestSha256} />;
+  })();
 
   return (
     <div className="pdw-workbench">
@@ -96,7 +129,7 @@ export function ReleaseWorkbench({
           applicatorBuckets={applicatorBuckets}
         />
         <section className="pdw-view-surface" role="tabpanel" aria-label={state.view}>
-          {renderView(state.view, state, setState)}
+          {view}
         </section>
       </div>
     </div>

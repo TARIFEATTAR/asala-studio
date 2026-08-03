@@ -107,9 +107,14 @@ function fixtureManifest(): PaperDollReleaseManifest {
   };
 }
 
-test("only the canonical CYL-9ML group opts into the release workbench", () => {
+test("each locked CYL-9ML body route opens the shared release workbench", () => {
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-amber-17-415-rollon"), true);
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-cobalt-blue-17-415-rollon"), true);
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-clear-17-415-rollon"), true);
   assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-frosted-17-415-rollon"), true);
-  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-clear-17-415-rollon"), false);
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-swirl-17-415-rollon"), true);
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-9ml-white-17-415-rollon"), false);
+  assert.equal(isCyl9ReleaseWorkbenchGroup("cylinder-3ml-clear-12mm-finemist"), false);
   assert.equal(isCyl9ReleaseWorkbenchGroup(undefined), false);
 });
 

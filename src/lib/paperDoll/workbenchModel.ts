@@ -6,6 +6,14 @@ import { resolvePaperDollAssembly } from "./releaseValidator";
 
 export const CYL9_RELEASE_WORKBENCH_SLUG = "cylinder-9ml-frosted-17-415-rollon";
 
+export const CYL9_RELEASE_WORKBENCH_SLUGS = new Set([
+  "cylinder-9ml-amber-17-415-rollon",
+  "cylinder-9ml-cobalt-blue-17-415-rollon",
+  "cylinder-9ml-clear-17-415-rollon",
+  "cylinder-9ml-frosted-17-415-rollon",
+  "cylinder-9ml-swirl-17-415-rollon",
+]);
+
 export type GeometryVerification = "geometry-locked" | "shared-mask" | "not-verified";
 
 export interface ReleaseInventorySystem {
@@ -69,7 +77,7 @@ const SYSTEM_LABELS: Record<ReleaseInventorySystem["key"], string> = {
 };
 
 export function isCyl9ReleaseWorkbenchGroup(groupSlug: string | null | undefined): boolean {
-  return groupSlug === CYL9_RELEASE_WORKBENCH_SLUG;
+  return Boolean(groupSlug && CYL9_RELEASE_WORKBENCH_SLUGS.has(groupSlug));
 }
 
 function systemForAsset(
