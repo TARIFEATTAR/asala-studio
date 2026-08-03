@@ -19,6 +19,7 @@ const fauxLeatherCap18415RecipePath = "docs/paper-doll-rig/faux-leather-cap-18-4
 const shortFlutedCap20400RecipePath = "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json";
 const shortFlutedCap18400RecipePath = "docs/paper-doll-rig/short-fluted-cap-18-400-family-recipe.json";
 const applicatorCap18400RecipePath = "docs/paper-doll-rig/applicator-cap-18-400-family-recipe.json";
+const sprayerProtectiveOvercap15415RecipePath = "docs/paper-doll-rig/sprayer-protective-overcap-15-415-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -140,6 +141,38 @@ test("15-415 standard-cap recipe preserves the verified 19 by 32 mm family", asy
     ["SSLV", "CP15-415ShnSl", "CMP-CAP-SSLV-15-415"],
   ]);
   assert.equal(recipe.mutationPolicy.remoteWritesPerformed, false);
+});
+
+test("15-415 sprayer protective overcap preserves the measured 20 by 41 mm envelope as a separate responsibility", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(
+    sprayerProtectiveOvercap15415RecipePath,
+    "utf8",
+  )));
+  assert.equal(recipe.geometryFamilyId, "overcap__15-415__fine-mist-protective__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__sprayer__15-415__01e5312a22");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 20,
+    outsideDiameterTolerance: 0.5,
+    height: 41,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [
+    variant.variantKey,
+    variant.sourceIdentity,
+    variant.graceSku,
+    variant.material,
+  ]), [
+    ["SBLK", "Spry15-415Blk", "CMP-SPR-BLK-15-415", "glossy-black"],
+    ["MGLD", "Spry15-415MattGl", "CMP-SPR-GLD-15-415", "matte-gold"],
+    ["MSLV", "Spry15-415MattSl", "CMP-SPR-SLV-15-415", "matte-silver"],
+    ["SGLD", "Spry15-415ShnGl", "CMP-SPR-SGLD-15-415", "mirror-gold"],
+    ["SSLV", "Spry15-415ShnSl", "CMP-SPR-SSLV-15-415", "mirror-silver"],
+  ]);
+  const plan = buildParametricOvercapRenderPlan(recipe);
+  assert.equal(plan.variantCount, 5);
+  assert.equal(plan.geometryLocked, false);
+  assert.equal(plan.productionPlateEligible, false);
 });
 
 test("18-415 short-cap recipe preserves the verified 21 by 19 mm family", async () => {

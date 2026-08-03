@@ -1,6 +1,6 @@
 # 15-415 sprayer source-extraction review
 
-Status: source extraction complete; geometry and production approval not claimed.
+Status: source extraction complete; dimension-calibrated authority candidates created; geometry and production approval not claimed.
 
 ## Result
 
@@ -49,6 +49,10 @@ mismatch stops the run before any derived review asset is written.
 The source composite never becomes a production plate. Production placement
 uses the physical mount axis and verified seats rather than review-centering
 coordinates.
+
+The next gate has now produced two independent exact-alpha candidate families
+and five-body fit sheets. See `SPRAYER-15-415-AUTHORITY-REVIEW.md`. The output
+remains review-only and does not change Current Release or Sanity.
 
 ## Reusable warning
 

@@ -33,7 +33,7 @@ must be reviewed by physical responsibility before production plates are counted
 | dropper | dropper :: 20-400 :: none :: Dropper | 1 | source-ready-physical-review | decomposition-audit-required |
 | pump | pump :: 18-415 :: none :: Pump | 7 | source-ready-physical-review | quarantined-responsibility-decomposition |
 | sprayer | sprayer :: 13-415 :: none :: Spray | 1 | source-ready-physical-review | decomposition-audit-required |
-| sprayer | sprayer :: 15-415 :: Fine Mist Sprayer :: Spray | 5 | source-ready-physical-review | source-extraction-review-created-authority-required |
+| sprayer | sprayer :: 15-415 :: Fine Mist Sprayer :: Spray | 5 | source-ready-physical-review | dimension-calibrated-authority-review-created-named-approval-required |
 | sprayer | sprayer :: 18-415 :: none :: Spray | 6 | source-ready-physical-review | decomposition-audit-required |
 
 ## Counting rule
