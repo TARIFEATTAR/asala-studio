@@ -8,6 +8,10 @@
     "height": 28.5,
     "verified": false
   },
+  "geometryCalibration": {
+    "heightScale": 0.98825,
+    "derivedFrom": "photographic-authority-alpha-v1"
+  },
   "render": {
     "widthPx": 1400,
     "heightPx": 2050,

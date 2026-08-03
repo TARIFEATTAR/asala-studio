@@ -52,6 +52,10 @@ const Cyl9CapFamilyRecipeSchema = z.object({
     height: z.number().positive(),
     verified: z.boolean(),
   }),
+  geometryCalibration: z.object({
+    heightScale: z.number().gt(0.95).lt(1.05),
+    derivedFrom: z.literal("photographic-authority-alpha-v1"),
+  }),
   render: z.object({
     widthPx: z.literal(1400),
     heightPx: z.literal(2050),
