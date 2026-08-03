@@ -18,6 +18,13 @@ import {
   compareAlphaSilhouettes,
   type AlphaSilhouetteComparison,
 } from "../../src/lib/paperDoll/closureMaterialPilot";
+import {
+  buildPlacedComponentLayer,
+  clampToAuthorityMask,
+  composeComponentAssembly,
+  inspectAuthorityMask as inspectGenericAuthorityMask,
+  normalizeMaterialIntoAuthority,
+} from "../../src/lib/paperDoll/componentPlateImage.node";
 
 const RECIPE_PATH = "docs/paper-doll-rig/cyl9-cap-family-recipe.json";
 const BLENDER_SCRIPT_PATH = "scripts/paper-doll/render_cyl9_cap_family.py";
@@ -53,6 +60,24 @@ export interface AuthorityDifference {
   maskAspectRatio: number;
   topArcObservation: string;
   differencePng: Buffer;
+}
+
+export interface MaterialPixelBounds {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export interface GeometryLockedMaterialPlate {
+  png: Buffer;
+  authorityBounds: AuthorityMaskInspection["bounds"];
+  materialBounds: MaterialPixelBounds;
+  qa: {
+    geometryLocked: boolean;
+    minIoU: number;
+    mismatchedPixels: number;
+  };
 }
 
 export function validateCompleteCapFamilyManifest(
@@ -104,80 +129,53 @@ function alphaBounds(image: DecodedRgba) {
 }
 
 export async function inspectAuthorityMask(maskPng: Buffer): Promise<AuthorityMaskInspection> {
-  const image = await decodeRgba(maskPng);
-  const occupied = new Uint8Array(image.width * image.height);
-  let occupiedPixels = 0;
-  let touchesFrame = false;
-
-  for (let y = 0; y < image.height; y++) {
-    for (let x = 0; x < image.width; x++) {
-      const index = y * image.width + x;
-      if (image.data[index * 4 + 3] === 0) continue;
-      occupied[index] = 1;
-      occupiedPixels++;
-      if (x === 0 || y === 0 || x === image.width - 1 || y === image.height - 1) touchesFrame = true;
-    }
-  }
-  if (occupiedPixels === 0) throw new Error("Authority mask is empty.");
-  if (touchesFrame) throw new Error("Authority mask touches the image frame.");
-
-  let componentCount = 0;
-  const visited = new Uint8Array(occupied.length);
-  const queue = new Int32Array(occupied.length);
-  for (let start = 0; start < occupied.length; start++) {
-    if (!occupied[start] || visited[start]) continue;
-    componentCount++;
-    let head = 0;
-    let tail = 0;
-    queue[tail++] = start;
-    visited[start] = 1;
-    while (head < tail) {
-      const current = queue[head++];
-      const x = current % image.width;
-      const y = Math.floor(current / image.width);
-      const neighbors = [
-        x > 0 ? current - 1 : -1,
-        x + 1 < image.width ? current + 1 : -1,
-        y > 0 ? current - image.width : -1,
-        y + 1 < image.height ? current + image.width : -1,
-      ];
-      for (const neighbor of neighbors) {
-        if (neighbor < 0 || !occupied[neighbor] || visited[neighbor]) continue;
-        visited[neighbor] = 1;
-        queue[tail++] = neighbor;
-      }
-    }
-  }
-  if (componentCount !== 1) {
-    throw new Error(`Authority mask must contain exactly 1 connected component; measured ${componentCount}.`);
-  }
-
-  const bounds = alphaBounds(image);
-  if (!bounds) throw new Error("Authority mask is empty.");
-  return { width: image.width, height: image.height, occupiedPixels, componentCount, touchesFrame, bounds };
+  const inspection = await inspectGenericAuthorityMask(maskPng, { expectedRegions: 1 });
+  const { left, top, width, height } = inspection.authorityBoundsPx;
+  return {
+    width: inspection.width,
+    height: inspection.height,
+    occupiedPixels: inspection.occupiedPixels,
+    componentCount: inspection.componentCount,
+    touchesFrame: inspection.touchesFrame,
+    bounds: {
+      left,
+      top,
+      right: left + width - 1,
+      bottom: top + height - 1,
+      width,
+      height,
+    },
+  };
 }
 
 export async function clampRenderToAuthorityMask(renderPng: Buffer, maskPng: Buffer): Promise<Buffer> {
-  const [render, mask, inspection] = await Promise.all([
-    decodeRgba(renderPng),
-    decodeRgba(maskPng),
-    inspectAuthorityMask(maskPng),
-  ]);
-  if (render.width !== mask.width || render.height !== mask.height) {
-    throw new Error(`Render and authority mask dimensions differ: ${render.width}×${render.height} vs ${mask.width}×${mask.height}.`);
-  }
+  return clampToAuthorityMask(renderPng, maskPng);
+}
 
-  const output = Buffer.alloc(render.data.length);
-  for (let index = 0; index < render.width * render.height; index++) {
-    if (mask.data[index * 4 + 3] === 0) continue;
-    output[index * 4] = render.data[index * 4];
-    output[index * 4 + 1] = render.data[index * 4 + 1];
-    output[index * 4 + 2] = render.data[index * 4 + 2];
-    output[index * 4 + 3] = 255;
-  }
-
-  if (inspection.occupiedPixels === 0) throw new Error("Authority mask is empty.");
-  return sharp(output, { raw: { width: render.width, height: render.height, channels: 4 } }).png().toBuffer();
+export async function buildGeometryLockedMaterialPlate(input: {
+  materialPng: Buffer;
+  authorityMaskPng: Buffer;
+  materialBounds: MaterialPixelBounds;
+}): Promise<GeometryLockedMaterialPlate> {
+  const result = await normalizeMaterialIntoAuthority({
+    materialPng: input.materialPng,
+    authorityMaskPng: input.authorityMaskPng,
+    sourceBoundsPx: input.materialBounds,
+  });
+  const { left, top, width, height } = result.authorityBoundsPx;
+  return {
+    png: result.png,
+    authorityBounds: {
+      left,
+      top,
+      right: left + width - 1,
+      bottom: top + height - 1,
+      width,
+      height,
+    },
+    materialBounds: input.materialBounds,
+    qa: result.qa,
+  };
 }
 
 export async function compareClampedVariantAlpha(
@@ -281,7 +279,7 @@ export async function measureAuthorityDifference(
   };
 }
 
-async function buildPlacedCapLayer(
+export async function buildPlacedCapLayer(
   capPng: Buffer,
   recipe: ReturnType<typeof parseCyl9CapFamilyRecipe>,
 ): Promise<{ layer: Buffer; placement: ReturnType<typeof solveCyl9CapPlacement> }> {
@@ -289,23 +287,22 @@ async function buildPlacedCapLayer(
   const bounds = alphaBounds(cap);
   if (!bounds) throw new Error("Clamped cap render has no alpha foreground.");
   const placement = solveCyl9CapPlacement(bounds.width, bounds.height, recipe);
-  const trimmed = await sharp(capPng)
-    .extract({ left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height })
-    .resize({ width: placement.width, height: placement.height, fit: "fill" })
-    .png()
-    .toBuffer();
-  const layer = await sharp({
-    create: {
-      width: recipe.placement.canvasWidthPx,
-      height: recipe.placement.canvasHeightPx,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+  const generic = await buildPlacedComponentLayer({
+    componentPng: capPng,
+    canvas: {
+      widthPx: recipe.placement.canvasWidthPx,
+      heightPx: recipe.placement.canvasHeightPx,
     },
-  }).composite([{ input: trimmed, left: placement.left, top: placement.top }]).png().toBuffer();
-  return { layer, placement };
+    transform: {
+      widthPx: recipe.placement.widthPx,
+      centerXPx: recipe.placement.centerX,
+      seatYPx: recipe.placement.bottomY,
+    },
+  });
+  return { layer: generic.layerPng, placement };
 }
 
-async function placeCapOnBody(
+export async function placeCapOnBody(
   bodyPath: string,
   capPng: Buffer,
   recipe: ReturnType<typeof parseCyl9CapFamilyRecipe>,
@@ -316,15 +313,15 @@ async function placeCapOnBody(
     throw new Error(`${bodyPath} is not a ${recipe.placement.canvasWidthPx}×${recipe.placement.canvasHeightPx} locked body plate.`);
   }
   return {
-    composite: await sharp(bodyPath)
-      .composite([{ input: placed.layer, left: 0, top: 0 }])
-      .png()
-      .toBuffer(),
+    composite: await composeComponentAssembly({
+      bodyPng: await readFile(bodyPath),
+      layerPng: placed.layer,
+    }),
     ...placed,
   };
 }
 
-async function fiveBodyLineup(composites: Array<{ name: string; png: Buffer }>): Promise<Buffer> {
+export async function fiveBodyLineup(composites: Array<{ name: string; png: Buffer }>): Promise<Buffer> {
   const tileWidth = 400;
   const imageHeight = 440;
   const labelHeight = 46;
