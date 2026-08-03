@@ -13,7 +13,7 @@
     },
     "sourceReadyLaneCount": 15,
     "sourceIncompleteLaneCount": 3,
-    "reviewedDecisionLaneCount": 4,
+    "reviewedDecisionLaneCount": 6,
     "finalReusablePlateDelta": null
   },
   "items": [
@@ -31,8 +31,15 @@
       ],
       "sourceIdentityCount": 3,
       "sourceStatus": "local-authorities-require-reconciliation",
-      "auditStatus": "decomposition-audit-required",
-      "evidencePaths": [],
+      "auditStatus": "shared-exterior-geometry-locked-complete-assembly-gates-remain",
+      "evidencePaths": [
+        "docs/paper-doll-rig/pump-17-415-component-kit-decomposition.json",
+        "docs/paper-doll-rig/DISPENSER-17-415-AUTHORITY-REVIEW.md",
+        "outputs/paper-doll-component-kit-reviews/17-415-pump/source-extraction-v1/manifest.json",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/manifest.json",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/pump-materials.png",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/pump-five-body-family-fit.png"
+      ],
       "suspectedResponsibilities": [
         "exterior-dispenser",
         "possible-secondary-overcap",
@@ -46,7 +53,7 @@
       ],
       "geometryClaim": "none",
       "productionPlateDelta": null,
-      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+      "nextGate": "Verify the pump dip-tube length and approve the independent translucent overcap in assembled context. Then cut the approved exterior plus completed body-contextual responsibilities into a named release."
     },
     {
       "reviewGroupKey": "geometry-review__sprayer__17-415__91195a1a8e",
@@ -65,8 +72,15 @@
       ],
       "sourceIdentityCount": 6,
       "sourceStatus": "local-authorities-require-reconciliation",
-      "auditStatus": "decomposition-audit-required",
-      "evidencePaths": [],
+      "auditStatus": "shared-exterior-geometry-locked-complete-assembly-gates-remain",
+      "evidencePaths": [
+        "docs/paper-doll-rig/sprayer-17-415-component-kit-decomposition.json",
+        "docs/paper-doll-rig/DISPENSER-17-415-AUTHORITY-REVIEW.md",
+        "outputs/paper-doll-component-kit-reviews/17-415-sprayer/source-extraction-v1/manifest.json",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/manifest.json",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/sprayer-materials.png",
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/sprayer-five-body-family-fit.png"
+      ],
       "suspectedResponsibilities": [
         "exterior-dispenser",
         "possible-secondary-overcap",
@@ -80,7 +94,7 @@
       ],
       "geometryClaim": "none",
       "productionPlateDelta": null,
-      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+      "nextGate": "Verify the body-contextual tube/plug assembly and approve the independent translucent sprayer overcap in assembled context. Then cut the approved exterior plus completed responsibilities into a named release."
     },
     {
       "reviewGroupKey": "geometry-review__dropper__17-415__a38fb41beb",
@@ -711,6 +725,6 @@
     "componentGeometryReviewGroupsPath": "docs/paper-doll-rig/component-geometry-review-groups.json",
     "componentGeometryReviewGroupsSha256": "72a6f3828a320d5a578c89623d2b97d48e00e00ebcf28cb5c9c462230b2e0c24",
     "componentPhysicalReviewDecisionsPath": "docs/paper-doll-rig/component-physical-review-decisions.json",
-    "componentPhysicalReviewDecisionsSha256": "81e87961a174dcc92d352f3dfcc8a02924f21c79b13c207498d301bf2b67c3e2"
+    "componentPhysicalReviewDecisionsSha256": "38534f2085814887e10d5638c516e63e8e2f5adb0fbdfd85b6e482afaca0dc85"
   }
 }

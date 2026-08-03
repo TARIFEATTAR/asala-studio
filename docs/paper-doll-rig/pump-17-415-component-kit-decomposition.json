@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kitId": "pump__17-415__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__pump__17-415__d4ca90a05c",
+  "sourceCompositeProductionEligible": false,
+  "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "sources": [
+    {
+      "sourceId": "psd-pump-matte-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "17. Ltn17-415MattSl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/14. 17-415 Lotion/17. Ltn17-415MattSl.psd",
+      "sha256": "150f2581054de1b5b851b04e4b0db829a64ab8aa59f98bfed3ad85baadbc7867",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-pump-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "18. Ltn17-415Gl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/14. 17-415 Lotion/18. Ltn17-415Gl.psd",
+      "sha256": "aa3ab15f1144714ed839ee606da2b719125b8917a3c10da0677bf705ffdf4426",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-pump-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "19. Ltn17-415Blk.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/14. 17-415 Lotion/19. Ltn17-415Blk.psd",
+      "sha256": "7df2d9f36f7e753b433fa85561346498e1324eec33a5f42d9338fdee3ff108d6",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "existing-lotion-overcap",
+      "sourceType": "existing-paper-doll-asset",
+      "originalFilename": "OverCap17-415-Lotion-Translucent.png",
+      "repositoryRelativePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png",
+      "sha256": "1b5980d6e673e9defe20c16721c694dc5c3ee99614dcf128d0c11f83a5ed05ce",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-pump-reference",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "Ltn17-415Gl.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/Ltn17-415Gl.gif",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "pump-head-and-collar",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "psd-pump-matte-silver", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 14", "Layer 12"] },
+        { "sourceId": "psd-pump-shiny-gold", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 13", "Layer 12"] },
+        { "sourceId": "psd-pump-black", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 11", "Layer 12"] }
+      ]
+    },
+    {
+      "partId": "pump-protective-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "existing-lotion-overcap", "method": "reviewed-selection-mask" }
+      ]
+    },
+    {
+      "partId": "pump-dip-tube",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "catalog-pump-reference", "method": "reviewed-selection-mask" }
+      ]
+    }
+  ]
+}

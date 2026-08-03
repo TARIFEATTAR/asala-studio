@@ -10,13 +10,13 @@ must be reviewed by physical responsibility before production plates are counted
 - Source identities represented: 83
 - Source-ready physical-review lanes: 15
 - Source-incomplete lanes: 3
-- Lanes with an explicit physical-review decision: 4
+- Lanes with an explicit physical-review decision: 6
 - Final reusable-plate delta: unresolved until responsibility review
 
 | Lane type | Descriptor evidence | Identities | Source status | Audit status |
 |---|---|---:|---|---|
-| pump | pump :: 17-415 :: none :: Pump | 3 | local-authorities-require-reconciliation | decomposition-audit-required |
-| sprayer | sprayer :: 17-415 :: Fine Mist Sprayer :: Spray | 6 | local-authorities-require-reconciliation | decomposition-audit-required |
+| pump | pump :: 17-415 :: none :: Pump | 3 | local-authorities-require-reconciliation | shared-exterior-geometry-locked-complete-assembly-gates-remain |
+| sprayer | sprayer :: 17-415 :: Fine Mist Sprayer :: Spray | 6 | local-authorities-require-reconciliation | shared-exterior-geometry-locked-complete-assembly-gates-remain |
 | dropper | dropper :: 17-415 :: Dropper :: Dropper | 1 | source-incomplete | source-evidence-required-before-decomposition |
 | sprayer | sprayer :: 13-415 :: Fine Mist Sprayer :: Spray | 11 | source-incomplete | source-evidence-required-before-decomposition |
 | sprayer | sprayer :: 18-415 :: Fine Mist Sprayer :: Spray | 2 | source-incomplete | source-evidence-required-before-decomposition |

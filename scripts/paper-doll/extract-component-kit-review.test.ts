@@ -89,6 +89,21 @@ async function cutoutFixture(): Promise<Buffer> {
   return sharp(pixels, { raw: { width: 8, height: 6, channels: 4 } }).png().toBuffer();
 }
 
+async function solidFixture(
+  width: number,
+  height: number,
+  color: { r: number; g: number; b: number },
+): Promise<Buffer> {
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { ...color, alpha: 1 },
+    },
+  }).png().toBuffer();
+}
+
 test("centers non-transparent bounds without resizing the source pixels", async () => {
   const result = await centerCutoutOnCanonicalCanvas(await cutoutFixture(), 20, 24);
   const metadata = await sharp(result.canvasPng).metadata();
@@ -115,6 +130,71 @@ test("plans every Photoshop selector as review-only responsibility output", () =
   assert.ok(jobs.every((job) => job.productionEligible === false));
   assert.ok(jobs.every((job) => job.geometryLocked === false));
   assert.equal(jobs[0].sourcePath, "/archive/sprayers/sprayer.psd");
+});
+
+test("plans a multi-scene Photoshop responsibility as one review candidate", () => {
+  const sourceBytes = Buffer.from("layered Photoshop fixture");
+  const recipe = fixtureRecipe(sha256(sourceBytes));
+  recipe.parts[0].sourceSelectors = [{
+    sourceId: "layered-source",
+    method: "psd-layer-composite" as const,
+    sceneIndices: [2, 3, 4],
+    layerNames: ["Actuator", "Collar", "Nozzle"],
+  }];
+
+  const jobs = planComponentKitReviewExtraction(recipe, "/archive", "/review");
+
+  assert.equal(jobs.length, 3);
+  assert.deepEqual(jobs[0].sceneIndices, [2, 3, 4]);
+  assert.deepEqual(jobs[0].layerNames, ["Actuator", "Collar", "Nozzle"]);
+  assert.match(jobs[0].cutoutPath, /scene-2-3-4__cutout\.png$/);
+});
+
+test("composites positioned Photoshop scenes before centering one responsibility", async () => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "component-kit-composite-"));
+  const archiveRoot = path.join(temporary, "archive");
+  const outputRoot = path.join(temporary, "output");
+  const sourceBytes = Buffer.from("layered Photoshop fixture");
+  await mkdir(path.join(archiveRoot, "sprayers"), { recursive: true });
+  await writeFile(path.join(archiveRoot, "sprayers", "sprayer.psd"), sourceBytes);
+  const recipe = fixtureRecipe(sha256(sourceBytes));
+  recipe.parts[0].sourceSelectors = [{
+    sourceId: "layered-source",
+    method: "psd-layer-composite" as const,
+    sceneIndices: [2, 3],
+    layerNames: ["Actuator", "Collar"],
+  }];
+
+  const result = await extractComponentKitReview({
+    recipe,
+    archiveRoot,
+    outputRoot,
+    decodePsdScene: async (_sourcePath, sceneIndex) => (
+      sceneIndex === 2
+        ? solidFixture(4, 3, { r: 220, g: 10, b: 10 })
+        : solidFixture(6, 2, { r: 10, g: 20, b: 220 })
+    ),
+    identifyPsdScene: async (_sourcePath, sceneIndex) => (
+      sceneIndex === 2
+        ? { left: 10, top: 5, width: 4, height: 3 }
+        : { left: 9, top: 8, width: 6, height: 2 }
+    ),
+    generatedAt: "2026-08-03T12:00:00.000Z",
+  });
+
+  assert.deepEqual(result.assets[0].sourcePageBounds, {
+    left: 9,
+    top: 5,
+    width: 6,
+    height: 5,
+  });
+  assert.deepEqual(result.assets[0].sourceNonTransparentBounds, {
+    left: 0,
+    top: 0,
+    width: 6,
+    height: 5,
+  });
+  assert.deepEqual(result.assets[0].sceneIndices, [2, 3]);
 });
 
 test("materializes SHA-verified cutouts and a review-only manifest", async () => {

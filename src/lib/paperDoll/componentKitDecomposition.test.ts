@@ -84,6 +84,71 @@ test("preserves immutable Photoshop provenance and part-level extraction selecto
   });
 });
 
+test("records an existing paper-doll plate as review evidence without re-extracting it", () => {
+  const existingAsset = structuredClone(sprayerKit) as Record<string, unknown> & {
+    sources: Array<Record<string, unknown>>;
+    parts: Array<Record<string, unknown> & { sourceSelectors: Array<Record<string, unknown>> }>;
+  };
+  existingAsset.sources.push({
+    sourceId: "existing-overcap",
+    sourceType: "existing-paper-doll-asset",
+    originalFilename: "OverCap17-415-Spray-Translucent.png",
+    repositoryRelativePath: "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
+    sha256: "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba",
+    productionEligible: false,
+  });
+  existingAsset.parts[1].sourceSelectors = [{
+    sourceId: "existing-overcap",
+    method: "reviewed-selection-mask",
+  }];
+
+  const parsed = parseComponentKitDecomposition(existingAsset);
+
+  assert.equal(parsed.sources[2].sourceType, "existing-paper-doll-asset");
+  assert.equal(
+    parsed.sources[2].repositoryRelativePath,
+    "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
+  );
+});
+
+test("accepts one reusable responsibility assembled from multiple positioned Photoshop scenes", () => {
+  const compound = structuredClone(sprayerKit) as Record<string, unknown> & {
+    parts: Array<Record<string, unknown>>;
+  };
+  compound.parts[0].sourceSelectors = [{
+    sourceId: "psd-head-black",
+    method: "psd-layer-composite",
+    sceneIndices: [2, 3, 4],
+    layerNames: ["Actuator", "Decorative collar", "Nozzle detail"],
+  }];
+
+  const parsed = parseComponentKitDecomposition(compound);
+
+  assert.deepEqual(parsed.parts[0].sourceSelectors[0], {
+    sourceId: "psd-head-black",
+    method: "psd-layer-composite",
+    sceneIndices: [2, 3, 4],
+    layerNames: ["Actuator", "Decorative collar", "Nozzle detail"],
+  });
+});
+
+test("rejects an ambiguous Photoshop scene composite", () => {
+  const invalid = structuredClone(sprayerKit) as Record<string, unknown> & {
+    parts: Array<Record<string, unknown>>;
+  };
+  invalid.parts[0].sourceSelectors = [{
+    sourceId: "psd-head-black",
+    method: "psd-layer-composite",
+    sceneIndices: [2, 2],
+    layerNames: ["Actuator"],
+  }];
+
+  assert.throws(
+    () => parseComponentKitDecomposition(invalid),
+    /Photoshop scene composites require unique scenes and one layer name per scene/,
+  );
+});
+
 test("decomposes a sprayer kit into two reusable plates and one body-contextual responsibility", () => {
   const plan = buildComponentKitDecompositionPlan(sprayerKit);
 
@@ -147,4 +212,21 @@ test("the 15-415 sprayer recipe records the layered head and assembly sources wi
   assert.equal(recipe.parts.find((part) => part.partId === "dip-tube")?.sourceSelectors.length, 5);
   assert.deepEqual(plan.reusablePlatePartIds, ["sprayer-head", "protective-overcap"]);
   assert.deepEqual(plan.bodyContextualPartIds, ["dip-tube"]);
+});
+
+test("the 17-415 sprayer and pump stay distinct while each preserves its compound responsibilities", async () => {
+  const [sprayer, pump] = await Promise.all([
+    readFile(path.resolve("docs/paper-doll-rig/sprayer-17-415-component-kit-decomposition.json"), "utf8"),
+    readFile(path.resolve("docs/paper-doll-rig/pump-17-415-component-kit-decomposition.json"), "utf8"),
+  ]).then((values) => values.map((value) => parseComponentKitDecomposition(JSON.parse(value))));
+
+  assert.notEqual(sprayer.kitId, pump.kitId);
+  assert.equal(sprayer.parts[0].sourceSelectors.length, 6);
+  assert.equal(pump.parts[0].sourceSelectors.length, 3);
+  assert.ok(sprayer.parts[0].sourceSelectors.every((selector) => selector.method === "psd-layer-composite"));
+  assert.ok(pump.parts[0].sourceSelectors.every((selector) => selector.method === "psd-layer-composite"));
+  assert.equal(sprayer.parts[1].partId, "sprayer-protective-overcap");
+  assert.equal(pump.parts[1].partId, "pump-protective-overcap");
+  assert.equal(sprayer.parts[2].outputPolicy, "body-contextual-weld");
+  assert.equal(pump.parts[2].outputPolicy, "body-contextual-weld");
 });

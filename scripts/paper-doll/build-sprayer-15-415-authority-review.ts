@@ -100,6 +100,58 @@ async function alphaBytes(png: Buffer): Promise<Buffer> {
   return sharp(png).ensureAlpha().extractChannel("alpha").raw().toBuffer();
 }
 
+export async function bleedMaterialColorsUnderTransparentPixels(
+  png: Buffer,
+  minimumSeedAlpha = 128,
+): Promise<Buffer> {
+  if (!Number.isInteger(minimumSeedAlpha) || minimumSeedAlpha < 1 || minimumSeedAlpha > 255) {
+    throw new Error("Material bleed seed alpha must be an integer from 1 through 255.");
+  }
+  const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const pixelCount = info.width * info.height;
+  const sourceIndex = new Int32Array(pixelCount);
+  sourceIndex.fill(-1);
+  const queue = new Int32Array(pixelCount);
+  let readIndex = 0;
+  let writeIndex = 0;
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += 1) {
+    // Exported Photoshop layers can contain nearly-transparent RGB pollution.
+    // Only materially visible pixels may seed the texture dilation; the exact
+    // authority alpha is restored after this operation.
+    if (data[pixelIndex * info.channels + 3] < minimumSeedAlpha) continue;
+    sourceIndex[pixelIndex] = pixelIndex;
+    queue[writeIndex++] = pixelIndex;
+  }
+  if (writeIndex === 0) throw new Error("Cannot bleed material colors from an empty source.");
+  const offsets = [[1, 0], [-1, 0], [0, 1], [0, -1]] as const;
+  while (readIndex < writeIndex) {
+    const pixelIndex = queue[readIndex++];
+    const y = Math.floor(pixelIndex / info.width);
+    const x = pixelIndex - y * info.width;
+    for (const [dx, dy] of offsets) {
+      const nextX = x + dx;
+      const nextY = y + dy;
+      if (nextX < 0 || nextY < 0 || nextX >= info.width || nextY >= info.height) continue;
+      const nextIndex = nextY * info.width + nextX;
+      if (sourceIndex[nextIndex] !== -1) continue;
+      sourceIndex[nextIndex] = sourceIndex[pixelIndex];
+      queue[writeIndex++] = nextIndex;
+    }
+  }
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex += 1) {
+    const nearest = sourceIndex[pixelIndex];
+    const targetOffset = pixelIndex * info.channels;
+    const sourceOffset = nearest * info.channels;
+    data[targetOffset] = data[sourceOffset];
+    data[targetOffset + 1] = data[sourceOffset + 1];
+    data[targetOffset + 2] = data[sourceOffset + 2];
+    data[targetOffset + 3] = 255;
+  }
+  return sharp(data, {
+    raw: { width: info.width, height: info.height, channels: info.channels },
+  }).png().toBuffer();
+}
+
 export async function cleanCalibratedDetachedAlphaIslands(input: {
   sourcePng: Buffer;
   calibration: DetachedAlphaIslandCalibration;
@@ -178,12 +230,14 @@ export async function buildCalibratedAuthorityMask(input: {
   seatYPx: number;
   allowedHeightPx: { minimum: number; maximum: number };
   sourceAlphaCleanup?: DetachedAlphaIslandCalibration;
+  resizedAlphaCleanup?: DetachedAlphaIslandCalibration;
 }): Promise<{
   maskPng: Buffer;
   sourceBoundsPx: PixelBounds;
   authorityBoundsPx: PixelBounds;
   uniformScale: number;
   sourceAlphaCleanupReport: DetachedAlphaIslandReport | null;
+  resizedAlphaCleanupReport: DetachedAlphaIslandReport | null;
 }> {
   const cleaned = input.sourceAlphaCleanup
     ? await cleanCalibratedDetachedAlphaIslands({
@@ -196,7 +250,7 @@ export async function buildCalibratedAuthorityMask(input: {
     throw new Error("Target physical width must be a positive integer.");
   }
   const sourceCrop = await sharp(cleaned.png).extract(sourceBoundsPx).png().toBuffer();
-  const resized = await sharp(sourceCrop)
+  const resizedSource = await sharp(sourceCrop)
     // Lanczos3 rings around high-contrast alpha edges and produced detached
     // 1–20px islands on the real Blender mask. Lanczos2 preserves the same
     // antialiased silhouette while keeping the procedural mask connected.
@@ -204,6 +258,13 @@ export async function buildCalibratedAuthorityMask(input: {
     .ensureAlpha()
     .png()
     .toBuffer();
+  const cleanedResized = input.resizedAlphaCleanup
+    ? await cleanCalibratedDetachedAlphaIslands({
+      sourcePng: resizedSource,
+      calibration: input.resizedAlphaCleanup,
+    })
+    : { png: resizedSource, report: null };
+  const resized = cleanedResized.png;
   const resizedMetadata = await sharp(resized).metadata();
   const resizedHeight = resizedMetadata.height ?? 0;
   if (resizedHeight < input.allowedHeightPx.minimum || resizedHeight > input.allowedHeightPx.maximum) {
@@ -213,7 +274,6 @@ export async function buildCalibratedAuthorityMask(input: {
   }
   const left = Math.round(input.centerXPx - input.targetWidthPx / 2);
   const top = input.seatYPx - resizedHeight;
-  const authorityBoundsPx = { left, top, width: input.targetWidthPx, height: resizedHeight };
   if (
     left < 0
     || top < 0
@@ -246,6 +306,7 @@ export async function buildCalibratedAuthorityMask(input: {
     authorityBoundsPx: inspection.authorityBoundsPx,
     uniformScale: input.targetWidthPx / sourceBoundsPx.width,
     sourceAlphaCleanupReport: cleaned.report,
+    resizedAlphaCleanupReport: cleanedResized.report,
   };
 }
 
@@ -263,12 +324,13 @@ export async function normalizeSourceMaterialToAuthority(input: {
     inspectAuthorityMask(input.authorityMaskPng, { expectedRegions: 1 }),
   ]);
   const crop = await sharp(input.sourcePng).extract(sourceBoundsPx).png().toBuffer();
-  const material = await sharp(crop).resize({
+  const resizedMaterial = await sharp(crop).resize({
     width: inspection.authorityBoundsPx.width,
     height: inspection.authorityBoundsPx.height,
     fit: "cover",
     position: "centre",
   }).ensureAlpha().png().toBuffer();
+  const material = await bleedMaterialColorsUnderTransparentPixels(resizedMaterial);
   const materialCanvas = await sharp({
     create: {
       width: inspection.width,

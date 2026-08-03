@@ -10,6 +10,7 @@ import sharp from "sharp";
 import {
   buildCalibratedAuthorityMask,
   buildSprayerAuthorityReview,
+  bleedMaterialColorsUnderTransparentPixels,
   cleanCalibratedDetachedAlphaIslands,
   normalizeSourceMaterialToAuthority,
 } from "./build-sprayer-15-415-authority-review";
@@ -60,6 +61,25 @@ test("calibrates a source silhouette uniformly to the physical width and mount s
   assert.equal(authority.uniformScale, 2);
 });
 
+test("can enforce a calibrated topology contract after alpha resampling", async () => {
+  const authority = await buildCalibratedAuthorityMask({
+    sourcePng: await rectanglePng(12, 22, 1),
+    canvas: { widthPx: 100, heightPx: 120 },
+    targetWidthPx: 20,
+    centerXPx: 50,
+    seatYPx: 90,
+    allowedHeightPx: { minimum: 39, maximum: 45 },
+    resizedAlphaCleanup: {
+      expectedSourceComponents: 1,
+      maxDiscardedComponentPixels: 0,
+      maxDiscardedTotalPixels: 0,
+    },
+  });
+
+  assert.equal(authority.resizedAlphaCleanupReport?.measuredSourceComponents, 1);
+  assert.equal(authority.resizedAlphaCleanupReport?.discardedTotalPixels, 0);
+});
+
 test("normalizes source material without changing the authority alpha", async () => {
   const authority = await buildCalibratedAuthorityMask({
     sourcePng: await rectanglePng(12, 22, 1),
@@ -77,6 +97,36 @@ test("normalizes source material without changing the authority alpha", async ()
   assert.equal(candidate.qa.mismatchedPixels, 0);
   assert.equal(candidate.qa.geometryLocked, true);
   assert.deepEqual(candidate.authorityBoundsPx, authority.authorityBoundsPx);
+});
+
+test("bleeds the nearest legitimate material color under transparent edge pixels", async () => {
+  const source = await sharp({
+    create: { width: 3, height: 3, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  }).composite([{
+    input: Buffer.from('<svg width="3" height="3" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="1" height="1" fill="#c86432"/></svg>'),
+  }]).png().toBuffer();
+
+  const bled = await bleedMaterialColorsUnderTransparentPixels(source);
+  const { data, info } = await sharp(bled).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+
+  for (let index = 0; index < info.width * info.height; index += 1) {
+    assert.deepEqual(Array.from(data.subarray(index * 4, index * 4 + 4)), [200, 100, 50, 255]);
+  }
+});
+
+test("does not let nearly-transparent Photoshop pollution seed material bleed", async () => {
+  const source = await sharp({
+    create: { width: 5, height: 1, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  }).composite([
+    { input: Buffer.from('<svg width="5" height="1" xmlns="http://www.w3.org/2000/svg"><rect x="1" width="1" height="1" fill="#c86432"/><rect x="4" width="1" height="1" fill="#ffffff" fill-opacity="0.12"/></svg>') },
+  ]).png().toBuffer();
+
+  const bled = await bleedMaterialColorsUnderTransparentPixels(source);
+  const { data, info } = await sharp(bled).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+
+  for (let index = 0; index < info.width * info.height; index += 1) {
+    assert.deepEqual(Array.from(data.subarray(index * 4, index * 4 + 4)), [200, 100, 50, 255]);
+  }
 });
 
 test("removes only source-calibrated detached alpha islands and records the measurement", async () => {

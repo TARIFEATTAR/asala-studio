@@ -43,6 +43,9 @@ test("preserves source readiness and reviewed decomposition evidence as separate
   const pump17415 = queue.items.find((item) => (
     item.reviewGroupKey === "geometry-review__pump__17-415__d4ca90a05c"
   ));
+  const sprayer17415 = queue.items.find((item) => (
+    item.reviewGroupKey === "geometry-review__sprayer__17-415__91195a1a8e"
+  ));
 
   assert.equal(sprayer15415?.auditStatus, "dimension-calibrated-authority-review-created-named-approval-required");
   assert.equal(sprayer15415?.sourceStatus, "source-ready-physical-review");
@@ -52,8 +55,12 @@ test("preserves source readiness and reviewed decomposition evidence as separate
   assert.ok(sprayer15415?.evidencePaths.some((value) => value.endsWith(
     "SPRAYER-15-415-AUTHORITY-REVIEW.md",
   )));
-  assert.equal(pump17415?.auditStatus, "decomposition-audit-required");
+  assert.equal(pump17415?.auditStatus, "shared-exterior-geometry-locked-complete-assembly-gates-remain");
   assert.equal(pump17415?.sourceStatus, "local-authorities-require-reconciliation");
+  assert.equal(sprayer17415?.auditStatus, "shared-exterior-geometry-locked-complete-assembly-gates-remain");
+  assert.ok(sprayer17415?.evidencePaths.some((value) => value.endsWith(
+    "DISPENSER-17-415-AUTHORITY-REVIEW.md",
+  )));
   assert.equal(queue.mutationPolicy.currentReleaseChanged, false);
   assert.equal(queue.mutationPolicy.sanityChanged, false);
 });
