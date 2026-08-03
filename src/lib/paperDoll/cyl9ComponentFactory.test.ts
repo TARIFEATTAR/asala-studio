@@ -84,12 +84,19 @@ test("the five body hashes remain locked and the cap calibration stays inset", (
   assert.equal(capPlacement.seatYPx, 1002);
 });
 
-test("every component preserves its real source filename and unresolved authority state", () => {
+test("every component preserves its real source filename and calibrated authority evidence", () => {
   const manifest = loadCyl9ComponentFactory();
 
   assert.ok(manifest.components.every(({ source }) => source.originalFilename.endsWith(".png")));
   assert.equal(new Set(manifest.components.map(({ source }) => source.originalFilename)).size, 23);
   assert.ok(manifest.components.every(({ authorityStatus, authority }) => (
-    authorityStatus === "missing" && authority === null
+    authorityStatus === "approved" &&
+    authority !== null &&
+    authority.expectedRegions === 1 &&
+    authority.maskWidthPx === 2080 &&
+    authority.maskHeightPx === 2288
   )));
+  assert.equal(new Set(manifest.components.map(({ geometryFamilyId }) => geometryFamilyId)).size, 13);
+  assert.ok(new Set(manifest.components.map(({ authority }) => authority?.maskSha256)).size >= 10);
+  assert.ok(manifest.placements.every(({ locked }) => locked === false));
 });
