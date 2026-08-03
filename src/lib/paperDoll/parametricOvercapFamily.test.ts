@@ -18,6 +18,7 @@ const tallRollonCap20400RecipePath = "docs/paper-doll-rig/tall-rollon-cap-20-400
 const fauxLeatherCap18415RecipePath = "docs/paper-doll-rig/faux-leather-cap-18-415-family-recipe.json";
 const shortFlutedCap20400RecipePath = "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json";
 const shortFlutedCap18400RecipePath = "docs/paper-doll-rig/short-fluted-cap-18-400-family-recipe.json";
+const applicatorCap18400RecipePath = "docs/paper-doll-rig/applicator-cap-18-400-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -321,6 +322,41 @@ test("18-400 short-cap recipe preserves the measured 21 by 11 mm fluted profile"
   ]);
   assert.equal(recipe.surfaceProfile.kind, "recessed-vertical-flutes");
   assert.equal(buildParametricOvercapRenderPlan(recipe).variantCount, 1);
+});
+
+test("18-400 applicator recipe preserves the measured 21 by 45 mm compound cap and glass-rod responsibility", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(applicatorCap18400RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__18-400__applicator-cap-with-glass-rod__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__18-400__7b644a08b3");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 21,
+    outsideDiameterTolerance: 0.5,
+    height: 45,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.stemApplicator, {
+    capHeightMm: 11,
+    stemOutsideDiameterMm: 1.5,
+    terminalBulbDiameterMm: 2.4,
+    terminalBulbHeightMm: 2.6,
+    bottomClearanceMm: 1,
+    material: "clear-glass",
+    evidenceState: "source-derived-review-candidate",
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku]), [
+    ["BLK", "18-400CpAppBlk", "CMP-APP-BLK-18-400"],
+  ]);
+});
+
+test("compound applicator geometry must fit inside the measured assembly envelope", async () => {
+  const raw = JSON.parse(await readFile(applicatorCap18400RecipePath, "utf8"));
+  raw.stemApplicator.capHeightMm = 45;
+  assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /cap height must be smaller/i);
+
+  const narrowTerminal = JSON.parse(await readFile(applicatorCap18400RecipePath, "utf8"));
+  narrowTerminal.stemApplicator.terminalBulbDiameterMm = 1;
+  assert.throws(() => parseParametricOvercapFamilyRecipe(narrowTerminal), /terminal bulb cannot be narrower/i);
 });
 
 test("parametric contract rejects a source identity repeated through an alias", async () => {

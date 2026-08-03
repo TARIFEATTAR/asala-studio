@@ -51,6 +51,9 @@ DIAMETER = float(RECIPE["nominalDimensionsMm"]["outsideDiameter"])
 NOMINAL_HEIGHT = float(RECIPE["nominalDimensionsMm"]["height"])
 HEIGHT_SCALE = float(RECIPE["geometryCalibration"]["heightScale"])
 HEIGHT = NOMINAL_HEIGHT * HEIGHT_SCALE
+STEM_APPLICATOR = RECIPE.get("stemApplicator")
+CAP_HEIGHT = float(STEM_APPLICATOR["capHeightMm"]) if STEM_APPLICATOR else HEIGHT
+CAP_Z_OFFSET = HEIGHT - CAP_HEIGHT
 RADIUS = DIAMETER / 2.0
 RENDER = RECIPE["render"]
 OUTPUT_ASPECT = float(RENDER["widthPx"]) / float(RENDER["heightPx"])
@@ -252,7 +255,7 @@ def build_cap_mesh(recipe: dict) -> tuple[bpy.types.Object, dict]:
                 recessed_vertex_count += 1
             minimum_radial_delta = min(minimum_radial_delta, radial_delta)
             maximum_radius = max(maximum_radius, radius)
-            z_value = height_ratio * HEIGHT
+            z_value = CAP_Z_OFFSET + height_ratio * CAP_HEIGHT
             vertices.append((radius * math.cos(angle), radius * math.sin(angle), z_value))
 
     for ring_index in range(len(ring_height_ratios) - 1):
@@ -268,7 +271,7 @@ def build_cap_mesh(recipe: dict) -> tuple[bpy.types.Object, dict]:
             ))
 
     top_center_index = len(vertices)
-    vertices.append((0.0, 0.0, HEIGHT))
+    vertices.append((0.0, 0.0, CAP_Z_OFFSET + CAP_HEIGHT))
     top_ring = (len(ring_height_ratios) - 1) * segments
     for segment in range(segments):
         next_segment = (segment + 1) % segments
@@ -293,6 +296,59 @@ def build_cap_mesh(recipe: dict) -> tuple[bpy.types.Object, dict]:
         "minimumRadialDeltaMm": minimum_radial_delta,
         "maximumRadiusMm": maximum_radius,
         "trimBandCount": len(TRIM_BANDS),
+    }
+
+
+def build_stem_applicator(recipe: dict) -> tuple[list[bpy.types.Object], dict | None]:
+    """Build an optional source-derived glass stem below a measured cap shell."""
+    if STEM_APPLICATOR is None:
+        return [], None
+
+    stem_diameter = float(STEM_APPLICATOR["stemOutsideDiameterMm"])
+    terminal_diameter = float(STEM_APPLICATOR["terminalBulbDiameterMm"])
+    terminal_height = float(STEM_APPLICATOR["terminalBulbHeightMm"])
+    bottom_clearance = float(STEM_APPLICATOR["bottomClearanceMm"])
+
+    terminal_center_z = bottom_clearance + terminal_height / 2.0
+    terminal_top_z = bottom_clearance + terminal_height
+    stem_bottom_z = terminal_top_z - min(terminal_height * 0.22, stem_diameter * 0.25)
+    stem_top_z = CAP_Z_OFFSET + min(0.35, CAP_HEIGHT * 0.04)
+    stem_depth = stem_top_z - stem_bottom_z
+    if stem_depth <= 0:
+        raise ValueError("Applicator stem has no positive span below the cap shell")
+
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=64,
+        radius=stem_diameter / 2.0,
+        depth=stem_depth,
+        location=(0.0, 0.0, stem_bottom_z + stem_depth / 2.0),
+    )
+    stem = bpy.context.active_object
+    stem.name = "applicator_clear_glass_stem"
+    for polygon in stem.data.polygons:
+        polygon.use_smooth = True
+
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        segments=64,
+        ring_count=32,
+        radius=1.0,
+        location=(0.0, 0.0, terminal_center_z),
+    )
+    terminal = bpy.context.active_object
+    terminal.name = "applicator_clear_glass_terminal"
+    terminal.scale = (terminal_diameter / 2.0, terminal_diameter / 2.0, terminal_height / 2.0)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    for polygon in terminal.data.polygons:
+        polygon.use_smooth = True
+
+    return [stem, terminal], {
+        "capHeightMm": CAP_HEIGHT,
+        "stemOutsideDiameterMm": stem_diameter,
+        "terminalBulbDiameterMm": terminal_diameter,
+        "terminalBulbHeightMm": terminal_height,
+        "bottomClearanceMm": bottom_clearance,
+        "material": STEM_APPLICATOR["material"],
+        "objectCount": 2,
     }
 
 
@@ -378,7 +434,7 @@ def assign_surface_materials(
     cap.data.materials.append(trim_material)
     for polygon in cap.data.polygons:
         mean_height = sum(cap.data.vertices[index].co.z for index in polygon.vertices) / len(polygon.vertices)
-        height_ratio = mean_height / HEIGHT
+        height_ratio = (mean_height - CAP_Z_OFFSET) / CAP_HEIGHT
         polygon.material_index = 1 if any(
             float(band["startHeightRatio"]) <= height_ratio <= float(band["endHeightRatio"])
             for band in TRIM_BANDS
@@ -401,6 +457,28 @@ def create_crystal_material() -> bpy.types.Material:
     return material
 
 
+def create_clear_glass_material() -> bpy.types.Material:
+    material = bpy.data.materials.new("applicator_clear_glass")
+    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Base Color"].default_value = (0.91, 0.95, 0.98, 1.0)
+    bsdf.inputs["Metallic"].default_value = 0.0
+    bsdf.inputs["Roughness"].default_value = 0.06
+    bsdf.inputs["IOR"].default_value = 1.46
+    transmission = bsdf.inputs.get("Transmission Weight")
+    if transmission is not None:
+        transmission.default_value = 0.92
+    coat = bsdf.inputs.get("Coat Weight")
+    if coat is not None:
+        coat.default_value = 0.08
+    return material
+
+
+def assign_uniform_material(objects: list[bpy.types.Object], material: bpy.types.Material) -> None:
+    for object_value in objects:
+        object_value.data.materials.clear()
+        object_value.data.materials.append(material)
+
+
 def build_crystals(recipe: dict) -> list[bpy.types.Object]:
     material = create_crystal_material()
     crystals = []
@@ -411,7 +489,7 @@ def build_crystals(recipe: dict) -> list[bpy.types.Object]:
         location = (
             surface_radius * math.sin(angle),
             -surface_radius * math.cos(angle),
-            HEIGHT * float(spec["heightRatio"]),
+            CAP_Z_OFFSET + CAP_HEIGHT * float(spec["heightRatio"]),
         )
         bpy.ops.mesh.primitive_cylinder_add(
             vertices=12,
@@ -478,6 +556,8 @@ def render_to(path: Path) -> None:
 
 scene = configure_scene()
 cap, geometry_stats = build_cap_mesh(RECIPE)
+stem_objects, stem_geometry_stats = build_stem_applicator(RECIPE)
+geometry_stats["stemApplicator"] = stem_geometry_stats
 camera = build_camera(RECIPE)
 scene.camera = camera
 studio = build_studio(RECIPE)
@@ -488,6 +568,9 @@ finish_materials = {
     for material_key in MATERIAL_PRESETS
 }
 cap.data.materials.append(finish_materials["mirror-silver"])
+stem_material = create_clear_glass_material() if stem_objects else None
+if stem_material is not None:
+    assign_uniform_material(stem_objects, stem_material)
 
 isolated_dir = OUT_DIR / "isolated"
 render_records = []
@@ -498,6 +581,9 @@ provenance = {
         "nominalHeight": NOMINAL_HEIGHT,
         "heightScale": HEIGHT_SCALE,
         "calibratedHeight": HEIGHT,
+        "capHeight": CAP_HEIGHT,
+        "capZOffset": CAP_Z_OFFSET,
+        "stemApplicator": STEM_APPLICATOR,
         "surfaceProfile": SURFACE_PROFILE,
     }),
     "cameraRecipeHash": canonical_hash(CAMERA_RECIPE),
@@ -517,20 +603,25 @@ for variant_key in REQUESTED_VARIANTS:
     decorated = variant["decoration"] == "crystal-v1"
     set_crystal_visibility(crystals, decorated)
     render_to(render_path)
+    material_assignment = {
+        "baseMaterial": variant["material"],
+        "trimMaterial": trim_material_key,
+        "trimBandCount": len(TRIM_BANDS),
+    }
+    if STEM_APPLICATOR:
+        material_assignment["stemMaterial"] = STEM_APPLICATOR["material"]
     render_records.append({
         "variantKey": variant_key,
         "path": str(render_path.relative_to(OUT_DIR)),
         "provenance": provenance,
         "crystals": [dict(item) for item in RECIPE["crystalLayout"]] if decorated else [],
-        "materialAssignment": {
-            "baseMaterial": variant["material"],
-            "trimMaterial": trim_material_key,
-            "trimBandCount": len(TRIM_BANDS),
-        },
+        "materialAssignment": material_assignment,
     })
 
 mask_path = OUT_DIR / "geometry-mask.png"
-assign_surface_materials(cap, create_mask_material(), None)
+mask_material = create_mask_material()
+assign_surface_materials(cap, mask_material, None)
+assign_uniform_material(stem_objects, mask_material)
 set_crystal_visibility(crystals, False)
 for panel in studio.values():
     panel.hide_render = True
