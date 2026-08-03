@@ -46,16 +46,16 @@ plastic and metal roller fitments, Current Release, or any active Sanity documen
 
 | Variant key | Catalog finish | Blender treatment |
 |---|---|---|
-| `SHN-SL` | Shiny Silver | vacuum-metallized mirror chrome |
-| `MT-SL` | Matte Silver | smooth low-gloss silver coating |
-| `SHN-GL` | Shiny Gold | vacuum-metallized warm gold mirror |
-| `MT-GL` | Matte Gold | smooth low-gloss warm gold coating |
-| `SHN-BLK` | Shiny Black | deep glossy black phenolic plastic |
-| `CU` | Shiny Copper | vacuum-metallized rose-copper mirror |
+| `SSLV` | Shiny Silver | vacuum-metallized mirror chrome |
+| `MSLV` | Matte Silver | smooth low-gloss silver coating |
+| `SGLD` | Shiny Gold | vacuum-metallized warm gold mirror |
+| `MGLD` | Matte Gold | smooth low-gloss warm gold coating |
+| `SBLK` | Shiny Black | deep glossy black phenolic plastic |
+| `MCPR` | Matte Copper | smooth low-gloss warm copper coating |
 | `WHT` | White | smooth glossy white phenolic plastic |
-| `SL-DOT` | Silver Dotted | shiny silver plus deterministic clear crystals |
-| `BLK-DOT` | Black Dotted | glossy black plus the same crystal layout |
-| `PNK-DOT` | Pink Dotted | smooth matte pink plus the same crystal layout |
+| `SLDT` | Silver Dotted | shiny silver plus deterministic clear crystals |
+| `BKDT` | Black Dotted | glossy black plus the same crystal layout |
+| `PKDT` | Pink Dotted | smooth matte pink plus the same crystal layout |
 
 The caps are moulded phenolic plastic. The words aluminium, anodised, brushed,
 machined, and metal must not appear in renderer material labels or AI prompts. Only
@@ -238,4 +238,3 @@ This milestone is complete when:
 5. all five locked body assemblies pass Family Fit using one shared placement;
 6. a named placement lock is written; and
 7. the cap family is eligible for an append-only release cut and Sanity draft sync.
-
