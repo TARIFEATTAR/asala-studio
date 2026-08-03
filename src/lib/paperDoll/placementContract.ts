@@ -5,7 +5,7 @@ const SHA256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 export const SharedPlacementLockRequestSchema = z.object({
   organizationId: z.string().uuid(),
   familyKey: z.literal("CYL-9ML"),
-  fitmentGeometryKey: z.literal("fitment__roller-ball__17-415__v1"),
+  fitmentGeometryKey: z.string().trim().min(3).max(180).regex(/^[a-z0-9][a-z0-9_.-]*$/),
   calibrationComponentVersionId: z.string().uuid(),
   expectedAuthorityMaskSha256: SHA256Schema,
   canvas: z.object({ widthPx: z.literal(2080), heightPx: z.literal(2288) }),

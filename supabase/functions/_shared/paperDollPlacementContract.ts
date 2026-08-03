@@ -1,7 +1,7 @@
 export interface PaperDollPlacementLockRequest {
   organizationId: string;
   familyKey: "CYL-9ML";
-  fitmentGeometryKey: "fitment__roller-ball__17-415__v1";
+  fitmentGeometryKey: string;
   calibrationComponentVersionId: string;
   expectedAuthorityMaskSha256: string;
   canvas: { widthPx: 2080; heightPx: 2288 };
@@ -32,7 +32,9 @@ function finite(value: unknown, label: string): number {
 export function parsePaperDollPlacementLockRequest(value: unknown): PaperDollPlacementLockRequest {
   const input = record(value, "Placement request");
   if (input.familyKey !== "CYL-9ML") throw new Error("familyKey must be CYL-9ML.");
-  if (input.fitmentGeometryKey !== "fitment__roller-ball__17-415__v1") throw new Error("fitmentGeometryKey must match the registered CYL-9ML roller geometry family.");
+  if (typeof input.fitmentGeometryKey !== "string" || !/^[a-z0-9][a-z0-9_.-]{2,179}$/.test(input.fitmentGeometryKey)) {
+    throw new Error("fitmentGeometryKey must be a registered safe geometry-family key.");
+  }
   if (typeof input.expectedAuthorityMaskSha256 !== "string" || !SHA256.test(input.expectedAuthorityMaskSha256)) {
     throw new Error("expectedAuthorityMaskSha256 must be a lowercase SHA-256.");
   }
@@ -55,7 +57,7 @@ export function parsePaperDollPlacementLockRequest(value: unknown): PaperDollPla
   return {
     organizationId: uuid(input.organizationId, "organizationId"),
     familyKey: "CYL-9ML",
-    fitmentGeometryKey: "fitment__roller-ball__17-415__v1",
+    fitmentGeometryKey: input.fitmentGeometryKey,
     calibrationComponentVersionId: uuid(input.calibrationComponentVersionId, "calibrationComponentVersionId"),
     expectedAuthorityMaskSha256: input.expectedAuthorityMaskSha256,
     canvas: { widthPx: 2080, heightPx: 2288 },

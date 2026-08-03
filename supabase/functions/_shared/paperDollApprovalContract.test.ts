@@ -49,7 +49,7 @@ test("approval implementation rejects stale, cross-org and unqualified candidate
 
 test("approval transaction copies candidate identity into a new approved child", async () => {
   const sql = await readFile(
-    new URL("../../migrations/20260802063000_paper_doll_approval_and_worker_health.sql", import.meta.url),
+    new URL("../../migrations/20260802062301_paper_doll_approval_and_worker_health.sql", import.meta.url),
     "utf8",
   );
   assert.match(sql, /CREATE OR REPLACE FUNCTION public\.approve_paper_doll_candidate/i);

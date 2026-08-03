@@ -72,7 +72,7 @@ const CandidateTransformSchema = z.object({
 
 export const CandidateJobRequestSchema = z.object({
   organizationId: z.string().uuid(),
-  requirementKey: z.string().regex(/^CYL-9ML:(BODY|OVERCAP|ROLLER):/),
+  requirementKey: z.string().regex(/^CYL-9ML:(BODY|CAP|OVERCAP|ROLLER|SPRAYER|PUMP):/),
   componentId: z.string().uuid(),
   parentComponentVersionId: z.string().uuid(),
   parentSha256: SHA256Schema,
@@ -95,13 +95,13 @@ export const CandidateJobRequestSchema = z.object({
     });
   }
   if (
-    value.requirementKey.startsWith("CYL-9ML:OVERCAP:")
+    /^CYL-9ML:(CAP|OVERCAP):/.test(value.requirementKey)
     && /\b(aluminium|aluminum|anodised|anodized|brushed|machined)\b/i.test(value.instruction)
   ) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["instruction"],
-      message: "Overcap instructions must describe moulded phenolic plastic and may not use metal-part fabrication language.",
+      message: "Cap instructions must describe moulded phenolic plastic and may not use metal-part fabrication language.",
     });
   }
   for (const [field, asset] of [

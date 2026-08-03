@@ -9,7 +9,9 @@ interface RollonLineupProps {
   rollerVariantKey?: string;
   rollerImageUrlOverride?: string;
   overcapVariantKey?: string;
+  overcapImageUrlOverride?: string;
   placementTransform?: FamilyPlacementTransform;
+  placementSlot?: "roller" | "overcap";
   placementId?: string;
 }
 
@@ -26,19 +28,21 @@ export function RollonLineup({
   rollerVariantKey = "PLASTIC",
   rollerImageUrlOverride,
   overcapVariantKey = null,
+  overcapImageUrlOverride,
   placementTransform = IDENTITY_FAMILY_PLACEMENT,
+  placementSlot = "roller",
   placementId,
 }: RollonLineupProps) {
   const lineupAssets: RollonLineupAsset[] = assets
-    .filter((asset) => asset.slot === "body" || asset.slot === "roller" || asset.slot === "overcap")
+    .filter((asset) => asset.slot === "body" || asset.slot === "roller" || asset.slot === "overcap" || asset.slot === "cap")
     .map((asset) => ({
       componentVersionId: asset.componentVersionId,
       displayName: asset.displayName,
-      slot: asset.slot as RollonLineupAsset["slot"],
+      slot: (asset.slot === "cap" ? "overcap" : asset.slot) as RollonLineupAsset["slot"],
       variantKey: asset.variantKey,
       imageUrl: asset.imageUrl,
     }));
-  const lineup = buildRollonLineup(lineupAssets, { rollerVariantKey, overcapVariantKey, rollerImageUrlOverride });
+  const lineup = buildRollonLineup(lineupAssets, { rollerVariantKey, overcapVariantKey, rollerImageUrlOverride, overcapImageUrlOverride });
   const complete = lineup.filter((item) => item.status === "complete").length;
   const placementPreviewActive = placementTransform.translateXPx !== 0
     || placementTransform.translateYPx !== 0
@@ -66,7 +70,7 @@ export function RollonLineup({
                   src={layer.imageUrl}
                   alt={layer.displayName}
                   className="absolute h-full w-full object-contain"
-                  style={layerIndex === 1 ? {
+                  style={(placementSlot === "roller" && layerIndex === 1) || (placementSlot === "overcap" && layerIndex === 2) ? {
                     left: `${placementTransform.translateXPx / 2080 * 100}%`,
                     top: `${placementTransform.translateYPx / 2288 * 100}%`,
                     transform: `scale(${placementTransform.scaleX})`,

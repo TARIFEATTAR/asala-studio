@@ -53,16 +53,13 @@ Deno.serve(async (request) => {
     || calibration.height_px !== 2288
   ) return json({ error: "Approved calibration identity, mask, or canvas changed" }, 409);
 
-  const { data: currentRelease } = await userClient
-    .from("paper_doll_family_releases")
-    .select("id")
+  const { data: currentHead } = await userClient
+    .from("paper_doll_family_release_heads")
+    .select("release_id")
     .eq("organization_id", placement.organizationId)
     .eq("family_key", placement.familyKey)
-    .neq("release_status", "superseded")
-    .order("created_at", { ascending: false })
-    .limit(1)
     .maybeSingle();
-  if (!currentRelease) return json({ error: "Current family release is unavailable" }, 409);
+  if (!currentHead) return json({ error: "Current family release is unavailable" }, 409);
 
   const [{ data: component }, { data: bodies }, { data: releaseMembership }] = await Promise.all([
     userClient.from("paper_doll_components")
@@ -77,12 +74,12 @@ Deno.serve(async (request) => {
     userClient.from("paper_doll_family_release_assets")
       .select("component_version_id, slot, release_id")
       .eq("organization_id", placement.organizationId)
-      .eq("release_id", currentRelease.id)
+      .eq("release_id", currentHead.release_id)
       .eq("slot", "body")
       .in("component_version_id", placement.compatibleBodyComponentVersionIds),
   ]);
-  if (!component || component.slot !== "roller" || component.geometry_family_id !== placement.fitmentGeometryKey) {
-    return json({ error: "Calibration geometry does not match the registered roller family" }, 409);
+  if (!component || component.slot === "body" || component.geometry_family_id !== placement.fitmentGeometryKey) {
+    return json({ error: "Calibration geometry does not match the registered fitment family" }, 409);
   }
   if ((bodies ?? []).length !== 5 || (bodies ?? []).some((body) => body.approval_status !== "approved")) {
     return json({ error: "Five approved body versions are required" }, 409);

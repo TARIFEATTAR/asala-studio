@@ -20,6 +20,9 @@ function releasePayload() {
       manifest_sha256: "b".repeat(64),
       created_at: "2026-08-01T00:00:00.000Z",
     },
+    releaseCut: null,
+    readiness: [],
+    publishRuns: [],
     assets: [{
       slot: "body",
       variantKey: "clear",
@@ -83,6 +86,7 @@ test("loadPaperDollReleaseWorkbench reads the RLS API and resolves private image
     args: { p_organization_id: ORGANIZATION_ID, p_family_key: "CYL-9ML" },
   }]);
   assert.equal(result?.release.status, "blocked");
+  assert.deepEqual(result?.readiness, { ready: 0, incomplete: 0, total: 0 });
   assert.equal(result?.assets[0].displayName, "Clear body");
   assert.equal(result?.assets[0].componentId, "20000000-0000-4000-8000-000000000001");
   assert.match(result?.assets[0].imageUrl ?? "", /^https:\/\/signed\.example\/paper-doll-approved\//);

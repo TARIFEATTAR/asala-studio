@@ -27,9 +27,16 @@ import {
   type PaperDollReleaseRpcClient,
   type PaperDollReleaseWorkbenchData,
 } from "@/lib/paperDoll/releaseRepository";
+import {
+  cutPaperDollRelease,
+  dryRunPaperDollSanityPublic,
+  publishPaperDollSanityPublic,
+  syncPaperDollSanityDraft,
+} from "@/lib/paperDoll/releaseCutRepository";
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
+import { ComponentSourceIntakePanel } from "./ComponentSourceIntakePanel";
 import type { ApprovedCandidateDetails, ApprovedCandidateVariant } from "@/lib/paperDoll/candidateReviewPolicy";
 import {
   loadSharedPlacement,
@@ -119,6 +126,9 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const approvedComponentVersionId = approvedCandidate?.componentVersionId ?? null;
   const [approverDisplayName, setApproverDisplayName] = useState("");
   const [placementApprovalNote, setPlacementApprovalNote] = useState("");
+  const [releaseVersion, setReleaseVersion] = useState("1.1.0-rollon-pair.1");
+  const [releaseApprovalNote, setReleaseApprovalNote] = useState("");
+  const [publicApprovalNote, setPublicApprovalNote] = useState("");
   const initializedReleaseRef = useRef<string | null>(null);
   const appliedPlacementRef = useRef<string | null>(null);
   const mask = useCandidateMask();
@@ -134,11 +144,16 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
+  const selectedAsset = useMemo(
+    () => query.data?.assets.find((asset) => asset.componentVersionId === selectedLayerId) ?? null,
+    [query.data, selectedLayerId],
+  );
+  const activeGeometryKey = selectedAsset?.geometryFamilyId ?? CYL9_ROLLER_GEOMETRY_KEY;
   const placementQueryKey = [
     "paper-doll-shared-placement",
     organizationId,
     CYL9_FAMILY_KEY,
-    CYL9_ROLLER_GEOMETRY_KEY,
+    activeGeometryKey,
     approvedCandidate?.authorityMaskSha256 ?? null,
   ] as const;
   const placementQuery = useQuery({
@@ -148,11 +163,11 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       {
         organizationId: organizationId!,
         familyKey: CYL9_FAMILY_KEY,
-        fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+        fitmentGeometryKey: activeGeometryKey,
         authorityMaskSha256: approvedCandidate!.authorityMaskSha256,
       },
     ),
-    enabled: Boolean(organizationId && approvedCandidate),
+    enabled: Boolean(organizationId && approvedCandidate && selectedAsset && selectedAsset.slot !== "body"),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -164,7 +179,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         {
           organizationId,
           familyKey: CYL9_FAMILY_KEY,
-          fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+          fitmentGeometryKey: activeGeometryKey,
           calibrationComponentVersionId: approvedCandidate.componentVersionId,
           expectedAuthorityMaskSha256: approvedCandidate.authorityMaskSha256,
           canvas: { widthPx: 2080, heightPx: 2288 },
@@ -180,6 +195,97 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       appliedPlacementRef.current = placement.id;
       setFamilyTransform(fromSharedPlacementRecord(placement));
     },
+  });
+  const releaseCutMutation = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !query.data) throw new Error("Current Release is unavailable.");
+      const placement = placementQuery.data;
+      if (!placement) throw new Error("Lock Shared Placement before cutting a release.");
+      if (!selectedAsset || selectedAsset.slot === "body") throw new Error("Select the approved fitment being cut.");
+      const selectedComponents = selectedAsset.slot === "roller"
+        ? ["PLASTIC", "METAL"].map((variantKey) => {
+            const variant = approvedVariants.find((item) => item.variantKey === variantKey);
+            if (!variant) throw new Error(`Approve ${variantKey === "PLASTIC" ? "Natural Plastic" : "Metal Ball"} pixels first.`);
+            if (variant.authorityMaskSha256 !== placement.authorityMaskSha256) throw new Error(`${variantKey} no longer matches the locked geometry authority.`);
+            return { componentVersionId: variant.componentVersionId, slot: "roller" as const, variantKey, placementVersionId: placement.id };
+          })
+        : approvedCandidate
+          ? [{
+              componentVersionId: approvedCandidate.componentVersionId,
+              slot: selectedAsset.slot as "cap" | "sprayer" | "overcap" | "pump",
+              variantKey: selectedAsset.variantKey,
+              placementVersionId: placement.id,
+            }]
+          : [];
+      if (selectedComponents.length === 0) throw new Error("Approve the selected component pixels first.");
+      const releaseCut = await cutPaperDollRelease(
+        supabase as unknown as Parameters<typeof cutPaperDollRelease>[0],
+        {
+          organizationId,
+          familyKey: CYL9_FAMILY_KEY,
+          expectedCurrentReleaseId: query.data.release.id,
+          releaseVersion,
+          selectedComponents,
+          compatibleBodyComponentVersionIds: bodies.map((body) => body.componentVersionId),
+          approverDisplayName,
+          approvalNote: releaseApprovalNote,
+          sourceGitCommit: import.meta.env.VITE_GIT_COMMIT || "local-uncommitted",
+          rendererVersion: "paper-doll-release-cut-v1",
+        },
+      );
+      try {
+        const draftSync = await syncPaperDollSanityDraft(
+          supabase as unknown as Parameters<typeof syncPaperDollSanityDraft>[0],
+          { organizationId, publishRunId: releaseCut.publishRunId },
+        );
+        return { releaseCut, draftSync, draftSyncError: null as string | null };
+      } catch (error) {
+        return { releaseCut, draftSync: null, draftSyncError: error instanceof Error ? error.message : String(error) };
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] });
+    },
+  });
+  const draftRetryMutation = useMutation({
+    mutationFn: async () => {
+      const run = query.data?.publishRuns.find((item) => item.destination === "sanity:draft" && ["queued", "failed"].includes(item.status));
+      if (!organizationId || !run) throw new Error("No retryable Sanity draft attempt is available.");
+      return syncPaperDollSanityDraft(
+        supabase as unknown as Parameters<typeof syncPaperDollSanityDraft>[0],
+        { organizationId, publishRunId: run.id },
+      );
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] }),
+  });
+  const publicDryRunMutation = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !query.data?.releaseCut) throw new Error("Cut and synchronize a Current Release first.");
+      return dryRunPaperDollSanityPublic(
+        supabase as unknown as Parameters<typeof dryRunPaperDollSanityPublic>[0],
+        { organizationId, releaseCutId: query.data.releaseCut.id },
+      );
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] }),
+  });
+  const publicPublishMutation = useMutation({
+    mutationFn: async () => {
+      if (!organizationId || !query.data?.releaseCut || !publicDryRunMutation.data) {
+        throw new Error("Run the exact public dry-run first.");
+      }
+      return publishPaperDollSanityPublic(
+        supabase as unknown as Parameters<typeof publishPaperDollSanityPublic>[0],
+        {
+          organizationId,
+          releaseCutId: query.data.releaseCut.id,
+          dryRunId: publicDryRunMutation.data.dryRunId,
+          expectedDraftSha256: publicDryRunMutation.data.draftSha256,
+          approverDisplayName,
+          approvalNote: publicApprovalNote,
+        },
+      );
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] }),
   });
 
   useEffect(() => {
@@ -197,10 +303,6 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     setFamilyTransform(initial.transform);
   }, [familyKey, query.data]);
 
-  const selectedAsset = useMemo(
-    () => query.data?.assets.find((asset) => asset.componentVersionId === selectedLayerId) ?? null,
-    [query.data, selectedLayerId],
-  );
   const visibleLayers = useMemo(() => {
     const body = bodies.find((asset) => asset.componentVersionId === selectedBodyId);
     const component = components.find((asset) => asset.componentVersionId === selectedLayerId);
@@ -225,8 +327,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   useEffect(() => {
     appliedPlacementRef.current = null;
-    if (approvedComponentVersionId) setFamilyTransform(MEASURED_ROLLER_PLACEMENT);
-  }, [approvedComponentVersionId]);
+    if (approvedComponentVersionId) setFamilyTransform(selectedAsset?.slot === "roller" ? MEASURED_ROLLER_PLACEMENT : IDENTITY_FAMILY_PLACEMENT);
+  }, [approvedComponentVersionId, selectedAsset?.slot]);
 
   useEffect(() => {
     const placement = placementQuery.data;
@@ -258,7 +360,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const candidateEditingEnabled = mode === "edit-lab"
     && selectedAsset?.slot !== "body"
     && Boolean(selectedAsset?.geometryMaskUrl);
-  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot === "roller" && Boolean(approvedCandidate);
+  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot !== "body" && Boolean(approvedCandidate);
   const activeTransform = mode === "family-fit" ? familyTransform : candidateTransform;
   const selectionReady = selectionKind === "whole-layer"
     || (selectionKind === "rectangle" && Boolean(mask.rectangle))
@@ -275,6 +377,14 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       : variant.variantKey === "METAL"
         ? "Metal Ball"
         : variant.variantKey);
+  const cutSelectionReady = selectedAsset?.slot === "roller"
+    ? ["PLASTIC", "METAL"].every((key) => approvedVariants.some((item) => item.variantKey === key))
+    : Boolean(selectedAsset && selectedAsset.slot !== "body" && approvedCandidate);
+  const cutSelectionLabel = selectedAsset?.slot === "roller"
+    ? "approved roller pair"
+    : selectedAsset && selectedAsset.slot !== "body"
+      ? `${selectedAsset.slot} ${selectedAsset.variantKey}`
+      : "select a fitment";
 
   const toggleVisibility = (id: string) => {
     setHiddenIds((current) => {
@@ -323,6 +433,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             <ToneBadge>{query.data.release.canvasWidthPx}×{query.data.release.canvasHeightPx}</ToneBadge>
           </div>
           <div className="mt-1 font-mono text-[8px]" style={{ color: "var(--darkroom-text-dim)" }}>manifest {query.data.release.manifestSha256.slice(0, 16)}… · live private ledger</div>
+          {query.data.releaseCut && <div className="mt-1 flex flex-wrap gap-2"><ToneBadge tone="good">Cut {query.data.releaseCut.id.slice(0, 8)}…</ToneBadge><ToneBadge>{query.data.readiness.ready}/{query.data.readiness.total} SKU ready</ToneBadge>{query.data.publishRuns[0] && <ToneBadge tone={query.data.publishRuns[0].status === "draft_synced" ? "good" : "warning"}>Sanity {query.data.publishRuns[0].status.replaceAll("_", " ")}</ToneBadge>}</div>}
         </div>
         <div className="flex overflow-hidden rounded border" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
           {(["release-lock", "family-fit", "edit-lab"] as AssemblyEditMode[]).map((item) => (
@@ -333,7 +444,63 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         </div>
       </header>
 
-      {mode === "release-lock" && <div className="rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(215,168,95,0.3)", color: "var(--darkroom-text-muted)", background: "rgba(215,168,95,0.035)" }}><strong style={{ color: "var(--darkroom-accent)" }}>Current Release.</strong> Read-only active ledger snapshot. Approved pixels and placement drafts are not released until a separate release cut. Sanity publication requires its own dry-run and named approval.</div>}
+      {mode === "release-lock" && (
+        <div className="space-y-3 rounded border p-3" style={{ borderColor: "rgba(215,168,95,0.3)", color: "var(--darkroom-text-muted)", background: "rgba(215,168,95,0.035)" }}>
+          <div className="text-[9px] leading-4"><strong style={{ color: "var(--darkroom-accent)" }}>Current Release.</strong> The explicit release head is read-only. A named cut can advance the five locked plates plus the exact approved roller pair and queue a stable Sanity draft; it never makes the public document visible.</div>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+            <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><span className="block text-[7px] uppercase tracking-[0.15em]">Release version</span><input aria-label="Release version" value={releaseVersion} onChange={(event) => setReleaseVersion(event.target.value)} className="mt-1 w-full bg-transparent font-mono text-[10px] outline-none" /></label>
+            <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><span className="block text-[7px] uppercase tracking-[0.15em]">Named approver</span><input aria-label="Release approver" value={approverDisplayName} onChange={(event) => setApproverDisplayName(event.target.value)} className="mt-1 w-full bg-transparent text-[10px] outline-none" /></label>
+            <label className="rounded border px-2 py-1.5 md:col-span-2" style={{ borderColor: "var(--darkroom-border-subtle)" }}><span className="block text-[7px] uppercase tracking-[0.15em]">Release-cut approval note</span><input aria-label="Release approval note" value={releaseApprovalNote} onChange={(event) => setReleaseApprovalNote(event.target.value)} className="mt-1 w-full bg-transparent text-[10px] outline-none" /></label>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
+            <div className="flex flex-wrap gap-2">
+              <ToneBadge tone={bodies.length === 5 ? "good" : "warning"}>{bodies.length}/5 bodies</ToneBadge>
+              {selectedAsset?.slot === "roller" ? <><ToneBadge tone={approvedVariants.some((item) => item.variantKey === "PLASTIC") ? "good" : "warning"}>Plastic pixels</ToneBadge><ToneBadge tone={approvedVariants.some((item) => item.variantKey === "METAL") ? "good" : "warning"}>Metal pixels</ToneBadge></> : <ToneBadge tone={cutSelectionReady ? "good" : "warning"}>{cutSelectionLabel}</ToneBadge>}
+              <ToneBadge tone={lockedPlacement ? "good" : "warning"}>Shared placement</ToneBadge>
+            </div>
+            <button type="button" disabled={releaseCutMutation.isPending || bodies.length !== 5 || !lockedPlacement || !approverDisplayName.trim() || !releaseApprovalNote.trim() || !cutSelectionReady} onClick={() => releaseCutMutation.mutate()} className="rounded border px-4 py-2 text-[8px] uppercase tracking-[0.15em] disabled:cursor-not-allowed disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.5)", color: "#6ee7a8", background: "rgba(110,231,168,0.05)" }}>{releaseCutMutation.isPending ? "Cutting immutable release…" : `Cut ${cutSelectionLabel} + Queue Sanity Draft`}</button>
+          </div>
+          {releaseCutMutation.error instanceof Error && <div className="rounded border px-3 py-2 text-[9px]" style={{ borderColor: "rgba(248,113,113,0.45)", color: "#fca5a5" }}>{releaseCutMutation.error.message}</div>}
+          {releaseCutMutation.data && <div className="rounded border px-3 py-2 text-[9px]" style={{ borderColor: releaseCutMutation.data.draftSync ? "rgba(110,231,168,0.45)" : "rgba(242,192,120,0.45)", color: releaseCutMutation.data.draftSync ? "#6ee7a8" : "#f2c078" }}>Current Release advanced · cut {releaseCutMutation.data.releaseCut.releaseCutId.slice(0, 8)}… · {releaseCutMutation.data.releaseCut.readiness.ready} ready / {releaseCutMutation.data.releaseCut.readiness.incomplete} incomplete SKUs · {releaseCutMutation.data.draftSync ? "Sanity draft synchronized" : `draft queued for retry (${releaseCutMutation.data.draftSyncError})`} · public unchanged</div>}
+          {query.data.publishRuns.some((item) => item.destination === "sanity:draft" && ["queued", "failed"].includes(item.status)) && <button type="button" disabled={draftRetryMutation.isPending} onClick={() => draftRetryMutation.mutate()} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(242,192,120,0.45)", color: "#f2c078" }}>{draftRetryMutation.isPending ? "Retrying draft sync…" : "Retry Sanity Draft Sync"}</button>}
+          {draftRetryMutation.error instanceof Error && <div className="text-[9px]" style={{ color: "#fca5a5" }}>{draftRetryMutation.error.message}</div>}
+          {query.data.releaseCut && (
+            <div className="space-y-3 rounded border p-3" style={{ borderColor: "rgba(97,214,200,0.3)", background: "rgba(97,214,200,0.025)" }}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="text-[8px] uppercase tracking-[0.16em]" style={{ color: "#61d6c8" }}>Sanity release controls</div>
+                  <p className="mt-1 max-w-2xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>The stable draft may be synchronized immediately. Public visibility is a separate named action bound to the exact dry-run checksum; it cannot silently follow a release cut.</p>
+                </div>
+                <ToneBadge tone={query.data.readiness.incomplete === 0 && query.data.readiness.ready > 0 ? "good" : "warning"}>{query.data.readiness.ready} ready · {query.data.readiness.incomplete} incomplete</ToneBadge>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" disabled={publicDryRunMutation.isPending || !query.data.publishRuns.some((item) => item.destination === "sanity:draft" && item.status === "draft_synced")} onClick={() => publicDryRunMutation.mutate()} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.45)", color: "#61d6c8" }}>{publicDryRunMutation.isPending ? "Comparing draft…" : "Run Public Dry-Run"}</button>
+                {publicDryRunMutation.data && <span className="font-mono text-[8px]" style={{ color: "var(--darkroom-text-dim)" }}>draft {publicDryRunMutation.data.draftSha256.slice(0, 12)}… · {publicDryRunMutation.data.changed ? "public differs" : "no public diff"}</span>}
+              </div>
+              {publicDryRunMutation.error instanceof Error && <div className="text-[9px]" style={{ color: "#fca5a5" }}>{publicDryRunMutation.error.message}</div>}
+              <div className="grid gap-2 md:grid-cols-[1fr_auto]">
+                <label className="rounded border px-2 py-1.5" style={{ borderColor: "var(--darkroom-border-subtle)" }}><span className="block text-[7px] uppercase tracking-[0.15em]">Second named public approval note</span><input aria-label="Public approval note" value={publicApprovalNote} onChange={(event) => setPublicApprovalNote(event.target.value)} className="mt-1 w-full bg-transparent text-[10px] outline-none" /></label>
+                <button type="button" disabled={publicPublishMutation.isPending || !publicDryRunMutation.data || query.data.readiness.incomplete !== 0 || query.data.readiness.ready < 1 || !approverDisplayName.trim() || !publicApprovalNote.trim()} onClick={() => publicPublishMutation.mutate()} className="rounded border px-4 py-2 text-[8px] uppercase tracking-[0.15em] disabled:cursor-not-allowed disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.5)", color: "#6ee7a8" }}>{publicPublishMutation.isPending ? "Publishing approved release…" : "Named Approval · Make Public"}</button>
+              </div>
+              {query.data.readiness.incomplete > 0 && <div className="text-[8px] leading-4" style={{ color: "#f2c078" }}>Public action remains disabled because this cut has incomplete SKUs. Approved layers still belong in the Sanity draft and are not discarded.</div>}
+              {publicPublishMutation.error instanceof Error && <div className="text-[9px]" style={{ color: "#fca5a5" }}>{publicPublishMutation.error.message}</div>}
+              {publicPublishMutation.data && <div className="text-[9px]" style={{ color: "#6ee7a8" }}>Public document published from exact draft {publicPublishMutation.data.draftSha256.slice(0, 12)}… with an immutable named approval receipt.</div>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {mode === "edit-lab" && (
+        <ComponentSourceIntakePanel
+          organizationId={organizationId}
+          registrarDisplayName={approverDisplayName}
+          onRegistrarDisplayNameChange={setApproverDisplayName}
+          onRegistered={(componentVersionId) => {
+            setSelectedLayerId(componentVersionId);
+            void queryClient.invalidateQueries({ queryKey: ["paper-doll-production-workbench", organizationId, familyKey] });
+          }}
+        />
+      )}
 
       <div>
         <div className="mb-2 flex items-center justify-between text-[9px] uppercase tracking-[0.18em]" style={{ color: "var(--darkroom-text-dim)" }}><span>Five locked body plates</span><span>baseline alignment sequence</span></div>
@@ -410,8 +577,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             <div className="mt-3 rounded border p-3" style={{ borderColor: "rgba(97,214,200,0.35)", background: "rgba(97,214,200,0.035)" }}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]" style={{ color: "#61d6c8" }}><Move3d className="h-3.5 w-3.5" />CYL-9ML roller family placement candidate</div>
-                  <p className="mt-1 max-w-xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>Amber is the calibration reference. Move the complete cropped roller layer; the identical transform cascades to all five locked bodies and every roller material. The hidden insertion plug remains intentionally omitted.</p>
+                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]" style={{ color: "#61d6c8" }}><Move3d className="h-3.5 w-3.5" />CYL-9ML {selectedAsset?.slot ?? "fitment"} family placement candidate</div>
+                  <p className="mt-1 max-w-xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>Amber is the calibration reference. Move the complete cropped component layer; the identical transform cascades to all five locked bodies and every exact-mask material variant.{selectedAsset?.slot === "roller" ? " The hidden insertion plug remains intentionally omitted." : ""}</p>
                 </div>
                 <ToneBadge tone="good">5/5 synchronized</ToneBadge>
               </div>
@@ -440,7 +607,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               </div>
 
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-                <button type="button" onClick={() => setFamilyTransform(MEASURED_ROLLER_PLACEMENT)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>Use calibrated flush · 262 px</button>
+                <button type="button" onClick={() => setFamilyTransform(selectedAsset?.slot === "roller" ? MEASURED_ROLLER_PLACEMENT : IDENTITY_FAMILY_PLACEMENT)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>{selectedAsset?.slot === "roller" ? "Use calibrated flush · 262 px" : "Use normalized source seat"}</button>
                 <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: placementIsExact ? "#6ee7a8" : "#f2c078" }}>{placementIsExact ? `Placement ${lockedPlacement?.id.slice(0, 8)}… loaded` : lockedPlacement ? "Draft changes · lock a new immutable version" : "Placement version not written"}</span>
               </div>
               <SharedPlacementPanel
@@ -495,8 +662,16 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
           : selectedAsset?.slot === "roller" && shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
             ? inspection?.imageUrl ?? undefined
           : undefined}
-        overcapVariantKey={null}
+        overcapVariantKey={selectedAsset && (selectedAsset.slot === "cap" || selectedAsset.slot === "overcap") ? inspection?.variantLabel ?? selectedAsset.variantKey : null}
+        overcapImageUrlOverride={selectedAsset && (selectedAsset.slot === "cap" || selectedAsset.slot === "overcap")
+          ? mode === "family-fit" && approvedCandidate
+            ? approvedCandidate.imageUrl
+            : shouldMountCandidatePreview(mode, inspection?.imageUrl ?? null)
+              ? inspection?.imageUrl ?? undefined
+              : undefined
+          : undefined}
         placementTransform={mode === "family-fit" ? familyTransform : IDENTITY_FAMILY_PLACEMENT}
+        placementSlot={selectedAsset && (selectedAsset.slot === "cap" || selectedAsset.slot === "overcap") ? "overcap" : "roller"}
         placementId={mode === "family-fit" && placementIsExact ? lockedPlacement?.id : undefined}
       />
 

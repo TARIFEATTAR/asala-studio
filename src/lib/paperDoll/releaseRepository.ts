@@ -29,6 +29,19 @@ export interface PaperDollReleaseWorkbenchData {
     manifestSha256: string;
     createdAt: string;
   };
+  releaseCut: null | {
+    id: string;
+    approverDisplayName: string;
+    createdAt: string;
+  };
+  readiness: { ready: number; incomplete: number; total: number };
+  publishRuns: Array<{
+    id: string;
+    status: string;
+    destination: string;
+    sanityDocumentId: string | null;
+    errorMessage: string | null;
+  }>;
   assets: Array<{
     componentId: string;
     componentVersionId: string;
@@ -121,8 +134,12 @@ export async function loadPaperDollReleaseWorkbench(
   const payload = record(response.data, "release workbench payload");
   const release = record(payload.release, "release");
   if (!Array.isArray(payload.assets)) throw new Error("Malformed release assets.");
+  const rawSources = Array.isArray(payload.sources) ? payload.sources : [];
+  const rawReadiness = Array.isArray(payload.readiness) ? payload.readiness : [];
+  const rawPublishRuns = Array.isArray(payload.publishRuns) ? payload.publishRuns : [];
+  const releaseCut = payload.releaseCut == null ? null : record(payload.releaseCut, "release cut");
 
-  const parsedAssets = payload.assets.map((rawAsset, index) => {
+  const parsedAssets = [...payload.assets, ...rawSources].map((rawAsset, index) => {
     const asset = record(rawAsset, `release asset ${index}`);
     const component = record(asset.component, `release asset ${index} component`);
     const version = record(asset.version, `release asset ${index} version`);
@@ -217,6 +234,26 @@ export async function loadPaperDollReleaseWorkbench(
       manifestSha256: string(release.manifest_sha256, "release manifest checksum"),
       createdAt: string(release.created_at, "release created at"),
     },
+    releaseCut: releaseCut ? {
+      id: string(releaseCut.id, "release cut id"),
+      approverDisplayName: string(releaseCut.approver_display_name, "release cut approver"),
+      createdAt: string(releaseCut.created_at, "release cut created at"),
+    } : null,
+    readiness: {
+      ready: rawReadiness.filter((row) => record(row, "readiness row").readiness_status === "ready").length,
+      incomplete: rawReadiness.filter((row) => record(row, "readiness row").readiness_status === "incomplete").length,
+      total: rawReadiness.length,
+    },
+    publishRuns: rawPublishRuns.map((raw, index) => {
+      const run = record(raw, `publish run ${index}`);
+      return {
+        id: string(run.id, `publish run ${index} id`),
+        status: string(run.publish_status, `publish run ${index} status`),
+        destination: string(run.destination, `publish run ${index} destination`),
+        sanityDocumentId: run.sanity_document_id == null ? null : string(run.sanity_document_id, `publish run ${index} document`),
+        errorMessage: run.error_message == null ? null : String(run.error_message),
+      };
+    }),
     assets: parsedAssets.map((asset) => ({
       ...asset,
       imageUrl: imageUrls[asset.componentVersionId],

@@ -16,7 +16,7 @@ test("ordinary Studio URLs retain the Masters entry point", () => {
 test("Compose presents the immutable ledger as Current Release", () => {
   const source = readFileSync(new URL("../components/paper-doll/ProductionCandidateWorkbench.tsx", import.meta.url), "utf8");
   assert.match(source, /Current Release/);
-  assert.match(source, /Read-only active ledger snapshot/);
+  assert.match(source, /explicit release head is read-only/);
   assert.doesNotMatch(source, />release lock</i);
 });
 
@@ -46,10 +46,10 @@ test("authority-mask inspection never paints the mask image over product pixels"
   assert.doesNotMatch(source, /name:\s*"authority-mask-overlay"/);
 });
 
-test("approved roller pixels route into roller-only Family Fit with one shared transform", () => {
+test("approved fitment pixels route into Family Fit with one shared transform", () => {
   const source = readFileSync(new URL("../components/paper-doll/ProductionCandidateWorkbench.tsx", import.meta.url), "utf8");
   assert.match(source, /onOpenFamilyFit=\{\(\) => enterMode\("family-fit"\)\}/);
-  assert.match(source, /overcapVariantKey=\{null\}/);
+  assert.match(source, /overcapVariantKey=\{selectedAsset && \(selectedAsset\.slot === "cap" \|\| selectedAsset\.slot === "overcap"\)/);
   assert.match(source, /placementTransform=\{mode === "family-fit" \? familyTransform/);
   assert.match(source, /approvedCandidate\.imageUrl/);
   assert.match(source, /onApprovedVariantsChange=\{handleApprovedVariantsChange\}/);

@@ -42,6 +42,10 @@ function validRequest() {
 
 test("AI jobs require an immutable parent, exact provider, and both masks", () => {
   assert.equal(CandidateJobRequestSchema.safeParse(validRequest()).success, true);
+  assert.equal(CandidateJobRequestSchema.safeParse({
+    ...validRequest(),
+    requirementKey: "CYL-9ML:CAP:MAT-GL",
+  }).success, true, "new cap intake uses the canonical CAP key");
 
   for (const missing of ["parentSha256", "authoritativeMask", "editMask"] as const) {
     const request: Record<string, unknown> = { ...validRequest() };
@@ -74,9 +78,10 @@ test("preview and legacy image models fail closed instead of falling back", () =
   }).success, false);
 });
 
-test("overcap prompts reject aluminium-part fabrication language", () => {
+test("cap prompts reject aluminium-part fabrication language", () => {
   assert.equal(CandidateJobRequestSchema.safeParse({
     ...validRequest(),
+    requirementKey: "CYL-9ML:CAP:MAT-GL",
     instruction: "Make this brushed anodized aluminum.",
   }).success, false);
 });

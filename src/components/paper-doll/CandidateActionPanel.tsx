@@ -64,7 +64,6 @@ const PROVIDERS: Array<{ id: CandidateProvider; label: string; detail: string }>
   { id: "google", label: "Nano Banana", detail: "Gemini image" },
   { id: "manual", label: "Upload", detail: "versioned source" },
 ];
-const OVERCAP_VARIANTS = new Set(["SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL", "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT"]);
 const ROLLER_VARIANTS = new Set(["PLASTIC", "METAL"]);
 
 function dataUrlBytes(dataUrl: string): Uint8Array {
@@ -132,9 +131,7 @@ export function CandidateActionPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const [reviewVariant, setReviewVariant] = useState<"PLASTIC" | "METAL">(
-    asset?.variantKey === "METAL" ? "METAL" : "PLASTIC",
-  );
+  const [reviewVariant, setReviewVariant] = useState(asset?.variantKey ?? "PLASTIC");
 
   const history = useQuery({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
@@ -149,7 +146,7 @@ export function CandidateActionPanel({
   const availableReviewVariants = useMemo(() => Array.from(new Set(
     componentHistory
       .map((entry) => entry.job.requirementKey.split(":").at(-1))
-      .filter((variant): variant is "PLASTIC" | "METAL" => variant === "PLASTIC" || variant === "METAL"),
+      .filter((variant): variant is string => Boolean(variant)),
   )), [componentHistory]);
   const selectedHistory = useMemo(
     () => componentHistory.filter((entry) => entry.job.requirementKey.endsWith(`:${reviewVariant}`)),
@@ -164,6 +161,9 @@ export function CandidateActionPanel({
       setReviewVariant(availableReviewVariants[0]);
     }
   }, [availableReviewVariants, reviewVariant]);
+  useEffect(() => {
+    if (asset?.variantKey) setReviewVariant(asset.variantKey);
+  }, [asset?.componentVersionId, asset?.variantKey]);
   // Failed and revoked outputs remain immutable audit records, but they cannot
   // displace a clean candidate in the working inspector.
   const latest = selectCandidateForReview(selectedHistory);
@@ -183,7 +183,9 @@ export function CandidateActionPanel({
   const requirement = useMemo(() => {
     if (!asset) return null;
     if (asset.slot === "roller" && ROLLER_VARIANTS.has(reviewVariant)) return `CYL-9ML:ROLLER:${reviewVariant}`;
-    if ((asset.slot === "overcap" || asset.slot === "cap") && OVERCAP_VARIANTS.has(asset.variantKey)) return `CYL-9ML:OVERCAP:${asset.variantKey}`;
+    if (asset.slot === "overcap" || asset.slot === "cap") return `CYL-9ML:CAP:${reviewVariant}`;
+    if (asset.slot === "sprayer") return `CYL-9ML:SPRAYER:${reviewVariant}`;
+    if (asset.slot === "pump") return `CYL-9ML:PUMP:${reviewVariant}`;
     return null;
   }, [asset, reviewVariant]);
 
@@ -340,7 +342,7 @@ export function CandidateActionPanel({
               <button
                 key={variant}
                 type="button"
-                disabled={!availableReviewVariants.includes(variant)}
+                disabled={availableReviewVariants.length > 0 && !availableReviewVariants.includes(variant)}
                 onClick={() => setReviewVariant(variant)}
                 className="rounded border px-2 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-30"
                 style={{ borderColor: reviewVariant === variant ? "rgba(97,214,200,0.52)" : "var(--darkroom-border-subtle)", color: reviewVariant === variant ? "#61d6c8" : "var(--darkroom-text-dim)" }}

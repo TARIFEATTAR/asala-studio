@@ -21,7 +21,7 @@ interface FunctionClient {
 const SharedPlacementRecordSchema = z.object({
   id: z.string().uuid(),
   familyKey: z.literal("CYL-9ML"),
-  fitmentGeometryKey: z.literal("fitment__roller-ball__17-415__v1"),
+  fitmentGeometryKey: z.string().regex(/^[a-z0-9][a-z0-9_.-]{2,179}$/),
   authorityMaskSha256: z.string().regex(/^[a-f0-9]{64}$/),
   canvas: z.object({ widthPx: z.literal(2080), heightPx: z.literal(2288) }),
   transform: z.object({

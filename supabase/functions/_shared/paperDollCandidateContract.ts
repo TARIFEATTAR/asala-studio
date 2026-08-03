@@ -146,12 +146,12 @@ export function parsePaperDollCandidateRequest(value: unknown): PaperDollCandida
   const instruction = string(raw.instruction, "instruction");
   if (instruction.length > 12_000) throw new Error("instruction exceeds 12,000 characters.");
   const requirementKey = string(raw.requirementKey, "requirementKey");
-  if (!/^CYL-9ML:(BODY|OVERCAP|ROLLER):/.test(requirementKey)) throw new Error("requirementKey is outside CYL-9ML scope.");
+  if (!/^CYL-9ML:(BODY|CAP|OVERCAP|ROLLER|SPRAYER|PUMP):/.test(requirementKey)) throw new Error("requirementKey is outside CYL-9ML scope.");
   if (
-    requirementKey.startsWith("CYL-9ML:OVERCAP:")
+    /^CYL-9ML:(CAP|OVERCAP):/.test(requirementKey)
     && /\b(aluminium|aluminum|anodised|anodized|brushed|machined)\b/i.test(instruction)
   ) {
-    throw new Error("Overcap instructions must describe moulded phenolic plastic and may not use metal-part fabrication language.");
+    throw new Error("Cap instructions must describe moulded phenolic plastic and may not use metal-part fabrication language.");
   }
   const transform = record(raw.transform, "transform");
   const translateXPx = transform.translateXPx;

@@ -61,6 +61,10 @@ test("references precede prompt text in every network-provider dispatch", () => 
 
 test("candidate request parser rejects cross-organization assets and asymmetric scale", () => {
   assert.equal(parsePaperDollCandidateRequest(request).model, "gemini-3.1-flash-image");
+  assert.equal(parsePaperDollCandidateRequest({
+    ...request,
+    requirementKey: "CYL-9ML:CAP:MAT-GL",
+  }).requirementKey, "CYL-9ML:CAP:MAT-GL");
   assert.throws(() => parsePaperDollCandidateRequest({
     ...request,
     source: { ...request.source, path: `90000000-0000-4000-8000-000000000009/CYL-9ML/source/${SHA}.png` },
@@ -71,6 +75,7 @@ test("candidate request parser rejects cross-organization assets and asymmetric 
   }), /asymmetric/i);
   assert.throws(() => parsePaperDollCandidateRequest({
     ...request,
+    requirementKey: "CYL-9ML:CAP:MAT-GL",
     instruction: "Make this a brushed anodised aluminium cap.",
   }), /phenolic plastic/i);
 });

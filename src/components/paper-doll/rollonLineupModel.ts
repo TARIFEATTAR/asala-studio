@@ -22,7 +22,7 @@ export interface RollonLineupItem {
 
 export function buildRollonLineup(
   assets: RollonLineupAsset[],
-  selection: { rollerVariantKey: string; overcapVariantKey?: string | null; rollerImageUrlOverride?: string },
+  selection: { rollerVariantKey: string; overcapVariantKey?: string | null; rollerImageUrlOverride?: string; overcapImageUrlOverride?: string },
 ): RollonLineupItem[] {
   const selectedRoller = assets.find((asset) => asset.slot === "roller" && asset.variantKey === selection.rollerVariantKey)
     ?? (selection.rollerImageUrlOverride ? assets.find((asset) => asset.slot === "roller") : null)
@@ -30,9 +30,12 @@ export function buildRollonLineup(
   const roller = selectedRoller && selection.rollerImageUrlOverride
     ? { ...selectedRoller, variantKey: selection.rollerVariantKey, imageUrl: selection.rollerImageUrlOverride }
     : selectedRoller;
-  const overcap = selection.overcapVariantKey
+  const selectedOvercap = selection.overcapVariantKey
     ? assets.find((asset) => asset.slot === "overcap" && asset.variantKey === selection.overcapVariantKey) ?? null
     : null;
+  const overcap = selectedOvercap && "overcapImageUrlOverride" in selection && typeof selection.overcapImageUrlOverride === "string"
+    ? { ...selectedOvercap, imageUrl: selection.overcapImageUrlOverride }
+    : selectedOvercap;
   return ROLLON_LINEUP_BODY_VARIANTS.map((bodyVariantKey) => {
     const body = assets.find((asset) => asset.slot === "body" && asset.variantKey === bodyVariantKey) ?? null;
     const issues = [
