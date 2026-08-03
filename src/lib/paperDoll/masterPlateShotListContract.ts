@@ -44,6 +44,8 @@ export const PaperDollMasterShotListSchema = z.object({
     familyIntakesSha256: Sha256Schema,
     componentAuthorityQueuePath: z.string().min(1),
     componentAuthorityQueueSha256: Sha256Schema,
+    parametricFamilyIndexPath: z.string().min(1),
+    parametricFamilyIndexSha256: Sha256Schema,
   }),
   summary: z.object({
     operationalRowCount: z.number().int().nonnegative(),

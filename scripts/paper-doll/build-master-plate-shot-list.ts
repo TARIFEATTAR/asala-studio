@@ -13,6 +13,7 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const catalogBacklogPath = path.join(workspaceRoot, "docs/paper-doll-rig/catalog-wide-plate-backlog.json");
 const familyIntakesPath = path.join(workspaceRoot, "docs/paper-doll-rig/catalog-family-intakes.json");
 const componentQueuePath = path.join(workspaceRoot, "docs/paper-doll-rig/component-authority-queue.json");
+const parametricFamilyIndexPath = path.join(workspaceRoot, "docs/paper-doll-rig/parametric-component-family-index.json");
 const cyl9ManifestPath = path.join(workspaceRoot, "docs/paper-doll-rig/cyl9-component-factory.json");
 const outputJsonPath = path.join(workspaceRoot, "docs/paper-doll-rig/master-plate-shot-list.json");
 const outputCsvPath = path.join(workspaceRoot, "docs/paper-doll-rig/master-plate-shot-list.csv");
@@ -64,16 +65,35 @@ function bodyAppearanceShotId(geometryKey: string, color: string): string {
 }
 
 export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotList> {
-  const [catalogText, familyText, componentText, cyl9Text] = await Promise.all([
+  const [catalogText, familyText, componentText, cyl9Text, parametricFamilyIndexText] = await Promise.all([
     readFile(catalogBacklogPath, "utf8"),
     readFile(familyIntakesPath, "utf8"),
     readFile(componentQueuePath, "utf8"),
     readFile(cyl9ManifestPath, "utf8"),
+    readFile(parametricFamilyIndexPath, "utf8"),
   ]);
   const catalog = JSON.parse(catalogText) as any;
   const familyIntakes = JSON.parse(familyText) as any;
   const componentQueue = JSON.parse(componentText) as any;
   const cyl9 = JSON.parse(cyl9Text) as any;
+  const parametricFamilyIndex = JSON.parse(parametricFamilyIndexText) as any;
+  const parametricCandidates = new Map<string, { recipePath: string; recipeSha256: string; localCandidateManifestPath: string; reviewContactSheetPath: string }>();
+  for (const family of parametricFamilyIndex.families) {
+    const recipePath = path.join(workspaceRoot, family.recipePath);
+    const recipeText = await readFile(recipePath, "utf8");
+    const recipe = JSON.parse(recipeText) as any;
+    for (const variant of recipe.variants) {
+      if (parametricCandidates.has(variant.sourceIdentity)) {
+        throw new Error(`Duplicate parametric candidate source identity: ${variant.sourceIdentity}`);
+      }
+      parametricCandidates.set(variant.sourceIdentity, {
+        recipePath: family.recipePath,
+        recipeSha256: sha256(recipeText),
+        localCandidateManifestPath: family.localCandidateManifestPath,
+        reviewContactSheetPath: family.reviewContactSheetPath,
+      });
+    }
+  }
   const componentByKey = new Map(cyl9.components.map((component: any) => [component.componentKey, component]));
   const cohortKeysByGeometry = new Map<string, string[]>();
   for (const cohort of familyIntakes.cohorts) {
@@ -140,6 +160,7 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
       ...item.finishEvidence,
       ...item.trimEvidence,
     ]).join(" · ") || item.sourceIdentity;
+    const parametricCandidate = parametricCandidates.get(item.sourceIdentity);
     return {
       shotId: `shot__${item.authorityQueueKey}`,
       recordType: "component-source" as const,
@@ -156,12 +177,21 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
       cohortKeys: [],
       status: hasLocal ? "authority-existing-local" as const : manual ? "manual-review-required" as const : "needs-authority" as const,
       priority: hasLocal ? "P0-VERIFY" as const : manual ? "P0-TRUTH" as const : "P1-PRODUCE" as const,
-      authorityStatus: item.authorityStatus,
+      authorityStatus: parametricCandidate ? "dimension-calibrated-profile-review-candidate" : item.authorityStatus,
       compatibilityStatus: item.compatibilityStatus,
-      nextGate: hasLocal ? "Approve material pixels and family fit through the production lifecycle." : manual ? "Resolve source identity/reference evidence before authority creation." : "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      existingAssetPaths: unique(localDefinitions.flatMap((component) => [component.source.path, component.authority?.maskPath])),
-      existingAssetSha256: unique(localDefinitions.flatMap((component) => [component.source.sha256, component.authority?.maskSha256])),
-      notes: item.issues.join(" | "),
+      nextGate: parametricCandidate ? "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved." : hasLocal ? "Approve material pixels and family fit through the production lifecycle." : manual ? "Resolve source identity/reference evidence before authority creation." : "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
+      existingAssetPaths: unique([
+        ...localDefinitions.flatMap((component) => [component.source.path, component.authority?.maskPath]),
+        ...(parametricCandidate ? [parametricCandidate.recipePath, parametricCandidate.localCandidateManifestPath, parametricCandidate.reviewContactSheetPath] : []),
+      ]),
+      existingAssetSha256: unique([
+        ...localDefinitions.flatMap((component) => [component.source.sha256, component.authority?.maskSha256]),
+        ...(parametricCandidate ? [parametricCandidate.recipeSha256] : []),
+      ]),
+      notes: unique([
+        ...item.issues,
+        ...(parametricCandidate ? ["Local candidate has exact shared alpha but is not geometry locked or production eligible."] : []),
+      ]).join(" | "),
     };
   });
 
@@ -261,6 +291,8 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
       familyIntakesSha256: sha256(familyText),
       componentAuthorityQueuePath: path.relative(workspaceRoot, componentQueuePath),
       componentAuthorityQueueSha256: sha256(componentText),
+      parametricFamilyIndexPath: path.relative(workspaceRoot, parametricFamilyIndexPath),
+      parametricFamilyIndexSha256: sha256(parametricFamilyIndexText),
     },
     summary: {
       operationalRowCount: rows.length,
@@ -280,6 +312,7 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
 function reportFor(shotList: PaperDollMasterShotList): string {
   const statusCounts = new Map<string, number>();
   for (const row of shotList.rows) statusCounts.set(row.status, (statusCounts.get(row.status) ?? 0) + 1);
+  const parametricProfileCandidateCount = shotList.rows.filter((row) => row.authorityStatus === "dimension-calibrated-profile-review-candidate").length;
   return `# Best Bottles master reusable plate shot list
 
 ## Answer
@@ -295,6 +328,7 @@ The operational ledger has ${shotList.summary.operationalRowCount} rows because 
 
 - ${shotList.summary.exactSourceBackedExistingCount} source-backed requirements already have exact local authority coverage.
 - ${shotList.summary.exactSourceBackedOutstandingCount} source-backed requirements remain authority or truth work.
+- ${parametricProfileCandidateCount} outstanding component appearances now have local dimension-calibrated profile candidates awaiting named authority review; they are not counted as approved coverage.
 - Status distribution: ${[...statusCounts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([status, count]) => `${status} ${count}`).join(", ")}.
 
 This is an upper-bound appearance shot list, not a claim that every row needs a separately modeled mesh. Geometry-family deduplication and deterministic material variants should reduce modeling work while retaining one approved output plate per required appearance.
