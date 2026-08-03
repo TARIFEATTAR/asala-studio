@@ -10,6 +10,7 @@ import {
 const recipePath = "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json";
 const standardCapRecipePath = "docs/paper-doll-rig/standard-cap-13-415-family-recipe.json";
 const standardCap15415RecipePath = "docs/paper-doll-rig/standard-cap-15-415-family-recipe.json";
+const shortCap18415RecipePath = "docs/paper-doll-rig/short-cap-18-415-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -131,4 +132,22 @@ test("15-415 standard-cap recipe preserves the verified 19 by 32 mm family", asy
     ["SSLV", "CP15-415ShnSl", "CMP-CAP-SSLV-15-415"],
   ]);
   assert.equal(recipe.mutationPolicy.remoteWritesPerformed, false);
+});
+
+test("18-415 short-cap recipe preserves the verified 21 by 19 mm family", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(shortCap18415RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__18-415__short-overcap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__18-415__5ef8879454");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 21,
+    outsideDiameterTolerance: 0.5,
+    height: 19,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku]), [
+    ["MSLV", "CP18-415MtSl", "CMP-CAP-MSLV-18415-S"],
+    ["SGLD", "CP18-415ShnGl", "CMP-CAP-SGLD-18415-S"],
+    ["SSLV", "CP18-415ShnSl", "CMP-CAP-SSLV-18415-S"],
+  ]);
 });

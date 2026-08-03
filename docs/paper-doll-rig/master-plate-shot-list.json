@@ -8,7 +8,7 @@
     "componentAuthorityQueuePath": "docs/paper-doll-rig/component-authority-queue.json",
     "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e",
     "parametricFamilyIndexPath": "docs/paper-doll-rig/parametric-component-family-index.json",
-    "parametricFamilyIndexSha256": "38749289d12236a6f40e4892c443e3b01967f7da6c866141e18f4f8f94f063b0"
+    "parametricFamilyIndexSha256": "9251bdfc9dfdc4c267759de8818788fd5ecb511651cf918b83c8d445c7198bb2"
   },
   "summary": {
     "operationalRowCount": 318,
@@ -13300,12 +13300,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/short-cap-18-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "ba96a07c9780e98e028fc8b0a0056f867518176d18ec20cb0a8ce96361f9b01e"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 275,
@@ -13384,12 +13390,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/short-cap-18-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "ba96a07c9780e98e028fc8b0a0056f867518176d18ec20cb0a8ce96361f9b01e"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 278,
@@ -13412,12 +13424,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/short-cap-18-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/18-415-short-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "ba96a07c9780e98e028fc8b0a0056f867518176d18ec20cb0a8ce96361f9b01e"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 279,
