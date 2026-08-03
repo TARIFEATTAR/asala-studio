@@ -8,7 +8,7 @@
     "componentAuthorityQueuePath": "docs/paper-doll-rig/component-authority-queue.json",
     "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e",
     "parametricFamilyIndexPath": "docs/paper-doll-rig/parametric-component-family-index.json",
-    "parametricFamilyIndexSha256": "22047229ccbef549b288376a8f3960fb8b655f5ad23d5c233289b0c386f19e25"
+    "parametricFamilyIndexSha256": "49250e210b95db1a6bc18eb725818fefffd6ae85acdc2a82fbd78be4fea5e7ce"
   },
   "summary": {
     "operationalRowCount": 318,
@@ -13054,12 +13054,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-short-fluted-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-short-fluted-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "5561fc0ea57542e6a40bbd25de31fa874afa34d66aa2751406cd332af4506865"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 266,
@@ -13082,12 +13088,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-short-fluted-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-short-fluted-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "5561fc0ea57542e6a40bbd25de31fa874afa34d66aa2751406cd332af4506865"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 267,

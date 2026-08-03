@@ -186,3 +186,32 @@ test("Blender assigns faux leather and metallic trim to separate source-derived 
     trimBandCount: 2,
   });
 });
+
+test("Blender defaults to the recipe variant set instead of a CYL-9ML variant", async (context) => {
+  try {
+    await readFile(blender);
+  } catch {
+    context.skip("Blender is not installed at the production path.");
+    return;
+  }
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "paper-doll-parametric-recipe-defaults-"));
+  const raw = JSON.parse(await readFile("docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json", "utf8"));
+  raw.render.widthPx = 128;
+  raw.render.heightPx = 160;
+  raw.render.samples = 1;
+  const recipePath = path.join(temporary, "recipe.json");
+  const outputPath = path.join(temporary, "output");
+  await writeFile(recipePath, `${JSON.stringify(raw)}\n`, "utf8");
+  const result = spawnSync(blender, [
+    "--background",
+    "--python", renderer,
+    "--",
+    "--recipe", recipePath,
+    "--out", outputPath,
+    "--samples", "1",
+  ], { encoding: "utf8", timeout: 120_000 });
+  const manifestPath = path.join(outputPath, "blender-manifest.json");
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  assert.deepEqual(manifest.renders.map((render: { variantKey: string }) => render.variantKey), ["BLK"]);
+});
