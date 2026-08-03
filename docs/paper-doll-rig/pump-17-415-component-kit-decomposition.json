@@ -63,11 +63,12 @@
     {
       "partId": "pump-protective-overcap",
       "responsibility": "secondary-overcap",
-      "outputPolicy": "reusable-full-canvas-plate",
+      "outputPolicy": "compound-with-exterior-swatches",
       "reviewFraming": "center-nontransparent-bounds",
-      "productionAnchor": "mount-axis-seat",
-      "independentlySelectable": true,
+      "productionAnchor": "component-relative",
+      "independentlySelectable": false,
       "assemblyContextQa": true,
+      "compoundWithPartId": "pump-head-and-collar",
       "sourceSelectors": [
         { "sourceId": "existing-lotion-overcap", "method": "reviewed-selection-mask" }
       ]

@@ -4,7 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseComponentCandidate } from "../../src/lib/paperDoll/componentPlateContract";
-import { loadCyl9ComponentFactory } from "../../src/lib/paperDoll/cyl9ComponentFactory";
+import {
+  CYL9_PRODUCTION_COMPONENT_KEYS,
+  loadCyl9ComponentFactory,
+} from "../../src/lib/paperDoll/cyl9ComponentFactory";
 
 type ArtifactIndex = {
   familyKey: string;
@@ -19,8 +22,8 @@ type ArtifactIndex = {
 export interface CandidateImportBundle {
   schemaVersion: 1;
   familyKey: "CYL-9ML";
-  candidateCount: 23;
-  assemblyReviewCount: 115;
+  candidateCount: 21;
+  assemblyReviewCount: 105;
   candidates: Array<{
     componentKey: string;
     variantKey: string;
@@ -79,10 +82,14 @@ export async function buildCyl9CandidateImportBundle(): Promise<CandidateImportB
 
   const selected = new Map([...materialized.artifacts, ...generated.artifacts].map((item) => [artifactKey(item), item]));
   for (const registered of rhinestones.artifacts) selected.set(artifactKey(registered), registered);
-  if (selected.size !== 23) throw new Error(`Candidate import bundle requires 23 unique candidates; found ${selected.size}.`);
+  const productionComponentKeys = new Set<string>(CYL9_PRODUCTION_COMPONENT_KEYS);
+  const productionComponents = manifest.components.filter((component) => productionComponentKeys.has(component.componentKey));
+  if (productionComponents.length !== 21) {
+    throw new Error(`Candidate import bundle requires 21 production-selectable component definitions; found ${productionComponents.length}.`);
+  }
 
   const candidates: CandidateImportBundle["candidates"] = [];
-  for (const component of manifest.components) {
+  for (const component of productionComponents) {
     for (const variant of component.variants) {
       const artifact = selected.get(artifactKey({ componentKey: component.componentKey, variantKey: variant.variantKey }));
       if (!artifact) throw new Error(`Missing selected candidate for ${component.componentKey}:${variant.variantKey}.`);
@@ -132,8 +139,8 @@ export async function buildCyl9CandidateImportBundle(): Promise<CandidateImportB
   return {
     schemaVersion: 1,
     familyKey: "CYL-9ML",
-    candidateCount: 23,
-    assemblyReviewCount: 115,
+    candidateCount: 21,
+    assemblyReviewCount: 105,
     candidates,
     mutationPolicy: {
       remoteWritesPerformed: false,

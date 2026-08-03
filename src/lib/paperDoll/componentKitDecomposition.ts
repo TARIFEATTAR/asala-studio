@@ -11,6 +11,7 @@ const ComponentResponsibilitySchema = z.enum([
 
 const ComponentOutputPolicySchema = z.enum([
   "reusable-full-canvas-plate",
+  "compound-with-exterior-swatches",
   "body-contextual-weld",
   "source-evidence-only",
 ]);
@@ -115,6 +116,7 @@ const ComponentKitPartSchema = z.object({
   productionAnchor: ComponentProductionAnchorSchema,
   independentlySelectable: z.boolean(),
   assemblyContextQa: z.boolean(),
+  compoundWithPartId: z.string().min(1).optional(),
   sourceSelectors: z.array(ComponentSourceSelectorSchema).min(1),
 });
 
@@ -208,15 +210,49 @@ export const ComponentKitDecompositionSchema = z.object({
 
     if (
       part.responsibility === "secondary-overcap"
-      && (
-        part.outputPolicy !== "reusable-full-canvas-plate"
-        || !part.independentlySelectable
-      )
+      && part.outputPolicy === "reusable-full-canvas-plate"
+      && !part.independentlySelectable
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Secondary overcap must be its own reusable plate and independently selectable.",
         path: ["parts", index],
+      });
+    }
+
+    if (part.responsibility === "secondary-overcap" && part.outputPolicy === "compound-with-exterior-swatches") {
+      const companion = part.compoundWithPartId
+        ? kit.parts.find((candidate) => candidate.partId === part.compoundWithPartId)
+        : undefined;
+      if (part.independentlySelectable) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Compound overcap swatches cannot be independently selected.",
+          path: ["parts", index, "independentlySelectable"],
+        });
+      }
+      if (part.productionAnchor !== "component-relative") {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Compound overcap swatches must be anchored relative to their exterior dispenser.",
+          path: ["parts", index, "productionAnchor"],
+        });
+      }
+      if (!companion || companion.responsibility !== "exterior-dispenser") {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Compound overcap swatches must reference the exterior dispenser part.",
+          path: ["parts", index, "compoundWithPartId"],
+        });
+      }
+    } else if (
+      part.responsibility === "secondary-overcap"
+      && part.outputPolicy !== "reusable-full-canvas-plate"
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Secondary overcap must be its own reusable plate or composed into exterior assembly swatches.",
+        path: ["parts", index, "outputPolicy"],
       });
     }
 
@@ -252,6 +288,7 @@ export type ComponentKitDecomposition = z.infer<typeof ComponentKitDecomposition
 export interface ComponentKitDecompositionPlan {
   kitId: string;
   reusablePlatePartIds: string[];
+  compoundSwatchPartIds: string[];
   bodyContextualPartIds: string[];
   sourceEvidencePartIds: string[];
   productionPlateCount: number;
@@ -269,16 +306,20 @@ export function buildComponentKitDecompositionPlan(
   const reusablePlatePartIds = kit.parts
     .filter((part) => part.outputPolicy === "reusable-full-canvas-plate")
     .map((part) => part.partId);
+  const compoundSwatchPartIds = kit.parts
+    .filter((part) => part.outputPolicy === "compound-with-exterior-swatches")
+    .map((part) => part.partId);
   return {
     kitId: kit.kitId,
     reusablePlatePartIds,
+    compoundSwatchPartIds,
     bodyContextualPartIds: kit.parts
       .filter((part) => part.outputPolicy === "body-contextual-weld")
       .map((part) => part.partId),
     sourceEvidencePartIds: kit.parts
       .filter((part) => part.outputPolicy === "source-evidence-only")
       .map((part) => part.partId),
-    productionPlateCount: reusablePlatePartIds.length,
+    productionPlateCount: reusablePlatePartIds.length + compoundSwatchPartIds.length,
     requiresAssemblyContextQa: kit.parts.some((part) => part.assemblyContextQa),
   };
 }

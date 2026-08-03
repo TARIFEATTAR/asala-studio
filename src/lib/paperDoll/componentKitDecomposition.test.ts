@@ -158,6 +158,39 @@ test("decomposes a sprayer kit into two reusable plates and one body-contextual 
   assert.equal(plan.requiresAssemblyContextQa, true);
 });
 
+test("routes a translucent overcap into closed assembly swatches instead of an independent overlay", () => {
+  const compound = structuredClone(sprayerKit) as Record<string, unknown> & {
+    parts: Array<Record<string, unknown>>;
+  };
+  compound.parts[1].outputPolicy = "compound-with-exterior-swatches";
+  compound.parts[1].productionAnchor = "component-relative";
+  compound.parts[1].independentlySelectable = false;
+  compound.parts[1].compoundWithPartId = "sprayer-head";
+
+  const parsed = parseComponentKitDecomposition(compound);
+  const plan = buildComponentKitDecompositionPlan(parsed);
+
+  assert.equal(parsed.parts[1].outputPolicy, "compound-with-exterior-swatches");
+  assert.deepEqual(plan.reusablePlatePartIds, ["sprayer-head"]);
+  assert.deepEqual(plan.compoundSwatchPartIds, ["protective-overcap"]);
+  assert.equal(plan.productionPlateCount, 2);
+});
+
+test("rejects a compound translucent overcap that remains independently selectable", () => {
+  const invalid = structuredClone(sprayerKit) as Record<string, unknown> & {
+    parts: Array<Record<string, unknown>>;
+  };
+  invalid.parts[1].outputPolicy = "compound-with-exterior-swatches";
+  invalid.parts[1].productionAnchor = "component-relative";
+  invalid.parts[1].independentlySelectable = true;
+  invalid.parts[1].compoundWithPartId = "sprayer-head";
+
+  assert.throws(
+    () => parseComponentKitDecomposition(invalid),
+    /Compound overcap swatches cannot be independently selected/,
+  );
+});
+
 test("rejects a dip tube flattened into a global reusable plate", () => {
   const invalid = structuredClone(sprayerKit) as Record<string, unknown> & {
     parts: Array<Record<string, unknown>>;
@@ -227,6 +260,12 @@ test("the 17-415 sprayer and pump stay distinct while each preserves its compoun
   assert.ok(pump.parts[0].sourceSelectors.every((selector) => selector.method === "psd-layer-composite"));
   assert.equal(sprayer.parts[1].partId, "sprayer-protective-overcap");
   assert.equal(pump.parts[1].partId, "pump-protective-overcap");
+  assert.equal(sprayer.parts[1].outputPolicy, "compound-with-exterior-swatches");
+  assert.equal(pump.parts[1].outputPolicy, "compound-with-exterior-swatches");
+  assert.equal(sprayer.parts[1].compoundWithPartId, "sprayer-head-and-collar");
+  assert.equal(pump.parts[1].compoundWithPartId, "pump-head-and-collar");
+  assert.equal(sprayer.parts[1].independentlySelectable, false);
+  assert.equal(pump.parts[1].independentlySelectable, false);
   assert.equal(sprayer.parts[2].outputPolicy, "body-contextual-weld");
   assert.equal(pump.parts[2].outputPolicy, "body-contextual-weld");
 });

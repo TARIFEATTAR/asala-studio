@@ -85,17 +85,17 @@ async function uploadImmutable(input: {
 
 async function loadBundle(bundlePath: string): Promise<CandidateImportBundle> {
   const bundle = JSON.parse(await readFile(bundlePath, "utf8")) as CandidateImportBundle;
-  if (bundle.schemaVersion !== 1 || bundle.familyKey !== "CYL-9ML" || bundle.candidateCount !== 23 || bundle.candidates.length !== 23) {
-    throw new Error("Candidate import bundle must contain the exact 23-component CYL-9ML set.");
+  if (bundle.schemaVersion !== 1 || bundle.familyKey !== "CYL-9ML" || bundle.candidateCount !== 21 || bundle.candidates.length !== 21) {
+    throw new Error("Candidate import bundle must contain the exact 21 production-selectable CYL-9ML components.");
   }
   if (Object.values(bundle.mutationPolicy).some((value) => value !== false)) {
     throw new Error("Candidate import bundle must prove zero prior production mutations.");
   }
-  if (new Set(bundle.candidates.map((item) => item.componentKey)).size !== 23) {
-    throw new Error("Candidate import bundle must contain 23 distinct component identities.");
+  if (new Set(bundle.candidates.map((item) => item.componentKey)).size !== 21) {
+    throw new Error("Candidate import bundle must contain 21 distinct component identities.");
   }
-  if (new Set(bundle.candidates.map((item) => item.candidate.candidateId)).size !== 23) {
-    throw new Error("Candidate import bundle must contain 23 distinct immutable candidate identities.");
+  if (new Set(bundle.candidates.map((item) => item.candidate.candidateId)).size !== 21) {
+    throw new Error("Candidate import bundle must contain 21 distinct immutable candidate identities.");
   }
   return bundle;
 }

@@ -55,9 +55,9 @@ test("preserves source readiness and reviewed decomposition evidence as separate
   assert.ok(sprayer15415?.evidencePaths.some((value) => value.endsWith(
     "SPRAYER-15-415-AUTHORITY-REVIEW.md",
   )));
-  assert.equal(pump17415?.auditStatus, "shared-exterior-geometry-locked-complete-assembly-gates-remain");
+  assert.equal(pump17415?.auditStatus, "shared-exterior-geometry-locked-compound-closed-swatch-and-body-context-gates-remain");
   assert.equal(pump17415?.sourceStatus, "local-authorities-require-reconciliation");
-  assert.equal(sprayer17415?.auditStatus, "shared-exterior-geometry-locked-complete-assembly-gates-remain");
+  assert.equal(sprayer17415?.auditStatus, "shared-exterior-geometry-locked-compound-closed-swatch-and-body-context-gates-remain");
   assert.ok(sprayer17415?.evidencePaths.some((value) => value.endsWith(
     "DISPENSER-17-415-AUTHORITY-REVIEW.md",
   )));

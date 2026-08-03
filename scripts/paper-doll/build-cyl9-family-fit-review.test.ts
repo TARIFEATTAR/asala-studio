@@ -7,8 +7,8 @@ import path from "node:path";
 
 import { mergeCyl9CandidateArtifacts } from "./build-cyl9-family-fit-review";
 
-test("complete review merges seven deterministic and sixteen generated candidates in catalog order", () => {
-  const componentOrder = Array.from({ length: 23 }, (_, index) => `component-${index}`);
+test("complete review merges seven deterministic and fourteen generated candidates in catalog order", () => {
+  const componentOrder = Array.from({ length: 21 }, (_, index) => `component-${index}`);
   const artifact = (componentKey: string) => ({
     componentKey,
     variantKey: componentKey,

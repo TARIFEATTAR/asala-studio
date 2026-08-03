@@ -101,6 +101,67 @@ export function resolveDispenser17415ApprovalState(input: {
   };
 }
 
+export function describeDispenser17415AssemblyResponsibilities(): {
+  closedAssemblySwatches: Array<{
+    lane: "sprayer" | "pump";
+    protectivePartId: string;
+    compoundWithPartId: string;
+    outputPolicy: "compound-with-exterior-swatches";
+    independentlySelectable: false;
+    sourcePath: string;
+    sourceSha256: string;
+  }>;
+  bodyContextualResponsibilities: Array<{
+    lane: "sprayer" | "pump";
+    partId: string;
+    route: "body-contextual-weld";
+    stockTubeLengthMm: number | null;
+    productionPlateEligible: false;
+    reviewIssue: string;
+  }>;
+} {
+  return {
+    closedAssemblySwatches: [
+      {
+        lane: "sprayer",
+        protectivePartId: "sprayer-protective-overcap",
+        compoundWithPartId: "sprayer-head-and-collar",
+        outputPolicy: "compound-with-exterior-swatches",
+        independentlySelectable: false,
+        sourcePath: "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
+        sourceSha256: "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba",
+      },
+      {
+        lane: "pump",
+        protectivePartId: "pump-protective-overcap",
+        compoundWithPartId: "pump-head-and-collar",
+        outputPolicy: "compound-with-exterior-swatches",
+        independentlySelectable: false,
+        sourcePath: "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png",
+        sourceSha256: "1b5980d6e673e9defe20c16721c694dc5c3ee99614dcf128d0c11f83a5ed05ce",
+      },
+    ],
+    bodyContextualResponsibilities: [
+      {
+        lane: "sprayer",
+        partId: "sprayer-dip-tube",
+        route: "body-contextual-weld",
+        stockTubeLengthMm: 93.8,
+        productionPlateEligible: false,
+        reviewIssue: "Stock length is known; tube diameter, body trim margin, pixel scale, and inserted-plug profile require review.",
+      },
+      {
+        lane: "pump",
+        partId: "pump-dip-tube",
+        route: "body-contextual-weld",
+        stockTubeLengthMm: null,
+        productionPlateEligible: false,
+        reviewIssue: "Pump tube length, diameter, body trim margin, pixel scale, and inserted-plug profile are not verified.",
+      },
+    ],
+  };
+}
+
 async function alphaBounds(png: Buffer): Promise<{ left: number; top: number; width: number; height: number }> {
   const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let left = info.width;
@@ -308,6 +369,7 @@ export async function buildDispenser17415AuthorityReview(input: {
     allCandidateAlphaMatchesAuthority,
     namedFamilyFitApproval: true,
   });
+  const assemblyResponsibilities = describeDispenser17415AssemblyResponsibilities();
   const manifest = {
     schemaVersion: 1,
     familyKey: "DISPENSER-17-415",
@@ -358,28 +420,7 @@ export async function buildDispenser17415AuthorityReview(input: {
       geometryLocked: approvalState.geometryLocked,
     },
     functionalLanes: serializableLanes,
-    independentOvercaps: [
-      {
-        lane: "sprayer",
-        componentKey: "overcap__17-415__SPRAY-TRNS",
-        sourcePath: "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
-        sourceSha256: "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba",
-        authorityMaskPath: "assets/paper-doll/authority-masks/cyl9/overcap__17-415__spray-translucent__v1__mask.png",
-        authorityMaskSha256: "da32c09f468e80be9d5f9410f4e69b403a82d011757e9ea60a6127e66de46e12",
-      },
-      {
-        lane: "pump",
-        componentKey: "overcap__17-415__LOTION-TRNS",
-        sourcePath: "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png",
-        sourceSha256: "1b5980d6e673e9defe20c16721c694dc5c3ee99614dcf128d0c11f83a5ed05ce",
-        authorityMaskPath: "assets/paper-doll/authority-masks/cyl9/overcap__17-415__lotion-translucent__v1__mask.png",
-        authorityMaskSha256: "ed1a5c17d4fada850e3a41bee36a01ad8829b6adeeb13b29d26306dddca69470",
-      },
-    ],
-    bodyContextualResponsibilities: [
-      { lane: "sprayer", partId: "sprayer-dip-tube", route: "body-contextual-weld", catalogLengthMm: 93.8, productionPlateEligible: false },
-      { lane: "pump", partId: "pump-dip-tube", route: "body-contextual-weld", catalogLengthMm: null, productionPlateEligible: false, reviewIssue: "pump tube length is not verified" },
-    ],
+    ...assemblyResponsibilities,
     contactSheetPaths,
     qa: {
       candidateCount: laneResults.sprayer.length + laneResults.pump.length,
@@ -389,7 +430,7 @@ export async function buildDispenser17415AuthorityReview(input: {
       namedFamilyFitApprovalRequired: approvalState.namedFamilyFitApprovalRequired,
     },
     productionEligible: approvalState.completeAssemblyProductionEligible,
-    productionEligibilityNote: "The exterior head-and-collar geometry is locked. Complete assemblies remain pre-release until the independent overcaps and body-contextual dip tubes pass their own gates.",
+    productionEligibilityNote: "The exterior head-and-collar geometry is locked. Complete assemblies remain pre-release until the compound closed swatches receive named visual approval and the body-contextual dip-tube/plug jobs pass their own calibrated gates.",
     currentReleaseChanged: false,
     sanityChanged: false,
   };

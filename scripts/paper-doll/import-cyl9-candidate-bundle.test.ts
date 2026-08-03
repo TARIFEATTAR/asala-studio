@@ -13,7 +13,7 @@ test("candidate bundle import is dry-run only by default", async () => {
   assert.equal(options.execute, false);
   assert.doesNotThrow(() => assertImportCandidateBundleAuthorization(options));
   const plan = await buildCandidateImportDryRun(options);
-  assert.equal(plan.candidateCount, 23);
+  assert.equal(plan.candidateCount, 21);
   assert.equal(plan.mode, "dry-run");
   assert.deepEqual(plan.forbiddenMutations, ["approval", "placement", "current-release", "sanity-draft", "public-publication"]);
 });

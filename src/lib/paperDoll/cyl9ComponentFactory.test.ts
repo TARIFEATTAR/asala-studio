@@ -3,6 +3,8 @@ import test from "node:test";
 
 import {
   CYL9_COMPONENT_KEYS,
+  CYL9_COMPOUND_SOURCE_ONLY_COMPONENT_KEYS,
+  CYL9_PRODUCTION_COMPONENT_KEYS,
   buildCyl9ExpectedCatalogMappings,
   countCyl9RowsPerBody,
   loadCyl9ComponentFactory,
@@ -13,6 +15,11 @@ test("CYL-9ML registers 23 component plates and 145 explicit assemblies", () => 
 
   assert.equal(manifest.components.length, 23);
   assert.equal(CYL9_COMPONENT_KEYS.length, 23);
+  assert.equal(CYL9_PRODUCTION_COMPONENT_KEYS.length, 21);
+  assert.deepEqual(CYL9_COMPOUND_SOURCE_ONLY_COMPONENT_KEYS, [
+    "overcap__17-415__SPRAY-TRNS",
+    "overcap__17-415__LOTION-TRNS",
+  ]);
   assert.deepEqual(
     manifest.components.map(({ componentKey }) => componentKey),
     [...CYL9_COMPONENT_KEYS],
@@ -97,7 +104,7 @@ test("CYL-9ML inventory contains the exact slot counts", () => {
   assert.equal(counts.overcap, 2);
 });
 
-test("catalog mapping generation is deterministic and includes secondary overcaps", () => {
+test("catalog mapping generation is deterministic and never stacks a translucent overcap", () => {
   const manifest = loadCyl9ComponentFactory();
   const generated = buildCyl9ExpectedCatalogMappings(manifest);
 
@@ -116,13 +123,24 @@ test("catalog mapping generation is deterministic and includes secondary overcap
   assert.ok(
     generated
       .filter(({ mode }) => mode === "spray")
-      .every(({ componentVariantKeys }) => componentVariantKeys.some((key) => key.includes("SPRAY-TRNS"))),
+      .every(({ componentVariantKeys }) => (
+        componentVariantKeys.length === 1
+        && componentVariantKeys[0].startsWith("sprayer__17-415__")
+        && !componentVariantKeys[0].includes("TRNS")
+      )),
   );
   assert.ok(
     generated
       .filter(({ mode }) => mode === "lotion")
-      .every(({ componentVariantKeys }) => componentVariantKeys.some((key) => key.includes("LOTION-TRNS"))),
+      .every(({ componentVariantKeys }) => (
+        componentVariantKeys.length === 1
+        && componentVariantKeys[0].startsWith("pump__17-415__")
+        && !componentVariantKeys[0].includes("TRNS")
+      )),
   );
+  assert.ok(generated.every(({ componentVariantKeys }) => (
+    componentVariantKeys.every((key) => !key.startsWith("overcap__17-415__"))
+  )));
 });
 
 test("the five body hashes remain locked and the cap calibration stays inset", () => {
