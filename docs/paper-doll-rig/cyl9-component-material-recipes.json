@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "familyKey": "CYL-9ML",
   "confirmationToken": "CYL9-MATERIAL-BATCH",
+  "priceCard": {
+    "priceCardId": "openai-gpt-image-2-high-2080x2288-2026-08-03",
+    "sourceUrl": "https://developers.openai.com/api/docs/models/gpt-image-2",
+    "model": "gpt-image-2",
+    "quality": "high",
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "outputTokenRateUsdPerMillion": 30,
+    "estimatedOutputTokens": 14114,
+    "estimatedOutputCostUsd": 0.42342,
+    "estimatedRequestCostUsd": 0.43,
+    "estimateScope": "output plus small rounding allowance; variable image/text input tokens are not invoice-reconciled"
+  },
   "materialPolicies": {
     "deterministic-mirror": {
       "provider": "deterministic",
@@ -12,13 +25,13 @@
     "gpt-material": {
       "provider": "openai",
       "model": "gpt-image-2",
-      "estimatedCostUsd": null,
+      "estimatedCostUsd": 0.43,
       "reviewChecklist": ["surface structure matches the declared material class", "camera and lighting direction remain catalog-consistent", "exact authority alpha is copied after generation"]
     },
     "gpt-rhinestone": {
       "provider": "openai",
       "model": "gpt-image-2",
-      "estimatedCostUsd": null,
+      "estimatedCostUsd": 0.43,
       "decorationPolicy": "deterministic-crystal-v1",
       "reviewChecklist": ["base material passes before decoration", "all eight registered stones retain stable IDs and positions", "stones remain inside the shared cap silhouette"]
     },
@@ -31,7 +44,7 @@
     "gpt-translucent": {
       "provider": "openai",
       "model": "gpt-image-2",
-      "estimatedCostUsd": null,
+      "estimatedCostUsd": 0.43,
       "reviewChecklist": ["transmission and edge density remain visible", "material is not flattened to opaque white", "assembly-context QA passes on all five bodies"]
     }
   },

@@ -1,4 +1,5 @@
 import cyl9FactoryJson from "../../../docs/paper-doll-rig/cyl9-component-factory.json";
+import cyl9CatalogCrosswalkJson from "../../../docs/paper-doll-rig/cyl9-catalog-crosswalk.json";
 
 import {
   parsePaperDollFamilyProductionManifest,
@@ -101,12 +102,45 @@ export function buildCyl9ExpectedCatalogMappings(
   return mappings;
 }
 
-export function loadCyl9ComponentFactory(): PaperDollFamilyProductionManifest {
-  const inventory = parsePaperDollFamilyProductionManifest(cyl9FactoryJson);
+export function attachCyl9CatalogMappings(
+  inventory: PaperDollFamilyProductionManifest,
+): PaperDollFamilyProductionManifest {
+  if (inventory.familyKey !== "CYL-9ML") {
+    throw new Error(`Cannot attach the CYL-9ML catalog crosswalk to ${inventory.familyKey}.`);
+  }
+  const crosswalk = cyl9CatalogCrosswalkJson as {
+    mappings: Array<{ mappingKey: string; graceSku: string; websiteSku: string }>;
+    reviewIssues: Array<{
+      issueKey: string;
+      websiteSku: string;
+      reason: "duplicate-website-sku-conflicting-body-color";
+      resolution: "selected-row-matching-website-sku-body";
+      selectedGraceSku: string;
+      sourceRows: Array<{ graceSku: string; color: string }>;
+    }>;
+  };
+  const catalogIdentityByMappingKey = new Map(
+    crosswalk.mappings.map((mapping) => [mapping.mappingKey, mapping]),
+  );
+  const catalogMappings = buildCyl9ExpectedCatalogMappings(inventory).map((mapping) => {
+    const identity = catalogIdentityByMappingKey.get(mapping.mappingKey);
+    if (!identity) throw new Error(`CYL-9ML crosswalk is missing ${mapping.mappingKey}.`);
+    return { ...mapping, graceSku: identity.graceSku, websiteSku: identity.websiteSku };
+  });
+  if (catalogIdentityByMappingKey.size !== catalogMappings.length) {
+    throw new Error("CYL-9ML crosswalk contains mappings outside the production manifest.");
+  }
   return parsePaperDollFamilyProductionManifest({
     ...inventory,
-    catalogMappings: buildCyl9ExpectedCatalogMappings(inventory),
+    catalogMappings,
+    catalogReviewIssues: crosswalk.reviewIssues,
   });
+}
+
+export function loadCyl9ComponentFactory(): PaperDollFamilyProductionManifest {
+  return attachCyl9CatalogMappings(
+    parsePaperDollFamilyProductionManifest(cyl9FactoryJson),
+  );
 }
 
 export function countCyl9RowsPerBody(
@@ -117,4 +151,3 @@ export function countCyl9RowsPerBody(
     return counts;
   }, {});
 }
-

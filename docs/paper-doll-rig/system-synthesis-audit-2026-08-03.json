@@ -1,0 +1,217 @@
+{
+  "auditVersion": 1,
+  "date": "2026-08-03",
+  "scope": "repository-audit-and-local-catalog-crosswalk",
+  "productionAuthority": "paper-doll-component-factory-v2-and-atomic-release-cut",
+  "evidence": {
+    "catalogRows": 2483,
+    "catalogFamilyLabels": 39,
+    "bodyGeometryRows": 118,
+    "rawNeckFinishLabels": 34,
+    "rawApplicatorLabels": 14,
+    "rawComponentAppearanceKeys": 363,
+    "catalogSourceBackedPlateRequirements": 309,
+    "catalogBodyAppearancePlateRequirements": 161,
+    "catalogExplicitComponentPlateRequirements": 148,
+    "catalogComponentDescriptorReviewGroups": 42,
+    "catalogVerifiedSharedComponentAuthorityGroups": 1,
+    "catalogVerifiedSharedComponentAuthorityAppearances": 10,
+    "catalogLocalComponentReconciliationGroups": 2,
+    "catalogSourceReadyComponentReviewGroups": 28,
+    "catalogSourceReadyComponentIdentitiesReviewed": 100,
+    "catalogSourceReadyComponentReferencesReviewed": 117,
+    "catalogSourceReferenceReviewFailures": 0,
+    "catalogPhysicalReviewDecisionsRecorded": 3,
+    "catalogDimensionCalibratedParametricCandidateFamilies": 1,
+    "catalogDimensionCalibratedParametricCandidateAppearances": 9,
+    "catalogParametricCandidateExactAlphaAppearances": 9,
+    "catalogParametricCandidateGeometryLocked": 0,
+    "catalogSourceIncompleteComponentReviewGroups": 11,
+    "catalogSourceBackedExactExisting": 22,
+    "catalogSourceBackedOutstanding": 287,
+    "catalogOperationalShotListRows": 318,
+    "catalogSupplementalExistingRows": 6,
+    "catalogMissingSourceResponsibilityRows": 3,
+    "tracked3dAssetFiles": 0,
+    "cyl9BodyPlates": 5,
+    "cyl9Components": 23,
+    "cyl9GeometryFamilies": 13,
+    "cyl9ApprovedAuthorities": 23,
+    "cyl9LockedPlacements": 0,
+    "cyl9DerivedAssemblyMappings": 145,
+    "cyl9CatalogRowsObserved": 147,
+    "cyl9UniqueWebsiteSkus": 145,
+    "cyl9DuplicateRowsQuarantined": 2,
+    "cyl9QueuedLocalCandidateRequests": 23,
+    "cyl9LocalCandidates": 23,
+    "cyl9ExactAlphaCandidates": 23,
+    "cyl9FamilyFitAssemblies": 115,
+    "cyl9RhinestoneCandidatesRegistered": 3,
+    "cyl9TranslucentCandidatesRequiringReview": 2,
+    "corePaperDollTestsPassing": 48,
+    "componentFactoryTestsPassing": 95,
+    "parametricBlenderIntegrationTestsPassing": 1,
+    "cyl9CapTestsPassing": 14
+  },
+  "capabilities": [
+    {
+      "capability": "canonical-catalog-and-measurement-truth",
+      "status": "existing-but-unreliable",
+      "recommended_action": "normalize dirty neck and component identities before catalog-wide compatibility",
+      "priority": "high"
+    },
+    {
+      "capability": "prompt-and-framing-rig",
+      "status": "existing-and-working",
+      "recommended_action": "preserve and keep distinct from physical 3d geometry claims",
+      "priority": "high"
+    },
+    {
+      "capability": "complete-parametric-3d-rig",
+      "status": "missing",
+      "recommended_action": "add only family-by-family when it materially improves geometry or internal optics",
+      "priority": "medium"
+    },
+    {
+      "capability": "13-415-parametric-overcap-candidate",
+      "status": "existing-but-incomplete",
+      "recommended_action": "review and approve the dimension-calibrated profile before treating its exact-alpha variants as geometry authority",
+      "priority": "high"
+    },
+    {
+      "capability": "cyl9-body-plate-authority",
+      "status": "existing-and-working",
+      "recommended_action": "preserve five approved hashes",
+      "priority": "critical"
+    },
+    {
+      "capability": "component-authority-masks",
+      "status": "existing-and-working",
+      "recommended_action": "reuse exact-alpha clamp for every candidate",
+      "priority": "critical"
+    },
+    {
+      "capability": "cyl9-material-candidate-library",
+      "status": "existing-and-working",
+      "recommended_action": "perform named pixel review on the 23 immutable local candidates; do not confuse candidate creation with approval",
+      "priority": "critical"
+    },
+    {
+      "capability": "cyl9-family-placement",
+      "status": "existing-but-incomplete",
+      "recommended_action": "review and lock 13 geometry-family placements",
+      "priority": "critical"
+    },
+    {
+      "capability": "catalog-exact-sku-recipes",
+      "status": "existing-and-working",
+      "recommended_action": "preserve the source-hashed 145-SKU crosswalk and keep the two conflicting duplicate rows quarantined",
+      "priority": "critical"
+    },
+    {
+      "capability": "deterministic-compositor",
+      "status": "existing-and-working",
+      "recommended_action": "extend only for proven missing layer categories",
+      "priority": "high"
+    },
+    {
+      "capability": "contextual-sprayer-pump-weld",
+      "status": "existing-but-incomplete",
+      "recommended_action": "validate one real CYL-9ML sprayer across visible and non-visible tube bodies",
+      "priority": "high"
+    },
+    {
+      "capability": "append-only-component-lifecycle",
+      "status": "existing-and-working",
+      "recommended_action": "make it the only production approval authority",
+      "priority": "critical"
+    },
+    {
+      "capability": "atomic-release-cut-and-current-release",
+      "status": "existing-and-working",
+      "recommended_action": "use after candidate and placement approval",
+      "priority": "critical"
+    },
+    {
+      "capability": "sanity-draft-public-separation",
+      "status": "existing-and-working",
+      "recommended_action": "sync draft after named release cut and keep public action separate",
+      "priority": "critical"
+    },
+    {
+      "capability": "legacy-darkroom-paper-doll",
+      "status": "existing-but-duplicated",
+      "recommended_action": "bridge intake to the new lifecycle and prevent legacy approvals from becoming production truth",
+      "priority": "high"
+    },
+    {
+      "capability": "liquid-content-layer",
+      "status": "existing-but-incomplete",
+      "recommended_action": "defer universal plates; run a body-contextual CYL-9ML A/B after component release proof",
+      "priority": "medium"
+    },
+    {
+      "capability": "labels-and-decoration",
+      "status": "missing",
+      "recommended_action": "add after component release proof with explicit panel and view compatibility",
+      "priority": "medium"
+    },
+    {
+      "capability": "catalog-wide-body-plate-library",
+      "status": "existing-but-incomplete",
+      "recommended_action": "work the 161-row body appearance list from the 118 measured geometries, preserving exact existing coverage and resolving truth flags before generation",
+      "priority": "high"
+    },
+    {
+      "capability": "catalog-wide-component-compatibility",
+      "status": "existing-but-incomplete",
+      "recommended_action": "group the 148 explicit component appearances into verified physical geometry families and normalize compatibility before production",
+      "priority": "high"
+    },
+    {
+      "capability": "catalog-wide-master-shot-list",
+      "status": "existing-and-working",
+      "recommended_action": "use the generated 318-row operational ledger as the only catalog-wide checklist; do not generate one image per SKU",
+      "priority": "critical"
+    },
+    {
+      "capability": "catalog-wide-component-geometry-review",
+      "status": "existing-but-incomplete",
+      "recommended_action": "review the 42 conservative descriptor lanes; promote shared geometry only from exact authority or verified physical dimensions",
+      "priority": "critical"
+    },
+    {
+      "capability": "catalog-wide-component-source-review-evidence",
+      "status": "existing-and-working",
+      "recommended_action": "use the ranked 28-lane diagnostic summary and recorded physical-review decisions; never treat source IoU as an automatic geometry gate",
+      "priority": "critical"
+    }
+  ],
+  "nextMilestone": {
+    "familyKey": "CYL-9ML",
+    "action": "perform named pixel and five-body review on the 23-component candidate matrix, then lock 13 family placements",
+    "productionWritesAuthorized": false
+  },
+  "nextFamilyIntake": {
+    "familyKey": "CYL-5ML-13-415",
+    "status": "pre-authority-intake",
+    "measuredGeometryRecords": 3,
+    "bodyAppearanceRequirements": 4,
+    "catalogIdentities": 54,
+    "normalizedComponentResponsibilities": {
+      "cap": 13,
+      "roller": 2,
+      "sprayer": 8
+    },
+    "localAuthorityEvidence": "missing",
+    "legacyFullProductReferencesFound": true,
+    "productionWritesAuthorized": false
+  },
+  "conditionalOrExcluded": {
+    "universalLiquidPlates": "deferred-pending-body-contextual-ab-test",
+    "labelAndDecorationPlates": "deferred-until-component-release-proof",
+    "integrationPlates": "only-for-reproducible-optical-seams-after-correct-placement",
+    "repositoryRestructure": "not-required",
+    "completeExistingPhysical3dRig": "not-found-in-repository"
+  }
+}

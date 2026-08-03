@@ -27,6 +27,62 @@ test("CYL-9ML registers 23 component plates and 145 explicit assemblies", () => 
   });
 });
 
+test("CYL-9ML production mappings preserve exact catalog identities and quarantine duplicate rows", () => {
+  const manifest = loadCyl9ComponentFactory() as ReturnType<typeof loadCyl9ComponentFactory> & {
+    catalogMappings: Array<{
+      mappingKey: string;
+      graceSku?: string;
+      websiteSku?: string;
+    }>;
+    catalogReviewIssues?: Array<{
+      issueKey: string;
+      websiteSku: string;
+      sourceRows: Array<{ graceSku: string; color: string }>;
+    }>;
+  };
+
+  assert.equal(new Set(manifest.catalogMappings.map(({ websiteSku }) => websiteSku)).size, 145);
+  assert.ok(manifest.catalogMappings.every(({ graceSku, websiteSku }) => graceSku && websiteSku));
+  assert.deepEqual(
+    manifest.catalogMappings.find(({ mappingKey }) => (
+      mappingKey === "CYL-9ML:SWL:ROLLON:WHT:METAL"
+    )),
+    {
+      mappingKey: "CYL-9ML:SWL:ROLLON:WHT:METAL",
+      graceSku: "GB-CYL-WHT-9ML-MRL-WHT",
+      websiteSku: "GBCylSwrl9MtlRollWht",
+      bodyVariantKey: "SWL",
+      mode: "rollon",
+      componentVariantKeys: [
+        "closure__17-415__rollon-overcap__WHT:WHT",
+        "roller__17-415__METAL:METAL",
+      ],
+    },
+  );
+  assert.deepEqual(
+    manifest.catalogReviewIssues?.map(({ websiteSku, sourceRows }) => ({
+      websiteSku,
+      sourceRows,
+    })),
+    [
+      {
+        websiteSku: "GBCylSwrl9MtlRollWht",
+        sourceRows: [
+          { graceSku: "GBCylSwrl9MtlRollWht", color: "Clear" },
+          { graceSku: "GB-CYL-WHT-9ML-MRL-WHT", color: "Swirl" },
+        ],
+      },
+      {
+        websiteSku: "GBCylSwrl9RollWht",
+        sourceRows: [
+          { graceSku: "GBCylSwrl9RollWht", color: "Clear" },
+          { graceSku: "GB-CYL-WHT-9ML-ROL-WHT", color: "Swirl" },
+        ],
+      },
+    ],
+  );
+});
+
 test("CYL-9ML inventory contains the exact slot counts", () => {
   const manifest = loadCyl9ComponentFactory();
   const counts = manifest.components.reduce<Record<string, number>>((result, { slot }) => {
@@ -45,7 +101,15 @@ test("catalog mapping generation is deterministic and includes secondary overcap
   const manifest = loadCyl9ComponentFactory();
   const generated = buildCyl9ExpectedCatalogMappings(manifest);
 
-  assert.deepEqual(generated, manifest.catalogMappings);
+  assert.deepEqual(
+    generated,
+    manifest.catalogMappings.map(({ mappingKey, bodyVariantKey, mode, componentVariantKeys }) => ({
+      mappingKey,
+      bodyVariantKey,
+      mode,
+      componentVariantKeys,
+    })),
+  );
   assert.equal(generated.filter(({ mode }) => mode === "rollon").length, 100);
   assert.equal(generated.filter(({ mode }) => mode === "spray").length, 30);
   assert.equal(generated.filter(({ mode }) => mode === "lotion").length, 15);

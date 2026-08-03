@@ -182,7 +182,9 @@ export async function buildCyl9ComponentBatch(
     mode: options.mode,
     target: options.mode === "plan" ? "none" : (options.target ?? "local"),
     jobs,
-    knownEstimatedCostUsd: jobs.reduce((sum, job) => sum + (job.estimatedCostUsd ?? 0), 0),
+    knownEstimatedCostUsd: Number(
+      jobs.reduce((sum, job) => sum + (job.estimatedCostUsd ?? 0), 0).toFixed(2),
+    ),
     unpricedProviderJobs: jobs.filter((job) => job.costStatus === "price-card-required").length,
     reviewAssemblies: jobs.length * manifest.bodyPlates.length,
     catalogMappings: manifest.catalogMappings.length,

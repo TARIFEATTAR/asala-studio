@@ -1,8 +1,10 @@
-"""Render the CYL-9ML roll-on over-cap family from one Blender authority mesh.
+"""Render a parametric roll-on over-cap family from one Blender authority mesh.
 
-The script is intentionally headless and deterministic. Geometry, camera, studio,
-and mask recipes are hashed into a manifest so a material variant cannot silently
-drift away from the shiny-silver authority.
+The historical filename remains for backwards compatibility with the CYL-9ML
+pipeline. Geometry is now recipe-owned so other measured over-cap families can
+reuse the renderer without inheriting the 17-415 profile by accident. The script
+is intentionally headless and deterministic. Geometry, camera, studio, and mask
+recipes are hashed into a manifest so a material variant cannot silently drift.
 """
 
 from __future__ import annotations
@@ -53,7 +55,7 @@ RENDER = RECIPE["render"]
 # Normalized revolved half-profile. This is deliberately flatter and less bulbous
 # at the top than the v1 generic beveled cylinder. The small taper and shallow
 # corner roll match the approved shiny-silver photographic silhouette.
-PROFILE_NORMALIZED = [
+DEFAULT_PROFILE_NORMALIZED = [
     [0.5000, 0.0000],
     [0.5000, 0.9000],
     [0.4980, 0.9450],
@@ -63,6 +65,7 @@ PROFILE_NORMALIZED = [
     [0.4100, 0.9980],
     [0.0000, 1.0000],
 ]
+PROFILE_NORMALIZED = RECIPE.get("profileNormalized", DEFAULT_PROFILE_NORMALIZED)
 
 CAMERA_RECIPE = {
     "type": "orthographic",

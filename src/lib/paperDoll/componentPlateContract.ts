@@ -173,9 +173,30 @@ const FamilyBodyPlateSchema = z.object({
 
 const FamilyCatalogMappingSchema = z.object({
   mappingKey: z.string().min(1),
+  graceSku: z.string().min(1).optional(),
+  websiteSku: z.string().min(1).optional(),
   bodyVariantKey: z.string().min(1),
   mode: z.enum(["rollon", "spray", "lotion", "closure"]),
   componentVariantKeys: z.array(z.string().min(1)).min(1),
+}).superRefine((mapping, context) => {
+  if (Boolean(mapping.graceSku) === Boolean(mapping.websiteSku)) return;
+  context.addIssue({
+    code: z.ZodIssueCode.custom,
+    path: [mapping.graceSku ? "websiteSku" : "graceSku"],
+    message: "Catalog mapping SKU identity requires both graceSku and websiteSku.",
+  });
+});
+
+const FamilyCatalogReviewIssueSchema = z.object({
+  issueKey: z.string().min(1),
+  websiteSku: z.string().min(1),
+  reason: z.enum(["duplicate-website-sku-conflicting-body-color"]),
+  resolution: z.enum(["selected-row-matching-website-sku-body"]),
+  selectedGraceSku: z.string().min(1),
+  sourceRows: z.array(z.object({
+    graceSku: z.string().min(1),
+    color: z.string().min(1),
+  })).min(2),
 });
 
 export const PaperDollFamilyProductionManifestSchema = z.object({
@@ -190,6 +211,7 @@ export const PaperDollFamilyProductionManifestSchema = z.object({
   components: z.array(FamilyComponentDefinitionSchema).min(1),
   placements: z.array(ComponentPlacementSchema),
   catalogMappings: z.array(FamilyCatalogMappingSchema),
+  catalogReviewIssues: z.array(FamilyCatalogReviewIssueSchema).default([]),
   releaseTarget: z.object({ sanityDocumentId: z.string().min(1) }),
 }).superRefine((manifest, context) => {
   addDuplicateIssues(
