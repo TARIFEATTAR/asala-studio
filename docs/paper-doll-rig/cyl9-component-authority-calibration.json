@@ -1,0 +1,1207 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "decision": "authority-approved-placement-unlocked",
+  "bodyPlateSha256s": [
+    "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3",
+    "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c",
+    "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+    "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956",
+    "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68"
+  ],
+  "components": [
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SSLV",
+      "variantKey": "SSLV",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MSLV",
+      "variantKey": "MSLV",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SGLD",
+      "variantKey": "SGLD",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MGLD",
+      "variantKey": "MGLD",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SBLK",
+      "variantKey": "SBLK",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MCPR",
+      "variantKey": "MCPR",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__WHT",
+      "variantKey": "WHT",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SLDT",
+      "variantKey": "SLDT",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__BKDT",
+      "variantKey": "BKDT",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__PKDT",
+      "variantKey": "PKDT",
+      "slot": "cap",
+      "status": "approved",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "authoritySourcePath": "outputs/paper-doll-cyl9-cap-family/candidate-v2/geometry-mask.png",
+      "authoritySourceSha256": "2feea8be6d9cfb3804c06761146aad8b35a2a03175b15b262e2e1642aa0519c4",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 124,
+        "top": 188,
+        "width": 1152,
+        "height": 1679
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "authorityBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "roller__17-415__PLASTIC",
+      "variantKey": "PLASTIC",
+      "slot": "roller",
+      "status": "approved",
+      "geometryFamilyId": "roller__17-415__shared__v1",
+      "authoritySourcePath": "assets/paper-doll/components/closure__17-415__plastic-roller-ball__natural__candidate__v03.png",
+      "authoritySourceSha256": "74964b921a779d80faa377d0a00c3a4da3bd787c88f41abe3c6da0c6f4b7e747",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 204,
+        "top": 192,
+        "width": 846,
+        "height": 789
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/roller__17-415__shared__v1__mask.png",
+      "maskSha256": "b02b1d26a2dff724a4d19b5edce062073cc19a703cbc62a22ad782605739af41",
+      "authorityBoundsPx": {
+        "left": 907,
+        "top": 675,
+        "width": 269,
+        "height": 251
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "roller__17-415__METAL",
+      "variantKey": "METAL",
+      "slot": "roller",
+      "status": "approved",
+      "geometryFamilyId": "roller__17-415__shared__v1",
+      "authoritySourcePath": "assets/paper-doll/components/closure__17-415__plastic-roller-ball__natural__candidate__v03.png",
+      "authoritySourceSha256": "74964b921a779d80faa377d0a00c3a4da3bd787c88f41abe3c6da0c6f4b7e747",
+      "extraction": {
+        "method": "alpha-row-envelope",
+        "threshold": 16,
+        "stableThresholdRange": [
+          8,
+          32
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 204,
+        "top": 192,
+        "width": 846,
+        "height": 789
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/roller__17-415__shared__v1__mask.png",
+      "maskSha256": "b02b1d26a2dff724a4d19b5edce062073cc19a703cbc62a22ad782605739af41",
+      "authorityBoundsPx": {
+        "left": 907,
+        "top": 675,
+        "width": 269,
+        "height": 251
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__GLD",
+      "variantKey": "GLD",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__GLD__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Gl.png",
+      "authoritySourceSha256": "6a38f9a617fb299e031ee50ba5fbc4352c5f8bfa338d276396f1ad86b6df2574",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 130,
+        "top": 125,
+        "width": 290,
+        "height": 514
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__GLD__v1__mask.png",
+      "maskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__MSLV",
+      "variantKey": "MSLV",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__MSLV__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415MattSl.png",
+      "authoritySourceSha256": "a1d4328aea3d3f5aa75e6008b652e8c1e4c38c3e43492b7d3f9e00b7b604d8bb",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 126,
+        "top": 125,
+        "width": 296,
+        "height": 517
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__MSLV__v1__mask.png",
+      "maskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 368,
+        "width": 363,
+        "height": 634
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__BLK",
+      "variantKey": "BLK",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__BLK__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Blk.png",
+      "authoritySourceSha256": "cb5f3b0859321744fc8d4ac36e98f7b93b978ef1562f3e466bb7b754df5c3e21",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 133,
+        "top": 125,
+        "width": 286,
+        "height": 514
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__BLK__v1__mask.png",
+      "maskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 350,
+        "width": 363,
+        "height": 652
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__SSLV",
+      "variantKey": "SSLV",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__SSLV__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415ShnSl.png",
+      "authoritySourceSha256": "3349fdc0b740905fcb6193499d92eff913479116faf5b981a64d03fb5f1df042",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 125,
+        "top": 125,
+        "width": 297,
+        "height": 514
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__SSLV__v1__mask.png",
+      "maskSha256": "624e60c8f927ba1da00db3ff254b7cbcd2eb7e7ffe40daa3ab5ed41fcd9a884e",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 374,
+        "width": 363,
+        "height": 628
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__RED",
+      "variantKey": "RED",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__RED__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Red.png",
+      "authoritySourceSha256": "2d49558a6719439312542fa7093987c28c348a544db9a6650a8fe7d14bc84da9",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 131,
+        "top": 125,
+        "width": 293,
+        "height": 519
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__RED__v1__mask.png",
+      "maskSha256": "d41143f9dcaaaa2784a99631e1eec0f74aac939433a6a2d1be698fdca37c4819",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "sprayer__17-415__TUR",
+      "variantKey": "TUR",
+      "slot": "sprayer",
+      "status": "approved",
+      "geometryFamilyId": "sprayer__17-415__TUR__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Tur.png",
+      "authoritySourceSha256": "2dfbb5b81ff3d32f57fa3989909b5a334597723eba16da79e1d4f9d6d0d07160",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 129,
+        "top": 125,
+        "width": 291,
+        "height": 520
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__TUR__v1__mask.png",
+      "maskSha256": "8389128411835efd64cf70b2d303bc33fc65ddfde9fb189455a21ba739f4e9ba",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 353,
+        "width": 363,
+        "height": 649
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "pump__17-415__BLK",
+      "variantKey": "BLK",
+      "slot": "pump",
+      "status": "approved",
+      "geometryFamilyId": "pump__17-415__BLK__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Blk.png",
+      "authoritySourceSha256": "c543dce2d771a63605b9c64a502e07bdb7a0360fea72894dc8f52bf6ee8f2a10",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 133,
+        "top": 125,
+        "width": 286,
+        "height": 514
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__BLK__v1__mask.png",
+      "maskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 350,
+        "width": 363,
+        "height": 652
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "pump__17-415__GLD",
+      "variantKey": "GLD",
+      "slot": "pump",
+      "status": "approved",
+      "geometryFamilyId": "pump__17-415__GLD__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Gl.png",
+      "authoritySourceSha256": "96b91ce40b5baac460fd9aa6a331bb418f012c41055e6311b068acceaa17db0a",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 130,
+        "top": 125,
+        "width": 290,
+        "height": 514
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__GLD__v1__mask.png",
+      "maskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "pump__17-415__MSLV",
+      "variantKey": "MSLV",
+      "slot": "pump",
+      "status": "approved",
+      "geometryFamilyId": "pump__17-415__MSLV__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415MattSl.png",
+      "authoritySourceSha256": "a93d64fa7aabec45b17dc27a0d4a86988fef29e12bd028c2ca8a88f725082ca0",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 126,
+        "top": 125,
+        "width": 296,
+        "height": 517
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__MSLV__v1__mask.png",
+      "maskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 368,
+        "width": 363,
+        "height": 634
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "overcap__17-415__SPRAY-TRNS",
+      "variantKey": "SPRAY-TRNS",
+      "slot": "overcap",
+      "status": "approved",
+      "geometryFamilyId": "overcap__17-415__spray-translucent__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
+      "authoritySourceSha256": "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 11,
+        "top": 11,
+        "width": 221,
+        "height": 265
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/overcap__17-415__spray-translucent__v1__mask.png",
+      "maskSha256": "da32c09f468e80be9d5f9410f4e69b403a82d011757e9ea60a6127e66de46e12",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 567,
+        "width": 363,
+        "height": 435
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    },
+    {
+      "componentKey": "overcap__17-415__LOTION-TRNS",
+      "variantKey": "LOTION-TRNS",
+      "slot": "overcap",
+      "status": "approved",
+      "geometryFamilyId": "overcap__17-415__lotion-translucent__v1",
+      "authoritySourcePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png",
+      "authoritySourceSha256": "1b5980d6e673e9defe20c16721c694dc5c3ee99614dcf128d0c11f83a5ed05ce",
+      "extraction": {
+        "method": "white-background-row-envelope",
+        "threshold": 8,
+        "stableThresholdRange": [
+          6,
+          12
+        ]
+      },
+      "sourceBoundsPx": {
+        "left": 11,
+        "top": 11,
+        "width": 221,
+        "height": 267
+      },
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/overcap__17-415__lotion-translucent__v1__mask.png",
+      "maskSha256": "ed1a5c17d4fada850e3a41bee36a01ad8829b6adeeb13b29d26306dddca69470",
+      "authorityBoundsPx": {
+        "left": 860,
+        "top": 563,
+        "width": 363,
+        "height": 439
+      },
+      "expectedRegions": 1,
+      "componentCount": 1,
+      "touchesFrame": false
+    }
+  ],
+  "geometryFamilies": [
+    {
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "members": [
+        "closure__17-415__rollon-overcap__SSLV",
+        "closure__17-415__rollon-overcap__MSLV",
+        "closure__17-415__rollon-overcap__SGLD",
+        "closure__17-415__rollon-overcap__MGLD",
+        "closure__17-415__rollon-overcap__SBLK",
+        "closure__17-415__rollon-overcap__MCPR",
+        "closure__17-415__rollon-overcap__WHT",
+        "closure__17-415__rollon-overcap__SLDT",
+        "closure__17-415__rollon-overcap__BKDT",
+        "closure__17-415__rollon-overcap__PKDT"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png",
+      "maskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "roller__17-415__shared__v1",
+      "members": [
+        "roller__17-415__PLASTIC",
+        "roller__17-415__METAL"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/roller__17-415__shared__v1__mask.png",
+      "maskSha256": "b02b1d26a2dff724a4d19b5edce062073cc19a703cbc62a22ad782605739af41",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__GLD__v1",
+      "members": [
+        "sprayer__17-415__GLD"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__GLD__v1__mask.png",
+      "maskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__MSLV__v1",
+      "members": [
+        "sprayer__17-415__MSLV"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__MSLV__v1__mask.png",
+      "maskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__BLK__v1",
+      "members": [
+        "sprayer__17-415__BLK"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__BLK__v1__mask.png",
+      "maskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__SSLV__v1",
+      "members": [
+        "sprayer__17-415__SSLV"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__SSLV__v1__mask.png",
+      "maskSha256": "624e60c8f927ba1da00db3ff254b7cbcd2eb7e7ffe40daa3ab5ed41fcd9a884e",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__RED__v1",
+      "members": [
+        "sprayer__17-415__RED"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__RED__v1__mask.png",
+      "maskSha256": "d41143f9dcaaaa2784a99631e1eec0f74aac939433a6a2d1be698fdca37c4819",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "sprayer__17-415__TUR__v1",
+      "members": [
+        "sprayer__17-415__TUR"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/sprayer__17-415__TUR__v1__mask.png",
+      "maskSha256": "8389128411835efd64cf70b2d303bc33fc65ddfde9fb189455a21ba739f4e9ba",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "pump__17-415__BLK__v1",
+      "members": [
+        "pump__17-415__BLK"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__BLK__v1__mask.png",
+      "maskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "pump__17-415__GLD__v1",
+      "members": [
+        "pump__17-415__GLD"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__GLD__v1__mask.png",
+      "maskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "pump__17-415__MSLV__v1",
+      "members": [
+        "pump__17-415__MSLV"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/pump__17-415__MSLV__v1__mask.png",
+      "maskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "overcap__17-415__spray-translucent__v1",
+      "members": [
+        "overcap__17-415__SPRAY-TRNS"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/overcap__17-415__spray-translucent__v1__mask.png",
+      "maskSha256": "da32c09f468e80be9d5f9410f4e69b403a82d011757e9ea60a6127e66de46e12",
+      "maxAlphaMismatchPixels": 0
+    },
+    {
+      "geometryFamilyId": "overcap__17-415__lotion-translucent__v1",
+      "members": [
+        "overcap__17-415__LOTION-TRNS"
+      ],
+      "maskPath": "assets/paper-doll/authority-masks/cyl9/overcap__17-415__lotion-translucent__v1__mask.png",
+      "maskSha256": "ed1a5c17d4fada850e3a41bee36a01ad8829b6adeeb13b29d26306dddca69470",
+      "maxAlphaMismatchPixels": 0
+    }
+  ],
+  "placements": [
+    {
+      "placementVersionId": "placement-calibration__closure__17-415__rollon-overcap__v2__344x501__v1",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "widthPx": 344,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 869,
+        "top": 501,
+        "width": 344,
+        "height": 501
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__roller__17-415__shared__v1__269x251__v1",
+      "geometryFamilyId": "roller__17-415__shared__v1",
+      "widthPx": 269,
+      "centerXPx": 1041,
+      "seatYPx": 926,
+      "placementBoundsPx": {
+        "left": 907,
+        "top": 675,
+        "width": 269,
+        "height": 251
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__GLD__v1__363x643__v1",
+      "geometryFamilyId": "sprayer__17-415__GLD__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__MSLV__v1__363x634__v1",
+      "geometryFamilyId": "sprayer__17-415__MSLV__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 368,
+        "width": 363,
+        "height": 634
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__BLK__v1__363x652__v1",
+      "geometryFamilyId": "sprayer__17-415__BLK__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 350,
+        "width": 363,
+        "height": 652
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__SSLV__v1__363x628__v1",
+      "geometryFamilyId": "sprayer__17-415__SSLV__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 374,
+        "width": 363,
+        "height": 628
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__RED__v1__363x643__v1",
+      "geometryFamilyId": "sprayer__17-415__RED__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__sprayer__17-415__TUR__v1__363x649__v1",
+      "geometryFamilyId": "sprayer__17-415__TUR__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 353,
+        "width": 363,
+        "height": 649
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__pump__17-415__BLK__v1__363x652__v1",
+      "geometryFamilyId": "pump__17-415__BLK__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 350,
+        "width": 363,
+        "height": 652
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__pump__17-415__GLD__v1__363x643__v1",
+      "geometryFamilyId": "pump__17-415__GLD__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 359,
+        "width": 363,
+        "height": 643
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__pump__17-415__MSLV__v1__363x634__v1",
+      "geometryFamilyId": "pump__17-415__MSLV__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 368,
+        "width": 363,
+        "height": 634
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__overcap__17-415__spray-translucent__v1__363x435__v1",
+      "geometryFamilyId": "overcap__17-415__spray-translucent__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 567,
+        "width": 363,
+        "height": 435
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    },
+    {
+      "placementVersionId": "placement-calibration__overcap__17-415__lotion-translucent__v1__363x439__v1",
+      "geometryFamilyId": "overcap__17-415__lotion-translucent__v1",
+      "widthPx": 363,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": {
+        "left": 860,
+        "top": 563,
+        "width": 363,
+        "height": 439
+      },
+      "compatibleBodyVariantKeys": [
+        "AMB",
+        "BLU",
+        "CLR",
+        "FRS",
+        "SWL"
+      ],
+      "locked": false
+    }
+  ],
+  "reviewNotes": [
+    "Every authority mask was measured on a real source and contains exactly one non-frame-touching connected region.",
+    "Ten cap finishes share the clean approved cap silhouette; rhinestones remain pixel detail inside that silhouette.",
+    "Plastic and metal rollers share the plastic V03 exterior silhouette; material pixels are clamped to this identical alpha.",
+    "Sprayer, pump, and translucent-overcap authorities are independently calibrated; their placements remain unlocked pending five-body Family Fit approval.",
+    "The five locked body plates and their SHA-256 identities are unchanged."
+  ]
+}
