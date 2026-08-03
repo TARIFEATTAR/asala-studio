@@ -17,6 +17,9 @@
     "explicitComponentPlateCount": 148,
     "exactSourceBackedExistingCount": 22,
     "exactSourceBackedOutstandingCount": 287,
+    "localReviewCandidateGeometryFamilyCount": 12,
+    "localReviewCandidateIdentityCount": 38,
+    "localReviewCandidateOutputCount": 37,
     "supplementalExistingCount": 6,
     "missingSourceResponsibilityCount": 3
   },
