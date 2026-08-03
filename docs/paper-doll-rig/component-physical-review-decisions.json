@@ -62,6 +62,40 @@
       "nextGate": "Confirm whether the clear protective cap is a separate compatible overcap plate and keep the pump authority independent from it. Require assembled translucent QA."
     },
     {
+      "decisionId": "review-decision__15-415-sprayer__component-kit-decomposition",
+      "sourceReviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
+      "status": "decomposition-contract-created-review-required",
+      "evidenceType": "layered-photoshop-archive-plus-reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
+      ],
+      "affectedSourceIdentities": [
+        "Spry15-415Blk",
+        "Spry15-415MattGl",
+        "Spry15-415MattSl",
+        "Spry15-415ShnGl",
+        "Spry15-415ShnSl"
+      ],
+      "observation": "Each catalog reference contains three distinct responsibilities: the exposed sprayer head, a detached protective overcap, and a dip tube. The five exact Photoshop sources preserve the exposed head, but their scene structures differ; the matte-silver source contains additional nozzle scenes. Photoshop layers must therefore be recomposed by visual responsibility rather than promoted one-layer-per-plate.",
+      "geometryClaim": "none",
+      "resolution": {
+        "state": "decomposition-contract-created",
+        "recipePath": "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
+        "reusablePlateResponsibilities": [
+          "sprayer-head",
+          "protective-overcap"
+        ],
+        "bodyContextualResponsibilities": [
+          "dip-tube"
+        ],
+        "sourceCompositeProductionEligible": false,
+        "geometryLocked": false,
+        "productionPlateEligible": false
+      },
+      "nextGate": "Extract and review the five sprayer-head appearances, isolate the matching protective overcaps, then validate the head and overcap authorities independently. Render or weld the dip tube per bottle cohort and body optics; never approve the flattened three-part source as one reusable plate."
+    },
+    {
       "decisionId": "review-decision__20-400-dropper__pipette-length-unproven",
       "sourceReviewGroupKey": "geometry-review__dropper__20-400__1f69cf193c",
       "status": "quarantined-body-contextual-length",
