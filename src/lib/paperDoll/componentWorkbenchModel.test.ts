@@ -37,6 +37,7 @@ test("component workbench expands all 23 CYL-9ML plates without confusing varian
     }, {}),
     { cap: 10, roller: 2, sprayer: 6, pump: 3, overcap: 2 },
   );
-  assert.equal(rows.filter((row) => row.authorityStatus === "missing").length, 23);
-  assert.equal(rows.every((row) => row.nextAction === "Register geometry authority"), true);
+  assert.equal(rows.filter((row) => row.authorityStatus === "approved").length, 23);
+  assert.equal(rows.every((row) => row.authority !== null), true);
+  assert.equal(rows.every((row) => row.nextAction === "Generate or upload candidate"), true);
 });
