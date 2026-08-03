@@ -26,6 +26,11 @@ interface PublishPreviewModelInput {
   projection: PaperDollSanityProjection;
   catalogReconciliation: MatrixModel["catalogReconciliation"];
   lineupReady: boolean;
+  releaseCutId?: string | null;
+  draftApproval?: { approvedByName: string; approvalNote: string } | null;
+  successfulDraftSync?: { releaseCutId: string; revision: string } | null;
+  publicApproval?: { approvedByName: string; approvalNote: string } | null;
+  downstreamScopeConfirmed?: boolean;
 }
 
 export interface PublishPreviewModel {
@@ -46,7 +51,8 @@ export interface PublishPreviewModel {
   };
   stableKeys: { assets: number; recipes: number; mappings: number; evidence: number };
   approvalEnabled: false;
-  publishEnabled: false;
+  draftSyncEnabled: boolean;
+  publishEnabled: boolean;
 }
 
 function componentTruthPasses(manifest: PaperDollReleaseManifest): boolean {
@@ -86,6 +92,11 @@ export function buildPublishPreviewModel({
   projection,
   catalogReconciliation,
   lineupReady,
+  releaseCutId = null,
+  draftApproval = null,
+  successfulDraftSync = null,
+  publicApproval = null,
+  downstreamScopeConfirmed = false,
 }: PublishPreviewModelInput): PublishPreviewModel {
   const catalogReady = catalogReconciliation.catalogProducts > 0 &&
     catalogReconciliation.unmatchedProducts === 0 &&
@@ -123,6 +134,25 @@ export function buildPublishPreviewModel({
     ...(!lineupReady ? ["named_lineup_approval_required"] : []),
     ...projection.publishBlockers,
   ];
+  const targetConfigured = projection.target.projectId !== "unconfigured" &&
+    projection.target.dataset !== "unconfigured" &&
+    projection.target.documentId !== "unconfigured";
+  const draftNamed = Boolean(
+    draftApproval?.approvedByName.trim() && draftApproval.approvalNote.trim(),
+  );
+  const publicNamed = Boolean(
+    publicApproval?.approvedByName.trim() && publicApproval.approvalNote.trim(),
+  );
+  const draftSyncEnabled = Boolean(
+    releaseCutId && targetConfigured && projection.roundTrip.passed && draftNamed,
+  );
+  const publishEnabled = Boolean(
+    draftSyncEnabled &&
+    successfulDraftSync?.releaseCutId === releaseCutId &&
+    successfulDraftSync?.revision.trim() &&
+    publicNamed &&
+    downstreamScopeConfirmed,
+  );
 
   return {
     phases,
@@ -147,6 +177,7 @@ export function buildPublishPreviewModel({
       evidence: projection.document.qaEvidence.length,
     },
     approvalEnabled: false,
-    publishEnabled: false,
+    draftSyncEnabled,
+    publishEnabled,
   };
 }

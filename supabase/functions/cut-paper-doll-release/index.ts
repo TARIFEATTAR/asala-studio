@@ -85,8 +85,6 @@ Deno.serve((request) =>
       );
     }
 
-    const componentVersionIds: string[] = [];
-    const candidateIds: string[] = [];
     const rows = assets.map((asset, index) => {
       const slot = requireString(
         asset.slot,
@@ -109,12 +107,10 @@ Deno.serve((request) =>
         asset.componentVersionId,
         `assets.${index}.componentVersionId`,
       );
-      componentVersionIds.push(componentVersionId);
       const candidateId = slot === "body" ? null : requireString(
         asset.componentCandidateId,
         `assets.${index}.componentCandidateId`,
       );
-      if (candidateId) candidateIds.push(candidateId);
       return {
         organization_id: organizationId,
         component_candidate_id: candidateId,
@@ -144,173 +140,32 @@ Deno.serve((request) =>
         ),
       };
     });
-    const uniqueCandidateIds = [...new Set(candidateIds)];
-
-    const [
-      { data: versions, error: versionsError },
-      { data: candidates, error: candidatesError },
-    ] = await Promise.all([
-      context.service.from("paper_doll_component_versions")
-        .select("id, approval_status")
-        .eq("organization_id", organizationId)
-        .in("id", componentVersionIds),
-      uniqueCandidateIds.length
-        ? context.service.from("paper_doll_component_candidates")
-          .select("id, lifecycle_state")
-          .eq("organization_id", organizationId)
-          .in("id", uniqueCandidateIds)
-        : Promise.resolve({ data: [], error: null }),
-    ]);
-    if (
-      versionsError || !versions ||
-      versions.length !== new Set(componentVersionIds).size ||
-      versions.some((version) => version.approval_status !== "approved")
-    ) {
-      databaseError(
-        versionsError,
-        "Every release component version must be approved.",
-      );
-    }
-    if (
-      candidatesError || !candidates ||
-      candidates.length !== uniqueCandidateIds.length ||
-      candidates.some((candidate) =>
-        candidate.lifecycle_state !== "placement-locked"
-      )
-    ) {
-      databaseError(
-        candidatesError,
-        "Every non-body candidate must have locked placement.",
-      );
-    }
-
-    const { data: head, error: headError } = await context.service
-      .from("paper_doll_release_heads")
-      .select("id, revision, current_release_cut_id")
-      .eq("organization_id", organizationId)
-      .eq("family_key", familyKey)
-      .maybeSingle();
-    if (headError) databaseError(headError, "Release head lookup failed.");
-    if (Number(head?.revision ?? 0) !== expectedHeadRevision) {
-      databaseError(
-        null,
-        "Current Release changed; refresh before cutting a release.",
-      );
-    }
-
-    let { data: cut, error: cutError } = await context.service
-      .from("paper_doll_release_cuts")
-      .select("id")
-      .eq("organization_id", organizationId)
-      .eq("family_key", familyKey)
-      .eq("manifest_sha256", manifestSha256)
-      .maybeSingle();
-    if (cutError) databaseError(cutError, "Release cut lookup failed.");
-    if (!cut) {
-      const created = await context.service.from("paper_doll_release_cuts")
-        .insert({
-          organization_id: organizationId,
-          family_key: familyKey,
-          release_version: releaseVersion,
-          validation_status: "validated",
-          manifest,
-          manifest_sha256: manifestSha256,
-          approved_by_user_id: context.user.id,
-          approved_by_display_name: approvedByName,
-          approval_note: approvalNote,
-        }).select("id").single();
-      if (created.error || !created.data) {
-        databaseError(created.error, "Release cut could not be appended.");
-      }
-      cut = created.data;
-    }
-
-    const releaseRows = rows.map((row) => ({
-      ...row,
-      release_cut_id: cut!.id,
-    }));
-    const { error: assetsError } = await context.service
-      .from("paper_doll_release_cut_assets")
-      .upsert(releaseRows, {
-        onConflict: "release_cut_id,slot,variant_key",
-        ignoreDuplicates: true,
-      });
-    if (assetsError) {
-      databaseError(assetsError, "Release-cut assets could not be appended.");
-    }
-
-    if (head) {
-      const { error: advanceError } = await context.service.rpc(
-        "paper_doll_advance_release_head",
-        {
-          p_organization_id: organizationId,
-          p_family_key: familyKey,
-          p_next_release_cut_id: cut.id,
-          p_expected_revision: expectedHeadRevision,
-          p_actor_user_id: context.user.id,
-          p_actor_display_name: approvedByName,
-          p_action_note: approvalNote,
-        },
-      );
-      if (advanceError) {
-        databaseError(advanceError, "Current Release compare-and-swap failed.");
-      }
-    } else {
-      const { error: createHeadError } = await context.service.from(
-        "paper_doll_release_heads",
-      ).insert({
-        organization_id: organizationId,
-        family_key: familyKey,
-        current_release_cut_id: cut.id,
-        revision: 0,
-      });
-      if (createHeadError) {
-        databaseError(
-          createHeadError,
-          "Initial Current Release could not be created.",
-        );
-      }
-    }
-
-    for (const candidateId of uniqueCandidateIds) {
-      const { data: updated, error: updateError } = await context.service
-        .from("paper_doll_component_candidates")
-        .update({ lifecycle_state: "released" })
-        .eq("id", candidateId)
-        .eq("organization_id", organizationId)
-        .eq("lifecycle_state", "placement-locked")
-        .select("id")
-        .maybeSingle();
-      if (updateError || !updated) {
-        databaseError(
-          updateError,
-          "Candidate release state could not be advanced.",
-        );
-      }
-      const { error: eventError } = await context.service.from(
-        "paper_doll_approval_events",
-      ).insert({
-        organization_id: organizationId,
-        candidate_id: candidateId,
-        action: "released",
-        approver_user_id: context.user.id,
-        approver_display_name: approvedByName,
-        approval_note: approvalNote,
-        evidence: { releaseCutId: cut.id, manifestSha256 },
-      });
-      if (eventError) {
-        databaseError(
-          eventError,
-          "Release approval event could not be appended.",
-        );
-      }
+    const { data: cutResult, error: cutError } = await context.service.rpc(
+      "paper_doll_cut_release_atomic",
+      {
+        p_organization_id: organizationId,
+        p_family_key: familyKey,
+        p_release_version: releaseVersion,
+        p_manifest: manifest,
+        p_manifest_sha256: manifestSha256,
+        p_assets: rows,
+        p_expected_head_revision: expectedHeadRevision,
+        p_actor_user_id: context.user.id,
+        p_actor_display_name: approvedByName,
+        p_action_note: approvalNote,
+      },
+    );
+    if (cutError || !cutResult) {
+      databaseError(cutError, "Atomic release cut could not be completed.");
     }
 
     return jsonResponse(200, {
-      releaseCutId: cut.id,
+      releaseCutId: cutResult.releaseCutId,
       familyKey,
       releaseVersion,
       manifestSha256,
+      headRevision: cutResult.headRevision,
+      idempotent: cutResult.idempotent,
       currentRelease: true,
       sanityChanged: false,
     });

@@ -50,6 +50,35 @@ export interface PaperDollSanityProjection {
   writeCount: 0;
 }
 
+export interface PaperDollSanityDraftProjection {
+  mode: "draft-sync-request";
+  target: PaperDollSanityTarget;
+  document: PaperDollSanityDocument;
+  releaseCutId: string;
+  manifestSha256: string;
+  payloadSha256: string;
+  validation: PaperDollReleaseValidation;
+  roundTrip: PaperDollSanityProjection["roundTrip"];
+  assetPlan: PaperDollSanityProjection["assetPlan"];
+  publishEligible: false;
+  publishBlockers: string[];
+  writeCount: 1;
+}
+
+export interface PaperDollSanityPublicRequest {
+  mode: "public-publish-request";
+  target: PaperDollSanityTarget;
+  document: PaperDollSanityDocument;
+  releaseCutId: string;
+  manifestSha256: string;
+  payloadSha256: string;
+  successfulDraftRevision: string;
+  downstreamScopeConfirmed: true;
+  approvedByName: string;
+  approvalNote: string;
+  writeCount: 1;
+}
+
 export const UNCONFIGURED_PAPER_DOLL_SANITY_TARGET: PaperDollSanityTarget = {
   projectId: "unconfigured",
   dataset: "unconfigured",
@@ -203,5 +232,85 @@ export async function buildPaperDollSanityProjection(
     publishEligible: false,
     publishBlockers: [...new Set(publishBlockers)],
     writeCount: 0,
+  };
+}
+
+function publicDocumentId(documentId: string): string {
+  const value = documentId.replace(/^drafts\./, "").trim();
+  if (!value) throw new Error("Sanity document ID is required.");
+  return value;
+}
+
+export async function buildPaperDollSanityDraftProjection(
+  manifest: PaperDollReleaseManifest,
+  target: PaperDollSanityTarget,
+  releaseCutId: string,
+): Promise<PaperDollSanityDraftProjection> {
+  if (!releaseCutId.trim()) throw new Error("Release cut ID is required for draft sync.");
+  const baseId = publicDocumentId(target.documentId);
+  const draftTarget = { ...target, documentId: `drafts.${baseId}` };
+  const preview = await buildPaperDollSanityProjection(manifest, draftTarget);
+  const document = { ...preview.document, _id: draftTarget.documentId };
+  const payloadSha256 = await sha256Text(canonicalizeReleaseValue({
+    releaseCutId,
+    document,
+  }));
+  return {
+    mode: "draft-sync-request",
+    target: draftTarget,
+    document,
+    releaseCutId,
+    manifestSha256: preview.manifestSha256,
+    payloadSha256,
+    validation: preview.validation,
+    roundTrip: preview.roundTrip,
+    assetPlan: preview.assetPlan,
+    publishEligible: false,
+    publishBlockers: ["separate_named_public_action_required"],
+    writeCount: 1,
+  };
+}
+
+export function buildPaperDollSanityPublicRequest(input: {
+  draftProjection: PaperDollSanityDraftProjection;
+  successfulDraftSync: { releaseCutId: string; revision: string } | null;
+  downstreamScopeConfirmed: boolean;
+  approvedByName: string;
+  approvalNote: string;
+}): PaperDollSanityPublicRequest {
+  const {
+    draftProjection,
+    successfulDraftSync,
+    downstreamScopeConfirmed,
+    approvedByName,
+    approvalNote,
+  } = input;
+  if (
+    !successfulDraftSync ||
+    successfulDraftSync.releaseCutId !== draftProjection.releaseCutId ||
+    !successfulDraftSync.revision.trim()
+  ) {
+    throw new Error("Public publication requires a matching successful draft sync for the same release cut.");
+  }
+  if (!downstreamScopeConfirmed) {
+    throw new Error("Downstream catalog scope must be explicitly confirmed before public publication.");
+  }
+  if (!approvedByName.trim() || !approvalNote.trim()) {
+    throw new Error("Public publication requires a named approver and approval note.");
+  }
+  const documentId = publicDocumentId(draftProjection.target.documentId);
+  const target = { ...draftProjection.target, documentId };
+  return {
+    mode: "public-publish-request",
+    target,
+    document: { ...draftProjection.document, _id: documentId },
+    releaseCutId: draftProjection.releaseCutId,
+    manifestSha256: draftProjection.manifestSha256,
+    payloadSha256: draftProjection.payloadSha256,
+    successfulDraftRevision: successfulDraftSync.revision,
+    downstreamScopeConfirmed: true,
+    approvedByName: approvedByName.trim(),
+    approvalNote: approvalNote.trim(),
+    writeCount: 1,
   };
 }

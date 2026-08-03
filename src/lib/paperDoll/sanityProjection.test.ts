@@ -3,7 +3,9 @@ import { test } from "node:test";
 
 import type { PaperDollReleaseManifest } from "./releaseContract";
 import {
+  buildPaperDollSanityDraftProjection,
   buildPaperDollSanityProjection,
+  buildPaperDollSanityPublicRequest,
   parseManifestFromPaperDollSanityDocument,
 } from "./sanityProjection";
 
@@ -136,4 +138,62 @@ test("blocked projection proves zero writes and contains no mutation or credenti
   assert.equal(projection.mode, "no-write-preview");
   assert.deepEqual(projection.assetPlan, { upload: 0, reuse: 0, unresolved: 2 });
   assert.doesNotMatch(JSON.stringify(projection), /mutation|token|secret|credential/i);
+});
+
+test("draft projection always targets the deterministic draft document", async () => {
+  const target = {
+    projectId: "gh97irjh",
+    dataset: "production",
+    documentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    documentType: "paperDollFamily" as const,
+  };
+  const draft = await buildPaperDollSanityDraftProjection(
+    fixtureManifest("ready"),
+    target,
+    "cut-cyl9-fixture",
+  );
+  assert.equal(draft.target.documentId, `drafts.${target.documentId}`);
+  assert.equal(draft.document._id, `drafts.${target.documentId}`);
+  assert.equal(draft.releaseCutId, "cut-cyl9-fixture");
+  assert.equal(draft.publishEligible, false);
+  assert.equal(draft.writeCount, 1);
+});
+
+test("public request requires the same successful draft cut and downstream scope confirmation", async () => {
+  const target = {
+    projectId: "gh97irjh",
+    dataset: "production",
+    documentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    documentType: "paperDollFamily" as const,
+  };
+  const draft = await buildPaperDollSanityDraftProjection(
+    fixtureManifest("ready"),
+    target,
+    "cut-cyl9-fixture",
+  );
+  assert.throws(() => buildPaperDollSanityPublicRequest({
+    draftProjection: draft,
+    successfulDraftSync: null,
+    downstreamScopeConfirmed: true,
+    approvedByName: "Jordan Richter",
+    approvalNote: "Publish verified roll-on scope.",
+  }), /matching successful draft/i);
+  assert.throws(() => buildPaperDollSanityPublicRequest({
+    draftProjection: draft,
+    successfulDraftSync: { releaseCutId: "cut-cyl9-fixture", revision: "draft-rev-1" },
+    downstreamScopeConfirmed: false,
+    approvedByName: "Jordan Richter",
+    approvalNote: "Publish verified roll-on scope.",
+  }), /scope/i);
+
+  const request = buildPaperDollSanityPublicRequest({
+    draftProjection: draft,
+    successfulDraftSync: { releaseCutId: "cut-cyl9-fixture", revision: "draft-rev-1" },
+    downstreamScopeConfirmed: true,
+    approvedByName: "Jordan Richter",
+    approvalNote: "Publish verified roll-on scope.",
+  });
+  assert.equal(request.target.documentId, target.documentId);
+  assert.equal(request.document._id, target.documentId);
+  assert.equal(request.successfulDraftRevision, "draft-rev-1");
 });

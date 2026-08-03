@@ -86,3 +86,39 @@ test("publish preview proves unconfigured zero-write state and disables actions"
   assert.equal(model.diff.changes, 0);
   assert.match(model.payloadSha256, /^[a-f0-9]{64}$/);
 });
+
+test("draft and public guards remain separate named actions", async () => {
+  const projection = await buildPaperDollSanityProjection(manifest, {
+    projectId: "gh97irjh",
+    dataset: "production",
+    documentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    documentType: "paperDollFamily",
+  });
+  const draftReady = buildPublishPreviewModel({
+    manifest,
+    projection,
+    catalogReconciliation: { catalogProducts: 1, mappedProducts: 1, previewMappings: 0, unmatchedProducts: 0 },
+    lineupReady: true,
+    releaseCutId: "cut-cyl9-v1",
+    draftApproval: { approvedByName: "Jordan Richter", approvalNote: "Sync approved layers." },
+    successfulDraftSync: null,
+    publicApproval: null,
+    downstreamScopeConfirmed: false,
+  });
+  assert.equal(draftReady.draftSyncEnabled, true);
+  assert.equal(draftReady.publishEnabled, false);
+
+  const publicReady = buildPublishPreviewModel({
+    manifest,
+    projection,
+    catalogReconciliation: { catalogProducts: 1, mappedProducts: 1, previewMappings: 0, unmatchedProducts: 0 },
+    lineupReady: true,
+    releaseCutId: "cut-cyl9-v1",
+    draftApproval: { approvedByName: "Jordan Richter", approvalNote: "Sync approved layers." },
+    successfulDraftSync: { releaseCutId: "cut-cyl9-v1", revision: "draft-rev-1" },
+    publicApproval: { approvedByName: "Jordan Richter", approvalNote: "Publish roll-on scope." },
+    downstreamScopeConfirmed: true,
+  });
+  assert.equal(publicReady.draftSyncEnabled, true);
+  assert.equal(publicReady.publishEnabled, true);
+});
