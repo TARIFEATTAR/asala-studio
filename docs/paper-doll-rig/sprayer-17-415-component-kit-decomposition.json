@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "kitId": "sprayer__17-415__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__sprayer__17-415__91195a1a8e",
+  "sourceCompositeProductionEligible": false,
+  "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "sources": [
+    {
+      "sourceId": "psd-sprayer-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "11. Spry17-415Gl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/11. Spry17-415Gl.psd",
+      "sha256": "6be1f163ccf98c092fafbc889686be601b0706c2c1dca3a6a40eb35807995540",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-sprayer-matte-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "12. Spry17-415MattSl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/12. Spry17-415MattSl.psd",
+      "sha256": "cc50f6c922187256becfb655397b045939f65b07b292bd35fca7735d0baaeb66",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-sprayer-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "13. Spry17-415Blk.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/13. Spry17-415Blk.psd",
+      "sha256": "4d8aa231dbedd4910be40e7bc150aabc267395c12961846a5a85913f09b481be",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-sprayer-shiny-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "14. Spry17-415ShnSl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/14. Spry17-415ShnSl.psd",
+      "sha256": "8d4a211ce46b20fe1e70b3a23b8d6054eed2862150f01e60aa77928a83c69004",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-sprayer-red",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "15. Spry17-415Red.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/15. Spry17-415Red.psd",
+      "sha256": "d597dc4806a9d20fe813676af33d78b0d0145de05c29db7bf499ed9ef8bf653c",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-sprayer-turquoise",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "16. Spry17-415Tur.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/13. 17-415 Spray/16. Spry17-415Tur.psd",
+      "sha256": "468c2a35e0367f94fafbcab68173720c87ff4e770eb73d36a112b7d6fa6e25b5",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "existing-spray-overcap",
+      "sourceType": "existing-paper-doll-asset",
+      "originalFilename": "OverCap17-415-Spray-Translucent.png",
+      "repositoryRelativePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png",
+      "sha256": "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-sprayer-reference",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "Spry17-415Gl.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415Gl.gif",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "sprayer-head-and-collar",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "psd-sprayer-shiny-gold", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 13", "Layer 12"] },
+        { "sourceId": "psd-sprayer-matte-silver", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 14", "Layer 12"] },
+        { "sourceId": "psd-sprayer-black", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 11", "Layer 12"] },
+        { "sourceId": "psd-sprayer-shiny-silver", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 15", "Layer 12"] },
+        { "sourceId": "psd-sprayer-red", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 16", "Layer 12"] },
+        { "sourceId": "psd-sprayer-turquoise", "method": "psd-layer-composite", "sceneIndices": [2, 3, 4], "layerNames": ["Layer 10", "Layer 17", "Layer 12"] }
+      ]
+    },
+    {
+      "partId": "sprayer-protective-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "existing-spray-overcap", "method": "reviewed-selection-mask" }
+      ]
+    },
+    {
+      "partId": "sprayer-dip-tube",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "catalog-sprayer-reference", "method": "reviewed-selection-mask" }
+      ]
+    }
+  ]
+}

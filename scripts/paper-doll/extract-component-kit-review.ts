@@ -33,8 +33,11 @@ export interface ComponentKitReviewExtractionJob {
   sourcePath: string;
   sourceSha256: string;
   originalFilename: string;
+  selectorMethod: "psd-layer-scene" | "psd-layer-composite";
   sceneIndex: number;
   layerName: string;
+  sceneIndices: number[];
+  layerNames: string[];
   cutoutPath: string;
   reviewCanvasPath: string;
   productionEligible: false;
@@ -106,7 +109,7 @@ export function planComponentKitReviewExtraction(
   const jobs: ComponentKitReviewExtractionJob[] = [];
   for (const part of recipe.parts) {
     for (const selector of part.sourceSelectors) {
-      if (selector.method !== "psd-layer-scene") continue;
+      if (selector.method !== "psd-layer-scene" && selector.method !== "psd-layer-composite") continue;
       const source = sourceById.get(selector.sourceId);
       if (
         !source
@@ -116,7 +119,13 @@ export function planComponentKitReviewExtraction(
       ) {
         throw new Error(`PSD selector ${selector.sourceId} has no verified Photoshop source.`);
       }
-      const stem = `${safeToken(source.sourceId)}__scene-${selector.sceneIndex}`;
+      const sceneIndices = selector.method === "psd-layer-scene"
+        ? [selector.sceneIndex]
+        : selector.sceneIndices;
+      const layerNames = selector.method === "psd-layer-scene"
+        ? [selector.layerName]
+        : selector.layerNames;
+      const stem = `${safeToken(source.sourceId)}__scene-${sceneIndices.join("-")}`;
       const partRoot = path.resolve(outputRoot, safeToken(part.partId));
       jobs.push({
         kitId: recipe.kitId,
@@ -129,8 +138,11 @@ export function planComponentKitReviewExtraction(
         sourcePath: resolveInside(archiveRoot, source.archiveRelativePath),
         sourceSha256: source.sha256,
         originalFilename: source.originalFilename,
-        sceneIndex: selector.sceneIndex,
-        layerName: selector.layerName,
+        selectorMethod: selector.method,
+        sceneIndex: sceneIndices[0],
+        layerName: layerNames.join(" + "),
+        sceneIndices,
+        layerNames,
         cutoutPath: path.join(partRoot, `${stem}__cutout.png`),
         reviewCanvasPath: path.join(partRoot, `${stem}__review-canvas.png`),
         productionEligible: false,
@@ -139,6 +151,39 @@ export function planComponentKitReviewExtraction(
     }
   }
   return jobs;
+}
+
+async function compositePositionedScenes(
+  scenes: Array<{ png: Buffer; bounds: ScenePageBounds }>,
+): Promise<{ png: Buffer; bounds: ScenePageBounds }> {
+  const left = Math.min(...scenes.map((scene) => scene.bounds.left));
+  const top = Math.min(...scenes.map((scene) => scene.bounds.top));
+  const right = Math.max(...scenes.map((scene) => scene.bounds.left + scene.bounds.width));
+  const bottom = Math.max(...scenes.map((scene) => scene.bounds.top + scene.bounds.height));
+  const bounds = { left, top, width: right - left, height: bottom - top };
+  const overlays: sharp.OverlayOptions[] = [];
+  for (const scene of scenes) {
+    const metadata = await sharp(scene.png).metadata();
+    if (metadata.width !== scene.bounds.width || metadata.height !== scene.bounds.height) {
+      throw new Error(
+        `Decoded Photoshop scene dimensions ${metadata.width ?? "?"}x${metadata.height ?? "?"} do not match identified bounds ${scene.bounds.width}x${scene.bounds.height}.`,
+      );
+    }
+    overlays.push({
+      input: scene.png,
+      left: scene.bounds.left - left,
+      top: scene.bounds.top - top,
+    });
+  }
+  const png = await sharp({
+    create: {
+      width: bounds.width,
+      height: bounds.height,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  }).composite(overlays).png().toBuffer();
+  return { png, bounds };
 }
 
 export async function centerCutoutOnCanonicalCanvas(
@@ -282,7 +327,7 @@ async function renderResponsibilityContactSheet(
         <rect width="100%" height="100%" fill="#171714"/>
         <text x="24" y="35" fill="#d5b16a" font-family="Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(asset.sourceId)}</text>
         <text x="24" y="65" fill="#f2efe9" font-family="Arial, sans-serif" font-size="15">${escapeXml(asset.originalFilename)}</text>
-        <text x="24" y="91" fill="#aaa59b" font-family="Arial, sans-serif" font-size="14">scene ${asset.sceneIndex} · ${escapeXml(asset.layerName)}</text>
+        <text x="24" y="91" fill="#aaa59b" font-family="Arial, sans-serif" font-size="14">scene ${asset.sceneIndices.join("+")} · ${escapeXml(asset.layerName)}</text>
         <text x="24" y="119" fill="#79d8ce" font-family="Arial, sans-serif" font-size="13">SOURCE EXTRACTION · REVIEW ONLY</text>
       </svg>
     `);
@@ -331,10 +376,18 @@ export async function extractComponentKitReview(
 
   const assets: ExtractedComponentKitReviewAsset[] = [];
   for (const job of jobs) {
-    const [scenePng, sourcePageBounds] = await Promise.all([
-      decodePsdScene(job.sourcePath, job.sceneIndex),
-      identifyPsdScene(job.sourcePath, job.sceneIndex),
-    ]);
+    const scenes = await Promise.all(job.sceneIndices.map(async (sceneIndex) => {
+      const [png, bounds] = await Promise.all([
+        decodePsdScene(job.sourcePath, sceneIndex),
+        identifyPsdScene(job.sourcePath, sceneIndex),
+      ]);
+      return { png, bounds };
+    }));
+    const positioned = scenes.length === 1
+      ? { png: scenes[0].png, bounds: scenes[0].bounds }
+      : await compositePositionedScenes(scenes);
+    const scenePng = positioned.png;
+    const sourcePageBounds = positioned.bounds;
     const centered = await centerCutoutOnCanonicalCanvas(
       scenePng,
       recipe.canonicalCanvas.width,

@@ -35,12 +35,14 @@ const ComponentKitSourceSchema = z.object({
   sourceType: z.enum([
     "photoshop-layered-source",
     "catalog-composite-reference",
+    "existing-paper-doll-asset",
   ]),
   originalFilename: z.string().min(1).refine(
     (value) => !/[\\/]/.test(value),
     "Original filename must not contain path separators.",
   ),
   archiveRelativePath: z.string().min(1).optional(),
+  repositoryRelativePath: z.string().min(1).optional(),
   referenceUrl: z.string().url().optional(),
   sha256: Sha256Schema.optional(),
   productionEligible: z.literal(false),
@@ -68,6 +70,22 @@ const ComponentKitSourceSchema = z.object({
       path: ["referenceUrl"],
     });
   }
+  if (source.sourceType === "existing-paper-doll-asset") {
+    if (!source.repositoryRelativePath) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Existing paper-doll asset requires a repository-relative path.",
+        path: ["repositoryRelativePath"],
+      });
+    }
+    if (!source.sha256) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Existing paper-doll asset requires an immutable SHA-256.",
+        path: ["sha256"],
+      });
+    }
+  }
 });
 
 const ComponentSourceSelectorSchema = z.discriminatedUnion("method", [
@@ -76,6 +94,12 @@ const ComponentSourceSelectorSchema = z.discriminatedUnion("method", [
     method: z.literal("psd-layer-scene"),
     sceneIndex: z.number().int().nonnegative(),
     layerName: z.string().min(1),
+  }),
+  z.object({
+    sourceId: z.string().min(1),
+    method: z.literal("psd-layer-composite"),
+    sceneIndices: z.array(z.number().int().nonnegative()).min(2),
+    layerNames: z.array(z.string().min(1)).min(2),
   }),
   z.object({
     sourceId: z.string().min(1),
@@ -144,13 +168,26 @@ export const ComponentKitDecompositionSchema = z.object({
           path: ["parts", index, "sourceSelectors", selectorIndex, "sourceId"],
         });
       } else if (
-        selector.method === "psd-layer-scene"
+        (selector.method === "psd-layer-scene" || selector.method === "psd-layer-composite")
         && source.sourceType !== "photoshop-layered-source"
       ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           message: "PSD layer selectors require a Photoshop layered source.",
           path: ["parts", index, "sourceSelectors", selectorIndex],
+        });
+      }
+      if (
+        selector.method === "psd-layer-composite"
+        && (
+          selector.sceneIndices.length !== selector.layerNames.length
+          || new Set(selector.sceneIndices).size !== selector.sceneIndices.length
+        )
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Photoshop scene composites require unique scenes and one layer name per scene.",
+          path: ["parts", index, "sourceSelectors", selectorIndex, "sceneIndices"],
         });
       }
     });
