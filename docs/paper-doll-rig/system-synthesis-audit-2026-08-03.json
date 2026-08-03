@@ -22,9 +22,9 @@
     "catalogSourceReadyComponentReferencesReviewed": 117,
     "catalogSourceReferenceReviewFailures": 0,
     "catalogPhysicalReviewDecisionsRecorded": 3,
-    "catalogDimensionCalibratedParametricCandidateFamilies": 2,
-    "catalogDimensionCalibratedParametricCandidateAppearances": 11,
-    "catalogParametricCandidateExactAlphaAppearances": 11,
+    "catalogDimensionCalibratedParametricCandidateFamilies": 3,
+    "catalogDimensionCalibratedParametricCandidateAppearances": 13,
+    "catalogParametricCandidateExactAlphaAppearances": 13,
     "catalogParametricCandidateGeometryLocked": 0,
     "catalogSourceIncompleteComponentReviewGroups": 11,
     "catalogSourceBackedExactExisting": 22,
@@ -49,7 +49,7 @@
     "cyl9RhinestoneCandidatesRegistered": 3,
     "cyl9TranslucentCandidatesRequiringReview": 2,
     "corePaperDollTestsPassing": 48,
-    "componentFactoryTestsPassing": 99,
+    "componentFactoryTestsPassing": 100,
     "parametricBlenderIntegrationTestsPassing": 1,
     "cyl9CapTestsPassing": 14
   },
@@ -73,9 +73,9 @@
       "priority": "medium"
     },
     {
-      "capability": "13-415-parametric-overcap-candidates",
+      "capability": "measured-parametric-overcap-candidates",
       "status": "existing-but-incomplete",
-      "recommended_action": "review and approve the distinct roll-on and standard-cap dimension-calibrated profiles before treating their exact-alpha variants as geometry authority",
+      "recommended_action": "review and approve the three distinct 13-415 and 15-415 dimension-calibrated profiles before treating their exact-alpha variants as geometry authority",
       "priority": "high"
     },
     {

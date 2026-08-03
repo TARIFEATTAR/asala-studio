@@ -12,6 +12,12 @@
       "localCandidateManifestPath": "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/candidate-manifest.json",
       "reviewContactSheetPath": "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/review-contact-sheet.png",
       "state": "dimension-calibrated-profile-review-candidate"
+    },
+    {
+      "recipePath": "docs/paper-doll-rig/standard-cap-15-415-family-recipe.json",
+      "localCandidateManifestPath": "outputs/paper-doll-parametric-overcaps/15-415-standard-cap/candidate-v1/candidate-manifest.json",
+      "reviewContactSheetPath": "outputs/paper-doll-parametric-overcaps/15-415-standard-cap/candidate-v1/review-contact-sheet.png",
+      "state": "dimension-calibrated-profile-review-candidate"
     }
   ],
   "mutationPolicy": {
