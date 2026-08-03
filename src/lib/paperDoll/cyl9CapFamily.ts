@@ -110,3 +110,74 @@ export function solveCyl9CapPlacement(
     bottomY: recipe.placement.bottomY,
   });
 }
+
+const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
+
+const Cyl9BlenderProvenanceSchema = z.object({
+  meshRecipeHash: Sha256Schema,
+  cameraRecipeHash: Sha256Schema,
+  studioRecipeHash: Sha256Schema,
+  maskRecipeHash: Sha256Schema,
+});
+
+const Cyl9CrystalTransformSchema = z.object({
+  id: z.string().min(1),
+  angleDeg: z.number(),
+  heightRatio: z.number(),
+  scaleRatio: z.number(),
+});
+
+const Cyl9BlenderManifestSchema = z.object({
+  schemaVersion: z.literal(1),
+  geometryFamilyId: z.literal("closure__17-415__rollon-overcap__v2"),
+  blenderVersion: z.string().min(1),
+  maskPath: z.string().min(1),
+  sharedProvenance: Cyl9BlenderProvenanceSchema,
+  renders: z.array(z.object({
+    variantKey: z.enum(CYL9_CAP_VARIANT_KEYS),
+    path: z.string().min(1),
+    provenance: Cyl9BlenderProvenanceSchema,
+    crystals: z.array(Cyl9CrystalTransformSchema),
+  })).min(1),
+}).superRefine((manifest, context) => {
+  const authority = manifest.renders.find(({ variantKey }) => variantKey === "SSLV");
+  if (!authority) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["renders"],
+      message: "Blender manifest must include the SSLV authority render.",
+    });
+    return;
+  }
+
+  const fields = [
+    "meshRecipeHash",
+    "cameraRecipeHash",
+    "studioRecipeHash",
+    "maskRecipeHash",
+  ] as const;
+  for (const [index, render] of manifest.renders.entries()) {
+    for (const field of fields) {
+      if (render.provenance[field] !== authority.provenance[field]) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["renders", index, "provenance", field],
+          message: `${render.variantKey} ${field} differs from SSLV authority.`,
+        });
+      }
+      if (render.provenance[field] !== manifest.sharedProvenance[field]) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["renders", index, "provenance", field],
+          message: `${render.variantKey} ${field} differs from shared provenance.`,
+        });
+      }
+    }
+  }
+});
+
+export type Cyl9BlenderManifest = z.infer<typeof Cyl9BlenderManifestSchema>;
+
+export function parseCyl9BlenderManifest(value: unknown): Cyl9BlenderManifest {
+  return Cyl9BlenderManifestSchema.parse(value);
+}
