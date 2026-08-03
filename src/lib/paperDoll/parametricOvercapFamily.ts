@@ -28,6 +28,7 @@ const materialSchema = z.enum([
 const variantSchema = z.object({
   variantKey: z.string().regex(/^[A-Z0-9]+$/),
   sourceIdentity: z.string().min(1),
+  sourceIdentityAliases: z.array(z.string().min(1)).default([]),
   graceSku: z.string().min(1),
   material: materialSchema,
   trimMaterial: materialSchema.optional(),
@@ -133,8 +134,9 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   if (!unique(recipe.variants.map((variant) => variant.variantKey))) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Variant keys must be unique." });
   }
-  if (!unique(recipe.variants.map((variant) => variant.sourceIdentity))) {
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Source identities must be unique." });
+  const sourceIdentitiesAndAliases = recipe.variants.flatMap((variant) => [variant.sourceIdentity, ...variant.sourceIdentityAliases]);
+  if (!unique(sourceIdentitiesAndAliases)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Source identities and aliases must be unique." });
   }
   if (!unique(recipe.variants.map((variant) => variant.graceSku))) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Grace SKUs must be unique." });

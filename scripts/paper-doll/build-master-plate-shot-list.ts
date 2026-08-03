@@ -83,15 +83,17 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
     const recipeText = await readFile(recipePath, "utf8");
     const recipe = JSON.parse(recipeText) as any;
     for (const variant of recipe.variants) {
-      if (parametricCandidates.has(variant.sourceIdentity)) {
-        throw new Error(`Duplicate parametric candidate source identity: ${variant.sourceIdentity}`);
+      for (const sourceIdentity of [variant.sourceIdentity, ...(variant.sourceIdentityAliases ?? [])]) {
+        if (parametricCandidates.has(sourceIdentity)) {
+          throw new Error(`Duplicate parametric candidate source identity: ${sourceIdentity}`);
+        }
+        parametricCandidates.set(sourceIdentity, {
+          recipePath: family.recipePath,
+          recipeSha256: sha256(recipeText),
+          localCandidateManifestPath: family.localCandidateManifestPath,
+          reviewContactSheetPath: family.reviewContactSheetPath,
+        });
       }
-      parametricCandidates.set(variant.sourceIdentity, {
-        recipePath: family.recipePath,
-        recipeSha256: sha256(recipeText),
-        localCandidateManifestPath: family.localCandidateManifestPath,
-        reviewContactSheetPath: family.reviewContactSheetPath,
-      });
     }
   }
   const componentByKey = new Map(cyl9.components.map((component: any) => [component.componentKey, component]));

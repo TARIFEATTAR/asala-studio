@@ -33,14 +33,16 @@ def canonical_hash(value: object) -> str:
 RECIPE_PATH = Path(cli_value("recipe", "docs/paper-doll-rig/cyl9-cap-family-recipe.json"))
 OUT_DIR = Path(cli_value("out", "outputs/paper-doll-cyl9-cap-family/candidate-v2"))
 SAMPLES = int(cli_value("samples", "128"))
-REQUESTED_VARIANTS = [
-    value.strip() for value in str(cli_value("variants", "SSLV")).split(",") if value.strip()
-]
 
 with RECIPE_PATH.open("r", encoding="utf8") as handle:
     RECIPE = json.load(handle)
 
 VARIANTS = {entry["variantKey"]: entry for entry in RECIPE["variants"]}
+REQUESTED_VARIANTS = [
+    value.strip()
+    for value in str(cli_value("variants", ",".join(VARIANTS.keys()))).split(",")
+    if value.strip()
+]
 unsupported = [key for key in REQUESTED_VARIANTS if key not in VARIANTS]
 if unsupported:
     raise ValueError(f"Unknown CYL-9ML cap variants: {', '.join(unsupported)}")

@@ -16,6 +16,7 @@ const tallCap8425RecipePath = "docs/paper-doll-rig/tall-cap-8-425-family-recipe.
 const shortFlutedCap8425RecipePath = "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json";
 const tallRollonCap20400RecipePath = "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json";
 const fauxLeatherCap18415RecipePath = "docs/paper-doll-rig/faux-leather-cap-18-415-family-recipe.json";
+const shortFlutedCap20400RecipePath = "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -58,7 +59,7 @@ test("recipe rejects duplicate catalog identities instead of silently collapsing
   raw.variants[1].sourceIdentity = raw.variants[0].sourceIdentity;
   assert.throws(
     () => parseParametricOvercapFamilyRecipe(raw),
-    /source identities must be unique/i,
+    /source identities and aliases must be unique/i,
   );
 });
 
@@ -284,4 +285,27 @@ test("parametric contract rejects trim materials without declared trim geometry"
   const raw = JSON.parse(await readFile(tallRollonCap20400RecipePath, "utf8"));
   raw.variants[0].trimMaterial = "mirror-silver";
   assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /trim material requires declared trim bands/i);
+});
+
+test("20-400 short-cap recipe preserves two source identities as aliases of one 23 by 12 mm output", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(shortFlutedCap20400RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__20-400__short-fluted-cap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__20-400__75550d33bd");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 23,
+    outsideDiameterTolerance: 0.5,
+    height: 12,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.equal(recipe.variants.length, 1);
+  assert.deepEqual(recipe.variants[0].sourceIdentityAliases, ["20-400cp1ozShortBlk"]);
+  assert.equal(recipe.surfaceProfile.kind, "recessed-vertical-flutes");
+  assert.equal(buildParametricOvercapRenderPlan(recipe).variantCount, 1);
+});
+
+test("parametric contract rejects a source identity repeated through an alias", async () => {
+  const raw = JSON.parse(await readFile(fauxLeatherCap18415RecipePath, "utf8"));
+  raw.variants[1].sourceIdentityAliases = [raw.variants[0].sourceIdentity];
+  assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /source identities and aliases must be unique/i);
 });
