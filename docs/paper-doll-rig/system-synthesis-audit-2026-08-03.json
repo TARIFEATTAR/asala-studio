@@ -53,7 +53,7 @@
     "cyl9RhinestoneCandidatesRegistered": 3,
     "cyl9CompoundClosedSwatchFamiliesRequiringReview": 2,
     "corePaperDollTestsPassing": 48,
-    "componentFactoryTestsPassing": 150,
+    "componentFactoryTestsPassing": 151,
     "parametricBlenderIntegrationTestsPassing": 3,
     "cyl9CapTestsPassing": 14
   },
@@ -81,6 +81,12 @@
       "status": "existing-but-incomplete",
       "recommended_action": "review and approve the twelve distinct measured cap profiles covering 38 appearances with 37 rendered outputs before treating their exact-alpha variants as geometry authority; preserve the 18-400 applicator as one measured 21 by 45 mm compound cap-and-glass-rod responsibility while keeping its stem dimensions review-only, retain the 18-400 short cap as its own measured 21 by 11 mm fluted profile, preserve the two 20-400 short-cap source identities as aliases of one identical 23 by 12 mm output, keep source-derived flute and trim-zone parameters review-only, reconstruct the five faux-leather materials through exact-mask candidates, and quarantine the conflicting 13-415 short-cap heights",
       "priority": "high"
+    },
+    {
+      "capability": "parametric-component-geometry-review-book",
+      "status": "existing-and-working",
+      "recommended_action": "use the six neck-finish pages and combined overview for named profile review; do not promote geometry, materials, or compatibility from the overview alone",
+      "priority": "critical"
     },
     {
       "capability": "cyl9-body-plate-authority",
