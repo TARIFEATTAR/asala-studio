@@ -17,6 +17,7 @@ const shortFlutedCap8425RecipePath = "docs/paper-doll-rig/short-fluted-cap-8-425
 const tallRollonCap20400RecipePath = "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json";
 const fauxLeatherCap18415RecipePath = "docs/paper-doll-rig/faux-leather-cap-18-415-family-recipe.json";
 const shortFlutedCap20400RecipePath = "docs/paper-doll-rig/short-fluted-cap-20-400-family-recipe.json";
+const shortFlutedCap18400RecipePath = "docs/paper-doll-rig/short-fluted-cap-18-400-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -300,6 +301,24 @@ test("20-400 short-cap recipe preserves two source identities as aliases of one 
   });
   assert.equal(recipe.variants.length, 1);
   assert.deepEqual(recipe.variants[0].sourceIdentityAliases, ["20-400cp1ozShortBlk"]);
+  assert.equal(recipe.surfaceProfile.kind, "recessed-vertical-flutes");
+  assert.equal(buildParametricOvercapRenderPlan(recipe).variantCount, 1);
+});
+
+test("18-400 short-cap recipe preserves the measured 21 by 11 mm fluted profile", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(shortFlutedCap18400RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__18-400__short-fluted-cap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__18-400__075c71e858");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 21,
+    outsideDiameterTolerance: 0.5,
+    height: 11,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku]), [
+    ["BLK", "18-400CpShortBlk", "CMP-CAP-BLK-18-400"],
+  ]);
   assert.equal(recipe.surfaceProfile.kind, "recessed-vertical-flutes");
   assert.equal(buildParametricOvercapRenderPlan(recipe).variantCount, 1);
 });
