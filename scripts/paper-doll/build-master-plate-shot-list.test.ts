@@ -20,6 +20,9 @@ test("shot list distinguishes exact coverage from supplemental local assets", as
   const shotList = await buildMasterPlateShotList();
   assert.equal(shotList.summary.exactSourceBackedExistingCount, 22);
   assert.equal(shotList.summary.exactSourceBackedOutstandingCount, 287);
+  assert.equal(shotList.summary.localReviewCandidateGeometryFamilyCount, 12);
+  assert.equal(shotList.summary.localReviewCandidateIdentityCount, 38);
+  assert.equal(shotList.summary.localReviewCandidateOutputCount, 37);
   assert.equal(shotList.rows.filter((row) => row.recordType === "supplemental-existing" && row.plateType === "body").length, 2);
   assert.equal(shotList.rows.filter((row) => row.recordType === "supplemental-existing" && row.plateType !== "body").length, 4);
   assert.ok(shotList.rows.filter((row) => row.recordType === "source-gap").every((row) => row.status === "needs-source"));
@@ -72,4 +75,7 @@ test("shot list records local parametric profile candidates without counting the
   assert.ok(candidates.every((row) => row.status === "needs-authority"));
   assert.ok(candidates.every((row) => row.existingAssetPaths.some((assetPath) => assetPath.endsWith("-family-recipe.json"))));
   assert.equal(shotList.summary.exactSourceBackedExistingCount, 22);
+  assert.equal(shotList.summary.localReviewCandidateGeometryFamilyCount, 12);
+  assert.equal(shotList.summary.localReviewCandidateIdentityCount, 38);
+  assert.equal(shotList.summary.localReviewCandidateOutputCount, 37);
 });

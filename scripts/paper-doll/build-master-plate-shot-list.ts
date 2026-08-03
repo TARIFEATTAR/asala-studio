@@ -78,10 +78,12 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
   const cyl9 = JSON.parse(cyl9Text) as any;
   const parametricFamilyIndex = JSON.parse(parametricFamilyIndexText) as any;
   const parametricCandidates = new Map<string, { recipePath: string; recipeSha256: string; localCandidateManifestPath: string; reviewContactSheetPath: string }>();
+  let localReviewCandidateOutputCount = 0;
   for (const family of parametricFamilyIndex.families) {
     const recipePath = path.join(workspaceRoot, family.recipePath);
     const recipeText = await readFile(recipePath, "utf8");
     const recipe = JSON.parse(recipeText) as any;
+    localReviewCandidateOutputCount += recipe.variants.length;
     for (const variant of recipe.variants) {
       for (const sourceIdentity of [variant.sourceIdentity, ...(variant.sourceIdentityAliases ?? [])]) {
         if (parametricCandidates.has(sourceIdentity)) {
@@ -303,6 +305,9 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
       explicitComponentPlateCount: componentRows.length,
       exactSourceBackedExistingCount: sourceRows.filter((row) => row.status === "locked-existing" || row.status === "authority-existing-local").length,
       exactSourceBackedOutstandingCount: sourceRows.filter((row) => row.status !== "locked-existing" && row.status !== "authority-existing-local").length,
+      localReviewCandidateGeometryFamilyCount: parametricFamilyIndex.families.length,
+      localReviewCandidateIdentityCount: parametricCandidates.size,
+      localReviewCandidateOutputCount,
       supplementalExistingCount: supplementalBodyRows.length + supplementalComponentRows.length,
       missingSourceResponsibilityCount: sourceGapRows.length,
     },
@@ -314,7 +319,6 @@ export async function buildMasterPlateShotList(): Promise<PaperDollMasterShotLis
 function reportFor(shotList: PaperDollMasterShotList): string {
   const statusCounts = new Map<string, number>();
   for (const row of shotList.rows) statusCounts.set(row.status, (statusCounts.get(row.status) ?? 0) + 1);
-  const parametricProfileCandidateCount = shotList.rows.filter((row) => row.authorityStatus === "dimension-calibrated-profile-review-candidate").length;
   return `# Best Bottles master reusable plate shot list
 
 ## Answer
@@ -330,7 +334,7 @@ The operational ledger has ${shotList.summary.operationalRowCount} rows because 
 
 - ${shotList.summary.exactSourceBackedExistingCount} source-backed requirements already have exact local authority coverage.
 - ${shotList.summary.exactSourceBackedOutstandingCount} source-backed requirements remain authority or truth work.
-- ${parametricProfileCandidateCount} outstanding component appearances now have local dimension-calibrated profile candidates awaiting named authority review; they are not counted as approved coverage.
+- ${shotList.summary.localReviewCandidateOutputCount} local candidate outputs cover ${shotList.summary.localReviewCandidateIdentityCount} catalog identities across ${shotList.summary.localReviewCandidateGeometryFamilyCount} dimension-calibrated geometry families. They await named authority review and are not counted as approved coverage.
 - Status distribution: ${[...statusCounts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([status, count]) => `${status} ${count}`).join(", ")}.
 
 This is an upper-bound appearance shot list, not a claim that every row needs a separately modeled mesh. Geometry-family deduplication and deterministic material variants should reduce modeling work while retaining one approved output plate per required appearance.

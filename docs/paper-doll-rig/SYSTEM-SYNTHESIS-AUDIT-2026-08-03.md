@@ -14,11 +14,11 @@ The generic steering assumption that the repository already contains a complete 
 
 The immediate production gap is not another architecture. It is completing the existing lifecycle. As of the latest local evidence pass:
 
-- all 23 CYL-9ML component candidates exist on the canonical canvas;
-- all 23 copy the registered authority alpha exactly with zero mismatched pixels;
-- all 115 component/body assemblies exist in one production-candidate review matrix;
+- all 21 production-selectable CYL-9ML component candidates exist on the canonical canvas;
+- all 21 copy the registered authority alpha exactly with zero mismatched pixels;
+- all 105 production-selectable component/body assemblies exist in one production-candidate review matrix;
 - the three rhinestone candidates now use one deterministic eight-stone registry over stone-free material bases;
-- the two translucent overcaps remain explicitly marked for five-body human review;
+- the two translucent overcap sources are compound-only inputs; closed pump/sprayer swatches require five-body human review and are never produced by stacking a clear cap over an exposed mechanism;
 - 0 candidates have been promoted through named Approve Pixels; the guarded private-ledger import is prepared but intentionally unexecuted;
 - 0 of 13 geometry-family placements are locked;
 - no new release cut exists;
@@ -68,17 +68,17 @@ It is not currently a complete parametric 3D geometry/camera/lighting asset libr
 
 - Five approved, SHA-pinned body plates: Amber, Cobalt, Clear, Frosted, and Swirl.
 - Canonical canvas: 2080×2288, Bone `#F5F3EF`.
-- 23 component records and candidate plates:
+- 23 component source records, of which 21 are production-selectable plates:
   - 10 roll-on overcaps;
   - 2 roller fitments;
   - 6 fine-mist sprayers;
   - 3 lotion pumps;
-  - 2 translucent secondary overcaps.
-- 13 geometry families and 13 approved full-canvas authority masks.
+  - 2 translucent secondary overcaps retained only as compound-source inputs.
+- 11 production-selectable geometry families; 13 source authority families remain preserved for audit and compound construction.
 - 145 deterministic assembly combinations are derived from the manifest.
 - Exact-alpha clamp, four-box provenance, topology checks, material-class routing, rhinestone layout persistence, and translucent assembly review rules exist.
 - Candidate, approval, family-fit, placement, release-head, release-cut, Sanity-draft, and public-publication persistence exists in migrations and Edge Functions.
-- Current visual evidence: 23 candidate rows, 5 locked bodies, 115 exact-coordinate assemblies, 23 family lineups, and one full contact sheet under `outputs/paper-doll-component-factory/CYL-9ML/production-candidate-review/`.
+- Current visual evidence: 21 production candidate rows, 5 locked bodies, 105 exact-coordinate assemblies, 21 family lineups, and one full contact sheet under `outputs/paper-doll-component-factory/CYL-9ML/production-candidate-review/`.
 
 ## Rig-versus-plate responsibility matrix
 
@@ -108,7 +108,7 @@ It is not currently a complete parametric 3D geometry/camera/lighting asset libr
 5. A contextual weld lane that restores body pixels outside the approved mask.
 6. Component intake and QA, including the metal-roller detached-junk lesson.
 7. Exact-alpha authority-mask clamping and byte-level verification.
-8. A 23-component CYL-9ML inventory, 13 geometry authorities, material recipes, and 145 derived assembly combinations.
+8. A 23-source CYL-9ML inventory, 21 production-selectable components, 13 preserved source authorities, material recipes, and 145 catalog assembly mappings.
 9. Deterministic rhinestone registration using eight permanent IDs, fixed pixel centers, stone-free material bases, and a versioned post-process candidate lineage.
 10. An interactive family-fit workbench with individual body inspection.
 11. Append-only candidate history, named approvals, immutable placement versions, release heads/cuts, and Sanity sync records.
@@ -142,8 +142,8 @@ It is not currently a complete parametric 3D geometry/camera/lighting asset libr
 ### Blocking CYL-9ML production
 
 1. The 23-candidate private-ledger import and named pixel approvals remain operator actions. Candidate creation is not approval.
-2. The two translucent overcaps require explicit five-body visual acceptance; they cannot auto-pass from isolated alpha or brightness metrics.
-3. All 13 family placements remain unlocked pending named family-fit approval.
+2. Closed translucent pump/sprayer swatches require explicit five-body visual acceptance; they cannot auto-pass from isolated alpha or brightness metrics, and their clear overcaps may not be published as independent selectable layers.
+3. All 11 production-selectable family placements remain unlocked pending named family-fit approval.
 4. The new current release and Sanity draft do not exist yet. The browser now resolves exact persisted body-version UUIDs and can lock a reviewed shared placement without using local display IDs.
 5. The base manifest still stores an empty `catalogMappings` array; exact catalog identity now lives in the generated, source-hashed `cyl9-catalog-crosswalk.json` and is joined onto the 145 structural mappings at load time. Future family manifests still need the same declarative pattern generalized.
 
@@ -222,8 +222,8 @@ The next-family intake is now scaffolded separately as `CYL-5ML-13-415`. It cont
 
 1. **Reconcile CYL-9ML catalog identity — complete locally.** Exact `graceSku`/`websiteSku` mappings are persisted with a source hash; the two conflicting duplicate rows are quarantined as review evidence.
 2. **Material-candidate checkpoint — complete locally.** Seven deterministic and sixteen GPT-material candidates were produced and clamped; the three dotted finishes were then superseded locally by deterministic registered-stone candidates.
-3. **Approve pixels — next human gate.** Named review of the 23 component variants, including deterministic rhinestones and five-body translucent review.
-4. **Family fit and placement.** Review each of 13 geometry families on all five bodies, then lock shared placement versions. Use explicit per-body overrides only when evidence proves they are required.
+3. **Approve pixels — next human gate.** Named review of the 21 production-selectable component variants, including deterministic rhinestones and compound closed-swatch translucent review.
+4. **Family fit and placement.** Review each of 11 production-selectable geometry families on all five bodies, then lock shared placement versions. Use explicit per-body overrides only when evidence proves they are required.
 5. **Release cut.** Atomically cut five bodies plus approved components/placements into a new Current Release.
 6. **Sanity draft.** Sync only the named release cut to `drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d`; inspect downstream readiness before public publication.
 7. **Legacy bridge.** Route Darkroom upload/generation into the new candidate lifecycle and stop legacy destructive approvals from becoming production truth.
