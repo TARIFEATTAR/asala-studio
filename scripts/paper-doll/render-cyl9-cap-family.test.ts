@@ -7,7 +7,14 @@ import {
   clampRenderToAuthorityMask,
   compareClampedVariantAlpha,
   inspectAuthorityMask,
+  validateCompleteCapFamilyManifest,
 } from "./render-cyl9-cap-family";
+import {
+  CYL9_CAP_VARIANT_KEYS,
+  parseCyl9BlenderManifest,
+  parseCyl9CapFamilyRecipe,
+} from "../../src/lib/paperDoll/cyl9CapFamily";
+import { readFile } from "node:fs/promises";
 
 async function rgbaPng(
   width: number,
@@ -83,4 +90,58 @@ test("mask inspection rejects frame occupancy and detached regions", async () =>
 
   await assert.rejects(() => inspectAuthorityMask(frameMask), /touches the image frame/i);
   await assert.rejects(() => inspectAuthorityMask(islandsMask), /1 connected component/i);
+});
+
+async function completeManifestFixture() {
+  const recipe = parseCyl9CapFamilyRecipe(JSON.parse(
+    await readFile("docs/paper-doll-rig/cyl9-cap-family-recipe.json", "utf8"),
+  ));
+  const provenance = {
+    meshRecipeHash: "1".repeat(64),
+    cameraRecipeHash: "2".repeat(64),
+    studioRecipeHash: "3".repeat(64),
+    maskRecipeHash: "4".repeat(64),
+  };
+  const dotted = new Set(["SLDT", "BKDT", "PKDT"]);
+  return {
+    recipe,
+    manifest: parseCyl9BlenderManifest({
+      schemaVersion: 1,
+      geometryFamilyId: recipe.geometryFamilyId,
+      blenderVersion: "5.2.0 LTS",
+      maskPath: "geometry-mask.png",
+      sharedProvenance: provenance,
+      renders: CYL9_CAP_VARIANT_KEYS.map((variantKey) => ({
+        variantKey,
+        path: `isolated/${variantKey}.png`,
+        provenance,
+        crystals: dotted.has(variantKey) ? recipe.crystalLayout : [],
+      })),
+    }),
+  };
+}
+
+test("complete family requires all ten catalog variants exactly once", async () => {
+  const { recipe, manifest } = await completeManifestFixture();
+
+  assert.doesNotThrow(() => validateCompleteCapFamilyManifest(manifest, recipe));
+  assert.throws(
+    () => validateCompleteCapFamilyManifest({ ...manifest, renders: manifest.renders.slice(0, -1) }, recipe),
+    /exact ten catalog variants/i,
+  );
+});
+
+test("all dotted finishes preserve identical deterministic crystal transforms", async () => {
+  const { recipe, manifest } = await completeManifestFixture();
+  const invalid = {
+    ...manifest,
+    renders: manifest.renders.map((render) => render.variantKey === "BKDT"
+      ? { ...render, crystals: render.crystals.slice(1) }
+      : render),
+  };
+
+  assert.throws(
+    () => validateCompleteCapFamilyManifest(invalid, recipe),
+    /BKDT.*crystal transforms/i,
+  );
 });
