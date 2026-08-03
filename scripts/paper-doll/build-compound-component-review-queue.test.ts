@@ -44,10 +44,13 @@ test("preserves source readiness and reviewed decomposition evidence as separate
     item.reviewGroupKey === "geometry-review__pump__17-415__d4ca90a05c"
   ));
 
-  assert.equal(sprayer15415?.auditStatus, "source-extraction-review-created-authority-required");
+  assert.equal(sprayer15415?.auditStatus, "dimension-calibrated-authority-review-created-named-approval-required");
   assert.equal(sprayer15415?.sourceStatus, "source-ready-physical-review");
   assert.ok(sprayer15415?.evidencePaths.some((value) => value.endsWith(
     "SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
+  )));
+  assert.ok(sprayer15415?.evidencePaths.some((value) => value.endsWith(
+    "SPRAYER-15-415-AUTHORITY-REVIEW.md",
   )));
   assert.equal(pump17415?.auditStatus, "decomposition-audit-required");
   assert.equal(pump17415?.sourceStatus, "local-authorities-require-reconciliation");

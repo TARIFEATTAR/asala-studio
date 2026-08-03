@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "sprayer-protective-overcap-15-415-family-v1",
+  "familyKey": "SPRAYER-PROTECTIVE-OVERCAP-15-415",
+  "neckFinish": "15-415",
+  "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "Spry15-415ShnSl",
+    "sourceSha256": "692aab159c9f39f5dbb1ae6009e7577c0ef3c4d3bf0df17c8897ac8a01b1106f",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415ShnSl.gif",
+    "localReviewPath": "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/protective-overcap/assembly-clear30-shiny-silver__scene-4__cutout.png",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "Spry15-415ShnSl",
+    "fields": {
+      "heightWithCap": "41 ±0.5 mm",
+      "diameter": "20 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 20,
+    "outsideDiameterTolerance": 0.5,
+    "height": 41,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-sprayer-envelope-plus-extracted-protective-overcap-profile-v1"
+  },
+  "profileNormalized": [
+    [0.5, 0],
+    [0.5, 0.94],
+    [0.499, 0.965],
+    [0.493, 0.982],
+    [0.478, 0.993],
+    [0.44, 0.998],
+    [0, 1]
+  ],
+  "surfaceProfile": {
+    "kind": "smooth"
+  },
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "SBLK",
+      "sourceIdentity": "Spry15-415Blk",
+      "graceSku": "CMP-SPR-BLK-15-415",
+      "material": "glossy-black",
+      "decoration": "none",
+      "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1"
+    },
+    {
+      "variantKey": "MGLD",
+      "sourceIdentity": "Spry15-415MattGl",
+      "graceSku": "CMP-SPR-GLD-15-415",
+      "material": "matte-gold",
+      "decoration": "none",
+      "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1"
+    },
+    {
+      "variantKey": "MSLV",
+      "sourceIdentity": "Spry15-415MattSl",
+      "graceSku": "CMP-SPR-SLV-15-415",
+      "material": "matte-silver",
+      "decoration": "none",
+      "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1"
+    },
+    {
+      "variantKey": "SGLD",
+      "sourceIdentity": "Spry15-415ShnGl",
+      "graceSku": "CMP-SPR-SGLD-15-415",
+      "material": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1"
+    },
+    {
+      "variantKey": "SSLV",
+      "sourceIdentity": "Spry15-415ShnSl",
+      "graceSku": "CMP-SPR-SSLV-15-415",
+      "material": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "overcap__15-415__fine-mist-protective__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

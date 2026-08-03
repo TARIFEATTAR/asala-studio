@@ -64,15 +64,21 @@
     {
       "decisionId": "review-decision__15-415-sprayer__component-kit-decomposition",
       "sourceReviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
-      "status": "source-extraction-review-created-authority-required",
+      "status": "dimension-calibrated-authority-review-created-named-approval-required",
       "evidenceType": "layered-photoshop-archive-plus-reviewed-source-contact-sheet",
       "evidencePaths": [
         "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
         "docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
+        "docs/paper-doll-rig/SPRAYER-15-415-AUTHORITY-REVIEW.md",
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/manifest.json",
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/sprayer-head/contact-sheet.png",
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/protective-overcap/contact-sheet.png",
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/dip-tube/contact-sheet.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/manifest.json",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-materials.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-fit.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-materials.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-fit.png",
         "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
       ],
       "affectedSourceIdentities": [
@@ -85,11 +91,22 @@
       "observation": "Each catalog reference contains three distinct responsibilities: the exposed sprayer head, a detached protective overcap, and a dip tube. The five exact Photoshop sources preserve the exposed head, but their scene structures differ; the matte-silver source contains additional nozzle scenes. Photoshop layers must therefore be recomposed by visual responsibility rather than promoted one-layer-per-plate.",
       "geometryClaim": "none",
       "resolution": {
-        "state": "source-extraction-review-created",
+        "state": "dimension-calibrated-authority-review-created",
         "recipePath": "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
         "extractionReviewPath": "docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
         "extractionManifestPath": "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/manifest.json",
         "extractedReviewAssetCount": 15,
+        "authorityReviewManifestPath": "outputs/paper-doll-sprayer-15-415/authority-review-v1/manifest.json",
+        "authorityCandidateCount": 10,
+        "exactAlphaCandidateCount": 10,
+        "headAuthorityWidthPx": 363,
+        "protectiveOvercapAuthorityWidthPx": 363,
+        "headSourceCleanup": {
+          "measuredSourceComponents": 10,
+          "retainedComponentPixels": 77022,
+          "discardedComponentPixels": [13, 10, 9, 9, 8, 8, 6, 4, 4],
+          "discardedTotalPixels": 71
+        },
         "reusablePlateResponsibilities": [
           "sprayer-head",
           "protective-overcap"
@@ -101,7 +118,7 @@
         "geometryLocked": false,
         "productionPlateEligible": false
       },
-      "nextGate": "Calibrate and approve the exposed-head and protective-overcap geometry authorities independently, then clamp the five appearances to those exact masks. Render or weld the dip tube per bottle cohort and body optics; never approve the flattened three-part source as one reusable plate."
+      "nextGate": "Obtain named geometry-profile and five-body family-fit approval for the exposed-head and protective-overcap candidates. Keep the dip tube body-contextual, then register only approved exact-alpha plates; never approve the flattened three-part source as one reusable plate."
     },
     {
       "decisionId": "review-decision__20-400-dropper__pipette-length-unproven",
