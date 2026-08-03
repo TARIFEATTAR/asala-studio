@@ -31,14 +31,17 @@
       ],
       "sourceIdentityCount": 3,
       "sourceStatus": "local-authorities-require-reconciliation",
-      "auditStatus": "shared-exterior-geometry-locked-complete-assembly-gates-remain",
+      "auditStatus": "shared-exterior-geometry-locked-compound-closed-swatch-and-body-context-gates-remain",
       "evidencePaths": [
         "docs/paper-doll-rig/pump-17-415-component-kit-decomposition.json",
         "docs/paper-doll-rig/DISPENSER-17-415-AUTHORITY-REVIEW.md",
         "outputs/paper-doll-component-kit-reviews/17-415-pump/source-extraction-v1/manifest.json",
         "outputs/paper-doll-dispenser-17-415/authority-review-v1/manifest.json",
         "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/pump-materials.png",
-        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/pump-five-body-family-fit.png"
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/pump-five-body-family-fit.png",
+        "docs/paper-doll-rig/DISPENSER-17-415-CLOSED-ASSEMBLY-REVIEW.md",
+        "outputs/paper-doll-dispenser-17-415/closed-assembly-review-v1/review/pump-MSLV-closed-five-body.png",
+        "docs/paper-doll-rig/DISPENSER-17-415-BODY-CONTEXT-WELD-PLAN.md"
       ],
       "suspectedResponsibilities": [
         "exterior-dispenser",
@@ -53,7 +56,7 @@
       ],
       "geometryClaim": "none",
       "productionPlateDelta": null,
-      "nextGate": "Verify the pump dip-tube length and approve the independent translucent overcap in assembled context. Then cut the approved exterior plus completed body-contextual responsibilities into a named release."
+      "nextGate": "Obtain named five-body approval of the exact pump closed-swatch review, then material-only generate and clamp the remaining two closed appearances. Separately verify pump tube length, diameter, trim margin, pixel scale, and inserted-plug profile before any body-context weld mask."
     },
     {
       "reviewGroupKey": "geometry-review__sprayer__17-415__91195a1a8e",
@@ -72,14 +75,17 @@
       ],
       "sourceIdentityCount": 6,
       "sourceStatus": "local-authorities-require-reconciliation",
-      "auditStatus": "shared-exterior-geometry-locked-complete-assembly-gates-remain",
+      "auditStatus": "shared-exterior-geometry-locked-compound-closed-swatch-and-body-context-gates-remain",
       "evidencePaths": [
         "docs/paper-doll-rig/sprayer-17-415-component-kit-decomposition.json",
         "docs/paper-doll-rig/DISPENSER-17-415-AUTHORITY-REVIEW.md",
         "outputs/paper-doll-component-kit-reviews/17-415-sprayer/source-extraction-v1/manifest.json",
         "outputs/paper-doll-dispenser-17-415/authority-review-v1/manifest.json",
         "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/sprayer-materials.png",
-        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/sprayer-five-body-family-fit.png"
+        "outputs/paper-doll-dispenser-17-415/authority-review-v1/review/sprayer-five-body-family-fit.png",
+        "docs/paper-doll-rig/DISPENSER-17-415-CLOSED-ASSEMBLY-REVIEW.md",
+        "outputs/paper-doll-dispenser-17-415/closed-assembly-review-v1/review/sprayer-SSLV-closed-five-body.png",
+        "docs/paper-doll-rig/DISPENSER-17-415-BODY-CONTEXT-WELD-PLAN.md"
       ],
       "suspectedResponsibilities": [
         "exterior-dispenser",
@@ -94,7 +100,7 @@
       ],
       "geometryClaim": "none",
       "productionPlateDelta": null,
-      "nextGate": "Verify the body-contextual tube/plug assembly and approve the independent translucent sprayer overcap in assembled context. Then cut the approved exterior plus completed responsibilities into a named release."
+      "nextGate": "Obtain named five-body approval of the exact sprayer closed-swatch review, then material-only generate and clamp the remaining five closed appearances. Separately verify tube diameter, trim margin, pixel scale, and inserted-plug profile before any body-context weld mask."
     },
     {
       "reviewGroupKey": "geometry-review__dropper__17-415__a38fb41beb",
@@ -725,6 +731,6 @@
     "componentGeometryReviewGroupsPath": "docs/paper-doll-rig/component-geometry-review-groups.json",
     "componentGeometryReviewGroupsSha256": "72a6f3828a320d5a578c89623d2b97d48e00e00ebcf28cb5c9c462230b2e0c24",
     "componentPhysicalReviewDecisionsPath": "docs/paper-doll-rig/component-physical-review-decisions.json",
-    "componentPhysicalReviewDecisionsSha256": "38534f2085814887e10d5638c516e63e8e2f5adb0fbdfd85b6e482afaca0dc85"
+    "componentPhysicalReviewDecisionsSha256": "4f5e8ad2324597e9124e8833938835b9eff9c8246794eca5b6b16d8b679063f9"
   }
 }

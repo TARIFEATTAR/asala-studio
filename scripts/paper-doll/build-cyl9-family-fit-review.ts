@@ -6,7 +6,10 @@ import sharp from "sharp";
 
 import { parseComponentCandidate } from "../../src/lib/paperDoll/componentPlateContract";
 import { composeComponentAssembly } from "../../src/lib/paperDoll/componentPlateImage.node";
-import { loadCyl9ComponentFactory } from "../../src/lib/paperDoll/cyl9ComponentFactory";
+import {
+  CYL9_PRODUCTION_COMPONENT_KEYS,
+  loadCyl9ComponentFactory,
+} from "../../src/lib/paperDoll/cyl9ComponentFactory";
 
 const DEFAULT_MATERIALIZED = "outputs/paper-doll-component-factory/CYL-9ML/materialized";
 const DEFAULT_OUTPUT = "outputs/paper-doll-component-factory/CYL-9ML/family-fit-review";
@@ -198,13 +201,17 @@ export async function buildCyl9FamilyFitReview(input: {
       await readFile(path.join(path.resolve(input.generatedDirectory), "generation-index.json"), "utf8"),
     ) as MaterializationIndex
     : undefined;
-  if (generatedIndex && (generatedIndex.familyKey !== "CYL-9ML" || generatedIndex.artifacts.length !== 16)) {
-    throw new Error("Complete Family Fit review requires the sixteen-candidate generated CYL-9ML index.");
+  const productionComponentKeys = new Set<string>(CYL9_PRODUCTION_COMPONENT_KEYS);
+  const generatedArtifacts = generatedIndex?.artifacts.filter(({ componentKey }) => productionComponentKeys.has(componentKey));
+  if (generatedIndex && (generatedIndex.familyKey !== "CYL-9ML" || generatedArtifacts?.length !== 14)) {
+    throw new Error("Complete Family Fit review requires the fourteen production-selectable generated CYL-9ML candidates.");
   }
   const artifacts = mergeCyl9CandidateArtifacts({
-    deterministic: index.artifacts,
-    generated: generatedIndex?.artifacts,
-    componentOrder: manifest.components.map(({ componentKey }) => componentKey),
+    deterministic: index.artifacts.filter(({ componentKey }) => productionComponentKeys.has(componentKey)),
+    generated: generatedArtifacts,
+    componentOrder: manifest.components
+      .filter(({ componentKey }) => productionComponentKeys.has(componentKey))
+      .map(({ componentKey }) => componentKey),
   });
 
   const bodyPlates = await Promise.all(manifest.bodyPlates.map(async (body) => {

@@ -42,8 +42,8 @@ rewrite or claim to correct the conflicting catalog height field.
 | Responsibility | State | Production route |
 |---|---|---|
 | Exposed actuator/head plus collar | Geometry locked | Reusable full-canvas plate with exact authority alpha |
-| Sprayer translucent overcap | Independent existing plate; not approved by this decision | Its own mask, placement, and assembled translucent QA |
-| Lotion-pump translucent overcap | Independent existing plate; not approved by this decision | Its own mask, placement, and assembled translucent QA |
+| Sprayer translucent overcap | Compound closed-assembly responsibility; not approved by this decision | Bake the cap plus visible sprayer into one closed-state swatch; never stack an independent clear-cap layer |
+| Lotion-pump translucent overcap | Compound closed-assembly responsibility; not approved by this decision | Bake the cap plus visible pump into one closed-state swatch; never stack an independent clear-cap layer |
 | Sprayer dip tube and inserted plug | Body-contextual | Weld/render against the target body depth, occlusion, and refraction |
 | Pump dip tube and inserted plug | Body-contextual; length unresolved | Verify length, then weld/render against the target body |
 
@@ -88,6 +88,7 @@ npm run paperdoll:dispenser-17-415-authority-review
 
 This approval earns geometry lock for the reusable exposed exterior plates. It
 does not cut a Current Release, modify Sanity, publish a SKU, approve either
-translucent overcap, or approve a complete tube-bearing assembly. Those remain
-separate named gates so the approved exterior can progress without pretending
-the unresolved assembly responsibilities are complete.
+closed compound swatch, or approve a complete tube-bearing assembly. The
+closed-state candidates are reviewed separately under
+`DISPENSER-17-415-CLOSED-ASSEMBLY-REVIEW.md`; no standalone translucent overlay
+is permitted for this family.

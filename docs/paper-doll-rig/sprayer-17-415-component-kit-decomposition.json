@@ -90,11 +90,12 @@
     {
       "partId": "sprayer-protective-overcap",
       "responsibility": "secondary-overcap",
-      "outputPolicy": "reusable-full-canvas-plate",
+      "outputPolicy": "compound-with-exterior-swatches",
       "reviewFraming": "center-nontransparent-bounds",
-      "productionAnchor": "mount-axis-seat",
-      "independentlySelectable": true,
+      "productionAnchor": "component-relative",
+      "independentlySelectable": false,
       "assemblyContextQa": true,
+      "compoundWithPartId": "sprayer-head-and-collar",
       "sourceSelectors": [
         { "sourceId": "existing-spray-overcap", "method": "reviewed-selection-mask" }
       ]

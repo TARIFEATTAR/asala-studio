@@ -19,6 +19,16 @@ Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__bulb-
 
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__pump__18-415__4b1f4c5688/contact-sheet.png`.
 
+## 17-415 sprayer and lotion-pump assemblies
+
+The open state uses the approved exposed head-and-collar swatch. The closed state does not stack a universal translucent cap over that swatch. It uses one compound dispenser-plus-protective-overcap swatch for each finish, preserving the real transmitted color, reflections, occlusion, and edge behavior of the assembled part.
+
+The dip tube and inserted-plug interaction remain body-contextual. They are planned as ten SHA-bound jobs—sprayer and pump against each of the five locked CYL-9ML bodies—and never become global reusable tube plates. The 93.8 mm sprayer value is recorded as stock length only; the visible reach must be trimmed to the verified body interior. Pump length, both tube diameters, bottom clearance, the physical-to-pixel conversion, and plug profile remain calibration gates.
+
+Closed-swatch review: `docs/paper-doll-rig/DISPENSER-17-415-CLOSED-ASSEMBLY-REVIEW.md`.
+
+Body-context contract: `docs/paper-doll-rig/DISPENSER-17-415-BODY-CONTEXT-WELD-PLAN.md`.
+
 ## 20-400 droppers
 
 The catalog sources reuse identical photography across nominal 1 oz and 2 oz identities. That is not evidence that the inserted pipette has the same physical length. The exterior bulb/collar and body-contextual pipette are therefore separate responsibilities pending bottle-cohort dimensions.

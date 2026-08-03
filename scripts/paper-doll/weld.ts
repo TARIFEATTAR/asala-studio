@@ -19,7 +19,8 @@
  *   npm run paperdoll:weld -- --composite out/capoff.png \
  *     --recipe out/capoff.recipe.json \
  *     --applicator "Fine Mist Sprayer" --body-color Clear \
- *     [--tube-radius-mm 2.2] [--expect-tube|--no-expect-tube] \
+ *     --tube-radius-mm <verified physical radius> \
+ *     [--expect-tube|--no-expect-tube] \
  *     [--mask-only | --welded sim.png | --call] \
  *     --out out/welded
  *
@@ -147,6 +148,11 @@ async function main() {
   const applicator = str(args, "applicator") ?? "Fine Mist Sprayer";
   const bodyColor = str(args, "body-color") ?? "Clear";
   const expectTube = args.get("no-expect-tube") !== true;
+  const tubeRadiusArg = str(args, "tube-radius-mm");
+  if (!tubeRadiusArg || !Number.isFinite(Number(tubeRadiusArg)) || Number(tubeRadiusArg) <= 0) {
+    console.error("Required: --tube-radius-mm with a verified physical radius. The legacy 2.2 mm default is not production evidence.");
+    process.exit(1);
+  }
 
   const recipe = JSON.parse(readFileSync(resolve(recipePath), "utf8")) as CompositeRecipe;
   const spec = recipe.body.geometrySpec;
@@ -159,7 +165,7 @@ async function main() {
 
   const regionOptions = {
     ...DEFAULT_WELD_REGIONS,
-    tubeRadiusMm: Number(str(args, "tube-radius-mm") ?? DEFAULT_WELD_REGIONS.tubeRadiusMm),
+    tubeRadiusMm: Number(tubeRadiusArg),
   };
   const regions: WeldRegions = deriveWeldRegions(spec, fitmentBounds, regionOptions);
   const mask = buildWeldMask(spec.canvasWidthPx, spec.canvasHeightPx, regions);

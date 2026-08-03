@@ -32,6 +32,17 @@ export const CYL9_COMPONENT_KEYS = [
   "overcap__17-415__LOTION-TRNS",
 ] as const;
 
+/** Preserved source authorities used only to build compound closed swatches. */
+export const CYL9_COMPOUND_SOURCE_ONLY_COMPONENT_KEYS = [
+  "overcap__17-415__SPRAY-TRNS",
+  "overcap__17-415__LOTION-TRNS",
+] as const;
+
+const compoundSourceOnly = new Set<string>(CYL9_COMPOUND_SOURCE_ONLY_COMPONENT_KEYS);
+export const CYL9_PRODUCTION_COMPONENT_KEYS = CYL9_COMPONENT_KEYS.filter((componentKey) => (
+  !compoundSourceOnly.has(componentKey)
+));
+
 type CatalogMapping = PaperDollFamilyProductionManifest["catalogMappings"][number];
 type Component = PaperDollFamilyProductionManifest["components"][number];
 
@@ -55,8 +66,6 @@ export function buildCyl9ExpectedCatalogMappings(
   manifest: PaperDollFamilyProductionManifest,
 ): CatalogMapping[] {
   const mappings: CatalogMapping[] = [];
-  const sprayOvercap = componentByVariant(manifest, "overcap", "SPRAY-TRNS");
-  const lotionOvercap = componentByVariant(manifest, "overcap", "LOTION-TRNS");
 
   for (const bodyVariantKey of CYL9_BODY_VARIANT_KEYS) {
     for (const capVariantKey of CYL9_CAP_VARIANT_KEYS) {
@@ -82,7 +91,6 @@ export function buildCyl9ExpectedCatalogMappings(
         mode: "spray",
         componentVariantKeys: [
           componentVariantReference(sprayer),
-          componentVariantReference(sprayOvercap),
         ],
       });
     }
@@ -94,7 +102,6 @@ export function buildCyl9ExpectedCatalogMappings(
         mode: "lotion",
         componentVariantKeys: [
           componentVariantReference(pump),
-          componentVariantReference(lotionOvercap),
         ],
       });
     }

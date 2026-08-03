@@ -13,11 +13,12 @@ import {
   planCyl9MaterialGeneration,
 } from "./generate-cyl9-material-candidates";
 
-test("the paid material plan contains only the sixteen real provider gaps", async () => {
+test("the paid material plan excludes the two standalone translucent overcap dead ends", async () => {
   const plan = await planCyl9MaterialGeneration();
-  assert.equal(plan.jobs.length, 16);
-  assert.equal(plan.estimatedCostUsd, 6.88);
+  assert.equal(plan.jobs.length, 14);
+  assert.equal(plan.estimatedCostUsd, 6.02);
   assert.ok(plan.jobs.every(({ provider }) => provider === "openai"));
+  assert.ok(plan.jobs.every(({ componentKey }) => !componentKey.startsWith("overcap__17-415__")));
   assert.equal(plan.mutationPolicy.approvalsWritten, false);
   assert.equal(plan.mutationPolicy.currentReleaseChanged, false);
   assert.equal(plan.mutationPolicy.sanityChanged, false);

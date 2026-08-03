@@ -29,6 +29,7 @@ interface MaterialPolicy {
 interface MaterialRecipe {
   componentKey: string;
   policy: string;
+  productionUse?: "selectable" | "compound-source-only";
   physicalSubstrate: string;
   coating: string;
   referencePath: string;
@@ -107,6 +108,9 @@ function ensureRecipeFile(value: RecipeFile): RecipeFile {
   }
   for (const recipe of value.components) {
     if (!value.materialPolicies[recipe.policy]) throw new Error(`Unknown material policy: ${recipe.policy}.`);
+    if (recipe.productionUse === "compound-source-only" && !recipe.componentKey.startsWith("overcap__17-415__")) {
+      throw new Error(`Only a declared compound source may use compound-source-only: ${recipe.componentKey}.`);
+    }
   }
   return value;
 }
@@ -123,7 +127,12 @@ export async function buildCyl9ComponentBatch(
   const recipeByComponent = new Map(recipes.components.map((recipe) => [recipe.componentKey, recipe]));
   const rhinestones = buildRhinestoneLayout(recipes.rhinestoneLayout);
 
-  const jobs: Cyl9ComponentBatchJob[] = manifest.components.map((component) => {
+  const selectableComponents = manifest.components.filter((component) => {
+    const recipe = recipeByComponent.get(component.componentKey);
+    if (!recipe) throw new Error(`Missing material recipe for ${component.componentKey}.`);
+    return recipe.productionUse !== "compound-source-only";
+  });
+  const jobs: Cyl9ComponentBatchJob[] = selectableComponents.map((component) => {
     const recipe = recipeByComponent.get(component.componentKey);
     if (!recipe) throw new Error(`Missing material recipe for ${component.componentKey}.`);
     if (component.authorityStatus !== "approved" || !component.authority) {

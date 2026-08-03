@@ -7,7 +7,7 @@ Multi-part source artwork is evidence, not automatically one production plate. B
 1. Preserve the original PSD/PSB filename, archive-relative path, and SHA-256.
 2. Inspect the layered source and the assembled catalog reference together.
 3. Recompose Photoshop layer fragments that belong to one physical responsibility. One Photoshop layer does not imply one paper-doll plate.
-4. Split independently selectable exterior parts into separate full-canvas plates.
+4. Split independently selectable exterior parts into separate full-canvas plates. When a translucent protective overcap cannot be optically reproduced by normal alpha compositing, emit open and closed compound assembly swatches instead of a synthetic clear-cap overlay.
 5. Keep internal delivery hardware body-contextual when its length, visibility, refraction, or occlusion depends on the bottle.
 6. Center non-transparent bounds only for isolated review framing. Production placement uses the physical mount axis, seat, body centerline, and verified interior depth.
 7. Preserve the flattened source composite for provenance and visual comparison only. It is never geometry authority and never production eligible.
@@ -17,7 +17,8 @@ Multi-part source artwork is evidence, not automatically one production plate. B
 | Source responsibility | Normal output | Placement authority |
 |---|---|---|
 | Sprayer or pump exterior | reusable full-canvas plate | mount axis + seat |
-| Protective overcap | separate reusable full-canvas plate | mount axis + overcap seat |
+| Opaque or independently sold protective overcap | separate reusable full-canvas plate | mount axis + overcap seat |
+| Translucent overcap with baked mechanism interaction | compound closed-assembly swatches, paired with exposed/open swatches | component-relative to exterior; shared mount axis + seat |
 | Dip tube or inserted pipette | body-contextual weld or physical render | body centerline + verified interior depth |
 | Roller housing and ball | one exterior fitment authority when not independently selectable | mount axis + seat |
 | Roll-on overcap | separate reusable plate | mount axis + cap seat |
@@ -37,6 +38,8 @@ Multi-part source artwork is evidence, not automatically one production plate. B
 - any Photoshop source with multiple large connected responsibilities or multiple catalog-selectable parts.
 
 The machine-readable contract is implemented by `src/lib/paperDoll/componentKitDecomposition.ts`. The first real recipe is `sprayer-15-415-component-kit-decomposition.json`. Its SHA-verified source-extraction result and responsibility contact sheets are documented in `SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md`.
+
+The 17-415 spray and lotion lanes exercise the compound-swatches route. Their translucent overcaps are not independently selectable production layers: each closed swatch bakes the cap and visible mechanism together, while the exposed mechanism remains the open-state swatch. See `DISPENSER-17-415-CLOSED-ASSEMBLY-REVIEW.md`.
 
 Run `npm run paperdoll:extract-component-kit-review` to reproduce that local
 review set. The command writes review-only artifacts and records that production,

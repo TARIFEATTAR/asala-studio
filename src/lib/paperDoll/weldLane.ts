@@ -37,7 +37,9 @@ export interface WeldRegionOptions {
 
 export const DEFAULT_WELD_REGIONS: WeldRegionOptions = {
   collarBandMm: 2.5,
-  tubeRadiusMm: 2.2, // fine-mist sprayer; lotion pumps pass a fatter radius
+  // Synthetic pilot/test value only. The production CLI requires an explicit,
+  // physically verified radius and never treats this default as catalog truth.
+  tubeRadiusMm: 2.2,
   tubeBottomMarginMm: 2.0,
   collarPadMm: 1.5,
 };

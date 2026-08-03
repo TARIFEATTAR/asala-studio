@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "familyId": "CYL-9ML-17-415",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "scaleCalibration": {
+    "status": "ambiguous-review-required",
+    "threadCrestPxPerMm": 15.823529,
+    "bodyHeightProxyPxPerMm": 18.991429,
+    "divergencePercent": 20.020181,
+    "approvedPxPerMm": null,
+    "approvedPxPerMmEvidence": null,
+    "note": "Thread-crest and body-height proxies disagree materially. Preserve pixel registrations and require an explicit reviewed scale before creating tube-width or bottom-margin masks."
+  },
+  "summary": {
+    "bodyCount": 5,
+    "dispenserCount": 2,
+    "jobCount": 10,
+    "productionReadyJobCount": 0,
+    "dimensionReviewJobCount": 5,
+    "blockedJobCount": 5
+  },
+  "reusablePlateIds": [],
+  "jobs": [
+    {
+      "jobId": "cyl-9ml-17-415__sprayer__clear__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "sprayer",
+      "componentPartId": "sprayer-dip-tube",
+      "bodyId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "bodyColorway": "clear",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+      "bodyAssetSha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+      "outputPolicy": "body-contextual-weld",
+      "state": "dimension-review-required",
+      "sourceEvidence": "Best Bottles catalog dimension records a 93.8 mm stock tube; target-body trim, outside diameter, and inserted-plug profile remain unverified.",
+      "stockTubeLengthMm": 93.8,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2086,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2085,
+        "maximumReachPx": 1083,
+        "mustClipToBodyInterior": true,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__sprayer__frosted__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "sprayer",
+      "componentPartId": "sprayer-dip-tube",
+      "bodyId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "bodyColorway": "frosted",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__frosted__70.0x20.0mm.png",
+      "bodyAssetSha256": "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956",
+      "outputPolicy": "body-contextual-weld",
+      "state": "dimension-review-required",
+      "sourceEvidence": "Best Bottles catalog dimension records a 93.8 mm stock tube; target-body trim, outside diameter, and inserted-plug profile remain unverified.",
+      "stockTubeLengthMm": 93.8,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2092,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2091,
+        "maximumReachPx": 1089,
+        "mustClipToBodyInterior": true,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__sprayer__swirl__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "sprayer",
+      "componentPartId": "sprayer-dip-tube",
+      "bodyId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "bodyColorway": "swirl",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__swirl__70.0x20.0mm.png",
+      "bodyAssetSha256": "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68",
+      "outputPolicy": "body-contextual-weld",
+      "state": "dimension-review-required",
+      "sourceEvidence": "Best Bottles catalog dimension records a 93.8 mm stock tube; target-body trim, outside diameter, and inserted-plug profile remain unverified.",
+      "stockTubeLengthMm": 93.8,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2091,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2090,
+        "maximumReachPx": 1088,
+        "mustClipToBodyInterior": true,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__sprayer__amber__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "sprayer",
+      "componentPartId": "sprayer-dip-tube",
+      "bodyId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "bodyColorway": "amber",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png",
+      "bodyAssetSha256": "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3",
+      "outputPolicy": "body-contextual-weld",
+      "state": "dimension-review-required",
+      "sourceEvidence": "Best Bottles catalog dimension records a 93.8 mm stock tube; target-body trim, outside diameter, and inserted-plug profile remain unverified.",
+      "stockTubeLengthMm": 93.8,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2088,
+        "maximumReachPx": 1086,
+        "mustClipToBodyInterior": true,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__sprayer__cobalt__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "sprayer",
+      "componentPartId": "sprayer-dip-tube",
+      "bodyId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "bodyColorway": "cobalt",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__cobalt__70.0x20.0mm.png",
+      "bodyAssetSha256": "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c",
+      "outputPolicy": "body-contextual-weld",
+      "state": "dimension-review-required",
+      "sourceEvidence": "Best Bottles catalog dimension records a 93.8 mm stock tube; target-body trim, outside diameter, and inserted-plug profile remain unverified.",
+      "stockTubeLengthMm": 93.8,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2088,
+        "maximumReachPx": 1086,
+        "mustClipToBodyInterior": true,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__pump__clear__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "pump",
+      "componentPartId": "pump-dip-tube",
+      "bodyId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "bodyColorway": "clear",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+      "bodyAssetSha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+      "outputPolicy": "body-contextual-weld",
+      "state": "blocked-missing-tube-dimensions",
+      "sourceEvidence": "The repository has no verified 17-415 pump tube length, outside diameter, target-body trim margin, or inserted-plug profile.",
+      "stockTubeLengthMm": null,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2086,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2085,
+        "maximumReachPx": 1083,
+        "mustClipToBodyInterior": false,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "stock-tube-length-unverified",
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__pump__frosted__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "pump",
+      "componentPartId": "pump-dip-tube",
+      "bodyId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "bodyColorway": "frosted",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__frosted__70.0x20.0mm.png",
+      "bodyAssetSha256": "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956",
+      "outputPolicy": "body-contextual-weld",
+      "state": "blocked-missing-tube-dimensions",
+      "sourceEvidence": "The repository has no verified 17-415 pump tube length, outside diameter, target-body trim margin, or inserted-plug profile.",
+      "stockTubeLengthMm": null,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2092,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2091,
+        "maximumReachPx": 1089,
+        "mustClipToBodyInterior": false,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "stock-tube-length-unverified",
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__pump__swirl__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "pump",
+      "componentPartId": "pump-dip-tube",
+      "bodyId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "bodyColorway": "swirl",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__swirl__70.0x20.0mm.png",
+      "bodyAssetSha256": "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68",
+      "outputPolicy": "body-contextual-weld",
+      "state": "blocked-missing-tube-dimensions",
+      "sourceEvidence": "The repository has no verified 17-415 pump tube length, outside diameter, target-body trim margin, or inserted-plug profile.",
+      "stockTubeLengthMm": null,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2091,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2090,
+        "maximumReachPx": 1088,
+        "mustClipToBodyInterior": false,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "stock-tube-length-unverified",
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__pump__amber__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "pump",
+      "componentPartId": "pump-dip-tube",
+      "bodyId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "bodyColorway": "amber",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png",
+      "bodyAssetSha256": "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3",
+      "outputPolicy": "body-contextual-weld",
+      "state": "blocked-missing-tube-dimensions",
+      "sourceEvidence": "The repository has no verified 17-415 pump tube length, outside diameter, target-body trim margin, or inserted-plug profile.",
+      "stockTubeLengthMm": null,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2088,
+        "maximumReachPx": 1086,
+        "mustClipToBodyInterior": false,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "stock-tube-length-unverified",
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    },
+    {
+      "jobId": "cyl-9ml-17-415__pump__cobalt__body-context-v1",
+      "familyId": "CYL-9ML-17-415",
+      "lane": "pump",
+      "componentPartId": "pump-dip-tube",
+      "bodyId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "bodyColorway": "cobalt",
+      "bodyAssetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__cobalt__70.0x20.0mm.png",
+      "bodyAssetSha256": "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c",
+      "outputPolicy": "body-contextual-weld",
+      "state": "blocked-missing-tube-dimensions",
+      "sourceEvidence": "The repository has no verified 17-415 pump tube length, outside diameter, target-body trim margin, or inserted-plug profile.",
+      "stockTubeLengthMm": null,
+      "tubeDiameterMm": null,
+      "interiorBottomMarginMm": null,
+      "registration": {
+        "canvasWidthPx": 2080,
+        "canvasHeightPx": 2288,
+        "centerX": 1041,
+        "neckTopY": 760,
+        "neckBaseY": 968,
+        "baselineY": 2089,
+        "exteriorSeatY": 1002
+      },
+      "insertedPlugBand": {
+        "required": true,
+        "verticalEvidenceBoundsPx": {
+          "top": 760,
+          "bottom": 1002
+        },
+        "horizontalBoundsPx": null,
+        "state": "dimension-review-required"
+      },
+      "renderedPath": {
+        "startY": 1003,
+        "maximumBottomY": 2088,
+        "maximumReachPx": 1086,
+        "mustClipToBodyInterior": false,
+        "finalBottomY": null,
+        "finalReachMm": null
+      },
+      "mask": null,
+      "blockers": [
+        "stock-tube-length-unverified",
+        "tube-diameter-unverified",
+        "interior-bottom-margin-unverified",
+        "pixel-scale-ambiguous",
+        "inserted-plug-horizontal-bounds-unverified"
+      ]
+    }
+  ],
+  "mutationPolicy": {
+    "masksWritten": false,
+    "candidatesGenerated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

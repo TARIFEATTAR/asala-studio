@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  describeDispenser17415AssemblyResponsibilities,
   planDispenser17415Review,
   resolveDispenser17415ApprovalState,
 } from "./build-dispenser-17-415-authority-review";
@@ -79,4 +80,21 @@ test("earns geometry lock only from exact authority alpha plus named family-fit 
     allCandidateAlphaMatchesAuthority: true,
     namedFamilyFitApproval: false,
   }).geometryLocked, false);
+});
+
+test("routes translucent overcaps into compound closed swatches and keeps tubes body-contextual", () => {
+  const responsibilities = describeDispenser17415AssemblyResponsibilities();
+
+  assert.deepEqual(responsibilities.closedAssemblySwatches.map((entry) => ({
+    lane: entry.lane,
+    compoundWithPartId: entry.compoundWithPartId,
+    independentlySelectable: entry.independentlySelectable,
+  })), [
+    { lane: "sprayer", compoundWithPartId: "sprayer-head-and-collar", independentlySelectable: false },
+    { lane: "pump", compoundWithPartId: "pump-head-and-collar", independentlySelectable: false },
+  ]);
+  assert.equal("independentOvercaps" in responsibilities, false);
+  assert.ok(responsibilities.bodyContextualResponsibilities.every((entry) => (
+    entry.route === "body-contextual-weld" && entry.productionPlateEligible === false
+  )));
 });

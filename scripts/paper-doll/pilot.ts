@@ -30,7 +30,7 @@ import {
   type RgbaImage,
 } from "../../src/lib/paperDoll/componentRegistry";
 import type { CompositeRecipe } from "../../src/lib/paperDoll/compositeEngine";
-import { deriveWeldRegions } from "../../src/lib/paperDoll/weldLane";
+import { DEFAULT_WELD_REGIONS, deriveWeldRegions } from "../../src/lib/paperDoll/weldLane";
 import { runSwatchLockGate } from "../../src/lib/paperDoll/qaGates";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -248,6 +248,7 @@ async function main() {
   const regions = deriveWeldRegions(
     capoffRecipe.body.geometrySpec,
     capoffRecipe.layers[capoffRecipe.layers.length - 1].resolved.placedBounds,
+    DEFAULT_WELD_REGIONS,
   );
   const capoff = await loadRgba(resolve(PILOT_DIR, "clear-capoff.png"));
   const simWelded = makeImage(capoff.width, capoff.height, (x, y) => {
@@ -263,6 +264,7 @@ async function main() {
     "--recipe", resolve(PILOT_DIR, "clear-capoff.recipe.json"),
     "--applicator", "Fine Mist Sprayer",
     "--body-color", "Clear",
+    "--tube-radius-mm", String(DEFAULT_WELD_REGIONS.tubeRadiusMm),
     "--welded", resolve(fx, "sim-welded.png"),
     "--out", resolve(PILOT_DIR, "clear-sprayer-weld"),
   ]);
