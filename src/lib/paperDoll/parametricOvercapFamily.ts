@@ -1,0 +1,127 @@
+import { z } from "zod";
+
+const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
+
+const materialSchema = z.enum([
+  "mirror-silver",
+  "matte-silver",
+  "mirror-gold",
+  "matte-gold",
+  "glossy-black",
+  "matte-copper",
+  "glossy-white",
+  "matte-pink",
+]);
+
+const variantSchema = z.object({
+  variantKey: z.string().regex(/^[A-Z0-9]+$/),
+  sourceIdentity: z.string().min(1),
+  graceSku: z.string().min(1),
+  material: materialSchema,
+  decoration: z.enum(["none", "crystal-v1"]),
+  geometryFamilyId: z.string().min(1),
+});
+
+const crystalSchema = z.object({
+  id: z.string().min(1),
+  angleDeg: z.number().min(-89).max(89),
+  heightRatio: z.number().positive().lt(1),
+  scaleRatio: z.number().positive().lt(0.1),
+});
+
+const parametricOvercapFamilyRecipeSchema = z.object({
+  schemaVersion: z.literal(1),
+  recipeId: z.string().min(1),
+  familyKey: z.string().min(1),
+  neckFinish: z.string().min(1),
+  geometryFamilyId: z.string().min(1),
+  authorityReviewGroupKey: z.string().min(1),
+  authorityState: z.literal("dimension-calibrated-profile-review"),
+  authorityReference: z.object({
+    sourceIdentity: z.string().min(1),
+    sourceSha256: sha256Schema,
+    sourceUrl: z.string().url(),
+    localReviewPath: z.string().min(1),
+    status: z.literal("calibration-reference-not-approved-authority"),
+  }),
+  physicalTruthSource: z.object({
+    path: z.string().min(1),
+    websiteSku: z.string().min(1),
+    fields: z.object({
+      heightWithCap: z.literal("24 ±0.5 mm"),
+      diameter: z.literal("17 ±0.5 mm"),
+    }),
+  }),
+  nominalDimensionsMm: z.object({
+    outsideDiameter: z.literal(17),
+    outsideDiameterTolerance: z.literal(0.5),
+    height: z.literal(24),
+    heightTolerance: z.literal(0.5),
+    verified: z.literal(true),
+  }),
+  geometryCalibration: z.object({
+    heightScale: z.literal(1),
+    derivedFrom: z.literal("canonical-physical-dimensions-plus-source-medoid-profile-v1"),
+  }),
+  profileNormalized: z.array(z.tuple([z.number().min(0).max(0.5), z.number().min(0).max(1)])).min(4),
+  render: z.object({
+    widthPx: z.literal(1400),
+    heightPx: z.literal(2050),
+    samples: z.number().int().positive(),
+    topArcRatio: z.number().min(0).max(0.1),
+  }),
+  canvas: z.object({
+    widthPx: z.literal(2080),
+    heightPx: z.literal(2288),
+    backgroundHex: z.literal("#F5F3EF"),
+  }),
+  variants: z.array(variantSchema).min(1),
+  crystalLayout: z.array(crystalSchema),
+  mutationPolicy: z.object({
+    candidatesCreated: z.literal(false),
+    remoteWritesPerformed: z.literal(false),
+    currentReleaseChanged: z.literal(false),
+    sanityChanged: z.literal(false),
+  }),
+}).superRefine((recipe, context) => {
+  const unique = (values: string[]) => new Set(values).size === values.length;
+  if (!unique(recipe.variants.map((variant) => variant.variantKey))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Variant keys must be unique." });
+  }
+  if (!unique(recipe.variants.map((variant) => variant.sourceIdentity))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Source identities must be unique." });
+  }
+  if (!unique(recipe.variants.map((variant) => variant.graceSku))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Grace SKUs must be unique." });
+  }
+  if (recipe.variants.some((variant) => variant.geometryFamilyId !== recipe.geometryFamilyId)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Every variant must reference the recipe geometry family." });
+  }
+  if (!unique(recipe.crystalLayout.map((crystal) => crystal.id))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["crystalLayout"], message: "Crystal IDs must be unique." });
+  }
+  const decorated = recipe.variants.some((variant) => variant.decoration === "crystal-v1");
+  if (decorated && recipe.crystalLayout.length === 0) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["crystalLayout"], message: "Decorated variants require a deterministic crystal layout." });
+  }
+});
+
+export type ParametricOvercapFamilyRecipe = z.infer<typeof parametricOvercapFamilyRecipeSchema>;
+
+export function parseParametricOvercapFamilyRecipe(value: unknown): ParametricOvercapFamilyRecipe {
+  return parametricOvercapFamilyRecipeSchema.parse(value);
+}
+
+export function buildParametricOvercapRenderPlan(recipe: ParametricOvercapFamilyRecipe) {
+  return {
+    recipeId: recipe.recipeId,
+    geometryFamilyId: recipe.geometryFamilyId,
+    variantCount: recipe.variants.length,
+    variantKeys: recipe.variants.map((variant) => variant.variantKey),
+    authorityState: recipe.authorityState,
+    geometryLocked: false as const,
+    productionPlateEligible: false as const,
+    requiresExactAlphaClamp: true as const,
+    remoteWritesAuthorized: false as const,
+  };
+}

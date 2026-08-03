@@ -14,6 +14,7 @@ import type { PaperDollReleaseManifest } from "@/lib/paperDoll/releaseContract";
 import type { PaperDollReleaseValidation } from "@/lib/paperDoll/releaseValidator";
 import { loadCyl9ComponentFactory } from "@/lib/paperDoll/cyl9ComponentFactory";
 import { buildComponentWorkbenchRows } from "@/lib/paperDoll/componentWorkbenchModel";
+import { usePaperDollWorkbenchData } from "@/hooks/usePaperDollWorkbenchData";
 import { ComponentCandidateView } from "./ComponentCandidateView";
 import { ComponentInventoryView } from "./ComponentInventoryView";
 import { ComponentPlateView } from "./ComponentPlateView";
@@ -31,6 +32,7 @@ import {
 import "@/styles/paper-doll-workbench.css";
 
 interface ReleaseWorkbenchProps {
+  organizationId: string | null | undefined;
   manifest: PaperDollReleaseManifest;
   validation: PaperDollReleaseValidation;
   manifestSha256: string;
@@ -59,6 +61,7 @@ const RELEASE_VARIANT_ALIASES: Record<string, string> = {
 };
 
 export function ReleaseWorkbench({
+  organizationId,
   manifest,
   validation,
   manifestSha256,
@@ -74,12 +77,14 @@ export function ReleaseWorkbench({
     setSearchParams(serializeReleaseWorkbenchState(nextState, searchParams), { replace: true });
   };
   const factory = useMemo(() => loadCyl9ComponentFactory(), []);
+  const bodies = manifest.assets.filter((asset) => asset.slot === "body");
+  const { candidatesQuery, bodyVersionsQuery, approvalMutation, placementMutation } = usePaperDollWorkbenchData({ organizationId, manifest: factory, bodies });
   const rows = useMemo(() => buildComponentWorkbenchRows({
     manifest: factory,
-    candidates: [],
+    candidates: candidatesQuery.data ?? [],
     releaseAssets: manifest.assets,
     sanitySyncs: [],
-  }), [factory, manifest.assets]);
+  }), [candidatesQuery.data, factory, manifest.assets]);
   const selectedRow = rows.find((row) => row.componentKey === state.componentKey) ?? rows[0] ?? null;
   const selectedReleaseAsset = selectedRow
     ? manifest.assets.find((asset) => asset.slot === selectedRow.slot && (
@@ -87,13 +92,12 @@ export function ReleaseWorkbench({
       asset.variantKey === RELEASE_VARIANT_ALIASES[selectedRow.variantKey]
     )) ?? null
     : null;
-  const bodies = manifest.assets.filter((asset) => asset.slot === "body");
 
   const view = (() => {
     if (state.view === "inventory") return <ComponentInventoryView rows={rows} state={state} onStateChange={setState} />;
     if (state.view === "plate") return <ComponentPlateView row={selectedRow} />;
-    if (state.view === "candidate") return <ComponentCandidateView row={selectedRow} releaseAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} />;
-    if (state.view === "family-fit") return <FamilyFitView row={selectedRow} bodies={bodies} componentAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} state={state} onStateChange={setState} />;
+    if (state.view === "candidate") return <ComponentCandidateView row={selectedRow} releaseAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} onApprovePixels={(input) => approvalMutation.mutateAsync({ ...input, action: "pixels-approved" })} approvalPending={approvalMutation.isPending} />;
+    if (state.view === "family-fit") return <FamilyFitView row={selectedRow} bodies={bodies} componentAsset={selectedReleaseAsset} assetUrlsByPath={assetUrlsByPath} state={state} onStateChange={setState} onApproveFamilyFit={(input) => approvalMutation.mutateAsync({ ...input, action: "family-fit-approved" })} approvalPending={approvalMutation.isPending} bodyVersionIdsByVariant={bodyVersionsQuery.data ?? {}} bodyVersionsPending={bodyVersionsQuery.isLoading} onLockSharedPlacement={(input) => placementMutation.mutateAsync(input)} placementPending={placementMutation.isPending} />;
     if (state.view === "release") return <ReleaseCutView rows={rows} manifest={manifest} validation={validation} manifestSha256={manifestSha256} />;
     return <SanityProjectionView factory={factory} release={manifest} manifestSha256={manifestSha256} />;
   })();
@@ -129,6 +133,10 @@ export function ReleaseWorkbench({
           applicatorBuckets={applicatorBuckets}
         />
         <section className="pdw-view-surface" role="tabpanel" aria-label={state.view}>
+          {!organizationId && <div className="pdw-persistence-notice">Select an organization to load the private candidate ledger.</div>}
+          {candidatesQuery.isLoading && <div className="pdw-persistence-notice">Loading private component candidates…</div>}
+          {candidatesQuery.isError && <div className="pdw-persistence-notice pdw-persistence-notice--error">Candidate ledger unavailable: {candidatesQuery.error.message}</div>}
+          {organizationId && candidatesQuery.isSuccess && candidatesQuery.data.length === 0 && <div className="pdw-persistence-notice">The 23-component factory is ready locally, but no candidate bundle has been imported into the private ledger.</div>}
           {view}
         </section>
       </div>

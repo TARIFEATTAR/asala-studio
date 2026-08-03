@@ -625,6 +625,7 @@ export default function BestBottlesStudio() {
                 {activeTab === "components" && (
                   usesReleaseWorkbench ? (
                     <ReleaseWorkbench
+                      organizationId={currentOrganizationId}
                       manifest={workbenchReleaseManifest}
                       validation={workbenchReleaseValidation}
                       manifestSha256={workbenchReleaseManifestSha256}

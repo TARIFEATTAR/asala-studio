@@ -106,6 +106,7 @@ function manifestFixture(): PaperDollFamilyProductionManifest {
         ],
       },
     ],
+    catalogReviewIssues: [],
     releaseTarget: {
       sanityDocumentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
     },
@@ -121,6 +122,16 @@ test("component candidates preserve four distinct bounding boxes and the origina
   assert.deepEqual(parsed.editBoundsPx, { left: 29, top: 24, width: 980, height: 1461 });
   assert.deepEqual(parsed.placementBoundsPx, { left: 869, top: 500, width: 344, height: 502 });
   assert.equal(parsed.placementVersionId, null);
+});
+
+test("catalog mappings reject partial SKU identity", () => {
+  const partialIdentity = manifestFixture();
+  partialIdentity.catalogMappings[0].graceSku = "GB-CYL-AMB-9ML-ROL-SSLV";
+
+  assert.throws(
+    () => parsePaperDollFamilyProductionManifest(partialIdentity),
+    /graceSku.*websiteSku|websiteSku.*graceSku|both/i,
+  );
 });
 
 test("component candidates reject path-like original filenames", () => {

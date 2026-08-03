@@ -1,0 +1,769 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "sourceCatalogPath": "public/data/best-bottles-catalog-lite.json",
+  "sourceCatalogSha256": "7882ee5d521a6aaf551bc2cc9211a3d830209829d74c4675845f86effa1893cc",
+  "mappings": [
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:BKDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-02",
+      "websiteSku": "GBCyl9MtlRollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MCPR:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-03",
+      "websiteSku": "GBCyl9MtlRollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MGLD:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-04",
+      "websiteSku": "GBCyl9MtlRollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MSLV:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MSLV-01",
+      "websiteSku": "GBCyl9MtlRollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:PKDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-05",
+      "websiteSku": "GBCyl9MtlRollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SBLK:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-06",
+      "websiteSku": "GBCyl9MtlRollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SGLD:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-07",
+      "websiteSku": "GBCyl9MtlRollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SSLV:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-08",
+      "websiteSku": "GBCyl9MtlRollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SLDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-09",
+      "websiteSku": "GBCyl9MtlRollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:WHT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-T-10",
+      "websiteSku": "GBCyl9MtlRollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:BKDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-11",
+      "websiteSku": "GBCyl9RollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MCPR:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-12",
+      "websiteSku": "GBCyl9RollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MGLD:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-13",
+      "websiteSku": "GBCyl9RollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:MSLV:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-14",
+      "websiteSku": "GBCyl9RollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:PKDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-15",
+      "websiteSku": "GBCyl9RollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SBLK:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-16",
+      "websiteSku": "GBCyl9RollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SGLD:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-17",
+      "websiteSku": "GBCyl9RollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SSLV:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-18",
+      "websiteSku": "GBCyl9RollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:SLDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-19",
+      "websiteSku": "GBCyl9RollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:ROLLON:WHT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-T-20",
+      "websiteSku": "GBCyl9RollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:BLK",
+      "graceSku": "GB-CYL-CLR-9ML-T-21",
+      "websiteSku": "GBCyl9SpryBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:GLD",
+      "graceSku": "GB-CYL-CLR-9ML-T-22",
+      "websiteSku": "GBCyl9SpryGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:MSLV",
+      "graceSku": "GB-CYL-CLR-9ML-T-23",
+      "websiteSku": "GBCyl9SpryMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:RED",
+      "graceSku": "GB-CYL-CLR-9ML-T-24",
+      "websiteSku": "GBCyl9SpryRd"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:SSLV",
+      "graceSku": "GB-CYL-CLR-9ML-T-25",
+      "websiteSku": "GBCyl9SpryShSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:SPRAY:TUR",
+      "graceSku": "GB-CYL-CLR-9ML-T-26",
+      "websiteSku": "GBCyl9SpryTur"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:BKDT:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-BKDT",
+      "websiteSku": "GBCylAmb9MtlRollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MCPR:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MCPR",
+      "websiteSku": "GBCylAmb9MtlRollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MGLD:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MGLD",
+      "websiteSku": "GBCylAmb9MtlRollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MSLV:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-MSLV",
+      "websiteSku": "GBCylAmb9MtlRollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:PKDT:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-PKDT",
+      "websiteSku": "GBCylAmb9MtlRollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SBLK:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SBLK",
+      "websiteSku": "GBCylAmb9MtlRollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SGLD:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SGLD",
+      "websiteSku": "GBCylAmb9MtlRollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SSLV:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SSLV",
+      "websiteSku": "GBCylAmb9MtlRollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SLDT:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-SLDT",
+      "websiteSku": "GBCylAmb9MtlRollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:WHT:METAL",
+      "graceSku": "GB-CYL-AMB-9ML-MRL-WHT",
+      "websiteSku": "GBCylAmb9MtlRollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:BKDT:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-BKDT",
+      "websiteSku": "GBCylAmb9RollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MCPR:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MCPR",
+      "websiteSku": "GBCylAmb9RollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MGLD:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MGLD",
+      "websiteSku": "GBCylAmb9RollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:MSLV:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-MSLV",
+      "websiteSku": "GBCylAmb9RollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:PKDT:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-PKDT",
+      "websiteSku": "GBCylAmb9RollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SBLK:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SBLK",
+      "websiteSku": "GBCylAmb9RollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SGLD:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SGLD",
+      "websiteSku": "GBCylAmb9RollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SSLV:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SSLV",
+      "websiteSku": "GBCylAmb9RollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:SLDT:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-SLDT",
+      "websiteSku": "GBCylAmb9RollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:ROLLON:WHT:PLASTIC",
+      "graceSku": "GB-CYL-AMB-9ML-ROL-WHT",
+      "websiteSku": "GBCylAmb9RollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:BLK",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-BLK",
+      "websiteSku": "GBCylAmb9SpryBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:GLD",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-GLD",
+      "websiteSku": "GBCylAmb9SpryGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:MSLV",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-MSLV",
+      "websiteSku": "GBCylAmb9SpryMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:RED",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-RED",
+      "websiteSku": "GBCylAmb9SpryRd"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:SSLV",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-SSLV",
+      "websiteSku": "GBCylAmb9SpryShSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:SPRAY:TUR",
+      "graceSku": "GB-CYL-AMB-9ML-SPR-TRQ",
+      "websiteSku": "GBCylAmb9SpryTur"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:BKDT:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-BKDT",
+      "websiteSku": "GBCylBlu9MtlRollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MCPR:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MCPR",
+      "websiteSku": "GBCylBlu9MtlRollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MGLD:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MGLD",
+      "websiteSku": "GBCylBlu9MtlRollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MSLV:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-MSLV",
+      "websiteSku": "GBCylBlu9MtlRollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:PKDT:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-PKDT",
+      "websiteSku": "GBCylBlu9MtlRollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SBLK:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SBLK",
+      "websiteSku": "GBCylBlu9MtlRollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SGLD:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SGLD",
+      "websiteSku": "GBCylBlu9MtlRollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SSLV:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SSLV",
+      "websiteSku": "GBCylBlu9MtlRollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SLDT:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-SLDT",
+      "websiteSku": "GBCylBlu9MtlRollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:WHT:METAL",
+      "graceSku": "GB-CYL-BLU-9ML-MRL-WHT",
+      "websiteSku": "GBCylBlu9MtlRollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:BKDT:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-BKDT",
+      "websiteSku": "GBCylBlu9RollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MCPR:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MCPR",
+      "websiteSku": "GBCylBlu9RollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MGLD:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MGLD",
+      "websiteSku": "GBCylBlu9RollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:MSLV:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-MSLV",
+      "websiteSku": "GBCylBlu9RollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:PKDT:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-PKDT",
+      "websiteSku": "GBCylBlu9RollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SBLK:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SBLK",
+      "websiteSku": "GBCylBlu9RollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SGLD:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SGLD",
+      "websiteSku": "GBCylBlu9RollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SSLV:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SSLV",
+      "websiteSku": "GBCylBlu9RollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:SLDT:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-SLDT",
+      "websiteSku": "GBCylBlu9RollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:ROLLON:WHT:PLASTIC",
+      "graceSku": "GB-CYL-BLU-9ML-ROL-WHT",
+      "websiteSku": "GBCylBlu9RollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:BLK",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-BLK",
+      "websiteSku": "GBCylBlu9SpryBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:GLD",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-GLD",
+      "websiteSku": "GBCylBlu9SpryGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:MSLV",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-MSLV",
+      "websiteSku": "GBCylBlu9SpryMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:RED",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-RED",
+      "websiteSku": "GBCylBlu9SpryRd"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:SSLV",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-SSLV",
+      "websiteSku": "GBCylBlu9SpryShSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:SPRAY:TUR",
+      "graceSku": "GB-CYL-BLU-9ML-SPR-TRQ",
+      "websiteSku": "GBCylBlu9SpryTur"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:BKDT:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-BKDT",
+      "websiteSku": "GBCylFrst9MtlRollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MCPR:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MCPR",
+      "websiteSku": "GBCylFrst9MtlRollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MGLD:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MGLD",
+      "websiteSku": "GBCylFrst9MtlRollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MSLV:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-MSLV",
+      "websiteSku": "GBCylFrst9MtlRollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:PKDT:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-PKDT",
+      "websiteSku": "GBCylFrst9MtlRollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SBLK:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SBLK",
+      "websiteSku": "GBCylFrst9MtlRollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SGLD:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SGLD",
+      "websiteSku": "GBCylFrst9MtlRollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SSLV:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SSLV",
+      "websiteSku": "GBCylFrst9MtlRollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SLDT:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-SLDT",
+      "websiteSku": "GBCylFrst9MtlRollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:WHT:METAL",
+      "graceSku": "GB-CYL-FRS-9ML-MRL-WHT",
+      "websiteSku": "GBCylFrst9MtlRollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:BKDT:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-BKDT",
+      "websiteSku": "GBCylFrst9RollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MCPR:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MCPR",
+      "websiteSku": "GBCylFrst9RollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MGLD:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MGLD",
+      "websiteSku": "GBCylFrst9RollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:MSLV:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-MSLV",
+      "websiteSku": "GBCylFrst9RollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:PKDT:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-PKDT",
+      "websiteSku": "GBCylFrst9RollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SBLK:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SBLK",
+      "websiteSku": "GBCylFrst9RollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SGLD:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SGLD",
+      "websiteSku": "GBCylFrst9RollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SSLV:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SSLV",
+      "websiteSku": "GBCylFrst9RollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:SLDT:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-SLDT",
+      "websiteSku": "GBCylFrst9RollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:ROLLON:WHT:PLASTIC",
+      "graceSku": "GB-CYL-FRS-9ML-ROL-WHT",
+      "websiteSku": "GBCylFrst9RollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:BLK",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-BLK",
+      "websiteSku": "GBCylFrst9SpryBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:GLD",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-GLD",
+      "websiteSku": "GBCylFrst9SpryGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:MSLV",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-MSLV",
+      "websiteSku": "GBCylFrst9SpryMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:RED",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-RED",
+      "websiteSku": "GBCylFrst9SpryRd"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:SSLV",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-SSLV",
+      "websiteSku": "GBCylFrst9SpryShSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:SPRAY:TUR",
+      "graceSku": "GB-CYL-FRS-9ML-SPR-TRQ",
+      "websiteSku": "GBCylFrst9SpryTur"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:BKDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-BKDT-01",
+      "websiteSku": "GBCylSwrl9MtlRollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MCPR:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MCPR-01",
+      "websiteSku": "GBCylSwrl9MtlRollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MGLD:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MGLD-01",
+      "websiteSku": "GBCylSwrl9MtlRollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MSLV:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-MSLV-02",
+      "websiteSku": "GBCylSwrl9MtlRollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:PKDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-PKDT-01",
+      "websiteSku": "GBCylSwrl9MtlRollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SBLK:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SBLK-01",
+      "websiteSku": "GBCylSwrl9MtlRollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SGLD:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SGLD-01",
+      "websiteSku": "GBCylSwrl9MtlRollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SSLV:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SSLV-01",
+      "websiteSku": "GBCylSwrl9MtlRollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SLDT:METAL",
+      "graceSku": "GB-CYL-CLR-9ML-MRL-SLDT-01",
+      "websiteSku": "GBCylSwrl9MtlRollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:WHT:METAL",
+      "graceSku": "GB-CYL-WHT-9ML-MRL-WHT",
+      "websiteSku": "GBCylSwrl9MtlRollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:BKDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-BKDT-01",
+      "websiteSku": "GBCylSwrl9RollBlkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MCPR:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MCPR-01",
+      "websiteSku": "GBCylSwrl9RollMattCu"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MGLD:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MGLD-01",
+      "websiteSku": "GBCylSwrl9RollMattGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:MSLV:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-MSLV-01",
+      "websiteSku": "GBCylSwrl9RollMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:PKDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-PKDT-01",
+      "websiteSku": "GBCylSwrl9RollPnkDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SBLK:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SBLK-01",
+      "websiteSku": "GBCylSwrl9RollShBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SGLD:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SGLD-01",
+      "websiteSku": "GBCylSwrl9RollShnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SSLV:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SSLV-01",
+      "websiteSku": "GBCylSwrl9RollShnSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:SLDT:PLASTIC",
+      "graceSku": "GB-CYL-CLR-9ML-ROL-SLDT-01",
+      "websiteSku": "GBCylSwrl9RollSlDot"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:ROLLON:WHT:PLASTIC",
+      "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
+      "websiteSku": "GBCylSwrl9RollWht"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:BLK",
+      "graceSku": "GB-CYL-BLK-9ML-SPR-BLK",
+      "websiteSku": "GBCylSwrl9SpryBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:GLD",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-GLD",
+      "websiteSku": "GBCylSwrl9SpryGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:MSLV",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-MSLV-01",
+      "websiteSku": "GBCylSwrl9SpryMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:RED",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-RED",
+      "websiteSku": "GBCylSwrl9SpryRd"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:SSLV",
+      "graceSku": "GB-CYL-CLR-9ML-SPR-SSLV-01",
+      "websiteSku": "GBCylSwrl9SpryShSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:SPRAY:TUR",
+      "graceSku": "GB-CYL-CLR-9ML-T-27",
+      "websiteSku": "GBCylSwrl9SpryTur"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:LOTION:BLK",
+      "graceSku": "LB-CYL-CLR-9ML-T-01",
+      "websiteSku": "LBCyl9LtnBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:LOTION:GLD",
+      "graceSku": "LB-CYL-CLR-9ML-T-02",
+      "websiteSku": "LBCyl9LtnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:CLR:LOTION:MSLV",
+      "graceSku": "LB-CYL-CLR-9ML-T-03",
+      "websiteSku": "LBCyl9LtnMtSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:LOTION:BLK",
+      "graceSku": "LB-CYL-AMB-9ML-LPM-BLK",
+      "websiteSku": "LBCylAmb9LtnBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:LOTION:GLD",
+      "graceSku": "LB-CYL-AMB-9ML-LPM-GLD",
+      "websiteSku": "LBCylAmb9LtnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:AMB:LOTION:MSLV",
+      "graceSku": "LB-CYL-AMB-9ML-LPM-MSLV",
+      "websiteSku": "LBCylAmb9LtnMtSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:LOTION:BLK",
+      "graceSku": "LB-CYL-BLU-9ML-LPM-BLK",
+      "websiteSku": "LBCylBlu9LtnBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:LOTION:GLD",
+      "graceSku": "LB-CYL-BLU-9ML-LPM-GLD",
+      "websiteSku": "LBCylBlu9LtnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:BLU:LOTION:MSLV",
+      "graceSku": "LB-CYL-BLU-9ML-LPM-MSLV",
+      "websiteSku": "LBCylBlu9LtnMattSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:LOTION:BLK",
+      "graceSku": "LB-CYL-FRS-9ML-LPM-BLK",
+      "websiteSku": "LBCylFrst9LtnBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:LOTION:GLD",
+      "graceSku": "LB-CYL-FRS-9ML-LPM-GLD",
+      "websiteSku": "LBCylFrst9LtnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:FRS:LOTION:MSLV",
+      "graceSku": "LB-CYL-FRS-9ML-LPM-MSLV",
+      "websiteSku": "LBCylFrst9LtnMtSl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:LOTION:BLK",
+      "graceSku": "LB-CYL-BLK-9ML-LPM-BLK",
+      "websiteSku": "LBCylSwrl9LtnBlk"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:LOTION:GLD",
+      "graceSku": "LB-CYL-CLR-9ML-LPM-GLD",
+      "websiteSku": "LBCylSwrl9LtnGl"
+    },
+    {
+      "mappingKey": "CYL-9ML:SWL:LOTION:MSLV",
+      "graceSku": "LB-CYL-CLR-9ML-LPM-MSLV",
+      "websiteSku": "LBCylSwrl9LtnMtSl"
+    }
+  ],
+  "reviewIssues": [
+    {
+      "issueKey": "CYL-9ML:DUPLICATE:GBCylSwrl9MtlRollWht",
+      "websiteSku": "GBCylSwrl9MtlRollWht",
+      "reason": "duplicate-website-sku-conflicting-body-color",
+      "resolution": "selected-row-matching-website-sku-body",
+      "selectedGraceSku": "GB-CYL-WHT-9ML-MRL-WHT",
+      "sourceRows": [
+        {
+          "graceSku": "GBCylSwrl9MtlRollWht",
+          "color": "Clear"
+        },
+        {
+          "graceSku": "GB-CYL-WHT-9ML-MRL-WHT",
+          "color": "Swirl"
+        }
+      ]
+    },
+    {
+      "issueKey": "CYL-9ML:DUPLICATE:GBCylSwrl9RollWht",
+      "websiteSku": "GBCylSwrl9RollWht",
+      "reason": "duplicate-website-sku-conflicting-body-color",
+      "resolution": "selected-row-matching-website-sku-body",
+      "selectedGraceSku": "GB-CYL-WHT-9ML-ROL-WHT",
+      "sourceRows": [
+        {
+          "graceSku": "GBCylSwrl9RollWht",
+          "color": "Clear"
+        },
+        {
+          "graceSku": "GB-CYL-WHT-9ML-ROL-WHT",
+          "color": "Swirl"
+        }
+      ]
+    }
+  ]
+}

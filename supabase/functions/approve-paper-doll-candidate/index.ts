@@ -38,7 +38,7 @@ Deno.serve((request) =>
 
     const { data: candidate, error: candidateError } = await context.service
       .from("paper_doll_component_candidates")
-      .select("id, lifecycle_state, normalized_sha256, qa")
+      .select("id, lifecycle_state, normalized_sha256, layer_sha256, component_id, qa")
       .eq("id", candidateId)
       .eq("organization_id", organizationId)
       .maybeSingle();
@@ -46,6 +46,37 @@ Deno.serve((request) =>
       databaseError(candidateError, "Candidate lookup failed.");
     }
     if (!candidate) databaseError(null, "Candidate is unavailable or stale.");
+
+    const componentVersion = action === "pixels-approved"
+      ? await (async () => {
+        const { data, error } = await context.service
+          .from("paper_doll_component_versions")
+          .select("id, approval_status")
+          .eq("organization_id", organizationId)
+          .eq("component_id", candidate.component_id)
+          .eq("image_sha256", candidate.layer_sha256);
+        if (error || !data || data.length !== 1) {
+          databaseError(error, "Pixel approval requires one exact candidate component version.");
+        }
+        if (!new Set(["candidate", "approved"]).has(data[0].approval_status)) {
+          databaseError(null, "The exact component version is not eligible for pixel approval.");
+        }
+        return data[0] as { id: string; approval_status: string };
+      })()
+      : null;
+
+    const ensureComponentVersionApproved = async () => {
+      if (!componentVersion || componentVersion.approval_status === "approved") return;
+      const { data, error } = await context.service
+        .from("paper_doll_component_versions")
+        .update({ approval_status: "approved" })
+        .eq("id", componentVersion.id)
+        .eq("organization_id", organizationId)
+        .eq("approval_status", "candidate")
+        .select("id")
+        .maybeSingle();
+      if (error || !data) databaseError(error, "Exact component version could not be promoted with pixel approval.");
+    };
 
     const { data: existing } = await context.service
       .from("paper_doll_approval_events")
@@ -66,6 +97,7 @@ Deno.serve((request) =>
           "This approval action already has different immutable evidence.",
         );
       }
+      await ensureComponentVersionApproved();
       return jsonResponse(200, {
         candidateId,
         lifecycleState: action,
@@ -134,12 +166,14 @@ Deno.serve((request) =>
     if (eventError || !event) {
       databaseError(eventError, "Approval event could not be appended.");
     }
+    await ensureComponentVersionApproved();
 
     return jsonResponse(200, {
       candidateId,
       lifecycleState: action,
       approvalEventId: event.id,
       idempotent: false,
+      componentVersionId: componentVersion?.id ?? null,
     });
   })
 );

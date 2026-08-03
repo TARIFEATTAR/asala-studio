@@ -9,9 +9,12 @@ Produce interchangeable packaging layers from one measured geometry truth. Gener
 
 ## Start
 
-1. Read the family manifest and run `scripts/validate_family_manifest.ts <manifest>`.
-2. Run `scripts/summarize_family_status.ts <manifest>` before choosing an action.
-3. Read the reference matching the current stage:
+1. Audit the repository evidence before creating assets. Treat the repository—not a proposed architecture—as the source of truth.
+2. Read the family intake or production manifest and run `scripts/validate_family_manifest.ts <manifest>`.
+   - A family intake is allowed to record missing authorities and unverified compatibility. It performs no candidate or production writes.
+   - A production manifest must satisfy the stricter authority, body, component, placement, catalog, and release contracts.
+3. Run `scripts/summarize_family_status.ts <manifest>` before choosing an action.
+4. Read the reference matching the current stage:
    - geometry, boxes, lifecycle: `references/component-contract.md`
    - materials and provider routing: `references/material-doctrine.md`
    - release/Sanity actions: `references/release-and-sanity.md`
@@ -23,6 +26,8 @@ Advance one persisted state at a time:
 `inventory → authority → candidate → Approve Pixels → Family Fit → Lock Shared Placement → release cut → Sanity draft → public publish`
 
 - Inventory every real component and compatible locked body before generating.
+- Normalize merchandising aliases into physical responsibilities, but preserve raw evidence and quarantine uncertain mappings.
+- Keep geometry, camera, scale, baseline, lighting, and contact behavior in the rig when they already work. Do not create a plate merely because a layer is possible.
 - Calibrate thresholds on each real file. Reject empty, frame, frame-touching, clipped, or undeclared-island masks.
 - Preserve source, edit, authority, and placement bounds as four separate records.
 - Use Blender/CAD for dimensional geometry. Use GPT Image only for material pixels, then normalize and copy the authority alpha exactly.
@@ -45,11 +50,15 @@ Stop and report the exact blocker when:
 
 Never call reference-anchored generation geometry locked. Never silently nudge production pixels. Never combine draft sync and public publication.
 
+Do not build universal liquid or integration plates. Prototype them body-contextually only after the component/release path passes and only if an A/B test beats the procedural rig.
+
 ## CYL-9ML Commands
 
 ```bash
 npm run paperdoll:calibrate-cyl9-authorities
 npm run paperdoll:cyl9-batch -- --plan
+npm run paperdoll:catalog-backlog
+npm run paperdoll:next-family-intake
 npm run test:paperdoll:factory
 ```
 

@@ -644,3 +644,30 @@
 @media (prefers-reduced-motion: reduce) {
   .pdw-workbench * { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
+.pdw-persistence-notice {
+  margin: 0 0 12px;
+  border: 1px solid rgba(216, 184, 94, 0.34);
+  background: rgba(216, 184, 94, 0.08);
+  color: #d8b85e;
+  padding: 10px 12px;
+  font: 500 11px/1.5 var(--font-mono, monospace);
+  letter-spacing: 0.04em;
+}
+
+.pdw-persistence-notice--error,
+.pdw-action-error {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(127, 29, 29, 0.18);
+  color: #fca5a5;
+}
+
+.pdw-action-error,
+.pdw-action-guidance {
+  grid-column: 1 / -1;
+  padding: 9px 11px;
+  font-size: 11px;
+}
+
+.pdw-action-guidance {
+  color: var(--darkroom-text-muted, #8b8b8b);
+}

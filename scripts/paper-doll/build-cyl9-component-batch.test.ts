@@ -16,9 +16,11 @@ test("the CYL-9ML batch plans one candidate for every component plate", async ()
   assert.equal(plan.mutationPolicy.sanityChanged, false);
 });
 
-test("the plan keeps unpriced provider work visible and preserves four-box evidence", async () => {
+test("the plan uses the versioned GPT Image price estimate and preserves four-box evidence", async () => {
   const plan = await buildCyl9ComponentBatch({ mode: "plan" });
-  assert.ok(plan.jobs.some((job) => job.costStatus === "price-card-required"));
+  assert.equal(plan.unpricedProviderJobs, 0);
+  assert.equal(plan.knownEstimatedCostUsd, 6.88);
+  assert.ok(plan.jobs.every((job) => job.costStatus === "known"));
   assert.ok(plan.jobs.every((job) => job.sourceBoundsPx && job.editBoundsPx && job.authorityBoundsPx && job.placementBoundsPx));
   assert.ok(plan.jobs.filter((job) => job.materialClass === "rhinestone").every((job) => job.rhinestoneLayout?.length === 8));
 });

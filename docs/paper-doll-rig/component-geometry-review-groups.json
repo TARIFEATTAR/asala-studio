@@ -1,0 +1,1803 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": {
+    "componentAuthorityQueuePath": "docs/paper-doll-rig/component-authority-queue.json",
+    "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e"
+  },
+  "summary": {
+    "sourceIdentityCount": 148,
+    "descriptorReviewGroupCount": 42,
+    "verifiedSharedAuthorityGroupCount": 1,
+    "verifiedSharedAuthorityIdentityCount": 10,
+    "localReconciliationGroupCount": 2,
+    "sourceReadyPhysicalReviewGroupCount": 28,
+    "sourceIncompleteGroupCount": 11
+  },
+  "groups": [
+    {
+      "reviewGroupKey": "geometry-review__pump__17-415__d4ca90a05c",
+      "descriptorSignature": "pump :: 17-415 :: none :: Pump",
+      "slotProposals": [
+        "pump"
+      ],
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Pump"
+      ],
+      "sourceIdentities": [
+        "Ltn17-415Blk",
+        "Ltn17-415Gl",
+        "Ltn17-415MattSl"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Matte Silver",
+        "Shiny Gold"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn17-415Blk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn17-415Gl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn17-415MattSl.gif"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceReferenceObservedCount": 3,
+      "localVariantCount": 3,
+      "localGeometryFamilyIds": [
+        "pump__17-415__BLK__v1",
+        "pump__17-415__GLD__v1",
+        "pump__17-415__MSLV__v1"
+      ],
+      "localAuthorityMaskSha256": [
+        "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+        "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+        "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553"
+      ],
+      "status": "local-authorities-require-reconciliation",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Compare local source silhouettes and physical dimensions. Do not merge the appearances until one exact authority is proven.",
+      "issues": [
+        "local-appearance-authorities-do-not-yet-prove-one-shared-mask"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__17-415__91195a1a8e",
+      "descriptorSignature": "sprayer :: 17-415 :: Fine Mist Sprayer :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "applicatorEvidence": [
+        "Fine Mist Sprayer"
+      ],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "Spry17-415Blk",
+        "Spry17-415Gl",
+        "Spry17-415MattSl",
+        "Spry17-415Red",
+        "Spry17-415ShnSl",
+        "Spry17-415Tur"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Matte Silver",
+        "Red",
+        "Shiny",
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415Blk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415Gl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415MattSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415Red.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415ShnSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry17-415Tur.gif"
+      ],
+      "sourceIdentityCount": 6,
+      "sourceReferenceObservedCount": 6,
+      "localVariantCount": 6,
+      "localGeometryFamilyIds": [
+        "sprayer__17-415__BLK__v1",
+        "sprayer__17-415__GLD__v1",
+        "sprayer__17-415__MSLV__v1",
+        "sprayer__17-415__RED__v1",
+        "sprayer__17-415__SSLV__v1",
+        "sprayer__17-415__TUR__v1"
+      ],
+      "localAuthorityMaskSha256": [
+        "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+        "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+        "624e60c8f927ba1da00db3ff254b7cbcd2eb7e7ffe40daa3ab5ed41fcd9a884e",
+        "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+        "8389128411835efd64cf70b2d303bc33fc65ddfde9fb189455a21ba739f4e9ba",
+        "d41143f9dcaaaa2784a99631e1eec0f74aac939433a6a2d1be698fdca37c4819"
+      ],
+      "status": "local-authorities-require-reconciliation",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Compare local source silhouettes and physical dimensions. Do not merge the appearances until one exact authority is proven.",
+      "issues": [
+        "local-appearance-authorities-do-not-yet-prove-one-shared-mask"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__13-415__0148fbf57d",
+      "descriptorSignature": "cap :: 13-415 :: N/A :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [
+        "N/A"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CMP-CAP-SBLK-13-415"
+      ],
+      "appearanceEvidence": [],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__13-425__1421409b51",
+      "descriptorSignature": "cap :: 13-425 :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "13-425"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP13-425Blk",
+        "CP13-425Wht"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "White"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__17-415__8d6f474583",
+      "descriptorSignature": "cap :: 17-415 :: N/A :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "applicatorEvidence": [
+        "N/A"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CMP-CAP-BDOT-17-415"
+      ],
+      "appearanceEvidence": [],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__22-400__177c8e14c9",
+      "descriptorSignature": "cap :: 22-400 :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "22-400"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CapBlackPoly22mm-400"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__24-400__2afd96ad37",
+      "descriptorSignature": "cap :: 24-400 :: N/A :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "24-400"
+      ],
+      "applicatorEvidence": [
+        "N/A"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP24-400BlkPls"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__press-fit__8ac18b4355",
+      "descriptorSignature": "cap :: PRESS-FIT :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "PRESS-FIT"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CJ30BlkCap",
+        "CJ30SlCap",
+        "CJ40BlkCap",
+        "CJ40SlCap",
+        "CJ5BlkCap",
+        "CJ5SlCap"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 6,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__special__8fa1ac4110",
+      "descriptorSignature": "cap :: SPECIAL :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "SPECIAL"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CPKeyChnGld",
+        "CPTslRed"
+      ],
+      "appearanceEvidence": [
+        "Gold",
+        "Red"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__unknown-neck__0f7252dd93",
+      "descriptorSignature": "cap :: unknown-neck :: Plastic Roller Ball :: Roll-On",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [],
+      "applicatorEvidence": [
+        "Plastic Roller Ball"
+      ],
+      "capStyleEvidence": [
+        "Roll-On"
+      ],
+      "sourceIdentities": [
+        "CPWhite1Oz"
+      ],
+      "appearanceEvidence": [
+        "White"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__17-415__a38fb41beb",
+      "descriptorSignature": "dropper :: 17-415 :: Dropper :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "applicatorEvidence": [
+        "Dropper"
+      ],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Droppers1ozElg"
+      ],
+      "appearanceEvidence": [
+        "Amber"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference",
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__13-415__c502bb6eb5",
+      "descriptorSignature": "sprayer :: 13-415 :: Fine Mist Sprayer :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [
+        "Fine Mist Sprayer"
+      ],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "13-415CAP4SpryCuMt",
+        "13-415CAP4SpryGlSh",
+        "13-415CAP4SprySlMt",
+        "CP13-415SpryBlkMt",
+        "CP13-415SpryBlkSh",
+        "CP13-415SpryBluMt",
+        "CP13-415SpryGlMt",
+        "CP13-415SpryGlSh",
+        "CP13-415SprySlMt",
+        "CP13-415SprySlSh",
+        "GBATom5RedBurg"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Blue",
+        "Matte Copper",
+        "Matte Silver",
+        "Red",
+        "Shiny Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-13-415__CP13-415SpryBluMt__pdp-main__v001_88e76cc2-dd02-4693-9c77-b63df85d0fbf.png?v=1781252658",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-BLK-13-415-01__CP13-415SpryBlkMt__pdp-main__v001_06db11c7-bb67-4e6b-a40c-46b8a16f2e9f.png?v=1781252661",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-BLK-13-415-02__CP13-415SpryBlkSh__pdp-main__v001_87a77651-0d79-41d2-a6d6-87e6e276490a.png?v=1781252661",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-SGLD-13-415-02__CP13-415SpryGlMt__pdp-main__v001_92103745-fcb4-414e-b59a-08313f61ff6b.png?v=1781252665",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-SGLD-13-415-03__CP13-415SpryGlSh__pdp-main__v001_b806de2c-0f21-4550-892a-47c1bda2b77f.png?v=1781252665",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-SLV-13-415-02__CP13-415SprySlMt__pdp-main__v001_b46daa3f-51d7-4769-9f42-83734e7666b4.png?v=1781252669",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-CAP-SLV-13-415-03__CP13-415SprySlSh__pdp-main__v001_62935185-d87a-40cd-ac6a-24172e39d78e.png?v=1781252669",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBlkMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBlkSh.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBluMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryGlMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryGlSh.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SprySlMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SprySlSh.gif"
+      ],
+      "sourceIdentityCount": 11,
+      "sourceReferenceObservedCount": 7,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "duplicate-source-rows-require-alias-review",
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__18-415__82e32a9e9a",
+      "descriptorSignature": "sprayer :: 18-415 :: Fine Mist Sprayer :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Fine Mist Sprayer"
+      ],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "18-415CAP4SpryMtGl",
+        "18-415CAP4SpryShnBlk"
+      ],
+      "appearanceEvidence": [
+        "Matte Gold",
+        "Shiny Black"
+      ],
+      "sourceReferenceUrls": [],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 0,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-incomplete",
+      "priority": "P0-TRUTH",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Obtain missing component imagery and physical dimensions before authority creation or geometry grouping.",
+      "issues": [
+        "one-or-more-source-identities-lack-component-image-reference"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__17-415__d970d8bbcd",
+      "descriptorSignature": "cap :: 17-415 :: Plastic Roller Ball :: Roll-On",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "applicatorEvidence": [
+        "Plastic Roller Ball"
+      ],
+      "capStyleEvidence": [
+        "Roll-On"
+      ],
+      "sourceIdentities": [
+        "CpRoll17-415BlkDot",
+        "CpRoll17-415Cu",
+        "CpRoll17-415MattGl",
+        "CpRoll17-415MattSl",
+        "CpRoll17-415PnkDot",
+        "CpRoll17-415ShnBlk",
+        "CpRoll17-415ShnGl",
+        "CpRoll17-415ShnSl",
+        "CpRoll17-415SlDot",
+        "CpRoll17-415White"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Copper",
+        "Matte Gold",
+        "Matte Silver",
+        "Pink",
+        "Shiny Black",
+        "Shiny Gold",
+        "Shiny Silver",
+        "Silver",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415BlkDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415Cu.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415MattGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415MattSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415PnkDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415ShnBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415ShnSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415SlDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CpRoll17-415White.gif"
+      ],
+      "sourceIdentityCount": 10,
+      "sourceReferenceObservedCount": 10,
+      "localVariantCount": 10,
+      "localGeometryFamilyIds": [
+        "closure__17-415__rollon-overcap__v2"
+      ],
+      "localAuthorityMaskSha256": [
+        "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be"
+      ],
+      "status": "verified-local-shared-authority",
+      "priority": "P0-VERIFY",
+      "geometryClaim": "verified-local-exact-alpha",
+      "nextGate": "Preserve the exact shared authority mask; complete named material, family-fit, placement, and release approval.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__274c4512c4",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: Cap/Closure :: none",
+      "slotProposals": [
+        "bulb-sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP18-415AnSpPnk"
+      ],
+      "appearanceEvidence": [
+        "Pink"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Pnk.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__e2b095d953",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: Fine Mist Sprayer :: Spray",
+      "slotProposals": [
+        "bulb-sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Fine Mist Sprayer"
+      ],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "CP18-415AnSpTslGl"
+      ],
+      "appearanceEvidence": [
+        "Gold"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Gl.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__6314ffe5b1",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: none :: Spray",
+      "slotProposals": [
+        "bulb-sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "AnSp18-415Blk",
+        "AnSp18-415Gl"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Shiny Gold"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Blk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Gl.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__unknown-neck__855d48f60c",
+      "descriptorSignature": "bulb-sprayer :: unknown-neck :: N/A :: none",
+      "slotProposals": [
+        "bulb-sprayer"
+      ],
+      "neckFinishEvidence": [],
+      "applicatorEvidence": [
+        "N/A"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "AntqSprBulbLavender"
+      ],
+      "appearanceEvidence": [
+        "Lavender"
+      ],
+      "sourceReferenceUrls": [
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-LVN-BULB__AntqSprBulbLavender__pdp-main__v001.png?v=1781252634"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09",
+      "descriptorSignature": "bulb-sprayer+sprayer :: 18-415 :: none :: Spray",
+      "slotProposals": [
+        "bulb-sprayer",
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "AnSp18-415IvyGl",
+        "AnSp18-415IvySl",
+        "AnSp18-415Lvn",
+        "AnSp18-415MtSl",
+        "AnSp18-415Red",
+        "AnSp18-415Wht",
+        "AnSpTsl18-415Blk",
+        "AnSpTsl18-415IvyGl",
+        "AnSpTsl18-415IvySl",
+        "AnSpTsl18-415Lvn",
+        "AnSpTsl18-415MtS",
+        "AnSpTsl18-415Pnk",
+        "AnSpTsl18-415Red",
+        "AnSpTsl18-415Wht"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Gold",
+        "Ivory",
+        "Lavender",
+        "Matte Silver",
+        "Pink",
+        "Red",
+        "Silver",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-BLK-18-415-02__AnSpTsl18-415Blk__pdp-main__v001_63c8c56f-5265-486a-b36d-936dfb2cb501.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-IVGD-18-415-01__AnSp18-415IvyGl__pdp-main__v001_a7aa6bbe-2238-4b4d-995b-ddf97692da26.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-IVGD-18-415-02__AnSpTsl18-415IvyGl__pdp-main__v001_d72e8275-77b9-4797-8746-84b981074862.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-IVSL-18-415-01__AnSp18-415IvySl__pdp-main__v001_4f430eab-d3fc-4f6b-b4c1-1c8484d5bbd1.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-IVSL-18-415-02__AnSpTsl18-415IvySl__pdp-main__v001_57a00653-a705-4033-b10d-482009c7e742.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-LVN-18-415-01__AnSp18-415Lvn__pdp-main__v001_05643dfc-766c-4230-a1bb-26fe74e58302.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-LVN-18-415-02__AnSpTsl18-415Lvn__pdp-main__v001_d9e2cd2b-90c2-4bbd-8415-6f6ae1e62888.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-MSLV-18-415-01__AnSp18-415MtSl__pdp-main__v001_55e4c050-bf11-4acf-a702-b3b2079d9002.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-MSLV-18-415-02__AnSpTsl18-415MtS__pdp-main__v001_05735831-fb3d-44bc-80be-5576a8fee274.png?v=1781252122",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-PNK-18-415__AnSpTsl18-415Pnk__pdp-main__v001_f71c68fb-331f-4600-b9e1-745067db8a32.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-RED-18-415-01__AnSp18-415Red__pdp-main__v001_dcc69524-5577-417e-91ab-466081910bb0.png?v=1781252122",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-RED-18-415-02__AnSpTsl18-415Red__pdp-main__v001_a81cdb4d-c9c5-456a-8e6b-ec343dbe6f0e.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-WHT-18-415-01__AnSp18-415Wht__pdp-main__v001_38b296db-e25d-480b-9bfc-f93663f84b75.png?v=1781252123",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-SPR-WHT-18-415-02__AnSpTsl18-415Wht__pdp-main__v001_7a28d13a-365a-4b08-b888-72d288d35b9c.png?v=1781252123",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415IvyGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415IvySl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Lvn.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415MtSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Red.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSp18-415Wht.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Blk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415IvyGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415IvySl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Lvn.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415MtS.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Pnk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Red.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/AnSpTsl18-415Wht.gif"
+      ],
+      "sourceIdentityCount": 14,
+      "sourceReferenceObservedCount": 14,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "conflicting-slot-proposal",
+        "duplicate-source-rows-require-alias-review",
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__13-415__bd7f336278",
+      "descriptorSignature": "cap :: 13-415 :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP13-415Gl",
+        "CP13-415Sl"
+      ],
+      "appearanceEvidence": [
+        "Shiny Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415Gl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415Sl.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__13-415__5b5524f566",
+      "descriptorSignature": "cap :: 13-415 :: Cap/Closure :: Short",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Short"
+      ],
+      "sourceIdentities": [
+        "CP13-415BlkSht",
+        "CP13-415WhtSht"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415BlkSht.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415WhtSht.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__13-415__e45a8a2c38",
+      "descriptorSignature": "cap :: 13-415 :: Plastic Roller Ball :: Roll-On",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [
+        "Plastic Roller Ball"
+      ],
+      "capStyleEvidence": [
+        "Roll-On"
+      ],
+      "sourceIdentities": [
+        "CPRoll13-415BlackDot",
+        "CPRoll13-415BlkSh",
+        "CPRoll13-415Cu",
+        "CPRoll13-415GlMt",
+        "CPRoll13-415GlSh",
+        "CPRoll13-415PinkDot",
+        "CPRoll13-415SlDot",
+        "CPRoll13-415SlMt",
+        "CPRoll13-415SlSh"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Copper",
+        "Pink",
+        "Shiny Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415BlackDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415BlkSh.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415Cu.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415GlMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415GlSh.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415PinkDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415SlDot.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415SlMt.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll13-415SlSh.gif"
+      ],
+      "sourceIdentityCount": 9,
+      "sourceReferenceObservedCount": 9,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__15-415__6962075287",
+      "descriptorSignature": "cap :: 15-415 :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "15-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP15-415ShnGl",
+        "CP15-415ShnSl"
+      ],
+      "appearanceEvidence": [
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP15-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP15-415ShnSl.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-400__075c71e858",
+      "descriptorSignature": "cap :: 18-400 :: Cap/Closure :: Short",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Short"
+      ],
+      "sourceIdentities": [
+        "18-400CpShortBlk"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-400ShortBlk.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-400__7b644a08b3",
+      "descriptorSignature": "cap :: 18-400 :: none :: Applicator",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Applicator"
+      ],
+      "sourceIdentities": [
+        "18-400CpAppBlk"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-400AppBlk.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-415__a49d784871",
+      "descriptorSignature": "cap :: 18-415 :: Cap/Closure :: Faux Leather",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Faux Leather"
+      ],
+      "sourceIdentities": [
+        "CP18-415BlkLthr",
+        "CP18-415BrwnLthr",
+        "CP18-415LBrwnLthr",
+        "CP18-415LIvyLthr",
+        "CP18-415LPnkLthr"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Brown",
+        "Ivory",
+        "Pink"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415BlkLthr.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415BrwnLthr.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415LBrwnLthr.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415LIvyLthr.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415LPnkLthr.gif"
+      ],
+      "sourceIdentityCount": 5,
+      "sourceReferenceObservedCount": 5,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-415__5ca9162ae8",
+      "descriptorSignature": "cap :: 18-415 :: Cap/Closure :: none",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [],
+      "sourceIdentities": [
+        "CP18-415Wh"
+      ],
+      "appearanceEvidence": [
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415Wh.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-415__5ef8879454",
+      "descriptorSignature": "cap :: 18-415 :: Cap/Closure :: Short",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Short"
+      ],
+      "sourceIdentities": [
+        "CP18-415MtSl",
+        "CP18-415ShnGl",
+        "CP18-415ShnSl"
+      ],
+      "appearanceEvidence": [
+        "Matte Silver",
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415MtSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415ShnSl.gif"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceReferenceObservedCount": 3,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-415__6137704566",
+      "descriptorSignature": "cap :: 18-415 :: Cap/Closure :: Tall",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Tall"
+      ],
+      "sourceIdentities": [
+        "CP18-415MtSlTall",
+        "CP18-415ShnBlkTall"
+      ],
+      "appearanceEvidence": [
+        "Matte Silver",
+        "Shiny Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415MtSlTall.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415ShnBlkTall.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__20-400__75550d33bd",
+      "descriptorSignature": "cap :: 20-400 :: Cap/Closure :: Short",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Short"
+      ],
+      "sourceIdentities": [
+        "20-400Cp2ozShortBlk",
+        "20-400cp1ozShortBlk"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP20-4001ozShortBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP20-4002ozShortBlk.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__20-400__50b30653ff",
+      "descriptorSignature": "cap :: 20-400 :: Plastic Roller Ball :: Tall",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "applicatorEvidence": [
+        "Plastic Roller Ball"
+      ],
+      "capStyleEvidence": [
+        "Tall"
+      ],
+      "sourceIdentities": [
+        "CPRoll20-400TallMattBlk",
+        "CPRoll20-400TallMattGl",
+        "CPRoll20-400TallMattSl",
+        "CPRoll20-400TallShnBlk",
+        "CPRoll20-400TallShnGl",
+        "CPRoll20-400TallShnSl"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallMattBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallMattGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallMattSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallShnBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallShnSl.gif"
+      ],
+      "sourceIdentityCount": 6,
+      "sourceReferenceObservedCount": 6,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__8-425__b0a7b8c0cf",
+      "descriptorSignature": "cap :: 8-425 :: Cap/Closure :: Short",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "8-425"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Short"
+      ],
+      "sourceIdentities": [
+        "8-425CpShortBlack",
+        "8-425CpShortWhite"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP8-425ShortBlack.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP8-425ShortWhite.gif"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceReferenceObservedCount": 2,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__8-425__840de1544d",
+      "descriptorSignature": "cap :: 8-425 :: Cap/Closure :: Tall",
+      "slotProposals": [
+        "cap"
+      ],
+      "neckFinishEvidence": [
+        "8-425"
+      ],
+      "applicatorEvidence": [
+        "Cap/Closure"
+      ],
+      "capStyleEvidence": [
+        "Tall"
+      ],
+      "sourceIdentities": [
+        "CP8-425TallBlack",
+        "CP8-425TallShnGl",
+        "CP8-425TallShnSl"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP8-425TallBlack.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP8-425TallShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP8-425TallShnSl.gif"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceReferenceObservedCount": 3,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-400__faf1ea000e",
+      "descriptorSignature": "dropper :: 18-400 :: Dropper :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "applicatorEvidence": [
+        "Dropper"
+      ],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Drp18-40015mlShnGlTrimBlkBulb",
+        "Drp18-40015mlShnGlTrimWhiteBulb",
+        "Drp18-40015mlShnSlTrimBlkBulb",
+        "Drp18-40015mlShnSlTrimWhiteBulb",
+        "Drp18-40015mlWhiteBulb"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlShnGlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlShnGlTrimWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlShnSlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlShnSlTrimWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlWhiteBulb.gif"
+      ],
+      "sourceIdentityCount": 5,
+      "sourceReferenceObservedCount": 5,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-400__9104590c62",
+      "descriptorSignature": "dropper :: 18-400 :: none :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Drp18-40015mlBlckBulb"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-40015mlBlckBulb.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-415__a8b7bd0585",
+      "descriptorSignature": "dropper :: 18-415 :: Dropper :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [
+        "Dropper"
+      ],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Drp18-415Cu",
+        "Drp18-415Gl",
+        "Drp18-415Sl"
+      ],
+      "appearanceEvidence": [
+        "Copper",
+        "Shiny Gold",
+        "Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-415Cu.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-415Gl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp18-415Sl.gif"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceReferenceObservedCount": 3,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__20-400__1f69cf193c",
+      "descriptorSignature": "dropper :: 20-400 :: Dropper :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "applicatorEvidence": [
+        "Dropper"
+      ],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Drp20-4001ozShnGlTrimBlkBulb",
+        "Drp20-4001ozShnSlTrimBlkBulb",
+        "Drp20-4001ozWhiteBulb",
+        "Drp20-4001ozlShnGlTrimWhiteBulb",
+        "Drp20-4001ozlShnSlTrimWhiteBulb",
+        "Drp20-4002ozBlckBulb",
+        "Drp20-4002ozShnGlTrimBlkBulb",
+        "Drp20-4002ozShnSlTrimBlkBulb",
+        "Drp20-4002ozWhiteBulb",
+        "Drp20-4002ozlShnGlTrimWhiteBulb",
+        "Drp20-4002ozlShnSlTrimWhiteBulb"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "White"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozShnGlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozShnSlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozlShnGlTrimWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozlShnSlTrimWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozBlckBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozShnGlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozShnSlTrimBlkBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozlShnGlTrimWhiteBulb.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4002ozlShnSlTrimWhiteBulb.gif"
+      ],
+      "sourceIdentityCount": 11,
+      "sourceReferenceObservedCount": 11,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__20-400__be82382059",
+      "descriptorSignature": "dropper :: 20-400 :: none :: Dropper",
+      "slotProposals": [
+        "dropper"
+      ],
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Dropper"
+      ],
+      "sourceIdentities": [
+        "Drp20-4001ozBlckBulb"
+      ],
+      "appearanceEvidence": [
+        "Black"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Drp20-4001ozBlckBulb.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "release-slot-contract-extension-required"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__pump__18-415__4b1f4c5688",
+      "descriptorSignature": "pump :: 18-415 :: none :: Pump",
+      "slotProposals": [
+        "pump"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Pump"
+      ],
+      "sourceIdentities": [
+        "Ltn18-415Cu",
+        "Ltn18-415MtGl",
+        "Ltn18-415MtSl",
+        "Ltn18-415MtSlCl",
+        "Ltn18-415ShnBlk",
+        "Ltn18-415ShnGl",
+        "Ltn18-415ShnSl"
+      ],
+      "appearanceEvidence": [
+        "Copper",
+        "Matte Gold",
+        "Matte Silver",
+        "Shiny Black",
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-LPM-CPR-18-415__Ltn18-415Cu__pdp-main__v001.png?v=1781251985",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-LPM-MGLD-18-415__Ltn18-415MtGl__pdp-main__v001_79571b0b-897c-4fa5-aacc-4d7d4f7837c5.png?v=1781251985",
+        "https://cdn.shopify.com/s/files/1/0739/9420/7524/files/CMP-LPM-MSLV-18-415-01__Ltn18-415MtSl__pdp-main__v001.png?v=1781251985",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415Cu.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415MtGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415MtSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415MtSlCl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415ShnBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Ltn18-415ShnSl.gif"
+      ],
+      "sourceIdentityCount": 7,
+      "sourceReferenceObservedCount": 7,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": [
+        "duplicate-source-rows-require-alias-review"
+      ]
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__13-415__29f23f5a84",
+      "descriptorSignature": "sprayer :: 13-415 :: none :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "CP13-415SpryCuMt"
+      ],
+      "appearanceEvidence": [
+        "Copper"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryCuMt.gif"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceReferenceObservedCount": 1,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
+      "descriptorSignature": "sprayer :: 15-415 :: Fine Mist Sprayer :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "15-415"
+      ],
+      "applicatorEvidence": [
+        "Fine Mist Sprayer"
+      ],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "Spry15-415Blk",
+        "Spry15-415MattGl",
+        "Spry15-415MattSl",
+        "Spry15-415ShnGl",
+        "Spry15-415ShnSl"
+      ],
+      "appearanceEvidence": [
+        "Black",
+        "Matte Gold",
+        "Matte Silver",
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415Blk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415MattGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415MattSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry15-415ShnSl.gif"
+      ],
+      "sourceIdentityCount": 5,
+      "sourceReferenceObservedCount": 5,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__18-415__0a02e5f733",
+      "descriptorSignature": "sprayer :: 18-415 :: none :: Spray",
+      "slotProposals": [
+        "sprayer"
+      ],
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "applicatorEvidence": [],
+      "capStyleEvidence": [
+        "Spray"
+      ],
+      "sourceIdentities": [
+        "Spry18-415Cu",
+        "Spry18-415MtGl",
+        "Spry18-415MtSl",
+        "Spry18-415ShnBlk",
+        "Spry18-415ShnGl",
+        "Spry18-415ShnSl"
+      ],
+      "appearanceEvidence": [
+        "Copper",
+        "Matte Gold",
+        "Matte Silver",
+        "Shiny Black",
+        "Shiny Gold",
+        "Shiny Silver"
+      ],
+      "sourceReferenceUrls": [
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415Cu.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415MtGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415MtSl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415ShnBlk.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415ShnGl.gif",
+        "https://www.bestbottles.com/images/store/enlarged_pics/Spry18-415ShnSl.gif"
+      ],
+      "sourceIdentityCount": 6,
+      "sourceReferenceObservedCount": 6,
+      "localVariantCount": 0,
+      "localGeometryFamilyIds": [],
+      "localAuthorityMaskSha256": [],
+      "status": "source-ready-physical-review",
+      "priority": "P1-PRODUCE",
+      "geometryClaim": "unverified-descriptor-cluster",
+      "nextGate": "Review source silhouettes and obtain/confirm physical dimensions; split or register one authority before material production.",
+      "issues": []
+    }
+  ],
+  "claimPolicy": {
+    "descriptorClusterIsGeometryLock": false,
+    "exactSharedAuthorityRequiredForVerifiedClaim": true,
+    "compatibilityInferred": false
+  },
+  "mutationPolicy": {
+    "assetsGenerated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

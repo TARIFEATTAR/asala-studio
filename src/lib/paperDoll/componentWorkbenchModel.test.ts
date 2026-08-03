@@ -41,3 +41,41 @@ test("component workbench expands all 23 CYL-9ML plates without confusing varian
   assert.equal(rows.every((row) => row.authority !== null), true);
   assert.equal(rows.every((row) => row.nextAction === "Generate or upload candidate"), true);
 });
+
+test("a newer candidate is reviewable even when an older version reached release", () => {
+  const manifest = loadCyl9ComponentFactory();
+  const component = manifest.components[0];
+  const variant = component.variants[0];
+  const base = {
+    familyKey: manifest.familyKey,
+    componentKey: component.componentKey,
+    variantKey: variant.variantKey,
+    source: component.source,
+    sourceBoundsPx: { left: 0, top: 0, width: component.source.widthPx, height: component.source.heightPx },
+    editBoundsPx: { left: 0, top: 0, width: component.source.widthPx, height: component.source.heightPx },
+    authorityBoundsPx: component.authority!.authorityBoundsPx,
+    placementBoundsPx: component.authority!.authorityBoundsPx,
+    authorityMaskPath: component.authority!.maskPath,
+    authorityMaskSha256: component.authority!.maskSha256,
+    normalizedCandidateSha256: "a".repeat(64),
+    fullCanvasLayerSha256: "a".repeat(64),
+    placementVersionId: null,
+    provider: "manual" as const,
+    model: "manual-v1",
+    promptSha256: null,
+    estimatedCostUsd: null,
+    qa: { geometryLocked: true, minIoU: 1, mismatchedPixels: 0 },
+    mutationPolicy: { currentReleaseChanged: false as const, sanityChanged: false as const },
+  };
+  const rows = buildComponentWorkbenchRows({
+    manifest,
+    releaseAssets: [],
+    sanitySyncs: [],
+    candidates: [
+      { ...base, candidateId: "old-released", lifecycleState: "released", createdAt: "2026-08-02T12:00:00Z" },
+      { ...base, candidateId: "new-review", lifecycleState: "candidate", createdAt: "2026-08-03T12:00:00Z" },
+    ],
+  });
+  assert.equal(rows[0].candidate?.candidateId, "new-review");
+  assert.equal(rows[0].nextAction, "Approve Pixels");
+});

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": {
+    "componentGeometryReviewPath": "docs/paper-doll-rig/component-geometry-review-groups.json",
+    "componentSourceReviewSummaryPath": "docs/paper-doll-rig/component-source-review-summary.json",
+    "sourceReadyBatchPath": "outputs/paper-doll-component-authority-reviews/source-ready-batch.json"
+  },
+  "decisions": [
+    {
+      "decisionId": "review-decision__18-415-atomizer__plain-versus-tassel",
+      "sourceReviewGroupKey": "geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09",
+      "status": "split-for-physical-review",
+      "evidenceType": "reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09/silhouette-analysis-contact-sheet.png"
+      ],
+      "observation": "The source sheet visibly contains two different assembled configurations: a short direct bulb attached at the collar and a long flexible-hose tassel assembly. They must not share one full-component authority.",
+      "reviewConfigurations": [
+        {
+          "configurationId": "18-415-atomizer-plain-bulb",
+          "sourceIdentities": [
+            "AnSp18-415IvyGl",
+            "AnSp18-415IvySl",
+            "AnSp18-415Lvn",
+            "AnSp18-415MtSl",
+            "AnSp18-415Red",
+            "AnSp18-415Wht"
+          ]
+        },
+        {
+          "configurationId": "18-415-atomizer-tassel",
+          "sourceIdentities": [
+            "AnSpTsl18-415Blk",
+            "AnSpTsl18-415IvyGl",
+            "AnSpTsl18-415IvySl",
+            "AnSpTsl18-415Lvn",
+            "AnSpTsl18-415MtS",
+            "AnSpTsl18-415Pnk",
+            "AnSpTsl18-415Red",
+            "AnSpTsl18-415Wht"
+          ]
+        }
+      ],
+      "geometryClaim": "none",
+      "nextGate": "Confirm collar, bulb, hose, tassel, and tube dimensions separately; decide which subassemblies become reusable plates before authority creation."
+    },
+    {
+      "decisionId": "review-decision__18-415-lotion-pump__clear-overcap-decomposition",
+      "sourceReviewGroupKey": "geometry-review__pump__18-415__4b1f4c5688",
+      "status": "quarantined-responsibility-decomposition",
+      "evidenceType": "reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__pump__18-415__4b1f4c5688/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__pump__18-415__4b1f4c5688/silhouette-analysis-contact-sheet.png"
+      ],
+      "affectedSourceIdentities": [
+        "Ltn18-415MtSlCl"
+      ],
+      "observation": "The clear-capped source visibly includes a distinct translucent protective overcap responsibility. It must not be treated as only a colorway of the exposed pump plate.",
+      "geometryClaim": "none",
+      "nextGate": "Confirm whether the clear protective cap is a separate compatible overcap plate and keep the pump authority independent from it. Require assembled translucent QA."
+    },
+    {
+      "decisionId": "review-decision__20-400-dropper__pipette-length-unproven",
+      "sourceReviewGroupKey": "geometry-review__dropper__20-400__1f69cf193c",
+      "status": "quarantined-body-contextual-length",
+      "evidenceType": "reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/silhouette-analysis-contact-sheet.png"
+      ],
+      "observation": "The source sheet reuses identical imagery across 1 oz and 2 oz identities. Reused photography does not prove one physical pipette length, and the inserted tube length depends on bottle height and shoulder geometry.",
+      "geometryClaim": "none",
+      "nextGate": "Treat the bulb/collar exterior and the inserted pipette as separate responsibilities. Obtain dimensions by target bottle cohort before producing body-contextual pipette or integration pixels."
+    }
+  ],
+  "claimPolicy": {
+    "reviewDecisionIsGeometryLock": false,
+    "filenameAloneIsEvidence": false,
+    "sourcePhotographyAloneProvesCompatibility": false,
+    "exactAlphaAuthorityRequiredForGeometryLock": true
+  },
+  "mutationPolicy": {
+    "assetsGenerated": false,
+    "candidatesCreated": false,
+    "compatibilityChanged": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

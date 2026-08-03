@@ -36,6 +36,7 @@ export interface BuildComponentCandidateInput {
   provider: ComponentCandidate["provider"];
   model: string;
   prompt: string | null;
+  estimatedCostUsd?: number | null;
   outputDirectory: string;
 }
 
@@ -165,7 +166,7 @@ export async function buildComponentCandidate(
     provider: input.provider,
     model: input.model,
     promptSha256: promptSha,
-    estimatedCostUsd: null,
+    estimatedCostUsd: input.estimatedCostUsd ?? null,
     qa: normalized.qa,
     mutationPolicy: { currentReleaseChanged: false, sanityChanged: false },
     lifecycleState: "candidate",

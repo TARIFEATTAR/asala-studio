@@ -33,6 +33,13 @@ export interface ComponentWorkbenchStatus {
 }
 
 export interface PersistedCandidateSummary extends ComponentCandidate {
+  componentId?: string;
+  componentVersionId?: string;
+  componentVersionApprovalStatus?: string;
+  normalizedPath?: string;
+  layerPath?: string;
+  normalizedUrl?: string;
+  layerUrl?: string;
   createdAt?: string;
   currentCandidateFailed?: boolean;
   quarantinedAncestor?: boolean;
@@ -174,9 +181,11 @@ function latestCandidate(
   return candidates
     .filter((candidate) => candidate.componentKey === componentKey && candidate.variantKey === variantKey)
     .sort((left, right) => {
+      const created = String(right.createdAt ?? "").localeCompare(String(left.createdAt ?? ""));
+      if (created !== 0) return created;
       const state = LIFECYCLE_RANK[right.lifecycleState] - LIFECYCLE_RANK[left.lifecycleState];
       if (state !== 0) return state;
-      return String(right.createdAt ?? "").localeCompare(String(left.createdAt ?? ""));
+      return right.candidateId.localeCompare(left.candidateId);
     })[0] ?? null;
 }
 

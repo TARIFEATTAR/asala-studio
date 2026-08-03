@@ -1,0 +1,1447 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-5ML-13-415",
+  "familyName": "Cylinder 5ml",
+  "scope": "All canonical 5 ml Cylinder website SKUs mapped to the 13-415 body cohort; authority intake only.",
+  "sourceBacklogPath": "docs/paper-doll-rig/catalog-wide-plate-backlog.json",
+  "sourceBacklogSha256": "7b0d33b4172faec6bea3efa3e6983ba098727e0e21e9e95d0399c9d85f5c9ca7",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "geometries": [
+    {
+      "geometryKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "capacityMl": 5,
+      "dimensionsMm": {
+        "bodyHeight": 53,
+        "widthAxis": 17,
+        "depthAxis": 17,
+        "axisSemantics": "round"
+      },
+      "productGroupSlugs": [
+        "cylinder-5ml-clear-13-415",
+        "cylinder-5ml-clear-13-415-capclosure",
+        "cylinder-5ml-clear-13-415-finemist",
+        "cylinder-5ml-clear-13-415-rollon",
+        "cylinder-5ml-cobalt-blue-13-415",
+        "cylinder-5ml-cobalt-blue-13-415-finemist",
+        "cylinder-5ml-cobalt-blue-13-415-rollon",
+        "cylinder-5ml-white-13-415"
+      ],
+      "conflictFlags": [],
+      "authorityStatus": "missing"
+    },
+    {
+      "geometryKey": "body__cylinder__5ml__53x18x18.0__49d0915777",
+      "capacityMl": 5,
+      "dimensionsMm": {
+        "bodyHeight": 53,
+        "widthAxis": 18,
+        "depthAxis": 18,
+        "axisSemantics": "round"
+      },
+      "productGroupSlugs": [
+        "cylinder-5ml-cobalt-blue-13-415"
+      ],
+      "conflictFlags": [
+        "h:dup_lineage_stale_value×1",
+        "h:missing_filled_from_group×1"
+      ],
+      "authorityStatus": "missing"
+    },
+    {
+      "geometryKey": "body__cylinder__5ml__54x17x17.0__bb133367ba",
+      "capacityMl": 5,
+      "dimensionsMm": {
+        "bodyHeight": 54,
+        "widthAxis": 17,
+        "depthAxis": 17,
+        "axisSemantics": "round"
+      },
+      "productGroupSlugs": [
+        "cylinder-5ml-clear-13-415-finemist"
+      ],
+      "conflictFlags": [],
+      "authorityStatus": "missing"
+    }
+  ],
+  "bodyAppearances": [
+    {
+      "bodyAppearanceKey": "body__cylinder__5ml__53x17x17.0__f94a16652c:clear",
+      "geometryKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "color": "Clear",
+      "truthStatus": "ready",
+      "authorityStatus": "missing",
+      "plateStatus": "missing"
+    },
+    {
+      "bodyAppearanceKey": "body__cylinder__5ml__53x17x17.0__f94a16652c:cobalt-blue",
+      "geometryKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "color": "Cobalt Blue",
+      "truthStatus": "ready",
+      "authorityStatus": "missing",
+      "plateStatus": "missing"
+    },
+    {
+      "bodyAppearanceKey": "body__cylinder__5ml__53x18x18.0__49d0915777:cobalt-blue",
+      "geometryKey": "body__cylinder__5ml__53x18x18.0__49d0915777",
+      "color": "Cobalt Blue",
+      "truthStatus": "ready",
+      "authorityStatus": "missing",
+      "plateStatus": "missing"
+    },
+    {
+      "bodyAppearanceKey": "body__cylinder__5ml__54x17x17.0__bb133367ba:clear",
+      "geometryKey": "body__cylinder__5ml__54x17x17.0__bb133367ba",
+      "color": "Clear",
+      "truthStatus": "ready",
+      "authorityStatus": "missing",
+      "plateStatus": "missing"
+    }
+  ],
+  "componentRequirements": [
+    {
+      "componentRequirementKey": "desired__cap__04b8acba3536",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Screw Cap",
+        "capColor": "Matte Gold",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__09135df256b5",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Tall",
+        "capColor": "Shiny Gold",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__1541d11590bf",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Roll-On",
+        "capColor": "Shiny Black",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__2bc23f93b445",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Dot Cap",
+        "capColor": "Pink with Dots",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__34d283e30a61",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Roll-On",
+        "capColor": "Matte Silver",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__42e7ae7384eb",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Short",
+        "capColor": "White",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c",
+        "body__cylinder__5ml__53x18x18.0__49d0915777"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__82bb3ada1f1d",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Dot Cap",
+        "capColor": "Silver with Dots",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__840f6e59779c",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Tall",
+        "capColor": "Shiny Silver",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__dde61fbb7182",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Roll-On",
+        "capColor": "Matte Copper",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__e00cc66dad13",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Dot Cap",
+        "capColor": "Black with Dots",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__e2098491a7d4",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Roll-On",
+        "capColor": "Shiny Silver",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__f1b268969250",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Screw Cap",
+        "capColor": "Shiny Gold",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__cap__f2f70a52a22f",
+      "slot": "cap",
+      "descriptor": {
+        "neckThreadSize": "13-415",
+        "capStyle": "Short",
+        "capColor": "Black",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__roller__61c17da20400",
+      "slot": "roller",
+      "descriptor": {
+        "applicator": "Metal Roller Ball",
+        "neckThreadSize": "13-415",
+        "ballMaterial": "Metal"
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__roller__88ae4e662700",
+      "slot": "roller",
+      "descriptor": {
+        "applicator": "Plastic Roller Ball",
+        "neckThreadSize": "13-415",
+        "ballMaterial": "Plastic"
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__028642558512",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Shiny Silver",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__165e85047ea0",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Matte Silver",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__246a43d584bc",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Shiny Black",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__5f2044213078",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Shiny Gold",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__7b26aa0eced6",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Matte Gold",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__c8f3e73a3611",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Matte Black",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__d2dd325bc402",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Matte Blue",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    },
+    {
+      "componentRequirementKey": "desired__sprayer__feabebf3f8e7",
+      "slot": "sprayer",
+      "descriptor": {
+        "applicator": "Fine Mist Sprayer",
+        "neckThreadSize": "13-415",
+        "finish": "Matte Copper",
+        "trimColor": ""
+      },
+      "compatibleGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "sourceIdentity": null,
+      "compatibilityStatus": "unverified",
+      "authorityStatus": "missing"
+    }
+  ],
+  "catalogIdentities": [
+    {
+      "websiteSku": "GBCyl5BlkSht",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-S"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f2f70a52a22f"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5Gl",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-GLD-T"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__09135df256b5"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollBlkDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-BKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e00cc66dad13",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollBlkSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__1541d11590bf",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollCuMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-MCPR"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__dde61fbb7182",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollGlMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-MGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__04b8acba3536",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollGlSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-SGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f1b268969250",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollPinkDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-PKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__2bc23f93b445",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollSlDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-SLDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__82bb3ada1f1d",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollSlMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-MSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__34d283e30a61",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5MtlRollSlSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-MRL-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e2098491a7d4",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollBlkDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-BKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e00cc66dad13",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollBlkSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__1541d11590bf",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollCuMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-MCPR"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__dde61fbb7182",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollGlMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-MGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__04b8acba3536",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollGlSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-SGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f1b268969250",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollPinkDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-PKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__2bc23f93b445",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollSlDot",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-SLDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__82bb3ada1f1d",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollSlMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-MSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__34d283e30a61",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5RollSlSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-ROL-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e2098491a7d4",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5Sl",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-SLV-T"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__840f6e59779c"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5SpryBlkMatt",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-SPR-MBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__c8f3e73a3611"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5SpryBlkSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-SPR-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__246a43d584bc"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5SprySlSh",
+      "graceSkus": [
+        "GB-CYL-CLR-5ML-SPR-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__028642558512"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCyl5WhtSht",
+      "graceSkus": [
+        "GB-CYL-WHT-5ML-WHT-S",
+        "GBCyl5WhtSht"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Clear"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__42e7ae7384eb"
+      ],
+      "reviewStatus": "manual-review-required",
+      "issues": [
+        "duplicate-website-sku-source-rows",
+        "conflicting-applicator-descriptors",
+        "conflicting-closure-descriptors"
+      ]
+    },
+    {
+      "websiteSku": "GBCylBlu5BlkSht",
+      "graceSkus": [
+        "GB-CYL-CBL-5ML-S-01"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f2f70a52a22f"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5Gl",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-GLD-T"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__09135df256b5"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollBlkDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-BKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e00cc66dad13",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollBlkSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__1541d11590bf",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollCuMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-MCPR"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__dde61fbb7182",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollGlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-MGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__04b8acba3536",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollGlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-SGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f1b268969250",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollPinkDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-PKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__2bc23f93b445",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollSlDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-SLDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__82bb3ada1f1d",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollSlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-MSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__34d283e30a61",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5MtlRollSlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-MRL-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e2098491a7d4",
+        "desired__roller__61c17da20400"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollBlkDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-BKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e00cc66dad13",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollBlkSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__1541d11590bf",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollCuMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-MCPR"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__dde61fbb7182",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollGlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-MGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__04b8acba3536",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollGlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-SGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__f1b268969250",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollPinkDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-PKDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__2bc23f93b445",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollSlDot",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-SLDT"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__82bb3ada1f1d",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollSlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-MSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__34d283e30a61",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5RollSlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-ROL-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__e2098491a7d4",
+        "desired__roller__88ae4e662700"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5Sl",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SLV-T"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__840f6e59779c"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SpryBlkSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-SBLK"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__246a43d584bc"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SpryBluMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-MBLU"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__d2dd325bc402"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SpryCuMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-MCPR"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__feabebf3f8e7"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SpryGlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-MGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__7b26aa0eced6"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SpryGlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-SGLD"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__5f2044213078"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SprySlMatt",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-MSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__165e85047ea0"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5SprySlSh",
+      "graceSkus": [
+        "GB-CYL-BLU-5ML-SPR-SSLV"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x17x17.0__f94a16652c"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__sprayer__028642558512"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    },
+    {
+      "websiteSku": "GBCylBlu5WhtSht",
+      "graceSkus": [
+        "GB-CYL-CBL-5ML-S-02"
+      ],
+      "bodyGeometryKeys": [
+        "body__cylinder__5ml__53x18x18.0__49d0915777"
+      ],
+      "bodyColors": [
+        "Cobalt Blue"
+      ],
+      "componentRequirementKeys": [
+        "desired__cap__42e7ae7384eb"
+      ],
+      "reviewStatus": "ready",
+      "issues": []
+    }
+  ],
+  "blockers": [
+    "three-body-geometry-authorities-missing",
+    "four-body-appearance-plates-missing",
+    "component-source-links-unverified",
+    "component-geometry-authorities-missing",
+    "duplicate-and-white-body-truth-review-open"
+  ],
+  "mutationPolicy": {
+    "candidatesGenerated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}
