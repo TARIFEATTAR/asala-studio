@@ -123,6 +123,12 @@ MATERIAL_PRESETS = {
         "roughness": 0.40,
         "coatWeight": 0.0,
     },
+    "matte-black": {
+        "baseColor": [0.010, 0.011, 0.013, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.40,
+        "coatWeight": 0.0,
+    },
     "glossy-black": {
         "baseColor": [0.008, 0.009, 0.011, 1.0],
         "metallic": 0.0,

@@ -13,6 +13,7 @@ const materialSchema = z.enum([
   "matte-silver",
   "mirror-gold",
   "matte-gold",
+  "matte-black",
   "glossy-black",
   "matte-copper",
   "glossy-white",
