@@ -22,9 +22,9 @@
     "catalogSourceReadyComponentReferencesReviewed": 117,
     "catalogSourceReferenceReviewFailures": 0,
     "catalogPhysicalReviewDecisionsRecorded": 3,
-    "catalogDimensionCalibratedParametricCandidateFamilies": 4,
-    "catalogDimensionCalibratedParametricCandidateAppearances": 16,
-    "catalogParametricCandidateExactAlphaAppearances": 16,
+    "catalogDimensionCalibratedParametricCandidateFamilies": 5,
+    "catalogDimensionCalibratedParametricCandidateAppearances": 18,
+    "catalogParametricCandidateExactAlphaAppearances": 18,
     "catalogParametricCandidateGeometryLocked": 0,
     "catalogSourceIncompleteComponentReviewGroups": 11,
     "catalogSourceBackedExactExisting": 22,
@@ -49,7 +49,7 @@
     "cyl9RhinestoneCandidatesRegistered": 3,
     "cyl9TranslucentCandidatesRequiringReview": 2,
     "corePaperDollTestsPassing": 48,
-    "componentFactoryTestsPassing": 101,
+    "componentFactoryTestsPassing": 102,
     "parametricBlenderIntegrationTestsPassing": 2,
     "cyl9CapTestsPassing": 14
   },
@@ -75,7 +75,7 @@
     {
       "capability": "measured-parametric-overcap-candidates",
       "status": "existing-but-incomplete",
-      "recommended_action": "review and approve the four distinct 13-415, 15-415, and 18-415 dimension-calibrated profiles before treating their exact-alpha variants as geometry authority",
+      "recommended_action": "review and approve the five distinct 13-415, 15-415, and 18-415 dimension-calibrated profiles before treating their exact-alpha variants as geometry authority",
       "priority": "high"
     },
     {
