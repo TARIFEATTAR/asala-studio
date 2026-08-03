@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
-import { buildPaperDollSanityDraftDocument } from "../_shared/paperDollSanityDraftContract.ts";
+import { buildPaperDollSanityDraftDocument, resolvePaperDollSanityConfig } from "../_shared/paperDollSanityDraftContract.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,9 +30,7 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const sanityProjectId = Deno.env.get("SANITY_PROJECT_ID") ?? "";
-  const sanityDataset = Deno.env.get("SANITY_DATASET") ?? "";
-  const sanityToken = Deno.env.get("SANITY_API_TOKEN") ?? Deno.env.get("SANITY_WRITE_TOKEN") ?? "";
+  const { projectId: sanityProjectId, dataset: sanityDataset, token: sanityToken } = resolvePaperDollSanityConfig((key) => Deno.env.get(key));
   const sanityPublicDocumentId = Deno.env.get("SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID") ?? "";
   const sanityDraftDocumentId = `drafts.${sanityPublicDocumentId}`;
   if (!supabaseUrl || !anonKey || !serviceRoleKey) return json({ error: "Draft sync service is not configured" }, 503);

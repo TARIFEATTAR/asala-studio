@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { parsePaperDollApprovalRequest } from "./paperDollApprovalContract";
+import {
+  buildPaperDollApprovedCopyPlan,
+  parsePaperDollApprovalRequest,
+} from "./paperDollApprovalContract";
 
 const ORG = "11111111-1111-4111-8111-111111111111";
 const VERSION = "22222222-2222-4222-8222-222222222222";
@@ -31,6 +34,35 @@ test("approval parser rejects anonymous names, bad SHA and empty evidence", () =
     approverDisplayName: " ",
     evidenceIds: [],
   }));
+});
+
+test("approved copy plan promotes both candidate pixels and their exact authority mask", () => {
+  assert.deepEqual(buildPaperDollApprovedCopyPlan({
+    organizationId: ORG,
+    candidateComponentVersionId: VERSION,
+    imagePath: `${ORG}/CYL-9ML/candidate.png`,
+    imageSha256: SHA,
+    imageContentType: "image/png",
+    imageByteSize: 1234,
+    geometryMaskPath: `${ORG}/CYL-9ML/shared-mask/${"b".repeat(64)}.png`,
+    geometryMaskSha256: "b".repeat(64),
+  }), [
+    {
+      kind: "pixels",
+      sourcePath: `${ORG}/CYL-9ML/candidate.png`,
+      approvedPath: `${ORG}/CYL-9ML/approved-${VERSION}/${SHA}.png`,
+      sha256: SHA,
+      contentType: "image/png",
+      expectedByteSize: 1234,
+    },
+    {
+      kind: "authority-mask",
+      sourcePath: `${ORG}/CYL-9ML/shared-mask/${"b".repeat(64)}.png`,
+      approvedPath: `${ORG}/CYL-9ML/shared-mask/${"b".repeat(64)}.png`,
+      sha256: "b".repeat(64),
+      contentType: "image/png",
+    },
+  ]);
 });
 
 test("approval implementation rejects stale, cross-org and unqualified candidates before promotion", async () => {

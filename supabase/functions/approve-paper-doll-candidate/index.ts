@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
-import { parsePaperDollApprovalRequest } from "../_shared/paperDollApprovalContract.ts";
+import {
+  buildPaperDollApprovedCopyPlan,
+  parsePaperDollApprovalRequest,
+} from "../_shared/paperDollApprovalContract.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,7 +54,7 @@ Deno.serve(async (request) => {
   // service-role Storage access or the service-only transaction is used.
   const { data: candidate } = await userClient
     .from("paper_doll_component_versions")
-    .select("id, organization_id, component_id, approval_status, storage_bucket, image_path, image_sha256, byte_size, content_type")
+    .select("id, organization_id, component_id, approval_status, storage_bucket, image_path, image_sha256, byte_size, content_type, geometry_mask_path, geometry_mask_sha256")
     .eq("id", approval.candidateComponentVersionId)
     .eq("organization_id", approval.organizationId)
     .maybeSingle();
@@ -82,34 +85,51 @@ Deno.serve(async (request) => {
   const service = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
   let approvedRef: Record<string, unknown> | null = null;
   if (approval.decision === "approved") {
-    const source = await service.storage.from(candidate.storage_bucket).download(candidate.image_path);
-    if (source.error || !source.data) return json({ error: "Candidate bytes are unavailable" }, 409);
-    const bytes = new Uint8Array(await source.data.arrayBuffer());
-    if (bytes.byteLength !== Number(candidate.byte_size) || await sha256(bytes) !== candidate.image_sha256) {
-      return json({ error: "Candidate Storage bytes do not match the ledger" }, 409);
+    if (!candidate.geometry_mask_path || !candidate.geometry_mask_sha256) {
+      return json({ error: "Candidate geometry authority is incomplete" }, 409);
     }
-    const approvedPath = `${approval.organizationId}/CYL-9ML/approved-${candidate.id}/${candidate.image_sha256}.png`;
-    const upload = await service.storage.from("paper-doll-approved").upload(approvedPath, bytes, {
-      upsert: false,
-      contentType: candidate.content_type,
+    const copies = buildPaperDollApprovedCopyPlan({
+      organizationId: approval.organizationId,
+      candidateComponentVersionId: candidate.id,
+      imagePath: candidate.image_path,
+      imageSha256: candidate.image_sha256,
+      imageContentType: candidate.content_type,
+      imageByteSize: Number(candidate.byte_size),
+      geometryMaskPath: candidate.geometry_mask_path,
+      geometryMaskSha256: candidate.geometry_mask_sha256,
     });
-    if (upload.error && !/already exists|duplicate/i.test(upload.error.message)) {
-      return json({ error: "Approved Storage copy failed" }, 500);
-    }
-    if (upload.error) {
-      const existing = await service.storage.from("paper-doll-approved").download(approvedPath);
-      if (existing.error || !existing.data) return json({ error: "Existing approved object could not be verified" }, 500);
-      const existingBytes = new Uint8Array(await existing.data.arrayBuffer());
-      if (existingBytes.byteLength !== bytes.byteLength || await sha256(existingBytes) !== candidate.image_sha256) {
-        return json({ error: "Existing approved object does not preserve candidate identity" }, 409);
+    let approvedPixelByteSize = 0;
+    for (const copy of copies) {
+      const source = await service.storage.from(candidate.storage_bucket).download(copy.sourcePath);
+      if (source.error || !source.data) return json({ error: `Candidate ${copy.kind} bytes are unavailable` }, 409);
+      const bytes = new Uint8Array(await source.data.arrayBuffer());
+      if ((copy.expectedByteSize !== undefined && bytes.byteLength !== copy.expectedByteSize) || await sha256(bytes) !== copy.sha256) {
+        return json({ error: `Candidate ${copy.kind} Storage bytes do not match the ledger` }, 409);
       }
+      const upload = await service.storage.from("paper-doll-approved").upload(copy.approvedPath, bytes, {
+        upsert: false,
+        contentType: copy.contentType,
+      });
+      if (upload.error && !/already exists|duplicate/i.test(upload.error.message)) {
+        return json({ error: `Approved ${copy.kind} Storage copy failed` }, 500);
+      }
+      if (upload.error) {
+        const existing = await service.storage.from("paper-doll-approved").download(copy.approvedPath);
+        if (existing.error || !existing.data) return json({ error: `Existing approved ${copy.kind} object could not be verified` }, 500);
+        const existingBytes = new Uint8Array(await existing.data.arrayBuffer());
+        if (existingBytes.byteLength !== bytes.byteLength || await sha256(existingBytes) !== copy.sha256) {
+          return json({ error: `Existing approved ${copy.kind} object does not preserve candidate identity` }, 409);
+        }
+      }
+      if (copy.kind === "pixels") approvedPixelByteSize = bytes.byteLength;
     }
+    const pixels = copies[0];
     approvedRef = {
       bucket: "paper-doll-approved",
-      path: approvedPath,
+      path: pixels.approvedPath,
       sha256: candidate.image_sha256,
       contentType: candidate.content_type,
-      byteSize: bytes.byteLength,
+      byteSize: approvedPixelByteSize,
     };
   }
 

@@ -8,6 +8,14 @@ export type SanityLayerInput = {
   offsetY?: number;
 };
 
+export function resolvePaperDollSanityConfig(get: (key: string) => string | undefined) {
+  return {
+    projectId: get("BESTBOTTLES_SANITY_PROJECT_ID") ?? get("SANITY_PROJECT_ID") ?? "",
+    dataset: get("BESTBOTTLES_SANITY_DATASET") ?? get("SANITY_DATASET") ?? "",
+    token: get("BESTBOTTLES_SANITY_WRITE_TOKEN") ?? get("SANITY_API_TOKEN") ?? get("SANITY_WRITE_TOKEN") ?? "",
+  };
+}
+
 export function buildPaperDollSanityDraftDocument(input: {
   familyKey: "CYL-9ML";
   publicDocumentId: string;

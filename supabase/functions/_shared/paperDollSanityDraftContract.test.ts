@@ -20,3 +20,25 @@ test("partial release creates the stable 2080x2288 draft but cannot become store
   assert.deepEqual(document.layerOrderRollon, ["body", "roller", "cap"]);
   assert.deepEqual(document.readinessSummary, { ready: 0, incomplete: 1, total: 1 });
 });
+
+test("Sanity configuration prefers the Best Bottles scoped credential", async () => {
+  const contract = await import("./paperDollSanityDraftContract.ts") as Record<string, unknown>;
+  const resolveConfig = contract.resolvePaperDollSanityConfig;
+  assert.equal(typeof resolveConfig, "function");
+
+  const values: Record<string, string> = {
+    BESTBOTTLES_SANITY_PROJECT_ID: "best-bottles-project",
+    BESTBOTTLES_SANITY_DATASET: "production",
+    BESTBOTTLES_SANITY_WRITE_TOKEN: "best-bottles-token",
+    SANITY_PROJECT_ID: "generic-project",
+    SANITY_DATASET: "generic-dataset",
+    SANITY_WRITE_TOKEN: "stale-generic-token",
+  };
+  const resolved = (resolveConfig as (get: (key: string) => string | undefined) => unknown)((key) => values[key]);
+
+  assert.deepEqual(resolved, {
+    projectId: "best-bottles-project",
+    dataset: "production",
+    token: "best-bottles-token",
+  });
+});

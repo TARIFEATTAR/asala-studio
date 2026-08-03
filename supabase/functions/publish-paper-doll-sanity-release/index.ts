@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { resolvePaperDollSanityConfig } from "../_shared/paperDollSanityDraftContract.ts";
 
 const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -32,9 +33,7 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const projectId = Deno.env.get("SANITY_PROJECT_ID") ?? "";
-  const dataset = Deno.env.get("SANITY_DATASET") ?? "";
-  const token = Deno.env.get("SANITY_API_TOKEN") ?? Deno.env.get("SANITY_WRITE_TOKEN") ?? "";
+  const { projectId, dataset, token } = resolvePaperDollSanityConfig((key) => Deno.env.get(key));
   const publicDocumentId = Deno.env.get("SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID") ?? "";
   const draftDocumentId = `drafts.${publicDocumentId}`;
   if (!supabaseUrl || !anonKey || !serviceRoleKey || !projectId || !dataset || !token || !/^(?!drafts\.)[A-Za-z0-9._-]+$/.test(publicDocumentId)) return json({ error: "Publication service or canonical document is not configured" }, 503);
