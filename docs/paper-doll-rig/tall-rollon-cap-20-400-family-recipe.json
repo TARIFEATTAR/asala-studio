@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "tall-rollon-cap-20-400-family-v1",
+  "familyKey": "TALL-ROLLON-CAP-20-400",
+  "neckFinish": "20-400",
+  "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__cap__20-400__50b30653ff",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "CPRoll20-400TallMattGl",
+    "sourceSha256": "4c7cfae409efe058f05b4ac9c3da2576c819b550385dcbdffb7daa3b391dffcb",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CPRoll20-400TallMattGl.gif",
+    "localReviewPath": "outputs/paper-doll-component-authority-reviews/geometry-review__cap__20-400__50b30653ff/source/cproll20-400tallmattgl__01.gif",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "CPRoll20-400TallMattGl",
+    "fields": {
+      "heightWithCap": "35 ±0.5 mm",
+      "diameter": "23 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 23,
+    "outsideDiameterTolerance": 0.5,
+    "height": 35,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-physical-dimensions-plus-source-medoid-profile-v1"
+  },
+  "profileNormalized": [
+    [0.5, 0],
+    [0.5, 0.9],
+    [0.498, 0.945],
+    [0.492, 0.966],
+    [0.48, 0.982],
+    [0.456, 0.993],
+    [0.41, 0.998],
+    [0, 1]
+  ],
+  "surfaceProfile": {
+    "kind": "smooth"
+  },
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "MBLK",
+      "sourceIdentity": "CPRoll20-400TallMattBlk",
+      "graceSku": "CMP-ROC-MBLK-20400-T",
+      "material": "matte-black",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    },
+    {
+      "variantKey": "MGLD",
+      "sourceIdentity": "CPRoll20-400TallMattGl",
+      "graceSku": "CMP-ROC-MGLD-20400-T",
+      "material": "matte-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    },
+    {
+      "variantKey": "MSLV",
+      "sourceIdentity": "CPRoll20-400TallMattSl",
+      "graceSku": "CMP-ROC-MSLV-20400-T",
+      "material": "matte-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SBLK",
+      "sourceIdentity": "CPRoll20-400TallShnBlk",
+      "graceSku": "CMP-ROC-SBLK-20400-T",
+      "material": "glossy-black",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SGLD",
+      "sourceIdentity": "CPRoll20-400TallShnGl",
+      "graceSku": "CMP-ROC-SGLD-20400-T",
+      "material": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SSLV",
+      "sourceIdentity": "CPRoll20-400TallShnSl",
+      "graceSku": "CMP-ROC-SSLV-20400-T",
+      "material": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}

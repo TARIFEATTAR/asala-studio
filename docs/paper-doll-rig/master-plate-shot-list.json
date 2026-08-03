@@ -8,7 +8,7 @@
     "componentAuthorityQueuePath": "docs/paper-doll-rig/component-authority-queue.json",
     "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e",
     "parametricFamilyIndexPath": "docs/paper-doll-rig/parametric-component-family-index.json",
-    "parametricFamilyIndexSha256": "27d586633b16716146b19e33397c11be930720cbb6cded5f6e8f157610564d40"
+    "parametricFamilyIndexSha256": "0931b7b43d063a571cff2d9afa691b4e9dc3316a9ef89b18a09fe51be8f06bd5"
   },
   "summary": {
     "operationalRowCount": 318,
@@ -13792,12 +13792,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 290,
@@ -13820,12 +13826,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 291,
@@ -14046,12 +14058,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 298,
@@ -14074,12 +14092,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 299,
@@ -14306,12 +14330,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 306,
@@ -14334,12 +14364,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "9e7659a08fa301f15567c95f78523a111e0c8774900f7ae6e8be548c5ae874ff"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 307,

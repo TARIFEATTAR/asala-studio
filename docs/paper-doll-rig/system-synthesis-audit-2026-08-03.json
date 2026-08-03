@@ -75,7 +75,7 @@
     {
       "capability": "measured-parametric-overcap-candidates",
       "status": "existing-but-incomplete",
-      "recommended_action": "review and approve the seven distinct measured cap profiles before treating their exact-alpha variants as geometry authority; keep the 8-425 short-cap flute parameter explicitly review-only until tooling truth is available",
+      "recommended_action": "review and approve the eight distinct measured cap profiles covering 29 appearances before treating their exact-alpha variants as geometry authority; keep the 8-425 short-cap flute parameter explicitly review-only until tooling truth is available and quarantine the conflicting 13-415 short-cap heights",
       "priority": "high"
     },
     {

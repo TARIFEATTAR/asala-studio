@@ -28,7 +28,7 @@ test("shot list distinguishes exact coverage from supplemental local assets", as
 test("shot list records local parametric profile candidates without counting them as approved authority", async () => {
   const shotList = await buildMasterPlateShotList();
   const candidates = shotList.rows.filter((row) => row.authorityStatus === "dimension-calibrated-profile-review-candidate");
-  assert.equal(candidates.length, 23);
+  assert.equal(candidates.length, 29);
   assert.deepEqual(new Set(candidates.map((row) => row.sourceIdentity)), new Set([
     "CPRoll13-415BlackDot",
     "CPRoll13-415BlkSh",
@@ -53,6 +53,12 @@ test("shot list records local parametric profile candidates without counting the
     "CP8-425TallShnSl",
     "8-425CpShortBlack",
     "8-425CpShortWhite",
+    "CPRoll20-400TallMattBlk",
+    "CPRoll20-400TallMattGl",
+    "CPRoll20-400TallMattSl",
+    "CPRoll20-400TallShnBlk",
+    "CPRoll20-400TallShnGl",
+    "CPRoll20-400TallShnSl",
   ]));
   assert.ok(candidates.every((row) => row.status === "needs-authority"));
   assert.ok(candidates.every((row) => row.existingAssetPaths.some((assetPath) => assetPath.endsWith("-family-recipe.json"))));

@@ -14,6 +14,7 @@ const shortCap18415RecipePath = "docs/paper-doll-rig/short-cap-18-415-family-rec
 const tallCap18415RecipePath = "docs/paper-doll-rig/tall-cap-18-415-family-recipe.json";
 const tallCap8425RecipePath = "docs/paper-doll-rig/tall-cap-8-425-family-recipe.json";
 const shortFlutedCap8425RecipePath = "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json";
+const tallRollonCap20400RecipePath = "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -223,4 +224,27 @@ test("parametric contract rejects a fluted surface whose fade zones overlap", as
   raw.surfaceProfile.endHeightRatio = 0.5;
   raw.surfaceProfile.fadeRatio = 0.06;
   assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /fade zones must fit/i);
+});
+
+test("20-400 tall roll-on recipe preserves six verified 23 by 35 mm appearances", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(tallRollonCap20400RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__20-400__tall-rollon-overcap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__20-400__50b30653ff");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 23,
+    outsideDiameterTolerance: 0.5,
+    height: 35,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku, variant.material]), [
+    ["MBLK", "CPRoll20-400TallMattBlk", "CMP-ROC-MBLK-20400-T", "matte-black"],
+    ["MGLD", "CPRoll20-400TallMattGl", "CMP-ROC-MGLD-20400-T", "matte-gold"],
+    ["MSLV", "CPRoll20-400TallMattSl", "CMP-ROC-MSLV-20400-T", "matte-silver"],
+    ["SBLK", "CPRoll20-400TallShnBlk", "CMP-ROC-SBLK-20400-T", "glossy-black"],
+    ["SGLD", "CPRoll20-400TallShnGl", "CMP-ROC-SGLD-20400-T", "mirror-gold"],
+    ["SSLV", "CPRoll20-400TallShnSl", "CMP-ROC-SSLV-20400-T", "mirror-silver"],
+  ]);
+  assert.equal(recipe.surfaceProfile.kind, "smooth");
+  assert.equal(recipe.mutationPolicy.remoteWritesPerformed, false);
 });

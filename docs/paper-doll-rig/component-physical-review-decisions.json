@@ -101,6 +101,24 @@
         "productionPlateEligible": false
       },
       "nextGate": "Review and name the 12 × 9 mm fluted/flanged profile authority; verify the source-derived flute parameter and material pixels before family fit."
+    },
+    {
+      "decisionId": "review-decision__13-415-short-cap__conflicting-height-truth",
+      "sourceReviewGroupKey": "geometry-review__cap__13-415__5b5524f566",
+      "status": "quarantined-conflicting-physical-dimensions",
+      "evidenceType": "canonical-row-conflict-plus-reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__cap__13-415__5b5524f566/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__cap__13-415__5b5524f566/silhouette-analysis-contact-sheet.png"
+      ],
+      "affectedSourceIdentities": [
+        "CP13-415BlkSht",
+        "CP13-415WhtSht"
+      ],
+      "observation": "The catalog assigns the black cap 17 × 10 mm and the white cap 17 × 32 mm even though the reviewed source sheet presents matching short ridged-cap forms. The 22 mm height conflict is too large to treat as material-only variation or to resolve from photography.",
+      "geometryClaim": "none",
+      "nextGate": "Verify both physical cap heights from a manufacturer drawing or direct measurement. Split the identities if the measurements truly differ; otherwise correct the erroneous catalog dimension before creating one shared profile."
     }
   ],
   "claimPolicy": {
