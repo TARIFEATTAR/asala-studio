@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "confirmationToken": "CYL9-MATERIAL-BATCH",
+  "materialPolicies": {
+    "deterministic-mirror": {
+      "provider": "deterministic",
+      "model": "exact-source-clamp-v1",
+      "estimatedCostUsd": 0,
+      "reviewChecklist": ["reflection structure matches the real reference", "no pixels escape the authority mask", "part still reads as coated molded plastic"]
+    },
+    "gpt-material": {
+      "provider": "openai",
+      "model": "gpt-image-2",
+      "estimatedCostUsd": null,
+      "reviewChecklist": ["surface structure matches the declared material class", "camera and lighting direction remain catalog-consistent", "exact authority alpha is copied after generation"]
+    },
+    "gpt-rhinestone": {
+      "provider": "openai",
+      "model": "gpt-image-2",
+      "estimatedCostUsd": null,
+      "decorationPolicy": "deterministic-crystal-v1",
+      "reviewChecklist": ["base material passes before decoration", "all eight registered stones retain stable IDs and positions", "stones remain inside the shared cap silhouette"]
+    },
+    "deterministic-roller": {
+      "provider": "deterministic",
+      "model": "exact-source-clamp-v1",
+      "estimatedCostUsd": 0,
+      "reviewChecklist": ["plastic housing is unchanged", "metal variant changes only the ball", "plastic and metal alpha bytes are identical"]
+    },
+    "gpt-translucent": {
+      "provider": "openai",
+      "model": "gpt-image-2",
+      "estimatedCostUsd": null,
+      "reviewChecklist": ["transmission and edge density remain visible", "material is not flattened to opaque white", "assembly-context QA passes on all five bodies"]
+    }
+  },
+  "rhinestoneLayout": [
+    { "id": "stone-top-left", "angleDeg": -42, "heightRatio": 0.78, "scaleRatio": 0.028 },
+    { "id": "stone-top-right", "angleDeg": 42, "heightRatio": 0.78, "scaleRatio": 0.028 },
+    { "id": "stone-upper-center", "angleDeg": 0, "heightRatio": 0.64, "scaleRatio": 0.028 },
+    { "id": "stone-mid-left", "angleDeg": -42, "heightRatio": 0.49, "scaleRatio": 0.028 },
+    { "id": "stone-mid-right", "angleDeg": 42, "heightRatio": 0.49, "scaleRatio": 0.028 },
+    { "id": "stone-lower-center", "angleDeg": 0, "heightRatio": 0.34, "scaleRatio": 0.028 },
+    { "id": "stone-bottom-left", "angleDeg": -42, "heightRatio": 0.19, "scaleRatio": 0.028 },
+    { "id": "stone-bottom-right", "angleDeg": 42, "heightRatio": 0.19, "scaleRatio": 0.028 }
+  ],
+  "components": [
+    { "componentKey": "closure__17-415__rollon-overcap__SSLV", "policy": "deterministic-mirror", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "thin mirror-chrome metallized coating", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnSl.png", "sourceBoundsPx": { "left": 132, "top": 158, "width": 291, "height": 424 } },
+    { "componentKey": "closure__17-415__rollon-overcap__MSLV", "policy": "gpt-material", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "diffuse matte-silver coating without mirror bands", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415MattSl.png", "sourceBoundsPx": { "left": 126, "top": 165, "width": 294, "height": 426 } },
+    { "componentKey": "closure__17-415__rollon-overcap__SGLD", "policy": "deterministic-mirror", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "thin champagne-gold metallized coating with mirror reflections", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnGl.png", "sourceBoundsPx": { "left": 128, "top": 160, "width": 294, "height": 419 } },
+    { "componentKey": "closure__17-415__rollon-overcap__MGLD", "policy": "gpt-material", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "diffuse matte-gold coating", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415MattGl.png", "sourceBoundsPx": { "left": 129, "top": 162, "width": 291, "height": 418 } },
+    { "componentKey": "closure__17-415__rollon-overcap__SBLK", "policy": "gpt-material", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "high-gloss black dielectric coating", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnBlk.png", "sourceBoundsPx": { "left": 132, "top": 158, "width": 297, "height": 422 } },
+    { "componentKey": "closure__17-415__rollon-overcap__MCPR", "policy": "gpt-material", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "diffuse matte-copper coating", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415Cu.png", "sourceBoundsPx": { "left": 135, "top": 157, "width": 291, "height": 423 } },
+    { "componentKey": "closure__17-415__rollon-overcap__WHT", "policy": "gpt-material", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "high-gloss white dielectric coating", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415White.png", "sourceBoundsPx": { "left": 137, "top": 162, "width": 291, "height": 420 } },
+    { "componentKey": "closure__17-415__rollon-overcap__SLDT", "policy": "gpt-rhinestone", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "mirror-chrome finish with clear rhinestones", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415SlDot.png", "sourceBoundsPx": { "left": 128, "top": 163, "width": 293, "height": 420 } },
+    { "componentKey": "closure__17-415__rollon-overcap__BKDT", "policy": "gpt-rhinestone", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "glossy black dielectric finish with clear rhinestones", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415BlkDot.png", "sourceBoundsPx": { "left": 125, "top": 163, "width": 298, "height": 418 } },
+    { "componentKey": "closure__17-415__rollon-overcap__PKDT", "policy": "gpt-rhinestone", "physicalSubstrate": "molded phenolic plastic overcap", "coating": "soft matte-pink finish with clear rhinestones", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415PnkDot.png", "sourceBoundsPx": { "left": 128, "top": 164, "width": 294, "height": 419 } },
+    { "componentKey": "roller__17-415__PLASTIC", "policy": "deterministic-roller", "physicalSubstrate": "natural molded plastic housing and ball", "coating": "uncoated neutral translucent plastic", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/RollerBall17-415-Plastic.png", "sourceBoundsPx": { "left": 1, "top": 2, "width": 182, "height": 163 } },
+    { "componentKey": "roller__17-415__METAL", "policy": "deterministic-roller", "physicalSubstrate": "natural molded plastic housing with stainless-steel ball", "coating": "mirror chrome only on the roller ball", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/RollerBall17-415-Metal.png", "sourceBoundsPx": { "left": 1, "top": 15, "width": 182, "height": 150 } },
+    { "componentKey": "sprayer__17-415__GLD", "policy": "deterministic-mirror", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "thin champagne-gold mirror sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Gl.png", "sourceBoundsPx": { "left": 130, "top": 125, "width": 290, "height": 514 } },
+    { "componentKey": "sprayer__17-415__MSLV", "policy": "gpt-material", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "matte-silver sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415MattSl.png", "sourceBoundsPx": { "left": 126, "top": 125, "width": 296, "height": 517 } },
+    { "componentKey": "sprayer__17-415__BLK", "policy": "gpt-material", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "glossy black dielectric sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Blk.png", "sourceBoundsPx": { "left": 133, "top": 125, "width": 286, "height": 514 } },
+    { "componentKey": "sprayer__17-415__SSLV", "policy": "deterministic-mirror", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "thin mirror-chrome sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415ShnSl.png", "sourceBoundsPx": { "left": 125, "top": 125, "width": 297, "height": 514 } },
+    { "componentKey": "sprayer__17-415__RED", "policy": "gpt-material", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "high-gloss red dielectric sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Red.png", "sourceBoundsPx": { "left": 131, "top": 125, "width": 293, "height": 519 } },
+    { "componentKey": "sprayer__17-415__TUR", "policy": "gpt-material", "physicalSubstrate": "molded plastic fine-mist actuator with decorative sleeve", "coating": "high-gloss turquoise dielectric sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Tur.png", "sourceBoundsPx": { "left": 129, "top": 125, "width": 291, "height": 520 } },
+    { "componentKey": "pump__17-415__BLK", "policy": "gpt-material", "physicalSubstrate": "molded plastic lotion pump with decorative sleeve", "coating": "glossy black dielectric sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Blk.png", "sourceBoundsPx": { "left": 133, "top": 125, "width": 286, "height": 514 } },
+    { "componentKey": "pump__17-415__GLD", "policy": "deterministic-mirror", "physicalSubstrate": "molded plastic lotion pump with decorative sleeve", "coating": "thin champagne-gold mirror sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Gl.png", "sourceBoundsPx": { "left": 130, "top": 125, "width": 290, "height": 514 } },
+    { "componentKey": "pump__17-415__MSLV", "policy": "gpt-material", "physicalSubstrate": "molded plastic lotion pump with decorative sleeve", "coating": "matte-silver sleeve", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415MattSl.png", "sourceBoundsPx": { "left": 126, "top": 125, "width": 296, "height": 517 } },
+    { "componentKey": "overcap__17-415__SPRAY-TRNS", "policy": "gpt-translucent", "physicalSubstrate": "translucent molded plastic overcap; resin grade unverified", "coating": "uncoated translucent plastic", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png", "sourceBoundsPx": { "left": 11, "top": 11, "width": 221, "height": 265 } },
+    { "componentKey": "overcap__17-415__LOTION-TRNS", "policy": "gpt-translucent", "physicalSubstrate": "translucent molded plastic overcap; resin grade unverified", "coating": "uncoated translucent plastic", "referencePath": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png", "sourceBoundsPx": { "left": 11, "top": 11, "width": 221, "height": 267 } }
+  ]
+}

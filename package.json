@@ -89,8 +89,9 @@
     "paperdoll:render-cyl9-caps": "tsx scripts/paper-doll/render-cyl9-cap-family.ts",
     "paperdoll:component-candidate": "tsx scripts/paper-doll/build-component-candidate.ts",
     "paperdoll:calibrate-cyl9-authorities": "tsx scripts/paper-doll/calibrate-cyl9-component-authorities.ts",
+    "paperdoll:cyl9-batch": "tsx scripts/paper-doll/build-cyl9-component-batch.ts",
     "test:paperdoll:cyl9-caps": "tsx --test src/lib/paperDoll/cyl9CapFamily.test.ts scripts/paper-doll/render-cyl9-cap-family.test.ts",
-    "test:paperdoll:factory": "tsx --test supabase/functions/_shared/paperDollExactAlpha.node.test.ts src/lib/paperDoll/componentPlateContract.test.ts src/lib/paperDoll/componentPlateImage.node.test.ts src/lib/paperDoll/componentMaterialPrompt.test.ts src/lib/paperDoll/cyl9ComponentFactory.test.ts src/lib/paperDoll/releaseContract.test.ts scripts/paper-doll/build-component-candidate.test.ts scripts/paper-doll/calibrate-cyl9-component-authorities.test.ts",
+    "test:paperdoll:factory": "tsx --test supabase/functions/_shared/paperDollExactAlpha.node.test.ts src/lib/paperDoll/componentPlateContract.test.ts src/lib/paperDoll/componentPlateImage.node.test.ts src/lib/paperDoll/componentMaterialPrompt.test.ts src/lib/paperDoll/cyl9ComponentFactory.test.ts src/lib/paperDoll/releaseContract.test.ts src/lib/paperDoll/rhinestoneLayout.test.ts scripts/paper-doll/build-component-candidate.test.ts scripts/paper-doll/calibrate-cyl9-component-authorities.test.ts scripts/paper-doll/build-cyl9-component-batch.test.ts",
     "test:paperdoll": "tsx --test src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/closureMaterialPilot.test.ts"
   },
   "dependencies": {
