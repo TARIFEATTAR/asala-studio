@@ -18,6 +18,11 @@ const materialSchema = z.enum([
   "matte-copper",
   "glossy-white",
   "matte-pink",
+  "faux-leather-black",
+  "faux-leather-brown",
+  "faux-leather-light-brown",
+  "faux-leather-ivory",
+  "faux-leather-pink",
 ]);
 
 const variantSchema = z.object({
@@ -25,6 +30,7 @@ const variantSchema = z.object({
   sourceIdentity: z.string().min(1),
   graceSku: z.string().min(1),
   material: materialSchema,
+  trimMaterial: materialSchema.optional(),
   decoration: z.enum(["none", "crystal-v1"]),
   geometryFamilyId: z.string().min(1),
 });
@@ -34,6 +40,12 @@ const crystalSchema = z.object({
   angleDeg: z.number().min(-89).max(89),
   heightRatio: z.number().positive().lt(1),
   scaleRatio: z.number().positive().lt(0.1),
+});
+
+const trimBandSchema = z.object({
+  startHeightRatio: z.number().min(0).max(1),
+  endHeightRatio: z.number().min(0).max(1),
+  evidenceState: z.literal("source-derived-review-candidate"),
 });
 
 const surfaceProfileSchema = z.discriminatedUnion("kind", [
@@ -88,6 +100,7 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   }),
   profileNormalized: z.array(z.tuple([z.number().min(0).max(0.5), z.number().min(0).max(1)])).min(4),
   surfaceProfile: surfaceProfileSchema.default({ kind: "smooth" }),
+  trimBands: z.array(trimBandSchema).default([]),
   render: z.object({
     widthPx: z.literal(1400),
     heightPx: z.literal(2050),
@@ -141,6 +154,22 @@ const parametricOvercapFamilyRecipeSchema = z.object({
     && recipe.surfaceProfile.startHeightRatio + recipe.surfaceProfile.fadeRatio * 2 >= recipe.surfaceProfile.endHeightRatio
   ) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["surfaceProfile"], message: "Flute fade zones must fit between the declared start and end heights." });
+  }
+  const sortedTrimBands = [...recipe.trimBands].sort((left, right) => left.startHeightRatio - right.startHeightRatio);
+  for (const [index, band] of sortedTrimBands.entries()) {
+    if (band.startHeightRatio >= band.endHeightRatio) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["trimBands"], message: "Trim bands must have a positive height span." });
+    }
+    const previous = sortedTrimBands[index - 1];
+    if (previous && previous.endHeightRatio > band.startHeightRatio) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["trimBands"], message: "Trim bands must not overlap." });
+    }
+  }
+  if (recipe.trimBands.length === 0 && recipe.variants.some((variant) => variant.trimMaterial)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "A trim material requires declared trim bands." });
+  }
+  if (recipe.trimBands.length > 0 && recipe.variants.some((variant) => !variant.trimMaterial)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Every variant requires a trim material when trim bands are declared." });
   }
 });
 
