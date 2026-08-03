@@ -13,6 +13,7 @@ const standardCap15415RecipePath = "docs/paper-doll-rig/standard-cap-15-415-fami
 const shortCap18415RecipePath = "docs/paper-doll-rig/short-cap-18-415-family-recipe.json";
 const tallCap18415RecipePath = "docs/paper-doll-rig/tall-cap-18-415-family-recipe.json";
 const tallCap8425RecipePath = "docs/paper-doll-rig/tall-cap-8-425-family-recipe.json";
+const shortFlutedCap8425RecipePath = "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -187,4 +188,39 @@ test("8-425 tall-cap recipe preserves the verified 11 by 16 mm family", async ()
     ["SGLD", "CP8-425TallShnGl", "CMP-CAP-SGLD-8425-T"],
     ["SSLV", "CP8-425TallShnSl", "CMP-CAP-SSLV-8425-T"],
   ]);
+});
+
+test("8-425 short-cap recipe preserves the verified flange and source-derived recessed flutes", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(shortFlutedCap8425RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__8-425__short-fluted-cap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__8-425__b0a7b8c0cf");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 12,
+    outsideDiameterTolerance: 0.5,
+    height: 9,
+    heightTolerance: 0.1,
+    verified: true,
+  });
+  assert.deepEqual(recipe.surfaceProfile, {
+    kind: "recessed-vertical-flutes",
+    fluteCount: 32,
+    fluteDepthRatio: 0.018,
+    startHeightRatio: 0.12,
+    endHeightRatio: 0.91,
+    fadeRatio: 0.035,
+    phaseDeg: 0,
+    evidenceState: "source-derived-review-candidate",
+  });
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku]), [
+    ["BLK", "8-425CpShortBlack", "CMP-CAP-BLK-8-425"],
+    ["WHT", "8-425CpShortWhite", "CMP-CAP-WHT-8-425"],
+  ]);
+});
+
+test("parametric contract rejects a fluted surface whose fade zones overlap", async () => {
+  const raw = JSON.parse(await readFile(shortFlutedCap8425RecipePath, "utf8"));
+  raw.surfaceProfile.startHeightRatio = 0.4;
+  raw.surfaceProfile.endHeightRatio = 0.5;
+  raw.surfaceProfile.fadeRatio = 0.06;
+  assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /fade zones must fit/i);
 });

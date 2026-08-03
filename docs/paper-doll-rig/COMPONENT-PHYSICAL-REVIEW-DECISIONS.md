@@ -27,9 +27,11 @@ Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__dropp
 
 ## 8-425 short caps
 
-The black and white short-cap sources visibly contain vertical knurling and a lower flange. They must not be rendered with the smooth overcap profile. The next candidate requires a measured fluted-wall and flange-capable parametric profile; no geometry authority is claimed from the source sheet.
+The black and white short-cap sources visibly contain vertical knurling and a lower flange. They must not be rendered with the smooth overcap profile. A dedicated 12 × 9 mm fluted/flanged local candidate now exists with exact shared alpha for both appearances. Its 32-flute parameter is explicitly source-derived review evidence, not verified tooling truth; no geometry authority is claimed until named profile review.
 
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__cap__8-425__b0a7b8c0cf/contact-sheet.png`.
+
+Candidate review: `outputs/paper-doll-parametric-overcaps/8-425-short-fluted-cap/candidate-v1/review-contact-sheet.png`.
 
 ## Policy
 

@@ -36,6 +36,12 @@
       "localCandidateManifestPath": "outputs/paper-doll-parametric-overcaps/8-425-tall-cap/candidate-v1/candidate-manifest.json",
       "reviewContactSheetPath": "outputs/paper-doll-parametric-overcaps/8-425-tall-cap/candidate-v1/review-contact-sheet.png",
       "state": "dimension-calibrated-profile-review-candidate"
+    },
+    {
+      "recipePath": "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json",
+      "localCandidateManifestPath": "outputs/paper-doll-parametric-overcaps/8-425-short-fluted-cap/candidate-v1/candidate-manifest.json",
+      "reviewContactSheetPath": "outputs/paper-doll-parametric-overcaps/8-425-short-fluted-cap/candidate-v1/review-contact-sheet.png",
+      "state": "dimension-calibrated-profile-review-candidate"
     }
   ],
   "mutationPolicy": {
