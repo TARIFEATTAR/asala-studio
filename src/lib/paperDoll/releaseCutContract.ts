@@ -68,11 +68,11 @@ export function deriveAssemblyReadiness(
   return { status: missingReasons.length === 0 ? "ready" : "incomplete", missingReasons };
 }
 
-export function stableSanityDocumentIds(familyKey: string): { draftId: string; publicId: string } {
-  const clean = familyKey.trim();
-  if (!/^[A-Z0-9-]+$/.test(clean)) throw new Error("familyKey is not safe for a stable Sanity document ID.");
+export function sanityDocumentIds(publicDocumentId: string): { draftId: string; publicId: string } {
+  const clean = publicDocumentId.trim();
+  if (!/^(?!drafts\.)[A-Za-z0-9._-]+$/.test(clean)) throw new Error("publicDocumentId is not a safe canonical Sanity document ID.");
   return {
-    draftId: `drafts.paperDollFamily.${clean}`,
-    publicId: `paperDollFamily.${clean}`,
+    draftId: `drafts.${clean}`,
+    publicId: clean,
   };
 }

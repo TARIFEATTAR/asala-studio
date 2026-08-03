@@ -37,7 +37,7 @@ test("cutPaperDollRelease invokes the service boundary and parses the immutable 
       publishRunId: "88888888-8888-4888-8888-888888888888",
       manifestSha256: "a".repeat(64), releaseStatus: "blocked",
       readiness: { ready: 0, incomplete: 100 },
-      draftDocumentId: "drafts.paperDollFamily.CYL-9ML", publicDocumentId: "paperDollFamily.CYL-9ML",
+      draftDocumentId: "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d", publicDocumentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
       sanityPublished: false,
     }, error: null };
   } } }, request);
@@ -63,7 +63,7 @@ test("public publication is two explicit calls bound to the exact dry-run SHA", 
     }, error: null };
     return { data: {
       publishRunId: "99999999-9999-4999-8999-999999999999",
-      documentId: "paperDollFamily.CYL-9ML", status: "published",
+      documentId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d", status: "published",
       draftSha256: "b".repeat(64), publicPublished: true,
     }, error: null };
   } } };

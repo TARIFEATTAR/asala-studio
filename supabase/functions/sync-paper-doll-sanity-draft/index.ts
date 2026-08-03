@@ -33,8 +33,10 @@ Deno.serve(async (request) => {
   const sanityProjectId = Deno.env.get("SANITY_PROJECT_ID") ?? "";
   const sanityDataset = Deno.env.get("SANITY_DATASET") ?? "";
   const sanityToken = Deno.env.get("SANITY_API_TOKEN") ?? Deno.env.get("SANITY_WRITE_TOKEN") ?? "";
+  const sanityPublicDocumentId = Deno.env.get("SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID") ?? "";
+  const sanityDraftDocumentId = `drafts.${sanityPublicDocumentId}`;
   if (!supabaseUrl || !anonKey || !serviceRoleKey) return json({ error: "Draft sync service is not configured" }, 503);
-  if (!sanityProjectId || !sanityDataset || !sanityToken) return json({ error: "Sanity draft credentials are not configured" }, 503);
+  if (!sanityProjectId || !sanityDataset || !sanityToken || !/^(?!drafts\.)[A-Za-z0-9._-]+$/.test(sanityPublicDocumentId)) return json({ error: "Sanity draft credentials or canonical document are not configured" }, 503);
 
   const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } }, auth: { persistSession: false } });
   const { data: { user }, error: userError } = await userClient.auth.getUser(authorization.replace(/^Bearer\s+/i, ""));
@@ -43,7 +45,7 @@ Deno.serve(async (request) => {
     .select("id, organization_id, release_id, release_cut_id, publish_status, sanity_document_id")
     .eq("id", input.publishRunId).eq("organization_id", input.organizationId).maybeSingle();
   if (!visibleRun) return json({ error: "Organization draft-sync access denied" }, 403);
-  if (!visibleRun.release_cut_id || visibleRun.sanity_document_id !== "drafts.paperDollFamily.CYL-9ML") {
+  if (!visibleRun.release_cut_id || visibleRun.sanity_document_id !== sanityDraftDocumentId) {
     return json({ error: "Publish run is not a CYL-9ML draft attempt" }, 409);
   }
 
@@ -96,7 +98,7 @@ Deno.serve(async (request) => {
     }
 
     const document = buildPaperDollSanityDraftDocument({
-      familyKey: "CYL-9ML", releaseId: release.id, releaseCutId: cut.id,
+      familyKey: "CYL-9ML", publicDocumentId: sanityPublicDocumentId, releaseId: release.id, releaseCutId: cut.id,
       releaseVersion: release.release_version, manifestSha256: release.manifest_sha256,
       rendererVersion: release.renderer_version, syncedAt: new Date().toISOString(),
       placement: placement ? {

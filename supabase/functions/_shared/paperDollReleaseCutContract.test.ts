@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { parseReleaseCutRequest } from "./paperDollReleaseCutContract.ts";
@@ -29,4 +30,16 @@ test("Edge release-cut parser rejects duplicate membership", () => {
     compatibleBodyComponentVersionIds: [body, body, uuid("7"), uuid("8"), uuid("9")],
     approverDisplayName: "Jordan", approvalNote: "Approved", sourceGitCommit: "e63eeaf", rendererVersion: "v1",
   }), /slot and variant/i);
+});
+
+test("release cut binds the queued draft to the configured canonical Sanity document atomically", async () => {
+  const [migration, edge] = await Promise.all([
+    readFile(new URL("../../migrations/20260803011000_bind_paper_doll_cut_to_canonical_sanity_document.sql", import.meta.url), "utf8"),
+    readFile(new URL("../cut-paper-doll-release/index.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(migration, /canonical_draft_id := 'drafts\.' \|\| canonical_public_id/);
+  assert.match(migration, /UPDATE public\.paper_doll_publish_runs/);
+  assert.match(migration, /RETURN cut_result \|\| jsonb_build_object/);
+  assert.match(edge, /SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID/);
+  assert.match(edge, /p_sanity_public_document_id: sanityPublicDocumentId/);
 });

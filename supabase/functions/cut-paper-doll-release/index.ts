@@ -63,7 +63,10 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  if (!supabaseUrl || !anonKey || !serviceRoleKey) return json({ error: "Release service is not configured" }, 503);
+  const sanityPublicDocumentId = Deno.env.get("SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID") ?? "";
+  if (!supabaseUrl || !anonKey || !serviceRoleKey || !/^(?!drafts\.)[A-Za-z0-9._-]+$/.test(sanityPublicDocumentId)) {
+    return json({ error: "Release service or canonical Sanity document is not configured" }, 503);
+  }
 
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authorization } }, auth: { persistSession: false },
@@ -146,6 +149,7 @@ Deno.serve(async (request) => {
       p_approval_note: cut.approvalNote,
       p_source_git_commit: cut.sourceGitCommit,
       p_renderer_version: cut.rendererVersion,
+      p_sanity_public_document_id: sanityPublicDocumentId,
     });
     if (error || !data) {
       console.error("[paper-doll release cut]", error?.message);

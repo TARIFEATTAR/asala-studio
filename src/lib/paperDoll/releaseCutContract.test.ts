@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   deriveAssemblyReadiness,
   parseReleaseCutRequest,
-  stableSanityDocumentIds,
+  sanityDocumentIds,
 } from "./releaseCutContract";
 
 const UUIDS = {
@@ -77,9 +77,10 @@ test("readiness is per SKU: approved bodies and rollers remain incomplete until 
   assert.deepEqual(withCap, { status: "ready", missingReasons: [] });
 });
 
-test("Sanity draft and public IDs are stable and deliberately separate", () => {
-  assert.deepEqual(stableSanityDocumentIds("CYL-9ML"), {
-    draftId: "drafts.paperDollFamily.CYL-9ML",
-    publicId: "paperDollFamily.CYL-9ML",
+test("Sanity draft reuses the canonical editorial document identity", () => {
+  assert.deepEqual(sanityDocumentIds("d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"), {
+    draftId: "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    publicId: "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
   });
+  assert.throws(() => sanityDocumentIds("drafts.already-a-draft"), /canonical Sanity document ID/);
 });

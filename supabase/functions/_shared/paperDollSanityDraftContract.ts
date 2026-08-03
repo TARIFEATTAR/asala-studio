@@ -10,6 +10,7 @@ export type SanityLayerInput = {
 
 export function buildPaperDollSanityDraftDocument(input: {
   familyKey: "CYL-9ML";
+  publicDocumentId: string;
   releaseId: string;
   releaseCutId: string;
   releaseVersion: string;
@@ -23,7 +24,7 @@ export function buildPaperDollSanityDraftDocument(input: {
   const complete = input.readiness.filter((row) => row.status === "ready").length;
   const incomplete = input.readiness.length - complete;
   return {
-    _id: `drafts.paperDollFamily.${input.familyKey}`,
+    _id: `drafts.${input.publicDocumentId}`,
     _type: "paperDollFamily",
     familyKey: input.familyKey,
     displayName: "Cylinder · 9 mL · 17-415",

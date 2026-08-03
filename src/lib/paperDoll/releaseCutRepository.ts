@@ -18,8 +18,8 @@ const ReleaseCutResultSchema = z.object({
   manifestSha256: z.string().regex(/^[a-f0-9]{64}$/),
   releaseStatus: z.enum(["blocked", "ready"]),
   readiness: z.object({ ready: z.coerce.number().int().nonnegative(), incomplete: z.coerce.number().int().nonnegative() }),
-  draftDocumentId: z.literal("drafts.paperDollFamily.CYL-9ML"),
-  publicDocumentId: z.literal("paperDollFamily.CYL-9ML"),
+  draftDocumentId: z.string().regex(/^drafts\.[A-Za-z0-9._-]+$/),
+  publicDocumentId: z.string().regex(/^(?!drafts\.)[A-Za-z0-9._-]+$/),
   sanityPublished: z.literal(false),
 });
 
@@ -27,7 +27,7 @@ export type ReleaseCutResult = z.infer<typeof ReleaseCutResultSchema>;
 
 const SanityDraftSyncResultSchema = z.object({
   publishRunId: z.string().uuid(),
-  documentId: z.literal("drafts.paperDollFamily.CYL-9ML"),
+  documentId: z.string().regex(/^drafts\.[A-Za-z0-9._-]+$/),
   status: z.literal("draft_synced"),
   storefrontReady: z.boolean(),
   readiness: z.object({ ready: z.coerce.number().int().nonnegative(), incomplete: z.coerce.number().int().nonnegative(), total: z.coerce.number().int().nonnegative() }),
@@ -51,7 +51,7 @@ const SanityPublicDryRunResultSchema = z.object({
 
 const SanityPublicPublishResultSchema = z.object({
   publishRunId: z.string().uuid(),
-  documentId: z.literal("paperDollFamily.CYL-9ML"),
+  documentId: z.string().regex(/^(?!drafts\.)[A-Za-z0-9._-]+$/),
   status: z.literal("published"),
   draftSha256: z.string().regex(/^[a-f0-9]{64}$/),
   publicPublished: z.literal(true),

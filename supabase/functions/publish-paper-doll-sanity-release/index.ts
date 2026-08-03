@@ -35,7 +35,9 @@ Deno.serve(async (request) => {
   const projectId = Deno.env.get("SANITY_PROJECT_ID") ?? "";
   const dataset = Deno.env.get("SANITY_DATASET") ?? "";
   const token = Deno.env.get("SANITY_API_TOKEN") ?? Deno.env.get("SANITY_WRITE_TOKEN") ?? "";
-  if (!supabaseUrl || !anonKey || !serviceRoleKey || !projectId || !dataset || !token) return json({ error: "Publication service is not configured" }, 503);
+  const publicDocumentId = Deno.env.get("SANITY_CYL9_PAPER_DOLL_DOCUMENT_ID") ?? "";
+  const draftDocumentId = `drafts.${publicDocumentId}`;
+  if (!supabaseUrl || !anonKey || !serviceRoleKey || !projectId || !dataset || !token || !/^(?!drafts\.)[A-Za-z0-9._-]+$/.test(publicDocumentId)) return json({ error: "Publication service or canonical document is not configured" }, 503);
   const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } }, auth: { persistSession: false } });
   const { data: { user }, error: userError } = await userClient.auth.getUser(authorization.replace(/^Bearer\s+/i, ""));
   if (userError || !user) return json({ error: "Not signed in" }, 401);
@@ -43,11 +45,11 @@ Deno.serve(async (request) => {
   if (!visibleCut) return json({ error: "Organization release-cut access denied" }, 403);
 
   const query = encodeURIComponent(`*[_id in [$draftId,$publicId]]`);
-  const queryResponse = await fetch(`https://${projectId}.api.sanity.io/v2025-02-19/data/query/${encodeURIComponent(dataset)}?query=${query}&$draftId=${encodeURIComponent(JSON.stringify("drafts.paperDollFamily.CYL-9ML"))}&$publicId=${encodeURIComponent(JSON.stringify("paperDollFamily.CYL-9ML"))}`, { headers: { Authorization: `Bearer ${token}` } });
+  const queryResponse = await fetch(`https://${projectId}.api.sanity.io/v2025-02-19/data/query/${encodeURIComponent(dataset)}?query=${query}&$draftId=${encodeURIComponent(JSON.stringify(draftDocumentId))}&$publicId=${encodeURIComponent(JSON.stringify(publicDocumentId))}`, { headers: { Authorization: `Bearer ${token}` } });
   if (!queryResponse.ok) return json({ error: "Unable to read the Sanity draft" }, 502);
   const documents = (await queryResponse.json()).result as Array<Record<string, unknown>>;
-  const draftRaw = documents.find((document) => document._id === "drafts.paperDollFamily.CYL-9ML");
-  const publicRaw = documents.find((document) => document._id === "paperDollFamily.CYL-9ML");
+  const draftRaw = documents.find((document) => document._id === draftDocumentId);
+  const publicRaw = documents.find((document) => document._id === publicDocumentId);
   if (!draftRaw || draftRaw.releaseCutId !== input.releaseCutId) return json({ error: "Stable Sanity draft is missing or belongs to another cut" }, 409);
   const draft = cleanSanityDocument(draftRaw);
   const draftSha = await sha256(draft);
@@ -82,7 +84,7 @@ Deno.serve(async (request) => {
     if (attemptError) return json({ error: "Unable to allocate the public dry-run sequence" }, 500);
     const { data: run, error } = await service.from("paper_doll_publish_runs").insert({
       organization_id: input.organizationId, release_id: visibleCut.resulting_release_id,
-      release_cut_id: visibleCut.id, destination: "sanity:public", sanity_document_id: "paperDollFamily.CYL-9ML",
+      release_cut_id: visibleCut.id, destination: "sanity:public", sanity_document_id: publicDocumentId,
       publish_status: "public_dry_run", request_sha256: draftSha, attempt_sequence: Number(latestAttempt?.attempt_sequence ?? 0) + 1,
       result: { draftSha256: draftSha, currentPublicSha256: publicSha, changed: publicSha !== draftSha, readiness: draft.readinessSummary ?? null },
       completed_at: new Date().toISOString(),
@@ -122,7 +124,7 @@ Deno.serve(async (request) => {
     if (approvalError) return json({ error: "Unable to record the named publication approval" }, 409);
   }
 
-  const publicDocument = { ...draft, _id: "paperDollFamily.CYL-9ML" };
+  const publicDocument = { ...draft, _id: publicDocumentId };
   const mutation = await fetch(`https://${projectId}.api.sanity.io/v2025-02-19/data/mutate/${encodeURIComponent(dataset)}?returnIds=true&visibility=async`, {
     method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ mutations: [{ createOrReplace: publicDocument }] }),
@@ -132,6 +134,6 @@ Deno.serve(async (request) => {
     return json({ error: "Sanity public mutation was rejected; the named approval receipt is retained for an exact retry" }, 502);
   }
   const mutationResult = await mutation.json();
-  await service.from("paper_doll_publish_runs").update({ publish_status: "published", result: { ...dryRun.result, transactionId: mutationResult.transactionId ?? null, publishedDocumentId: "paperDollFamily.CYL-9ML" }, completed_at: new Date().toISOString() }).eq("id", dryRun.id);
-  return json({ publishRunId: dryRun.id, documentId: "paperDollFamily.CYL-9ML", status: "published", draftSha256: draftSha, publicPublished: true });
+  await service.from("paper_doll_publish_runs").update({ publish_status: "published", result: { ...dryRun.result, transactionId: mutationResult.transactionId ?? null, publishedDocumentId: publicDocumentId }, completed_at: new Date().toISOString() }).eq("id", dryRun.id);
+  return json({ publishRunId: dryRun.id, documentId: publicDocumentId, status: "published", draftSha256: draftSha, publicPublished: true });
 });
