@@ -1,0 +1,4 @@
+interface:
+  display_name: "Best Bottles Paper-Doll Production"
+  short_description: "Produce geometry-locked packaging families"
+  default_prompt: "Use $best-bottles-paper-doll-production to run the full paper-doll lifecycle for this Best Bottles family."
