@@ -73,6 +73,23 @@
       "observation": "The source sheet reuses identical imagery across 1 oz and 2 oz identities. Reused photography does not prove one physical pipette length, and the inserted tube length depends on bottle height and shoulder geometry.",
       "geometryClaim": "none",
       "nextGate": "Treat the bulb/collar exterior and the inserted pipette as separate responsibilities. Obtain dimensions by target bottle cohort before producing body-contextual pipette or integration pixels."
+    },
+    {
+      "decisionId": "review-decision__8-425-short-cap__fluted-profile-required",
+      "sourceReviewGroupKey": "geometry-review__cap__8-425__b0a7b8c0cf",
+      "status": "requires-dedicated-parametric-surface-profile",
+      "evidenceType": "reviewed-source-contact-sheet",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__cap__8-425__b0a7b8c0cf/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__cap__8-425__b0a7b8c0cf/silhouette-analysis-contact-sheet.png"
+      ],
+      "affectedSourceIdentities": [
+        "8-425CpShortBlack",
+        "8-425CpShortWhite"
+      ],
+      "observation": "Both sources show a knurled cylindrical wall and a distinct lower flange. The smooth overcap renderer would erase real molded geometry and must not be used for these two appearances.",
+      "geometryClaim": "none",
+      "nextGate": "Add a measured fluted-wall and lower-flange profile to the parametric renderer, then create one exact-alpha review family for black and white."
     }
   ],
   "claimPolicy": {

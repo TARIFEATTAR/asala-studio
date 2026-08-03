@@ -25,6 +25,12 @@ The catalog sources reuse identical photography across nominal 1 oz and 2 oz ide
 
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/contact-sheet.png`.
 
+## 8-425 short caps
+
+The black and white short-cap sources visibly contain vertical knurling and a lower flange. They must not be rendered with the smooth overcap profile. The next candidate requires a measured fluted-wall and flange-capable parametric profile; no geometry authority is claimed from the source sheet.
+
+Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__cap__8-425__b0a7b8c0cf/contact-sheet.png`.
+
 ## Policy
 
 - No decision above earns geometry lock.
