@@ -38,6 +38,8 @@ The exact Photoshop archive contains all five named sprayer-head sources. Four h
 
 Contract: `docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json`.
 
+SHA-verified extraction review: `docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md`.
+
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png`.
 
 ## 8-425 short caps
