@@ -60,6 +60,13 @@ function manifestFixture(): PaperDollFamilyProductionManifest {
         componentKey: "closure__17-415__rollon-overcap",
         slot: "cap",
         geometryFamilyId: "closure__17-415__rollon-overcap-v1",
+        source: {
+          originalFilename: "CpRoll17-415ShnSl.png",
+          path: "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnSl.png",
+          sha256: sha("9"),
+          widthPx: 552,
+          heightPx: 736,
+        },
         authorityStatus: "approved",
         authority: {
           authorityId: "authority-cap-v1",
@@ -166,4 +173,3 @@ test("family production manifests reject duplicate variants and placement IDs", 
     /duplicate placement/i,
   );
 });
-

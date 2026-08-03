@@ -129,6 +129,7 @@ export const FamilyComponentDefinitionSchema = z.object({
   componentKey: z.string().min(1),
   slot: PaperDollSlotSchema,
   geometryFamilyId: z.string().min(1),
+  source: ComponentSourceSchema,
   authorityStatus: z.enum(["missing", "calibrating", "approved", "revoked"]),
   authority: ComponentAuthoritySchema.nullable(),
   variants: z.array(ComponentVariantSchema).min(1),

@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "bodyPlates": [
+    {
+      "bodyVariantKey": "AMB",
+      "componentVersionId": "body__cylinder__9ml__amber__70.0x20.0mm@c84db213449d",
+      "imagePath": "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png",
+      "imageSha256": "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3"
+    },
+    {
+      "bodyVariantKey": "BLU",
+      "componentVersionId": "body__cylinder__9ml__cobalt__70.0x20.0mm@87804d45a242",
+      "imagePath": "assets/paper-doll/body-plates/body__cylinder__9ml__cobalt__70.0x20.0mm.png",
+      "imageSha256": "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c"
+    },
+    {
+      "bodyVariantKey": "CLR",
+      "componentVersionId": "body__cylinder__9ml__clear__70.0x20.0mm@97cfe967a4ab",
+      "imagePath": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+      "imageSha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f"
+    },
+    {
+      "bodyVariantKey": "FRS",
+      "componentVersionId": "body__cylinder__9ml__frosted__70.0x20.0mm@c844fb9f3a6f",
+      "imagePath": "assets/paper-doll/body-plates/body__cylinder__9ml__frosted__70.0x20.0mm.png",
+      "imageSha256": "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956"
+    },
+    {
+      "bodyVariantKey": "SWL",
+      "componentVersionId": "body__cylinder__9ml__swirl__70.0x20.0mm@c2b67ee9151d",
+      "imagePath": "assets/paper-doll/body-plates/body__cylinder__9ml__swirl__70.0x20.0mm.png",
+      "imageSha256": "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68"
+    }
+  ],
+  "components": [
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SSLV",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415ShnSl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnSl.png", "sha256": "023227623dacac68bc3cf8951ba5834af03d6a3539a39486d7d83fd3845a9220", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "SSLV", "materialVariant": "shiny-silver", "materialClass": "mirror" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MSLV",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415MattSl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415MattSl.png", "sha256": "5de4add9da33fcd4ab11352bbebdd0dfa7011aec76c1b7f5806f264420245592", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "MSLV", "materialVariant": "matte-silver", "materialClass": "matte" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SGLD",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415ShnGl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnGl.png", "sha256": "0105445b1a6e978a8cfcdb6de66e7eca2c90ae1f4e5677a463f0fc8a045c7992", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "SGLD", "materialVariant": "shiny-gold", "materialClass": "mirror" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MGLD",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415MattGl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415MattGl.png", "sha256": "c923d7433aa3db4fa12ddde24a14e87133dc5f76c7b48c4a7d8911dcb0cf1d41", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "MGLD", "materialVariant": "matte-gold", "materialClass": "matte" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SBLK",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415ShnBlk.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415ShnBlk.png", "sha256": "371e59fa7400223900a82121dd2508176bf20e34e699bc44cf2e280e51a82e43", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "SBLK", "materialVariant": "shiny-black", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__MCPR",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415Cu.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415Cu.png", "sha256": "da3f178ef7f864030b3377e342c24078c0db185c1312b493df2b7b658aabddeb", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "MCPR", "materialVariant": "matte-copper", "materialClass": "matte" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__WHT",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415White.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415White.png", "sha256": "47f7377150209b401e013ad640610feaeb529ac13054deee388420eeeb8ebd6d", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "WHT", "materialVariant": "glossy-white", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__SLDT",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415SlDot.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415SlDot.png", "sha256": "1ecde0caa9f33792b010d6ba876c1b98e59cd821a65d2263a24008d5fef458e2", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "SLDT", "materialVariant": "silver-rhinestone", "materialClass": "rhinestone" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__BKDT",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415BlkDot.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415BlkDot.png", "sha256": "f71cc4fb0ac78883574949fd8d932b7c5ec7fcf4417a7821e41378a8aff6ae0a", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "BKDT", "materialVariant": "black-rhinestone", "materialClass": "rhinestone" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "closure__17-415__rollon-overcap__PKDT",
+      "slot": "cap",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "source": { "originalFilename": "CpRoll17-415PnkDot.png", "path": "outputs/paper-doll-plates/cap-regen-sources/CpRoll17-415PnkDot.png", "sha256": "88e8a8d47953d36a562ce8ab91feac38e261f7ef4c57f29ff0119fa66619d33c", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "PKDT", "materialVariant": "pink-rhinestone", "materialClass": "rhinestone" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "roller__17-415__PLASTIC",
+      "slot": "roller",
+      "geometryFamilyId": "roller__17-415__plastic__provisional",
+      "source": { "originalFilename": "RollerBall17-415-Plastic.png", "path": "outputs/paper-doll-plates/cap-regen-sources/RollerBall17-415-Plastic.png", "sha256": "8930a975f0013ecf539e282926d57e79222c3e698906c975e092a847b92855a9", "widthPx": 184, "heightPx": 165 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "PLASTIC", "materialVariant": "natural-plastic", "materialClass": "roller-plastic" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "roller__17-415__METAL",
+      "slot": "roller",
+      "geometryFamilyId": "roller__17-415__metal__provisional",
+      "source": { "originalFilename": "RollerBall17-415-Metal.png", "path": "outputs/paper-doll-plates/cap-regen-sources/RollerBall17-415-Metal.png", "sha256": "d81c15b7658d3e410994123b709f63f99e0fc3339a9ded1c8e11cb118f400034", "widthPx": 184, "heightPx": 165 },
+      "authorityStatus": "missing",
+      "authority": null,
+      "variants": [{ "variantKey": "METAL", "materialVariant": "mirror-chrome-ball", "materialClass": "roller-steel-ball" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__GLD",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__GLD__provisional",
+      "source": { "originalFilename": "Spry17-415Gl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Gl.png", "sha256": "6a38f9a617fb299e031ee50ba5fbc4352c5f8bfa338d276396f1ad86b6df2574", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "GLD", "materialVariant": "shiny-gold", "materialClass": "mirror" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__MSLV",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__MSLV__provisional",
+      "source": { "originalFilename": "Spry17-415MattSl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415MattSl.png", "sha256": "a1d4328aea3d3f5aa75e6008b652e8c1e4c38c3e43492b7d3f9e00b7b604d8bb", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "MSLV", "materialVariant": "matte-silver", "materialClass": "matte" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__BLK",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__BLK__provisional",
+      "source": { "originalFilename": "Spry17-415Blk.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Blk.png", "sha256": "cb5f3b0859321744fc8d4ac36e98f7b93b978ef1562f3e466bb7b754df5c3e21", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "BLK", "materialVariant": "shiny-black", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__SSLV",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__SSLV__provisional",
+      "source": { "originalFilename": "Spry17-415ShnSl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415ShnSl.png", "sha256": "3349fdc0b740905fcb6193499d92eff913479116faf5b981a64d03fb5f1df042", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "SSLV", "materialVariant": "shiny-silver", "materialClass": "mirror" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__RED",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__RED__provisional",
+      "source": { "originalFilename": "Spry17-415Red.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Red.png", "sha256": "2d49558a6719439312542fa7093987c28c348a544db9a6650a8fe7d14bc84da9", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "RED", "materialVariant": "shiny-red", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "sprayer__17-415__TUR",
+      "slot": "sprayer",
+      "geometryFamilyId": "sprayer__17-415__TUR__provisional",
+      "source": { "originalFilename": "Spry17-415Tur.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Spry17-415Tur.png", "sha256": "2dfbb5b81ff3d32f57fa3989909b5a334597723eba16da79e1d4f9d6d0d07160", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "TUR", "materialVariant": "shiny-turquoise", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "pump__17-415__BLK",
+      "slot": "pump",
+      "geometryFamilyId": "pump__17-415__BLK__provisional",
+      "source": { "originalFilename": "Ltn17-415Blk.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Blk.png", "sha256": "c543dce2d771a63605b9c64a502e07bdb7a0360fea72894dc8f52bf6ee8f2a10", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "BLK", "materialVariant": "shiny-black", "materialClass": "glossy-dielectric" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "pump__17-415__GLD",
+      "slot": "pump",
+      "geometryFamilyId": "pump__17-415__GLD__provisional",
+      "source": { "originalFilename": "Ltn17-415Gl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415Gl.png", "sha256": "96b91ce40b5baac460fd9aa6a331bb418f012c41055e6311b068acceaa17db0a", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "GLD", "materialVariant": "shiny-gold", "materialClass": "mirror" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "pump__17-415__MSLV",
+      "slot": "pump",
+      "geometryFamilyId": "pump__17-415__MSLV__provisional",
+      "source": { "originalFilename": "Ltn17-415MattSl.png", "path": "outputs/paper-doll-plates/cap-regen-sources/Ltn17-415MattSl.png", "sha256": "a93d64fa7aabec45b17dc27a0d4a86988fef29e12bd028c2ca8a88f725082ca0", "widthPx": 552, "heightPx": 736 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "MSLV", "materialVariant": "matte-silver", "materialClass": "matte" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "overcap__17-415__SPRAY-TRNS",
+      "slot": "overcap",
+      "geometryFamilyId": "overcap__17-415__spray-translucent__provisional",
+      "source": { "originalFilename": "OverCap17-415-Spray-Translucent.png", "path": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Spray-Translucent.png", "sha256": "4aeb97ec447c8db30721da98ff6058f3ac1268303d1d864f8d1519fa926a85ba", "widthPx": 243, "heightPx": 276 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "SPRAY-TRNS", "materialVariant": "spray-translucent", "materialClass": "translucent" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    },
+    {
+      "componentKey": "overcap__17-415__LOTION-TRNS",
+      "slot": "overcap",
+      "geometryFamilyId": "overcap__17-415__lotion-translucent__provisional",
+      "source": { "originalFilename": "OverCap17-415-Lotion-Translucent.png", "path": "outputs/paper-doll-plates/cap-regen-sources/OverCap17-415-Lotion-Translucent.png", "sha256": "1b5980d6e673e9defe20c16721c694dc5c3ee99614dcf128d0c11f83a5ed05ce", "widthPx": 243, "heightPx": 278 },
+      "authorityStatus": "missing", "authority": null,
+      "variants": [{ "variantKey": "LOTION-TRNS", "materialVariant": "lotion-translucent", "materialClass": "translucent" }],
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"]
+    }
+  ],
+  "placements": [
+    {
+      "placementVersionId": "placement-calibration__closure__17-415__rollon-overcap__344x502__v1",
+      "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+      "widthPx": 344,
+      "centerXPx": 1041,
+      "seatYPx": 1002,
+      "placementBoundsPx": { "left": 869, "top": 500, "width": 344, "height": 502 },
+      "compatibleBodyVariantKeys": ["AMB", "BLU", "CLR", "FRS", "SWL"],
+      "locked": false
+    }
+  ],
+  "catalogMappings": [],
+  "releaseTarget": {
+    "sanityDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  }
+}
