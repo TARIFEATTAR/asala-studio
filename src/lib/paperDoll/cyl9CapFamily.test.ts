@@ -34,6 +34,14 @@ test("silver calibration is one uniform pixel narrower with the seat unchanged",
   assert.equal(placed.bottomExclusive, 1002);
 });
 
+test("profile height calibration is versioned without changing nominal dimensions", async () => {
+  const recipe = await loadRecipe();
+
+  assert.equal(recipe.nominalDimensionsMm.height, 28.5);
+  assert.equal(recipe.geometryCalibration.heightScale, 0.98825);
+  assert.equal(recipe.geometryCalibration.derivedFrom, "photographic-authority-alpha-v1");
+});
+
 test("recipe rejects duplicate or missing catalog variants", async () => {
   const recipe = await loadRecipe();
   const invalid = {

@@ -46,7 +46,9 @@ if any(key != "SSLV" for key in REQUESTED_VARIANTS):
     raise ValueError("The calibrated-master milestone currently renders SSLV only.")
 
 DIAMETER = float(RECIPE["nominalDimensionsMm"]["outsideDiameter"])
-HEIGHT = float(RECIPE["nominalDimensionsMm"]["height"])
+NOMINAL_HEIGHT = float(RECIPE["nominalDimensionsMm"]["height"])
+HEIGHT_SCALE = float(RECIPE["geometryCalibration"]["heightScale"])
+HEIGHT = NOMINAL_HEIGHT * HEIGHT_SCALE
 RADIUS = DIAMETER / 2.0
 RENDER = RECIPE["render"]
 
@@ -68,6 +70,7 @@ CAMERA_RECIPE = {
     "type": "orthographic",
     "topArcRatio": float(RENDER["topArcRatio"]),
     "frameHeightMultiplier": 1.22,
+    "framingHeightMm": NOMINAL_HEIGHT,
     "targetZRatio": 0.5,
 }
 
@@ -137,7 +140,7 @@ def build_cap_mesh(recipe: dict) -> bpy.types.Object:
 def build_camera(recipe: dict) -> bpy.types.Object:
     camera_data = bpy.data.cameras.new("cyl9_cap_camera")
     camera_data.type = "ORTHO"
-    camera_data.ortho_scale = HEIGHT * CAMERA_RECIPE["frameHeightMultiplier"]
+    camera_data.ortho_scale = NOMINAL_HEIGHT * CAMERA_RECIPE["frameHeightMultiplier"]
     camera = bpy.data.objects.new("cyl9_cap_camera", camera_data)
     bpy.context.collection.objects.link(camera)
 
@@ -240,7 +243,13 @@ cap.data.materials.append(mirror_silver)
 isolated_dir = OUT_DIR / "isolated"
 render_records = []
 provenance = {
-    "meshRecipeHash": canonical_hash({"profile": PROFILE_NORMALIZED, "diameter": DIAMETER, "height": HEIGHT}),
+    "meshRecipeHash": canonical_hash({
+        "profile": PROFILE_NORMALIZED,
+        "diameter": DIAMETER,
+        "nominalHeight": NOMINAL_HEIGHT,
+        "heightScale": HEIGHT_SCALE,
+        "calibratedHeight": HEIGHT,
+    }),
     "cameraRecipeHash": canonical_hash(CAMERA_RECIPE),
     "studioRecipeHash": canonical_hash(STUDIO_RECIPE),
     "maskRecipeHash": canonical_hash(MASK_RECIPE),
