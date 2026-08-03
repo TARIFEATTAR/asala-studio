@@ -15,6 +15,7 @@ const tallCap18415RecipePath = "docs/paper-doll-rig/tall-cap-18-415-family-recip
 const tallCap8425RecipePath = "docs/paper-doll-rig/tall-cap-8-425-family-recipe.json";
 const shortFlutedCap8425RecipePath = "docs/paper-doll-rig/short-fluted-cap-8-425-family-recipe.json";
 const tallRollonCap20400RecipePath = "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json";
+const fauxLeatherCap18415RecipePath = "docs/paper-doll-rig/faux-leather-cap-18-415-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -247,4 +248,40 @@ test("20-400 tall roll-on recipe preserves six verified 23 by 35 mm appearances"
   ]);
   assert.equal(recipe.surfaceProfile.kind, "smooth");
   assert.equal(recipe.mutationPolicy.remoteWritesPerformed, false);
+});
+
+test("18-415 faux-leather recipe preserves one 25 by 30 mm shell with five material and trim combinations", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(fauxLeatherCap18415RecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__18-415__faux-leather-cap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__18-415__a49d784871");
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 25,
+    outsideDiameterTolerance: 0.5,
+    height: 30,
+    heightTolerance: 0.5,
+    verified: true,
+  });
+  assert.deepEqual(recipe.trimBands, [
+    { startHeightRatio: 0, endHeightRatio: 0.18, evidenceState: "source-derived-review-candidate" },
+    { startHeightRatio: 0.82, endHeightRatio: 1, evidenceState: "source-derived-review-candidate" },
+  ]);
+  assert.deepEqual(recipe.variants.map((variant) => [
+    variant.variantKey,
+    variant.sourceIdentity,
+    variant.graceSku,
+    variant.material,
+    variant.trimMaterial,
+  ]), [
+    ["BLKL", "CP18-415BlkLthr", "CMP-CAP-BLK-18415-LTR", "faux-leather-black", "mirror-silver"],
+    ["BRNL", "CP18-415BrwnLthr", "CMP-CAP-BRN-18415-LTR", "faux-leather-brown", "mirror-silver"],
+    ["LBRL", "CP18-415LBrwnLthr", "CMP-CAP-LBRN-18415-LTR", "faux-leather-light-brown", "mirror-silver"],
+    ["IVYL", "CP18-415LIvyLthr", "CMP-CAP-IVY-18415-LTR", "faux-leather-ivory", "mirror-gold"],
+    ["PNKL", "CP18-415LPnkLthr", "CMP-CAP-PNK-18415-LTR", "faux-leather-pink", "mirror-gold"],
+  ]);
+});
+
+test("parametric contract rejects trim materials without declared trim geometry", async () => {
+  const raw = JSON.parse(await readFile(tallRollonCap20400RecipePath, "utf8"));
+  raw.variants[0].trimMaterial = "mirror-silver";
+  assert.throws(() => parseParametricOvercapFamilyRecipe(raw), /trim material requires declared trim bands/i);
 });

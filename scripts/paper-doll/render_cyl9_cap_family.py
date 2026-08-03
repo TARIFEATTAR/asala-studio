@@ -69,6 +69,7 @@ DEFAULT_PROFILE_NORMALIZED = [
 ]
 PROFILE_NORMALIZED = RECIPE.get("profileNormalized", DEFAULT_PROFILE_NORMALIZED)
 SURFACE_PROFILE = RECIPE.get("surfaceProfile", {"kind": "smooth"})
+TRIM_BANDS = RECIPE.get("trimBands", [])
 
 CAMERA_RECIPE = {
     "type": "orthographic",
@@ -152,6 +153,41 @@ MATERIAL_PRESETS = {
         "metallic": 0.0,
         "roughness": 0.38,
         "coatWeight": 0.0,
+    },
+    "faux-leather-black": {
+        "baseColor": [0.012, 0.009, 0.008, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.34,
+        "coatWeight": 0.08,
+        "textureStyle": "reptile-review-placeholder",
+    },
+    "faux-leather-brown": {
+        "baseColor": [0.20, 0.065, 0.018, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.37,
+        "coatWeight": 0.05,
+        "textureStyle": "reptile-review-placeholder",
+    },
+    "faux-leather-light-brown": {
+        "baseColor": [0.46, 0.22, 0.075, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.39,
+        "coatWeight": 0.04,
+        "textureStyle": "reptile-review-placeholder",
+    },
+    "faux-leather-ivory": {
+        "baseColor": [0.72, 0.57, 0.39, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.43,
+        "coatWeight": 0.02,
+        "textureStyle": "pebbled-review-placeholder",
+    },
+    "faux-leather-pink": {
+        "baseColor": [0.66, 0.25, 0.36, 1.0],
+        "metallic": 0.0,
+        "roughness": 0.42,
+        "coatWeight": 0.03,
+        "textureStyle": "pebbled-review-placeholder",
     },
 }
 
@@ -254,6 +290,7 @@ def build_cap_mesh(recipe: dict) -> tuple[bpy.types.Object, dict]:
         "recessedVertexCount": recessed_vertex_count,
         "minimumRadialDeltaMm": minimum_radial_delta,
         "maximumRadiusMm": maximum_radius,
+        "trimBandCount": len(TRIM_BANDS),
     }
 
 
@@ -312,7 +349,38 @@ def create_finish_material(material_key: str) -> bpy.types.Material:
     coat = bsdf.inputs.get("Coat Weight")
     if coat is not None:
         coat.default_value = preset["coatWeight"]
+    if preset.get("textureStyle"):
+        texture = material.node_tree.nodes.new("ShaderNodeTexNoise")
+        texture.inputs["Scale"].default_value = 72.0 if preset["textureStyle"].startswith("reptile") else 118.0
+        texture.inputs["Detail"].default_value = 4.5
+        texture.inputs["Roughness"].default_value = 0.76
+        bump = material.node_tree.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.16 if preset["textureStyle"].startswith("reptile") else 0.10
+        bump.inputs["Distance"].default_value = 0.075
+        material.node_tree.links.new(texture.outputs["Fac"], bump.inputs["Height"])
+        material.node_tree.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
     return material
+
+
+def assign_surface_materials(
+    cap: bpy.types.Object,
+    base_material: bpy.types.Material,
+    trim_material: bpy.types.Material | None,
+) -> None:
+    cap.data.materials.clear()
+    cap.data.materials.append(base_material)
+    if trim_material is None:
+        for polygon in cap.data.polygons:
+            polygon.material_index = 0
+        return
+    cap.data.materials.append(trim_material)
+    for polygon in cap.data.polygons:
+        mean_height = sum(cap.data.vertices[index].co.z for index in polygon.vertices) / len(polygon.vertices)
+        height_ratio = mean_height / HEIGHT
+        polygon.material_index = 1 if any(
+            float(band["startHeightRatio"]) <= height_ratio <= float(band["endHeightRatio"])
+            for band in TRIM_BANDS
+        ) else 0
 
 
 def create_crystal_material() -> bpy.types.Material:
@@ -438,7 +506,12 @@ provenance = {
 for variant_key in REQUESTED_VARIANTS:
     variant = VARIANTS[variant_key]
     render_path = isolated_dir / f"{variant_key}.png"
-    cap.data.materials[0] = finish_materials[variant["material"]]
+    trim_material_key = variant.get("trimMaterial")
+    assign_surface_materials(
+        cap,
+        finish_materials[variant["material"]],
+        finish_materials[trim_material_key] if trim_material_key else None,
+    )
     decorated = variant["decoration"] == "crystal-v1"
     set_crystal_visibility(crystals, decorated)
     render_to(render_path)
@@ -447,10 +520,15 @@ for variant_key in REQUESTED_VARIANTS:
         "path": str(render_path.relative_to(OUT_DIR)),
         "provenance": provenance,
         "crystals": [dict(item) for item in RECIPE["crystalLayout"]] if decorated else [],
+        "materialAssignment": {
+            "baseMaterial": variant["material"],
+            "trimMaterial": trim_material_key,
+            "trimBandCount": len(TRIM_BANDS),
+        },
     })
 
 mask_path = OUT_DIR / "geometry-mask.png"
-cap.data.materials[0] = create_mask_material()
+assign_surface_materials(cap, create_mask_material(), None)
 set_crystal_visibility(crystals, False)
 for panel in studio.values():
     panel.hide_render = True

@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "faux-leather-cap-18-415-family-v1",
+  "familyKey": "FAUX-LEATHER-CAP-18-415",
+  "neckFinish": "18-415",
+  "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__cap__18-415__a49d784871",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "CP18-415LBrwnLthr",
+    "sourceSha256": "ea8eadd50852c01788542e46f9f4f48bc8b7f9479394dc5e8e9e4ecb2eac5654",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP18-415LBrwnLthr.gif",
+    "localReviewPath": "outputs/paper-doll-component-authority-reviews/geometry-review__cap__18-415__a49d784871/source/cp18-415lbrwnlthr__01.gif",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "CP18-415LBrwnLthr",
+    "fields": {
+      "heightWithCap": "30 ±0.5 mm",
+      "diameter": "25 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 25,
+    "outsideDiameterTolerance": 0.5,
+    "height": 30,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-physical-dimensions-plus-source-medoid-banded-profile-v1"
+  },
+  "profileNormalized": [
+    [0.455, 0],
+    [0.485, 0.01],
+    [0.5, 0.035],
+    [0.498, 0.07],
+    [0.47, 0.09],
+    [0.49, 0.12],
+    [0.5, 0.145],
+    [0.488, 0.17],
+    [0.465, 0.18],
+    [0.465, 0.82],
+    [0.488, 0.83],
+    [0.5, 0.855],
+    [0.49, 0.88],
+    [0.47, 0.91],
+    [0.498, 0.93],
+    [0.5, 0.965],
+    [0.485, 0.99],
+    [0.455, 1],
+    [0, 1]
+  ],
+  "surfaceProfile": {
+    "kind": "smooth"
+  },
+  "trimBands": [
+    {
+      "startHeightRatio": 0,
+      "endHeightRatio": 0.18,
+      "evidenceState": "source-derived-review-candidate"
+    },
+    {
+      "startHeightRatio": 0.82,
+      "endHeightRatio": 1,
+      "evidenceState": "source-derived-review-candidate"
+    }
+  ],
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "BLKL",
+      "sourceIdentity": "CP18-415BlkLthr",
+      "graceSku": "CMP-CAP-BLK-18415-LTR",
+      "material": "faux-leather-black",
+      "trimMaterial": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1"
+    },
+    {
+      "variantKey": "BRNL",
+      "sourceIdentity": "CP18-415BrwnLthr",
+      "graceSku": "CMP-CAP-BRN-18415-LTR",
+      "material": "faux-leather-brown",
+      "trimMaterial": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1"
+    },
+    {
+      "variantKey": "LBRL",
+      "sourceIdentity": "CP18-415LBrwnLthr",
+      "graceSku": "CMP-CAP-LBRN-18415-LTR",
+      "material": "faux-leather-light-brown",
+      "trimMaterial": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1"
+    },
+    {
+      "variantKey": "IVYL",
+      "sourceIdentity": "CP18-415LIvyLthr",
+      "graceSku": "CMP-CAP-IVY-18415-LTR",
+      "material": "faux-leather-ivory",
+      "trimMaterial": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1"
+    },
+    {
+      "variantKey": "PNKL",
+      "sourceIdentity": "CP18-415LPnkLthr",
+      "graceSku": "CMP-CAP-PNK-18415-LTR",
+      "material": "faux-leather-pink",
+      "trimMaterial": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__18-415__faux-leather-cap__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}
