@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+  "authorityImagePath": "assets/paper-doll/components/closure__17-415__roll-on-over-cap__shiny-silver.png",
+  "nominalDimensionsMm": {
+    "outsideDiameter": 19.5,
+    "height": 28.5,
+    "verified": false
+  },
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "placement": {
+    "canvasWidthPx": 2080,
+    "canvasHeightPx": 2288,
+    "widthPx": 362,
+    "centerX": 1041,
+    "bottomY": 1002
+  },
+  "variants": [
+    { "variantKey": "SSLV", "material": "mirror-silver", "decoration": "none" },
+    { "variantKey": "MSLV", "material": "matte-silver", "decoration": "none" },
+    { "variantKey": "SGLD", "material": "mirror-gold", "decoration": "none" },
+    { "variantKey": "MGLD", "material": "matte-gold", "decoration": "none" },
+    { "variantKey": "SBLK", "material": "glossy-black", "decoration": "none" },
+    { "variantKey": "MCPR", "material": "matte-copper", "decoration": "none" },
+    { "variantKey": "WHT", "material": "glossy-white", "decoration": "none" },
+    { "variantKey": "SLDT", "material": "mirror-silver", "decoration": "crystal-v1" },
+    { "variantKey": "BKDT", "material": "glossy-black", "decoration": "crystal-v1" },
+    { "variantKey": "PKDT", "material": "matte-pink", "decoration": "crystal-v1" }
+  ],
+  "crystalLayout": [
+    { "id": "stone-top-left", "angleDeg": -42, "heightRatio": 0.78, "scaleRatio": 0.028 },
+    { "id": "stone-top-right", "angleDeg": 42, "heightRatio": 0.78, "scaleRatio": 0.028 },
+    { "id": "stone-upper-center", "angleDeg": 0, "heightRatio": 0.64, "scaleRatio": 0.028 },
+    { "id": "stone-mid-left", "angleDeg": -42, "heightRatio": 0.49, "scaleRatio": 0.028 },
+    { "id": "stone-mid-right", "angleDeg": 42, "heightRatio": 0.49, "scaleRatio": 0.028 },
+    { "id": "stone-lower-center", "angleDeg": 0, "heightRatio": 0.34, "scaleRatio": 0.028 },
+    { "id": "stone-bottom-left", "angleDeg": -42, "heightRatio": 0.19, "scaleRatio": 0.028 },
+    { "id": "stone-bottom-right", "angleDeg": 42, "heightRatio": 0.19, "scaleRatio": 0.028 }
+  ]
+}

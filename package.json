@@ -21,6 +21,8 @@
     "paper-doll:cyl9:release": "tsx scripts/paper-doll/build-cyl9-rollon-release.ts",
     "paper-doll:candidate:process": "tsx scripts/paper-doll/process-paper-doll-candidate.ts",
     "bestbottles:catalog:reconcile": "tsx scripts/build-bestbottles-catalog-lite.ts",
+    "paperdoll:render-cyl9-caps": "tsx scripts/paper-doll/render-cyl9-cap-family.ts",
+    "test:paperdoll:cyl9-caps": "tsx --test src/lib/paperDoll/cyl9CapFamily.test.ts scripts/paper-doll/render-cyl9-cap-family.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
