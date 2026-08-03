@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "kitId": "sprayer__15-415__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
+  "sourceCompositeProductionEligible": false,
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "sources": [
+    {
+      "sourceId": "psd-head-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "1. Spry15-415Blk.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/16. 15-415 Sprayer/1. Spry15-415Blk.psd",
+      "sha256": "b22b91e47d3fd7b0b8f517afd472b739a2e83d8c280ea4ab964272a77e688521",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "2. Spry15-415ShnGl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/16. 15-415 Sprayer/2. Spry15-415ShnGl.psd",
+      "sha256": "27306218de1ffa384a703c5f76dc57a98bf31bbed70599adb0924bbb89b295d8",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-shiny-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. Spry15-415ShnSl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/16. 15-415 Sprayer/3. Spry15-415ShnSl.psd",
+      "sha256": "a49aa56c45b4b7f522c4e556da7e42386590a7ea6872f02ea5f9e5f413631aaa",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-matte-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4. Spry15-415MattSl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/16. 15-415 Sprayer/4. Spry15-415MattSl.psd",
+      "sha256": "96787cf37c1027edfaa49135a39f9ba0653d0212e73d5fa75023a733698e0448",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-matte-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "5. Spry15-415MattGl.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/16. 15-415 Sprayer/5. Spry15-415MattGl.psd",
+      "sha256": "e64eb4a4190cd9671add2f4ec0b7ff9e0a5e2b0182347ccc089775f19f3e9cad",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear30-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "1. GBCrcl30SpryBlk.psd",
+      "archiveRelativePath": "15-415 Bottles/2. Circle Clear 30ml - Uncapped/Circle 30ml/1. GBCrcl30SpryBlk.psd",
+      "sha256": "be3c467f8b3258bf5babb0babd76e30cc8e9b59578ac45a2e38a793bd75cc9d6",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear30-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "2. GBCrcl30SpryShnGl.psd",
+      "archiveRelativePath": "15-415 Bottles/2. Circle Clear 30ml - Uncapped/Circle 30ml/2. GBCrcl30SpryShnGl.psd",
+      "sha256": "4156ee780630103031bc7dd7faec15389a4b7cd6932bd416bddf60638defb25f",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear30-shiny-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. GBCrcl30SpryShSl.psd",
+      "archiveRelativePath": "15-415 Bottles/2. Circle Clear 30ml - Uncapped/Circle 30ml/3. GBCrcl30SpryShSl.psd",
+      "sha256": "7c303290d1d68efbbd1234c8f534d687e45f118f1371fe8199525c4970e0b6b0",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear30-matte-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4. GBCrcl30SpryMattSl.psd",
+      "archiveRelativePath": "15-415 Bottles/2. Circle Clear 30ml - Uncapped/Circle 30ml/4. GBCrcl30SpryMattSl.psd",
+      "sha256": "eaa75545dfea8e8b0e7c4528a81dc8e74754cf27dcf69f681d5e645df8ef21a2",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear30-matte-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "5. GBCrcl30SpryMattGl.psd",
+      "archiveRelativePath": "15-415 Bottles/2. Circle Clear 30ml - Uncapped/Circle 30ml/5. GBCrcl30SpryMattGl.psd",
+      "sha256": "5cc5639e2015134814ed7407548446417b6e77843169325c8cfee290af770eaa",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "sprayer-head",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": false,
+      "sourceSelectors": [
+        { "sourceId": "psd-head-black", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 14" },
+        { "sourceId": "psd-head-shiny-gold", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 15" },
+        { "sourceId": "psd-head-shiny-silver", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 18" },
+        { "sourceId": "psd-head-matte-silver", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 19" },
+        { "sourceId": "psd-head-matte-gold", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 22" }
+      ]
+    },
+    {
+      "partId": "protective-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "assembly-clear30-black", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "Layer 5" },
+        { "sourceId": "assembly-clear30-shiny-gold", "method": "psd-layer-scene", "sceneIndex": 7, "layerName": "Layer 7" },
+        { "sourceId": "assembly-clear30-shiny-silver", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "Layer 11" },
+        { "sourceId": "assembly-clear30-matte-silver", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 8" },
+        { "sourceId": "assembly-clear30-matte-gold", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "Layer 15" }
+      ]
+    },
+    {
+      "partId": "dip-tube",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "assembly-clear30-black", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 3" },
+        { "sourceId": "assembly-clear30-shiny-gold", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "Layer 11" },
+        { "sourceId": "assembly-clear30-shiny-silver", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 14" },
+        { "sourceId": "assembly-clear30-matte-silver", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "Layer 12" },
+        { "sourceId": "assembly-clear30-matte-gold", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 12" }
+      ]
+    }
+  ]
+}
