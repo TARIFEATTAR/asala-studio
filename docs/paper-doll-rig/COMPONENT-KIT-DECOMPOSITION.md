@@ -42,6 +42,13 @@ Run `npm run paperdoll:extract-component-kit-review` to reproduce that local
 review set. The command writes review-only artifacts and records that production,
 geometry lock, Current Release, and Sanity state remain unchanged.
 
+Run `npm run paperdoll:compound-component-review-queue` to regenerate the
+catalog-wide conservative gate. The resulting
+`compound-component-review-queue.json` and
+`COMPOUND-COMPONENT-REVIEW-QUEUE.md` identify every current pump, sprayer,
+dropper, bulb/tassel, and compound-applicator lane that requires responsibility
+review. Inclusion in that queue does not itself add a plate.
+
 ## Approval sequence
 
 `source archive -> responsibility map -> extracted review cutouts -> exact authority masks -> material candidates -> family assembly QA -> named approval -> shared placement -> release cut`
