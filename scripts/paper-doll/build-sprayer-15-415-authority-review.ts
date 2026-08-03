@@ -331,7 +331,7 @@ async function renderCandidateContactSheet(input: {
   }).composite(tiles.map((tile, index) => ({ input: tile, left: index * tileWidth, top: 0 }))).png().toBuffer();
 }
 
-async function renderFamilyFitContactSheet(input: {
+async function renderScaleContextContactSheet(input: {
   bodyPlates: Array<{ bodyId: string; path: string }>;
   componentPng: Buffer;
 }): Promise<Buffer> {
@@ -364,7 +364,7 @@ export async function buildSprayerAuthorityReview(input: {
   calibration: AuthorityCalibration;
   headAuthoritySourceAlphaCleanup?: DetachedAlphaIslandCalibration;
   headAuthorityHeightCalibration?: SourceAspectHeightCalibration;
-  bodyPlates: Array<{ bodyId: string; path: string }>;
+  scaleContextBodyPlates: Array<{ bodyId: string; path: string }>;
 }): Promise<{ manifestPath: string; contactSheetPaths: string[] }> {
   const extractionBytes = await readFile(input.extractionManifestPath);
   const extraction = JSON.parse(extractionBytes.toString("utf8")) as ExtractionManifest;
@@ -483,12 +483,15 @@ export async function buildSprayerAuthorityReview(input: {
   const contactSheetPaths: string[] = [];
   for (const family of candidateFamilies) {
     const materialPath = path.join(reviewDirectory, `${family.partId}-materials.png`);
-    const fitPath = path.join(reviewDirectory, `${family.partId}-five-body-fit.png`);
+    const scaleContextPath = path.join(reviewDirectory, `${family.partId}-five-body-scale-context.png`);
     const material = await renderCandidateContactSheet({ title: family.partId, candidates: family.candidates });
     const referenceCandidate = family.candidates.find((candidate) => candidate.variantKey === "SSLV")!;
-    const fit = await renderFamilyFitContactSheet({ bodyPlates: input.bodyPlates, componentPng: referenceCandidate.png });
-    await Promise.all([writeFile(materialPath, material), writeFile(fitPath, fit)]);
-    contactSheetPaths.push(materialPath, fitPath);
+    const scaleContext = await renderScaleContextContactSheet({
+      bodyPlates: input.scaleContextBodyPlates,
+      componentPng: referenceCandidate.png,
+    });
+    await Promise.all([writeFile(materialPath, material), writeFile(scaleContextPath, scaleContext)]);
+    contactSheetPaths.push(materialPath, scaleContextPath);
   }
   const manifest = {
     schemaVersion: 1,
@@ -531,7 +534,16 @@ export async function buildSprayerAuthorityReview(input: {
     geometryLocked: false,
     productionEligible: false,
     namedAuthorityReviewRequired: true,
-    familyFitApprovalRequired: true,
+    compatibilityClaim: "none",
+    familyFitApprovalRequired: false,
+    compatibilityReviewRequired: true,
+    scaleContext: {
+      bodyFamily: "CYL-9ML",
+      bodyNeckFinish: "17-415",
+      componentNeckFinish: "15-415",
+      purpose: "visual-scale-and-material-context-only",
+      physicalFitClaim: false,
+    },
     currentReleaseChanged: false,
     sanityChanged: false,
   };
@@ -568,7 +580,7 @@ async function main(): Promise<void> {
       toleranceMm: 0.25,
       basis: "cleaned-shiny-silver-source-aspect-at-catalog-20mm-width",
     },
-    bodyPlates: bodyRegistry.entries.map((entry) => ({
+    scaleContextBodyPlates: bodyRegistry.entries.map((entry) => ({
       bodyId: entry.id.split("__")[3],
       path: path.resolve(entry.asset.path),
     })),

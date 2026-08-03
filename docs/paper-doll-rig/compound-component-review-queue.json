@@ -637,9 +637,9 @@
         "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/dip-tube/contact-sheet.png",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/manifest.json",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-materials.png",
-        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-fit.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/sprayer-head-five-body-scale-context.png",
         "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-materials.png",
-        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-fit.png",
+        "outputs/paper-doll-sprayer-15-415/authority-review-v1/review/protective-overcap-five-body-scale-context.png",
         "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
       ],
       "suspectedResponsibilities": [
@@ -655,7 +655,7 @@
       ],
       "geometryClaim": "none",
       "productionPlateDelta": null,
-      "nextGate": "Obtain named geometry-profile and five-body family-fit approval for the exposed-head and protective-overcap candidates. Keep the dip tube body-contextual, then register only approved exact-alpha plates; never approve the flattened three-part source as one reusable plate."
+      "nextGate": "Obtain named geometry-profile review for the exposed-head and protective-overcap candidates, then evaluate family fit only on a verified compatible 15-415 body cohort. Keep the dip tube body-contextual; never treat the 17-415 CYL-9ML scale-context sheets as compatibility evidence or approve the flattened three-part source as one reusable plate."
     },
     {
       "reviewGroupKey": "geometry-review__sprayer__18-415__0a02e5f733",
@@ -711,6 +711,6 @@
     "componentGeometryReviewGroupsPath": "docs/paper-doll-rig/component-geometry-review-groups.json",
     "componentGeometryReviewGroupsSha256": "72a6f3828a320d5a578c89623d2b97d48e00e00ebcf28cb5c9c462230b2e0c24",
     "componentPhysicalReviewDecisionsPath": "docs/paper-doll-rig/component-physical-review-decisions.json",
-    "componentPhysicalReviewDecisionsSha256": "201f1dba0d2dae8f654986dd3a26a4c3d64bc92152453171b6a9a8ca0ec6dab7"
+    "componentPhysicalReviewDecisionsSha256": "81e87961a174dcc92d352f3dfcc8a02924f21c79b13c207498d301bf2b67c3e2"
   }
 }

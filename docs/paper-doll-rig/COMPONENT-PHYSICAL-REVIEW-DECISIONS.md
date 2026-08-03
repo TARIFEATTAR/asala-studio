@@ -42,7 +42,7 @@ SHA-verified extraction review: `docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRA
 
 Dimension-calibrated authority review: `docs/paper-doll-rig/SPRAYER-15-415-AUTHORITY-REVIEW.md`.
 
-The review build proposes independent 363 px-wide masks on the locked CYL-9ML center axis and seat. All five appearances in each responsibility are exact-alpha clamped. The head source cleanup is calibrated from the real shiny-silver file—one 77,022-pixel closure plus nine measured 4–13 pixel detached artifacts—and rejects any topology change outside that recorded contract. This still does not earn geometry lock; named profile and five-body fit approval remain required.
+The review build proposes independent 363 px-wide masks using the locked CYL-9ML pixel scale as visual context. All five appearances in each responsibility are exact-alpha clamped. The head source cleanup is calibrated from the real shiny-silver file—one 77,022-pixel closure plus nine measured 4–13 pixel detached artifacts—and rejects any topology change outside that recorded contract. This still does not earn geometry lock. The context bodies are 17-415, so they cannot prove compatibility or family fit for a 15-415 component; named profile review and a verified compatible 15-415 body cohort remain required.
 
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png`.
 
