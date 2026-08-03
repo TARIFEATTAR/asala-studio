@@ -54,3 +54,5 @@ Before this family can be locked:
 5. Resolve the separate 53×18 and 54×17 catalog measurement rows; do not collapse them into this authority by filename similarity.
 
 No remote database, Current Release, Sanity draft, or public catalog state is changed by this review build.
+
+The next review-only assembly checkpoint is documented in `CYL5-ROLLON-CAP-FAMILY-FIT-REVIEW.md`.
