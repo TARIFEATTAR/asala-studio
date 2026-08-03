@@ -1,0 +1,710 @@
+{
+  "schemaVersion": 1,
+  "summary": {
+    "catalogReviewLaneCount": 20,
+    "sourceIdentityCount": 83,
+    "laneTypeCounts": {
+      "pump": 2,
+      "sprayer": 6,
+      "dropper": 6,
+      "bulb-sprayer": 4,
+      "bulb-sprayer+sprayer": 1,
+      "compound-applicator": 1
+    },
+    "sourceReadyLaneCount": 15,
+    "sourceIncompleteLaneCount": 3,
+    "reviewedDecisionLaneCount": 4,
+    "finalReusablePlateDelta": null
+  },
+  "items": [
+    {
+      "reviewGroupKey": "geometry-review__pump__17-415__d4ca90a05c",
+      "laneType": "pump",
+      "descriptorSignature": "pump :: 17-415 :: none :: Pump",
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "sourceIdentities": [
+        "Ltn17-415Blk",
+        "Ltn17-415Gl",
+        "Ltn17-415MattSl"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceStatus": "local-authorities-require-reconciliation",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__17-415__91195a1a8e",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 17-415 :: Fine Mist Sprayer :: Spray",
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "sourceIdentities": [
+        "Spry17-415Blk",
+        "Spry17-415Gl",
+        "Spry17-415MattSl",
+        "Spry17-415Red",
+        "Spry17-415ShnSl",
+        "Spry17-415Tur"
+      ],
+      "sourceIdentityCount": 6,
+      "sourceStatus": "local-authorities-require-reconciliation",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__17-415__a38fb41beb",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 17-415 :: Dropper :: Dropper",
+      "neckFinishEvidence": [
+        "17-415"
+      ],
+      "sourceIdentities": [
+        "Droppers1ozElg"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-incomplete",
+      "auditStatus": "source-evidence-required-before-decomposition",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__13-415__c502bb6eb5",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 13-415 :: Fine Mist Sprayer :: Spray",
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "sourceIdentities": [
+        "13-415CAP4SpryCuMt",
+        "13-415CAP4SpryGlSh",
+        "13-415CAP4SprySlMt",
+        "CP13-415SpryBlkMt",
+        "CP13-415SpryBlkSh",
+        "CP13-415SpryBluMt",
+        "CP13-415SpryGlMt",
+        "CP13-415SpryGlSh",
+        "CP13-415SprySlMt",
+        "CP13-415SprySlSh",
+        "GBATom5RedBurg"
+      ],
+      "sourceIdentityCount": 11,
+      "sourceStatus": "source-incomplete",
+      "auditStatus": "source-evidence-required-before-decomposition",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__18-415__82e32a9e9a",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 18-415 :: Fine Mist Sprayer :: Spray",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "18-415CAP4SpryMtGl",
+        "18-415CAP4SpryShnBlk"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceStatus": "source-incomplete",
+      "auditStatus": "source-evidence-required-before-decomposition",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__274c4512c4",
+      "laneType": "bulb-sprayer",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: Cap/Closure :: none",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "CP18-415AnSpPnk"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "mounting-collar",
+        "bulb",
+        "hose-or-tube",
+        "possible-tassel-or-decorative-accessory"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?",
+        "Are bulb, hose, tassel, and collar sold or replaced independently?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__e2b095d953",
+      "laneType": "bulb-sprayer",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: Fine Mist Sprayer :: Spray",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "CP18-415AnSpTslGl"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "mounting-collar",
+        "bulb",
+        "hose-or-tube",
+        "possible-tassel-or-decorative-accessory"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?",
+        "Are bulb, hose, tassel, and collar sold or replaced independently?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__18-415__6314ffe5b1",
+      "laneType": "bulb-sprayer",
+      "descriptorSignature": "bulb-sprayer :: 18-415 :: none :: Spray",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "AnSp18-415Blk",
+        "AnSp18-415Gl"
+      ],
+      "sourceIdentityCount": 2,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "mounting-collar",
+        "bulb",
+        "hose-or-tube",
+        "possible-tassel-or-decorative-accessory"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?",
+        "Are bulb, hose, tassel, and collar sold or replaced independently?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer__unknown-neck__855d48f60c",
+      "laneType": "bulb-sprayer",
+      "descriptorSignature": "bulb-sprayer :: unknown-neck :: N/A :: none",
+      "neckFinishEvidence": [],
+      "sourceIdentities": [
+        "AntqSprBulbLavender"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "mounting-collar",
+        "bulb",
+        "hose-or-tube",
+        "possible-tassel-or-decorative-accessory"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?",
+        "Are bulb, hose, tassel, and collar sold or replaced independently?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09",
+      "laneType": "bulb-sprayer+sprayer",
+      "descriptorSignature": "bulb-sprayer+sprayer :: 18-415 :: none :: Spray",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "AnSp18-415IvyGl",
+        "AnSp18-415IvySl",
+        "AnSp18-415Lvn",
+        "AnSp18-415MtSl",
+        "AnSp18-415Red",
+        "AnSp18-415Wht",
+        "AnSpTsl18-415Blk",
+        "AnSpTsl18-415IvyGl",
+        "AnSpTsl18-415IvySl",
+        "AnSpTsl18-415Lvn",
+        "AnSpTsl18-415MtS",
+        "AnSpTsl18-415Pnk",
+        "AnSpTsl18-415Red",
+        "AnSpTsl18-415Wht"
+      ],
+      "sourceIdentityCount": 14,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "split-for-physical-review",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__bulb-sprayer-sprayer__18-415__ebc56aeb09/silhouette-analysis-contact-sheet.png"
+      ],
+      "suspectedResponsibilities": [
+        "mounting-collar",
+        "bulb",
+        "hose-or-tube",
+        "possible-tassel-or-decorative-accessory"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?",
+        "Are bulb, hose, tassel, and collar sold or replaced independently?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Confirm collar, bulb, hose, tassel, and tube dimensions separately; decide which subassemblies become reusable plates before authority creation."
+    },
+    {
+      "reviewGroupKey": "geometry-review__cap__18-400__7b644a08b3",
+      "laneType": "compound-applicator",
+      "descriptorSignature": "cap :: 18-400 :: none :: Applicator",
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "sourceIdentities": [
+        "18-400CpAppBlk"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-cap-shell",
+        "visible-applicator",
+        "inserted-body-contextual-stem"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-400__faf1ea000e",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 18-400 :: Dropper :: Dropper",
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "sourceIdentities": [
+        "Drp18-40015mlShnGlTrimBlkBulb",
+        "Drp18-40015mlShnGlTrimWhiteBulb",
+        "Drp18-40015mlShnSlTrimBlkBulb",
+        "Drp18-40015mlShnSlTrimWhiteBulb",
+        "Drp18-40015mlWhiteBulb"
+      ],
+      "sourceIdentityCount": 5,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-400__9104590c62",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 18-400 :: none :: Dropper",
+      "neckFinishEvidence": [
+        "18-400"
+      ],
+      "sourceIdentities": [
+        "Drp18-40015mlBlckBulb"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__18-415__a8b7bd0585",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 18-415 :: Dropper :: Dropper",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "Drp18-415Cu",
+        "Drp18-415Gl",
+        "Drp18-415Sl"
+      ],
+      "sourceIdentityCount": 3,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__20-400__1f69cf193c",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 20-400 :: Dropper :: Dropper",
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "sourceIdentities": [
+        "Drp20-4001ozShnGlTrimBlkBulb",
+        "Drp20-4001ozShnSlTrimBlkBulb",
+        "Drp20-4001ozWhiteBulb",
+        "Drp20-4001ozlShnGlTrimWhiteBulb",
+        "Drp20-4001ozlShnSlTrimWhiteBulb",
+        "Drp20-4002ozBlckBulb",
+        "Drp20-4002ozShnGlTrimBlkBulb",
+        "Drp20-4002ozShnSlTrimBlkBulb",
+        "Drp20-4002ozWhiteBulb",
+        "Drp20-4002ozlShnGlTrimWhiteBulb",
+        "Drp20-4002ozlShnSlTrimWhiteBulb"
+      ],
+      "sourceIdentityCount": 11,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "quarantined-body-contextual-length",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/silhouette-analysis-contact-sheet.png"
+      ],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Treat the bulb/collar exterior and the inserted pipette as separate responsibilities. Obtain dimensions by target bottle cohort before producing body-contextual pipette or integration pixels."
+    },
+    {
+      "reviewGroupKey": "geometry-review__dropper__20-400__be82382059",
+      "laneType": "dropper",
+      "descriptorSignature": "dropper :: 20-400 :: none :: Dropper",
+      "neckFinishEvidence": [
+        "20-400"
+      ],
+      "sourceIdentities": [
+        "Drp20-4001ozBlckBulb"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "bulb-and-collar-exterior",
+        "inserted-pipette",
+        "possible-secondary-overcap"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__pump__18-415__4b1f4c5688",
+      "laneType": "pump",
+      "descriptorSignature": "pump :: 18-415 :: none :: Pump",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "Ltn18-415Cu",
+        "Ltn18-415MtGl",
+        "Ltn18-415MtSl",
+        "Ltn18-415MtSlCl",
+        "Ltn18-415ShnBlk",
+        "Ltn18-415ShnGl",
+        "Ltn18-415ShnSl"
+      ],
+      "sourceIdentityCount": 7,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "quarantined-responsibility-decomposition",
+      "evidencePaths": [
+        "outputs/paper-doll-component-authority-reviews/geometry-review__pump__18-415__4b1f4c5688/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__pump__18-415__4b1f4c5688/silhouette-analysis-contact-sheet.png"
+      ],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Confirm whether the clear protective cap is a separate compatible overcap plate and keep the pump authority independent from it. Require assembled translucent QA."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__13-415__29f23f5a84",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 13-415 :: none :: Spray",
+      "neckFinishEvidence": [
+        "13-415"
+      ],
+      "sourceIdentities": [
+        "CP13-415SpryCuMt"
+      ],
+      "sourceIdentityCount": 1,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__15-415__01e5312a22",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 15-415 :: Fine Mist Sprayer :: Spray",
+      "neckFinishEvidence": [
+        "15-415"
+      ],
+      "sourceIdentities": [
+        "Spry15-415Blk",
+        "Spry15-415MattGl",
+        "Spry15-415MattSl",
+        "Spry15-415ShnGl",
+        "Spry15-415ShnSl"
+      ],
+      "sourceIdentityCount": 5,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "source-extraction-review-created-authority-required",
+      "evidencePaths": [
+        "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
+        "docs/paper-doll-rig/SPRAYER-15-415-SOURCE-EXTRACTION-REVIEW.md",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/manifest.json",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/sprayer-head/contact-sheet.png",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/protective-overcap/contact-sheet.png",
+        "outputs/paper-doll-component-kit-reviews/15-415-sprayer/source-extraction-v1/dip-tube/contact-sheet.png",
+        "outputs/paper-doll-component-authority-reviews/geometry-review__sprayer__15-415__01e5312a22/contact-sheet.png"
+      ],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Calibrate and approve the exposed-head and protective-overcap geometry authorities independently, then clamp the five appearances to those exact masks. Render or weld the dip tube per bottle cohort and body optics; never approve the flattened three-part source as one reusable plate."
+    },
+    {
+      "reviewGroupKey": "geometry-review__sprayer__18-415__0a02e5f733",
+      "laneType": "sprayer",
+      "descriptorSignature": "sprayer :: 18-415 :: none :: Spray",
+      "neckFinishEvidence": [
+        "18-415"
+      ],
+      "sourceIdentities": [
+        "Spry18-415Cu",
+        "Spry18-415MtGl",
+        "Spry18-415MtSl",
+        "Spry18-415ShnBlk",
+        "Spry18-415ShnGl",
+        "Spry18-415ShnSl"
+      ],
+      "sourceIdentityCount": 6,
+      "sourceStatus": "source-ready-physical-review",
+      "auditStatus": "decomposition-audit-required",
+      "evidencePaths": [],
+      "suspectedResponsibilities": [
+        "exterior-dispenser",
+        "possible-secondary-overcap",
+        "internal-delivery-tube"
+      ],
+      "reviewQuestions": [
+        "Which visible parts are independently selectable catalog components?",
+        "Which source layers are fragments of one physical responsibility and must be recomposed?",
+        "Which inserted parts change length, visibility, refraction, or occlusion by target bottle?",
+        "What physical mount axis, seat, and target-body depth control production placement?"
+      ],
+      "geometryClaim": "none",
+      "productionPlateDelta": null,
+      "nextGate": "Inspect layered and assembled sources, record a responsibility map, then create a component-kit recipe only if more than one physical responsibility is proven."
+    }
+  ],
+  "supplementalLocalChecks": [
+    {
+      "checkId": "local-check__17-415-roller-fitments",
+      "scope": "plastic and metal roller housings plus balls; roll-on overcaps remain separate",
+      "decision": "Treat each housing-and-ball assembly as one exterior fitment responsibility unless catalog selection proves otherwise. Preserve the shared physical mount and keep the roll-on overcap independent.",
+      "geometryClaim": "none"
+    }
+  ],
+  "countingPolicy": "The source-backed master shot-list count is a baseline. Do not increase or decrease the reusable production-plate count until a reviewed responsibility map proves the final split.",
+  "mutationPolicy": {
+    "candidatesGenerated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  },
+  "generatedFrom": {
+    "componentGeometryReviewGroupsPath": "docs/paper-doll-rig/component-geometry-review-groups.json",
+    "componentGeometryReviewGroupsSha256": "72a6f3828a320d5a578c89623d2b97d48e00e00ebcf28cb5c9c462230b2e0c24",
+    "componentPhysicalReviewDecisionsPath": "docs/paper-doll-rig/component-physical-review-decisions.json",
+    "componentPhysicalReviewDecisionsSha256": "f3ae942cb5ffbdad1d6c28aa5276b68687ea9fb0ba2edfa91250c37d9f6c3fd2"
+  }
+}
