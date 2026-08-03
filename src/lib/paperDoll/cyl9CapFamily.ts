@@ -65,8 +65,8 @@ const Cyl9CapFamilyRecipeSchema = z.object({
   placement: z.object({
     canvasWidthPx: z.literal(2080),
     canvasHeightPx: z.literal(2288),
-    widthPx: z.literal(362, {
-      errorMap: () => ({ message: "CYL-9ML cap calibration must remain 362 px wide." }),
+    widthPx: z.literal(344, {
+      errorMap: () => ({ message: "CYL-9ML cap calibration must remain 344 px wide." }),
     }),
     centerX: z.literal(1041),
     bottomY: z.literal(1002),

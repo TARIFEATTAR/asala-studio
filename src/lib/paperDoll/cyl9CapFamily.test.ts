@@ -25,11 +25,11 @@ test("recipe contains the exact ten catalog cap keys", async () => {
   assert.equal(new Set(recipe.variants.map(({ variantKey }) => variantKey)).size, 10);
 });
 
-test("silver calibration is one uniform pixel narrower with the seat unchanged", async () => {
+test("Best Bottles cap-to-body calibration is inset with the seat unchanged", async () => {
   const recipe = await loadRecipe();
   const placed = solveCyl9CapPlacement(1400, 2050, recipe);
 
-  assert.equal(placed.width, 362);
+  assert.equal(placed.width, 344);
   assert.equal(placed.left + placed.rightExclusive, 2082);
   assert.equal(placed.bottomExclusive, 1002);
 });
@@ -63,7 +63,7 @@ test("recipe rejects non-canonical placement values", async () => {
       ...recipe,
       placement: { ...recipe.placement, widthPx: 363 },
     }),
-    /362 px/i,
+    /344 px/i,
   );
 });
 
