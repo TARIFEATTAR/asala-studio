@@ -123,6 +123,7 @@ test("contact-sheet contain padding stays transparent over the Bone review tile"
   const blenderOutputDir = path.join(temporary, "blender");
   const outputDir = path.join(temporary, "candidate");
   const raw = JSON.parse(await readFile("docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json", "utf8"));
+  raw.variants = raw.variants.slice(0, 2);
   await writeFile(recipePath, `${JSON.stringify(raw)}\n`, "utf8");
   await mkdir(path.join(blenderOutputDir, "isolated"), { recursive: true });
   const maskPixels = [];
@@ -155,6 +156,8 @@ test("contact-sheet contain padding stays transparent over the Bone review tile"
 
   const result = await materializeParametricOvercapCandidate({ recipePath, blenderOutputDir, outputDir });
   const { data, info } = await sharp(result.contactSheetPath).raw().toBuffer({ resolveWithObject: true });
+  assert.equal(info.width, 720);
+  assert.equal(info.height, 480);
   const pixel = (x: number, y: number) => Array.from(data.subarray((y * info.width + x) * info.channels, (y * info.width + x) * info.channels + 3));
   assert.deepEqual(pixel(35, 200), [245, 243, 239], "contain padding rendered as an opaque black bar instead of the Bone tile background");
 });

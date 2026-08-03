@@ -6,7 +6,9 @@
     "familyIntakesPath": "docs/paper-doll-rig/catalog-family-intakes.json",
     "familyIntakesSha256": "e8eded0a3effa5651c7e06787996288f8592490caad6d19c292f8a2ad01d4842",
     "componentAuthorityQueuePath": "docs/paper-doll-rig/component-authority-queue.json",
-    "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e"
+    "componentAuthorityQueueSha256": "ef088389bd7e475eae193f7a3b50c017367b3f5aa14a5fb588358bdea6f2eb1e",
+    "parametricFamilyIndexPath": "docs/paper-doll-rig/parametric-component-family-index.json",
+    "parametricFamilyIndexSha256": "1a0fe66e1ba098cedcb44f14908d29a7b94e9bd8bb2e16edeb44f82117365012"
   },
   "summary": {
     "operationalRowCount": 318,
@@ -8607,7 +8609,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 166,
@@ -8636,7 +8638,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 167,
@@ -8665,7 +8667,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 168,
@@ -8694,7 +8696,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 169,
@@ -8723,7 +8725,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 170,
@@ -8752,7 +8754,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 171,
@@ -8781,7 +8783,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 172,
@@ -8810,7 +8812,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 173,
@@ -8839,7 +8841,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 174,
@@ -8868,7 +8870,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 175,
@@ -8897,7 +8899,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 176,
@@ -8926,7 +8928,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 177,
@@ -8955,7 +8957,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 178,
@@ -8984,7 +8986,7 @@
       "nextGate": "Resolve source identity/reference evidence before authority creation.",
       "existingAssetPaths": [],
       "existingAssetSha256": [],
-      "notes": "duplicate-source-rows-require-alias-review | conflicting-slot-proposal | release-slot-contract-extension-required"
+      "notes": "conflicting-slot-proposal | duplicate-source-rows-require-alias-review | release-slot-contract-extension-required"
     },
     {
       "lineNumber": 179,
@@ -13662,12 +13664,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 288,
@@ -13690,12 +13698,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 289,
@@ -13774,12 +13788,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/standard-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "f7ecb8a90be588236fae483fb1eab7fac0b672074c1d28e153137e933dade336"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 292,
@@ -13886,12 +13906,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/standard-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-standard-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "f7ecb8a90be588236fae483fb1eab7fac0b672074c1d28e153137e933dade336"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 296,
@@ -13914,12 +13940,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 297,
@@ -13998,12 +14030,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 300,
@@ -14026,12 +14064,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 301,
@@ -14054,12 +14098,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 302,
@@ -14082,12 +14132,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 303,
@@ -14110,12 +14166,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 304,
@@ -14138,12 +14200,18 @@
       "cohortKeys": [],
       "status": "needs-authority",
       "priority": "P1-PRODUCE",
-      "authorityStatus": "missing",
+      "authorityStatus": "dimension-calibrated-profile-review-candidate",
       "compatibilityStatus": "unverified",
-      "nextGate": "Create one geometry authority, derive approved material pixels, then verify fit per cohort.",
-      "existingAssetPaths": [],
-      "existingAssetSha256": [],
-      "notes": ""
+      "nextGate": "Review and name the dimension-calibrated profile authority; material pixels, family fit, and compatibility remain unapproved.",
+      "existingAssetPaths": [
+        "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/candidate-manifest.json",
+        "outputs/paper-doll-parametric-overcaps/13-415-rollon-cap/candidate-v1/review-contact-sheet.png"
+      ],
+      "existingAssetSha256": [
+        "6f728d0e688166166632408e8523b4fcc6d1599d874112da278117bbb37621bf"
+      ],
+      "notes": "Local candidate has exact shared alpha but is not geometry locked or production eligible."
     },
     {
       "lineNumber": 305,

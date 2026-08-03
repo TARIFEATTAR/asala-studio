@@ -43,6 +43,8 @@ async function buildReviewContactSheet(
 ): Promise<Buffer> {
   const tileWidth = 360;
   const tileHeight = 480;
+  const columns = Math.min(3, variants.length);
+  const rows = Math.ceil(variants.length / columns);
   const tiles = await Promise.all(variants.map(async (variant) => {
     const recipeVariant = recipe.variants.find((entry) => entry.variantKey === variant.variantKey);
     if (!recipeVariant) throw new Error(`${variant.variantKey} is missing from the recipe.`);
@@ -65,11 +67,11 @@ async function buildReviewContactSheet(
     return sharp(label).composite([{ input: image, left: 30, top: 28 }]).png().toBuffer();
   }));
   return sharp({
-    create: { width: 1080, height: 1440, channels: 4, background: "#151515" },
+    create: { width: columns * tileWidth, height: rows * tileHeight, channels: 4, background: "#151515" },
   }).composite(tiles.map((input, index) => ({
     input,
-    left: (index % 3) * tileWidth,
-    top: Math.floor(index / 3) * tileHeight,
+    left: (index % columns) * tileWidth,
+    top: Math.floor(index / columns) * tileHeight,
   }))).png().toBuffer();
 }
 

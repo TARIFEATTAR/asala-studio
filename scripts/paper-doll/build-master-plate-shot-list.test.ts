@@ -24,3 +24,25 @@ test("shot list distinguishes exact coverage from supplemental local assets", as
   assert.equal(shotList.rows.filter((row) => row.recordType === "supplemental-existing" && row.plateType !== "body").length, 4);
   assert.ok(shotList.rows.filter((row) => row.recordType === "source-gap").every((row) => row.status === "needs-source"));
 });
+
+test("shot list records local parametric profile candidates without counting them as approved authority", async () => {
+  const shotList = await buildMasterPlateShotList();
+  const candidates = shotList.rows.filter((row) => row.authorityStatus === "dimension-calibrated-profile-review-candidate");
+  assert.equal(candidates.length, 11);
+  assert.deepEqual(new Set(candidates.map((row) => row.sourceIdentity)), new Set([
+    "CPRoll13-415BlackDot",
+    "CPRoll13-415BlkSh",
+    "CPRoll13-415Cu",
+    "CPRoll13-415GlMt",
+    "CPRoll13-415GlSh",
+    "CPRoll13-415PinkDot",
+    "CPRoll13-415SlDot",
+    "CPRoll13-415SlMt",
+    "CPRoll13-415SlSh",
+    "CP13-415Gl",
+    "CP13-415Sl",
+  ]));
+  assert.ok(candidates.every((row) => row.status === "needs-authority"));
+  assert.ok(candidates.every((row) => row.existingAssetPaths.some((assetPath) => assetPath.endsWith("-family-recipe.json"))));
+  assert.equal(shotList.summary.exactSourceBackedExistingCount, 22);
+});

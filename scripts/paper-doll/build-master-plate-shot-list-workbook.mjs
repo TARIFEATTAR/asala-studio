@@ -24,6 +24,7 @@ const shotSheet = workbook.worksheets.add("Shot List");
 const geometrySheet = workbook.worksheets.add("Geometry Review");
 const sourceReviewSheet = workbook.worksheets.add("Source Review");
 const decisionSheet = workbook.worksheets.add("Review Decisions");
+const profileCandidateSheet = workbook.worksheets.add("Profile Candidates");
 const gapSheet = workbook.worksheets.add("Source Gaps");
 const definitionSheet = workbook.worksheets.add("Definitions");
 
@@ -363,6 +364,36 @@ decisionSheet.freezePanes.freezeColumns(3);
 [46, 44, 34, 28, 52, 62, 64, 18, 58, 18, 22, 36]
   .forEach((width, index) => decisionSheet.getRangeByIndexes(0, index, 1, 1).format.columnWidth = width);
 
+const profileCandidates = source.rows.filter((row) => row.authorityStatus === "dimension-calibrated-profile-review-candidate");
+titleBand(
+  profileCandidateSheet,
+  `PROFILE CANDIDATES — ${profileCandidates.length} APPEARANCES`,
+  "Measured local Blender candidates awaiting named profile authority. Exact shared alpha is evidence of consistency, not approval or compatibility.",
+  "N",
+);
+profileCandidateSheet.getRange("A5:N5").values = [[
+  "Line", "Source Identity", "Plate Type", "Family", "Neck Finish", "Appearance", "Geometry / Authority Key",
+  "Authority Status", "Next Gate", "Recipe / Candidate Evidence", "Source References", "Owner", "Review Status", "Approval Note",
+]];
+profileCandidateSheet.getRange(`A6:N${profileCandidates.length + 5}`).values = profileCandidates.map((row) => [
+  row.lineNumber, safeText(row.sourceIdentity), safeText(row.plateType), safeText(row.family), safeText(row.neckFinish),
+  safeText(row.appearance), safeText(row.geometryOrAuthorityKey), safeText(row.authorityStatus), safeText(row.nextGate),
+  safeText(row.existingAssetPaths), safeText(row.sourceReferenceUrls), "", "Not Started", "",
+]);
+const profileCandidateTable = profileCandidateSheet.tables.add(`A5:N${profileCandidates.length + 5}`, true, "ParametricProfileCandidatesTable");
+profileCandidateTable.style = "TableStyleMedium4";
+profileCandidateTable.showFilterButton = true;
+profileCandidateSheet.getRange("A5:N5").format = { fill: colors.charcoal, font: { color: colors.bone, bold: true }, wrapText: true };
+profileCandidateSheet.getRange(`A6:N${profileCandidates.length + 5}`).format = { fill: colors.paleAmber, verticalAlignment: "top", wrapText: true };
+profileCandidateSheet.getRange(`A6:N${profileCandidates.length + 5}`).format.rowHeight = 52;
+profileCandidateSheet.getRange(`M6:M${profileCandidates.length + 5}`).dataValidation = {
+  rule: { type: "list", values: ["Not Started", "In Review", "Profile Revision", "Authority Approved", "Blocked"] },
+};
+profileCandidateSheet.freezePanes.freezeRows(5);
+profileCandidateSheet.freezePanes.freezeColumns(5);
+[8, 28, 16, 22, 16, 30, 48, 40, 58, 66, 52, 18, 22, 38]
+  .forEach((width, index) => profileCandidateSheet.getRangeByIndexes(0, index, 1, 1).format.columnWidth = width);
+
 const sourceGaps = source.rows.filter((row) => row.recordType === "source-gap");
 titleBand(
   gapSheet,
@@ -386,7 +417,7 @@ titleBand(
   "The workbook is a filterable operational view of immutable, machine-readable repository evidence.",
   "F",
 );
-definitionSheet.getRange("A5:C15").values = [
+definitionSheet.getRange("A5:C16").values = [
   ["Term", "Meaning", "Required action"],
   ["Source-backed plate", "One catalog-evidenced body or component appearance output.", "Produce or verify exact pixels."],
   ["Operational row", "A source-backed plate, preserved supplemental asset, or blocked source gap.", "Follow its next gate."],
@@ -396,24 +427,26 @@ definitionSheet.getRange("A5:C15").values = [
   ["manual-review-required", "Catalog evidence conflicts or is insufficient.", "Resolve truth before generation."],
   ["needs-source", "Required responsibility has no canonical independent source row.", "Obtain verified physical/source identity."],
   ["needs-authority", "Source evidence exists but no clean authority is registered.", "Create authority, derive material pixels, exact-alpha clamp."],
+  ["Profile candidate", "A measured local parametric candidate with exact shared alpha but no named geometry approval.", "Review profile; do not count as authority or production coverage."],
   ["Descriptor review lane", "A conservative cluster sharing exact slot, neck, applicator, and cap-style descriptors.", "Review physical dimensions and silhouette; never call it geometry locked."],
   ["Exact shared authority", "Every appearance in a lane resolves to one geometry family and one identical authority-mask SHA.", "May serve as one reusable geometry authority after named verification."],
 ];
-definitionSheet.getRange("A5:C15").format = { borders: { preset: "all", style: "thin", color: "#CFC9BE" }, wrapText: true, verticalAlignment: "top" };
+definitionSheet.getRange("A5:C16").format = { borders: { preset: "all", style: "thin", color: "#CFC9BE" }, wrapText: true, verticalAlignment: "top" };
 definitionSheet.getRange("A5:C5").format = { fill: colors.gold, font: { color: colors.charcoal, bold: true } };
-definitionSheet.getRange("A17:F25").values = [
+definitionSheet.getRange("A18:F27").values = [
   ["Source", "Repository path", "SHA-256", "Purpose", "Remote writes", "Current Release / Sanity"],
   ["Catalog backlog", source.generatedFrom.catalogBacklogPath, source.generatedFrom.catalogBacklogSha256, "161 body appearances and catalog identity evidence", "None", "Unchanged"],
   ["Family intakes", source.generatedFrom.familyIntakesPath, source.generatedFrom.familyIntakesSha256, "97 family/capacity/neck cohorts", "None", "Unchanged"],
   ["Component queue", source.generatedFrom.componentAuthorityQueuePath, source.generatedFrom.componentAuthorityQueueSha256, "148 explicit component source identities", "None", "Unchanged"],
+  ["Parametric family index", source.generatedFrom.parametricFamilyIndexPath, source.generatedFrom.parametricFamilyIndexSha256, "Measured local profile candidates awaiting named authority review", "None", "Unchanged"],
   ["Geometry review", "docs/paper-doll-rig/component-geometry-review-groups.json", "See repository", "42 conservative physical-review lanes", "None", "Unchanged"],
   ["Source review", "docs/paper-doll-rig/component-source-review-summary.json", "See repository", "28 calibrated lanes / 117 references; diagnostics only", "None", "Unchanged"],
   ["Review decisions", "docs/paper-doll-rig/component-physical-review-decisions.json", "See repository", "Explicit split/quarantine boundaries without geometry approval", "None", "Unchanged"],
   ["Master JSON", "docs/paper-doll-rig/master-plate-shot-list.json", "See repository", "Canonical machine-readable ledger", "None", "Unchanged"],
   ["Master CSV", "docs/paper-doll-rig/master-plate-shot-list.csv", "Generated with JSON", "Portable filter/sort interchange", "None", "Unchanged"],
 ];
-definitionSheet.getRange("A17:F25").format = { borders: { preset: "all", style: "thin", color: "#CFC9BE" }, wrapText: true, verticalAlignment: "top" };
-definitionSheet.getRange("A17:F17").format = { fill: colors.charcoal2, font: { color: colors.bone, bold: true } };
+definitionSheet.getRange("A18:F27").format = { borders: { preset: "all", style: "thin", color: "#CFC9BE" }, wrapText: true, verticalAlignment: "top" };
+definitionSheet.getRange("A18:F18").format = { fill: colors.charcoal2, font: { color: colors.bone, bold: true } };
 [24, 48, 52, 40, 18, 22].forEach((width, index) => definitionSheet.getRangeByIndexes(0, index, 1, 1).format.columnWidth = width);
 definitionSheet.freezePanes.freezeRows(3);
 
@@ -424,8 +457,9 @@ const previews = [
   ["Geometry Review", "A1:U28", "geometry-review-preview.png"],
   ["Source Review", "A1:U28", "source-review-preview.png"],
   ["Review Decisions", "A1:L8", "review-decisions-preview.png"],
+  ["Profile Candidates", "A1:N16", "profile-candidates-preview.png"],
   ["Source Gaps", "A1:H9", "source-gaps-preview.png"],
-  ["Definitions", "A1:F25", "definitions-preview.png"],
+  ["Definitions", "A1:F27", "definitions-preview.png"],
 ];
 for (const [sheetName, range, filename] of previews) {
   const image = await workbook.render({ sheetName, range, scale: 1, format: "png" });

@@ -1,6 +1,12 @@
 import { z } from "zod";
 
 const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
+const dimensionFieldPattern = /^(\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)\s*mm$/i;
+
+function parseDimensionField(value: string): { value: number; tolerance: number } | null {
+  const match = value.match(dimensionFieldPattern);
+  return match ? { value: Number(match[1]), tolerance: Number(match[2]) } : null;
+}
 
 const materialSchema = z.enum([
   "mirror-silver",
@@ -48,20 +54,20 @@ const parametricOvercapFamilyRecipeSchema = z.object({
     path: z.string().min(1),
     websiteSku: z.string().min(1),
     fields: z.object({
-      heightWithCap: z.literal("24 ±0.5 mm"),
-      diameter: z.literal("17 ±0.5 mm"),
+      heightWithCap: z.string().min(1),
+      diameter: z.string().min(1),
     }),
   }),
   nominalDimensionsMm: z.object({
-    outsideDiameter: z.literal(17),
-    outsideDiameterTolerance: z.literal(0.5),
-    height: z.literal(24),
-    heightTolerance: z.literal(0.5),
+    outsideDiameter: z.number().positive(),
+    outsideDiameterTolerance: z.number().nonnegative(),
+    height: z.number().positive(),
+    heightTolerance: z.number().nonnegative(),
     verified: z.literal(true),
   }),
   geometryCalibration: z.object({
-    heightScale: z.literal(1),
-    derivedFrom: z.literal("canonical-physical-dimensions-plus-source-medoid-profile-v1"),
+    heightScale: z.number().positive(),
+    derivedFrom: z.string().min(1),
   }),
   profileNormalized: z.array(z.tuple([z.number().min(0).max(0.5), z.number().min(0).max(1)])).min(4),
   render: z.object({
@@ -85,6 +91,14 @@ const parametricOvercapFamilyRecipeSchema = z.object({
   }),
 }).superRefine((recipe, context) => {
   const unique = (values: string[]) => new Set(values).size === values.length;
+  const heightField = parseDimensionField(recipe.physicalTruthSource.fields.heightWithCap);
+  const diameterField = parseDimensionField(recipe.physicalTruthSource.fields.diameter);
+  if (!heightField || heightField.value !== recipe.nominalDimensionsMm.height || heightField.tolerance !== recipe.nominalDimensionsMm.heightTolerance) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["physicalTruthSource", "fields", "heightWithCap"], message: "Height field must match nominal dimensions." });
+  }
+  if (!diameterField || diameterField.value !== recipe.nominalDimensionsMm.outsideDiameter || diameterField.tolerance !== recipe.nominalDimensionsMm.outsideDiameterTolerance) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["physicalTruthSource", "fields", "diameter"], message: "Diameter field must match nominal dimensions." });
+  }
   if (!unique(recipe.variants.map((variant) => variant.variantKey))) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["variants"], message: "Variant keys must be unique." });
   }

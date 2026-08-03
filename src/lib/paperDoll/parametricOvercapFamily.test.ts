@@ -8,6 +8,7 @@ import {
 } from "./parametricOvercapFamily";
 
 const recipePath = "docs/paper-doll-rig/rollon-cap-13-415-family-recipe.json";
+const standardCapRecipePath = "docs/paper-doll-rig/standard-cap-13-415-family-recipe.json";
 
 test("13-415 roll-on recipe resolves nine catalog appearances onto one dimension-calibrated geometry candidate", async () => {
   const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(recipePath, "utf8")));
@@ -52,4 +53,63 @@ test("recipe rejects duplicate catalog identities instead of silently collapsing
     () => parseParametricOvercapFamilyRecipe(raw),
     /source identities must be unique/i,
   );
+});
+
+test("parametric contract accepts a different verified measured cap family", async () => {
+  const raw = JSON.parse(await readFile(recipePath, "utf8"));
+  raw.recipeId = "measured-cap-19x30-v1";
+  raw.familyKey = "MEASURED-CAP-19X30";
+  raw.neckFinish = "18-415";
+  raw.geometryFamilyId = "closure__18-415__measured-overcap__physical-v1";
+  raw.physicalTruthSource.websiteSku = "MEASURED-19X30";
+  raw.physicalTruthSource.fields = {
+    heightWithCap: "30 ±0.25 mm",
+    diameter: "19 ±0.2 mm",
+  };
+  raw.nominalDimensionsMm = {
+    outsideDiameter: 19,
+    outsideDiameterTolerance: 0.2,
+    height: 30,
+    heightTolerance: 0.25,
+    verified: true,
+  };
+  raw.geometryCalibration.derivedFrom = "verified-drawing-plus-source-profile-v1";
+  raw.variants = raw.variants.slice(0, 1).map((variant: Record<string, unknown>) => ({
+    ...variant,
+    geometryFamilyId: raw.geometryFamilyId,
+  }));
+  raw.crystalLayout = [];
+  raw.variants[0].decoration = "none";
+
+  const recipe = parseParametricOvercapFamilyRecipe(raw);
+  assert.deepEqual(recipe.nominalDimensionsMm, {
+    outsideDiameter: 19,
+    outsideDiameterTolerance: 0.2,
+    height: 30,
+    heightTolerance: 0.25,
+    verified: true,
+  });
+  assert.equal(recipe.physicalTruthSource.fields.heightWithCap, "30 ±0.25 mm");
+});
+
+test("parametric contract rejects physical-truth text that disagrees with nominal dimensions", async () => {
+  const raw = JSON.parse(await readFile(recipePath, "utf8"));
+  raw.physicalTruthSource.fields.diameter = "19 ±0.5 mm";
+
+  assert.throws(
+    () => parseParametricOvercapFamilyRecipe(raw),
+    /diameter field must match nominal dimensions/i,
+  );
+});
+
+test("13-415 standard-cap recipe preserves its two catalog identities as a separate geometry candidate", async () => {
+  const recipe = parseParametricOvercapFamilyRecipe(JSON.parse(await readFile(standardCapRecipePath, "utf8")));
+  assert.equal(recipe.geometryFamilyId, "closure__13-415__standard-overcap__physical-v1");
+  assert.equal(recipe.authorityReviewGroupKey, "geometry-review__cap__13-415__bd7f336278");
+  assert.deepEqual(recipe.variants.map((variant) => [variant.variantKey, variant.sourceIdentity, variant.graceSku]), [
+    ["SGLD", "CP13-415Gl", "CMP-CAP-SGLD-13-415-01"],
+    ["SSLV", "CP13-415Sl", "CMP-CAP-SLV-13-415-01"],
+  ]);
+  assert.equal(new Set(recipe.variants.map((variant) => variant.geometryFamilyId)).size, 1);
+  assert.equal(recipe.mutationPolicy.remoteWritesPerformed, false);
 });

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "standard-cap-13-415-family-v1",
+  "familyKey": "STANDARD-CAP-13-415",
+  "neckFinish": "13-415",
+  "geometryFamilyId": "closure__13-415__standard-overcap__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__cap__13-415__bd7f336278",
+  "authorityState": "dimension-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "CP13-415Gl",
+    "sourceSha256": "6cba146578689e5fbcf5ec2339274f43bea227d20f2e1cf214201c24e6019f24",
+    "sourceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415Gl.gif",
+    "localReviewPath": "outputs/paper-doll-component-authority-reviews/geometry-review__cap__13-415__bd7f336278/source/cp13-415gl__01.gif",
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/BestBottles_Master_v8.3_Verification.csv",
+    "websiteSku": "CP13-415Gl",
+    "fields": {
+      "heightWithCap": "24 ±0.5 mm",
+      "diameter": "17 ±0.5 mm"
+    }
+  },
+  "nominalDimensionsMm": {
+    "outsideDiameter": 17,
+    "outsideDiameterTolerance": 0.5,
+    "height": 24,
+    "heightTolerance": 0.5,
+    "verified": true
+  },
+  "geometryCalibration": {
+    "heightScale": 1,
+    "derivedFrom": "canonical-physical-dimensions-plus-source-medoid-profile-v1"
+  },
+  "profileNormalized": [
+    [0.5, 0],
+    [0.5, 0.9],
+    [0.498, 0.945],
+    [0.492, 0.966],
+    [0.48, 0.982],
+    [0.456, 0.993],
+    [0.41, 0.998],
+    [0, 1]
+  ],
+  "render": {
+    "widthPx": 1400,
+    "heightPx": 2050,
+    "samples": 128,
+    "topArcRatio": 0.02
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "SGLD",
+      "sourceIdentity": "CP13-415Gl",
+      "graceSku": "CMP-CAP-SGLD-13-415-01",
+      "material": "mirror-gold",
+      "decoration": "none",
+      "geometryFamilyId": "closure__13-415__standard-overcap__physical-v1"
+    },
+    {
+      "variantKey": "SSLV",
+      "sourceIdentity": "CP13-415Sl",
+      "graceSku": "CMP-CAP-SLV-13-415-01",
+      "material": "mirror-silver",
+      "decoration": "none",
+      "geometryFamilyId": "closure__13-415__standard-overcap__physical-v1"
+    }
+  ],
+  "crystalLayout": [],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}
