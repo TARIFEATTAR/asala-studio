@@ -32,6 +32,13 @@ export const PaperDollQaStatusSchema = z.enum([
   "blocked",
 ]);
 
+export const PaperDollPixelBoundsSchema = z.object({
+  left: z.number().int().nonnegative(),
+  top: z.number().int().nonnegative(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+
 export const PaperDollReleaseAssetSchema = z.object({
   componentVersionId: z.string().min(1),
   componentKey: z.string().min(1),
@@ -54,6 +61,12 @@ export const PaperDollReleaseAssetSchema = z.object({
   mountAxisXPx: z.number(),
   seatYPx: z.number(),
   approvalStatus: z.enum(["candidate", "blocked", "approved", "rejected"]),
+  candidateId: z.string().min(1).optional(),
+  placementVersionId: z.string().min(1).optional(),
+  sourceBoundsPx: PaperDollPixelBoundsSchema.optional(),
+  authorityBoundsPx: PaperDollPixelBoundsSchema.optional(),
+  editBoundsPx: PaperDollPixelBoundsSchema.optional(),
+  placementBoundsPx: PaperDollPixelBoundsSchema.optional(),
 });
 
 export const PaperDollQaEvidenceSchema = z.object({
@@ -103,6 +116,7 @@ export const PaperDollReleaseManifestSchema = z.object({
 });
 
 export type PaperDollSlot = z.infer<typeof PaperDollSlotSchema>;
+export type PaperDollPixelBounds = z.infer<typeof PaperDollPixelBoundsSchema>;
 export type PaperDollReleaseAsset = z.infer<typeof PaperDollReleaseAssetSchema>;
 export type PaperDollQaEvidence = z.infer<typeof PaperDollQaEvidenceSchema>;
 export type PaperDollReleaseManifest = z.infer<typeof PaperDollReleaseManifestSchema>;

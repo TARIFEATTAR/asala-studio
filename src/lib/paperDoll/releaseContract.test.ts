@@ -45,3 +45,38 @@ test("canonical JSON and manifest hash ignore object insertion order", () => {
   assert.equal(canonicalizeReleaseValue(validRelease), canonicalizeReleaseValue(reordered));
   assert.equal(hashPaperDollRelease(validRelease), hashPaperDollRelease(reordered));
 });
+
+test("release assets preserve optional candidate, placement, and four-box evidence", () => {
+  const bounds = { left: 869, top: 500, width: 344, height: 502 };
+  const parsed = parsePaperDollReleaseManifest({
+    ...validRelease,
+    assets: [{
+      componentVersionId: "cap-v1",
+      componentKey: "closure__17-415__rollon-overcap",
+      geometryFamilyId: "closure__17-415__rollon-overcap-v1",
+      slot: "cap",
+      variantKey: "SGLD",
+      materialVariant: "shiny-gold",
+      imagePath: "private://paper-doll-components/cap.png",
+      imageSha256: "a".repeat(64),
+      geometryMaskPath: "private://paper-doll-authority/cap-mask.png",
+      geometryMaskSha256: "b".repeat(64),
+      widthPx: 2080,
+      heightPx: 2288,
+      alphaBounds: { left: 869, top: 500, right: 1212, bottom: 1001 },
+      mountAxisXPx: 1041,
+      seatYPx: 1002,
+      approvalStatus: "approved",
+      candidateId: "candidate-cap-gold-v1",
+      placementVersionId: "placement-cap-v1",
+      sourceBoundsPx: { left: 29, top: 24, width: 980, height: 1461 },
+      authorityBoundsPx: bounds,
+      editBoundsPx: { left: 29, top: 24, width: 980, height: 1461 },
+      placementBoundsPx: bounds,
+    }],
+  });
+
+  assert.equal(parsed.assets[0].candidateId, "candidate-cap-gold-v1");
+  assert.equal(parsed.assets[0].placementVersionId, "placement-cap-v1");
+  assert.deepEqual(parsed.assets[0].placementBoundsPx, bounds);
+});

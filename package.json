@@ -88,6 +88,7 @@
     "paperdoll:regen-closures": "tsx scripts/paper-doll/regenerate-closures.ts",
     "paperdoll:render-cyl9-caps": "tsx scripts/paper-doll/render-cyl9-cap-family.ts",
     "test:paperdoll:cyl9-caps": "tsx --test src/lib/paperDoll/cyl9CapFamily.test.ts scripts/paper-doll/render-cyl9-cap-family.test.ts",
+    "test:paperdoll:factory": "tsx --test src/lib/paperDoll/componentPlateContract.test.ts src/lib/paperDoll/releaseContract.test.ts",
     "test:paperdoll": "tsx --test src/lib/paperDoll/componentRegistry.test.ts src/lib/paperDoll/compositeEngine.test.ts src/lib/paperDoll/weldLane.test.ts src/lib/paperDoll/qaGates.test.ts src/lib/paperDoll/closureMaterialPilot.test.ts"
   },
   "dependencies": {
