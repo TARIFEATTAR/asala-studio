@@ -227,6 +227,77 @@ test("rejects a reusable exterior plate that is not anchored to the physical mou
   );
 });
 
+test("accepts a reducer insert as the named primary component authority", () => {
+  const reducerKit = {
+    schemaVersion: 1,
+    kitId: "reducer__18-415__physical-v1",
+    sourceReviewGroupKey: "geometry-review__reducer__18-415__v1",
+    sourceCompositeProductionEligible: false,
+    primaryAuthorityPartId: "reducer-insert",
+    canonicalCanvas: { width: 2080, height: 2288 },
+    sources: [{
+      sourceId: "standalone-reducer",
+      sourceType: "photoshop-layered-source",
+      originalFilename: "18-415Reducer.psd",
+      archiveRelativePath: "reducers/18-415Reducer.psd",
+      sha256: "a".repeat(64),
+      productionEligible: false,
+    }],
+    parts: [
+      {
+        partId: "reducer-insert",
+        responsibility: "visible-insert",
+        outputPolicy: "reusable-full-canvas-plate",
+        reviewFraming: "center-nontransparent-bounds",
+        productionAnchor: "mount-axis-seat",
+        independentlySelectable: true,
+        assemblyContextQa: true,
+        sourceSelectors: [{
+          sourceId: "standalone-reducer",
+          method: "psd-layer-scene",
+          sceneIndex: 3,
+          layerName: "translucent reducer insert",
+        }],
+      },
+      {
+        partId: "standalone-cap-reference",
+        responsibility: "integration-effect",
+        outputPolicy: "source-evidence-only",
+        reviewFraming: "preserve-source-bounds",
+        productionAnchor: "not-applicable",
+        independentlySelectable: false,
+        assemblyContextQa: false,
+        sourceSelectors: [{
+          sourceId: "standalone-reducer",
+          method: "psd-layer-scene",
+          sceneIndex: 2,
+          layerName: "black cap reference",
+        }],
+      },
+    ],
+  } as const;
+
+  const parsed = parseComponentKitDecomposition(reducerKit);
+  const plan = buildComponentKitDecompositionPlan(parsed);
+
+  assert.equal(parsed.primaryAuthorityPartId, "reducer-insert");
+  assert.deepEqual(plan.reusablePlatePartIds, ["reducer-insert"]);
+  assert.deepEqual(plan.sourceEvidencePartIds, ["standalone-cap-reference"]);
+  assert.equal(plan.productionPlateCount, 1);
+});
+
+test("rejects a named primary component authority that is not a reusable mount-axis component", () => {
+  const invalid = structuredClone(sprayerKit) as Record<string, unknown> & {
+    parts: Array<Record<string, unknown>>;
+  };
+  invalid.primaryAuthorityPartId = "dip-tube";
+
+  assert.throws(
+    () => parseComponentKitDecomposition(invalid),
+    /Primary component authority must be a reusable exterior dispenser or visible insert anchored to the physical mount axis/,
+  );
+});
+
 test("the 15-415 sprayer recipe records the layered head and assembly sources without flattening the kit", async () => {
   const recipePath = path.resolve(
     "docs/paper-doll-rig/sprayer-15-415-component-kit-decomposition.json",
@@ -322,4 +393,26 @@ test("the 28/50 mL jumbo roll-on kit is closed to two rollers and black/white ov
   assert.ok(recipe.sources.every((source) => source.productionEligible === false));
   assert.ok(sourceIds.every((sourceId) => /jumbo-(28|50)-(plastic|metal)-(black|white)/.test(sourceId)));
   assert.ok(sourceIds.every((sourceId) => !/boston|dropper|spray|pump/i.test(sourceId)));
+});
+
+test("the 18-415 reducer kit promotes only the exposed flange and keeps caps separate", async () => {
+  const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
+    path.resolve("docs/paper-doll-rig/reducer-18-415-component-kit-decomposition.json"),
+    "utf8",
+  )));
+  const plan = buildComponentKitDecompositionPlan(recipe);
+  const flange = recipe.parts.find((part) => part.partId === "reducer-visible-flange");
+  const fullInsert = recipe.parts.find((part) => part.partId === "full-insert-geometry-reference");
+
+  assert.equal(recipe.primaryAuthorityPartId, "reducer-visible-flange");
+  assert.deepEqual(plan.reusablePlatePartIds, ["reducer-visible-flange"]);
+  assert.equal(plan.productionPlateCount, 1);
+  assert.deepEqual(flange?.sourceSelectors, [{
+    sourceId: "reducer-standalone",
+    method: "reviewed-selection-mask",
+  }]);
+  assert.equal(fullInsert?.outputPolicy, "source-evidence-only");
+  assert.equal(fullInsert?.sourceSelectors[0].method, "psd-layer-scene");
+  assert.ok(recipe.parts.every((part) => !/gold|silver|leather|white-cap-variant/i.test(part.partId)));
+  assert.ok(recipe.sources.every((source) => source.productionEligible === false));
 });

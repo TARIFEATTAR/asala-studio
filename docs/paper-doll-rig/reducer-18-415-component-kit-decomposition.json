@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "kitId": "reducer__18-415__visible-flange__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__reducer__18-415__visible-flange-v1",
+  "sourceCompositeProductionEligible": false,
+  "primaryAuthorityPartId": "reducer-visible-flange",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "sources": [
+    {
+      "sourceId": "reducer-standalone",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "18-415Reducer.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/23. 18-415 Reducer/18-415Reducer.psd",
+      "sha256": "64d269c34ba00ad242a426b4aa18be4259aa858e123561ab7a5ce8392fd31bfa",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "cylinder-30-reducer-white-archive-reference",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "10. GBCyl30RdcrWht.psd",
+      "archiveRelativePath": "2. 18-415 Bottles/1. Cylindrical 30ml/1. Cylindrical 30ml PSD/10. GBCyl30RdcrWht.psd",
+      "sha256": "8af109efe5ad6d5f6754d9c1b1620b10b0a64586e7490db909666e185738aedd",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "cylinder-50-reducer-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "10. GBCyl50RdcrWht.psd",
+      "archiveRelativePath": "2. 18-415 Bottles/2. Cylindrical 50ml/1. Cylindrical 50ml PSD/10. GBCyl50RdcrWht.psd",
+      "sha256": "9bd9ab6585d778dcfde0545196ea6e7f23b06470b373206fd053c0a7b1584bc7",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "cylinder-100-reducer-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "10. GBCyl100RdcrWht.psd",
+      "archiveRelativePath": "2. 18-415 Bottles/3. Cylindrical 100ml/1. Cylindrical 100ml PSD/10. GBCyl100RdcrWht.psd",
+      "sha256": "94f9a3288e11d5eb2669894984c24c14ed83c757cf12c861f04594de93772f61",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "reducer-visible-flange",
+      "responsibility": "visible-insert",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "reducer-standalone",
+          "method": "reviewed-selection-mask"
+        }
+      ]
+    },
+    {
+      "partId": "full-insert-geometry-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": false,
+      "sourceSelectors": [
+        {
+          "sourceId": "reducer-standalone",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "full translucent reducer insert; hidden plug body is reference only"
+        }
+      ]
+    },
+    {
+      "partId": "standalone-black-cap-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": false,
+      "sourceSelectors": [
+        {
+          "sourceId": "reducer-standalone",
+          "method": "psd-layer-scene",
+          "sceneIndex": 2,
+          "layerName": "black cap reference; separate cap-family responsibility"
+        }
+      ]
+    },
+    {
+      "partId": "cylinder-assembly-context-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "cylinder-30-reducer-white-archive-reference",
+          "method": "reviewed-selection-mask"
+        },
+        {
+          "sourceId": "cylinder-50-reducer-white",
+          "method": "reviewed-selection-mask"
+        },
+        {
+          "sourceId": "cylinder-100-reducer-white",
+          "method": "reviewed-selection-mask"
+        }
+      ]
+    }
+  ]
+}

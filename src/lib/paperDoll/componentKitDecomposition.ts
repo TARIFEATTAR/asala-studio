@@ -125,6 +125,7 @@ export const ComponentKitDecompositionSchema = z.object({
   kitId: z.string().min(1),
   sourceReviewGroupKey: z.string().min(1),
   sourceCompositeProductionEligible: z.literal(false),
+  primaryAuthorityPartId: z.string().min(1).optional(),
   canonicalCanvas: z.object({
     width: z.number().int().positive(),
     height: z.number().int().positive(),
@@ -152,7 +153,26 @@ export const ComponentKitDecompositionSchema = z.object({
   const sourceById = new Map(kit.sources.map((source) => [source.sourceId, source]));
 
   const exteriorParts = kit.parts.filter((part) => part.responsibility === "exterior-dispenser");
-  if (exteriorParts.length !== 1) {
+  const namedPrimary = kit.primaryAuthorityPartId
+    ? kit.parts.find((part) => part.partId === kit.primaryAuthorityPartId)
+    : undefined;
+  if (kit.primaryAuthorityPartId) {
+    const namedPrimaryIsValid = namedPrimary
+      && (namedPrimary.responsibility === "exterior-dispenser" || namedPrimary.responsibility === "visible-insert")
+      && namedPrimary.outputPolicy === "reusable-full-canvas-plate"
+      && namedPrimary.productionAnchor === "mount-axis-seat"
+      && namedPrimary.independentlySelectable;
+    const exteriorSetIsUnambiguous = namedPrimary?.responsibility === "exterior-dispenser"
+      ? exteriorParts.length === 1 && exteriorParts[0].partId === namedPrimary.partId
+      : exteriorParts.length === 0;
+    if (!namedPrimaryIsValid || !exteriorSetIsUnambiguous) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Primary component authority must be a reusable exterior dispenser or visible insert anchored to the physical mount axis.",
+        path: ["primaryAuthorityPartId"],
+      });
+    }
+  } else if (exteriorParts.length !== 1) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Component kit must declare exactly one exterior dispenser authority.",
@@ -266,6 +286,21 @@ export const ComponentKitDecompositionSchema = z.object({
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Exterior dispenser must use the physical mount-axis seat as its reusable-plate anchor.",
+        path: ["parts", index],
+      });
+    }
+
+    if (
+      part.responsibility === "visible-insert"
+      && part.outputPolicy === "reusable-full-canvas-plate"
+      && (
+        part.productionAnchor !== "mount-axis-seat"
+        || !part.independentlySelectable
+      )
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Reusable visible insert must use the physical mount-axis seat and remain independently selectable.",
         path: ["parts", index],
       });
     }

@@ -117,6 +117,7 @@
     "paperdoll:sprayer-13-415-head-review": "tsx scripts/paper-doll/build-sprayer-13-415-head-authority-review.ts",
     "paperdoll:sprayer-13-415-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/sprayer-13-415-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/13-415-sprayer/source-extraction-v1",
     "paperdoll:jumbo-rollon-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/16mm-jumbo-rollon/source-extraction-v2",
+    "paperdoll:reducer-18-415-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/reducer-18-415-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/18-415-reducer/source-extraction-v1",
     "paperdoll:sprayer-13-415-overcap-review": "tsx scripts/paper-doll/build-sprayer-13-415-overcap-review.ts",
     "paperdoll:sprayer-13-415-tube-plan": "tsx scripts/paper-doll/build-sprayer-13-415-tube-registration-plan.ts",
     "paperdoll:dispenser-17-415-authority-review": "tsx scripts/paper-doll/build-dispenser-17-415-authority-review.ts",
