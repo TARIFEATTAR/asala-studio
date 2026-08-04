@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-04T17:45:50Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "releaseVersion": "1.3.0-complete-family.1",
+  "releaseId": "66e2250e-f772-4d84-97a7-5f8a8d31a2dd",
+  "releaseCutId": "a371f808-3dd5-44a5-a5d3-586cf6370aa0",
+  "publishRunId": "c530b519-61fa-4631-b36e-09cc3f1df550",
+  "sourceGitCommit": "0cb33a7854f0de1cd1b87d9fc3c4f94343f20d32",
+  "databaseManifestSha256": "08372d194a42f178b39b3a3b676245d98ef0001d33268f244a9f224a2c6e6e66",
+  "canonicalManifestSha256": "4ed331df58f3a836efd5297f8d2df6db568ab4a451762e25441d566e38a7b48c",
+  "assetCounts": {
+    "body": 5,
+    "roller": 2,
+    "cap": 10,
+    "sprayer": 6,
+    "pump": 3,
+    "total": 26
+  },
+  "readiness": {
+    "ready": 145,
+    "incomplete": 0,
+    "blockers": 0
+  },
+  "sanity": {
+    "projectId": "gh97irjh",
+    "dataset": "production",
+    "releaseDraftId": "drafts.paperDollRelease.CYL-9ML.1-3-0-complete-family-1",
+    "releaseDraftRevision": "ubo8BhTQVZZbL1Ex60N0Fs",
+    "familyDraftId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "familyDraftRevision": "ubo8BhTQVZZbL1Ex60N0Fs",
+    "layerAssetCount": 26,
+    "assemblyMappingCount": 145,
+    "releaseBlockerCount": 0,
+    "storefrontReady": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicRevisionBefore": "h252mBOg0gY3yHiZAFTF90",
+    "publicRevisionAfter": "h252mBOg0gY3yHiZAFTF90",
+    "publicPublicationPerformed": false
+  },
+  "supabaseReceipt": {
+    "publishStatus": "success",
+    "completedAt": "2026-08-04T17:45:26.89211+00:00",
+    "sanityDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  }
+}

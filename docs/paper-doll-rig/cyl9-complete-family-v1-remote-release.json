@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-04T17:37:43.310Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "sourceReleaseId": "0b0d0586-fb48-4c04-8be2-8cefc4b73c9b",
+  "sourceReleaseVersion": "1.2.0-capped-dispensers.1",
+  "releaseVersion": "1.3.0-complete-family.1",
+  "sourceGitCommit": "0cb33a7854f0de1cd1b87d9fc3c4f94343f20d32",
+  "capPlacementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+  "capComponentVersionIds": [
+    {
+      "componentVersionId": "ff8eb538-651e-40a1-8df7-df90b00507d3",
+      "variantKey": "BKDT"
+    },
+    {
+      "componentVersionId": "7412ba5f-ee20-4865-8111-1e9facbdf763",
+      "variantKey": "MCPR"
+    },
+    {
+      "componentVersionId": "a55f48d2-7a10-4946-a675-15e889afb7ee",
+      "variantKey": "MGLD"
+    },
+    {
+      "componentVersionId": "dfb881b5-6582-49a7-a42f-f1eda454057f",
+      "variantKey": "MSLV"
+    },
+    {
+      "componentVersionId": "e7e5fa5e-31c5-467c-9818-9197b4a163c8",
+      "variantKey": "PKDT"
+    },
+    {
+      "componentVersionId": "685429a9-265d-489c-938b-98a54f9f35d0",
+      "variantKey": "SBLK"
+    },
+    {
+      "componentVersionId": "4e2f8b60-925f-4e6a-b37d-3bc4e1780950",
+      "variantKey": "SGLD"
+    },
+    {
+      "componentVersionId": "8b0da7f6-ba3a-4711-ae88-25ec27ca255f",
+      "variantKey": "SLDT"
+    },
+    {
+      "componentVersionId": "6c4e9b24-01b4-4d1e-9462-307bf0ab2d38",
+      "variantKey": "SSLV"
+    },
+    {
+      "componentVersionId": "adcd518a-74de-4c86-96e0-a04a2d900e97",
+      "variantKey": "WHT"
+    }
+  ],
+  "assetCounts": {
+    "body": 5,
+    "roller": 2,
+    "cap": 10,
+    "sprayer": 6,
+    "pump": 3
+  },
+  "readiness": {
+    "ready": 145,
+    "incomplete": 0
+  },
+  "releaseCut": {
+    "readiness": {
+      "ready": 145,
+      "incomplete": 0
+    },
+    "releaseId": "66e2250e-f772-4d84-97a7-5f8a8d31a2dd",
+    "publishRunId": "c530b519-61fa-4631-b36e-09cc3f1df550",
+    "releaseCutId": "a371f808-3dd5-44a5-a5d3-586cf6370aa0",
+    "releaseStatus": "ready",
+    "manifestSha256": "08372d194a42f178b39b3a3b676245d98ef0001d33268f244a9f224a2c6e6e66",
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "sanityPublished": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicPublicationPerformed": false
+  }
+}
