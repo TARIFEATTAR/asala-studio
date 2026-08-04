@@ -79,6 +79,27 @@ approval, default JWT verification, and fail-closed deployment.
 ## Current hold
 
 The TypeScript tests, scoped lint, clean npm install, and Vite production build
-pass. The pgTAP migration test is present but has not run because the local
-Docker daemon is unavailable. Do not apply these migrations to production until
-the local or staging database test passes.
+pass.
+
+The pgTAP migration test **has now run and passed** — 17 of 17 assertions, zero
+failures — against a native PostgreSQL 16 cluster via
+`supabase/tests/native-replay/run-native-replay.sh`, which stands in for
+`supabase start` where no Docker daemon is available. Evidence:
+`docs/paper-doll-rig/evidence/CYL-9ML-MIGRATION-GATE-VERIFICATION.md`.
+
+The release ledger is therefore verified: six tables, RLS enabled, immutability
+and tenancy contracts held, and no ledger write privilege granted to
+`authenticated`.
+
+Two conditions still gate production:
+
+1. **Rollout step 3 is unchanged.** Apply the migrations to a non-production
+   Supabase project and rerun the pgTAP test there. The native harness uses a
+   bootstrap shim rather than the real platform images, so it proves migration
+   consistency but does not exercise GoTrue, Realtime, or the storage API.
+2. **The candidate-job chain cannot be rebuilt from this repository.**
+   `public.generation_attempts` is referenced by a foreign key in
+   `20260802052230_paper_doll_candidate_jobs.sql` but has no `CREATE TABLE`
+   anywhere in the repo, so that migration and the four after it — candidate
+   jobs, worker health, and approval — fail on any clean database. Add the
+   missing migration before relying on a from-scratch rebuild.
