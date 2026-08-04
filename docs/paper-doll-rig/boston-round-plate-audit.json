@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T02:16:04.108Z",
+  "productionEligible": false,
+  "geometryLocked": false,
+  "currentReleaseChanged": false,
+  "sanityChanged": false,
+  "audit": {
+    "catalogRowCount": 123,
+    "catalogRowsByCapacityMl": {
+      "15": 16,
+      "30": 53,
+      "60": 54
+    },
+    "catalogRowsByNeckFinish": {
+      "18-400": 16,
+      "20-400": 107
+    },
+    "bodyAppearances": [
+      {
+        "capacityMl": 15,
+        "color": "amber",
+        "neckFinish": "18-400",
+        "bodyHeightMm": 68,
+        "diameterMm": 25,
+        "catalogRowCount": 7
+      },
+      {
+        "capacityMl": 15,
+        "color": "clear",
+        "neckFinish": "18-400",
+        "bodyHeightMm": 68,
+        "diameterMm": 25,
+        "catalogRowCount": 2
+      },
+      {
+        "capacityMl": 15,
+        "color": "cobalt-blue",
+        "neckFinish": "18-400",
+        "bodyHeightMm": 68,
+        "diameterMm": 25,
+        "catalogRowCount": 7
+      },
+      {
+        "capacityMl": 30,
+        "color": "amber",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 78,
+        "diameterMm": 33,
+        "catalogRowCount": 18
+      },
+      {
+        "capacityMl": 30,
+        "color": "clear",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 78,
+        "diameterMm": 33,
+        "catalogRowCount": 18
+      },
+      {
+        "capacityMl": 30,
+        "color": "cobalt-blue",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 78,
+        "diameterMm": 33,
+        "catalogRowCount": 17
+      },
+      {
+        "capacityMl": 60,
+        "color": "amber",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 94,
+        "diameterMm": 39,
+        "catalogRowCount": 18
+      },
+      {
+        "capacityMl": 60,
+        "color": "clear",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 94,
+        "diameterMm": 39,
+        "catalogRowCount": 19
+      },
+      {
+        "capacityMl": 60,
+        "color": "cobalt-blue",
+        "neckFinish": "20-400",
+        "bodyHeightMm": 94,
+        "diameterMm": 39,
+        "catalogRowCount": 17
+      }
+    ],
+    "truthConflicts": [
+      {
+        "websiteSku": "GBBstn1ozBlkCapSht",
+        "graceSku": "GB-BSR-CLR-30ML-BLK-S",
+        "capacityMl": 30,
+        "color": "clear",
+        "field": "canon_bodyHeightMm",
+        "observed": 68,
+        "familyMode": 78,
+        "disposition": "manual-review-required"
+      }
+    ],
+    "compatibilityByCapacityMl": {
+      "15": {
+        "neckFinish": "18-400",
+        "responsibilities": [
+          "dropper",
+          "short-cap"
+        ]
+      },
+      "30": {
+        "neckFinish": "20-400",
+        "responsibilities": [
+          "dropper",
+          "metal-roller",
+          "plastic-roller",
+          "short-cap"
+        ]
+      },
+      "60": {
+        "neckFinish": "20-400",
+        "responsibilities": [
+          "dropper",
+          "metal-roller",
+          "plastic-roller",
+          "short-cap"
+        ]
+      }
+    },
+    "dropperAppearanceKeys": [
+      "black:none",
+      "black:shiny-gold",
+      "black:shiny-silver",
+      "white:none",
+      "white:shiny-gold",
+      "white:shiny-silver"
+    ],
+    "rollerFitmentKeys": [
+      "metal",
+      "plastic"
+    ],
+    "rollerOvercapFinishKeys": [
+      "matte-black",
+      "matte-gold",
+      "matte-silver",
+      "shiny-black",
+      "shiny-gold",
+      "shiny-silver"
+    ]
+  }
+}
