@@ -1,6 +1,6 @@
 # Cylinder requested-family source registration
 
-**State:** seven source families registered for review; the disputed 74 × 21 mm roll-on is body-only identity evidence and cannot compete with the five locked 70 × 20 mm masters; the 28/50 mL large-roller bodies are pinned to exact live product dimensions; no geometry authority, production release, or Sanity mutation
+**State:** seven source families registered for review; the disputed 74 × 21 mm roll-on is body-only identity evidence and cannot compete with the five locked 70 × 20 mm masters; the 25/50/100 mL sprays and 28/50 mL large rollers are pinned to exact live product dimensions; no geometry authority, production release, or Sanity mutation
 
 This tranche covers seven confirmed Cylinder positions around and beyond the 9 mL 17-415 pilot. It does not stretch the pilot assets into another physical shell. Each active family is derived from its own SHA-pinned layered Photoshop source and registered to its reviewed catalog presentation position.
 
@@ -21,11 +21,17 @@ Runtime recipe:
 | 9 mL regular roll-on | reported 74 × 21 mm, 17-415 | `roll-on\|9\|regular`, reference-only | **identity decision required** | clean body scene only; contaminated component scenes detached; five locked 70 × 20 mm plates remain active authority |
 | 28 mL large-roller bottle | 81 × 31 mm body; 100 mm capped; 16 mm | `roll-on\|28`, body-only at 59.94% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
 | 50 mL large-roller bottle | 98 × 37 mm body; 116 mm capped; 16 mm | `roll-on\|50`, body-only at 65.896552% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
-| 25 mL spray | 83 × 32 mm, 18-415 | `spray\|25`, 73.210526% | **manual review required** | body + body-contextual dip tube + sprayer head; overcap detached |
-| 50 mL spray | 117 × 32 mm, 18-415 | `spray\|50`, 78% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
-| 100 mL spray | 154 × 35 mm, 18-415 | `spray\|100`, 79% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
+| 25 mL spray | 83 × 32 mm body; 108 mm capped; 18-415 | `spray\|25`, 73.210526% | exact user/live-catalog identity | body + body-contextual dip tube + sprayer head; overcap detached |
+| 50 mL spray | 117 × 32 mm body; 142 mm capped; 18-415 | `spray\|50`, 78% | exact user/live-catalog identity | body + body-contextual dip tube + sprayer head; overcap detached |
+| 100 mL spray | 154 × 35 mm body; 195 mm capped; 18-415 | `spray\|100`, 79% | exact user/live-catalog identity | body + body-contextual dip tube + sprayer head; overcap detached |
 
-The 25 mL source archive and filename call the product “30 mL,” while current catalog truth identifies the family as 25 mL / 83 × 32 mm. The source remains reviewable but cannot become body authority until a named identity decision resolves that conflict.
+The user-supplied exact product page and measured image resolve the legacy 25/30 naming conflict: the sold shell is the 25 mL / 83 × 32 mm / 18-415 body with 108 mm capped height. The Photoshop archive and filename still say “30 mL”; that text remains immutable provenance but no longer blocks body-authority work. The exact 50 mL and 100 mL pages likewise pin 117 × 32 / 142 mm and 154 × 35 / 195 mm physical contracts.
+
+Exact spray references:
+
+- 25 mL `GBCyl25SpryCu`: [product page](https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-copper-spray-and-cap), 83 × 32 mm body, 108 mm capped, 18-415.
+- 50 mL `GBCyl50SpryCu`: [product page](https://www.bestbottles.com/product/cylinder-design-50-ml-glass-bottle-matte-copper-spray-and-cap), 117 × 32 mm body, 142 mm capped, 18-415.
+- 100 mL `GBCyl100SpryCu`: [product page](https://www.bestbottles.com/product/cylinder-design-100-ml-glass-bottle-matte-copper-spray-and-cap), 154 × 35 mm body, 195 mm capped, 18-415.
 
 The tall 9 mL registration deliberately does not call the physical family “a spray.” The layered spray PSD supplies clean body evidence, but the same 106 × 18 mm 13-415 shell is sold with regular caps and roll-on assemblies as well. The body-only review uses the measured body-to-assembly ratio and the supplied side-by-side physical photograph as scale evidence. It does not allow the sprayer head's source pixels to redefine the body height.
 
@@ -50,6 +56,8 @@ The live body contracts are now pinned directly in the recipe rather than inferr
 - 50 mL `GBCyl50RollBlk`: [exact product page](https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap), 98 × 37 mm body, 116 mm capped, 16 mm neck, large roller ball.
 
 These measurements verify body identity and relative catalog scale. They do not approve the extracted roller pixels. The user subsequently confirmed the exact uncapped Photoshop folders as the intended source families; their plastic fitment layers are valid large-roller candidates. Current family-scale review assemblies still display bodies only so component pixels can be approved independently. The 28 and 50 mL families remain separate from the 9 mL roller family and require their own geometry/material review plus separate body placement calibration.
+
+The first capacity-specific Family Fit package is now generated at `outputs/paper-doll-component-family-fit-reviews/jumbo-rollon-16mm/family-fit-v1/`. It deterministically applies the original source-coordinate roller/body relationship through each body's registered uniform transform, producing four open assemblies: 28/50 mL × natural-plastic/metal-ball. Exact group alpha is preserved across the two materials. Black/white overcap pixels remain registered but their closed seating position is still unproven because every Photoshop source stores the cap detached beside the bottle.
 
 The eight PSDs have now been decomposed by responsibility. Plastic large-roller scenes are isolated reusable candidates. Metal roller scenes include duplicated glass neck and thread pixels and therefore remain source evidence until a deterministic mask removes only the neck pixels. Full findings and promotion gates are recorded in `docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md`.
 
@@ -102,10 +110,9 @@ Before any family becomes production eligible:
 1. approve the source identity and physical geometry;
 2. approve the exact alpha authority for each independently reusable exterior component;
 3. approve each body-contextual tube against its own bottle assembly;
-4. resolve the 25 mL versus 30 mL source identity conflict;
-5. perform family-fit review for each detached overcap;
-6. run mask-and-clamp verification on any GPT-enhanced pixels;
-7. record named material, geometry, placement, and assembly-context approvals;
-8. cut an append-only release separately.
+4. perform family-fit review for each detached overcap;
+5. run mask-and-clamp verification on any GPT-enhanced pixels;
+6. record named material, geometry, placement, and assembly-context approvals;
+7. cut an append-only release separately.
 
 The source-registration builder does not perform any of those promotion actions automatically.

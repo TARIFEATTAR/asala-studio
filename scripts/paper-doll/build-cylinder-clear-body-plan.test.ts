@@ -19,13 +19,13 @@ test("deduplicates the authority-ready Cylinder positions into measured clear-bo
 
   assert.deepEqual(plan.summary, {
     catalogCoveragePositionCount: 18,
-    authorityReadyDisplayPositionCount: 12,
-    uniqueBodyAuthorityCount: 8,
-    bodyOnlyCandidateAvailableCount: 6,
+    authorityReadyDisplayPositionCount: 14,
+    uniqueBodyAuthorityCount: 9,
+    bodyOnlyCandidateAvailableCount: 7,
     bodyExtractionRequiredCount: 0,
     sourceCalibratedBlenderRequiredCount: 2,
     candidateReadyPositionCount: 2,
-    truthDecisionPositionCount: 3,
+    truthDecisionPositionCount: 1,
     exactReferenceRequiredPositionCount: 1,
     paidGenerationRequestCount: 0,
   });
@@ -54,7 +54,7 @@ test("deduplicates the authority-ready Cylinder positions into measured clear-bo
   );
   assert.ok(plan.coverageAudit.every((entry: any) => entry.productClass === "Cylinder"));
   assert.equal(plan.coverageAudit.some((entry: any) => /glass.?rod|vial/i.test(entry.displayKey)), false);
-  assert.equal(plan.coverageAudit.find((entry: any) => entry.displayKey === "spray|25").stage, "truth-decision-required");
+  assert.equal(plan.coverageAudit.find((entry: any) => entry.displayKey === "spray|25").stage, "authority-build-ready");
   assert.equal(plan.coverageAudit.find((entry: any) => entry.displayKey === "roll-on|28").dimensionsMm.bodyHeight, 81);
   assert.equal(plan.coverageAudit.find((entry: any) => entry.displayKey === "roll-on|50").dimensionsMm.bodyHeight, 98);
   assert.equal(plan.coverageAudit.find((entry: any) => entry.displayKey === "spray|9|tall").dimensionsMm.bodyHeight, 106);
@@ -65,7 +65,7 @@ test("deduplicates the authority-ready Cylinder positions into measured clear-bo
     plan.bodyAuthorities.some((entry: any) => entry.geometryKey === "body__cylinder__9ml__74x21x21.0__c3c136fd9e"),
     false,
   );
-  assert.equal(new Set(plan.bodyAuthorities.map((entry: any) => entry.geometryKey)).size, 8);
+  assert.equal(new Set(plan.bodyAuthorities.map((entry: any) => entry.geometryKey)).size, 9);
   assert.deepEqual(
     plan.bodyAuthorities.filter((entry: any) => entry.sourceState === "body-extraction-required").map((entry: any) => entry.geometryKey),
     [],

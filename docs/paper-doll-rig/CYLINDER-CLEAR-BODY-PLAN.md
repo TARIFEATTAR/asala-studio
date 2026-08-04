@@ -4,8 +4,8 @@
 
 ## Outcome
 
-- 12 authority-ready presentation positions reduce to 8 physical clear-body authorities.
-- 6 body-only candidates already exist locally.
+- 14 authority-ready presentation positions reduce to 9 physical clear-body authorities.
+- 7 body-only candidates already exist locally.
 - 0 approved assembled PSD references still need body-layer extraction before authority review.
 - 2 mini-sprayer sources contain baked-in dip-tube pixels and therefore require source-calibrated Blender bodies rather than destructive retouching.
 - The approved 70 × 20 mm clear 9 mL plate is the optical benchmark only. It is never stretched into another bottle.
@@ -23,7 +23,7 @@ This table is the non-lossy catalog checklist. Build-ready authorities remain se
 | `spray|5` | 53 × 17 mm | 13-415 | authority-build-ready |
 | `spray|9|regular` | 70 × 20 mm | 17-415 | candidate-ready-for-named-approval |
 | `spray|9|tall` | 106 × 18 mm | 13-415 | authority-build-ready |
-| `spray|25` | 83 × 32 mm | 18-415 | truth-decision-required |
+| `spray|25` | 83 × 32 mm | 18-415 | authority-build-ready |
 | `spray|50` | 117 × 32 mm | 18-415 | authority-build-ready |
 | `spray|100` | 154 × 35 mm | 18-415 | authority-build-ready |
 | `roll-on|5` | 53 × 17 mm | 13-415 | authority-build-ready |
@@ -33,7 +33,7 @@ This table is the non-lossy catalog checklist. Build-ready authorities remain se
 | `roll-on|9|tall` | 106 × 18 mm | 13-415 | authority-build-ready |
 | `roll-on|28` | 81 × 31 mm | 16mm | authority-build-ready |
 | `roll-on|50` | 98 × 37 mm | 16mm | authority-build-ready |
-| `reducer|25` | 83 × 32 mm | 18-415 | truth-decision-required |
+| `reducer|25` | 83 × 32 mm | 18-415 | authority-build-ready |
 | `reducer|50` | 117 × 32 mm | 18-415 | authority-build-ready |
 | `reducer|100` | 154 × 35 mm | 18-415 | authority-build-ready |
 
@@ -45,6 +45,7 @@ This table is the non-lossy catalog checklist. Build-ready authorities remain se
 | `body__cylinder__4ml__49x14x14.0__c3932dacb5` | 4 mL · 49 × 14 mm · 12mm | `spray|4` | source-calibrated-blender-required | Calibrate a parametric Blender body to the SHA-pinned assembled reference because the PSD body pixels contain the dip tube; review the body profile before material generation. |
 | `body__cylinder__5ml__53x17x17.0__f94a16652c` | 5 mL · 53 × 17 mm · 13-415 | `spray|5`, `roll-on|5` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |
 | `body__cylinder__9ml__106x18x18.0__fca612c530` | 9 mL · 106 × 18 mm · 13-415 | `spray|9|tall`, `roll-on|9|tall` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |
+| `body__cylinder__25ml__83x32x32.0__a389ecedb8` | 25 mL · 83 × 32 mm · 18-415 | `spray|25`, `reducer|25` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |
 | `body__cylinder__50ml__117x32x32.0__16f88e6875` | 50 mL · 117 × 32 mm · 18-415 | `spray|50`, `reducer|50` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |
 | `body__cylinder__100ml__154x35x35.0__b6c5e98693` | 100 mL · 154 × 35 mm · 18-415 | `spray|100`, `reducer|100` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |
 | `body__cylinder__28ml__81x31x31.0__78183a1776` | 28 mL · 81 × 31 mm · 16mm | `roll-on|28` | body-only-candidate-available | Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary. |

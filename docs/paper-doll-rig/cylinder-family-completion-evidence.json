@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfDate": "2026-08-03",
+  "asOfDate": "2026-08-04",
   "scope": "Best Bottles Cylinder paper-doll family",
   "positions": [
     {
@@ -45,11 +45,11 @@
     },
     {
       "displayKey": "spray|25",
-      "stage": "truth-decision-required",
+      "stage": "authority-build-ready",
       "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
       "requiredResponsibilities": ["body", "18-415-sprayer-head", "body-contextual-dip-tube", "protective-overcap"],
-      "evidencePaths": ["docs/paper-doll-rig/CYLINDER-REQUESTED-FAMILY-SOURCE-REGISTRATION.md"],
-      "nextGate": "Resolve the archive 30 mL label versus current 25 mL catalog identity before body authority creation."
+      "evidencePaths": ["docs/paper-doll-rig/CYLINDER-REQUESTED-FAMILY-SOURCE-REGISTRATION.md", "docs/paper-doll-rig/cylinder-requested-family-source-recipes.json"],
+      "nextGate": "Build the verified 83 × 32 mm body authority, then fit the 18-415 sprayer and its body-specific tube. The legacy 30 mL source filename remains provenance only."
     },
     {
       "displayKey": "spray|50",
@@ -125,11 +125,11 @@
     },
     {
       "displayKey": "reducer|25",
-      "stage": "truth-decision-required",
+      "stage": "authority-build-ready",
       "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
       "requiredResponsibilities": ["body", "18-415-reducer-visible-flange", "separate-overcap"],
-      "evidencePaths": ["docs/paper-doll-rig/REDUCER-18-415-COMPONENT-KIT.md"],
-      "nextGate": "Resolve the 25/30 mL identity conflict, then approve only the reducer's exposed flange and keep its insertion plug hidden."
+      "evidencePaths": ["docs/paper-doll-rig/REDUCER-18-415-COMPONENT-KIT.md", "docs/paper-doll-rig/cylinder-requested-family-source-recipes.json"],
+      "nextGate": "Reuse the verified 83 × 32 mm body authority, then approve only the reducer's exposed flange and keep its insertion plug hidden."
     },
     {
       "displayKey": "reducer|50",
@@ -171,13 +171,13 @@
       "programId": "CYL-JUMBO-16MM-ROLLON",
       "stage": "authority-build-ready",
       "scope": "28 and 50 mL bodies; plastic and metal roller fitments; black and white caps; 8 exact assemblies",
-      "nextGate": "Review the clean exact-alpha plastic/metal candidates already extracted without glass-neck pixels, then calibrate 28 mL and 50 mL Family Fit separately."
+      "nextGate": "Review the four capacity-specific open-roller Family Fit assemblies; approve one authority per capacity, then establish an assembled black/white overcap seating reference before completing the 8 closed SKU assemblies."
     },
     {
       "programId": "CYL-18-415-SPRAY-REDUCER",
       "stage": "authority-build-ready",
       "scope": "25/50/100 mL bodies; sprayer/tube systems; reducer flange; independent cap families",
-      "nextGate": "Resolve 25/30 truth, build three body authorities, then complete sprayer and reducer Family Fit."
+      "nextGate": "Build the three verified body authorities from the 25/50/100 mL product contracts, then complete sprayer and reducer Family Fit."
     },
     {
       "programId": "CYL-CLASSIC-9ML",

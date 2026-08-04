@@ -26,8 +26,8 @@ test("builds one completion row for every Cylinder display position without hidi
   assert.deepEqual(board.summary, {
     positionCount: 18,
     candidateReadyForNamedApprovalCount: 2,
-    authorityBuildReadyCount: 12,
-    truthDecisionRequiredCount: 3,
+    authorityBuildReadyCount: 14,
+    truthDecisionRequiredCount: 1,
     exactReferenceRequiredCount: 1,
     productionReleasedCount: 0,
   });

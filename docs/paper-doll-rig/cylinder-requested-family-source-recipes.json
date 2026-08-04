@@ -206,8 +206,18 @@
         "originalFilename": "23. GBCyl30SpryMtSl.psd",
         "sha256": "2880b76a2cfd540fe62d2303c18a809d321ff924e38449e51abd573c5e58a532",
         "canvas": { "width": 1750, "height": 1750 },
-        "identityStatus": "manual-review-required",
-        "identityConflict": "Catalog truth is 25 mL / 83 × 32 mm, but the source archive and filename call this family 30 mL. The source can be reviewed visually but cannot become body authority until identity is approved."
+        "identityStatus": "source-backed",
+        "catalogReference": {
+          "productUrl": "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-copper-spray-and-cap",
+          "websiteSku": "GBCyl25SpryCu",
+          "capacityMl": 25,
+          "bodyHeightMm": 83,
+          "assembledHeightMm": 108,
+          "diameterMm": 32,
+          "neckFinish": "18-415",
+          "applicatorDescription": "fine mist spray with opaque overcap"
+        },
+        "notes": "The legacy Photoshop folder and filename say 30 mL, but the user-supplied exact BestBottles.com product page and measured image establish this physical shell as the sold 25 mL / 83 × 32 mm / 18-415 family. Preserve the legacy filename only as source provenance."
       },
       "layers": [
         { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 818, "top": 743, "width": 166, "height": 822 }, "assemblyMember": true, "zIndex": 20 },
@@ -233,7 +243,17 @@
         "sha256": "7491623a01ae34622aa23b343b9c56c77638bf3b5b5150bab7d444c798f43c1e",
         "canvas": { "width": 1400, "height": 2100 },
         "identityStatus": "source-backed",
-        "notes": "The source dip-tube layer extends beyond the PSD document canvas; preserve its registered source bounds and crop only at the canonical output edge."
+        "catalogReference": {
+          "productUrl": "https://www.bestbottles.com/product/cylinder-design-50-ml-glass-bottle-matte-copper-spray-and-cap",
+          "websiteSku": "GBCyl50SpryCu",
+          "capacityMl": 50,
+          "bodyHeightMm": 117,
+          "assembledHeightMm": 142,
+          "diameterMm": 32,
+          "neckFinish": "18-415",
+          "applicatorDescription": "fine mist spray with opaque overcap"
+        },
+        "notes": "The user-supplied exact BestBottles.com product page verifies the 117 × 32 mm body and 142 mm capped height. The source dip-tube layer extends beyond the PSD document canvas; preserve its registered source bounds and crop only at the canonical output edge."
       },
       "layers": [
         { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 523, "top": 677, "width": 227, "height": 1898 }, "assemblyMember": true, "zIndex": 20 },
@@ -258,7 +278,18 @@
         "originalFilename": "23. GBCyl100SpryMtSl.psd",
         "sha256": "5bb4458eba0b7440e03fa59212a90f61218d4e749f0b7542eb4a61f3bbb6ba94",
         "canvas": { "width": 1750, "height": 2713 },
-        "identityStatus": "source-backed"
+        "identityStatus": "source-backed",
+        "catalogReference": {
+          "productUrl": "https://www.bestbottles.com/product/cylinder-design-100-ml-glass-bottle-matte-copper-spray-and-cap",
+          "websiteSku": "GBCyl100SpryCu",
+          "capacityMl": 100,
+          "bodyHeightMm": 154,
+          "assembledHeightMm": 195,
+          "diameterMm": 35,
+          "neckFinish": "18-415",
+          "applicatorDescription": "fine mist spray with opaque overcap"
+        },
+        "notes": "The user-supplied exact BestBottles.com product page verifies the 154 × 35 mm body and 195 mm capped height."
       },
       "layers": [
         { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 689, "top": 603, "width": 232, "height": 1960 }, "assemblyMember": true, "zIndex": 20 },
