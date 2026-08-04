@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 import sharp from "sharp";
 
 import {
+  buildCyl9SourceCapReview,
   normalizeCapMaterialToAuthority,
   planCyl9SourceCapVariants,
   translateFullCanvasLayer,
@@ -60,7 +64,7 @@ test("clamps every cap material to the exact authority alpha", async () => {
   assert.deepEqual(actualAlpha, expectedAlpha);
 });
 
-test("replays the approved cap family placement two pixels higher without resizing", async () => {
+test("replays the approved cap family placement three pixels higher without resizing", async () => {
   const pixel = await sharp({
     create: { width: 1, height: 1, channels: 4, background: { r: 220, g: 40, b: 20, alpha: 1 } },
   }).png().toBuffer();
@@ -68,11 +72,22 @@ test("replays the approved cap family placement two pixels higher without resizi
     create: { width: 6, height: 6, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
   }).composite([{ input: pixel, left: 3, top: 3 }]).png().toBuffer();
 
-  const translated = await translateFullCanvasLayer(layer, { x: 0, y: -2 });
+  const translated = await translateFullCanvasLayer(layer, { x: 0, y: -3 });
   const { data, info } = await sharp(translated).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const alphaAt = (x: number, y: number) => data[(y * info.width + x) * 4 + 3];
 
   assert.deepEqual({ width: info.width, height: info.height }, { width: 6, height: 6 });
-  assert.equal(alphaAt(3, 1), 255);
+  assert.equal(alphaAt(3, 0), 255);
   assert.equal(alphaAt(3, 3), 0);
+});
+
+test("records the three-pixel shared family placement in the review manifest", async () => {
+  const outputRoot = await mkdtemp(join(tmpdir(), "cyl9-cap-placement-"));
+  try {
+    const result = await buildCyl9SourceCapReview({ outputRoot });
+    const manifest = JSON.parse(await readFile(result.manifestPath, "utf8"));
+    assert.deepEqual(manifest.sharedPlacement, { x: 0, y: -3, scale: 1 });
+  } finally {
+    await rm(outputRoot, { recursive: true, force: true });
+  }
 });
