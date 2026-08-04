@@ -1,0 +1,707 @@
+{
+  "schemaVersion": 1,
+  "lockId": "placement-lock__6d8b410f84d237c0ce54765a",
+  "placementVersionId": "placement-version__6d8b410f84d237c0ce54765a",
+  "lifecycleState": "placement-locked",
+  "approvedByName": "Jordan Richter",
+  "approvedAt": "2026-08-04T10:19:43.755Z",
+  "approvalNote": "Approved capped source dispenser pixels and shared 346 px placement across all five locked CYL-9ML body plates.",
+  "approvals": [
+    {
+      "action": "pixels-approved",
+      "approvedByName": "Jordan Richter",
+      "approvedAt": "2026-08-04T10:19:43.755Z",
+      "note": "Approved capped source dispenser pixels and shared 346 px placement across all five locked CYL-9ML body plates."
+    },
+    {
+      "action": "family-fit-approved",
+      "approvedByName": "Jordan Richter",
+      "approvedAt": "2026-08-04T10:19:43.755Z",
+      "note": "Approved capped source dispenser pixels and shared 346 px placement across all five locked CYL-9ML body plates."
+    },
+    {
+      "action": "placement-locked",
+      "approvedByName": "Jordan Richter",
+      "approvedAt": "2026-08-04T10:19:43.755Z",
+      "note": "Approved capped source dispenser pixels and shared 346 px placement across all five locked CYL-9ML body plates."
+    }
+  ],
+  "contentSha256": "6d8b410f84d237c0ce54765a15346c919bcef880159d4254e992d96dedff25c6",
+  "familyKey": "CYL-9ML",
+  "geometryFamilyKey": "17-415-capped-dispensers-v3",
+  "sourceManifestPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/manifest.json",
+  "sourceManifestSha256": "833eecd1fbc8df033a337ee7652a8977988311a139a0cb0382b9c2f7777c41c9",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288
+  },
+  "sharedPlacement": {
+    "targetWidthPx": 346,
+    "centerXPx": 1041,
+    "seatYPx": 1002
+  },
+  "components": [
+    {
+      "componentKey": "pump__17-415__BLK",
+      "lane": "pump",
+      "variantKey": "BLK",
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/pump/BLK.png",
+      "candidateSha256": "f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/pump-closed-assembly.png",
+      "authoritySha256": "f23394cf2c6fdcf9da097c6909c7c67b101324f44de1fc2c09613979030b76af",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "pump__17-415__GLD",
+      "lane": "pump",
+      "variantKey": "GLD",
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/pump/GLD.png",
+      "candidateSha256": "509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/pump-closed-assembly.png",
+      "authoritySha256": "f23394cf2c6fdcf9da097c6909c7c67b101324f44de1fc2c09613979030b76af",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "pump__17-415__MSLV",
+      "lane": "pump",
+      "variantKey": "MSLV",
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/pump/MSLV.png",
+      "candidateSha256": "eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/pump-closed-assembly.png",
+      "authoritySha256": "f23394cf2c6fdcf9da097c6909c7c67b101324f44de1fc2c09613979030b76af",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__BLK",
+      "lane": "sprayer",
+      "variantKey": "BLK",
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/BLK.png",
+      "candidateSha256": "c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__GLD",
+      "lane": "sprayer",
+      "variantKey": "GLD",
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/GLD.png",
+      "candidateSha256": "3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__MSLV",
+      "lane": "sprayer",
+      "variantKey": "MSLV",
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/MSLV.png",
+      "candidateSha256": "4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__RED",
+      "lane": "sprayer",
+      "variantKey": "RED",
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/RED.png",
+      "candidateSha256": "a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__SSLV",
+      "lane": "sprayer",
+      "variantKey": "SSLV",
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/SSLV.png",
+      "candidateSha256": "9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    },
+    {
+      "componentKey": "sprayer__17-415__TUR",
+      "lane": "sprayer",
+      "variantKey": "TUR",
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "candidatePath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/candidates/sprayer/TUR.png",
+      "candidateSha256": "ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "authorityPath": "/Users/jordanrichter/Projects/Madison Studio/madison-app/outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/authority/sprayer-closed-assembly.png",
+      "authoritySha256": "152b882879d721ae5417d296c35d6837b5f3310cb618510c6cd19cefac724c74",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      },
+      "geometryLocked": true,
+      "lifecycleState": "placement-locked"
+    }
+  ],
+  "bodyPlates": [
+    {
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "assetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png",
+      "assetSha256": "c84db213449da4ef6afbcb67fad0da5811ae937c3c9c1234be801cb473ea31c3",
+      "widthPx": 2080,
+      "heightPx": 2288
+    },
+    {
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "assetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+      "assetSha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+      "widthPx": 2080,
+      "heightPx": 2288
+    },
+    {
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "assetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__cobalt__70.0x20.0mm.png",
+      "assetSha256": "87804d45a242795aaecf10d677ad469b22803e2f2476421ffbce5d4d944f148c",
+      "widthPx": 2080,
+      "heightPx": 2288
+    },
+    {
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "assetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__frosted__70.0x20.0mm.png",
+      "assetSha256": "c844fb9f3a6ffb467daa02d17cb2378b659fc2e0be166f13073bb7b4f8422956",
+      "widthPx": 2080,
+      "heightPx": 2288
+    },
+    {
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "assetPath": "assets/paper-doll/body-plates/body__cylinder__9ml__swirl__70.0x20.0mm.png",
+      "assetSha256": "c2b67ee9151dc89d44d3a8d65a112b908bb84a2c833ba0bcf643b16586371e68",
+      "widthPx": 2080,
+      "heightPx": 2288
+    }
+  ],
+  "placementRows": [
+    {
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 323,
+        "width": 346,
+        "height": 679
+      }
+    },
+    {
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "bodyPlateId": "body__cylinder__9ml__amber__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "bodyPlateId": "body__cylinder__9ml__clear__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "bodyPlateId": "body__cylinder__9ml__cobalt__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "bodyPlateId": "body__cylinder__9ml__frosted__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    },
+    {
+      "componentVersionId": "local:ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1",
+      "bodyPlateId": "body__cylinder__9ml__swirl__70.0x20.0mm",
+      "placementBoundsPx": {
+        "left": 868,
+        "top": 329,
+        "width": 346,
+        "height": 673
+      }
+    }
+  ],
+  "releaseState": {
+    "currentReleaseChanged": false,
+    "releaseCutCreated": false,
+    "sanityDraftChanged": false,
+    "publicPublicationChanged": false
+  },
+  "persistence": {
+    "localLockWritten": true,
+    "remoteDatabaseWritten": false,
+    "nextAction": "register immutable candidates and replay this named lock in the production workbench"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "reviewedBy": "Jordan Richter",
+  "reviewedAt": "2026-08-04",
+  "sourceReviewSheet": "outputs/paper-doll-component-factory/CYL-9ML/production-candidate-review/contact-sheet.png",
+  "bodyPlates": {
+    "status": "approved",
+    "decision": "All five regenerated bottle plates look good and remain frozen."
+  },
+  "components": [
+    { "componentKey": "closure__17-415__rollon-overcap__SSLV", "status": "acceptable" },
+    { "componentKey": "closure__17-415__rollon-overcap__MSLV", "status": "rework-material", "reason": "Reads as brushed metal." },
+    { "componentKey": "closure__17-415__rollon-overcap__SGLD", "status": "acceptable" },
+    { "componentKey": "closure__17-415__rollon-overcap__MGLD", "status": "rework-material", "reason": "Reads as brushed metal." },
+    { "componentKey": "closure__17-415__rollon-overcap__SBLK", "status": "rework-material", "reason": "Glossy black material is not acceptable." },
+    { "componentKey": "closure__17-415__rollon-overcap__MCPR", "status": "rework-material", "reason": "Reads as brushed metal." },
+    { "componentKey": "closure__17-415__rollon-overcap__WHT", "status": "placement-review", "reason": "Material is acceptable but appears slightly too low; diagnose edge pixels versus shared placement before changing geometry." },
+    { "componentKey": "closure__17-415__rollon-overcap__SLDT", "status": "rejected", "reason": "Supposed matte-silver dotted finish is too shiny and unclear." },
+    { "componentKey": "closure__17-415__rollon-overcap__BKDT", "status": "rejected", "reason": "Too dull, engineered-looking, and the shape is inaccurate." },
+    { "componentKey": "closure__17-415__rollon-overcap__PKDT", "status": "rejected", "reason": "Color and material do not match the supplied pink-dot reference." },
+    { "componentKey": "roller__17-415__PLASTIC", "status": "superseded-source-required", "reason": "Review sheet does not use the updated roller candidate." },
+    { "componentKey": "roller__17-415__METAL", "status": "superseded-source-required", "reason": "Review sheet does not use the updated roller candidate." },
+    { "componentKey": "sprayer__17-415", "status": "source-backed-replacement-built", "reason": "Reconstructed candidates were rejected; use capped Photoshop assembly with band-only swatches." },
+    { "componentKey": "pump__17-415", "status": "source-backed-replacement-built", "reason": "Use capped Photoshop assembly with band-only swatches." }
+  ],
+  "replacementReview": {
+    "approvedSourceVersion": {
+      "manifest": "outputs/paper-doll-dispenser-17-415/capped-source-swatches-v2/manifest.json",
+      "contactSheet": "outputs/paper-doll-dispenser-17-415/capped-source-swatches-v2/review/contact-sheet.png",
+      "decision": "Visually approved with one-pixel-per-side shared-width correction requested."
+    },
+    "adjustedCandidateVersion": {
+      "manifest": "outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/manifest.json",
+      "contactSheet": "outputs/paper-doll-dispenser-17-415/capped-source-swatches-v3/review/contact-sheet.png",
+      "placementChange": {
+        "previousWidthPx": 344,
+        "candidateWidthPx": 346,
+        "centerXPx": 1041,
+        "seatYPx": 1002,
+        "reason": "Increase one pixel on each side without changing center or seat."
+      }
+    },
+    "candidateCount": 9,
+    "assemblyReviewCount": 45,
+    "state": "named-five-body-visual-review-required",
+    "geometryLocked": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  },
+  "closedDispenserArchitecture": {
+    "capOn": "One compound component contains the translucent protective overcap, internal mechanism visible through it, and the finish band.",
+    "bandVariants": "Only the band material pixels vary; the upper assembly and authority alpha remain fixed.",
+    "capOff": "A separate open-dispenser component is required for uncapped merchandising views.",
+    "independentClearOverlayAllowed": false
+  }
+}
