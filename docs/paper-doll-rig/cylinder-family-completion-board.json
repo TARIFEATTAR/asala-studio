@@ -336,9 +336,10 @@
         "black-or-white-overcap"
       ],
       "evidencePaths": [
-        "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md"
+        "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md",
+        "docs/paper-doll-rig/jumbo-rollon-16mm-capped-source-evidence.json"
       ],
-      "nextGate": "Approve the exact-folder 81 × 31 mm body and the source-calibrated 28 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies specifically to this body."
+      "nextGate": "Approve the exact-folder 81 × 31 mm body and source-calibrated plastic/metal large-roller authorities. Exclude sidecar cap placement; seat any closed-cap recipe only from verified closed reference or measured capped-height evidence."
     },
     {
       "displayKey": "roll-on|50",
@@ -359,9 +360,10 @@
         "black-or-white-overcap"
       ],
       "evidencePaths": [
-        "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md"
+        "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md",
+        "docs/paper-doll-rig/jumbo-rollon-16mm-capped-source-evidence.json"
       ],
-      "nextGate": "Approve the exact-folder 98 × 37 mm body and the source-calibrated 50 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies separately from the 28 mL family."
+      "nextGate": "Approve the exact-folder 98 × 37 mm body and source-calibrated plastic/metal large-roller authorities. Exclude sidecar cap placement; calibrate closed-cap recipes separately from the 28 mL family using verified seating evidence."
     },
     {
       "displayKey": "reducer|25",

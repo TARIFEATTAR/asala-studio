@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "jumbo-rollon__16mm__28-50ml__capped-source-evidence-v1",
+  "archive": {
+    "label": "BBUAT-Upload-Files/2. PSD Capped ",
+    "role": "assembly-and-material-reference",
+    "mutationPolicy": "read-only"
+  },
+  "productionPolicy": {
+    "cappedComposite": "assembly-reference-only",
+    "isolatedCapScene": "material-and-silhouette-review-only",
+    "detachedSidecarCap": "exclude-from-production",
+    "seatedPlacement": "not-inferred-from-sidecar-page-offset",
+    "geometryLocked": false,
+    "productionEligible": false
+  },
+  "sources": [
+    {
+      "capacityMl": 28,
+      "rollerMaterial": "metal-ball-plastic-housing",
+      "capColor": "black",
+      "originalFilename": "1. GBCyl28MtlRollBlk.psd",
+      "archiveRelativePath": "16. 16 mm/1. 28ml Capped/1. GBCyl28MtlRollBlk.psd",
+      "sha256": "cdb8551b2ea5caeb4469e01ad4626f277738ec12938fb653131cd4c0d4dfe288",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 3,
+      "capMaterialSceneIndex": 4,
+      "excludedSidecarSceneIndices": [5]
+    },
+    {
+      "capacityMl": 28,
+      "rollerMaterial": "metal-ball-plastic-housing",
+      "capColor": "white",
+      "originalFilename": "2.  GBCyl28MtlRollWht.psd",
+      "archiveRelativePath": "16. 16 mm/1. 28ml Capped/2.  GBCyl28MtlRollWht.psd",
+      "sha256": "c3b5c9232ca208819699e6c3dd97ae1b70257df7cc4181c3387da279886861c9",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 3,
+      "capMaterialSceneIndex": 4,
+      "excludedSidecarSceneIndices": []
+    },
+    {
+      "capacityMl": 28,
+      "rollerMaterial": "natural-plastic",
+      "capColor": "black",
+      "originalFilename": "3. GBCyl28RollBlk.psd",
+      "archiveRelativePath": "16. 16 mm/1. 28ml Capped/3. GBCyl28RollBlk.psd",
+      "sha256": "2bf146e961717d721e0b317932cc0538a7760a68400d8b684caf68237e426479",
+      "bodySceneIndex": 3,
+      "fitmentSceneIndex": 2,
+      "capMaterialSceneIndex": 5,
+      "excludedSidecarSceneIndices": []
+    },
+    {
+      "capacityMl": 28,
+      "rollerMaterial": "natural-plastic",
+      "capColor": "white",
+      "originalFilename": "4.  GBCyl28RollWht.psd",
+      "archiveRelativePath": "16. 16 mm/1. 28ml Capped/4.  GBCyl28RollWht.psd",
+      "sha256": "a6a88ec3fe6e0bd7081d0fb0dc7043621c59e34a9bd0c64547ae25fb364f666c",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 3,
+      "capMaterialSceneIndex": 5,
+      "excludedSidecarSceneIndices": []
+    },
+    {
+      "capacityMl": 50,
+      "rollerMaterial": "natural-plastic",
+      "capColor": "black",
+      "originalFilename": "1. GBCyl50RollBlk.psd",
+      "archiveRelativePath": "16. 16 mm/2. 50ml Capped/1. GBCyl50RollBlk.psd",
+      "sha256": "ee26a52d78ab668d19edac58fd266a6bdc58c221226b09b672f6dd006f228c2c",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 4,
+      "capMaterialSceneIndex": 5,
+      "excludedSidecarSceneIndices": []
+    },
+    {
+      "capacityMl": 50,
+      "rollerMaterial": "natural-plastic",
+      "capColor": "white",
+      "originalFilename": "2. GBCyl50RollWht.psd",
+      "archiveRelativePath": "16. 16 mm/2. 50ml Capped/2. GBCyl50RollWht.psd",
+      "sha256": "528b3ac7e3dfe742fffc60f1b01d61508bf6535e46f3bb31c1636977dd814c5d",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 4,
+      "capMaterialSceneIndex": 6,
+      "excludedSidecarSceneIndices": [5]
+    },
+    {
+      "capacityMl": 50,
+      "rollerMaterial": "metal-ball-plastic-housing",
+      "capColor": "black",
+      "originalFilename": "3. GBCyl50MtlRollBlk.psd",
+      "archiveRelativePath": "16. 16 mm/2. 50ml Capped/3. GBCyl50MtlRollBlk.psd",
+      "sha256": "b22324d16e9273c6757d006365723041b0fba30abd0856fc7fdbfb8bab38f2bf",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 3,
+      "capMaterialSceneIndex": 4,
+      "excludedSidecarSceneIndices": []
+    },
+    {
+      "capacityMl": 50,
+      "rollerMaterial": "metal-ball-plastic-housing",
+      "capColor": "white",
+      "originalFilename": "4. GBCyl50MtlRollWht.psd",
+      "archiveRelativePath": "16. 16 mm/2. 50ml Capped/4. GBCyl50MtlRollWht.psd",
+      "sha256": "87acc86f2961c9daf9ee5e85193afdb298790f384cf09ae2d9f1ef3533d36ae0",
+      "bodySceneIndex": 2,
+      "fitmentSceneIndex": 3,
+      "capMaterialSceneIndex": 4,
+      "excludedSidecarSceneIndices": []
+    }
+  ],
+  "summary": {
+    "sourceCount": 8,
+    "capacityCount": 2,
+    "rollerMaterialCount": 2,
+    "capColorCount": 2,
+    "completeCombinationCount": 8,
+    "detachedSidecarProductionAssets": 0,
+    "namedReviewRequired": true
+  }
+}
