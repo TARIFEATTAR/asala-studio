@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "state": "source-registered-review-only",
+  "archiveRoot": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288,
+    "centerX": 1040,
+    "baselineY": 2082,
+    "background": "#F5F3EF"
+  },
+  "rules": {
+    "transformScope": "complete-paper-doll-assembly",
+    "geometryLockGate": "approved-exact-alpha-mask-and-clamp",
+    "enhancementPolicy": "material-and-lighting-only",
+    "detachedComponentPolicy": "review-only-until-family-fit-approval",
+    "remoteWritesAllowed": false
+  },
+  "families": [
+    {
+      "familyKey": "CYL-9ML-13-415-SPRAY-TALL",
+      "label": "9 mL tall slim 13-415 spray",
+      "displayKey": "spray|9|tall",
+      "geometry": {
+        "geometryKey": "body__cylinder__9ml__106x18x18.0__fca612c530",
+        "capacityMl": 9,
+        "bodyHeightMm": 106,
+        "bodyWidthMm": 18,
+        "neckFinish": "13-415"
+      },
+      "source": {
+        "archiveRelativePath": "5. 13-415 Bottles PSD/13. Tall Cylinder 9ml/3. GBTallCyl9SpryBlkMt.psd",
+        "originalFilename": "3. GBTallCyl9SpryBlkMt.psd",
+        "sha256": "72ca21d99b451ac8409d65966fa70013c65473435c3ea1405a260cd24a65eca4",
+        "canvas": { "width": 750, "height": 1594 },
+        "identityStatus": "source-backed"
+      },
+      "layers": [
+        { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 137, "top": 265, "width": 243, "height": 1253 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 3, "sourceBoundsPx": { "left": 220, "top": 312, "width": 74, "height": 1054 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 451, "top": 1137, "width": 205, "height": 381 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 158, "top": 67, "width": 181, "height": 358 }, "assemblyMember": true, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-28ML-16MM-ROLLON",
+      "label": "28 mL big roll-on",
+      "displayKey": "roll-on|28",
+      "geometry": {
+        "geometryKey": "body__cylinder__28ml__81x31x31.0__78183a1776",
+        "capacityMl": 28,
+        "bodyHeightMm": 81,
+        "bodyWidthMm": 31,
+        "neckFinish": "16MM-ROLLON"
+      },
+      "source": {
+        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/4.  GBCyl28RollWht.psd",
+        "originalFilename": "4.  GBCyl28RollWht.psd",
+        "sha256": "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0",
+        "canvas": { "width": 1400, "height": 1925 },
+        "identityStatus": "source-backed"
+      },
+      "layers": [
+        { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 199, "top": 251, "width": 445, "height": 1577 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "roller-fitment", "role": "exterior-component", "sceneIndex": 3, "sourceBoundsPx": { "left": 221, "top": 466, "width": 339, "height": 576 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "white-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 773, "top": 1313, "width": 496, "height": 515 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 243, "top": 534, "width": 335, "height": 351 }, "assemblyMember": false, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-50ML-16MM-ROLLON",
+      "label": "50 mL big roll-on",
+      "displayKey": "roll-on|50",
+      "geometry": {
+        "geometryKey": "body__cylinder__50ml__98x37x37.0__d5cabe6ea2",
+        "capacityMl": 50,
+        "bodyHeightMm": 98,
+        "bodyWidthMm": 37,
+        "neckFinish": "16MM-ROLLON"
+      },
+      "source": {
+        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/2. GBCyl50RollWht.psd",
+        "originalFilename": "2. GBCyl50RollWht.psd",
+        "sha256": "1879bd88979eba638f4fa2469f5dd4b5067f43d4e4f0fb7da0e852d81bb32a3f",
+        "canvas": { "width": 1400, "height": 1925 },
+        "identityStatus": "source-backed",
+        "excludedScenes": [{ "sceneIndex": 6, "reason": "hidden duplicate overcap" }]
+      },
+      "layers": [
+        { "layerId": "white-overcap", "role": "detached-review", "sceneIndex": 2, "sourceBoundsPx": { "left": 813, "top": 1313, "width": 496, "height": 515 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "body", "role": "body", "sceneIndex": 3, "sourceBoundsPx": { "left": 226, "top": 453, "width": 509, "height": 1368 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "roller-fitment", "role": "exterior-component", "sceneIndex": 4, "sourceBoundsPx": { "left": 249, "top": 172, "width": 396, "height": 698 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 276, "top": 252, "width": 394, "height": 420 }, "assemblyMember": false, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-25ML-18-415-SPRAY",
+      "label": "25 mL spray",
+      "displayKey": "spray|25",
+      "geometry": {
+        "geometryKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
+        "capacityMl": 25,
+        "bodyHeightMm": 83,
+        "bodyWidthMm": 32,
+        "neckFinish": "18-415"
+      },
+      "source": {
+        "archiveRelativePath": "2. 18-415 Bottles/1. Cylindrical 30ml/1. Cylindrical 30ml PSD/23. GBCyl30SpryMtSl.psd",
+        "originalFilename": "23. GBCyl30SpryMtSl.psd",
+        "sha256": "2880b76a2cfd540fe62d2303c18a809d321ff924e38449e51abd573c5e58a532",
+        "canvas": { "width": 1750, "height": 1750 },
+        "identityStatus": "manual-review-required",
+        "identityConflict": "Catalog truth is 25 mL / 83 × 32 mm, but the source archive and filename call this family 30 mL. The source can be reviewed visually but cannot become body authority until identity is approved."
+      },
+      "layers": [
+        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 818, "top": 743, "width": 166, "height": 822 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 3, "sourceBoundsPx": { "left": 1174, "top": 1099, "width": 336, "height": 587 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "body", "role": "body", "sceneIndex": 4, "sourceBoundsPx": { "left": 636, "top": 533, "width": 457, "height": 1154 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 709, "top": 208, "width": 306, "height": 536 }, "assemblyMember": true, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-50ML-18-415-SPRAY",
+      "label": "50 mL spray",
+      "displayKey": "spray|50",
+      "geometry": {
+        "geometryKey": "body__cylinder__50ml__117x32x32.0__16f88e6875",
+        "capacityMl": 50,
+        "bodyHeightMm": 117,
+        "bodyWidthMm": 32,
+        "neckFinish": "18-415"
+      },
+      "source": {
+        "archiveRelativePath": "2. 18-415 Bottles/2. Cylindrical 50ml/1. Cylindrical 50ml PSD/23. GBCyl50SpryMtSl.psd",
+        "originalFilename": "23. GBCyl50SpryMtSl.psd",
+        "sha256": "7491623a01ae34622aa23b343b9c56c77638bf3b5b5150bab7d444c798f43c1e",
+        "canvas": { "width": 1400, "height": 2100 },
+        "identityStatus": "source-backed",
+        "notes": "The source dip-tube layer extends beyond the PSD document canvas; preserve its registered source bounds and crop only at the canonical output edge."
+      },
+      "layers": [
+        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 523, "top": 677, "width": 227, "height": 1898 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "body", "role": "body", "sceneIndex": 3, "sourceBoundsPx": { "left": 473, "top": 417, "width": 456, "height": 1650 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 4, "sourceBoundsPx": { "left": 543, "top": 139, "width": 306, "height": 536 }, "assemblyMember": true, "zIndex": 30 },
+        { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 5, "sourceBoundsPx": { "left": 992, "top": 1485, "width": 336, "height": 587 }, "assemblyMember": false, "zIndex": 40 }
+      ]
+    },
+    {
+      "familyKey": "CYL-100ML-18-415-SPRAY",
+      "label": "100 mL spray",
+      "displayKey": "spray|100",
+      "geometry": {
+        "geometryKey": "body__cylinder__100ml__154x35x35.0__b6c5e98693",
+        "capacityMl": 100,
+        "bodyHeightMm": 154,
+        "bodyWidthMm": 35,
+        "neckFinish": "18-415"
+      },
+      "source": {
+        "archiveRelativePath": "2. 18-415 Bottles/3. Cylindrical 100ml/1. Cylindrical 100ml PSD/23. GBCyl100SpryMtSl.psd",
+        "originalFilename": "23. GBCyl100SpryMtSl.psd",
+        "sha256": "5bb4458eba0b7440e03fa59212a90f61218d4e749f0b7542eb4a61f3bbb6ba94",
+        "canvas": { "width": 1750, "height": 2713 },
+        "identityStatus": "source-backed"
+      },
+      "layers": [
+        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 2, "sourceBoundsPx": { "left": 689, "top": 603, "width": 232, "height": 1960 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 3, "sourceBoundsPx": { "left": 1291, "top": 2069, "width": 336, "height": 587 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "body", "role": "body", "sceneIndex": 4, "sourceBoundsPx": { "left": 612, "top": 293, "width": 513, "height": 2366 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 715, "top": 68, "width": 306, "height": 536 }, "assemblyMember": true, "zIndex": 30 }
+      ]
+    }
+  ]
+}
