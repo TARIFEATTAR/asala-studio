@@ -79,6 +79,8 @@ The differing transparent bounds mean these six source images are not already ge
 
 ## Roller assembly decomposition finding
 
+The review-only kit is now registered in `boston-round-rollon-20-400-component-kit-decomposition.json`. Its reproducible extraction, calibrated topology results, and GPT material trial are documented in `BOSTON-ROUND-ROLLON-20-400-COMPONENT-KIT.md`.
+
 The 30 mL amber roll-on PSD `10GBBS~1.PSD` proves that the archive separates the assembly into distinct scenes:
 
 | Scene | Observed responsibility | Disposition |
@@ -95,6 +97,6 @@ The metal and plastic fitment scenes repeat at similar source dimensions through
 1. Extract exterior dropper scenes separately from pipette scenes.
 2. Compare clean alpha silhouettes by appearance and neck lane.
 3. Inspect 30 mL and 60 mL assembly PSDs to identify plastic and metal roller fitment scenes without bottle pixels.
-4. Calibrate one 20-400 roller-overcap geometry and clamp all six materials to it.
+4. Reuse the existing dimension-calibrated 20-400 roller-overcap geometry candidate and clamp all six materials only after named profile review; do not create a duplicate cap system.
 5. Calibrate placement separately for 15, 30, and 60 mL bodies.
 6. Promote nothing until named pixel, geometry, placement, and assembly-context approvals pass.

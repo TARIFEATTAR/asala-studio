@@ -416,3 +416,42 @@ test("the 18-415 reducer kit promotes only the exposed flange and keeps caps sep
   assert.ok(recipe.parts.every((part) => !/gold|silver|leather|white-cap-variant/i.test(part.partId)));
   assert.ok(recipe.sources.every((source) => source.productionEligible === false));
 });
+
+test("the Boston Round 20-400 roller kit normalizes fitments without duplicating overcap geometry", async () => {
+  const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
+    path.resolve("docs/paper-doll-rig/boston-round-rollon-20-400-component-kit-decomposition.json"),
+    "utf8",
+  )));
+  const plan = buildComponentKitDecompositionPlan(recipe);
+  const fitment = recipe.parts.find((part) => part.partId === "roller-fitment");
+  const overcap = recipe.parts.find((part) => part.partId === "tall-rollon-overcap");
+  const bodyContext = recipe.parts.find((part) => part.partId === "body-neck-context-reference");
+  const metalSelector = fitment?.sourceSelectors.find((selector) => selector.sourceId === "amber-30-rollon-assembly");
+  const plasticSelector = fitment?.sourceSelectors.find((selector) => selector.method === "psd-layer-scene");
+  const overcapSource = recipe.sources.find((source) => source.sourceId === "existing-parametric-overcap-mask");
+
+  assert.equal(recipe.primaryAuthorityPartId, "roller-fitment");
+  assert.deepEqual(plan.reusablePlatePartIds, ["roller-fitment", "tall-rollon-overcap"]);
+  assert.equal(plan.productionPlateCount, 2);
+  assert.equal(metalSelector?.method, "reviewed-selection-mask");
+  assert.deepEqual(plasticSelector, {
+    sourceId: "amber-30-rollon-assembly",
+    method: "psd-layer-scene",
+    sceneIndex: 4,
+    layerName: "natural plastic roller fitment candidate",
+  });
+  assert.equal(overcap?.sourceSelectors[0].method, "reviewed-selection-mask");
+  assert.equal(overcapSource?.sourceType, "existing-paper-doll-asset");
+  assert.equal(
+    overcapSource?.repositoryRelativePath,
+    "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/blender-v1/geometry-mask.png",
+  );
+  assert.equal(bodyContext?.outputPolicy, "source-evidence-only");
+  assert.deepEqual(bodyContext?.sourceSelectors, [{
+    sourceId: "amber-30-rollon-assembly",
+    method: "psd-layer-scene",
+    sceneIndex: 3,
+    layerName: "amber 30 mL body and neck context",
+  }]);
+  assert.ok(recipe.sources.every((source) => source.productionEligible === false));
+});

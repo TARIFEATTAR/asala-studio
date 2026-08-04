@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kitId": "boston-round-rollon__20-400__physical-v1",
+  "state": "material-and-silhouette-review",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "source": {
+    "originalFilename": "10GBBS~1.PSD",
+    "sha256": "7bfa8507955d7d7ae2d0ad8908e9a1424e829eed74683269e23a674475a9fa83"
+  },
+  "plasticSourceCleanup": {
+    "measuredSourceComponents": 22,
+    "retainedComponentPixels": 25267,
+    "discardedComponentPixels": [9, 9, 9, 9, 8, 8, 8, 8, 8, 7, 7, 6, 6, 5, 5, 5, 5, 4, 3, 3, 2],
+    "discardedTotalPixels": 134,
+    "cleanedReviewPath": "outputs/paper-doll-component-authority-reviews/boston-round-rollon-20-400/roller-fitment-v1/plastic-source-cleaned.png",
+    "cleanedReviewSha256": "cd376f4ed6186add7e0abe97853cba3c40c97d0725858400e05b4e5a049697b3",
+    "reviewMaskPath": "outputs/paper-doll-component-authority-reviews/boston-round-rollon-20-400/roller-fitment-v1/authority-review-mask.png",
+    "reviewMaskSha256": "f44abc3ca348731b53141f7dd99e002428a6f65a4e75d8a6e14defb964e38e8a",
+    "authorityBoundsPx": {
+      "left": 936,
+      "top": 1063,
+      "width": 210,
+      "height": 166
+    },
+    "componentCountAfterCleanup": 1,
+    "touchesFrame": false,
+    "geometryLocked": false,
+    "reason": "Topology is clean, but the legacy top profile is visibly faceted and still needs physical silhouette review."
+  },
+  "metalSource": {
+    "measuredSourceComponents": 6,
+    "retainedComponentPixels": 44334,
+    "discardedComponentPixels": [10, 5, 4, 2, 1],
+    "discardedTotalPixels": 22,
+    "sourceBoundsPx": {
+      "left": 917,
+      "top": 1037,
+      "width": 246,
+      "height": 214
+    },
+    "productionEligible": false,
+    "reason": "The main connected region contains an attached opaque white polygon; detached-island cleanup cannot repair it."
+  },
+  "rawMaterialCandidates": {
+    "provider": "openai-imagegen-built-in",
+    "model": "not-exposed-by-tool",
+    "geometryAuthority": false,
+    "plastic": {
+      "path": "outputs/paper-doll-component-authority-reviews/boston-round-rollon-20-400/roller-fitment-v1/raw-gpt-candidates/PLASTIC-v1.png",
+      "sha256": "edf7aa869ec5111d08cee369952efa6addcd750633495aa1b578dc2175e82ce2",
+      "calibratedForegroundBoundsPx": {
+        "left": 166,
+        "top": 222,
+        "width": 917,
+        "height": 768
+      }
+    },
+    "metal": {
+      "path": "outputs/paper-doll-component-authority-reviews/boston-round-rollon-20-400/roller-fitment-v1/raw-gpt-candidates/METAL-v1.png",
+      "sha256": "5b79e7e057b2967edde42009146a64af4515303bb07c4c20f6d2171b225155f6",
+      "calibratedForegroundBoundsPx": {
+        "left": 166,
+        "top": 221,
+        "width": 918,
+        "height": 769
+      }
+    },
+    "foregroundCalibration": {
+      "method": "corner-background trim diagnostic",
+      "fuzzPercent": 4,
+      "interpretation": "Diagnostic source bounds only; not an alpha authority."
+    }
+  },
+  "overcapGeometry": {
+    "recipePath": "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
+    "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1",
+    "nominalDimensionsMm": {
+      "outsideDiameter": 23,
+      "height": 35
+    },
+    "duplicated": false
+  },
+  "nextGate": "named physical roller-profile review followed by exact authority-alpha clamp",
+  "productionEligible": false,
+  "geometryLocked": false,
+  "currentReleaseChanged": false,
+  "sanityChanged": false
+}
