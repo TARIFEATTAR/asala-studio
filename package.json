@@ -109,6 +109,7 @@
     "paperdoll:parametric-overcap-candidate": "tsx scripts/paper-doll/build-parametric-overcap-family.ts",
     "paperdoll:render-boston-round-roller": "\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python scripts/paper-doll/render_parametric_roller_fitment.py -- --recipe docs/paper-doll-rig/boston-round-roller-fitment-20-400-family-recipe.json --out outputs/paper-doll-parametric-fitments/20-400-roller-fitment/blender-v1 --samples 128",
     "paperdoll:build-boston-round-roller": "tsx scripts/paper-doll/build-parametric-roller-fitment.ts --recipe docs/paper-doll-rig/boston-round-roller-fitment-20-400-family-recipe.json --blender-output outputs/paper-doll-parametric-fitments/20-400-roller-fitment/blender-v1 --out outputs/paper-doll-parametric-fitments/20-400-roller-fitment/candidate-v1",
+    "paperdoll:materialize-boston-round-roller": "tsx scripts/paper-doll/materialize-parametric-roller-materials.ts --candidate-dir outputs/paper-doll-parametric-fitments/20-400-roller-fitment/candidate-v1 --raw-dir outputs/paper-doll-parametric-fitments/20-400-roller-fitment/material-v1/raw --out outputs/paper-doll-parametric-fitments/20-400-roller-fitment/material-v1",
     "paperdoll:parametric-review-book": "tsx scripts/paper-doll/build-parametric-component-review-book.ts",
     "paperdoll:cyl5-body-authority-review": "tsx scripts/paper-doll/build-cylinder-body-authority-review.ts",
     "paperdoll:cylinder-requested-family-review": "tsx scripts/paper-doll/build-cylinder-requested-family-review.ts",

@@ -1,10 +1,10 @@
 # Boston Round 20-400 Roller Parametric Review
 
-Status: local geometry review candidate; not production approved
+Status: exact-alpha material candidates created; material and family-fit review remain open
 
 Scope: 30 mL and 60 mL Boston Round roll-on families
 
-Remote writes: none
+Remote writes: generation-attempt ledger only; no approval, placement, release, or Sanity writes
 
 ## Decision
 
@@ -33,10 +33,32 @@ The flange, housing, shoulder, and ball are separate Blender objects driven by o
 ```bash
 npm run paperdoll:render-boston-round-roller
 npm run paperdoll:build-boston-round-roller
+npm run paperdoll:materialize-boston-round-roller
 npm run test:paperdoll:parametric-roller-render
 ```
 
-The first command renders two material references and one shared object mask. The second clamps both references to the mask, verifies exact pairwise alpha, creates a contact sheet, and emits a no-spend GPT Image 2 material plan.
+The first command renders two material references and one shared object mask. The second clamps both references to the mask, verifies exact pairwise alpha, creates a contact sheet, and emits a no-spend GPT Image 2 material plan. After the two authorized provider calls, the third command calibrates each real provider file, normalizes its detected foreground bounds into the registered authority bounds, copies the exact authority alpha, and writes the material review manifest.
+
+## Material pass v1 — 2026-08-03
+
+Two explicitly authorized high-quality `gpt-image-2` edits completed:
+
+- `PLASTIC` raw SHA-256: `b2d12c07f9f39910076c4d33af9dc4355380c7b62555657f9580e7701ff37b10`;
+- `METAL` raw SHA-256: `6c8c4e7a8ea92bc33d6f4fcdf5e336503191ddc4e64079551f48de6ddb6ccfda`.
+
+Real-file foreground calibration was stable from maximum-RGB thresholds 8 through 32. Threshold 16 was selected independently for each provider output before normalization. After the exact-alpha clamp:
+
+- pairwise alpha mismatch: `0` pixels;
+- geometry match to the registered review mask: pass;
+- production eligibility: false until material review, named geometry approval, and 30/60 mL family fit;
+- Current Release and Sanity: unchanged.
+
+Visual disposition:
+
+- `METAL`: strong mirror-chrome ball candidate; positive operator review, but no persisted Approve Pixels action yet;
+- `PLASTIC`: usable v1 evidence, but it reads too opaque/white and remains a refinement candidate rather than the recommended production material.
+
+Material artifacts remain under the ignored local path `outputs/paper-doll-parametric-fitments/20-400-roller-fitment/material-v1/`.
 
 ## Approval gates
 
