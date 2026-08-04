@@ -366,7 +366,7 @@ test("the 13-415 sprayer separates eight reusable heads, opaque overcaps, and bo
   assert.equal(plan.productionPlateCount, 2);
 });
 
-test("the 28/50 mL jumbo roll-on kit quarantines invalid rollers and preserves black/white overcaps", async () => {
+test("the 28/50 mL jumbo roll-on kit registers valid large-roller candidates and preserves black/white overcaps", async () => {
   const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
     path.resolve("docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json"),
     "utf8",
@@ -380,21 +380,21 @@ test("the 28/50 mL jumbo roll-on kit quarantines invalid rollers and preserves b
   const contracts = recipe.catalogProductContracts ?? [];
 
   assert.equal(recipe.sources.length, 8);
-  assert.equal(recipe.authorityState, "exact-authority-required");
+  assert.equal(recipe.authorityState, "source-candidate-present");
+  assert.equal(recipe.primaryAuthorityPartId, "jumbo-roller-fitment");
   assert.equal(fitment?.sourceSelectors.length, 8);
   assert.equal(fitment?.sourceSelectors.filter((selector) => selector.method === "reviewed-selection-mask").length, 4);
-  assert.equal(fitment?.outputPolicy, "source-evidence-only");
-  assert.equal(fitment?.independentlySelectable, false);
+  assert.equal(fitment?.outputPolicy, "reusable-full-canvas-plate");
+  assert.equal(fitment?.independentlySelectable, true);
   assert.equal(overcap?.sourceSelectors.length, 8);
   assert.equal(metalComposite?.sourceSelectors.length, 4);
   assert.equal(integration?.sourceSelectors.length, 4);
-  assert.deepEqual(plan.reusablePlatePartIds, ["jumbo-overcap"]);
+  assert.deepEqual(plan.reusablePlatePartIds, ["jumbo-roller-fitment", "jumbo-overcap"]);
   assert.deepEqual(plan.sourceEvidencePartIds, [
-    "jumbo-roller-fitment",
     "metal-fitment-neck-composite-reference",
     "plastic-fitment-neck-integration-reference",
   ]);
-  assert.equal(plan.productionPlateCount, 1);
+  assert.equal(plan.productionPlateCount, 2);
   assert.ok(recipe.sources.every((source) => source.productionEligible === false));
   assert.ok(sourceIds.every((sourceId) => /jumbo-(28|50)-(plastic|metal)-(black|white)/.test(sourceId)));
   assert.ok(sourceIds.every((sourceId) => !/boston|dropper|spray|pump/i.test(sourceId)));
