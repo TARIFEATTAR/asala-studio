@@ -33,17 +33,19 @@ test("approval parser rejects anonymous names, bad SHA and empty evidence", () =
   }));
 });
 
-test("approval implementation rejects stale, cross-org and unqualified candidates before promotion", async () => {
+test("v2 approval implementation binds named lifecycle actions to exact candidate and QA identity", async () => {
   const source = await readFile(new URL("../approve-paper-doll-candidate/index.ts", import.meta.url), "utf8");
-  assert.match(source, /auth\.getUser/);
+  assert.match(source, /createPaperDollActionContext/);
   assert.match(source, /organization_id/);
-  assert.match(source, /expectedCandidateSha256/);
-  assert.match(source, /candidate_ready/);
-  assert.match(source, /blocking/);
-  assert.match(source, /geometry-mask-identity/);
-  assert.match(source, /opaque-white-fraction/);
-  assert.match(source, /approve_paper_doll_candidate/);
-  assert.match(source, /upsert:\s*false/);
+  assert.match(source, /expectedContentSha256/);
+  assert.match(source, /expectedLifecycleState/);
+  assert.match(source, /validateApprovalRequest/);
+  assert.match(source, /geometryLocked/);
+  assert.match(source, /mismatchedPixels/);
+  assert.match(source, /paper_doll_approval_events/);
+  assert.match(source, /paper_doll_component_versions/);
+  assert.match(source, /image_sha256/);
+  assert.match(source, /approval_status:\s*"approved"/);
   assert.doesNotMatch(source, /paper_doll_family_release_assets["')]/);
 });
 
