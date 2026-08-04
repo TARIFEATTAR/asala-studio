@@ -31,6 +31,20 @@ const ComponentProductionAnchorSchema = z.enum([
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/);
 
+const CatalogProductContractSchema = z.object({
+  familyKey: z.string().min(1),
+  catalogProductId: z.string().min(1),
+  referenceUrl: z.string().url(),
+  capacityMl: z.number().positive(),
+  bodyHeightMm: z.number().positive(),
+  bodyDiameterMm: z.number().positive(),
+  assembledHeightMm: z.number().positive(),
+  assembledHeightToleranceMm: z.number().nonnegative(),
+  neckSizeMm: z.number().positive(),
+  applicatorClass: z.string().min(1),
+  placementAuthorityScope: z.enum(["family-specific", "shared-exact-geometry"]),
+});
+
 const ComponentKitSourceSchema = z.object({
   sourceId: z.string().min(1),
   sourceType: z.enum([
@@ -125,14 +139,27 @@ export const ComponentKitDecompositionSchema = z.object({
   kitId: z.string().min(1),
   sourceReviewGroupKey: z.string().min(1),
   sourceCompositeProductionEligible: z.literal(false),
+  authorityState: z.enum(["source-candidate-present", "exact-authority-required"]).optional(),
   primaryAuthorityPartId: z.string().min(1).optional(),
   canonicalCanvas: z.object({
     width: z.number().int().positive(),
     height: z.number().int().positive(),
   }),
+  catalogProductContracts: z.array(CatalogProductContractSchema).min(1).optional(),
   sources: z.array(ComponentKitSourceSchema).min(1),
   parts: z.array(ComponentKitPartSchema).min(2),
 }).superRefine((kit, context) => {
+  if (kit.catalogProductContracts) {
+    const familyKeys = kit.catalogProductContracts.map((contract) => contract.familyKey);
+    if (new Set(familyKeys).size !== familyKeys.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Catalog product contract family keys must be unique.",
+        path: ["catalogProductContracts"],
+      });
+    }
+  }
+
   const partIds = kit.parts.map((part) => part.partId);
   if (new Set(partIds).size !== partIds.length) {
     context.addIssue({
@@ -153,10 +180,24 @@ export const ComponentKitDecompositionSchema = z.object({
   const sourceById = new Map(kit.sources.map((source) => [source.sourceId, source]));
 
   const exteriorParts = kit.parts.filter((part) => part.responsibility === "exterior-dispenser");
+  const exactAuthorityRequired = kit.authorityState === "exact-authority-required";
   const namedPrimary = kit.primaryAuthorityPartId
     ? kit.parts.find((part) => part.partId === kit.primaryAuthorityPartId)
     : undefined;
-  if (kit.primaryAuthorityPartId) {
+  if (exactAuthorityRequired) {
+    const unresolvedExteriorIsReviewOnly = !kit.primaryAuthorityPartId
+      && exteriorParts.length === 1
+      && exteriorParts[0].outputPolicy === "source-evidence-only"
+      && exteriorParts[0].productionAnchor === "not-applicable"
+      && !exteriorParts[0].independentlySelectable;
+    if (!unresolvedExteriorIsReviewOnly) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A kit awaiting exact authority must retain exactly one non-selectable exterior responsibility as source evidence only.",
+        path: ["parts"],
+      });
+    }
+  } else if (kit.primaryAuthorityPartId) {
     const namedPrimaryIsValid = namedPrimary
       && (namedPrimary.responsibility === "exterior-dispenser" || namedPrimary.responsibility === "visible-insert")
       && namedPrimary.outputPolicy === "reusable-full-canvas-plate"
@@ -278,6 +319,7 @@ export const ComponentKitDecompositionSchema = z.object({
 
     if (
       part.responsibility === "exterior-dispenser"
+      && !exactAuthorityRequired
       && (
         part.outputPolicy !== "reusable-full-canvas-plate"
         || part.productionAnchor !== "mount-axis-seat"

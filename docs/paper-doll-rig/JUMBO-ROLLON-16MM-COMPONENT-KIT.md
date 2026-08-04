@@ -1,8 +1,17 @@
 # 16 mm jumbo roll-on component kit
 
-**State:** exact eight-product source matrix registered and extracted for review; no geometry authority, production approval, release, or Sanity mutation
+**State:** exact eight-product source matrix registered; both currently surfaced source rollers are invalid small-roller references and are quarantined; no geometry authority, production approval, release, or Sanity mutation
 
 This family is the straight-sided 28 mL and 50 mL Cylinder massage roll-on sold by Best Bottles. It is not a Boston Round family and it inherits no Boston Round components.
+
+## Locked product truth
+
+| Capacity | Exact product | Body | Capped height | Neck | Applicator class |
+|---|---|---:|---:|---|---|
+| 28 mL | [`GBCyl1ozRollWht`](https://www.bestbottles.com/product/cylinder-style-28-ml-glass-bottle-plastic-roll-on-and-white-cap) | 81 × 31 mm | 100 ±1 mm | 16 mm | large roller ball |
+| 50 mL | [`GBCyl50RollBlk`](https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap) | 98 × 37 mm | 116 ±2 mm | 16 mm | large roller ball |
+
+These contracts are user-confirmed and live-catalog verified. Neither body nor fitment may inherit the 9 mL 17-415 roller geometry or placement. Body identity is resolved. The small roller visible in the current 28/50 mL source composites is explicitly invalid for these products; roller-pixel geometry/material approval remains pending.
 
 ## Closed catalog scope
 
@@ -37,12 +46,12 @@ All eight PSDs are SHA-pinned. The decomposition contains four responsibilities:
 
 | Responsibility | Source result | Current disposition |
 |---|---|---|
-| plastic roller fitment | clean isolated PSD scenes in four assemblies | reusable-plate candidates; authority not approved |
+| plastic roller fitment | isolated PSD scenes in four assemblies, but the visible form is the wrong small roller | quarantined reference only; not a reusable-plate candidate |
 | metal roller fitment | ball and housing are welded to visible bottle-neck pixels in all four PSD scenes | selection-mask required before a reusable candidate exists |
 | black/white overcap | detached PSD scenes in all eight assemblies | reusable-plate candidates; authority not approved |
 | neck integration | plastic and metal source composites include body pixels | evidence only; never an independently selectable plate |
 
-The metal source composite is intentionally separated from the `jumbo-roller-fitment` extraction lane. The system must not approve the glass neck and threads as closure pixels.
+The metal source composite is intentionally separated from the `jumbo-roller-fitment` extraction lane. The system must not approve the glass neck and threads as closure pixels. The plastic source scenes are also detached from assembly previews because the user rejected their small-roller form as invalid for both jumbo products.
 
 ## Real-file comparison
 

@@ -7,7 +7,10 @@ import test from "node:test";
 
 import sharp from "sharp";
 
-import { buildCylinderRequestedFamilyReview } from "./build-cylinder-requested-family-review";
+import {
+  buildCylinderRequestedFamilyReview,
+  parseCylinderRequestedFamilySourceRecipe,
+} from "./build-cylinder-requested-family-review";
 
 const sha256 = (value: Buffer) => createHash("sha256").update(value).digest("hex");
 
@@ -161,4 +164,68 @@ test("rejects a mutated PSD before creating a review manifest", async () => {
     decodePsdScene: async () => fixture(1, 1, { r: 0, g: 0, b: 0 }),
   }), /SHA-256 mismatch/);
   await assert.rejects(() => readFile(path.join(outputRoot, "manifest.json")), /ENOENT/);
+});
+
+test("keeps the disputed 74x21 mm regular roll-on as body-only identity-review evidence", async () => {
+  const productionRecipe = parseCylinderRequestedFamilySourceRecipe(JSON.parse(
+    await readFile("docs/paper-doll-rig/cylinder-requested-family-source-recipes.json", "utf8"),
+  ));
+  const family = productionRecipe.families.find((candidate) => candidate.familyKey === "CYL-9ML-17-415-ROLLON-74X21");
+  assert.ok(family);
+  assert.equal(family.reviewScope, "body-only");
+  assert.equal(family.displayKey, "roll-on|9|regular");
+  assert.equal(family.source.identityStatus, "manual-review-required");
+  assert.match(family.source.identityConflict!, /five locked 70 × 20 mm/i);
+  assert.equal(family.geometry.geometryKey, "body__cylinder__9ml__74x21x21.0__c3c136fd9e");
+  assert.deepEqual(family.layers.map((layer) => [layer.layerId, layer.sceneIndex, layer.assemblyMember]), [
+    ["body", 3, true],
+    ["roller-fitment", 4, false],
+    ["roll-on-overcap", 2, false],
+  ]);
+});
+
+test("pins the verified 28 and 50 ml jumbo body contracts to their live product references", async () => {
+  const productionRecipe = parseCylinderRequestedFamilySourceRecipe(JSON.parse(
+    await readFile("docs/paper-doll-rig/cylinder-requested-family-source-recipes.json", "utf8"),
+  ));
+  const twentyEight = productionRecipe.families.find((candidate) => candidate.displayKey === "roll-on|28");
+  const fifty = productionRecipe.families.find((candidate) => candidate.displayKey === "roll-on|50");
+  assert.ok(twentyEight);
+  assert.ok(fifty);
+  assert.equal(twentyEight.reviewScope, "body-only");
+  assert.equal(fifty.reviewScope, "body-only");
+  assert.equal(twentyEight.source.componentValidationStatus, "invalid-small-roller-large-roller-authority-required");
+  assert.equal(fifty.source.componentValidationStatus, "invalid-small-roller-large-roller-authority-required");
+  assert.deepEqual(twentyEight.layers.map((layer) => [layer.layerId, layer.assemblyMember]), [
+    ["body", true],
+    ["invalid-small-plastic-roller-reference", false],
+    ["white-overcap", false],
+    ["neck-integration-reference", false],
+  ]);
+  assert.deepEqual(fifty.layers.map((layer) => [layer.layerId, layer.assemblyMember]), [
+    ["body", true],
+    ["black-overcap", false],
+    ["invalid-small-plastic-roller-reference", false],
+    ["neck-integration-reference", false],
+  ]);
+  assert.deepEqual(twentyEight.source.catalogReference, {
+    productUrl: "https://www.bestbottles.com/product/cylinder-style-28-ml-glass-bottle-plastic-roll-on-and-white-cap",
+    websiteSku: "GBCyl1ozRollWht",
+    capacityMl: 28,
+    bodyHeightMm: 81,
+    assembledHeightMm: 100,
+    diameterMm: 31,
+    neckFinish: "16mm",
+    applicatorDescription: "large roller ball",
+  });
+  assert.deepEqual(fifty.source.catalogReference, {
+    productUrl: "https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap",
+    websiteSku: "GBCyl50RollBlk",
+    capacityMl: 50,
+    bodyHeightMm: 98,
+    assembledHeightMm: 116,
+    diameterMm: 37,
+    neckFinish: "16mm",
+    applicatorDescription: "large roller ball",
+  });
 });

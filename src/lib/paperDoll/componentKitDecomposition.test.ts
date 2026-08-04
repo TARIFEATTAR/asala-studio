@@ -366,7 +366,7 @@ test("the 13-415 sprayer separates eight reusable heads, opaque overcaps, and bo
   assert.equal(plan.productionPlateCount, 2);
 });
 
-test("the 28/50 mL jumbo roll-on kit is closed to two rollers and black/white overcaps", async () => {
+test("the 28/50 mL jumbo roll-on kit quarantines invalid rollers and preserves black/white overcaps", async () => {
   const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
     path.resolve("docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json"),
     "utf8",
@@ -377,22 +377,58 @@ test("the 28/50 mL jumbo roll-on kit is closed to two rollers and black/white ov
   const metalComposite = recipe.parts.find((part) => part.partId === "metal-fitment-neck-composite-reference");
   const integration = recipe.parts.find((part) => part.partId === "plastic-fitment-neck-integration-reference");
   const sourceIds = recipe.sources.map((source) => source.sourceId);
+  const contracts = recipe.catalogProductContracts ?? [];
 
   assert.equal(recipe.sources.length, 8);
+  assert.equal(recipe.authorityState, "exact-authority-required");
   assert.equal(fitment?.sourceSelectors.length, 8);
   assert.equal(fitment?.sourceSelectors.filter((selector) => selector.method === "reviewed-selection-mask").length, 4);
+  assert.equal(fitment?.outputPolicy, "source-evidence-only");
+  assert.equal(fitment?.independentlySelectable, false);
   assert.equal(overcap?.sourceSelectors.length, 8);
   assert.equal(metalComposite?.sourceSelectors.length, 4);
   assert.equal(integration?.sourceSelectors.length, 4);
-  assert.deepEqual(plan.reusablePlatePartIds, ["jumbo-roller-fitment", "jumbo-overcap"]);
+  assert.deepEqual(plan.reusablePlatePartIds, ["jumbo-overcap"]);
   assert.deepEqual(plan.sourceEvidencePartIds, [
+    "jumbo-roller-fitment",
     "metal-fitment-neck-composite-reference",
     "plastic-fitment-neck-integration-reference",
   ]);
-  assert.equal(plan.productionPlateCount, 2);
+  assert.equal(plan.productionPlateCount, 1);
   assert.ok(recipe.sources.every((source) => source.productionEligible === false));
   assert.ok(sourceIds.every((sourceId) => /jumbo-(28|50)-(plastic|metal)-(black|white)/.test(sourceId)));
   assert.ok(sourceIds.every((sourceId) => !/boston|dropper|spray|pump/i.test(sourceId)));
+  assert.deepEqual(
+    contracts.map((contract) => ({
+      familyKey: contract.familyKey,
+      catalogProductId: contract.catalogProductId,
+      body: `${contract.bodyHeightMm}x${contract.bodyDiameterMm}`,
+      capped: `${contract.assembledHeightMm}±${contract.assembledHeightToleranceMm}`,
+      neck: contract.neckSizeMm,
+      applicator: contract.applicatorClass,
+      placementAuthorityScope: contract.placementAuthorityScope,
+    })),
+    [
+      {
+        familyKey: "roll-on|28|jumbo",
+        catalogProductId: "GBCyl1ozRollWht",
+        body: "81x31",
+        capped: "100±1",
+        neck: 16,
+        applicator: "large roller ball",
+        placementAuthorityScope: "family-specific",
+      },
+      {
+        familyKey: "roll-on|50|jumbo",
+        catalogProductId: "GBCyl50RollBlk",
+        body: "98x37",
+        capped: "116±2",
+        neck: 16,
+        applicator: "large roller ball",
+        placementAuthorityScope: "family-specific",
+      },
+    ],
+  );
 });
 
 test("the 18-415 reducer kit promotes only the exposed flange and keeps caps separate", async () => {

@@ -71,9 +71,40 @@
       ]
     },
     {
+      "familyKey": "CYL-9ML-17-415-ROLLON-74X21",
+      "label": "9 mL regular 74 × 21 mm roll-on",
+      "displayKey": "roll-on|9|regular",
+      "reviewScope": "body-only",
+      "geometry": {
+        "geometryKey": "body__cylinder__9ml__74x21x21.0__c3c136fd9e",
+        "capacityMl": 9,
+        "bodyHeightMm": 74,
+        "bodyWidthMm": 21,
+        "neckFinish": "17-415"
+      },
+      "source": {
+        "archiveRelativePath": "17-415 Bottles/6. Frosted 9ml (Capped)/5. GBCylFrst9MtlRollMattGl.psd",
+        "originalFilename": "5. GBCylFrst9MtlRollMattGl.psd",
+        "sha256": "0c6abaa99f6529381f4aca20efac4b8e412a08f5116a70267210ca9e459e65db",
+        "canvas": { "width": 750, "height": 1594 },
+        "identityStatus": "manual-review-required",
+        "exactCatalogIdentities": [
+          { "websiteSku": "GBCylFrst9MtlRollMattGl", "graceSku": "GB-CYL-FRS-9ML-MRL-MGLD" }
+        ],
+        "identityConflict": "The Photoshop and catalog evidence report a 74 × 21 mm 9 mL 17-415 shell, while the user-confirmed active paper-doll family already has five locked 70 × 20 mm 9 mL 17-415 body masters. Preserve this source as body-only review evidence until a named catalog decision proves it is a separate production shell.",
+        "notes": "Body-only identity-review evidence. It must not replace or compete with the five locked 70 × 20 mm CYL-9ML plates. Scene 4 contains a large opaque white contamination shape, so both source component scenes remain detached audit evidence; approved shared 17-415 components must enter later through Family Fit."
+      },
+      "layers": [
+        { "layerId": "body", "role": "body", "sceneIndex": 3, "sourceBoundsPx": { "left": 249, "top": 618, "width": 250, "height": 903 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "roller-fitment", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 255, "top": 457, "width": 228, "height": 324 }, "assemblyMember": false, "zIndex": 20 },
+        { "layerId": "roll-on-overcap", "role": "detached-review", "sceneIndex": 2, "sourceBoundsPx": { "left": 154, "top": 487, "width": 353, "height": 319 }, "assemblyMember": false, "zIndex": 30 }
+      ]
+    },
+    {
       "familyKey": "CYL-28ML-16MM-JUMBO-ROLLON",
       "label": "28 mL jumbo massage roll-on",
       "displayKey": "roll-on|28",
+      "reviewScope": "body-only",
       "geometry": {
         "geometryKey": "body__cylinder__28ml__81x31x31.0__78183a1776",
         "capacityMl": 28,
@@ -87,16 +118,28 @@
         "sha256": "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0",
         "canvas": { "width": 1400, "height": 1925 },
         "identityStatus": "source-backed",
+        "componentValidationStatus": "invalid-small-roller-large-roller-authority-required",
+        "catalogReference": {
+          "productUrl": "https://www.bestbottles.com/product/cylinder-style-28-ml-glass-bottle-plastic-roll-on-and-white-cap",
+          "websiteSku": "GBCyl1ozRollWht",
+          "capacityMl": 28,
+          "bodyHeightMm": 81,
+          "assembledHeightMm": 100,
+          "diameterMm": 31,
+          "neckFinish": "16mm",
+          "applicatorDescription": "large roller ball"
+        },
         "exactCatalogIdentities": [
           { "websiteSku": "GBMtlRoll28Wht", "graceSku": "GB-CYL-CLR-28ML-MRL-02" },
           { "websiteSku": "GBCyl1ozRollWht", "graceSku": "GB-CYL-CLR-28ML-RBL-WHT" },
           { "websiteSku": "GBRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-RBL" },
           { "websiteSku": "GBMtlRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-MRL-01" }
-        ]
+        ],
+        "notes": "The body source is valid review evidence. The visible roller scene is not the catalog-correct large 16 mm roller and is quarantined as detached evidence. Do not assemble or approve this family until a true large-roller authority is mounted and calibrated specifically to the 28 mL body."
       },
       "layers": [
         { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 199, "top": 251, "width": 445, "height": 1577 }, "assemblyMember": true, "zIndex": 10 },
-        { "layerId": "plastic-roller-fitment", "role": "exterior-component", "sceneIndex": 3, "sourceBoundsPx": { "left": 221, "top": 466, "width": 339, "height": 576 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "invalid-small-plastic-roller-reference", "role": "detached-review", "sceneIndex": 3, "sourceBoundsPx": { "left": 221, "top": 466, "width": 339, "height": 576 }, "assemblyMember": false, "zIndex": 20 },
         { "layerId": "white-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 773, "top": 1313, "width": 496, "height": 515 }, "assemblyMember": false, "zIndex": 40 },
         { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 243, "top": 534, "width": 335, "height": 351 }, "assemblyMember": false, "zIndex": 30 }
       ]
@@ -105,6 +148,7 @@
       "familyKey": "CYL-50ML-16MM-JUMBO-ROLLON",
       "label": "50 mL jumbo massage roll-on",
       "displayKey": "roll-on|50",
+      "reviewScope": "body-only",
       "geometry": {
         "geometryKey": "body__cylinder__50ml__98x37x37.0__d5cabe6ea2",
         "capacityMl": 50,
@@ -118,17 +162,29 @@
         "sha256": "b7cf4e25c9c25e167a28c4b1c18c4adb944594a20c6e4e6e0e4d2913d6997101",
         "canvas": { "width": 1400, "height": 1925 },
         "identityStatus": "source-backed",
+        "componentValidationStatus": "invalid-small-roller-large-roller-authority-required",
+        "catalogReference": {
+          "productUrl": "https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap",
+          "websiteSku": "GBCyl50RollBlk",
+          "capacityMl": 50,
+          "bodyHeightMm": 98,
+          "assembledHeightMm": 116,
+          "diameterMm": 37,
+          "neckFinish": "16mm",
+          "applicatorDescription": "large roller ball"
+        },
         "exactCatalogIdentities": [
           { "websiteSku": "GBCyl50MtlRollWht", "graceSku": "GB-CYL-WHT-50ML-MRL-WHT" },
           { "websiteSku": "GBCyl50RollWht", "graceSku": "GB-CYL-WHT-50ML-ROL-WHT" },
           { "websiteSku": "GBCyl50RollBlk", "graceSku": "GB-CYL-BLK-50ML-ROL-BLK" },
           { "websiteSku": "GBCyl50MtlRollBlk", "graceSku": "GB-CYL-BLK-50ML-MRL-BLK" }
-        ]
+        ],
+        "notes": "The body source is valid review evidence. The visible roller scene is not the catalog-correct large 16 mm roller and is quarantined as detached evidence. Do not assemble or approve this family until a true large-roller authority is mounted and calibrated specifically to the 50 mL body."
       },
       "layers": [
         { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 226, "top": 453, "width": 509, "height": 1368 }, "assemblyMember": true, "zIndex": 10 },
         { "layerId": "black-overcap", "role": "detached-review", "sceneIndex": 3, "sourceBoundsPx": { "left": 867, "top": 1313, "width": 438, "height": 509 }, "assemblyMember": false, "zIndex": 40 },
-        { "layerId": "plastic-roller-fitment", "role": "exterior-component", "sceneIndex": 4, "sourceBoundsPx": { "left": 252, "top": 173, "width": 399, "height": 697 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "invalid-small-plastic-roller-reference", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 252, "top": 173, "width": 399, "height": 697 }, "assemblyMember": false, "zIndex": 20 },
         { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 280, "top": 253, "width": 394, "height": 420 }, "assemblyMember": false, "zIndex": 30 }
       ]
     },

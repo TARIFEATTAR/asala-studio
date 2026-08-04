@@ -18,10 +18,22 @@ const defaultRecipePath = path.join(workspaceRoot, "docs/paper-doll-rig/cylinder
 const defaultOutputRoot = path.join(workspaceRoot, "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons");
 
 type IdentityStatus = "source-backed" | "manual-review-required";
+type ComponentValidationStatus = "source-component-valid" | "invalid-small-roller-large-roller-authority-required";
 
 interface ExactCatalogIdentity {
   websiteSku: string;
   graceSku: string;
+}
+
+interface CatalogReference {
+  productUrl: string;
+  websiteSku: string;
+  capacityMl: number;
+  bodyHeightMm: number;
+  assembledHeightMm: number;
+  diameterMm: number;
+  neckFinish: string;
+  applicatorDescription: "large roller ball";
 }
 
 interface SourceRecipeLayer {
@@ -37,6 +49,7 @@ interface SourceRecipeFamily {
   familyKey: string;
   label: string;
   displayKey: string;
+  reviewScope: "complete-assembly" | "body-only";
   geometry: {
     geometryKey: string;
     capacityMl: number;
@@ -50,6 +63,8 @@ interface SourceRecipeFamily {
     sha256: string;
     canvas: { width: number; height: number };
     identityStatus: IdentityStatus;
+    componentValidationStatus?: ComponentValidationStatus;
+    catalogReference?: CatalogReference;
     exactCatalogIdentities?: ExactCatalogIdentity[];
     identityConflict?: string;
     notes?: string;
@@ -152,6 +167,23 @@ function parseExactCatalogIdentities(value: unknown, label: string): ExactCatalo
   });
 }
 
+function parseCatalogReference(value: unknown, label: string): CatalogReference {
+  assertRecord(value, label);
+  assertString(value.productUrl, `${label}.productUrl`);
+  if (!String(value.productUrl).startsWith("https://www.bestbottles.com/product/")) {
+    throw new Error(`${label}.productUrl must be an exact Best Bottles product URL.`);
+  }
+  assertString(value.websiteSku, `${label}.websiteSku`);
+  for (const key of ["capacityMl", "bodyHeightMm", "assembledHeightMm", "diameterMm"] as const) {
+    if (typeof value[key] !== "number" || value[key] <= 0) throw new Error(`${label}.${key} must be positive.`);
+  }
+  assertString(value.neckFinish, `${label}.neckFinish`);
+  if (value.applicatorDescription !== "large roller ball") {
+    throw new Error(`${label}.applicatorDescription must identify the large roller ball.`);
+  }
+  return value as unknown as CatalogReference;
+}
+
 export function parseCylinderRequestedFamilySourceRecipe(value: unknown): SourceRecipe {
   assertRecord(value, "recipe");
   if (value.schemaVersion !== 1 || value.state !== "source-registered-review-only") {
@@ -232,6 +264,10 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     familyKeys.add(candidate.familyKey);
     assertString(candidate.label, `${label}.label`);
     assertString(candidate.displayKey, `${label}.displayKey`);
+    const reviewScope = candidate.reviewScope ?? "complete-assembly";
+    if (reviewScope !== "complete-assembly" && reviewScope !== "body-only") {
+      throw new Error(`${label}.reviewScope is invalid.`);
+    }
     assertRecord(candidate.geometry, `${label}.geometry`);
     assertString(candidate.geometry.geometryKey, `${label}.geometry.geometryKey`);
     assertInteger(candidate.geometry.capacityMl, `${label}.geometry.capacityMl`, 1);
@@ -252,8 +288,28 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     if (candidate.source.identityStatus !== "source-backed" && candidate.source.identityStatus !== "manual-review-required") {
       throw new Error(`${label}.source.identityStatus is invalid.`);
     }
+    if (candidate.source.componentValidationStatus !== undefined
+      && candidate.source.componentValidationStatus !== "source-component-valid"
+      && candidate.source.componentValidationStatus !== "invalid-small-roller-large-roller-authority-required") {
+      throw new Error(`${label}.source.componentValidationStatus is invalid.`);
+    }
     if (candidate.source.exactCatalogIdentities !== undefined) {
       parseExactCatalogIdentities(candidate.source.exactCatalogIdentities, `${label}.source.exactCatalogIdentities`);
+    }
+    const catalogReference = candidate.source.catalogReference === undefined
+      ? undefined
+      : parseCatalogReference(candidate.source.catalogReference, `${label}.source.catalogReference`);
+    if (catalogReference) {
+      if (catalogReference.capacityMl !== candidate.geometry.capacityMl
+        || catalogReference.bodyHeightMm !== candidate.geometry.bodyHeightMm
+        || catalogReference.diameterMm !== candidate.geometry.bodyWidthMm
+        || catalogReference.neckFinish.toLowerCase() !== candidate.geometry.neckFinish.toLowerCase().replace("-rollon", "")) {
+        throw new Error(`${label}.source.catalogReference conflicts with the registered physical geometry.`);
+      }
+      const presentation = resolveCylinderPaperDollPresentation(candidate.displayKey);
+      if (catalogReference.assembledHeightMm !== presentation.assembledHeightMm) {
+        throw new Error(`${label}.source.catalogReference conflicts with the reviewed assembled-height contract.`);
+      }
     }
     if (!Array.isArray(candidate.layers) || candidate.layers.length < 2) throw new Error(`${label}.layers are required.`);
     const layers = candidate.layers.map((layerValue, layerIndex): SourceRecipeLayer => {
@@ -279,8 +335,9 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
       familyKey: candidate.familyKey,
       label: candidate.label,
       displayKey: candidate.displayKey,
+      reviewScope,
       geometry: candidate.geometry as SourceRecipeFamily["geometry"],
-      source: candidate.source as unknown as SourceRecipeFamily["source"],
+      source: { ...candidate.source, catalogReference } as unknown as SourceRecipeFamily["source"],
       layers,
     };
   });
@@ -358,7 +415,14 @@ async function fullCanvasLayer(
 }
 
 async function familyContactSheet(
-  families: Array<{ label: string; displayKey: string; identityStatus: IdentityStatus; assemblyPreviewPath: string }>,
+  families: Array<{
+    label: string;
+    displayKey: string;
+    identityStatus: IdentityStatus;
+    componentValidationStatus: ComponentValidationStatus | null;
+    assemblyPreviewPath: string;
+    catalogReference: CatalogReference | null;
+  }>,
   outputPath: string,
 ): Promise<void> {
   const tileWidth = 720;
@@ -370,9 +434,18 @@ async function familyContactSheet(
     const tileLeft = (index % columns) * tileWidth;
     const tileTop = Math.floor(index / columns) * tileHeight;
     const preview = await sharp(family.assemblyPreviewPath)
-      .resize({ width: 660, height: 760, fit: "contain", background: "#F5F3EF" }).png().toBuffer();
-    const label = Buffer.from(`<svg width="${tileWidth}" height="110"><rect width="100%" height="100%" fill="#171714"/><text x="24" y="38" font-family="Arial" font-size="24" fill="#E4BC68">${escapeXml(family.label)}</text><text x="24" y="70" font-family="Arial" font-size="17" fill="#FFFFFF">${escapeXml(family.displayKey)}</text><text x="24" y="96" font-family="Arial" font-size="15" fill="${family.identityStatus === "source-backed" ? "#64D995" : "#F4B860"}">${escapeXml(family.identityStatus)}</text></svg>`);
-    overlays.push({ input: preview, left: tileLeft + 30, top: tileTop + 10 }, { input: label, left: tileLeft, top: tileTop + 790 });
+      .resize({ width: 660, height: 720, fit: "contain", background: "#F5F3EF" }).png().toBuffer();
+    const contract = family.catalogReference
+      ? `${family.catalogReference.bodyHeightMm}×${family.catalogReference.diameterMm} mm body · ${family.catalogReference.assembledHeightMm} mm capped · ${family.catalogReference.neckFinish}`
+      : "";
+    const applicator = family.catalogReference
+      ? family.catalogReference.applicatorDescription.toUpperCase()
+      : "";
+    const reviewStatus = family.componentValidationStatus === "invalid-small-roller-large-roller-authority-required"
+      ? "BODY ONLY · SOURCE ROLLER INVALID"
+      : family.identityStatus;
+    const label = Buffer.from(`<svg width="${tileWidth}" height="150"><rect width="100%" height="100%" fill="#171714"/><text x="24" y="34" font-family="Arial" font-size="23" fill="#E4BC68">${escapeXml(family.label)}</text><text x="24" y="63" font-family="Arial" font-size="16" fill="#FFFFFF">${escapeXml(family.displayKey)}</text><text x="24" y="88" font-family="Arial" font-size="14" font-weight="700" fill="${family.componentValidationStatus ? "#F08A74" : family.identityStatus === "source-backed" ? "#64D995" : "#F4B860"}">${escapeXml(reviewStatus)}</text><text x="24" y="115" font-family="monospace" font-size="14" fill="#D7D2C8">${escapeXml(contract)}</text><text x="24" y="139" font-family="Arial" font-size="14" font-weight="700" fill="#73E0D1">${escapeXml(applicator)}</text></svg>`);
+    overlays.push({ input: preview, left: tileLeft + 30, top: tileTop + 10 }, { input: label, left: tileLeft, top: tileTop + 750 });
   }
   await sharp({
     create: {
@@ -401,6 +474,9 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
   const manifestFamilies = [];
   for (const { family, sourcePath } of sourceChecks) {
     const presentation = resolveCylinderPaperDollPresentation(family.displayKey);
+    const reviewTargetHeightPct = family.reviewScope === "body-only"
+      ? presentation.targetAssembledHeightPct * family.geometry.bodyHeightMm / presentation.assembledHeightMm
+      : presentation.targetAssembledHeightPct;
     const visibleBoundsByLayer = new Map(family.layers.map((layer) => [
       layer.layerId,
       clipLayerBoundsToSourceCanvas(layer.sourceBoundsPx, family.source.canvas),
@@ -410,7 +486,8 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
       canvas: { width: recipe.canonicalCanvas.width, height: recipe.canonicalCanvas.height },
       targetCenterX: recipe.canonicalCanvas.centerX,
       targetBaselineY: recipe.canonicalCanvas.baselineY,
-      targetAssembledHeightPct: presentation.targetAssembledHeightPct,
+      targetAssembledHeightPct: reviewTargetHeightPct,
+      reviewScope: family.reviewScope,
       layers: family.layers.map(({ layerId, role, assemblyMember }) => ({
         layerId,
         role,
@@ -502,10 +579,14 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
       familyKey: family.familyKey,
       label: family.label,
       displayKey: family.displayKey,
+      reviewScope: family.reviewScope,
       identityStatus: family.source.identityStatus,
+      componentValidationStatus: family.source.componentValidationStatus ?? null,
+      catalogReference: family.source.catalogReference ?? null,
       geometry: family.geometry,
       source: { ...family.source, sourcePath },
       catalogPresentation: presentation,
+      reviewTargetHeightPct,
       sourceAssemblyBoundsPx: plan.sourceAssemblyBoundsPx,
       targetAssemblyBoundsPx: plan.targetAssemblyBoundsPx,
       uniformScale: plan.uniformScale,

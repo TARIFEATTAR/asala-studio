@@ -1,8 +1,8 @@
 # Cylinder requested-family source registration
 
-**State:** six source assemblies registered for review; the 28/50 mL jumbo roll-ons resolved by exact user-supplied product identity; no geometry authority, production release, or Sanity mutation
+**State:** seven source families registered for review; the disputed 74 × 21 mm roll-on is body-only identity evidence and cannot compete with the five locked 70 × 20 mm masters; the 28/50 mL large-roller bodies are pinned to exact live product dimensions; no geometry authority, production release, or Sanity mutation
 
-This tranche covers six confirmed Cylinder positions requested after the 9 mL 17-415 pilot. It does not stretch the 9 mL pilot assets into larger products. Each active family is derived from its own SHA-pinned layered Photoshop source and registered to its reviewed catalog presentation position.
+This tranche covers seven confirmed Cylinder positions around and beyond the 9 mL 17-415 pilot. It does not stretch the pilot assets into another physical shell. Each active family is derived from its own SHA-pinned layered Photoshop source and registered to its reviewed catalog presentation position.
 
 Runtime recipe:
 
@@ -19,8 +19,9 @@ Runtime recipe:
 | Family | Physical truth | Display position | Source identity | Responsibilities |
 |---|---|---|---|---|
 | 9 mL tall slim spray | 106 × 18 mm, 13-415 | `spray\|9\|tall`, 71% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
-| 28 mL jumbo massage roll-on | 81 × 31 mm, 16 mm roll-on | `roll-on\|28`, 74% | exact user/catalog identity | body + plastic roller fitment; black/white overcap responsibilities detached; metal fitment source registered next |
-| 50 mL jumbo massage roll-on | 98 × 37 mm, 16 mm roll-on | `roll-on\|50`, 78% | exact user/catalog identity | body + plastic roller fitment; black/white overcap responsibilities detached; metal fitment source registered next |
+| 9 mL regular roll-on | reported 74 × 21 mm, 17-415 | `roll-on\|9\|regular`, reference-only | **identity decision required** | clean body scene only; contaminated component scenes detached; five locked 70 × 20 mm plates remain active authority |
+| 28 mL large-roller bottle | 81 × 31 mm body; 100 mm capped; 16 mm | `roll-on\|28`, body-only at 74% | exact user/live-catalog identity | valid body; invalid small roller quarantined; true large plastic/metal roller authority required; black/white overcaps detached |
+| 50 mL large-roller bottle | 98 × 37 mm body; 116 mm capped; 16 mm | `roll-on\|50`, body-only at 78% | exact user/live-catalog identity | valid body; invalid small roller quarantined; true large plastic/metal roller authority required; black/white overcaps detached |
 | 25 mL spray | 83 × 32 mm, 18-415 | `spray\|25`, 73.210526% | **manual review required** | body + body-contextual dip tube + sprayer head; overcap detached |
 | 50 mL spray | 117 × 32 mm, 18-415 | `spray\|50`, 78% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
 | 100 mL spray | 154 × 35 mm, 18-415 | `spray\|100`, 79% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
@@ -42,11 +43,18 @@ Their component scope is deliberately closed:
 
 No Boston Round droppers, short caps, decorative caps, pumps, or sprays are compatible by inheritance. The jumbo family contains only the two roller fitments and the black/white overcaps evidenced by these eight exact catalog identities.
 
-The eight PSDs have now been decomposed by responsibility. Plastic roller scenes are isolated; metal roller scenes include glass neck and thread pixels and therefore remain source evidence until a reviewed selection mask exists. Full findings and promotion gates are recorded in `docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md`.
+The live body contracts are now pinned directly in the recipe rather than inferred from Photoshop folder names:
+
+- 28 mL `GBCyl1ozRollWht`: [exact product page](https://www.bestbottles.com/product/cylinder-style-28-ml-glass-bottle-plastic-roll-on-and-white-cap), 81 × 31 mm body, 100 mm capped, 16 mm neck, large roller ball.
+- 50 mL `GBCyl50RollBlk`: [exact product page](https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap), 98 × 37 mm body, 116 mm capped, 16 mm neck, large roller ball.
+
+These measurements verify body identity and relative catalog scale. They do not approve the extracted roller pixels. The user explicitly rejected the small roller visible in both source composites as invalid for the jumbo products, so current review assemblies display bodies only. The 28 and 50 mL families require a true large-roller authority, remain separate from the 9 mL roller family, and require their own geometry/material review plus separate body placement calibration.
+
+The eight PSDs have now been decomposed by responsibility. Plastic roller scenes are isolated but visually invalid for this family; metal roller scenes include glass neck and thread pixels and therefore remain source evidence. Neither can become the large-roller authority. Full findings and promotion gates are recorded in `docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md`.
 
 ## Transform contract
 
-The builder finds the union of all assembly members in the registered source coordinate system, then maps that complete union into the family’s reviewed presentation zone. It applies the same uniform transform to:
+For complete-assembly reviews, the builder finds the union of all assembly members in the registered source coordinate system, then maps that complete union into the family’s reviewed presentation zone. It applies the same uniform transform to:
 
 - bottle body;
 - exterior sprayer head or roller fitment;
@@ -54,6 +62,8 @@ The builder finds the union of all assembly members in the registered source coo
 - any future approved family-specific integration layer.
 
 No member can receive an independent catalog scale. Detached overcaps and integration references receive no production placement from this source-registration step.
+
+The 74 × 21 mm 9 mL record is an explicit body-only exception. It is scaled from its reported physical body contract for visual comparison, but it remains `manual-review-required` and is excluded from the production body-authority queue until a named identity decision proves it is a separate sold shell.
 
 This family registration replaces the unsafe assumption that a pixels-per-millimeter value calibrated on the 9 mL bottle can be applied to 25–100 mL source files. For example, the 100 mL source assembly is much taller than the canonical canvas; the complete source union is uniformly mapped to its reviewed 79% hero position instead.
 

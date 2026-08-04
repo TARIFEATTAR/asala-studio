@@ -1,0 +1,979 @@
+{
+  "schemaVersion": 1,
+  "asOfDate": "2026-08-03",
+  "scope": "Best Bottles Cylinder clear-body authority tranche",
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "registration": {
+    "centerX": 1040,
+    "baselineY": 2082
+  },
+  "opticalBenchmark": {
+    "path": "assets/paper-doll/body-plates/body__cylinder__9ml__clear__70.0x20.0mm.png",
+    "sha256": "97cfe967a4ab02ba4de51c07416c80df54244adf8dfab95406a36f4fe90e933f",
+    "role": "Approved optical benchmark for clear-glass specularity, edge definition, restrained ground shadow, and premium catalog lighting only. It is never a geometry source for another capacity."
+  },
+  "summary": {
+    "catalogCoveragePositionCount": 18,
+    "authorityReadyDisplayPositionCount": 12,
+    "uniqueBodyAuthorityCount": 8,
+    "bodyOnlyCandidateAvailableCount": 6,
+    "bodyExtractionRequiredCount": 0,
+    "sourceCalibratedBlenderRequiredCount": 2,
+    "candidateReadyPositionCount": 2,
+    "truthDecisionPositionCount": 3,
+    "exactReferenceRequiredPositionCount": 1,
+    "paidGenerationRequestCount": 0
+  },
+  "coverageAudit": [
+    {
+      "displayKey": "spray|3",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__3ml__37x14x14.0__aa7c8c6e6d",
+      "dimensionsMm": {
+        "bodyHeight": 37,
+        "widthAxis": 14,
+        "depthAxis": 14,
+        "assembledHeight": 54
+      },
+      "neckFinish": "12mm",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBSPRY3MLCLBLK|GBSPRCLR3MLBLK",
+        "websiteSku": "GBSpry3mlClBlk",
+        "graceSku": "GB-SPR-CLR-3ML-BLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|4",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__4ml__49x14x14.0__c3932dacb5",
+      "dimensionsMm": {
+        "bodyHeight": 49,
+        "widthAxis": 14,
+        "depthAxis": 14,
+        "assembledHeight": 67
+      },
+      "neckFinish": "12mm",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBSPRY4MLCLBLK|GBSPRCLR4MLBLK",
+        "websiteSku": "GBSpry4mlClBlk",
+        "graceSku": "GB-SPR-CLR-4ML-BLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|5",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "dimensionsMm": {
+        "bodyHeight": 53,
+        "widthAxis": 17,
+        "depthAxis": 17,
+        "assembledHeight": 72
+      },
+      "neckFinish": "13-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYLBLU5SPRYBLKSH|GBCYLBLU5MLSPRSBLK",
+        "websiteSku": "GBCylBlu5SpryBlkSh",
+        "graceSku": "GB-CYL-BLU-5ML-SPR-SBLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|9|regular",
+      "productClass": "Cylinder",
+      "stage": "candidate-ready-for-named-approval",
+      "bodyAuthorityKey": "body__cylinder__9ml__70x20x20.0__7795014140",
+      "dimensionsMm": {
+        "bodyHeight": 70,
+        "widthAxis": 20,
+        "depthAxis": 20,
+        "assembledHeight": 96
+      },
+      "neckFinish": "17-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYLAMB9SPRYBLK|GBCYLAMB9MLSPRBLK",
+        "websiteSku": "GBCylAmb9SpryBlk",
+        "graceSku": "GB-CYL-AMB-9ML-SPR-BLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|9|tall",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__9ml__106x18x18.0__fca612c530",
+      "dimensionsMm": {
+        "bodyHeight": 106,
+        "widthAxis": 18,
+        "depthAxis": 18,
+        "assembledHeight": 111
+      },
+      "neckFinish": "13-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBTALLCYL9SPRYBLKMATT|GBCYLCLR9MLSPRMBLK",
+        "websiteSku": "GBTallCyl9SpryBlkMatt",
+        "graceSku": "GB-CYL-CLR-9ML-SPR-MBLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|25",
+      "productClass": "Cylinder",
+      "stage": "truth-decision-required",
+      "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
+      "dimensionsMm": {
+        "bodyHeight": 83,
+        "widthAxis": 32,
+        "depthAxis": 32,
+        "assembledHeight": 108
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL25SPRYSHNBLK|GRACE-UNRESOLVED",
+        "websiteSku": "GBcyl25SpryShnBlk",
+        "graceSku": null
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|50",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__50ml__117x32x32.0__16f88e6875",
+      "dimensionsMm": {
+        "bodyHeight": 117,
+        "widthAxis": 32,
+        "depthAxis": 32,
+        "assembledHeight": 142
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL50SPRYSHNBLK|GBCYLCLR50MLSPRSBLK",
+        "websiteSku": "GBCyl50SpryShnBlk",
+        "graceSku": "GB-CYL-CLR-50ML-SPR-SBLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "spray|100",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__100ml__154x35x35.0__b6c5e98693",
+      "dimensionsMm": {
+        "bodyHeight": 154,
+        "widthAxis": 35,
+        "depthAxis": 35,
+        "assembledHeight": 195
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL100SPRYSHNBLK|GBCYLCLR100MLSPRSBLK",
+        "websiteSku": "GBCyl100SpryShnBlk",
+        "graceSku": "GB-CYL-CLR-100ML-SPR-SBLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|5",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "dimensionsMm": {
+        "bodyHeight": 53,
+        "widthAxis": 17,
+        "depthAxis": 17,
+        "assembledHeight": 65
+      },
+      "neckFinish": "13-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYLBLU5ROLLGLMATT|GBCYLBLU5MLROLMGLD",
+        "websiteSku": "GBCylBlu5RollGlMatt",
+        "graceSku": "GB-CYL-BLU-5ML-ROL-MGLD"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|9|classic-20",
+      "productClass": "Cylinder",
+      "stage": "candidate-ready-for-named-approval",
+      "bodyAuthorityKey": "body__cylinder__9ml__70x20x20.0__7795014140",
+      "dimensionsMm": {
+        "bodyHeight": 70,
+        "widthAxis": 20,
+        "depthAxis": 20,
+        "assembledHeight": 83
+      },
+      "neckFinish": "17-415",
+      "referenceClass": "blocked-no-exact-reference",
+      "sourceIdentity": {
+        "canonicalIdentityKey": null,
+        "websiteSku": null,
+        "graceSku": null
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|9|classic-21",
+      "productClass": "Cylinder",
+      "stage": "exact-reference-required",
+      "bodyAuthorityKey": "body__cylinder__9ml__70x21x21.0__fc23539b78",
+      "dimensionsMm": {
+        "bodyHeight": 70,
+        "widthAxis": 21,
+        "depthAxis": 21,
+        "assembledHeight": 75
+      },
+      "neckFinish": "17-415",
+      "referenceClass": "blocked-no-exact-reference",
+      "sourceIdentity": {
+        "canonicalIdentityKey": null,
+        "websiteSku": null,
+        "graceSku": null
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|9|regular",
+      "productClass": "Cylinder",
+      "stage": "truth-decision-required",
+      "bodyAuthorityKey": "body__cylinder__9ml__74x21x21.0__c3c136fd9e",
+      "dimensionsMm": {
+        "bodyHeight": 74,
+        "widthAxis": 21,
+        "depthAxis": 21,
+        "assembledHeight": 87
+      },
+      "neckFinish": "17-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYLFRST9MTLROLLMATTGL|GBCYLFRS9MLMRLMGLD",
+        "websiteSku": "GBCylFrst9MtlRollMattGl",
+        "graceSku": "GB-CYL-FRS-9ML-MRL-MGLD"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|9|tall",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__9ml__106x18x18.0__fca612c530",
+      "dimensionsMm": {
+        "bodyHeight": 106,
+        "widthAxis": 18,
+        "depthAxis": 18,
+        "assembledHeight": 118
+      },
+      "neckFinish": "13-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLGLMATT|GBCYLFRS9MLT05",
+        "websiteSku": "GBTallCylFrst9MtlRollGlMatt",
+        "graceSku": "GB-CYL-FRS-9ML-T-05"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|28",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__28ml__81x31x31.0__78183a1776",
+      "dimensionsMm": {
+        "bodyHeight": 81,
+        "widthAxis": 31,
+        "depthAxis": 31,
+        "assembledHeight": 100
+      },
+      "neckFinish": "16mm",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBROLL28BLK|GBCYLCLR28MLRBL",
+        "websiteSku": "GBRoll28Blk",
+        "graceSku": "GB-CYL-CLR-28ML-RBL"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "roll-on|50",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__50ml__98x37x37.0__d5cabe6ea2",
+      "dimensionsMm": {
+        "bodyHeight": 98,
+        "widthAxis": 37,
+        "depthAxis": 37,
+        "assembledHeight": 116
+      },
+      "neckFinish": "16mm",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL50ROLLBLK|GBCYLBLK50MLROLBLK",
+        "websiteSku": "GBCyl50RollBlk",
+        "graceSku": "GB-CYL-BLK-50ML-ROL-BLK"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "reducer|25",
+      "productClass": "Cylinder",
+      "stage": "truth-decision-required",
+      "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
+      "dimensionsMm": {
+        "bodyHeight": 83,
+        "widthAxis": 32,
+        "depthAxis": 32,
+        "assembledHeight": 97
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+      "sourceIdentity": {
+        "canonicalIdentityKey": null,
+        "websiteSku": "GBcyl25RdcrBlkLthr",
+        "graceSku": null
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "reducer|50",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__50ml__117x32x32.0__16f88e6875",
+      "dimensionsMm": {
+        "bodyHeight": 117,
+        "widthAxis": 32,
+        "depthAxis": 32,
+        "assembledHeight": 131
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL50RDCRBLKLTHR|GBCYLCLR50MLRDCBKLT",
+        "websiteSku": "GBCyl50RdcrBlkLthr",
+        "graceSku": "GB-CYL-CLR-50ML-RDC-BKLT"
+      },
+      "productionEligible": false
+    },
+    {
+      "displayKey": "reducer|100",
+      "productClass": "Cylinder",
+      "stage": "authority-build-ready",
+      "bodyAuthorityKey": "body__cylinder__100ml__154x35x35.0__b6c5e98693",
+      "dimensionsMm": {
+        "bodyHeight": 154,
+        "widthAxis": 35,
+        "depthAxis": 35,
+        "assembledHeight": 184
+      },
+      "neckFinish": "18-415",
+      "referenceClass": "approved-psd-derived",
+      "sourceIdentity": {
+        "canonicalIdentityKey": "GBCYL100RDCRBLKLTHR|GBCYLCLR100MLRDCBKLT",
+        "websiteSku": "GBCyl100RdcrBlkLthr",
+        "graceSku": "GB-CYL-CLR-100ML-RDC-BKLT"
+      },
+      "productionEligible": false
+    }
+  ],
+  "bodyAuthorities": [
+    {
+      "geometryKey": "body__cylinder__3ml__37x14x14.0__aa7c8c6e6d",
+      "capacityMl": 3,
+      "dimensionsMm": {
+        "bodyHeight": 37,
+        "widthAxis": 14,
+        "depthAxis": 14
+      },
+      "neckFinish": "12mm",
+      "displayKeys": [
+        "spray|3"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|3",
+          "assembledHeightMm": 54,
+          "targetAssembledHeightPct": 56,
+          "expectedBodyHeightPxAfterAssemblyTransform": 878,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "source-calibrated-blender-required",
+      "bodyOnlyCandidatePath": null,
+      "sourceEvidence": [
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/4010a54843424f947432363420d864fe520fe259c682e93950a214d660f02445.png",
+          "previewSha256": "86013349e32f7eec619dfcd77a3e7ab9774dc628f7548f0ffff13c0623d00e12",
+          "canonicalIdentityKey": "GBSPRY3MLCLBLK|GBSPRCLR3MLBLK",
+          "websiteSku": "GBSpry3mlClBlk",
+          "graceSku": "GB-SPR-CLR-3ML-BLK"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate a parametric Blender body to the SHA-pinned assembled reference because the PSD body pixels contain the dip tube; review the body profile before material generation."
+    },
+    {
+      "geometryKey": "body__cylinder__4ml__49x14x14.0__c3932dacb5",
+      "capacityMl": 4,
+      "dimensionsMm": {
+        "bodyHeight": 49,
+        "widthAxis": 14,
+        "depthAxis": 14
+      },
+      "neckFinish": "12mm",
+      "displayKeys": [
+        "spray|4"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|4",
+          "assembledHeightMm": 67,
+          "targetAssembledHeightPct": 58,
+          "expectedBodyHeightPxAfterAssemblyTransform": 971,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "source-calibrated-blender-required",
+      "bodyOnlyCandidatePath": null,
+      "sourceEvidence": [
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/df4a28c21ae7a5dba2e659d6b0641ce0bb742181c737a17f99a9d935f32032ea.png",
+          "previewSha256": "08b32ea5ce9e75137a41a4c30a6ad48e88613df8eed564238737a77534e179a0",
+          "canonicalIdentityKey": "GBSPRY4MLCLBLK|GBSPRCLR4MLBLK",
+          "websiteSku": "GBSpry4mlClBlk",
+          "graceSku": "GB-SPR-CLR-4ML-BLK"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate a parametric Blender body to the SHA-pinned assembled reference because the PSD body pixels contain the dip tube; review the body profile before material generation."
+    },
+    {
+      "geometryKey": "body__cylinder__5ml__53x17x17.0__f94a16652c",
+      "capacityMl": 5,
+      "dimensionsMm": {
+        "bodyHeight": 53,
+        "widthAxis": 17,
+        "depthAxis": 17
+      },
+      "neckFinish": "13-415",
+      "displayKeys": [
+        "spray|5",
+        "roll-on|5"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|5",
+          "assembledHeightMm": 72,
+          "targetAssembledHeightPct": 61,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1027,
+          "transformScope": "complete-paper-doll-assembly"
+        },
+        {
+          "displayKey": "roll-on|5",
+          "assembledHeightMm": 65,
+          "targetAssembledHeightPct": 61,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1138,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-body-authority-reviews/CYL-5ML-13-415/53x17-clear-v1/canonical-review-candidate.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-12-GBCylBlu5SpryBlkSh-PDP.png",
+          "previewSha256": "48d3e63424a9c706d67ac8124092d7da0566fc47c55c71092874480d4d68923d",
+          "canonicalIdentityKey": "GBCYLBLU5SPRYBLKSH|GBCYLBLU5MLSPRSBLK",
+          "websiteSku": "GBCylBlu5SpryBlkSh",
+          "graceSku": "GB-CYL-BLU-5ML-SPR-SBLK"
+        },
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBCylBlu5RollGlMatt-PDP.png",
+          "previewSha256": "dab8f0c493ec7da6a40f4573a11c44c6e0419109274c8a683dc17b8506a97ef6",
+          "canonicalIdentityKey": "GBCYLBLU5ROLLGLMATT|GBCYLBLU5MLROLMGLD",
+          "websiteSku": "GBCylBlu5RollGlMatt",
+          "graceSku": "GB-CYL-BLU-5ML-ROL-MGLD"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__9ml__106x18x18.0__fca612c530",
+      "capacityMl": 9,
+      "dimensionsMm": {
+        "bodyHeight": 106,
+        "widthAxis": 18,
+        "depthAxis": 18
+      },
+      "neckFinish": "13-415",
+      "displayKeys": [
+        "spray|9|tall",
+        "roll-on|9|tall"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|9|tall",
+          "assembledHeightMm": 111,
+          "targetAssembledHeightPct": 71,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1551,
+          "transformScope": "complete-paper-doll-assembly"
+        },
+        {
+          "displayKey": "roll-on|9|tall",
+          "assembledHeightMm": 118,
+          "targetAssembledHeightPct": 71,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1459,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-9ml-13-415-spray-tall/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-12-GBTallCyl9SpryBlkMatt-PDP.png",
+          "previewSha256": "b89665eb0aed69942dc2d46fe77fd84e276bccde226994902687b3e5ed1538e1",
+          "canonicalIdentityKey": "GBTALLCYL9SPRYBLKMATT|GBCYLCLR9MLSPRMBLK",
+          "websiteSku": "GBTallCyl9SpryBlkMatt",
+          "graceSku": "GB-CYL-CLR-9ML-SPR-MBLK"
+        },
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBTallCylFrst9MtlRollGlMatt-PDP.png",
+          "previewSha256": "4bbaa5e6f488c91bd704dcac6bec155249b8d6ee48bd9a1bbeb657e311cbd995",
+          "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLGLMATT|GBCYLFRS9MLT05",
+          "websiteSku": "GBTallCylFrst9MtlRollGlMatt",
+          "graceSku": "GB-CYL-FRS-9ML-T-05"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__50ml__117x32x32.0__16f88e6875",
+      "capacityMl": 50,
+      "dimensionsMm": {
+        "bodyHeight": 117,
+        "widthAxis": 32,
+        "depthAxis": 32
+      },
+      "neckFinish": "18-415",
+      "displayKeys": [
+        "spray|50",
+        "reducer|50"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|50",
+          "assembledHeightMm": 142,
+          "targetAssembledHeightPct": 78,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1470,
+          "transformScope": "complete-paper-doll-assembly"
+        },
+        {
+          "displayKey": "reducer|50",
+          "assembledHeightMm": 131,
+          "targetAssembledHeightPct": 78,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1594,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-50ml-18-415-spray/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/c96158ba03561cb0a5caa9d43522fc16ad4e93e7275875898c013c6e34d2e14d.png",
+          "previewSha256": "46082d941104a1c88402364d1aca2d3a39d97edd939b784d94ab264a57e3f83e",
+          "canonicalIdentityKey": "GBCYL50SPRYSHNBLK|GBCYLCLR50MLSPRSBLK",
+          "websiteSku": "GBCyl50SpryShnBlk",
+          "graceSku": "GB-CYL-CLR-50ML-SPR-SBLK"
+        },
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/1cc94d6ca944e2b05aabffe907915e38f1fdf9e429afad4482c86bc1309bc09a.png",
+          "previewSha256": "dc514f5969306eb2c2386dc3d91888c0f54b33e14a522636b48cf5c6edc3c25c",
+          "canonicalIdentityKey": "GBCYL50RDCRBLKLTHR|GBCYLCLR50MLRDCBKLT",
+          "websiteSku": "GBCyl50RdcrBlkLthr",
+          "graceSku": "GB-CYL-CLR-50ML-RDC-BKLT"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__100ml__154x35x35.0__b6c5e98693",
+      "capacityMl": 100,
+      "dimensionsMm": {
+        "bodyHeight": 154,
+        "widthAxis": 35,
+        "depthAxis": 35
+      },
+      "neckFinish": "18-415",
+      "displayKeys": [
+        "spray|100",
+        "reducer|100"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|100",
+          "assembledHeightMm": 195,
+          "targetAssembledHeightPct": 79,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1427,
+          "transformScope": "complete-paper-doll-assembly"
+        },
+        {
+          "displayKey": "reducer|100",
+          "assembledHeightMm": 184,
+          "targetAssembledHeightPct": 79,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1513,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-100ml-18-415-spray/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/1a97f7defbe835241550424193b991e34a952b8aa0f1fa1f1cb1c43eb1f519a3.png",
+          "previewSha256": "05ae096f7e189f45e89cd9efb81c463666fa20cf7f33ff29506cd6afa32261f5",
+          "canonicalIdentityKey": "GBCYL100SPRYSHNBLK|GBCYLCLR100MLSPRSBLK",
+          "websiteSku": "GBCyl100SpryShnBlk",
+          "graceSku": "GB-CYL-CLR-100ML-SPR-SBLK"
+        },
+        {
+          "referenceClass": "approved-psd-derived",
+          "previewPath": "tmp/best-bottles-reference-production/psd-cap-state-audit-v1/previews/1288f7542f255188ce8ff914634bc352dd20e63663f970df7fc967e6bdedad7f.png",
+          "previewSha256": "e2b1f389d694d2140ebc8261e7618b07f69c981efebfff5d9f76e5a514c423fe",
+          "canonicalIdentityKey": "GBCYL100RDCRBLKLTHR|GBCYLCLR100MLRDCBKLT",
+          "websiteSku": "GBCyl100RdcrBlkLthr",
+          "graceSku": "GB-CYL-CLR-100ML-RDC-BKLT"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__28ml__81x31x31.0__78183a1776",
+      "capacityMl": 28,
+      "dimensionsMm": {
+        "bodyHeight": 81,
+        "widthAxis": 31,
+        "depthAxis": 31
+      },
+      "neckFinish": "16mm",
+      "displayKeys": [
+        "roll-on|28"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "roll-on|28",
+          "assembledHeightMm": 100,
+          "targetAssembledHeightPct": 74,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1371,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-28ml-16mm-jumbo-rollon/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBRoll28Blk-PDP.png",
+          "previewSha256": "99aa60eb117e16149c0697368ad4cd2a97439fe8141aee58d8e557ff8f54324d",
+          "canonicalIdentityKey": "GBROLL28BLK|GBCYLCLR28MLRBL",
+          "websiteSku": "GBRoll28Blk",
+          "graceSku": "GB-CYL-CLR-28ML-RBL"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__50ml__98x37x37.0__d5cabe6ea2",
+      "capacityMl": 50,
+      "dimensionsMm": {
+        "bodyHeight": 98,
+        "widthAxis": 37,
+        "depthAxis": 37
+      },
+      "neckFinish": "16mm",
+      "displayKeys": [
+        "roll-on|50"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "roll-on|50",
+          "assembledHeightMm": 116,
+          "targetAssembledHeightPct": 78,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1508,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-50ml-16mm-jumbo-rollon/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBCyl50RollBlk-PDP.png",
+          "previewSha256": "efc384b09524074b67dbff8f2c07ff1a8b939da3ad3b60546530a0a0cd98e36c",
+          "canonicalIdentityKey": "GBCYL50ROLLBLK|GBCYLBLK50MLROLBLK",
+          "websiteSku": "GBCyl50RollBlk",
+          "graceSku": "GB-CYL-BLK-50ML-ROL-BLK"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    }
+  ],
+  "qualityDoctrine": {
+    "geometrySourceOfTruth": "per-body approved source silhouette or source-calibrated Blender profile",
+    "opticalSourceOfTruth": "approved 9 mL clear body benchmark",
+    "finalScaleSourceOfTruth": "reviewed Cylinder complete-assembly presentation contract",
+    "geometryLockGate": "exact authority-alpha clamp with zero mismatched pixels",
+    "shadowPolicy": "deterministic catalog integration effect; excluded from geometry authority alpha",
+    "railPolicy": "calibrate the existing vertical-rail gate on each real candidate before trusting it"
+  },
+  "mutationPolicy": {
+    "paidGenerationPerformed": false,
+    "approvalsWritten": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false,
+    "publicPublicationChanged": false
+  }
+}
