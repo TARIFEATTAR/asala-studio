@@ -1,6 +1,6 @@
 # 13-415 roll-on overcap profile review
 
-**Date:** 2026-08-03  
+**Date:** 2026-08-03
 **State:** local dimension-calibrated candidate; not geometry locked; not production eligible
 
 ## What was built

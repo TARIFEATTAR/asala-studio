@@ -1,7 +1,7 @@
 # CYL-9ML production-candidate handoff
 
-**Date:** 2026-08-03  
-**Scope:** local candidate and visual-evidence preparation only  
+**Date:** 2026-08-03
+**Scope:** local candidate and visual-evidence preparation only
 **Production mutation status:** no named approvals, placement locks, Current Release changes, Sanity writes, or public publication
 
 ## Outcome

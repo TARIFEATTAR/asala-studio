@@ -1,7 +1,7 @@
 # Best Bottles paper-doll system synthesis audit
 
-**Date:** 2026-08-03  
-**Scope:** read-only repository audit  
+**Date:** 2026-08-03
+**Scope:** read-only repository audit
 **Decision:** preserve the existing rig and the new 2080×2288 component-factory lifecycle; do not start a third plate system.
 
 ## Executive verdict

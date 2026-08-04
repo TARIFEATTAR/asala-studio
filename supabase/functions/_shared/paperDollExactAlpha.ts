@@ -51,4 +51,3 @@ export function compareExactAlphaBytes(
     geometryLocked: minIoU === 1 && mismatchedPixels === 0,
   };
 }
-

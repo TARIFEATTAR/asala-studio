@@ -44,4 +44,3 @@ test("exact alpha helpers reject dimension mismatches", () => {
     /length/i,
   );
 });
-
