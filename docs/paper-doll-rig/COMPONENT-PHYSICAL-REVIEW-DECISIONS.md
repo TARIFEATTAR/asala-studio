@@ -33,7 +33,11 @@ Body-context contract: `docs/paper-doll-rig/DISPENSER-17-415-BODY-CONTEXT-WELD-P
 
 The catalog sources reuse identical photography across nominal 1 oz and 2 oz identities. That is not evidence that the inserted pipette has the same physical length. The exterior bulb/collar and body-contextual pipette are therefore separate responsibilities pending bottle-cohort dimensions.
 
+Reproducible scene extraction confirms six exterior appearances across two geometry cohorts: ribbed molded collars and smooth decorative trim collars. White/no-trim is the cleanest ribbed source candidate; black/shiny-gold is the cleanest smooth-trim source candidate. Both shiny-silver sources contain large detached opaque white polygons and remain material references only. The nominal 30 mL and 60 mL pipette cutouts are byte-identical, so a capacity-correct 60 mL pipette must come from verified interior depth rather than the reused PSD.
+
 Evidence: `outputs/paper-doll-component-authority-reviews/geometry-review__dropper__20-400__1f69cf193c/contact-sheet.png`.
+
+Component-kit review: `docs/paper-doll-rig/BOSTON-ROUND-DROPPER-20-400-COMPONENT-KIT.md`.
 
 ## 15-415 fine-mist sprayer kits
 

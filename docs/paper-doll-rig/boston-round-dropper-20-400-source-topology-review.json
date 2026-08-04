@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kitId": "boston-round-dropper__20-400__physical-v1",
+  "reviewDate": "2026-08-03",
+  "status": "source-evidence-only",
+  "productionEligible": false,
+  "geometryLocked": false,
+  "diagnosticPolicy": {
+    "alphaThresholdsTested": [1, 8, 16, 32, 64, 128],
+    "reportedComparisonThreshold": 16,
+    "thresholdIsApprovalGate": false,
+    "notes": "Threshold 16 is reported only as a stable comparison point across the real extracted files. Cleanup and authority decisions remain source-specific."
+  },
+  "exteriorSources": [
+    {
+      "sourceId": "dropper-30-white-none",
+      "cutoutSha256": "a52e704c426458e0f6848e5e8892e1a3d5a36d27a104f17820bede128a8a528c",
+      "sourceBoundsPx": { "width": 666, "height": 881 },
+      "threshold16": { "componentCount": 1, "componentAreasPx": [368576] },
+      "disposition": "cleanest-ribbed-collar-source-candidate",
+      "notes": "One connected source silhouette at the comparison threshold; still not a physical geometry authority."
+    },
+    {
+      "sourceId": "dropper-30-black-none",
+      "cutoutSha256": "7cf17e91ea658167c915b9dc5d0ee849b4aedb2bc8d1a317c1b2feab0aa89e4c",
+      "sourceBoundsPx": { "width": 779, "height": 1028 },
+      "threshold16": { "componentCount": 2, "componentAreasPx": [436783, 931] },
+      "disposition": "detached-island-review-required",
+      "notes": "A separate opaque triangular fragment remains outside the main ribbed-collar silhouette."
+    },
+    {
+      "sourceId": "dropper-30-black-shiny-silver",
+      "cutoutSha256": "605fc20a3621f5359996c0bac90992dc37bd796ceb55a322fe8c0b451bfde181",
+      "sourceBoundsPx": { "width": 1014, "height": 1155 },
+      "threshold16": { "componentCount": 2, "componentAreasPx": [484808, 6910] },
+      "disposition": "contaminated-source-material-reference-only",
+      "notes": "Large detached opaque white polygonal contamination is visible below the collar."
+    },
+    {
+      "sourceId": "dropper-30-white-shiny-gold",
+      "cutoutSha256": "2f99f2f22375297e3a8ddad7770f98350856f65b4e7fefd01f9c60d2628a4805",
+      "sourceBoundsPx": { "width": 753, "height": 978 },
+      "threshold16": { "componentCount": 2, "componentAreasPx": [446792, 167] },
+      "disposition": "small-detached-island-review-required",
+      "notes": "The primary smooth-trim silhouette is intact; a small detached source artifact remains."
+    },
+    {
+      "sourceId": "dropper-30-black-shiny-gold",
+      "cutoutSha256": "c0d04d46206073493477f14ee4f1db9d7e0848e9c970191037eaf830b3e16848",
+      "sourceBoundsPx": { "width": 710, "height": 938 },
+      "threshold16": { "componentCount": 1, "componentAreasPx": [424636] },
+      "disposition": "cleanest-smooth-trim-source-candidate",
+      "notes": "One connected source silhouette at the comparison threshold; low-alpha edge speckles exist at threshold 1 and must not be generalized into a catalog-wide rule."
+    },
+    {
+      "sourceId": "dropper-30-white-shiny-silver",
+      "cutoutSha256": "dcf3d288a0f11e53e1dc8cac2e34c3c2a4a8e7ea6e5539d2b05416457f7b9f92",
+      "sourceBoundsPx": { "width": 915, "height": 1123 },
+      "threshold16": { "componentCount": 2, "componentAreasPx": [454282, 9737] },
+      "disposition": "contaminated-source-material-reference-only",
+      "notes": "Large detached opaque white polygonal contamination is visible below the collar."
+    }
+  ],
+  "capacityEvidence": {
+    "pipette30CutoutSha256": "e152a3587a5b8ff2e080fda664ac6c786e6022591489bbd6f64d9d2c368f904a",
+    "pipette60LabeledCutoutSha256": "e152a3587a5b8ff2e080fda664ac6c786e6022591489bbd6f64d9d2c368f904a",
+    "byteIdentical": true,
+    "safeConclusion": "The archive reused one pipette image. It cannot prove a capacity-correct 60 mL pipette length."
+  },
+  "nextGate": "Review separate ribbed-collar and smooth-trim physical geometry authorities, then generate capacity-correct pipettes from verified interior depths."
+}

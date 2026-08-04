@@ -122,6 +122,7 @@
     "paperdoll:jumbo-rollon-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/16mm-jumbo-rollon/source-extraction-v2",
     "paperdoll:reducer-18-415-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/reducer-18-415-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/18-415-reducer/source-extraction-v1",
     "paperdoll:boston-round-rollon-20-400-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/boston-round-rollon-20-400-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/boston-round-rollon-20-400/source-extraction-v1",
+    "paperdoll:boston-round-dropper-20-400-kit-review": "tsx scripts/paper-doll/extract-component-kit-review.ts --recipe docs/paper-doll-rig/boston-round-dropper-20-400-component-kit-decomposition.json --output-root outputs/paper-doll-component-kit-reviews/boston-round-dropper-20-400/source-extraction-v1",
     "paperdoll:boston-round-plate-audit": "tsx scripts/paper-doll/build-boston-round-plate-audit.ts",
     "paperdoll:sprayer-13-415-overcap-review": "tsx scripts/paper-doll/build-sprayer-13-415-overcap-review.ts",
     "paperdoll:sprayer-13-415-tube-plan": "tsx scripts/paper-doll/build-sprayer-13-415-tube-registration-plan.ts",

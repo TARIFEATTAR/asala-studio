@@ -455,3 +455,34 @@ test("the Boston Round 20-400 roller kit normalizes fitments without duplicating
   }]);
   assert.ok(recipe.sources.every((source) => source.productionEligible === false));
 });
+
+test("the Boston Round 20-400 dropper kit reuses six exterior appearances but keeps pipettes capacity-specific", async () => {
+  const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
+    path.resolve("docs/paper-doll-rig/boston-round-dropper-20-400-component-kit-decomposition.json"),
+    "utf8",
+  )));
+  const plan = buildComponentKitDecompositionPlan(recipe);
+  const exterior = recipe.parts.find((part) => part.partId === "bulb-collar-exterior");
+  const pipette30 = recipe.parts.find((part) => part.partId === "pipette-30ml");
+  const pipette60 = recipe.parts.find((part) => part.partId === "pipette-60ml");
+  const contact = recipe.parts.find((part) => part.partId === "upper-pipette-contact-reference");
+
+  assert.equal(recipe.primaryAuthorityPartId, "bulb-collar-exterior");
+  assert.equal(recipe.sources.length, 7);
+  assert.equal(exterior?.sourceSelectors.length, 6);
+  assert.ok(exterior?.sourceSelectors.every((selector) => selector.method === "psd-layer-scene"));
+  assert.deepEqual(plan.reusablePlatePartIds, ["bulb-collar-exterior"]);
+  assert.deepEqual(plan.bodyContextualPartIds, ["pipette-30ml", "pipette-60ml"]);
+  assert.deepEqual(plan.sourceEvidencePartIds, ["upper-pipette-contact-reference"]);
+  assert.equal(plan.productionPlateCount, 1);
+  assert.equal(pipette30?.productionAnchor, "body-centerline-to-interior-base");
+  assert.equal(pipette60?.productionAnchor, "body-centerline-to-interior-base");
+  assert.equal(contact?.productionAnchor, "not-applicable");
+  assert.equal(
+    recipe.sources.find((source) => source.sourceId === "dropper-30-white-none")?.sha256,
+    recipe.sources.find((source) => source.sourceId === "dropper-60-white-none-capacity-reference")?.sha256,
+    "The duplicate archive bytes must remain explicit evidence, never an inferred capacity-correct pipette.",
+  );
+  assert.ok(recipe.sources.every((source) => source.productionEligible === false));
+  assert.ok(recipe.parts.every((part) => !/bottle|body-plate/i.test(part.partId)));
+});
