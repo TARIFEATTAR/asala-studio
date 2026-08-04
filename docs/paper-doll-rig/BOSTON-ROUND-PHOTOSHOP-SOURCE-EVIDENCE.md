@@ -92,11 +92,19 @@ The 30 mL amber roll-on PSD `10GBBS~1.PSD` proves that the archive separates the
 
 The metal and plastic fitment scenes repeat at similar source dimensions throughout the roll-on archive, but pixel hashes are not identical. Similar scene bounds therefore do not earn a shared geometry claim. The next safe step is to select one clean geometry source or measured render, build one approved mask, and clamp both metal and plastic material variants to that authority where physical geometry is proven identical.
 
+## Dropper decomposition finding
+
+The review-only dropper kit is registered in `boston-round-dropper-20-400-component-kit-decomposition.json` and documented in `BOSTON-ROUND-DROPPER-20-400-COMPONENT-KIT.md`. Its SHA-verified extraction produces six exterior appearances, two labeled capacity pipettes, and four repeated upper-contact references without promoting any source pixels.
+
+Real-file topology analysis confirms two exterior geometry cohorts: ribbed molded collars and smooth decorative trim collars. The shiny-silver sources contain large detached opaque white polygons; smaller source-specific artifacts remain in black/no-trim and white/shiny-gold. No fixed island threshold is used as an approval rule.
+
+The 30 mL and nominal 60 mL pipette cutouts are byte-identical (`e152a3587a5b8ff2e080fda664ac6c786e6022591489bbd6f64d9d2c368f904a`). The archive therefore cannot establish a 60 mL physical pipette length. Capacity-correct pipettes remain body-contextual.
+
 ## Next review gates
 
-1. Extract exterior dropper scenes separately from pipette scenes.
-2. Compare clean alpha silhouettes by appearance and neck lane.
-3. Inspect 30 mL and 60 mL assembly PSDs to identify plastic and metal roller fitment scenes without bottle pixels.
+1. Review one ribbed-collar and one smooth-trim dropper geometry profile; do not promote contaminated silver sources.
+2. Confirm 30 mL and 60 mL pipette seat and interior-depth measurements.
+3. Review the shared parametric roller profile and the accepted plastic-v2 / positive-metal-v1 material candidates.
 4. Reuse the existing dimension-calibrated 20-400 roller-overcap geometry candidate and clamp all six materials only after named profile review; do not create a duplicate cap system.
 5. Calibrate placement separately for 15, 30, and 60 mL bodies.
 6. Promote nothing until named pixel, geometry, placement, and assembly-context approvals pass.

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "kitId": "boston-round-dropper__20-400__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__boston-round-dropper__20-400__physical-v1",
+  "sourceCompositeProductionEligible": false,
+  "primaryAuthorityPartId": "bulb-collar-exterior",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "sources": [
+    {
+      "sourceId": "dropper-30-white-none",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "7.  20-400Drp1ozWhiteBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/7.  20-400Drp1ozWhiteBulb.psd",
+      "sha256": "07c0a388a4d16cd0afd1c14fbb9daae9414e25f67b83a36e1473c54c9b1ef011",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-30-black-none",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "8. 20-400Drp1ozBlckBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/8. 20-400Drp1ozBlckBulb.psd",
+      "sha256": "6de19ac345d3e9da15a8bc97bee2a50529d195064b76c12e028f8497b2f8d849",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-30-black-shiny-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "9. 20-400Drp1ozShnSlTrimBlkBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/9. 20-400Drp1ozShnSlTrimBlkBulb.psd",
+      "sha256": "c4595742d254f6c626e5aeac6eaa0c88972fe7aa01b0727801974ce9feacdf73",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-30-white-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "10. 20-400Drp1ozlShnGlTrimWhiteBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/10. 20-400Drp1ozlShnGlTrimWhiteBulb.psd",
+      "sha256": "82c5613797169aab8f481904dbb1d096f6075eb3d51940414943d8afb3dc898e",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-30-black-shiny-gold",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "11. 20-400Drp1ozShnGlTrimBlkBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/11. 20-400Drp1ozShnGlTrimBlkBulb.psd",
+      "sha256": "3cfa4cbf88942ccfa5ffcbeaddd8e863fad1becb7ec6c03014ecf8959c1b088a",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-30-white-shiny-silver",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "12. 20-400Drp1ozlShnSlTrimWhiteBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/12. 20-400Drp1ozlShnSlTrimWhiteBulb.psd",
+      "sha256": "cd6c7421ab796ff87f3a8a4165bff517a33c4eda1be3b143a90f5fac3363cb6d",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "dropper-60-white-none-capacity-reference",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "13. 20-400Drp2ozWhiteBulb.psd",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/20-400 and 18-400 Droppers only images/13. 20-400Drp2ozWhiteBulb.psd",
+      "sha256": "07c0a388a4d16cd0afd1c14fbb9daae9414e25f67b83a36e1473c54c9b1ef011",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "bulb-collar-exterior",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "dropper-30-white-none",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 1 · white bulb and white collar exterior"
+        },
+        {
+          "sourceId": "dropper-30-black-none",
+          "method": "psd-layer-scene",
+          "sceneIndex": 4,
+          "layerName": "Layer 9 · black bulb and black ribbed collar exterior"
+        },
+        {
+          "sourceId": "dropper-30-black-shiny-silver",
+          "method": "psd-layer-scene",
+          "sceneIndex": 4,
+          "layerName": "Layer 8 · black bulb and shiny-silver collar exterior"
+        },
+        {
+          "sourceId": "dropper-30-white-shiny-gold",
+          "method": "psd-layer-scene",
+          "sceneIndex": 4,
+          "layerName": "Layer 6 · white bulb and shiny-gold collar exterior"
+        },
+        {
+          "sourceId": "dropper-30-black-shiny-gold",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 4 · black bulb and shiny-gold collar exterior"
+        },
+        {
+          "sourceId": "dropper-30-white-shiny-silver",
+          "method": "psd-layer-scene",
+          "sceneIndex": 4,
+          "layerName": "Layer 7 · white bulb and shiny-silver collar exterior"
+        }
+      ]
+    },
+    {
+      "partId": "pipette-30ml",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "dropper-30-white-none",
+          "method": "psd-layer-scene",
+          "sceneIndex": 2,
+          "layerName": "Layer 2 · 30 mL labeled glass pipette source evidence"
+        }
+      ]
+    },
+    {
+      "partId": "pipette-60ml",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "dropper-60-white-none-capacity-reference",
+          "method": "psd-layer-scene",
+          "sceneIndex": 2,
+          "layerName": "Layer 2 · 60 mL labeled glass pipette source evidence"
+        }
+      ]
+    },
+    {
+      "partId": "upper-pipette-contact-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "dropper-30-black-none",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 5 · upper-pipette or collar-contact evidence"
+        },
+        {
+          "sourceId": "dropper-30-black-shiny-silver",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 5 · upper-pipette or collar-contact evidence"
+        },
+        {
+          "sourceId": "dropper-30-white-shiny-gold",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 5 · upper-pipette or collar-contact evidence"
+        },
+        {
+          "sourceId": "dropper-30-white-shiny-silver",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "Layer 5 · upper-pipette or collar-contact evidence"
+        }
+      ]
+    }
+  ]
+}
