@@ -74,6 +74,33 @@
       "interpretation": "Diagnostic source bounds only; not an alpha authority."
     }
   },
+  "parametricProfileReview": {
+    "recipePath": "docs/paper-doll-rig/boston-round-roller-fitment-20-400-family-recipe.json",
+    "candidateManifestPath": "outputs/paper-doll-parametric-fitments/20-400-roller-fitment/candidate-v1/candidate-manifest.json",
+    "candidateManifestSha256": "7a5d160d85743797b5d6af4e4bed49c18c0d9d8e681df9b5f5538cca0f2649f6",
+    "authorityMaskPath": "outputs/paper-doll-parametric-fitments/20-400-roller-fitment/blender-v1/geometry-mask.png",
+    "authorityMaskSha256": "ec9902ba5d3153507fbbbc3f28dcdde37eb5c2239ca73ca34e0de87567ccf156",
+    "authorityBoundsPx": {
+      "left": 748,
+      "top": 913,
+      "width": 584,
+      "height": 468
+    },
+    "componentCount": 1,
+    "touchesFrame": false,
+    "minimumPairwiseAlphaIou": 1,
+    "maximumPairwiseMismatchedPixels": 0,
+    "geometryCalibrationState": "assembly-derived-estimate-not-supplier-cad",
+    "geometryLocked": false,
+    "productionEligible": false,
+    "gptMaterialPlan": {
+      "provider": "openai",
+      "model": "gpt-image-2",
+      "jobCount": 2,
+      "paidGenerationAuthorized": false
+    },
+    "reason": "The round-ball parametric profile fixes legacy faceting and proves one exact silhouette for plastic and metal. It still requires named profile approval and 30/60 mL family-fit review."
+  },
   "overcapGeometry": {
     "recipePath": "docs/paper-doll-rig/tall-rollon-cap-20-400-family-recipe.json",
     "geometryFamilyId": "closure__20-400__tall-rollon-overcap__physical-v1",
@@ -83,7 +110,7 @@
     },
     "duplicated": false
   },
-  "nextGate": "named physical roller-profile review followed by exact authority-alpha clamp",
+  "nextGate": "named review of the parametric roller profile, followed by explicitly authorized GPT Image 2 material edits and 30/60 mL family fit",
   "productionEligible": false,
   "geometryLocked": false,
   "currentReleaseChanged": false,
