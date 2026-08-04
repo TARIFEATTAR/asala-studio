@@ -269,3 +269,28 @@ test("the 17-415 sprayer and pump stay distinct while each preserves its compoun
   assert.equal(sprayer.parts[2].outputPolicy, "body-contextual-weld");
   assert.equal(pump.parts[2].outputPolicy, "body-contextual-weld");
 });
+
+test("the 13-415 sprayer separates eight reusable heads, opaque overcaps, and body-contextual tubes", async () => {
+  const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
+    path.resolve("docs/paper-doll-rig/sprayer-13-415-component-kit-decomposition.json"),
+    "utf8",
+  )));
+  const plan = buildComponentKitDecompositionPlan(recipe);
+  const head = recipe.parts.find((part) => part.partId === "sprayer-head-and-collar");
+  const overcap = recipe.parts.find((part) => part.partId === "opaque-protective-overcap");
+  const tube = recipe.parts.find((part) => part.partId === "sprayer-dip-tube");
+
+  assert.equal(recipe.sources.filter((source) => source.sourceType === "photoshop-layered-source").length, 15);
+  assert.equal(head?.sourceSelectors.filter((selector) => selector.method === "psd-layer-scene").length, 8);
+  assert.equal(overcap?.sourceSelectors.length, 8);
+  assert.equal(overcap?.sourceSelectors.filter((selector) => selector.method === "psd-layer-scene").length, 7);
+  assert.equal(overcap?.outputPolicy, "reusable-full-canvas-plate");
+  assert.equal(overcap?.independentlySelectable, true);
+  assert.equal(tube?.sourceSelectors.length, 8);
+  assert.equal(tube?.sourceSelectors.filter((selector) => selector.method === "psd-layer-scene").length, 7);
+  assert.equal(tube?.outputPolicy, "body-contextual-weld");
+  assert.equal(tube?.independentlySelectable, false);
+  assert.deepEqual(plan.reusablePlatePartIds, ["sprayer-head-and-collar", "opaque-protective-overcap"]);
+  assert.deepEqual(plan.bodyContextualPartIds, ["sprayer-dip-tube"]);
+  assert.equal(plan.productionPlateCount, 2);
+});

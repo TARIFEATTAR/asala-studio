@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "sprayer-head__13-415__approved-source-alpha-v1",
+  "kitId": "sprayer__13-415__physical-v1",
+  "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "approvedSource": {
+    "repositoryRelativePath": "assets/paper-doll/components/closure__13-415__fine-mist-sprayer__matte-gold.png",
+    "originalFilename": "closure__13-415__fine-mist-sprayer__matte-gold.png",
+    "sha256": "b683f66491b93e3e84ca6751141ce2ad6850c83217879137778364aa2e754d11",
+    "reviewedBy": "jordan",
+    "reviewedAt": "2026-07-31T14:37:31.426Z",
+    "approvalScope": "source-appearance-and-silhouette-evidence",
+    "alphaCleanup": {
+      "expectedSourceComponents": 29,
+      "maxDiscardedComponentPixels": 37,
+      "maxDiscardedTotalPixels": 519
+    }
+  },
+  "sceneSources": [
+    {
+      "variantKey": "MBLK",
+      "finish": "matte-black",
+      "originalFilename": "1. Spry13-415BlkMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/1. Spry13-415BlkMt.psd",
+      "sha256": "5838d3e95dbb374a07fc803c9942d26f4cd095227c8802c46374f5f30420b2ed",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 20, "maxDiscardedComponentPixels": 118, "maxDiscardedTotalPixels": 498 }
+    },
+    {
+      "variantKey": "MCPR",
+      "finish": "matte-copper",
+      "originalFilename": "2. Spry13-415CuMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/2. Spry13-415CuMt.psd",
+      "sha256": "d189e4b5c4fff6eae343eb2d0ddc645d60b0fbda8221530dc572ac602238cf7e",
+      "sceneIndex": 2,
+      "layerName": "Layer 2",
+      "alphaCleanup": { "expectedSourceComponents": 2, "maxDiscardedComponentPixels": 572, "maxDiscardedTotalPixels": 572 }
+    },
+    {
+      "variantKey": "SBLK",
+      "finish": "glossy-black",
+      "originalFilename": "3. Spry13-415BlkSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/3. Spry13-415BlkSh.psd",
+      "sha256": "ce50f51841b5ba993d2ff93572e033ce11966f6f813450ee515c670d7a2d2444",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 17, "maxDiscardedComponentPixels": 43, "maxDiscardedTotalPixels": 462 }
+    },
+    {
+      "variantKey": "MBLU",
+      "finish": "matte-blue",
+      "originalFilename": "4. Spry13-415BluMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/4. Spry13-415BluMt.psd",
+      "sha256": "b2b49d5d52699716f2d1e112ac67ac5cabcefef195b45e12ed19c2d53c20e763",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 9, "maxDiscardedComponentPixels": 25, "maxDiscardedTotalPixels": 149 }
+    },
+    {
+      "variantKey": "SGLD",
+      "finish": "mirror-gold",
+      "originalFilename": "5. Spry13-415GlSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/5. Spry13-415GlSh.psd",
+      "sha256": "f72dd7c1010a3fc5e9047da22246694de1d16c1a131f5c0be596a6975423d1ea",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 2748, "maxDiscardedComponentPixels": 712, "maxDiscardedTotalPixels": 13537 }
+    },
+    {
+      "variantKey": "MGLD",
+      "finish": "matte-gold",
+      "originalFilename": "6. Spry13-415GlMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/6. Spry13-415GlMt.psd",
+      "sha256": "fa8420c5ab99e899c51ad6cd11ee3f5453c5b9791cd9191a72b2aa5537bd0139",
+      "sceneIndex": 2,
+      "layerName": "Layer 2",
+      "alphaCleanup": { "expectedSourceComponents": 29, "maxDiscardedComponentPixels": 37, "maxDiscardedTotalPixels": 519 }
+    },
+    {
+      "variantKey": "MSLV",
+      "finish": "matte-silver",
+      "originalFilename": "7. Spry13-415SlMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/7. Spry13-415SlMt.psd",
+      "sha256": "00abbb4adf89dbfa821cb26e88175e2d104c432bb4f5e864003bf0bb413232cc",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 13, "maxDiscardedComponentPixels": 49, "maxDiscardedTotalPixels": 319 }
+    },
+    {
+      "variantKey": "SSLV",
+      "finish": "mirror-silver",
+      "originalFilename": "8 Spry13-415SlSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/8 Spry13-415SlSh.psd",
+      "sha256": "a3ff0b0a1c654f472193f07cf8e1b875f06ea694eba72d3e9b698d839f236032",
+      "sceneIndex": 2,
+      "layerName": "Layer 1",
+      "alphaCleanup": { "expectedSourceComponents": 2812, "maxDiscardedComponentPixels": 709, "maxDiscardedTotalPixels": 13435 }
+    }
+  ],
+  "authorityReviewState": "named-geometry-review-required",
+  "productionEligible": false,
+  "geometryLocked": false
+}

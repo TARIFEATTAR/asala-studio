@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "kitId": "sprayer__13-415__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__sprayer__13-415__c502bb6eb5",
+  "sourceCompositeProductionEligible": false,
+  "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "sources": [
+    {
+      "sourceId": "psd-head-black-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "1. Spry13-415BlkMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/1. Spry13-415BlkMt.psd",
+      "sha256": "5838d3e95dbb374a07fc803c9942d26f4cd095227c8802c46374f5f30420b2ed",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-copper-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "2. Spry13-415CuMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/2. Spry13-415CuMt.psd",
+      "sha256": "d189e4b5c4fff6eae343eb2d0ddc645d60b0fbda8221530dc572ac602238cf7e",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-black-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. Spry13-415BlkSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/3. Spry13-415BlkSh.psd",
+      "sha256": "ce50f51841b5ba993d2ff93572e033ce11966f6f813450ee515c670d7a2d2444",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-blue-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4. Spry13-415BluMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/4. Spry13-415BluMt.psd",
+      "sha256": "b2b49d5d52699716f2d1e112ac67ac5cabcefef195b45e12ed19c2d53c20e763",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-gold-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "5. Spry13-415GlSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/5. Spry13-415GlSh.psd",
+      "sha256": "f72dd7c1010a3fc5e9047da22246694de1d16c1a131f5c0be596a6975423d1ea",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-gold-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "6. Spry13-415GlMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/6. Spry13-415GlMt.psd",
+      "sha256": "fa8420c5ab99e899c51ad6cd11ee3f5453c5b9791cd9191a72b2aa5537bd0139",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-silver-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "7. Spry13-415SlMt.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/7. Spry13-415SlMt.psd",
+      "sha256": "00abbb4adf89dbfa821cb26e88175e2d104c432bb4f5e864003bf0bb413232cc",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "psd-head-silver-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "8 Spry13-415SlSh.psd",
+      "archiveRelativePath": "20. Closures - Cap, Sprayers, Lotion pumps, etc/18. 13-415 Sprayers/8 Spry13-415SlSh.psd",
+      "sha256": "a3ff0b0a1c654f472193f07cf8e1b875f06ea694eba72d3e9b698d839f236032",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "approved-head-matte-gold",
+      "sourceType": "existing-paper-doll-asset",
+      "originalFilename": "closure__13-415__fine-mist-sprayer__matte-gold.png",
+      "repositoryRelativePath": "assets/paper-doll/components/closure__13-415__fine-mist-sprayer__matte-gold.png",
+      "sha256": "b683f66491b93e3e84ca6751141ce2ad6850c83217879137778364aa2e754d11",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-black-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. GBCyl5SpryBlkMt.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/3. GBCyl5SpryBlkMt.psd",
+      "sha256": "e657ac4ac176570e9bc7b34e5f96739757874d12024a1492e2c0b218e2318a40",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-black-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4. GBCyl5SpryBlkSh.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/4. GBCyl5SpryBlkSh.psd",
+      "sha256": "dba7fd2b77d10e10e21b23cd64549c4b3ac4b792bbfe178ce1338a964951179d",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-blue-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "5. GBCyl5SpryBluMt.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/5. GBCyl5SpryBluMt.psd",
+      "sha256": "624f9034a783ab345f4e41c6a34da050b15337da6a45527c0b72b1a0bfa9b36d",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-gold-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "6. GBCyl5SpryGlSh.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/6. GBCyl5SpryGlSh.psd",
+      "sha256": "baaad02327a755fb937fd2f0186394b37259aa1f376726116984417938584c75",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-gold-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "7. GBCyl5SpryGlMt.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/7. GBCyl5SpryGlMt.psd",
+      "sha256": "0bb73a3b56cf3d1423bb86b95c48c048c8eb5719531a7d89a09ed4bfaa11544d",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-silver-matte",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "8. GBCyl5SprySlMt.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/8. GBCyl5SprySlMt.psd",
+      "sha256": "5f1fe98ab2bf700a1fc99c1033e1b5a22f6bfa000aad8baf6c4c9449d274069b",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "assembly-clear5-silver-shiny",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "9. GBCyl5SprySlSh.psd",
+      "archiveRelativePath": "5. 13-415 Bottles PSD/2. Clear 5ml Cylinder/9. GBCyl5SprySlSh.psd",
+      "sha256": "5a894662d1953b11d3a0b42dbbff3b24cd2d48169788d63be5635c985b8a99b4",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-black-matte",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryBlkMt.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBlkMt.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-copper-matte",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryCuMt.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryCuMt.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-black-shiny",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryBlkSh.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBlkSh.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-blue-matte",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryBluMt.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryBluMt.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-gold-shiny",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryGlSh.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryGlSh.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-gold-matte",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SpryGlMt.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SpryGlMt.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-silver-matte",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SprySlMt.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SprySlMt.gif",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "catalog-kit-silver-shiny",
+      "sourceType": "catalog-composite-reference",
+      "originalFilename": "CP13-415SprySlSh.gif",
+      "referenceUrl": "https://www.bestbottles.com/images/store/enlarged_pics/CP13-415SprySlSh.gif",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "sprayer-head-and-collar",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "psd-head-black-matte", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "psd-head-copper-matte", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 2" },
+        { "sourceId": "psd-head-black-shiny", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "psd-head-blue-matte", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "psd-head-gold-shiny", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "psd-head-gold-matte", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 2" },
+        { "sourceId": "psd-head-silver-matte", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "psd-head-silver-shiny", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "Layer 1" },
+        { "sourceId": "approved-head-matte-gold", "method": "reviewed-selection-mask" }
+      ]
+    },
+    {
+      "partId": "opaque-protective-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "assembly-clear5-black-matte", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 13" },
+        { "sourceId": "catalog-kit-copper-matte", "method": "reviewed-selection-mask" },
+        { "sourceId": "assembly-clear5-black-shiny", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 12" },
+        { "sourceId": "assembly-clear5-blue-matte", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 16" },
+        { "sourceId": "assembly-clear5-gold-shiny", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 18" },
+        { "sourceId": "assembly-clear5-gold-matte", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 19" },
+        { "sourceId": "assembly-clear5-silver-matte", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 21" },
+        { "sourceId": "assembly-clear5-silver-shiny", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "Layer 23" }
+      ]
+    },
+    {
+      "partId": "sprayer-dip-tube",
+      "responsibility": "internal-delivery",
+      "outputPolicy": "body-contextual-weld",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "body-centerline-to-interior-base",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "assembly-clear5-black-matte", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 12" },
+        { "sourceId": "catalog-kit-copper-matte", "method": "reviewed-selection-mask" },
+        { "sourceId": "assembly-clear5-black-shiny", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 11" },
+        { "sourceId": "assembly-clear5-blue-matte", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 15" },
+        { "sourceId": "assembly-clear5-gold-shiny", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 17" },
+        { "sourceId": "assembly-clear5-gold-matte", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 18" },
+        { "sourceId": "assembly-clear5-silver-matte", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 20" },
+        { "sourceId": "assembly-clear5-silver-shiny", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "Layer 22" }
+      ]
+    }
+  ]
+}
