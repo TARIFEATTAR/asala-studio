@@ -435,7 +435,11 @@ async function main(): Promise<void> {
       p_approval_note: placementLock.approvalNote,
     });
     if (lock.error) throw lock.error;
-    placements.set(lane, lock.data.placementVersion.id);
+    const placementVersionId = lock.data?.id;
+    if (typeof placementVersionId !== "string") {
+      throw new Error(`Placement lock for ${lane} returned no immutable placement ID.`);
+    }
+    placements.set(lane, placementVersionId);
   }
 
   const currentAssets = before.memberships.map((membership) => {
