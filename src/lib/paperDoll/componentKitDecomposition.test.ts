@@ -294,3 +294,32 @@ test("the 13-415 sprayer separates eight reusable heads, opaque overcaps, and bo
   assert.deepEqual(plan.bodyContextualPartIds, ["sprayer-dip-tube"]);
   assert.equal(plan.productionPlateCount, 2);
 });
+
+test("the 28/50 mL jumbo roll-on kit is closed to two rollers and black/white overcaps", async () => {
+  const recipe = parseComponentKitDecomposition(JSON.parse(await readFile(
+    path.resolve("docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json"),
+    "utf8",
+  )));
+  const plan = buildComponentKitDecompositionPlan(recipe);
+  const fitment = recipe.parts.find((part) => part.partId === "jumbo-roller-fitment");
+  const overcap = recipe.parts.find((part) => part.partId === "jumbo-overcap");
+  const metalComposite = recipe.parts.find((part) => part.partId === "metal-fitment-neck-composite-reference");
+  const integration = recipe.parts.find((part) => part.partId === "plastic-fitment-neck-integration-reference");
+  const sourceIds = recipe.sources.map((source) => source.sourceId);
+
+  assert.equal(recipe.sources.length, 8);
+  assert.equal(fitment?.sourceSelectors.length, 8);
+  assert.equal(fitment?.sourceSelectors.filter((selector) => selector.method === "reviewed-selection-mask").length, 4);
+  assert.equal(overcap?.sourceSelectors.length, 8);
+  assert.equal(metalComposite?.sourceSelectors.length, 4);
+  assert.equal(integration?.sourceSelectors.length, 4);
+  assert.deepEqual(plan.reusablePlatePartIds, ["jumbo-roller-fitment", "jumbo-overcap"]);
+  assert.deepEqual(plan.sourceEvidencePartIds, [
+    "metal-fitment-neck-composite-reference",
+    "plastic-fitment-neck-integration-reference",
+  ]);
+  assert.equal(plan.productionPlateCount, 2);
+  assert.ok(recipe.sources.every((source) => source.productionEligible === false));
+  assert.ok(sourceIds.every((sourceId) => /jumbo-(28|50)-(plastic|metal)-(black|white)/.test(sourceId)));
+  assert.ok(sourceIds.every((sourceId) => !/boston|dropper|spray|pump/i.test(sourceId)));
+});

@@ -9,6 +9,8 @@ Runtime recipe:
 - `docs/paper-doll-rig/cylinder-requested-family-source-recipes.json`
 - builder: `scripts/paper-doll/build-cylinder-requested-family-review.ts`
 - current exact-identity output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/`
+- jumbo component decomposition: `docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json`
+- jumbo component review: `outputs/paper-doll-component-kit-reviews/16mm-jumbo-rollon/source-extraction-v2/`
 - historical pre-resolution output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v1/`
 - historical mistaken-quarantine output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected/`
 
@@ -39,6 +41,8 @@ Their component scope is deliberately closed:
 | 50 mL | `GBCyl50RollWht` | `GBCyl50RollBlk` | `GBCyl50MtlRollWht` | `GBCyl50MtlRollBlk` |
 
 No Boston Round droppers, short caps, decorative caps, pumps, or sprays are compatible by inheritance. The jumbo family contains only the two roller fitments and the black/white overcaps evidenced by these eight exact catalog identities.
+
+The eight PSDs have now been decomposed by responsibility. Plastic roller scenes are isolated; metal roller scenes include glass neck and thread pixels and therefore remain source evidence until a reviewed selection mask exists. Full findings and promotion gates are recorded in `docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md`.
 
 ## Transform contract
 

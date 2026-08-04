@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "kitId": "jumbo-rollon__16mm__28-50ml__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__jumbo-rollon__16mm__28-50ml__v1",
+  "sourceCompositeProductionEligible": false,
+  "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "sources": [
+    {
+      "sourceId": "jumbo-28-metal-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "1. GBCyl28MtlRollBlk.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/1. GBCyl28MtlRollBlk.psd",
+      "sha256": "50d44a77f0efb65fe6c3b4e569d2138799acbe4a0136fd5708cba59286fb958c",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-28-metal-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "2.  GBCyl28MtlRollWht.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/2.  GBCyl28MtlRollWht.psd",
+      "sha256": "14a4c0e68cc5821aa0da5f8f4f1a1ad9578c5850eb3e8f80fd28c5666faf1bd4",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-28-plastic-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. GBCyl28RollBlk.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/3. GBCyl28RollBlk.psd",
+      "sha256": "27e61c60b32e4fb7c762a46239de914bbabeb54b0f90009bde6f69774a395745",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-28-plastic-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4.  GBCyl28RollWht.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/4.  GBCyl28RollWht.psd",
+      "sha256": "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-50-plastic-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "1. GBCyl50RollBlk.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/1. GBCyl50RollBlk.psd",
+      "sha256": "b7cf4e25c9c25e167a28c4b1c18c4adb944594a20c6e4e6e0e4d2913d6997101",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-50-plastic-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "2. GBCyl50RollWht.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/2. GBCyl50RollWht.psd",
+      "sha256": "1879bd88979eba638f4fa2469f5dd4b5067f43d4e4f0fb7da0e852d81bb32a3f",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-50-metal-black",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "3. GBCyl50MtlRollBlk.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/3. GBCyl50MtlRollBlk.psd",
+      "sha256": "986851ecd3257d24f5f05d4f84e10b4b408802100b3019829a51c4744f694649",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "jumbo-50-metal-white",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "4. GBCyl50MtlRollWht.psd",
+      "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/4. GBCyl50MtlRollWht.psd",
+      "sha256": "fa774c3a68778395724bef062ffa738d490d61ef66b02929f731f4d2caddb852",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "jumbo-roller-fitment",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "jumbo-28-metal-black", "method": "reviewed-selection-mask" },
+        { "sourceId": "jumbo-28-metal-white", "method": "reviewed-selection-mask" },
+        { "sourceId": "jumbo-28-plastic-black", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "plastic roller fitment" },
+        { "sourceId": "jumbo-28-plastic-white", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "plastic roller fitment" },
+        { "sourceId": "jumbo-50-plastic-black", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "plastic roller fitment" },
+        { "sourceId": "jumbo-50-plastic-white", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "plastic roller fitment" },
+        { "sourceId": "jumbo-50-metal-black", "method": "reviewed-selection-mask" },
+        { "sourceId": "jumbo-50-metal-white", "method": "reviewed-selection-mask" }
+      ]
+    },
+    {
+      "partId": "jumbo-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "jumbo-28-metal-black", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "black overcap" },
+        { "sourceId": "jumbo-28-metal-white", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "white overcap" },
+        { "sourceId": "jumbo-28-plastic-black", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "black overcap" },
+        { "sourceId": "jumbo-28-plastic-white", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "white overcap" },
+        { "sourceId": "jumbo-50-plastic-black", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "black overcap" },
+        { "sourceId": "jumbo-50-plastic-white", "method": "psd-layer-scene", "sceneIndex": 2, "layerName": "white overcap" },
+        { "sourceId": "jumbo-50-metal-black", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "black overcap" },
+        { "sourceId": "jumbo-50-metal-white", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "white overcap" }
+      ]
+    },
+    {
+      "partId": "metal-fitment-neck-composite-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "jumbo-28-metal-black", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "metal roller plus glass neck composite" },
+        { "sourceId": "jumbo-28-metal-white", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "metal roller plus glass neck composite" },
+        { "sourceId": "jumbo-50-metal-black", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "metal roller plus glass neck composite" },
+        { "sourceId": "jumbo-50-metal-white", "method": "psd-layer-scene", "sceneIndex": 3, "layerName": "metal roller plus glass neck composite" }
+      ]
+    },
+    {
+      "partId": "plastic-fitment-neck-integration-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        { "sourceId": "jumbo-28-plastic-black", "method": "psd-layer-scene", "sceneIndex": 4, "layerName": "neck and plastic housing integration reference" },
+        { "sourceId": "jumbo-28-plastic-white", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "neck and plastic housing integration reference" },
+        { "sourceId": "jumbo-50-plastic-black", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "neck and plastic housing integration reference" },
+        { "sourceId": "jumbo-50-plastic-white", "method": "psd-layer-scene", "sceneIndex": 5, "layerName": "neck and plastic housing integration reference" }
+      ]
+    }
+  ]
+}
