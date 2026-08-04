@@ -44,11 +44,18 @@ After cleanup, all eight head material candidates copy one exact centered author
 - Head source sheet: `outputs/paper-doll-component-kit-reviews/13-415-sprayer/source-extraction-v1/sprayer-head-and-collar/contact-sheet.png`
 - Opaque-cap source sheet: `outputs/paper-doll-component-kit-reviews/13-415-sprayer/source-extraction-v1/opaque-protective-overcap/contact-sheet.png`
 - Dip-tube source sheet: `outputs/paper-doll-component-kit-reviews/13-415-sprayer/source-extraction-v1/sprayer-dip-tube/contact-sheet.png`
+- Exact-alpha opaque-overcap review: `outputs/paper-doll-component-authority-reviews/sprayer-13-415/opaque-overcap-v1/`
+- Opaque-overcap contact sheet: `outputs/paper-doll-component-authority-reviews/sprayer-13-415/opaque-overcap-v1/contact-sheet.png`
+- Source-body tube registration: `outputs/paper-doll-component-kit-reviews/13-415-sprayer/tube-registration-v1/manifest.json`
+
+The seven opaque-overcap candidates now share byte-identical review alpha. This is a named profile-review set, not an approved authority. Matte copper remains absent because there is no equivalent layered 5 mL overcap source.
+
+All seven layered assemblies preserve the same tube registration relative to their 218×636 px source body: x offset 89 px, y offset 105 px, width 60 px, and height 463 px. This proves a repeatable source relationship. It does not authorize a target-body weld because the current 53×17 mm body remains `named-geometry-review-required`.
 
 ## Required next work
 
 1. Obtain named approval of the clean head authority profile.
 2. Fit the head/collar onto the reviewed 53×17 mm 5 mL body without changing the body authority.
-3. Build a separate opaque-overcap authority review from the seven PSD extracts; keep matte copper incomplete until equivalent source evidence exists.
-4. Map each tube through the source-body registration coordinates into the target body context; never flatten a tube into a global reusable plate.
+3. Obtain named approval of the opaque-overcap review profile; keep matte copper incomplete until equivalent source evidence exists.
+4. Approve the 53×17 mm target body authority, then map the confirmed source-body tube registration into explicit immutable target-body jobs. Never flatten a tube into a global reusable plate.
 5. Review open and capped assemblies separately. A future translucent overcap must use a compound closed-assembly swatch rather than a transparent cap overlay.
