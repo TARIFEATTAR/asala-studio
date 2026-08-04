@@ -33,7 +33,7 @@ interface CatalogReference {
   assembledHeightMm: number;
   diameterMm: number;
   neckFinish: string;
-  applicatorDescription: "large roller ball";
+  applicatorDescription: "large roller ball" | "fine mist spray with opaque overcap";
 }
 
 interface SourceRecipeLayer {
@@ -167,7 +167,7 @@ function parseExactCatalogIdentities(value: unknown, label: string): ExactCatalo
   });
 }
 
-function parseCatalogReference(value: unknown, label: string): CatalogReference {
+function parseCatalogReference(value: unknown, label: string, displayKey: string): CatalogReference {
   assertRecord(value, label);
   assertString(value.productUrl, `${label}.productUrl`);
   if (!String(value.productUrl).startsWith("https://www.bestbottles.com/product/")) {
@@ -178,8 +178,13 @@ function parseCatalogReference(value: unknown, label: string): CatalogReference 
     if (typeof value[key] !== "number" || value[key] <= 0) throw new Error(`${label}.${key} must be positive.`);
   }
   assertString(value.neckFinish, `${label}.neckFinish`);
-  if (value.applicatorDescription !== "large roller ball") {
-    throw new Error(`${label}.applicatorDescription must identify the large roller ball.`);
+  const expectedApplicator = displayKey.startsWith("roll-on|")
+    ? "large roller ball"
+    : displayKey.startsWith("spray|")
+      ? "fine mist spray with opaque overcap"
+      : null;
+  if (!expectedApplicator || value.applicatorDescription !== expectedApplicator) {
+    throw new Error(`${label}.applicatorDescription must match the ${displayKey} family responsibility.`);
   }
   return value as unknown as CatalogReference;
 }
@@ -298,7 +303,7 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     }
     const catalogReference = candidate.source.catalogReference === undefined
       ? undefined
-      : parseCatalogReference(candidate.source.catalogReference, `${label}.source.catalogReference`);
+      : parseCatalogReference(candidate.source.catalogReference, `${label}.source.catalogReference`, candidate.displayKey);
     if (catalogReference) {
       if (catalogReference.capacityMl !== candidate.geometry.capacityMl
         || catalogReference.bodyHeightMm !== candidate.geometry.bodyHeightMm

@@ -1,6 +1,6 @@
 # Cylinder family completion board
 
-**As of:** 2026-08-03
+**As of:** 2026-08-04
 
 **State:** generated execution view; no approval, release, Supabase, or Sanity mutation
 
@@ -8,8 +8,8 @@
 
 - 18 reviewed presentation positions are preserved.
 - 2 CYL-9ML positions have a complete local candidate inventory ready for named approval.
-- 12 positions have sufficient evidence to build or review authorities.
-- 3 positions require a catalog-truth decision.
+- 14 positions have sufficient evidence to build or review authorities.
+- 1 positions require a catalog-truth decision.
 - 1 position requires an exact reference.
 - 0 positions are represented here as production released.
 
@@ -24,7 +24,7 @@ This board is derived from the existing Cylinder presentation contract and SHA/e
 | `spray|5` | 5 mL spray | authority-build-ready | `body__cylinder__5ml__53x17x17.0__f94a16652c` | Approve one 53 × 17 mm body profile, then fit the eight exact-alpha head candidates and seven source-backed opaque overcaps. |
 | `spray|9|regular` | 9 mL regular spray | candidate-ready-for-named-approval | `body__cylinder__9ml__70x20x20.0__7795014140` | Run named pixel review, five-body assembly review, Family Fit, and shared-placement lock; then cut an append-only release. |
 | `spray|9|tall` | 9 mL tall 13-415 spray | authority-build-ready | `body__cylinder__9ml__106x18x18.0__fca612c530` | Extract and approve one shared 106 × 18 mm tall-body authority for regular-cap, roll-on, and fine-mist modes; then calibrate each 13-415 component family independently at the tall-family seat. |
-| `spray|25` | 25 mL spray | truth-decision-required | `body__cylinder__25ml__83x32x32.0__a389ecedb8` | Resolve the archive 30 mL label versus current 25 mL catalog identity before body authority creation. |
+| `spray|25` | 25 mL spray | authority-build-ready | `body__cylinder__25ml__83x32x32.0__a389ecedb8` | Build the verified 83 × 32 mm body authority, then fit the 18-415 sprayer and its body-specific tube. The legacy 30 mL source filename remains provenance only. |
 | `spray|50` | 50 mL spray | authority-build-ready | `body__cylinder__50ml__117x32x32.0__16f88e6875` | Build the 117 × 32 mm body authority from the registered source, then fit the 18-415 sprayer and its body-specific tube. |
 | `spray|100` | 100 mL spray | authority-build-ready | `body__cylinder__100ml__154x35x35.0__b6c5e98693` | Build the 154 × 35 mm body authority from the registered source, then fit the 18-415 sprayer and its body-specific tube. |
 | `roll-on|5` | 5 mL regular roll-on | authority-build-ready | `body__cylinder__5ml__53x17x17.0__f94a16652c` | Approve the 53 × 17 mm body profile and one cap profile, then exact-alpha clamp and fit the roller and cap variants. |
@@ -34,7 +34,7 @@ This board is derived from the existing Cylinder presentation contract and SHA/e
 | `roll-on|9|tall` | 9 mL tall roll-on | authority-build-ready | `body__cylinder__9ml__106x18x18.0__fca612c530` | Reuse the shared 106 × 18 mm tall-body authority, then create separate tall-family placements for the 13-415 roller and regular-cap profiles. |
 | `roll-on|28` | 28 mL big roll-on | authority-build-ready | `body__cylinder__28ml__81x31x31.0__78183a1776` | Approve the exact-folder 81 × 31 mm body and the source-calibrated 28 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies specifically to this body. |
 | `roll-on|50` | 50 mL big roll-on | authority-build-ready | `body__cylinder__50ml__98x37x37.0__d5cabe6ea2` | Approve the exact-folder 98 × 37 mm body and the source-calibrated 50 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies separately from the 28 mL family. |
-| `reducer|25` | 25 mL reducer | truth-decision-required | `body__cylinder__25ml__83x32x32.0__a389ecedb8` | Resolve the 25/30 mL identity conflict, then approve only the reducer's exposed flange and keep its insertion plug hidden. |
+| `reducer|25` | 25 mL reducer | authority-build-ready | `body__cylinder__25ml__83x32x32.0__a389ecedb8` | Reuse the verified 83 × 32 mm body authority, then approve only the reducer's exposed flange and keep its insertion plug hidden. |
 | `reducer|50` | 50 mL reducer | authority-build-ready | `body__cylinder__50ml__117x32x32.0__16f88e6875` | Approve the visible-flange mask, fit it to the 117 × 32 mm body seat, and review each independent cap family. |
 | `reducer|100` | 100 mL reducer | authority-build-ready | `body__cylinder__100ml__154x35x35.0__b6c5e98693` | Approve the visible-flange mask, fit it to the 154 × 35 mm body seat, and review each independent cap family. |
 
@@ -45,14 +45,14 @@ This board is derived from the existing Cylinder presentation contract and SHA/e
 | `CYL-9ML-17-415` | candidate-ready-for-named-approval | 5 locked 70 × 20 mm body plates; 23 component candidates; 145 exact catalog assemblies; separate 74 × 21 mm regular roll-on authority still required | Named pixel approval, five-body Family Fit, shared-placement lock, release cut, and Sanity draft for the 70 × 20 mm pilot; independently build the 74 × 21 mm roll-on authority. |
 | `CYL-MINI-12MM-SPRAYER` | authority-build-ready | 3 and 4 mL clear Cylinder bodies plus the verified 12 mm fine-mist system | Create body authorities and decompose the exact sprayer/tube/overcap responsibilities. |
 | `CYL-13-415` | authority-build-ready | 5 mL and tall 9 mL bodies; 9 roll-on caps; 2 roller fitments; 8 sprayer heads; 7 layered opaque overcaps plus one matte-copper source gap | Name body and component authorities, close the matte-copper overcap evidence gap, then fit per body. |
-| `CYL-JUMBO-16MM-ROLLON` | authority-build-ready | 28 and 50 mL bodies; plastic and metal roller fitments; black and white caps; 8 exact assemblies | Review the clean exact-alpha plastic/metal candidates already extracted without glass-neck pixels, then calibrate 28 mL and 50 mL Family Fit separately. |
-| `CYL-18-415-SPRAY-REDUCER` | authority-build-ready | 25/50/100 mL bodies; sprayer/tube systems; reducer flange; independent cap families | Resolve 25/30 truth, build three body authorities, then complete sprayer and reducer Family Fit. |
+| `CYL-JUMBO-16MM-ROLLON` | authority-build-ready | 28 and 50 mL bodies; plastic and metal roller fitments; black and white caps; 8 exact assemblies | Review the four capacity-specific open-roller Family Fit assemblies; approve one authority per capacity, then establish an assembled black/white overcap seating reference before completing the 8 closed SKU assemblies. |
+| `CYL-18-415-SPRAY-REDUCER` | authority-build-ready | 25/50/100 mL bodies; sprayer/tube systems; reducer flange; independent cap families | Build the three verified body authorities from the 25/50/100 mL product contracts, then complete sprayer and reducer Family Fit. |
 | `CYL-CLASSIC-9ML` | exact-reference-required | distinct classic 70 × 20 mm and 70 × 21 mm roll-on shells | Find exact approved references before any Blender profile or component compatibility claim. |
 
 ## Production sequence
 
 1. Approve and release the existing 70 × 20 mm CYL-9ML candidate pack without changing the five locked bodies.
-2. Build measured Blender/source-calibrated body authority masks for the 12 authority-ready positions, grouped by shared body geometry; keep the disputed 74 × 21 mm body review-only while the five locked 70 × 20 mm plates remain the active 9 mL 17-415 authority.
+2. Build measured Blender/source-calibrated body authority masks for the 14 authority-ready positions, grouped by shared body geometry; keep the disputed 74 × 21 mm body review-only while the five locked 70 × 20 mm plates remain the active 9 mL 17-415 authority.
 3. Use GPT Image only for material fidelity, reflections, and restrained shadow; exact-alpha clamp every result to the named authority.
 4. Fit reusable components by physical cohort and render every dip tube or inserted interaction in body context.
 5. Resolve the 25/30 mL identity conflict and find exact references for both classic 9 mL shells.

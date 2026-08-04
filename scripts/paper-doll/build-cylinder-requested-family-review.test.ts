@@ -255,3 +255,53 @@ test("pins the verified 28 and 50 ml jumbo body contracts to their live product 
     applicatorDescription: "large roller ball",
   });
 });
+
+test("pins the verified 25, 50, and 100 ml 18-415 spray contracts to their exact product references", async () => {
+  const productionRecipe = parseCylinderRequestedFamilySourceRecipe(JSON.parse(
+    await readFile("docs/paper-doll-rig/cylinder-requested-family-source-recipes.json", "utf8"),
+  ));
+  const expected = [
+    {
+      familyKey: "CYL-25ML-18-415-SPRAY",
+      productUrl: "https://www.bestbottles.com/product/cylinder-design-25-ml-glass-bottle-matte-copper-spray-and-cap",
+      websiteSku: "GBCyl25SpryCu",
+      capacityMl: 25,
+      bodyHeightMm: 83,
+      assembledHeightMm: 108,
+      diameterMm: 32,
+    },
+    {
+      familyKey: "CYL-50ML-18-415-SPRAY",
+      productUrl: "https://www.bestbottles.com/product/cylinder-design-50-ml-glass-bottle-matte-copper-spray-and-cap",
+      websiteSku: "GBCyl50SpryCu",
+      capacityMl: 50,
+      bodyHeightMm: 117,
+      assembledHeightMm: 142,
+      diameterMm: 32,
+    },
+    {
+      familyKey: "CYL-100ML-18-415-SPRAY",
+      productUrl: "https://www.bestbottles.com/product/cylinder-design-100-ml-glass-bottle-matte-copper-spray-and-cap",
+      websiteSku: "GBCyl100SpryCu",
+      capacityMl: 100,
+      bodyHeightMm: 154,
+      assembledHeightMm: 195,
+      diameterMm: 35,
+    },
+  ];
+  for (const contract of expected) {
+    const family = productionRecipe.families.find((candidate) => candidate.familyKey === contract.familyKey);
+    assert.ok(family);
+    assert.equal(family.source.identityStatus, "source-backed");
+    assert.deepEqual(family.source.catalogReference, {
+      productUrl: contract.productUrl,
+      websiteSku: contract.websiteSku,
+      capacityMl: contract.capacityMl,
+      bodyHeightMm: contract.bodyHeightMm,
+      assembledHeightMm: contract.assembledHeightMm,
+      diameterMm: contract.diameterMm,
+      neckFinish: "18-415",
+      applicatorDescription: "fine mist spray with opaque overcap",
+    });
+  }
+});

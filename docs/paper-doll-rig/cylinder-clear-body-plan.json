@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOfDate": "2026-08-03",
+  "asOfDate": "2026-08-04",
   "scope": "Best Bottles Cylinder clear-body authority tranche",
   "canvas": {
     "widthPx": 2080,
@@ -18,13 +18,13 @@
   },
   "summary": {
     "catalogCoveragePositionCount": 18,
-    "authorityReadyDisplayPositionCount": 12,
-    "uniqueBodyAuthorityCount": 8,
-    "bodyOnlyCandidateAvailableCount": 6,
+    "authorityReadyDisplayPositionCount": 14,
+    "uniqueBodyAuthorityCount": 9,
+    "bodyOnlyCandidateAvailableCount": 7,
     "bodyExtractionRequiredCount": 0,
     "sourceCalibratedBlenderRequiredCount": 2,
     "candidateReadyPositionCount": 2,
-    "truthDecisionPositionCount": 3,
+    "truthDecisionPositionCount": 1,
     "exactReferenceRequiredPositionCount": 1,
     "paidGenerationRequestCount": 0
   },
@@ -132,7 +132,7 @@
     {
       "displayKey": "spray|25",
       "productClass": "Cylinder",
-      "stage": "truth-decision-required",
+      "stage": "authority-build-ready",
       "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
       "dimensionsMm": {
         "bodyHeight": 83,
@@ -332,7 +332,7 @@
     {
       "displayKey": "reducer|25",
       "productClass": "Cylinder",
-      "stage": "truth-decision-required",
+      "stage": "authority-build-ready",
       "bodyAuthorityKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
       "dimensionsMm": {
         "bodyHeight": 83,
@@ -643,6 +643,85 @@
           "canonicalIdentityKey": "GBTALLCYLFRST9MTLROLLGLMATT|GBCYLFRS9MLT05",
           "websiteSku": "GBTallCylFrst9MtlRollGlMatt",
           "graceSku": "GB-CYL-FRS-9ML-T-05"
+        }
+      ],
+      "materialTarget": "premium-clear-glass",
+      "authorityMaskIncludesGroundShadow": false,
+      "catalogAppearanceIncludesDeterministicGroundShadow": true,
+      "geometryLocked": false,
+      "productionEligible": false,
+      "authorityStrategy": "approve-clean-source-silhouette-or-source-calibrated-blender-profile",
+      "gptMaterialPass": {
+        "status": "not-requested",
+        "provider": "gpt-image-2",
+        "requiresExplicitPaidAuthorization": true,
+        "allowedChanges": [
+          "glass material fidelity",
+          "specular highlights",
+          "refraction",
+          "edge definition"
+        ],
+        "forbiddenChanges": [
+          "silhouette",
+          "neck",
+          "threads",
+          "seat",
+          "scale",
+          "camera",
+          "placement",
+          "shadow geometry"
+        ],
+        "exactAlphaMismatchTolerancePx": 0
+      },
+      "nextGate": "Calibrate the real body candidate, approve a clean bottle-only authority mask, then decide whether a paid material pass is necessary."
+    },
+    {
+      "geometryKey": "body__cylinder__25ml__83x32x32.0__a389ecedb8",
+      "capacityMl": 25,
+      "dimensionsMm": {
+        "bodyHeight": 83,
+        "widthAxis": 32,
+        "depthAxis": 32
+      },
+      "neckFinish": "18-415",
+      "displayKeys": [
+        "spray|25",
+        "reducer|25"
+      ],
+      "presentationTargets": [
+        {
+          "displayKey": "spray|25",
+          "assembledHeightMm": 108,
+          "targetAssembledHeightPct": 73.210526,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1287,
+          "transformScope": "complete-paper-doll-assembly"
+        },
+        {
+          "displayKey": "reducer|25",
+          "assembledHeightMm": 97,
+          "targetAssembledHeightPct": 73.210526,
+          "expectedBodyHeightPxAfterAssemblyTransform": 1433,
+          "transformScope": "complete-paper-doll-assembly"
+        }
+      ],
+      "sourceState": "body-only-candidate-available",
+      "bodyOnlyCandidatePath": "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/cyl-25ml-18-415-spray/review-plates/body.png",
+      "sourceEvidence": [
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBcyl25SpryShnBlk-PDP.png",
+          "previewSha256": "e4c77a46280b85778843e387cb8711251ae4b6ea953c2eb5cab80d16e5ab888e",
+          "canonicalIdentityKey": "GBCYL25SPRYSHNBLK|GRACE-UNRESOLVED",
+          "websiteSku": "GBcyl25SpryShnBlk",
+          "graceSku": null
+        },
+        {
+          "referenceClass": "user-confirmed-pdp-screenshot-scale-only",
+          "previewPath": "tmp/best-bottles-reference-production/cylinder-applicator-curves-v1/evidence/2026-07-13-GBcyl25RdcrBlkLthr-PDP-cap-on-main.png",
+          "previewSha256": "b69ec458173c72f7fbb2a8d5f736fa3cdc77d8ec2611cf959d6969ceb94842c2",
+          "canonicalIdentityKey": null,
+          "websiteSku": "GBcyl25RdcrBlkLthr",
+          "graceSku": null
         }
       ],
       "materialTarget": "premium-clear-glass",

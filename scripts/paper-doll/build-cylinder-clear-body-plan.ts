@@ -213,7 +213,7 @@ export async function buildCylinderClearBodyPlan() {
         widthAxis: first.widthAxisMm,
         depthAxis: first.secondAxisMm,
       },
-      neckFinish: neckFinish(first),
+      neckFinish: coverageNeckFinish(positions[0].row, first),
       displayKeys: positions.map(({ row }) => row.displayKey),
       presentationTargets: positions.map(({ row, curve, presentation }) => ({
         displayKey: row.displayKey,
@@ -261,7 +261,7 @@ export async function buildCylinderClearBodyPlan() {
 
   const plan = {
     schemaVersion: 1,
-    asOfDate: "2026-08-03",
+    asOfDate: "2026-08-04",
     scope: "Best Bottles Cylinder clear-body authority tranche",
     canvas: CANVAS,
     registration: REGISTRATION,
@@ -298,9 +298,9 @@ export async function buildCylinderClearBodyPlan() {
     },
   };
   if (plan.summary.catalogCoveragePositionCount !== 18
-    || plan.summary.authorityReadyDisplayPositionCount !== 12
-    || plan.summary.uniqueBodyAuthorityCount !== 8) {
-    throw new Error("Cylinder clear-body plan no longer matches the reviewed 18-position / 12-build-ready / 8-authority contract.");
+    || plan.summary.authorityReadyDisplayPositionCount !== 14
+    || plan.summary.uniqueBodyAuthorityCount !== 9) {
+    throw new Error("Cylinder clear-body plan no longer matches the reviewed 18-position / 14-build-ready / 9-authority contract.");
   }
   return plan;
 }

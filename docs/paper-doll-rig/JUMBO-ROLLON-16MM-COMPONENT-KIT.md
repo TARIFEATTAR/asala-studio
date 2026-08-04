@@ -1,6 +1,6 @@
 # 16 mm jumbo roll-on component kit
 
-**State:** exact eight-product source matrix registered; the user-confirmed uncapped folders contain valid jumbo bodies and large-roller source assemblies; plastic fitments are separable candidates, metal fitments require deterministic neck removal; no geometry authority, production approval, release, or Sanity mutation
+**State:** exact eight-product source matrix registered; separate 28/50 mL plastic and metal-ball candidates now have exact within-capacity alpha and deterministic source-relative Family Fit assemblies; black/white overcap pixels remain detached and lack an assembled seating authority; no named geometry approval, placement lock, release, or Sanity mutation
 
 This family is the straight-sided 28 mL and 50 mL Cylinder massage roll-on sold by Best Bottles. It is not a Boston Round family and it inherits no Boston Round components.
 
@@ -44,6 +44,8 @@ Recipe:
 - authority-review recipe: `docs/paper-doll-rig/jumbo-rollon-16mm-authority-review.json`
 - authority-review command: `npm run paperdoll:jumbo-rollon-authority-review`
 - current authority-review output: `outputs/paper-doll-component-authority-reviews/jumbo-rollon-16mm/authority-review-v1/`
+- Family Fit command: `npm run paperdoll:jumbo-rollon-family-fit-review`
+- current Family Fit output: `outputs/paper-doll-component-family-fit-reviews/jumbo-rollon-16mm/family-fit-v1/`
 
 All eight PSDs are SHA-pinned. The decomposition contains four responsibilities:
 
@@ -92,6 +94,19 @@ The raw Photoshop fitment layers contain small detached alpha islands. Cleanup i
 - 50 mL authority: 43 measured components; one 76,314 px fitment retained; 1,180 px across 42 measured islands removed.
 
 These candidates remain `named-geometry-review-required`. Their centered authority bounds are review coordinates, not production placement. Each size still requires a separate Family Fit placement on its exact body before release.
+
+## Capacity-specific Family Fit
+
+The first Family Fit package now resolves the four open assemblies without a manual pixel nudge:
+
+| Capacity | Placement bounds | Plastic | Metal ball |
+|---|---:|---|---|
+| 28 mL | `x 910 · y 907 · 243 × 220` | exact group alpha | exact group alpha |
+| 50 mL | `x 857 · y 280 · 360 × 336` | exact group alpha | exact group alpha |
+
+The placement is derived from the original Photoshop component/body relationship under the registered body-family uniform transform. Finishes cannot acquire different placement. This is review evidence only: the authority candidates still require a named geometry approval and each capacity requires named Family Fit approval before a placement lock.
+
+The cap layer remains a separate blocker. Every exact Photoshop source stores its black or white cap beside the bottle rather than seated over the fitment. Those pixels prove color and source silhouette, but not the closed assembly's Y position or overlap. The system therefore records `missing-assembled-placement-authority` instead of fabricating a cap placement from the detached layout.
 
 ## Visible source defects and review gates
 
