@@ -60,3 +60,19 @@ test("preserves the monotonic 3 ml to 100 ml presentation hierarchy", () => {
   assert.ok(five.targetAssembledHeightPx < nine.targetAssembledHeightPx);
   assert.ok(nine.targetAssembledHeightPx < hundred.targetAssembledHeightPx);
 });
+
+test("uses the reviewed Cylinder display position before the capacity-only fallback", () => {
+  const result = resolvePaperDollCatalogPresentation({
+    capacityMl: 9,
+    cylinderDisplayKey: "spray|9|tall",
+    canvas: { widthPx: 2080, heightPx: 2288 },
+    sourceAssemblyBoundsPx: { left: 900, top: 500, width: 280, height: 1580 },
+    targetCenterXPx: 1040,
+    targetBaselineYPx: 2082,
+  });
+
+  assert.equal(result.targetAssembledHeightPct, 71);
+  assert.equal(result.targetSource, "reviewed-cylinder-applicator-display-position");
+  assert.equal(result.cylinderDisplayKey, "spray|9|tall");
+  assert.equal(result.assembledHeightMm, 111);
+});

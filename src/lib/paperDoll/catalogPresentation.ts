@@ -2,6 +2,7 @@ import {
   BEST_BOTTLES_CATALOG_SCALE_VERSION,
   resolveBestBottlesGlobalScalePct,
 } from "../../config/bestBottlesCatalogScale";
+import { resolveCylinderPaperDollPresentation } from "../../config/bestBottlesCylinderPresentation";
 
 export type PaperDollBounds = {
   left: number;
@@ -16,6 +17,7 @@ export type PaperDollCatalogPresentationInput = {
   sourceAssemblyBoundsPx: PaperDollBounds;
   targetCenterXPx: number;
   targetBaselineYPx: number;
+  cylinderDisplayKey?: string;
   targetAssembledHeightPct?: number;
   targetSource?: string;
 };
@@ -43,7 +45,16 @@ export function resolvePaperDollCatalogPresentation(input: PaperDollCatalogPrese
   if (!Number.isFinite(input.targetCenterXPx) || !Number.isFinite(input.targetBaselineYPx)) {
     throw new Error("Presentation centerline and baseline must be finite.");
   }
+  const cylinderProfile = input.cylinderDisplayKey
+    ? resolveCylinderPaperDollPresentation(input.cylinderDisplayKey)
+    : null;
+  if (cylinderProfile && cylinderProfile.capacityMl !== input.capacityMl) {
+    throw new Error(
+      `Cylinder display position ${input.cylinderDisplayKey} is ${cylinderProfile.capacityMl} mL, not ${input.capacityMl} mL.`,
+    );
+  }
   const targetAssembledHeightPct = input.targetAssembledHeightPct
+    ?? cylinderProfile?.targetAssembledHeightPct
     ?? resolveBestBottlesGlobalScalePct(input.capacityMl);
   if (!Number.isFinite(targetAssembledHeightPct)
     || targetAssembledHeightPct <= 0
@@ -68,7 +79,11 @@ export function resolvePaperDollCatalogPresentation(input: PaperDollCatalogPrese
     scaleContractVersion: BEST_BOTTLES_CATALOG_SCALE_VERSION,
     transformScope: "complete-paper-doll-assembly" as const,
     capacityMl: input.capacityMl,
-    targetSource: input.targetSource ?? "global-capacity-curve",
+    targetSource: input.targetSource
+      ?? cylinderProfile?.targetSource
+      ?? "global-capacity-curve",
+    cylinderDisplayKey: cylinderProfile?.displayKey ?? null,
+    assembledHeightMm: cylinderProfile?.assembledHeightMm ?? null,
     targetAssembledHeightPct,
     targetAssembledHeightPx,
     uniformScale,
