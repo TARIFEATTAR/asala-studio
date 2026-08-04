@@ -47,6 +47,13 @@ function recipe(sourceSha256: string) {
       status: "missing-exact-identity",
       requiredEvidence: "One exact SKU, product URL, photograph, or measured dimensions.",
     }],
+    supersededIdentityCorrections: [{
+      requestedLabel: "50 mL jumbo roll-on",
+      previousDecision: "quarantined-wrong-family",
+      status: "superseded-by-exact-user-reference",
+      resolution: "The physical source family was correct; exact product identity is now supplied.",
+      exactCatalogIdentities: [{ websiteSku: "GBCyl50RollBlk", graceSku: "GB-CYL-BLK-50ML-ROL-BLK" }],
+    }],
     families: [{
       familyKey: "CYL-100ML-18-415-SPRAY",
       label: "100 mL spray",
@@ -64,6 +71,7 @@ function recipe(sourceSha256: string) {
         sha256: sourceSha256,
         canvas: { width: 120, height: 100 },
         identityStatus: "source-backed",
+        exactCatalogIdentities: [{ websiteSku: "GBCyl100SpryMtSl", graceSku: "GB-CYL-CLR-100ML-SPR-MSLV" }],
       },
       layers: [
         { layerId: "body", role: "body", sceneIndex: 2, sourceBoundsPx: { left: 20, top: 30, width: 40, height: 80 }, assemblyMember: true, zIndex: 10 },
@@ -130,6 +138,9 @@ test("materializes full-canvas review plates with one assembly transform", async
   assert.equal(result.manifest.unresolvedRequestedFamilies.length, 1);
   assert.equal(result.manifest.summary.rejectedRegistrationCount, 1);
   assert.equal(result.manifest.summary.unresolvedRequestedFamilyCount, 1);
+  assert.equal(result.manifest.supersededIdentityCorrections.length, 1);
+  assert.equal(result.manifest.summary.supersededIdentityCorrectionCount, 1);
+  assert.equal(family.source.exactCatalogIdentities[0].websiteSku, "GBCyl100SpryMtSl");
   assert.equal((await sharp(body.fullCanvasPlatePath!).metadata()).width, 200);
   assert.equal((await sharp(family.assemblyPreviewPath).metadata()).height, 240);
   assert.equal((await sharp(result.contactSheetPath).metadata()).width, 720);

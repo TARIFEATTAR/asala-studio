@@ -1,39 +1,44 @@
 # Cylinder requested-family source registration
 
-**State:** four source assemblies registered for review; two incorrect requested-family matches quarantined; no geometry authority, production release, or Sanity mutation
+**State:** six source assemblies registered for review; the 28/50 mL jumbo roll-ons resolved by exact user-supplied product identity; no geometry authority, production release, or Sanity mutation
 
-This tranche currently covers four confirmed Cylinder positions requested after the 9 mL 17-415 pilot. It does not stretch the 9 mL pilot assets into larger products. Each active family is derived from its own SHA-pinned layered Photoshop source and registered to its reviewed catalog presentation position.
+This tranche covers six confirmed Cylinder positions requested after the 9 mL 17-415 pilot. It does not stretch the 9 mL pilot assets into larger products. Each active family is derived from its own SHA-pinned layered Photoshop source and registered to its reviewed catalog presentation position.
 
 Runtime recipe:
 
 - `docs/paper-doll-rig/cylinder-requested-family-source-recipes.json`
 - builder: `scripts/paper-doll/build-cylinder-requested-family-review.ts`
-- current corrected output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected/`
-- historical rejected output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v1/`
+- current exact-identity output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/`
+- historical pre-resolution output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v1/`
+- historical mistaken-quarantine output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected/`
 
 ## Registered review families
 
 | Family | Physical truth | Display position | Source identity | Responsibilities |
 |---|---|---|---|---|
 | 9 mL tall slim spray | 106 × 18 mm, 13-415 | `spray\|9\|tall`, 71% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
+| 28 mL jumbo massage roll-on | 81 × 31 mm, 16 mm roll-on | `roll-on\|28`, 74% | exact user/catalog identity | body + plastic roller fitment; black/white overcap responsibilities detached; metal fitment source registered next |
+| 50 mL jumbo massage roll-on | 98 × 37 mm, 16 mm roll-on | `roll-on\|50`, 78% | exact user/catalog identity | body + plastic roller fitment; black/white overcap responsibilities detached; metal fitment source registered next |
 | 25 mL spray | 83 × 32 mm, 18-415 | `spray\|25`, 73.210526% | **manual review required** | body + body-contextual dip tube + sprayer head; overcap detached |
 | 50 mL spray | 117 × 32 mm, 18-415 | `spray\|50`, 78% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
 | 100 mL spray | 154 × 35 mm, 18-415 | `spray\|100`, 79% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
 
 The 25 mL source archive and filename call the product “30 mL,” while current catalog truth identifies the family as 25 mL / 83 × 32 mm. The source remains reviewable but cannot become body authority until a named identity decision resolves that conflict.
 
-## Quarantined roll-on mappings
+## Jumbo roll-on identity resolution
 
-The original v1 review included the catalog's existing 28 mL and 50 mL Cylinder roll-ons. A read-only product-truth audit verified that those Photoshop sources match the current Best Bottles products and their catalog records. The user then confirmed that these are **not** the larger roll-on bottles intended by the request.
+The original source registration found the correct straight-sided physical families but did not yet have an exact product identity. A later correction quarantined them after an ambiguous visual exchange. The user then supplied BestBottles.com screenshots for `GBCyl1ozRollWht` and `GBCyl50RollBlk` and explicitly confirmed that these are the intended jumbo massage-therapy roll-ons.
 
-They are therefore not defective products and are not deleted from the full catalog. They are rejected only as matches for the unresolved requested pair:
+The quarantine is superseded, not erased. The runtime manifest preserves the correction history while reporting zero active rejected or unresolved families.
 
-| Requested position | Rejected registration | Catalog evidence | State |
-|---|---|---|---|
-| 28 mL big roll-on | `CYL-28ML-16MM-ROLLON` / `GBCyl28RollWht.psd` | four current 28 mL Cylinder roll-on SKUs | quarantined; promotion prohibited |
-| 50 mL big roll-on | `CYL-50ML-16MM-ROLLON` / `GBCyl50RollWht.psd` | four current 50 mL Cylinder roll-on SKUs | quarantined; promotion prohibited |
+Their component scope is deliberately closed:
 
-The intended pair remains `missing-exact-identity`. One exact SKU, product URL, photograph, Photoshop filename, or measured dimension set is required for each intended bottle before source registration. The builder preserves this blocker in the generated manifest and never guesses a replacement from capacity or filename alone.
+| Capacity | Plastic + white | Plastic + black | Metal + white | Metal + black |
+|---|---|---|---|---|
+| 28 mL | `GBCyl1ozRollWht` | `GBRoll28Blk` | `GBMtlRoll28Wht` | `GBMtlRoll28Blk` |
+| 50 mL | `GBCyl50RollWht` | `GBCyl50RollBlk` | `GBCyl50MtlRollWht` | `GBCyl50MtlRollBlk` |
+
+No Boston Round droppers, short caps, decorative caps, pumps, or sprays are compatible by inheritance. The jumbo family contains only the two roller fitments and the black/white overcaps evidenced by these eight exact catalog identities.
 
 ## Transform contract
 
