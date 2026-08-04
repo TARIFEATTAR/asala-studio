@@ -10,11 +10,26 @@ test("covers every reviewed Cylinder applicator display position without collaps
   assert.equal(CYLINDER_PAPER_DOLL_PRESENTATION_POSITIONS.length, 18);
   assert.equal(
     CYLINDER_PAPER_DOLL_PRESENTATION_POSITIONS.filter((position) => position.status === "ready").length,
-    16,
+    17,
   );
   assert.equal(
     CYLINDER_PAPER_DOLL_PRESENTATION_POSITIONS.filter((position) => position.status === "blocked").length,
-    2,
+    1,
+  );
+});
+
+test("reuses the exact locked 70x20 body for the classic 9 ml roll-on without collapsing 70x21 or 74x21", () => {
+  const spray = resolveCylinderPaperDollPresentation("spray|9|regular");
+  const classic = resolveCylinderPaperDollPresentation("roll-on|9|classic-20");
+  const regular = resolveCylinderPaperDollPresentation("roll-on|9|regular");
+
+  assert.equal(spray.bodyHeightMm, 70);
+  assert.equal(classic.bodyHeightMm, 70);
+  assert.equal(classic.capacityMl, 9);
+  assert.equal(regular.bodyHeightMm, 74);
+  assert.throws(
+    () => resolveCylinderPaperDollPresentation("roll-on|9|classic-21"),
+    /blocked.*no exact supplied or approved reference/i,
   );
 });
 
@@ -28,6 +43,8 @@ test("keeps the tall 9 ml 13-415 spray distinct from the regular 9 ml spray", ()
   assert.equal(tall.targetAssembledHeightPct, 71);
   assert.equal(tall.familyCorrectionPct, 2);
   assert.ok(tall.targetAssembledHeightPct > regular.targetAssembledHeightPct);
+  assert.ok(tall.bodyHeightMm > regular.bodyHeightMm * 1.5);
+  assert.ok(tall.bodyHeightMm > resolveCylinderPaperDollPresentation("roll-on|9|regular").bodyHeightMm * 1.4);
 });
 
 test("resolves the approved big roll-on and spray coverage positions", () => {
@@ -50,7 +67,7 @@ test("resolves the approved big roll-on and spray coverage positions", () => {
 
 test("refuses blocked or unknown display positions", () => {
   assert.throws(
-    () => resolveCylinderPaperDollPresentation("roll-on|9|classic-20"),
+    () => resolveCylinderPaperDollPresentation("roll-on|9|classic-21"),
     /blocked.*no exact supplied or approved reference/i,
   );
   assert.throws(

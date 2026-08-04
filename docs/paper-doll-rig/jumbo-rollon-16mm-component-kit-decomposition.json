@@ -3,7 +3,36 @@
   "kitId": "jumbo-rollon__16mm__28-50ml__physical-v1",
   "sourceReviewGroupKey": "geometry-review__jumbo-rollon__16mm__28-50ml__v1",
   "sourceCompositeProductionEligible": false,
+  "authorityState": "exact-authority-required",
   "canonicalCanvas": { "width": 2080, "height": 2288 },
+  "catalogProductContracts": [
+    {
+      "familyKey": "roll-on|28|jumbo",
+      "catalogProductId": "GBCyl1ozRollWht",
+      "referenceUrl": "https://www.bestbottles.com/product/cylinder-style-28-ml-glass-bottle-plastic-roll-on-and-white-cap",
+      "capacityMl": 28,
+      "bodyHeightMm": 81,
+      "bodyDiameterMm": 31,
+      "assembledHeightMm": 100,
+      "assembledHeightToleranceMm": 1,
+      "neckSizeMm": 16,
+      "applicatorClass": "large roller ball",
+      "placementAuthorityScope": "family-specific"
+    },
+    {
+      "familyKey": "roll-on|50|jumbo",
+      "catalogProductId": "GBCyl50RollBlk",
+      "referenceUrl": "https://www.bestbottles.com/product/cylinder-style-50-ml-glass-bottle-plastic-roll-on-and-black-cap",
+      "capacityMl": 50,
+      "bodyHeightMm": 98,
+      "bodyDiameterMm": 37,
+      "assembledHeightMm": 116,
+      "assembledHeightToleranceMm": 2,
+      "neckSizeMm": 16,
+      "applicatorClass": "large roller ball",
+      "placementAuthorityScope": "family-specific"
+    }
+  ],
   "sources": [
     {
       "sourceId": "jumbo-28-metal-black",
@@ -74,10 +103,10 @@
     {
       "partId": "jumbo-roller-fitment",
       "responsibility": "exterior-dispenser",
-      "outputPolicy": "reusable-full-canvas-plate",
-      "reviewFraming": "center-nontransparent-bounds",
-      "productionAnchor": "mount-axis-seat",
-      "independentlySelectable": true,
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
       "assemblyContextQa": true,
       "sourceSelectors": [
         { "sourceId": "jumbo-28-metal-black", "method": "reviewed-selection-mask" },

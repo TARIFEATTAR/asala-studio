@@ -25,6 +25,7 @@ export type BuildRegisteredFamilyLayerPlanInput = {
   targetCenterX: number;
   targetBaselineY: number;
   targetAssembledHeightPct: number;
+  reviewScope?: "complete-assembly" | "body-only";
   layers: RegisteredFamilyLayerInput[];
 };
 
@@ -68,11 +69,15 @@ export function buildRegisteredFamilyLayerPlan(input: BuildRegisteredFamilyLayer
     assertBounds(layer.sourceBoundsPx, `${layer.layerId}.sourceBoundsPx`);
   }
   const assemblyLayers = input.layers.filter((layer) => layer.assemblyMember);
+  const reviewScope = input.reviewScope ?? "complete-assembly";
   if (!assemblyLayers.some((layer) => layer.role === "body")) {
     throw new Error("A registered family assembly requires one body layer.");
   }
-  if (!assemblyLayers.some((layer) => layer.role === "exterior-component")) {
+  if (reviewScope === "complete-assembly" && !assemblyLayers.some((layer) => layer.role === "exterior-component")) {
     throw new Error("A registered family assembly requires one exterior component layer.");
+  }
+  if (reviewScope === "body-only" && assemblyLayers.some((layer) => layer.role !== "body")) {
+    throw new Error("A body-only review may place only the body layer; all component sources must remain detached review evidence.");
   }
   const sourceAssemblyBoundsPx = unionBounds(assemblyLayers.map((layer) => layer.sourceBoundsPx));
   const targetHeight = Math.round(input.canvas.height * input.targetAssembledHeightPct / 100);
@@ -109,6 +114,7 @@ export function buildRegisteredFamilyLayerPlan(input: BuildRegisteredFamilyLayer
   return {
     schemaVersion: 1 as const,
     familyKey: input.familyKey,
+    reviewScope,
     canvas: input.canvas,
     sourceAssemblyBoundsPx,
     targetAssemblyBoundsPx,
@@ -118,6 +124,8 @@ export function buildRegisteredFamilyLayerPlan(input: BuildRegisteredFamilyLayer
     uniformScale,
     transformScope: "complete-paper-doll-assembly" as const,
     layers,
-    rule: "Apply this one transform to every assembly member. Detached review layers receive no placement until family-fit approval.",
+    rule: reviewScope === "body-only"
+      ? "Place only the clean body source. Every component source remains detached until a clean authority and Family Fit approval exist."
+      : "Apply this one transform to every assembly member. Detached review layers receive no placement until family-fit approval.",
   };
 }

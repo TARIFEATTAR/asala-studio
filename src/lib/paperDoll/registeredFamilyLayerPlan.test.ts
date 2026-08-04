@@ -65,3 +65,22 @@ test("rejects a family without one body and one exterior assembly component", ()
     ],
   }), /exterior component/i);
 });
+
+test("allows an explicit body-only review without pretending it is a complete assembly", () => {
+  const plan = buildRegisteredFamilyLayerPlan({
+    familyKey: "CYL-9ML-17-415-ROLLON-74X21",
+    canvas: { width: 2080, height: 2288 },
+    targetCenterX: 1040,
+    targetBaselineY: 2082,
+    targetAssembledHeightPct: 69,
+    reviewScope: "body-only",
+    layers: [
+      { layerId: "body", role: "body", sourceBoundsPx: { left: 249, top: 618, width: 250, height: 903 }, assemblyMember: true },
+      { layerId: "contaminated-roller", role: "detached-review", sourceBoundsPx: { left: 255, top: 457, width: 228, height: 324 }, assemblyMember: false },
+    ],
+  });
+
+  assert.equal(plan.reviewScope, "body-only");
+  assert.equal(plan.layers[0].placementBoundsPx?.height, plan.targetAssemblyBoundsPx.height);
+  assert.equal(plan.layers[1].placementBoundsPx, null);
+});
