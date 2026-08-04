@@ -41,6 +41,9 @@ Recipe:
 - `docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json`
 - extraction command: `npm run paperdoll:jumbo-rollon-kit-review`
 - current review output: `outputs/paper-doll-component-kit-reviews/16mm-jumbo-rollon/source-extraction-v2/`
+- authority-review recipe: `docs/paper-doll-rig/jumbo-rollon-16mm-authority-review.json`
+- authority-review command: `npm run paperdoll:jumbo-rollon-authority-review`
+- current authority-review output: `outputs/paper-doll-component-authority-reviews/jumbo-rollon-16mm/authority-review-v1/`
 
 All eight PSDs are SHA-pinned. The decomposition contains four responsibilities:
 
@@ -71,6 +74,24 @@ These are diagnostics, not geometry approvals. A shared 16 mm product label does
 - separate 28 and 50 mL placement calibration;
 - no shared cross-size authority until a clean measured component or calibrated rig render proves it;
 - exact alpha clamp required before `geometryLocked=true`.
+
+## Authority-review candidates
+
+The source-calibrated review now produces two intentionally separate authority groups:
+
+| Group | Authority bounds on 2080 × 2288 | Same-product source comparison | Material candidates |
+|---|---:|---:|---|
+| 28 mL | 280 × 253 px | normalized diagnostic IoU `1.0000` | natural plastic; metal ball with plastic housing |
+| 50 mL | 327 × 305 px | normalized diagnostic IoU `0.9867` | natural plastic; metal ball with plastic housing |
+
+Every material candidate copies the exact alpha bytes of its own group authority: binary IoU `1.0000`, zero mismatched alpha bytes. The 28 mL and 50 mL masks are not collapsed into one authority. The metal candidate transfers only the calibrated visible ball rows from the metal source composite, then clamps those pixels to the plastic-fitment authority; the duplicated glass neck is never admitted into the candidate.
+
+The raw Photoshop fitment layers contain small detached alpha islands. Cleanup is calibrated on the actual immutable files instead of using a global threshold:
+
+- 28 mL authority: 32 measured components; one 54,065 px fitment retained; 816 px across 31 measured islands removed.
+- 50 mL authority: 43 measured components; one 76,314 px fitment retained; 1,180 px across 42 measured islands removed.
+
+These candidates remain `named-geometry-review-required`. Their centered authority bounds are review coordinates, not production placement. Each size still requires a separate Family Fit placement on its exact body before release.
 
 ## Visible source defects and review gates
 
