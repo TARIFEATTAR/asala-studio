@@ -125,7 +125,7 @@
       "evidencePaths": [
         "docs/paper-doll-rig/CYLINDER-REQUESTED-FAMILY-SOURCE-REGISTRATION.md"
       ],
-      "nextGate": "Extract the registered tall body profile, clamp material pixels to its authority, then map the 13-415 sprayer kit at the tall-family seat."
+      "nextGate": "Extract and approve one shared 106 × 18 mm tall-body authority for regular-cap, roll-on, and fine-mist modes; then calibrate each 13-415 component family independently at the tall-family seat."
     },
     {
       "displayKey": "spray|25",
@@ -314,7 +314,7 @@
         "docs/paper-doll-rig/CYL5-ROLLON-CAP-FAMILY-FIT-REVIEW.md",
         "docs/paper-doll-rig/CYLINDER-PRESENTATION-COVERAGE.md"
       ],
-      "nextGate": "Build the shared tall body authority, then create a separate tall-family placement for the 13-415 roller and cap profiles."
+      "nextGate": "Reuse the shared 106 × 18 mm tall-body authority, then create separate tall-family placements for the 13-415 roller and regular-cap profiles."
     },
     {
       "displayKey": "roll-on|28",
@@ -337,7 +337,7 @@
       "evidencePaths": [
         "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md"
       ],
-      "nextGate": "Approve the 81 × 31 mm body, build a true large 16 mm plastic/metal roller authority from measured or exact catalog evidence, and keep the invalid small source roller quarantined; then calibrate the four assemblies specifically to the 28 mL body."
+      "nextGate": "Approve the exact-folder 81 × 31 mm body and the source-calibrated 28 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies specifically to this body."
     },
     {
       "displayKey": "roll-on|50",
@@ -360,7 +360,7 @@
       "evidencePaths": [
         "docs/paper-doll-rig/JUMBO-ROLLON-16MM-COMPONENT-KIT.md"
       ],
-      "nextGate": "Approve the 98 × 37 mm body, build a true large 16 mm plastic/metal roller authority from measured or exact catalog evidence, and keep the invalid small source roller quarantined; then calibrate placement separately from the 28 mL family."
+      "nextGate": "Approve the exact-folder 98 × 37 mm body and the source-calibrated 50 mL plastic/metal large-roller authority candidates, then calibrate the four black/white-cap assemblies separately from the 28 mL family."
     },
     {
       "displayKey": "reducer|25",
@@ -452,7 +452,7 @@
       "programId": "CYL-JUMBO-16MM-ROLLON",
       "stage": "authority-build-ready",
       "scope": "28 and 50 mL bodies; plastic and metal roller fitments; black and white caps; 8 exact assemblies",
-      "nextGate": "Clean component masks, remove neck pixels from metal references, and calibrate both capacities separately."
+      "nextGate": "Review the clean exact-alpha plastic/metal candidates already extracted without glass-neck pixels, then calibrate 28 mL and 50 mL Family Fit separately."
     },
     {
       "programId": "CYL-18-415-SPRAY-REDUCER",

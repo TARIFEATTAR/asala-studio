@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -505,6 +505,10 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
     const familyRoot = path.join(input.outputRoot, safeToken(family.familyKey));
     const plateRoot = path.join(familyRoot, "review-plates");
     const detachedRoot = path.join(familyRoot, "detached-source-reviews");
+    // Review outputs are reproducible. Clear only this derived family directory so
+    // obsolete layers from an earlier classification cannot survive a rebuild and
+    // masquerade as current evidence.
+    await rm(familyRoot, { recursive: true, force: true });
     await mkdir(plateRoot, { recursive: true });
     await mkdir(detachedRoot, { recursive: true });
     const decoded = new Map<number, Buffer>();
