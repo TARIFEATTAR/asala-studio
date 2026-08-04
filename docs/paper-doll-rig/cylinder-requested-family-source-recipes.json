@@ -16,54 +16,32 @@
     "detachedComponentPolicy": "review-only-until-family-fit-approval",
     "remoteWritesAllowed": false
   },
-  "rejectedRegistrations": [
+  "rejectedRegistrations": [],
+  "unresolvedRequestedFamilies": [],
+  "supersededIdentityCorrections": [
     {
-      "requestedLabel": "28 mL big roll-on",
-      "rejectedFamilyKey": "CYL-28ML-16MM-ROLLON",
-      "reason": "User confirmed on 2026-08-03 that this legitimate sold Best Bottles product is not the intended big roll-on bottle.",
-      "promotionAllowed": false,
-      "catalogEvidence": {
-        "skus": [
-          "GB-CYL-CLR-28ML-MRL-02",
-          "GB-CYL-CLR-28ML-RBL-WHT",
-          "GB-CYL-CLR-28ML-RBL",
-          "GB-CYL-CLR-28ML-MRL-01"
-        ]
-      },
-      "sourceEvidence": {
-        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/4.  GBCyl28RollWht.psd",
-        "sha256": "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0"
-      }
+      "requestedLabel": "28 mL jumbo roll-on",
+      "previousDecision": "quarantined-wrong-family",
+      "status": "superseded-by-exact-user-reference",
+      "resolution": "User supplied the exact BestBottles.com GBCyl1ozRollWht product screenshot and confirmed this straight-sided massage-therapy jumbo roll-on family is intended.",
+      "exactCatalogIdentities": [
+        { "websiteSku": "GBMtlRoll28Wht", "graceSku": "GB-CYL-CLR-28ML-MRL-02" },
+        { "websiteSku": "GBCyl1ozRollWht", "graceSku": "GB-CYL-CLR-28ML-RBL-WHT" },
+        { "websiteSku": "GBRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-RBL" },
+        { "websiteSku": "GBMtlRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-MRL-01" }
+      ]
     },
     {
-      "requestedLabel": "50 mL big roll-on",
-      "rejectedFamilyKey": "CYL-50ML-16MM-ROLLON",
-      "reason": "User confirmed on 2026-08-03 that this legitimate sold Best Bottles product is not the intended big roll-on bottle.",
-      "promotionAllowed": false,
-      "catalogEvidence": {
-        "skus": [
-          "GB-CYL-WHT-50ML-MRL-WHT",
-          "GB-CYL-WHT-50ML-ROL-WHT",
-          "GB-CYL-BLK-50ML-ROL-BLK",
-          "GB-CYL-BLK-50ML-MRL-BLK"
-        ]
-      },
-      "sourceEvidence": {
-        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/2. GBCyl50RollWht.psd",
-        "sha256": "1879bd88979eba638f4fa2469f5dd4b5067f43d4e4f0fb7da0e852d81bb32a3f"
-      }
-    }
-  ],
-  "unresolvedRequestedFamilies": [
-    {
-      "requestedLabel": "28 mL big roll-on",
-      "status": "missing-exact-identity",
-      "requiredEvidence": "One exact SKU, product URL, photograph, Photoshop filename, or measured dimensions for the intended bottle."
-    },
-    {
-      "requestedLabel": "50 mL big roll-on",
-      "status": "missing-exact-identity",
-      "requiredEvidence": "One exact SKU, product URL, photograph, Photoshop filename, or measured dimensions for the intended bottle."
+      "requestedLabel": "50 mL jumbo roll-on",
+      "previousDecision": "quarantined-wrong-family",
+      "status": "superseded-by-exact-user-reference",
+      "resolution": "User supplied the exact BestBottles.com GBCyl50RollBlk product screenshot and confirmed this straight-sided massage-therapy jumbo roll-on family is intended.",
+      "exactCatalogIdentities": [
+        { "websiteSku": "GBCyl50MtlRollWht", "graceSku": "GB-CYL-WHT-50ML-MRL-WHT" },
+        { "websiteSku": "GBCyl50RollWht", "graceSku": "GB-CYL-WHT-50ML-ROL-WHT" },
+        { "websiteSku": "GBCyl50RollBlk", "graceSku": "GB-CYL-BLK-50ML-ROL-BLK" },
+        { "websiteSku": "GBCyl50MtlRollBlk", "graceSku": "GB-CYL-BLK-50ML-MRL-BLK" }
+      ]
     }
   ],
   "families": [
@@ -90,6 +68,68 @@
         { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 3, "sourceBoundsPx": { "left": 220, "top": 312, "width": 74, "height": 1054 }, "assemblyMember": true, "zIndex": 20 },
         { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 451, "top": 1137, "width": 205, "height": 381 }, "assemblyMember": false, "zIndex": 40 },
         { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 158, "top": 67, "width": 181, "height": 358 }, "assemblyMember": true, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-28ML-16MM-JUMBO-ROLLON",
+      "label": "28 mL jumbo massage roll-on",
+      "displayKey": "roll-on|28",
+      "geometry": {
+        "geometryKey": "body__cylinder__28ml__81x31x31.0__78183a1776",
+        "capacityMl": 28,
+        "bodyHeightMm": 81,
+        "bodyWidthMm": 31,
+        "neckFinish": "16MM-ROLLON"
+      },
+      "source": {
+        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/2. 28ml  Uncapped/4.  GBCyl28RollWht.psd",
+        "originalFilename": "4.  GBCyl28RollWht.psd",
+        "sha256": "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0",
+        "canvas": { "width": 1400, "height": 1925 },
+        "identityStatus": "source-backed",
+        "exactCatalogIdentities": [
+          { "websiteSku": "GBMtlRoll28Wht", "graceSku": "GB-CYL-CLR-28ML-MRL-02" },
+          { "websiteSku": "GBCyl1ozRollWht", "graceSku": "GB-CYL-CLR-28ML-RBL-WHT" },
+          { "websiteSku": "GBRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-RBL" },
+          { "websiteSku": "GBMtlRoll28Blk", "graceSku": "GB-CYL-CLR-28ML-MRL-01" }
+        ]
+      },
+      "layers": [
+        { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 199, "top": 251, "width": 445, "height": 1577 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "plastic-roller-fitment", "role": "exterior-component", "sceneIndex": 3, "sourceBoundsPx": { "left": 221, "top": 466, "width": 339, "height": 576 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "white-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 773, "top": 1313, "width": 496, "height": 515 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 243, "top": 534, "width": 335, "height": 351 }, "assemblyMember": false, "zIndex": 30 }
+      ]
+    },
+    {
+      "familyKey": "CYL-50ML-16MM-JUMBO-ROLLON",
+      "label": "50 mL jumbo massage roll-on",
+      "displayKey": "roll-on|50",
+      "geometry": {
+        "geometryKey": "body__cylinder__50ml__98x37x37.0__d5cabe6ea2",
+        "capacityMl": 50,
+        "bodyHeightMm": 98,
+        "bodyWidthMm": 37,
+        "neckFinish": "16MM-ROLLON"
+      },
+      "source": {
+        "archiveRelativePath": "Rollon bottles - 30ml and 50ml/4. 50ml Uncapped/1. GBCyl50RollBlk.psd",
+        "originalFilename": "1. GBCyl50RollBlk.psd",
+        "sha256": "b7cf4e25c9c25e167a28c4b1c18c4adb944594a20c6e4e6e0e4d2913d6997101",
+        "canvas": { "width": 1400, "height": 1925 },
+        "identityStatus": "source-backed",
+        "exactCatalogIdentities": [
+          { "websiteSku": "GBCyl50MtlRollWht", "graceSku": "GB-CYL-WHT-50ML-MRL-WHT" },
+          { "websiteSku": "GBCyl50RollWht", "graceSku": "GB-CYL-WHT-50ML-ROL-WHT" },
+          { "websiteSku": "GBCyl50RollBlk", "graceSku": "GB-CYL-BLK-50ML-ROL-BLK" },
+          { "websiteSku": "GBCyl50MtlRollBlk", "graceSku": "GB-CYL-BLK-50ML-MRL-BLK" }
+        ]
+      },
+      "layers": [
+        { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 226, "top": 453, "width": 509, "height": 1368 }, "assemblyMember": true, "zIndex": 10 },
+        { "layerId": "black-overcap", "role": "detached-review", "sceneIndex": 3, "sourceBoundsPx": { "left": 867, "top": 1313, "width": 438, "height": 509 }, "assemblyMember": false, "zIndex": 40 },
+        { "layerId": "plastic-roller-fitment", "role": "exterior-component", "sceneIndex": 4, "sourceBoundsPx": { "left": 252, "top": 173, "width": 399, "height": 697 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "neck-integration-reference", "role": "integration-reference", "sceneIndex": 5, "sourceBoundsPx": { "left": 280, "top": 253, "width": 394, "height": 420 }, "assemblyMember": false, "zIndex": 30 }
       ]
     },
     {

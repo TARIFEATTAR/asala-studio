@@ -15,9 +15,14 @@ import {
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const defaultRecipePath = path.join(workspaceRoot, "docs/paper-doll-rig/cylinder-requested-family-source-recipes.json");
-const defaultOutputRoot = path.join(workspaceRoot, "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected");
+const defaultOutputRoot = path.join(workspaceRoot, "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons");
 
 type IdentityStatus = "source-backed" | "manual-review-required";
+
+interface ExactCatalogIdentity {
+  websiteSku: string;
+  graceSku: string;
+}
 
 interface SourceRecipeLayer {
   layerId: string;
@@ -45,6 +50,7 @@ interface SourceRecipeFamily {
     sha256: string;
     canvas: { width: number; height: number };
     identityStatus: IdentityStatus;
+    exactCatalogIdentities?: ExactCatalogIdentity[];
     identityConflict?: string;
     notes?: string;
     excludedScenes?: Array<{ sceneIndex: number; reason: string }>;
@@ -67,6 +73,14 @@ interface UnresolvedRequestedFamily {
   requiredEvidence: string;
 }
 
+interface SupersededIdentityCorrection {
+  requestedLabel: string;
+  previousDecision: "quarantined-wrong-family";
+  status: "superseded-by-exact-user-reference";
+  resolution: string;
+  exactCatalogIdentities: ExactCatalogIdentity[];
+}
+
 interface SourceRecipe {
   schemaVersion: 1;
   state: "source-registered-review-only";
@@ -86,6 +100,7 @@ interface SourceRecipe {
   };
   rejectedRegistrations: RejectedRegistration[];
   unresolvedRequestedFamilies: UnresolvedRequestedFamily[];
+  supersededIdentityCorrections: SupersededIdentityCorrection[];
   families: SourceRecipeFamily[];
 }
 
@@ -120,6 +135,21 @@ function parseBounds(value: unknown, label: string): RegisteredFamilyBounds {
   assertInteger(value.width, `${label}.width`, 1);
   assertInteger(value.height, `${label}.height`, 1);
   return { left: value.left, top: value.top, width: value.width, height: value.height };
+}
+
+function parseExactCatalogIdentities(value: unknown, label: string): ExactCatalogIdentity[] {
+  if (!Array.isArray(value) || value.length < 1) throw new Error(`${label} must contain at least one exact identity.`);
+  const seen = new Set<string>();
+  return value.map((candidate, index) => {
+    const identityLabel = `${label}[${index}]`;
+    assertRecord(candidate, identityLabel);
+    assertString(candidate.websiteSku, `${identityLabel}.websiteSku`);
+    assertString(candidate.graceSku, `${identityLabel}.graceSku`);
+    const key = `${candidate.websiteSku}|${candidate.graceSku}`;
+    if (seen.has(key)) throw new Error(`Duplicate exact catalog identity: ${key}`);
+    seen.add(key);
+    return { websiteSku: candidate.websiteSku, graceSku: candidate.graceSku };
+  });
 }
 
 export function parseCylinderRequestedFamilySourceRecipe(value: unknown): SourceRecipe {
@@ -173,6 +203,25 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     assertString(candidate.requiredEvidence, `${label}.requiredEvidence`);
     return candidate as unknown as UnresolvedRequestedFamily;
   });
+  const supersededIdentityCorrections = (value.supersededIdentityCorrections ?? []) as unknown;
+  if (!Array.isArray(supersededIdentityCorrections)) throw new Error("supersededIdentityCorrections must be an array.");
+  const parsedSupersededIdentityCorrections = supersededIdentityCorrections.map((candidate, index): SupersededIdentityCorrection => {
+    const label = `supersededIdentityCorrections[${index}]`;
+    assertRecord(candidate, label);
+    assertString(candidate.requestedLabel, `${label}.requestedLabel`);
+    if (candidate.previousDecision !== "quarantined-wrong-family"
+      || candidate.status !== "superseded-by-exact-user-reference") {
+      throw new Error(`${label} must explicitly supersede the earlier quarantine decision.`);
+    }
+    assertString(candidate.resolution, `${label}.resolution`);
+    return {
+      requestedLabel: candidate.requestedLabel,
+      previousDecision: candidate.previousDecision,
+      status: candidate.status,
+      resolution: candidate.resolution,
+      exactCatalogIdentities: parseExactCatalogIdentities(candidate.exactCatalogIdentities, `${label}.exactCatalogIdentities`),
+    };
+  });
   if (!Array.isArray(value.families) || value.families.length < 1) throw new Error("At least one source family is required.");
   const familyKeys = new Set<string>();
   const families = value.families.map((candidate, familyIndex): SourceRecipeFamily => {
@@ -202,6 +251,9 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     assertInteger(candidate.source.canvas.height, `${label}.source.canvas.height`, 1);
     if (candidate.source.identityStatus !== "source-backed" && candidate.source.identityStatus !== "manual-review-required") {
       throw new Error(`${label}.source.identityStatus is invalid.`);
+    }
+    if (candidate.source.exactCatalogIdentities !== undefined) {
+      parseExactCatalogIdentities(candidate.source.exactCatalogIdentities, `${label}.source.exactCatalogIdentities`);
     }
     if (!Array.isArray(candidate.layers) || candidate.layers.length < 2) throw new Error(`${label}.layers are required.`);
     const layers = candidate.layers.map((layerValue, layerIndex): SourceRecipeLayer => {
@@ -239,6 +291,7 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     rules: value.rules as unknown as SourceRecipe["rules"],
     rejectedRegistrations: parsedRejectedRegistrations,
     unresolvedRequestedFamilies: parsedUnresolvedRequestedFamilies,
+    supersededIdentityCorrections: parsedSupersededIdentityCorrections,
     families,
   };
 }
@@ -478,6 +531,7 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
     rules: recipe.rules,
     rejectedRegistrations: recipe.rejectedRegistrations,
     unresolvedRequestedFamilies: recipe.unresolvedRequestedFamilies,
+    supersededIdentityCorrections: recipe.supersededIdentityCorrections,
     families: manifestFamilies,
     summary: {
       familyCount: manifestFamilies.length,
@@ -487,6 +541,7 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
       productionEligibleCount: 0,
       rejectedRegistrationCount: recipe.rejectedRegistrations.length,
       unresolvedRequestedFamilyCount: recipe.unresolvedRequestedFamilies.length,
+      supersededIdentityCorrectionCount: recipe.supersededIdentityCorrections.length,
     },
     enhancementBoundary: {
       allowed: ["material fidelity", "lighting fidelity", "reflection quality", "surface finish"],
