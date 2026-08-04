@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kitId": "boston-round-rollon__20-400__physical-v1",
+  "sourceReviewGroupKey": "geometry-review__boston-round-rollon__20-400__physical-v1",
+  "sourceCompositeProductionEligible": false,
+  "primaryAuthorityPartId": "roller-fitment",
+  "canonicalCanvas": {
+    "width": 2080,
+    "height": 2288
+  },
+  "sources": [
+    {
+      "sourceId": "amber-30-rollon-assembly",
+      "sourceType": "photoshop-layered-source",
+      "originalFilename": "10GBBS~1.PSD",
+      "archiveRelativePath": "Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/1. Amber Bottle (1 ounce30 ml) Roll on/10GBBS~1.PSD",
+      "sha256": "7bfa8507955d7d7ae2d0ad8908e9a1424e829eed74683269e23a674475a9fa83",
+      "productionEligible": false
+    },
+    {
+      "sourceId": "existing-parametric-overcap-mask",
+      "sourceType": "existing-paper-doll-asset",
+      "originalFilename": "geometry-mask.png",
+      "repositoryRelativePath": "outputs/paper-doll-parametric-overcaps/20-400-tall-rollon-cap/blender-v1/geometry-mask.png",
+      "sha256": "a7bfc29e4d5de918bd61e0152deba9a1b51ec8a5e66a1a9a386d37edd363a43e",
+      "productionEligible": false
+    }
+  ],
+  "parts": [
+    {
+      "partId": "roller-fitment",
+      "responsibility": "exterior-dispenser",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "amber-30-rollon-assembly",
+          "method": "reviewed-selection-mask"
+        },
+        {
+          "sourceId": "amber-30-rollon-assembly",
+          "method": "psd-layer-scene",
+          "sceneIndex": 4,
+          "layerName": "natural plastic roller fitment candidate"
+        }
+      ]
+    },
+    {
+      "partId": "tall-rollon-overcap",
+      "responsibility": "secondary-overcap",
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "existing-parametric-overcap-mask",
+          "method": "reviewed-selection-mask"
+        }
+      ]
+    },
+    {
+      "partId": "metal-fitment-contaminated-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": false,
+      "sourceSelectors": [
+        {
+          "sourceId": "amber-30-rollon-assembly",
+          "method": "psd-layer-scene",
+          "sceneIndex": 2,
+          "layerName": "metal roller fitment with opaque white contamination"
+        }
+      ]
+    },
+    {
+      "partId": "body-neck-context-reference",
+      "responsibility": "integration-effect",
+      "outputPolicy": "source-evidence-only",
+      "reviewFraming": "preserve-source-bounds",
+      "productionAnchor": "not-applicable",
+      "independentlySelectable": false,
+      "assemblyContextQa": true,
+      "sourceSelectors": [
+        {
+          "sourceId": "amber-30-rollon-assembly",
+          "method": "psd-layer-scene",
+          "sceneIndex": 3,
+          "layerName": "amber 30 mL body and neck context"
+        }
+      ]
+    }
+  ]
+}
