@@ -1,0 +1,14 @@
+SOURCE OF TRUTH
+The supplied Blender render defines the exact 20-400 roller-fitment geometry, silhouette, scale, camera, perspective, component position, flange, housing, shoulder, roller ball, manufactured edges, and canonical 2080 x 2288 coordinates.
+
+TASK
+Reconstruct the roller fitment as a premium commercial studio product image while preserving the supplied geometry exactly.
+
+MATERIAL
+Keep the flange, shoulder, and housing as the same clean natural translucent molded plastic used by the plastic-ball variant: neutral milky-clear plastic, subtle internal light transmission, believable dielectric Fresnel highlights, slightly denser translucent edges, and crisp molded edges. Change only the exposed roller ball to bright mirror-polished chrome stainless-steel appearance with a clean curved studio reflection, controlled bright highlight, dark reflection band, and physically believable spherical specularity. The housing is not metal, not metallized, and not opaque white.
+
+Improve only material fidelity, physically believable reflections, highlight rolloff, subtle plastic transmission, edge clarity, and premium studio-lighting quality.
+
+Do not move, resize, crop, rotate, widen, narrow, tilt, shorten, lengthen, or reinterpret the flange, housing, shoulder, or ball. Do not add a bottle, cap, background object, plug below the flange, thread, shadow, label, text, dust, scratches, detached islands, metal housing, opaque white paint, chalkiness, bloom, or a second light source.
+
+The output will be clamped to the exact registered authority alpha. Generated framing, background, shadow, and alpha are discarded. Return a full 2080 x 2288 PNG in the original coordinates.
