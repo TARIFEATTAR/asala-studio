@@ -10,7 +10,7 @@ const execFile = promisify(execFileCallback);
 const DEFAULT_CAPPED_ROOT = "/Users/jordanrichter/Projects/Clients/Nemat-International/BBUAT-Upload-Files/2. PSD Capped ";
 const DEFAULT_OUTPUT_ROOT = "outputs/paper-doll-cyl9-cap-family/source-backed-v1";
 const AUTHORITY_MASK_PATH = "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png";
-const SHARED_PLACEMENT = { x: 0, y: -2, scale: 1 } as const;
+const SHARED_PLACEMENT = { x: 0, y: -3, scale: 1 } as const;
 
 const BODY_SOURCES = [
   { key: "AMBER", path: "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png" },
