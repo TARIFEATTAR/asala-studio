@@ -135,7 +135,7 @@
     "paperdoll:dispenser-17-415-closed-swatches": "tsx scripts/paper-doll/build-dispenser-17-415-closed-swatches.ts",
     "paperdoll:cyl9-capped-dispenser-swatches": "tsx scripts/paper-doll/build-cyl9-capped-dispenser-swatches.ts",
     "paperdoll:lock-cyl9-capped-dispensers": "tsx scripts/paper-doll/lock-cyl9-capped-dispenser-placement.ts",
-    "paperdoll:release-cyl9-capped-dispensers": "tsx scripts/paper-doll/register-cyl9-capped-dispenser-release.ts",
+    "paperdoll:release-cyl9-capped-dispensers": "tsx --env-file=.env scripts/paper-doll/register-cyl9-capped-dispenser-release.ts",
     "paperdoll:dispenser-17-415-body-context-plan": "tsx scripts/paper-doll/build-dispenser-17-415-body-context-plan.ts",
     "paperdoll:next-family-intake": "tsx scripts/paper-doll/build-next-family-intake.ts",
     "test:paperdoll:cyl9-caps": "tsx --test src/lib/paperDoll/cyl9CapFamily.test.ts scripts/paper-doll/render-cyl9-cap-family.test.ts",

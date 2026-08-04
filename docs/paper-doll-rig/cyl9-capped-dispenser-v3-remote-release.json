@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-04T10:39:25.096Z",
+  "familyKey": "CYL-9ML",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "sourceReleaseId": "55db3642-cc00-4a4e-af03-431f1ad450fd",
+  "sourceReleaseVersion": "1.1.0-rollon-pair.1",
+  "sourcePlacementLockId": "placement-lock__6d8b410f84d237c0ce54765a",
+  "sourcePlacementLockSha256": "6d8b410f84d237c0ce54765a15346c919bcef880159d4254e992d96dedff25c6",
+  "sourceGitCommit": "c6e4c6c7e5237a24bc53fd0b25df34d066e24b1f",
+  "registeredComponentVersions": [
+    {
+      "lane": "pump",
+      "variantKey": "BLK",
+      "componentVersionId": "26d57f19-9387-4812-bd98-cc5340246f61",
+      "imageSha256": "f25c206c441fe6da05005b14cc3b200ce75293c3913b5453b656c43bd687968d"
+    },
+    {
+      "lane": "pump",
+      "variantKey": "GLD",
+      "componentVersionId": "6ada1995-9fbe-4e8d-982e-302935209961",
+      "imageSha256": "509adad6f202af745783290cd7ee6d7c03988ccb9abf97cff5b842e1d25f65d3"
+    },
+    {
+      "lane": "pump",
+      "variantKey": "MSLV",
+      "componentVersionId": "efbb8c2a-1fe6-44b8-a5c1-bf834e958332",
+      "imageSha256": "eb052f4922db2fe13ac9958abde2d42a6fbfc08e7c4981e4502ca88bf86e2d0d"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "BLK",
+      "componentVersionId": "3c5c9b0d-15e6-4d10-9aba-b9c9c8c150bb",
+      "imageSha256": "c66fa92ccca4399500bfee967dea536b3f63d456076c31f65e759c4399f9573b"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "GLD",
+      "componentVersionId": "49bb2795-523f-49eb-aba9-ac0ee940fab1",
+      "imageSha256": "3dec096a233aaa1ffda02ef5a23a5678f54824509a322ee271f8ce2713a64a1d"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "MSLV",
+      "componentVersionId": "cc6f82c2-8921-4cc5-bda3-50843d49cc66",
+      "imageSha256": "4dbfa1cca8601808f04b1f89e8c1f206f9c199bd4af4421e5baa7cc02e31264b"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "RED",
+      "componentVersionId": "1fab7aab-c44b-4c61-b084-be6bad68f38d",
+      "imageSha256": "a78fe6c88a8d2b381f6c93bdb7cbb22459b7df1984e4f1ce3806c93c70bcf357"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "SSLV",
+      "componentVersionId": "f563d203-e7f2-4a79-9aa1-1c990838148e",
+      "imageSha256": "9f1349a7590ed07283c8fadd7a59ef25411fb4f926e2f01cf5302a462a622caf"
+    },
+    {
+      "lane": "sprayer",
+      "variantKey": "TUR",
+      "componentVersionId": "0cedbcea-ecdf-4520-a079-8e52fcb55f8f",
+      "imageSha256": "ae593927172c40ba5c9de50420b4491aa1f24c88c4f365e43ca49712109162b1"
+    }
+  ],
+  "placementVersionIds": {
+    "sprayer": "dca77c82-b87d-4134-b3d0-202bac7597d1",
+    "pump": "16e80d24-ed62-4b36-98a7-3e99c993c47e"
+  },
+  "storage": {
+    "uploaded": 0,
+    "verifiedExisting": 18
+  },
+  "releaseCut": {
+    "readiness": {
+      "ready": 45,
+      "incomplete": 100
+    },
+    "releaseId": "0b0d0586-fb48-4c04-8be2-8cefc4b73c9b",
+    "publishRunId": "37e95a5b-8d1b-401f-a2ae-6eb163a09a13",
+    "releaseCutId": "1f359208-a7b7-4520-8bc5-9fd69f51a14e",
+    "releaseStatus": "blocked",
+    "manifestSha256": "47cbb31cdf57f79d56441111fb8b5be35164f2f98fbedf303364dd85c9d9b999",
+    "draftDocumentId": "drafts.paperDollFamily.CYL-9ML",
+    "sanityPublished": false,
+    "publicDocumentId": "paperDollFamily.CYL-9ML"
+  },
+  "readiness": {
+    "ready": 45,
+    "incomplete": 100
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "publicPublicationChanged": false,
+    "publicDocumentId": "paperDollFamily.CYL-9ML"
+  }
+}
