@@ -194,18 +194,18 @@ test("pins the verified 28 and 50 ml jumbo body contracts to their live product 
   assert.ok(fifty);
   assert.equal(twentyEight.reviewScope, "body-only");
   assert.equal(fifty.reviewScope, "body-only");
-  assert.equal(twentyEight.source.componentValidationStatus, "invalid-small-roller-large-roller-authority-required");
-  assert.equal(fifty.source.componentValidationStatus, "invalid-small-roller-large-roller-authority-required");
+  assert.equal(twentyEight.source.componentValidationStatus, "source-component-valid");
+  assert.equal(fifty.source.componentValidationStatus, "source-component-valid");
   assert.deepEqual(twentyEight.layers.map((layer) => [layer.layerId, layer.assemblyMember]), [
     ["body", true],
-    ["invalid-small-plastic-roller-reference", false],
+    ["large-plastic-roller-candidate", false],
     ["white-overcap", false],
     ["neck-integration-reference", false],
   ]);
   assert.deepEqual(fifty.layers.map((layer) => [layer.layerId, layer.assemblyMember]), [
     ["body", true],
     ["black-overcap", false],
-    ["invalid-small-plastic-roller-reference", false],
+    ["large-plastic-roller-candidate", false],
     ["neck-integration-reference", false],
   ]);
   assert.deepEqual(twentyEight.source.catalogReference, {

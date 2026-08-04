@@ -3,7 +3,8 @@
   "kitId": "jumbo-rollon__16mm__28-50ml__physical-v1",
   "sourceReviewGroupKey": "geometry-review__jumbo-rollon__16mm__28-50ml__v1",
   "sourceCompositeProductionEligible": false,
-  "authorityState": "exact-authority-required",
+  "authorityState": "source-candidate-present",
+  "primaryAuthorityPartId": "jumbo-roller-fitment",
   "canonicalCanvas": { "width": 2080, "height": 2288 },
   "catalogProductContracts": [
     {
@@ -103,10 +104,10 @@
     {
       "partId": "jumbo-roller-fitment",
       "responsibility": "exterior-dispenser",
-      "outputPolicy": "source-evidence-only",
-      "reviewFraming": "preserve-source-bounds",
-      "productionAnchor": "not-applicable",
-      "independentlySelectable": false,
+      "outputPolicy": "reusable-full-canvas-plate",
+      "reviewFraming": "center-nontransparent-bounds",
+      "productionAnchor": "mount-axis-seat",
+      "independentlySelectable": true,
       "assemblyContextQa": true,
       "sourceSelectors": [
         { "sourceId": "jumbo-28-metal-black", "method": "reviewed-selection-mask" },

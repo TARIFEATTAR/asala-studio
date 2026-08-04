@@ -442,9 +442,16 @@ async function familyContactSheet(
       ? family.catalogReference.applicatorDescription.toUpperCase()
       : "";
     const reviewStatus = family.componentValidationStatus === "invalid-small-roller-large-roller-authority-required"
-      ? "BODY ONLY · SOURCE ROLLER INVALID"
-      : family.identityStatus;
-    const label = Buffer.from(`<svg width="${tileWidth}" height="150"><rect width="100%" height="100%" fill="#171714"/><text x="24" y="34" font-family="Arial" font-size="23" fill="#E4BC68">${escapeXml(family.label)}</text><text x="24" y="63" font-family="Arial" font-size="16" fill="#FFFFFF">${escapeXml(family.displayKey)}</text><text x="24" y="88" font-family="Arial" font-size="14" font-weight="700" fill="${family.componentValidationStatus ? "#F08A74" : family.identityStatus === "source-backed" ? "#64D995" : "#F4B860"}">${escapeXml(reviewStatus)}</text><text x="24" y="115" font-family="monospace" font-size="14" fill="#D7D2C8">${escapeXml(contract)}</text><text x="24" y="139" font-family="Arial" font-size="14" font-weight="700" fill="#73E0D1">${escapeXml(applicator)}</text></svg>`);
+      ? "BODY ONLY · COMPONENT AUTHORITY REQUIRED"
+      : family.componentValidationStatus === "source-component-valid" && family.reviewScope === "body-only"
+        ? "BODY SOURCE · VALID COMPONENT SOURCE FAMILY"
+        : family.identityStatus;
+    const reviewStatusColor = family.componentValidationStatus === "invalid-small-roller-large-roller-authority-required"
+      ? "#F08A74"
+      : family.identityStatus === "source-backed"
+        ? "#64D995"
+        : "#F4B860";
+    const label = Buffer.from(`<svg width="${tileWidth}" height="150"><rect width="100%" height="100%" fill="#171714"/><text x="24" y="34" font-family="Arial" font-size="23" fill="#E4BC68">${escapeXml(family.label)}</text><text x="24" y="63" font-family="Arial" font-size="16" fill="#FFFFFF">${escapeXml(family.displayKey)}</text><text x="24" y="88" font-family="Arial" font-size="14" font-weight="700" fill="${reviewStatusColor}">${escapeXml(reviewStatus)}</text><text x="24" y="115" font-family="monospace" font-size="14" fill="#D7D2C8">${escapeXml(contract)}</text><text x="24" y="139" font-family="Arial" font-size="14" font-weight="700" fill="#73E0D1">${escapeXml(applicator)}</text></svg>`);
     overlays.push({ input: preview, left: tileLeft + 30, top: tileTop + 10 }, { input: label, left: tileLeft, top: tileTop + 750 });
   }
   await sharp({
