@@ -1,6 +1,6 @@
 # 16 mm jumbo roll-on component kit
 
-**State:** exact eight-product source matrix registered; separate 28/50 mL plastic and metal-ball candidates now have exact within-capacity alpha and deterministic source-relative Family Fit assemblies; black/white overcap pixels remain detached and lack an assembled seating authority; no named geometry approval, placement lock, release, or Sanity mutation
+**State:** exact eight-product capped/uncapped source matrix registered; separate 28/50 mL plastic and metal-ball candidates now have exact within-capacity alpha and deterministic source-relative Family Fit assemblies; detached sidecar-cap placement is explicitly excluded from production; no named geometry approval, placement lock, release, or Sanity mutation
 
 This family is the straight-sided 28 mL and 50 mL Cylinder massage roll-on sold by Best Bottles. It is not a Boston Round family and it inherits no Boston Round components.
 
@@ -46,14 +46,16 @@ Recipe:
 - current authority-review output: `outputs/paper-doll-component-authority-reviews/jumbo-rollon-16mm/authority-review-v1/`
 - Family Fit command: `npm run paperdoll:jumbo-rollon-family-fit-review`
 - current Family Fit output: `outputs/paper-doll-component-family-fit-reviews/jumbo-rollon-16mm/family-fit-v1/`
+- capped source evidence: `docs/paper-doll-rig/jumbo-rollon-16mm-capped-source-evidence.json`
+- paired archive audit: `docs/paper-doll-rig/bbuat-paired-psd-source-audit.json`
 
-All eight PSDs are SHA-pinned. The decomposition contains four responsibilities:
+All eight uncapped PSDs and all eight matching capped PSDs are SHA-pinned. The decomposition contains four responsibilities:
 
 | Responsibility | Source result | Current disposition |
 |---|---|---|
 | plastic roller fitment | isolated large-roller PSD scenes in four assemblies | reusable-plate candidates; authority and placement not yet approved |
 | metal roller fitment | ball and housing are welded to visible bottle-neck pixels in all four PSD scenes | valid material/assembly evidence; deterministic selection mask required before a reusable candidate exists |
-| black/white overcap | detached PSD scenes in all eight assemblies | reusable-plate candidates; authority not approved |
+| black/white overcap | detached PSD scenes in all eight assemblies | material/silhouette evidence only; the sidecar location is excluded from production |
 | neck integration | plastic and metal source composites include body pixels | evidence only; never an independently selectable plate |
 
 The metal source composite is intentionally separated from the directly extractable `jumbo-roller-fitment` lane. The system must not approve the duplicated glass neck and threads as closure pixels. The plastic source scenes are valid component candidates but remain detached from the body-scale review sheet because component approval and placement occur in the component-kit workflow.
@@ -106,7 +108,7 @@ The first Family Fit package now resolves the four open assemblies without a man
 
 The placement is derived from the original Photoshop component/body relationship under the registered body-family uniform transform. Finishes cannot acquire different placement. This is review evidence only: the authority candidates still require a named geometry approval and each capacity requires named Family Fit approval before a placement lock.
 
-The cap layer remains a separate blocker. Every exact Photoshop source stores its black or white cap beside the bottle rather than seated over the fitment. Those pixels prove color and source silhouette, but not the closed assembly's Y position or overlap. The system therefore records `missing-assembled-placement-authority` instead of fabricating a cap placement from the detached layout.
+The detached sidecar cap is not a paper-doll production layer and its Photoshop page offset is never used as placement. Those pixels may prove color and source silhouette. If a closed-cap SKU is required, the isolated cap must be seated on the mount axis from a verified closed reference or the measured capped-height contract; the decorative sidecar arrangement is discarded.
 
 ## Visible source defects and review gates
 
