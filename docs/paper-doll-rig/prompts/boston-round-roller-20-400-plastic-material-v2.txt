@@ -1,0 +1,14 @@
+SOURCE OF TRUTH
+The supplied Bone-canvas Blender conditioning image defines the exact 20-400 roller-fitment geometry, silhouette, scale, camera, perspective, component position, flange, housing, shoulder, roller ball, manufactured edges, and canonical 2080 x 2288 coordinates.
+
+TASK
+Improve only the material realism of this exact component. Preserve its geometry and position exactly.
+
+MATERIAL TARGET
+The roller ball, shoulder, housing, and flange are one coordinated natural translucent molded-plastic assembly. Make the plastic visibly translucent rather than opaque white: neutral colorless-to-milky polypropylene appearance, moderate light transmission, faint Bone environment visible through thinner areas, slightly denser edges and flange, realistic dielectric Fresnel, restrained uneven studio highlight rolloff, and subtle depth between the roller ball and housing. It should resemble a photographed inexpensive but clean mass-manufactured cosmetic roll-on fitment—not porcelain, white paint, frosted glass, chrome, or glossy CGI ceramic.
+
+Reduce the broad blown-out white highlight. Avoid perfect symmetry in the reflection while keeping the geometry perfectly centered. Preserve clean molding with no grain, scratches, dust, seams, pits, bubbles, or invented mechanical details.
+
+Do not move, resize, crop, rotate, widen, narrow, tilt, shorten, lengthen, or reinterpret the flange, housing, shoulder, or ball. Do not add a bottle, cap, plug below the flange, thread, shadow, label, text, detached island, black background, opaque white coating, chalkiness, bloom, or additional light source.
+
+Keep the surrounding canvas a uniform Best Bottles Bone color (#F5F3EF). Return a full 2080 x 2288 PNG in the original coordinates. The result will be normalized and clamped to the exact registered authority alpha; generated framing, background, shadow, and alpha are discarded.

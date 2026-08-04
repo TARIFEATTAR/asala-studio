@@ -60,6 +60,23 @@ Visual disposition:
 
 Material artifacts remain under the ignored local path `outputs/paper-doll-parametric-fitments/20-400-roller-fitment/material-v1/`.
 
+## Plastic material pass v2 — 2026-08-03
+
+One separately authorized plastic-only retry used an opaque canonical Bone conditioning canvas instead of the transparent-on-black input used by v1. Its prompt reduces broad white fill and asks for visibly translucent natural molded plastic with denser edges and restrained dielectric highlights.
+
+- conditioning SHA-256: `5b0f85b30e2ce7d4fb26a2736b799673a1bc787d6b5ec7873e8886b4837cb163`;
+- raw provider SHA-256: `d49fae0dde00f27955e9ff4bc16432ef9eb89b2c908834a7fbb3278bebed9a34`;
+- exact-alpha clamped SHA-256: `85269e247cb1cb1da55207844fec525db44f52136bf1d8a6bcff5d52d6aa3b39`;
+- calibrated source bounds at Bone-distance threshold 16: `left 752, top 916, width 590, height 471`;
+- authority-alpha mismatch: `0` pixels;
+- pairwise mismatch against the metal candidate alpha: `0` pixels.
+
+Plastic v2 is the approved material/pixel candidate. Jordan Richter explicitly accepted this revision on 2026-08-03 after reviewing the three-way v1/v2/metal contact sheet. Plastic v1 is retained as immutable history and superseded for visual review.
+
+This named material decision does not approve the assembly-derived geometry profile and does not constitute Family Fit, shared-placement lock, release, or Sanity publication. A persisted production `Approve Pixels` record may reference only the exact clamped SHA-256 above after the geometry authority is named; it must not silently substitute a later file.
+
+V2 artifacts remain under the ignored local path `outputs/paper-doll-parametric-fitments/20-400-roller-fitment/material-v2/`.
+
 ## Approval gates
 
 1. Review the parametric profile against the 30 mL Photoshop assembly.
