@@ -15,7 +15,7 @@ import {
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const defaultRecipePath = path.join(workspaceRoot, "docs/paper-doll-rig/cylinder-requested-family-source-recipes.json");
-const defaultOutputRoot = path.join(workspaceRoot, "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v1");
+const defaultOutputRoot = path.join(workspaceRoot, "outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected");
 
 type IdentityStatus = "source-backed" | "manual-review-required";
 
@@ -52,6 +52,21 @@ interface SourceRecipeFamily {
   layers: SourceRecipeLayer[];
 }
 
+interface RejectedRegistration {
+  requestedLabel: string;
+  rejectedFamilyKey: string;
+  reason: string;
+  promotionAllowed: false;
+  catalogEvidence: { skus: string[] };
+  sourceEvidence: { archiveRelativePath: string; sha256: string };
+}
+
+interface UnresolvedRequestedFamily {
+  requestedLabel: string;
+  status: "missing-exact-identity";
+  requiredEvidence: string;
+}
+
 interface SourceRecipe {
   schemaVersion: 1;
   state: "source-registered-review-only";
@@ -69,6 +84,8 @@ interface SourceRecipe {
     detachedComponentPolicy: "review-only-until-family-fit-approval";
     remoteWritesAllowed: false;
   };
+  rejectedRegistrations: RejectedRegistration[];
+  unresolvedRequestedFamilies: UnresolvedRequestedFamily[];
   families: SourceRecipeFamily[];
 }
 
@@ -125,6 +142,37 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     || value.rules.remoteWritesAllowed !== false) {
     throw new Error("Cylinder source recipe violates the review-only mask-and-clamp rules.");
   }
+  const rejectedRegistrations = (value.rejectedRegistrations ?? []) as unknown;
+  if (!Array.isArray(rejectedRegistrations)) throw new Error("rejectedRegistrations must be an array.");
+  const parsedRejectedRegistrations = rejectedRegistrations.map((candidate, index): RejectedRegistration => {
+    const label = `rejectedRegistrations[${index}]`;
+    assertRecord(candidate, label);
+    assertString(candidate.requestedLabel, `${label}.requestedLabel`);
+    assertString(candidate.rejectedFamilyKey, `${label}.rejectedFamilyKey`);
+    assertString(candidate.reason, `${label}.reason`);
+    if (candidate.promotionAllowed !== false) throw new Error(`${label}.promotionAllowed must remain false.`);
+    assertRecord(candidate.catalogEvidence, `${label}.catalogEvidence`);
+    if (!Array.isArray(candidate.catalogEvidence.skus) || candidate.catalogEvidence.skus.length < 1) {
+      throw new Error(`${label}.catalogEvidence.skus must identify at least one rejected catalog product.`);
+    }
+    candidate.catalogEvidence.skus.forEach((sku, skuIndex) => assertString(sku, `${label}.catalogEvidence.skus[${skuIndex}]`));
+    assertRecord(candidate.sourceEvidence, `${label}.sourceEvidence`);
+    assertString(candidate.sourceEvidence.archiveRelativePath, `${label}.sourceEvidence.archiveRelativePath`);
+    if (typeof candidate.sourceEvidence.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(candidate.sourceEvidence.sha256)) {
+      throw new Error(`${label}.sourceEvidence.sha256 must be a lowercase SHA-256 digest.`);
+    }
+    return candidate as unknown as RejectedRegistration;
+  });
+  const unresolvedRequestedFamilies = (value.unresolvedRequestedFamilies ?? []) as unknown;
+  if (!Array.isArray(unresolvedRequestedFamilies)) throw new Error("unresolvedRequestedFamilies must be an array.");
+  const parsedUnresolvedRequestedFamilies = unresolvedRequestedFamilies.map((candidate, index): UnresolvedRequestedFamily => {
+    const label = `unresolvedRequestedFamilies[${index}]`;
+    assertRecord(candidate, label);
+    assertString(candidate.requestedLabel, `${label}.requestedLabel`);
+    if (candidate.status !== "missing-exact-identity") throw new Error(`${label}.status is invalid.`);
+    assertString(candidate.requiredEvidence, `${label}.requiredEvidence`);
+    return candidate as unknown as UnresolvedRequestedFamily;
+  });
   if (!Array.isArray(value.families) || value.families.length < 1) throw new Error("At least one source family is required.");
   const familyKeys = new Set<string>();
   const families = value.families.map((candidate, familyIndex): SourceRecipeFamily => {
@@ -189,6 +237,8 @@ export function parseCylinderRequestedFamilySourceRecipe(value: unknown): Source
     state: "source-registered-review-only",
     canonicalCanvas: canvas as unknown as SourceRecipe["canonicalCanvas"],
     rules: value.rules as unknown as SourceRecipe["rules"],
+    rejectedRegistrations: parsedRejectedRegistrations,
+    unresolvedRequestedFamilies: parsedUnresolvedRequestedFamilies,
     families,
   };
 }
@@ -426,6 +476,8 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
     generatedAt: input.generatedAt ?? new Date().toISOString(),
     canonicalCanvas: recipe.canonicalCanvas,
     rules: recipe.rules,
+    rejectedRegistrations: recipe.rejectedRegistrations,
+    unresolvedRequestedFamilies: recipe.unresolvedRequestedFamilies,
     families: manifestFamilies,
     summary: {
       familyCount: manifestFamilies.length,
@@ -433,6 +485,8 @@ export async function buildCylinderRequestedFamilyReview(input: BuildCylinderReq
       manualIdentityReviewCount: manifestFamilies.filter((family) => family.identityReviewRequired).length,
       geometryLockedCount: 0,
       productionEligibleCount: 0,
+      rejectedRegistrationCount: recipe.rejectedRegistrations.length,
+      unresolvedRequestedFamilyCount: recipe.unresolvedRequestedFamilies.length,
     },
     enhancementBoundary: {
       allowed: ["material fidelity", "lighting fidelity", "reflection quality", "surface finish"],

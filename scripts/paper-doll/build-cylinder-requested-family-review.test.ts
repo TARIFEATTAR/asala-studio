@@ -29,6 +29,24 @@ function recipe(sourceSha256: string) {
       detachedComponentPolicy: "review-only-until-family-fit-approval",
       remoteWritesAllowed: false,
     },
+    rejectedRegistrations: [{
+      requestedLabel: "28 mL big roll-on",
+      rejectedFamilyKey: "CYL-28ML-16MM-ROLLON",
+      reason: "User confirmed this sold Best Bottles product is not the intended bottle.",
+      promotionAllowed: false,
+      catalogEvidence: {
+        skus: ["GB-CYL-CLR-28ML-RBL-WHT", "GB-CYL-CLR-28ML-RBL"],
+      },
+      sourceEvidence: {
+        archiveRelativePath: "Rollon bottles - 30ml and 50ml/2. 28ml Uncapped/4. GBCyl28RollWht.psd",
+        sha256: "6f63bd84d0ababc7a48ab3c26c6804c7ca2e19e032c6828dcbda1fc1534534d0",
+      },
+    }],
+    unresolvedRequestedFamilies: [{
+      requestedLabel: "28 mL big roll-on",
+      status: "missing-exact-identity",
+      requiredEvidence: "One exact SKU, product URL, photograph, or measured dimensions.",
+    }],
     families: [{
       familyKey: "CYL-100ML-18-415-SPRAY",
       label: "100 mL spray",
@@ -107,6 +125,11 @@ test("materializes full-canvas review plates with one assembly transform", async
     currentReleaseChanged: false,
     sanityChanged: false,
   });
+  assert.equal(result.manifest.rejectedRegistrations.length, 1);
+  assert.equal(result.manifest.rejectedRegistrations[0].promotionAllowed, false);
+  assert.equal(result.manifest.unresolvedRequestedFamilies.length, 1);
+  assert.equal(result.manifest.summary.rejectedRegistrationCount, 1);
+  assert.equal(result.manifest.summary.unresolvedRequestedFamilyCount, 1);
   assert.equal((await sharp(body.fullCanvasPlatePath!).metadata()).width, 200);
   assert.equal((await sharp(family.assemblyPreviewPath).metadata()).height, 240);
   assert.equal((await sharp(result.contactSheetPath).metadata()).width, 720);
