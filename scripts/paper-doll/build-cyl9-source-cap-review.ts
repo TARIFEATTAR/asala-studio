@@ -10,6 +10,7 @@ const execFile = promisify(execFileCallback);
 const DEFAULT_CAPPED_ROOT = "/Users/jordanrichter/Projects/Clients/Nemat-International/BBUAT-Upload-Files/2. PSD Capped ";
 const DEFAULT_OUTPUT_ROOT = "outputs/paper-doll-cyl9-cap-family/source-backed-v1";
 const AUTHORITY_MASK_PATH = "assets/paper-doll/authority-masks/cyl9/closure__17-415__rollon-overcap__v2__mask.png";
+const SHARED_PLACEMENT = { x: 0, y: -2, scale: 1 } as const;
 
 const BODY_SOURCES = [
   { key: "AMBER", path: "assets/paper-doll/body-plates/body__cylinder__9ml__amber__70.0x20.0mm.png" },
@@ -24,8 +25,9 @@ export type Cyl9CapVariantKey = "BKDT" | "MCPR" | "MGLD" | "MSLV" | "PKDT" | "SB
 export interface Cyl9SourceCapVariant {
   variantKey: Cyl9CapVariantKey;
   label: string;
-  sourcePsdPath: string;
-  layerIndex: number;
+  sourceMode: "capped-psd-layer" | "reviewed-existing-png";
+  sourcePath: string;
+  layerIndex?: number;
 }
 
 const SOURCE_VARIANTS = [
@@ -38,15 +40,22 @@ const SOURCE_VARIANTS = [
   { variantKey: "SGLD", label: "Shiny gold", file: "16. GBCyl9RollShnGl.psd", layerIndex: 4 },
   { variantKey: "SLDT", label: "Silver dotted", file: "13. GBCyl9RollSlDot.psd", layerIndex: 4 },
   { variantKey: "SSLV", label: "Shiny silver", file: "17. GBCyl9RollShnSl.psd", layerIndex: 4 },
-  { variantKey: "WHT", label: "White", file: "20. GBCyl9RollWht.psd", layerIndex: 4 },
 ] as const;
+
+const REVIEWED_WHITE_PATH = "outputs/paper-doll-cyl9-cap-family/material-calibration-v4/isolated/WHT.png";
 
 export function planCyl9SourceCapVariants(cappedRoot = DEFAULT_CAPPED_ROOT): Cyl9SourceCapVariant[] {
   const clearCappedDirectory = join(cappedRoot, "3.  17-415 Bottles", "10. Clear  (Capped)");
-  return SOURCE_VARIANTS.map(({ file, ...variant }) => ({
+  return [...SOURCE_VARIANTS.map(({ file, ...variant }) => ({
     ...variant,
-    sourcePsdPath: join(clearCappedDirectory, file),
-  }));
+    sourceMode: "capped-psd-layer" as const,
+    sourcePath: join(clearCappedDirectory, file),
+  })), {
+    variantKey: "WHT",
+    label: "White",
+    sourceMode: "reviewed-existing-png" as const,
+    sourcePath: REVIEWED_WHITE_PATH,
+  }];
 }
 
 interface Bounds { left: number; top: number; width: number; height: number }
@@ -106,6 +115,26 @@ export async function normalizeCapMaterialToAuthority(input: {
     materialCanvas.data[pixel * 4 + 3] = maskAlpha[pixel];
   }
   return sharp(materialCanvas.data, { raw: materialCanvas.info }).png().toBuffer();
+}
+
+export async function translateFullCanvasLayer(
+  layerPng: Buffer,
+  transform: { x: number; y: number },
+): Promise<Buffer> {
+  const { data, info } = await sharp(layerPng).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const output = Buffer.alloc(data.length);
+  for (let sourceY = 0; sourceY < info.height; sourceY += 1) {
+    const targetY = sourceY + transform.y;
+    if (targetY < 0 || targetY >= info.height) continue;
+    for (let sourceX = 0; sourceX < info.width; sourceX += 1) {
+      const targetX = sourceX + transform.x;
+      if (targetX < 0 || targetX >= info.width) continue;
+      const sourceOffset = (sourceY * info.width + sourceX) * 4;
+      const targetOffset = (targetY * info.width + targetX) * 4;
+      data.copy(output, targetOffset, sourceOffset, sourceOffset + 4);
+    }
+  }
+  return sharp(output, { raw: info }).png().toBuffer();
 }
 
 function sha256(bytes: Buffer): string {
@@ -170,8 +199,14 @@ export async function buildCyl9SourceCapReview(input: {
 
   for (const variant of variants) {
     const rawPath = join(rawDirectory, `${variant.variantKey}.png`);
-    await execFile("magick", [`${variant.sourcePsdPath}[${variant.layerIndex}]`, rawPath]);
-    const rawCap = await readFile(rawPath);
+    let rawCap: Buffer;
+    if (variant.sourceMode === "capped-psd-layer") {
+      await execFile("magick", [`${variant.sourcePath}[${variant.layerIndex}]`, rawPath]);
+      rawCap = await readFile(rawPath);
+    } else {
+      rawCap = await readFile(resolve(variant.sourcePath));
+      await writeFile(rawPath, rawCap);
+    }
     const layer = await normalizeCapMaterialToAuthority({ materialPng: rawCap, authorityMaskPng });
     const layerPath = join(layerDirectory, `${variant.variantKey}.png`);
     await writeFile(layerPath, layer);
@@ -181,10 +216,11 @@ export async function buildCyl9SourceCapReview(input: {
       sharp(authorityMaskPng).ensureAlpha().extractChannel("alpha").raw().toBuffer(),
     ]);
     if (!layerAlpha.equals(maskAlpha)) throw new Error(`${variant.variantKey} failed exact authority-alpha verification.`);
+    const placedLayer = await translateFullCanvasLayer(layer, SHARED_PLACEMENT);
 
     const assemblies = [];
     for (const body of BODY_SOURCES) {
-      const png = await sharp(resolve(body.path)).composite([{ input: layer, left: 0, top: 0 }]).png().toBuffer();
+      const png = await sharp(resolve(body.path)).composite([{ input: placedLayer, left: 0, top: 0 }]).png().toBuffer();
       const assemblyPath = join(assemblyDirectory, `${variant.variantKey}__${body.key}.png`);
       await writeFile(assemblyPath, png);
       assemblies.push({ bodyKey: body.key, png });
@@ -193,8 +229,9 @@ export async function buildCyl9SourceCapReview(input: {
     records.push({
       variantKey: variant.variantKey,
       label: variant.label,
-      sourcePsdPath: variant.sourcePsdPath,
-      sourceLayerIndex: variant.layerIndex,
+      sourceMode: variant.sourceMode,
+      sourcePath: variant.sourcePath,
+      sourceLayerIndex: variant.layerIndex ?? null,
       sourceLayerSha256: sha256(rawCap),
       authorityMaskPath: AUTHORITY_MASK_PATH,
       authorityMaskSha256: sha256(authorityMaskPng),
@@ -215,6 +252,7 @@ export async function buildCyl9SourceCapReview(input: {
     familyKey: "CYL-9ML",
     sourceType: "capped-psd-layer",
     geometryFamilyId: "closure__17-415__rollon-overcap__v2",
+    sharedPlacement: SHARED_PLACEMENT,
     canvas: { width: 2080, height: 2288 },
     bodyKeys: BODY_SOURCES.map(({ key }) => key),
     variantCount: records.length,
