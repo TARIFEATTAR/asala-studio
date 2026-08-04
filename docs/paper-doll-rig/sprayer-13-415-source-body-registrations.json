@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "familyId": "CYL-5ML-13-415",
+  "componentPartId": "sprayer-dip-tube",
+  "targetBodyAuthorityState": "named-geometry-review-required",
+  "sourceSceneContract": {
+    "bodySceneIndex": 2,
+    "tubeSceneIndex": 3,
+    "headSceneIndex": 4,
+    "detachedOvercapSceneIndex": 5,
+    "sourceCanvas": { "width": 600, "height": 975 }
+  },
+  "sources": [
+    {
+      "sourceId": "assembly-clear5-black-matte",
+      "sourceSha256": "e657ac4ac176570e9bc7b34e5f96739757874d12024a1492e2c0b218e2318a40",
+      "bodyBoundsPx": { "left": 82, "top": 273, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 171, "top": 378, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-black-shiny",
+      "sourceSha256": "dba7fd2b77d10e10e21b23cd64549c4b3ac4b792bbfe178ce1338a964951179d",
+      "bodyBoundsPx": { "left": 82, "top": 238, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 171, "top": 343, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-blue-matte",
+      "sourceSha256": "624f9034a783ab345f4e41c6a34da050b15337da6a45527c0b72b1a0bfa9b36d",
+      "bodyBoundsPx": { "left": 91, "top": 237, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 180, "top": 342, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-gold-shiny",
+      "sourceSha256": "baaad02327a755fb937fd2f0186394b37259aa1f376726116984417938584c75",
+      "bodyBoundsPx": { "left": 81, "top": 239, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 170, "top": 344, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-gold-matte",
+      "sourceSha256": "0bb73a3b56cf3d1423bb86b95c48c048c8eb5719531a7d89a09ed4bfaa11544d",
+      "bodyBoundsPx": { "left": 68, "top": 239, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 157, "top": 344, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-silver-matte",
+      "sourceSha256": "5f1fe98ab2bf700a1fc99c1033e1b5a22f6bfa000aad8baf6c4c9449d274069b",
+      "bodyBoundsPx": { "left": 59, "top": 237, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 148, "top": 342, "width": 60, "height": 463 }
+    },
+    {
+      "sourceId": "assembly-clear5-silver-shiny",
+      "sourceSha256": "5a894662d1953b11d3a0b42dbbff3b24cd2d48169788d63be5635c985b8a99b4",
+      "bodyBoundsPx": { "left": 63, "top": 239, "width": 218, "height": 636 },
+      "contextualPartBoundsPx": { "left": 152, "top": 344, "width": 60, "height": 463 }
+    }
+  ]
+}
