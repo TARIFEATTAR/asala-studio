@@ -63,6 +63,8 @@ The shadow is not part of the GPT plate. It remains a deterministic assembly-con
 
 ## Immediate gate
 
-Choose and approve the physical 20-400 roller profile before clamping the raw GPT candidates. The safest route is a small parametric roller housing and sphere calibrated against the 20-400 neck and the Photoshop assembly evidence. If the generated round-ball silhouette is selected instead, it remains a reviewed photographic authority and must receive named approval; generation itself never earns the lock.
+The small parametric roller housing and sphere now exist as a reproducible local review candidate. They are calibrated from the verified 33 mm Boston Round body and the Photoshop assembly pixel profile; they are not mislabeled as supplier CAD. Plastic and metal Blender references clamp to one exact mask with pairwise alpha IoU 1.0000 and zero mismatched alpha pixels.
+
+Review [BOSTON-ROUND-ROLLER-20-400-PARAMETRIC-REVIEW.md](./BOSTON-ROUND-ROLLER-20-400-PARAMETRIC-REVIEW.md) and name the physical profile approver before promoting the mask. GPT Image 2 jobs are prepared for natural plastic and mirror-chrome ball material reconstruction, but paid execution remains intentionally unauthorized. Generation itself never earns the lock.
 
 After authority selection, placement must be reviewed separately on 30 mL and 60 mL bodies. Amber, clear, and cobalt appearances inherit the capacity-level placement only after their body geometry is proven identical.

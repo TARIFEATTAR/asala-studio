@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "recipeId": "boston-round-roller-fitment-20-400-family-v1",
+  "familyKey": "BOSTON-ROUND-ROLLER-FITMENT-20-400",
+  "componentKind": "roller-fitment",
+  "neckFinish": "20-400",
+  "geometryFamilyId": "fitment__20-400__roller-ball__physical-v1",
+  "authorityReviewGroupKey": "geometry-review__roller-fitment__20-400__assembly-v1",
+  "authorityState": "assembly-calibrated-profile-review",
+  "authorityReference": {
+    "sourceIdentity": "GBBstnAmb1ozRollonGl / natural plastic roller scene",
+    "sourceSha256": "7bfa8507955d7d7ae2d0ad8908e9a1424e829eed74683269e23a674475a9fa83",
+    "sourcePath": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Original-Photoshop-Sources/Boston Rnd Bottles 20-400 (1oz and 2oz) + 18-400 half oz/1. Amber Bottle (1 ounce30 ml) Roll on/10GBBS~1.PSD",
+    "sceneIndex": 4,
+    "status": "calibration-reference-not-approved-authority"
+  },
+  "physicalTruthSource": {
+    "path": "docs/best-bottles-canonical-truth/best-bottles-master-truth.csv",
+    "websiteSku": "GBBstnAmb1ozRollonGl",
+    "sourceProductUrl": "https://www.bestbottles.com/product/boston-round-design-1-oz-amber-glass-bottle-plastic-roller-ball-shiny-gold-cap",
+    "bodyDiameterField": "33 ±0.5 mm"
+  },
+  "geometryCalibration": {
+    "evidenceState": "assembly-derived-estimate-not-supplier-cad",
+    "sourceBodyDiameterMm": 33,
+    "measuredBodyWidthPx": 386,
+    "pixelsPerMm": 11.696969696969697,
+    "sourceFitmentBoundsPx": {
+      "width": 210,
+      "height": 166
+    },
+    "measurementToleranceMm": 0.6,
+    "derivedFrom": "verified 33 mm Boston Round body diameter plus calibrated amber assembly pixel profile; not supplier CAD"
+  },
+  "geometry": {
+    "flangeOutsideDiameterMm": 17.953367875647668,
+    "flangeThicknessMm": 2.15,
+    "housingOutsideDiameterMm": 14.790155440414509,
+    "housingCylinderHeightMm": 6.4,
+    "shoulderHeightMm": 1.45,
+    "ballDiameterMm": 12.4,
+    "ballCenterZMm": 7.991709844559585,
+    "visibleHeightMm": 14.191709844559585
+  },
+  "render": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "samples": 128,
+    "topArcRatio": 0.02,
+    "targetOccupiedHeightPx": 460
+  },
+  "canvas": {
+    "widthPx": 2080,
+    "heightPx": 2288,
+    "backgroundHex": "#F5F3EF"
+  },
+  "variants": [
+    {
+      "variantKey": "PLASTIC",
+      "componentId": "roller__20-400__PLASTIC",
+      "geometryFamilyId": "fitment__20-400__roller-ball__physical-v1",
+      "housingMaterial": "natural-molded-plastic",
+      "ballMaterial": "natural-molded-plastic"
+    },
+    {
+      "variantKey": "METAL",
+      "componentId": "roller__20-400__METAL",
+      "geometryFamilyId": "fitment__20-400__roller-ball__physical-v1",
+      "housingMaterial": "natural-molded-plastic",
+      "ballMaterial": "mirror-chrome"
+    }
+  ],
+  "mutationPolicy": {
+    "candidatesCreated": false,
+    "paidGenerationAuthorized": false,
+    "remoteWritesPerformed": false,
+    "currentReleaseChanged": false,
+    "sanityChanged": false
+  }
+}
