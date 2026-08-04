@@ -176,7 +176,7 @@ CREATE TABLE public.paper_doll_approval_events (
     ON DELETE RESTRICT
 );
 
-CREATE TABLE public.paper_doll_placement_versions (
+CREATE TABLE public.paper_doll_factory_placement_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   family_key TEXT NOT NULL CHECK (length(btrim(family_key)) > 0),
@@ -196,10 +196,10 @@ CREATE TABLE public.paper_doll_placement_versions (
   locked_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT paper_doll_placement_versions_id_org_unique UNIQUE (id, organization_id),
-  CONSTRAINT paper_doll_placement_versions_family_version_unique
+  CONSTRAINT paper_doll_factory_placement_versions_id_org_unique UNIQUE (id, organization_id),
+  CONSTRAINT paper_doll_factory_placement_versions_family_version_unique
     UNIQUE (organization_id, family_key, geometry_family_id, version_number),
-  CONSTRAINT paper_doll_placement_versions_lock_fields CHECK (
+  CONSTRAINT paper_doll_factory_placement_versions_lock_fields CHECK (
     (placement_status = 'locked'
       AND locked_by_user_id IS NOT NULL
       AND length(btrim(locked_by_display_name)) > 0
@@ -213,7 +213,7 @@ CREATE TABLE public.paper_doll_placement_versions (
   )
 );
 
-CREATE TABLE public.paper_doll_placement_plates (
+CREATE TABLE public.paper_doll_factory_placement_plates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   placement_version_id UUID NOT NULL,
@@ -224,14 +224,14 @@ CREATE TABLE public.paper_doll_placement_plates (
     AND (adjustment->>'scale')::NUMERIC > 0
   ),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT paper_doll_placement_plates_id_org_unique UNIQUE (id, organization_id),
-  CONSTRAINT paper_doll_placement_plates_body_unique
+  CONSTRAINT paper_doll_factory_placement_plates_id_org_unique UNIQUE (id, organization_id),
+  CONSTRAINT paper_doll_factory_placement_plates_body_unique
     UNIQUE (placement_version_id, body_variant_key),
-  CONSTRAINT paper_doll_placement_plates_placement_org_fk
+  CONSTRAINT paper_doll_factory_placement_plates_placement_org_fk
     FOREIGN KEY (placement_version_id, organization_id)
-    REFERENCES public.paper_doll_placement_versions(id, organization_id)
+    REFERENCES public.paper_doll_factory_placement_versions(id, organization_id)
     ON DELETE RESTRICT,
-  CONSTRAINT paper_doll_placement_plates_body_version_org_fk
+  CONSTRAINT paper_doll_factory_placement_plates_body_version_org_fk
     FOREIGN KEY (body_component_version_id, organization_id)
     REFERENCES public.paper_doll_component_versions(id, organization_id)
     ON DELETE RESTRICT
@@ -340,7 +340,7 @@ CREATE TABLE public.paper_doll_release_cut_assets (
     ON DELETE RESTRICT,
   CONSTRAINT paper_doll_release_cut_assets_placement_org_fk
     FOREIGN KEY (placement_version_id, organization_id)
-    REFERENCES public.paper_doll_placement_versions(id, organization_id)
+    REFERENCES public.paper_doll_factory_placement_versions(id, organization_id)
     ON DELETE RESTRICT
 );
 
@@ -392,10 +392,10 @@ CREATE INDEX paper_doll_component_candidates_component_state_idx
   ON public.paper_doll_component_candidates (organization_id, component_id, lifecycle_state);
 CREATE INDEX paper_doll_approval_events_candidate_idx
   ON public.paper_doll_approval_events (candidate_id, created_at);
-CREATE INDEX paper_doll_placement_versions_family_idx
-  ON public.paper_doll_placement_versions (organization_id, family_key, geometry_family_id, version_number DESC);
-CREATE INDEX paper_doll_placement_plates_body_version_idx
-  ON public.paper_doll_placement_plates (body_component_version_id);
+CREATE INDEX paper_doll_factory_placement_versions_family_idx
+  ON public.paper_doll_factory_placement_versions (organization_id, family_key, geometry_family_id, version_number DESC);
+CREATE INDEX paper_doll_factory_placement_plates_body_version_idx
+  ON public.paper_doll_factory_placement_plates (body_component_version_id);
 CREATE INDEX paper_doll_release_heads_cut_idx
   ON public.paper_doll_release_heads (current_release_cut_id);
 CREATE INDEX paper_doll_release_head_events_previous_cut_idx
@@ -546,7 +546,7 @@ DECLARE
   parent_status TEXT;
 BEGIN
   SELECT placement_status INTO parent_status
-  FROM public.paper_doll_placement_versions
+  FROM public.paper_doll_factory_placement_versions
   WHERE id = OLD.placement_version_id AND organization_id = OLD.organization_id;
   IF parent_status = 'locked' THEN
     RAISE EXCEPTION 'Plates belonging to a locked paper-doll placement are immutable';
@@ -642,11 +642,11 @@ CREATE TRIGGER paper_doll_component_candidates_guard
 CREATE TRIGGER paper_doll_approval_events_append_only
   BEFORE UPDATE OR DELETE ON public.paper_doll_approval_events
   FOR EACH ROW EXECUTE FUNCTION public.paper_doll_reject_approval_event_mutation();
-CREATE TRIGGER paper_doll_placement_versions_guard
-  BEFORE UPDATE OR DELETE ON public.paper_doll_placement_versions
+CREATE TRIGGER paper_doll_factory_placement_versions_guard
+  BEFORE UPDATE OR DELETE ON public.paper_doll_factory_placement_versions
   FOR EACH ROW EXECUTE FUNCTION public.paper_doll_guard_placement_version();
-CREATE TRIGGER paper_doll_placement_plates_guard
-  BEFORE UPDATE OR DELETE ON public.paper_doll_placement_plates
+CREATE TRIGGER paper_doll_factory_placement_plates_guard
+  BEFORE UPDATE OR DELETE ON public.paper_doll_factory_placement_plates
   FOR EACH ROW EXECUTE FUNCTION public.paper_doll_guard_placement_plate();
 CREATE TRIGGER paper_doll_release_cuts_append_only
   BEFORE UPDATE OR DELETE ON public.paper_doll_release_cuts
@@ -764,8 +764,8 @@ ALTER TABLE public.paper_doll_candidate_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_candidate_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_component_candidates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_approval_events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.paper_doll_placement_versions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.paper_doll_placement_plates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paper_doll_factory_placement_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.paper_doll_factory_placement_plates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_release_heads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_release_head_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paper_doll_release_cuts ENABLE ROW LEVEL SECURITY;
@@ -784,11 +784,11 @@ CREATE POLICY paper_doll_component_candidates_select_org_members
 CREATE POLICY paper_doll_approval_events_select_org_members
   ON public.paper_doll_approval_events FOR SELECT TO authenticated
   USING (public.is_organization_member((SELECT auth.uid()), organization_id));
-CREATE POLICY paper_doll_placement_versions_select_org_members
-  ON public.paper_doll_placement_versions FOR SELECT TO authenticated
+CREATE POLICY paper_doll_factory_placement_versions_select_org_members
+  ON public.paper_doll_factory_placement_versions FOR SELECT TO authenticated
   USING (public.is_organization_member((SELECT auth.uid()), organization_id));
-CREATE POLICY paper_doll_placement_plates_select_org_members
-  ON public.paper_doll_placement_plates FOR SELECT TO authenticated
+CREATE POLICY paper_doll_factory_placement_plates_select_org_members
+  ON public.paper_doll_factory_placement_plates FOR SELECT TO authenticated
   USING (public.is_organization_member((SELECT auth.uid()), organization_id));
 CREATE POLICY paper_doll_release_heads_select_org_members
   ON public.paper_doll_release_heads FOR SELECT TO authenticated
@@ -810,8 +810,8 @@ REVOKE ALL ON TABLE public.paper_doll_candidate_requests FROM PUBLIC, anon, auth
 REVOKE ALL ON TABLE public.paper_doll_candidate_attempts FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.paper_doll_component_candidates FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.paper_doll_approval_events FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON TABLE public.paper_doll_placement_versions FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON TABLE public.paper_doll_placement_plates FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON TABLE public.paper_doll_factory_placement_versions FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON TABLE public.paper_doll_factory_placement_plates FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.paper_doll_release_heads FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.paper_doll_release_head_events FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.paper_doll_release_cuts FROM PUBLIC, anon, authenticated;
@@ -822,8 +822,8 @@ GRANT SELECT ON TABLE public.paper_doll_candidate_requests TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_candidate_attempts TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_component_candidates TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_approval_events TO authenticated;
-GRANT SELECT ON TABLE public.paper_doll_placement_versions TO authenticated;
-GRANT SELECT ON TABLE public.paper_doll_placement_plates TO authenticated;
+GRANT SELECT ON TABLE public.paper_doll_factory_placement_versions TO authenticated;
+GRANT SELECT ON TABLE public.paper_doll_factory_placement_plates TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_release_heads TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_release_head_events TO authenticated;
 GRANT SELECT ON TABLE public.paper_doll_release_cuts TO authenticated;
@@ -834,8 +834,8 @@ GRANT ALL ON TABLE public.paper_doll_candidate_requests TO service_role;
 GRANT ALL ON TABLE public.paper_doll_candidate_attempts TO service_role;
 GRANT ALL ON TABLE public.paper_doll_component_candidates TO service_role;
 GRANT ALL ON TABLE public.paper_doll_approval_events TO service_role;
-GRANT ALL ON TABLE public.paper_doll_placement_versions TO service_role;
-GRANT ALL ON TABLE public.paper_doll_placement_plates TO service_role;
+GRANT ALL ON TABLE public.paper_doll_factory_placement_versions TO service_role;
+GRANT ALL ON TABLE public.paper_doll_factory_placement_plates TO service_role;
 GRANT ALL ON TABLE public.paper_doll_release_heads TO service_role;
 GRANT ALL ON TABLE public.paper_doll_release_head_events TO service_role;
 GRANT ALL ON TABLE public.paper_doll_release_cuts TO service_role;
@@ -859,9 +859,9 @@ COMMENT ON TABLE public.paper_doll_component_candidates IS
   'Candidate-only normalized material, exact authority-mask QA, four pixel boxes, and lifecycle state.';
 COMMENT ON TABLE public.paper_doll_approval_events IS
   'Append-only named approvals and rejections for component candidates.';
-COMMENT ON TABLE public.paper_doll_placement_versions IS
+COMMENT ON TABLE public.paper_doll_factory_placement_versions IS
   'Versioned uniform-scale shared placement; locked rows are immutable.';
-COMMENT ON TABLE public.paper_doll_placement_plates IS
+COMMENT ON TABLE public.paper_doll_factory_placement_plates IS
   'Explicit compatible body plates and versioned per-body fit evidence for one shared placement.';
 COMMENT ON TABLE public.paper_doll_release_cuts IS
   'Immutable family release manifests, idempotent by manifest SHA.';

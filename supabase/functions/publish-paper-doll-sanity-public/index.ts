@@ -11,7 +11,10 @@ import {
   buildSanityMutation,
   validatePublicPublicationRequest,
 } from "../_shared/paperDollLifecycle.ts";
-import { writeSanityDocument } from "../_shared/paperDollSanity.ts";
+import {
+  type SanityMutationResult,
+  writeSanityDocument,
+} from "../_shared/paperDollSanity.ts";
 
 Deno.serve((request) =>
   runPaperDollAction(request, async () => {
@@ -102,142 +105,78 @@ Deno.serve((request) =>
     if (priorError) {
       databaseError(priorError, "Public publication ledger lookup failed.");
     }
-    if (prior?.sync_status === "success") {
-      return jsonResponse(200, {
-        syncId: prior.id,
-        releaseCutId,
-        documentId: operation.documentId,
-        status: "success",
-        idempotent: true,
-        publicPublished: true,
-        result: prior.result,
-      });
-    }
-    if (prior?.sync_status === "queued") {
-      databaseError(null, "This public publication is already queued.");
-    }
-
-    const { data: sync, error: syncError } = await context.service
-      .from("paper_doll_sanity_syncs")
-      .insert({
-        organization_id: organizationId,
-        release_cut_id: releaseCutId,
-        sanity_document_id: operation.documentId,
-        sync_action: "public",
-        sync_status: "queued",
-        request_sha256: requestSha256,
-        approved_by_user_id: context.user.id,
-        approved_by_display_name: approvedByName,
-        approval_note: approvalNote,
-        result: {
-          successfulDraftSyncId: successfulDraft!.id,
-          draftRequestSha256,
-        },
-      })
-      .select("id")
-      .single();
-    if (syncError || !sync) {
-      databaseError(syncError, "Public publication could not be queued.");
-    }
-
-    try {
-      const result = await writeSanityDocument(operation.document);
-      const { error: completeError } = await context.service
+    let sync = prior;
+    if (!sync) {
+      const queued = await context.service
         .from("paper_doll_sanity_syncs")
-        .update({
-          sync_status: "success",
+        .insert({
+          organization_id: organizationId,
+          release_cut_id: releaseCutId,
+          sanity_document_id: operation.documentId,
+          sync_action: "public",
+          sync_status: "queued",
+          request_sha256: requestSha256,
+          approved_by_user_id: context.user.id,
+          approved_by_display_name: approvedByName,
+          approval_note: approvalNote,
           result: {
-            ...result,
             successfulDraftSyncId: successfulDraft!.id,
             draftRequestSha256,
           },
-          completed_at: new Date().toISOString(),
         })
-        .eq("id", sync.id)
-        .eq("sync_status", "queued");
-      if (completeError) {
-        databaseError(
-          completeError,
-          "Public publication result could not be recorded.",
-        );
+        .select("id, sync_status, result")
+        .single();
+      if (queued.error || !queued.data) {
+        databaseError(queued.error, "Public publication could not be queued.");
       }
-
-      const { data: cutAssets, error: assetsError } = await context.service
-        .from("paper_doll_release_cut_assets")
-        .select("component_candidate_id")
-        .eq("organization_id", organizationId)
-        .eq("release_cut_id", releaseCutId)
-        .not("component_candidate_id", "is", null);
-      if (assetsError) {
-        databaseError(
-          assetsError,
-          "Release candidate membership could not be read.",
-        );
-      }
-      const candidateIds = [
-        ...new Set(
-          (cutAssets ?? []).map((asset) =>
-            String(asset.component_candidate_id)
-          ),
-        ),
-      ];
-      for (const candidateId of candidateIds) {
-        const { data: advanced, error: advanceError } = await context.service
-          .from("paper_doll_component_candidates")
-          .update({ lifecycle_state: "published" })
-          .eq("id", candidateId)
-          .eq("organization_id", organizationId)
-          .eq("lifecycle_state", "sanity-draft")
-          .select("id")
-          .maybeSingle();
-        if (advanceError || !advanced) {
-          databaseError(
-            advanceError,
-            "Candidate publication state could not be advanced.",
-          );
-        }
-        const { error: eventError } = await context.service.from(
-          "paper_doll_approval_events",
-        ).insert({
-          organization_id: organizationId,
-          candidate_id: candidateId,
-          action: "published",
-          approver_user_id: context.user.id,
-          approver_display_name: approvedByName,
-          approval_note: approvalNote,
-          evidence: {
-            releaseCutId,
-            syncId: sync.id,
-            successfulDraftSyncId: successfulDraft!.id,
-            downstreamScopeConfirmed,
-            sanityRevision: result.revision,
-          },
-        });
-        if (eventError) {
-          databaseError(
-            eventError,
-            "Publication approval event could not be appended.",
-          );
-        }
-      }
-      return jsonResponse(200, {
-        syncId: sync.id,
-        releaseCutId,
-        documentId: operation.documentId,
-        revision: result.revision,
-        status: "success",
-        idempotent: false,
-        publicPublished: true,
-      });
-    } catch (error) {
-      await context.service.from("paper_doll_sanity_syncs").update({
-        sync_status: "failed",
-        error_message: error instanceof Error
-          ? error.message
-          : "Public Sanity publication failed.",
-        completed_at: new Date().toISOString(),
-      }).eq("id", sync.id).eq("sync_status", "queued");
-      throw error;
+      sync = queued.data;
     }
+
+    let result = sync.result as Partial<SanityMutationResult> & Record<string, unknown>;
+    if (sync.sync_status !== "success") {
+      try {
+        const sanityResult = await writeSanityDocument(operation.document);
+        result = {
+          ...sanityResult,
+          successfulDraftSyncId: successfulDraft!.id,
+          draftRequestSha256,
+          downstreamScopeConfirmed,
+        };
+      } catch (error) {
+        await context.service.from("paper_doll_sanity_syncs").update({
+          sync_status: "failed",
+          error_message: error instanceof Error ? error.message : "Public Sanity publication failed.",
+          completed_at: new Date().toISOString(),
+        }).eq("id", sync.id).eq("sync_status", "queued");
+        throw error;
+      }
+    }
+
+    const { data: finalized, error: finalizeError } = await context.service.rpc(
+      "paper_doll_finalize_sanity_sync_atomic",
+      {
+        p_organization_id: organizationId,
+        p_sync_id: sync.id,
+        p_release_cut_id: releaseCutId,
+        p_sync_action: "public",
+        p_request_sha256: requestSha256,
+        p_result: result,
+        p_actor_user_id: context.user.id,
+        p_actor_display_name: approvedByName,
+        p_action_note: approvalNote,
+      },
+    );
+    if (finalizeError || !finalized) {
+      databaseError(finalizeError, "Public lifecycle finalization is pending; retry safely.");
+    }
+    return jsonResponse(200, {
+      syncId: sync.id,
+      releaseCutId,
+      documentId: operation.documentId,
+      revision: result.revision,
+      status: "success",
+      idempotent: finalized.idempotent === true,
+      publicPublished: true,
+    });
   })
 );

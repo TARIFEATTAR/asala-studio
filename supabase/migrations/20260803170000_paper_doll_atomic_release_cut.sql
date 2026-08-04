@@ -41,6 +41,11 @@ BEGIN
   IF jsonb_typeof(p_assets) <> 'array' OR jsonb_array_length(p_assets) = 0 THEN
     RAISE EXCEPTION 'Release cut assets are required';
   END IF;
+  IF jsonb_typeof(p_manifest->'assets') <> 'array'
+    OR jsonb_array_length(p_manifest->'assets') <> jsonb_array_length(p_assets)
+  THEN
+    RAISE EXCEPTION 'Release rows must equal the exact reviewed manifest assets';
+  END IF;
   IF p_expected_head_revision < 0 THEN
     RAISE EXCEPTION 'Expected release-head revision must be non-negative';
   END IF;
@@ -80,6 +85,44 @@ BEGIN
     RAISE EXCEPTION 'Release cut contains duplicate slot and variant memberships';
   END IF;
 
+  WITH supplied AS (
+    SELECT * FROM jsonb_to_recordset(p_assets) AS x(
+      component_candidate_id UUID,
+      component_version_id UUID,
+      placement_version_id UUID,
+      slot TEXT,
+      variant_key TEXT,
+      source_bounds JSONB,
+      edit_bounds JSONB,
+      authority_bounds JSONB,
+      placement_bounds JSONB
+    )
+  ), reviewed AS (
+    SELECT asset
+    FROM jsonb_array_elements(p_manifest->'assets') AS asset
+  )
+  SELECT count(*) INTO version_count
+  FROM supplied s
+  JOIN reviewed r
+    ON r.asset->>'slot' = s.slot
+   AND r.asset->>'variantKey' = s.variant_key
+   AND (r.asset->>'componentVersionId')::UUID = s.component_version_id
+   AND NULLIF(COALESCE(r.asset->>'candidateId', r.asset->>'componentCandidateId'), '')::UUID
+       IS NOT DISTINCT FROM s.component_candidate_id
+   AND NULLIF(r.asset->>'placementVersionId', '')::UUID
+       IS NOT DISTINCT FROM s.placement_version_id
+   AND COALESCE(r.asset->'sourceBoundsPx', r.asset->'sourceBounds')
+       IS NOT DISTINCT FROM s.source_bounds
+   AND COALESCE(r.asset->'editBoundsPx', r.asset->'editBounds')
+       IS NOT DISTINCT FROM s.edit_bounds
+   AND COALESCE(r.asset->'authorityBoundsPx', r.asset->'authorityBounds')
+       IS NOT DISTINCT FROM s.authority_bounds
+   AND COALESCE(r.asset->'placementBoundsPx', r.asset->'placementBounds')
+       IS NOT DISTINCT FROM s.placement_bounds;
+  IF version_count <> asset_count THEN
+    RAISE EXCEPTION 'Release rows must equal the exact reviewed manifest assets';
+  END IF;
+
   WITH rows AS (
     SELECT DISTINCT component_version_id
     FROM jsonb_to_recordset(p_assets) AS x(component_version_id UUID)
@@ -89,7 +132,16 @@ BEGIN
   JOIN public.paper_doll_component_versions v
     ON v.id = r.component_version_id
    AND v.organization_id = p_organization_id
-   AND v.approval_status = 'approved';
+   AND v.approval_status = 'approved'
+  JOIN public.paper_doll_components component
+    ON component.id = v.component_id
+   AND component.organization_id = v.organization_id
+   AND component.slot = (
+     SELECT asset->>'slot'
+     FROM jsonb_array_elements(p_assets) asset
+     WHERE (asset->>'component_version_id')::UUID = r.component_version_id
+     LIMIT 1
+   );
   IF version_count <> (
     SELECT count(DISTINCT (asset->>'component_version_id'))
     FROM jsonb_array_elements(p_assets) asset
@@ -98,8 +150,18 @@ BEGIN
   END IF;
 
   WITH rows AS (
-    SELECT DISTINCT component_candidate_id
-    FROM jsonb_to_recordset(p_assets) AS x(component_candidate_id UUID, slot TEXT)
+    SELECT *
+    FROM jsonb_to_recordset(p_assets) AS x(
+      component_candidate_id UUID,
+      component_version_id UUID,
+      placement_version_id UUID,
+      slot TEXT,
+      variant_key TEXT,
+      source_bounds JSONB,
+      edit_bounds JSONB,
+      authority_bounds JSONB,
+      placement_bounds JSONB
+    )
     WHERE slot <> 'body'
   )
   SELECT count(*) INTO candidate_count
@@ -107,33 +169,41 @@ BEGIN
   JOIN public.paper_doll_component_candidates c
     ON c.id = r.component_candidate_id
    AND c.organization_id = p_organization_id
-   AND c.lifecycle_state IN ('placement-locked','released','sanity-draft','published');
-  IF candidate_count <> (
-    SELECT count(DISTINCT (asset->>'component_candidate_id'))
-    FROM jsonb_array_elements(p_assets) asset
-    WHERE asset->>'slot' <> 'body'
-  ) THEN
-    RAISE EXCEPTION 'Every non-body candidate must have immutable locked placement';
-  END IF;
-
-  WITH rows AS (
-    SELECT DISTINCT placement_version_id
-    FROM jsonb_to_recordset(p_assets) AS x(placement_version_id UUID, slot TEXT)
-    WHERE slot <> 'body'
-  )
-  SELECT count(*) INTO placement_count
-  FROM rows r
-  JOIN public.paper_doll_placement_versions p
+   AND c.lifecycle_state IN ('placement-locked','released','sanity-draft','published')
+   AND c.variant_key = r.variant_key
+   AND c.source_bounds = r.source_bounds
+   AND c.edit_bounds = r.edit_bounds
+   AND c.authority_bounds = r.authority_bounds
+   AND c.placement_bounds = r.placement_bounds
+  JOIN public.paper_doll_component_versions v
+    ON v.id = r.component_version_id
+   AND v.organization_id = c.organization_id
+   AND v.component_id = c.component_id
+   AND v.approval_status = 'approved'
+   AND v.image_sha256 = c.layer_sha256
+  JOIN public.paper_doll_components component
+    ON component.id = c.component_id
+   AND component.organization_id = c.organization_id
+   AND component.slot = r.slot
+  JOIN public.paper_doll_factory_placement_versions p
     ON p.id = r.placement_version_id
-   AND p.organization_id = p_organization_id
+   AND p.organization_id = c.organization_id
    AND p.family_key = p_family_key
-   AND p.placement_status = 'locked';
-  IF placement_count <> (
-    SELECT count(DISTINCT (asset->>'placement_version_id'))
+   AND p.geometry_family_id = component.geometry_family_id
+   AND p.authority_mask_sha256 = c.authority_mask_sha256
+   AND p.placement_bounds = r.placement_bounds
+   AND p.placement_status = 'locked'
+  JOIN public.paper_doll_approval_events event
+    ON event.organization_id = c.organization_id
+   AND event.candidate_id = c.id
+   AND event.action = 'placement-locked'
+   AND event.evidence->>'placementVersionId' = p.id::TEXT;
+  IF candidate_count <> (
+    SELECT count(*)
     FROM jsonb_array_elements(p_assets) asset
     WHERE asset->>'slot' <> 'body'
   ) THEN
-    RAISE EXCEPTION 'Every non-body placement version must be locked for this family';
+    RAISE EXCEPTION 'Every non-body asset must bind its exact candidate, component version, slot, variant, placement, bounds, mask, and lock evidence';
   END IF;
 
   SELECT * INTO cut_row

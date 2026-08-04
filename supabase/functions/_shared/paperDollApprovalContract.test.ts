@@ -34,7 +34,11 @@ test("approval parser rejects anonymous names, bad SHA and empty evidence", () =
 });
 
 test("v2 approval implementation binds named lifecycle actions to exact candidate and QA identity", async () => {
-  const source = await readFile(new URL("../approve-paper-doll-candidate/index.ts", import.meta.url), "utf8");
+  const source = await readFile(new URL("../approve-paper-doll-lifecycle/index.ts", import.meta.url), "utf8");
+  const sql = await readFile(
+    new URL("../../migrations/20260803180000_paper_doll_atomic_lifecycle_actions.sql", import.meta.url),
+    "utf8",
+  );
   assert.match(source, /createPaperDollActionContext/);
   assert.match(source, /organization_id/);
   assert.match(source, /expectedContentSha256/);
@@ -42,10 +46,11 @@ test("v2 approval implementation binds named lifecycle actions to exact candidat
   assert.match(source, /validateApprovalRequest/);
   assert.match(source, /geometryLocked/);
   assert.match(source, /mismatchedPixels/);
-  assert.match(source, /paper_doll_approval_events/);
-  assert.match(source, /paper_doll_component_versions/);
-  assert.match(source, /image_sha256/);
-  assert.match(source, /approval_status:\s*"approved"/);
+  assert.match(source, /paper_doll_approve_candidate_atomic/);
+  assert.doesNotMatch(source, /\.update\(\{\s*lifecycle_state:/);
+  assert.match(sql, /paper_doll_component_candidates[\s\S]+FOR UPDATE/);
+  assert.match(sql, /paper_doll_component_versions[\s\S]+approval_status = 'approved'/);
+  assert.match(sql, /INSERT INTO public\.paper_doll_approval_events/);
   assert.doesNotMatch(source, /paper_doll_family_release_assets["')]/);
 });
 

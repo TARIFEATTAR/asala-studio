@@ -19,8 +19,8 @@ SELECT ok(
         'paper_doll_candidate_attempts',
         'paper_doll_component_candidates',
         'paper_doll_approval_events',
-        'paper_doll_placement_versions',
-        'paper_doll_placement_plates',
+        'paper_doll_factory_placement_versions',
+        'paper_doll_factory_placement_plates',
         'paper_doll_release_heads',
         'paper_doll_release_head_events',
         'paper_doll_release_cuts',
@@ -42,8 +42,8 @@ SELECT ok(
         'paper_doll_candidate_attempts',
         'paper_doll_component_candidates',
         'paper_doll_approval_events',
-        'paper_doll_placement_versions',
-        'paper_doll_placement_plates',
+        'paper_doll_factory_placement_versions',
+        'paper_doll_factory_placement_plates',
         'paper_doll_release_heads',
         'paper_doll_release_head_events',
         'paper_doll_release_cuts',
@@ -65,8 +65,8 @@ SELECT ok(
         'paper_doll_candidate_attempts',
         'paper_doll_component_candidates',
         'paper_doll_approval_events',
-        'paper_doll_placement_versions',
-        'paper_doll_placement_plates',
+        'paper_doll_factory_placement_versions',
+        'paper_doll_factory_placement_plates',
         'paper_doll_release_heads',
         'paper_doll_release_head_events',
         'paper_doll_release_cuts',
@@ -90,8 +90,8 @@ SELECT ok(
         'paper_doll_candidate_attempts',
         'paper_doll_component_candidates',
         'paper_doll_approval_events',
-        'paper_doll_placement_versions',
-        'paper_doll_placement_plates',
+        'paper_doll_factory_placement_versions',
+        'paper_doll_factory_placement_plates',
         'paper_doll_release_heads',
         'paper_doll_release_head_events',
         'paper_doll_release_cuts',
@@ -290,7 +290,7 @@ SELECT throws_ok(
   'approval history is append-only'
 );
 
-INSERT INTO public.paper_doll_placement_versions (
+INSERT INTO public.paper_doll_factory_placement_versions (
   id, organization_id, family_key, geometry_family_id, version_number,
   width_px, center_x_px, seat_y_px, placement_bounds,
   authority_mask_sha256, placement_status, locked_by_user_id,
@@ -304,7 +304,7 @@ INSERT INTO public.paper_doll_placement_versions (
   'Jordan Richter', 'Approved five-body family fit', now()
 );
 
-INSERT INTO public.paper_doll_placement_plates (
+INSERT INTO public.paper_doll_factory_placement_plates (
   organization_id, placement_version_id, body_variant_key,
   body_component_version_id, adjustment
 ) VALUES (
@@ -323,7 +323,7 @@ SET lifecycle_state = 'placement-locked'
 WHERE id = '67000000-0000-4000-8000-000000000001';
 
 SELECT throws_ok(
-  $$UPDATE public.paper_doll_placement_versions SET width_px = 345
+  $$UPDATE public.paper_doll_factory_placement_versions SET width_px = 345
     WHERE id = '69000000-0000-4000-8000-000000000001'$$,
   'P0001',
   'Locked paper-doll placement versions are immutable',
@@ -331,7 +331,7 @@ SELECT throws_ok(
 );
 
 SELECT throws_ok(
-  $$UPDATE public.paper_doll_placement_plates SET adjustment = '{"deltaX":1,"deltaY":0,"scale":1}'$$,
+  $$UPDATE public.paper_doll_factory_placement_plates SET adjustment = '{"deltaX":1,"deltaY":0,"scale":1}'$$,
   'P0001',
   'Plates belonging to a locked paper-doll placement are immutable',
   'locked per-body placement evidence is immutable'

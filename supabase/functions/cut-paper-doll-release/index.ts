@@ -2,7 +2,6 @@ import {
   createPaperDollActionContext,
   databaseError,
   jsonResponse,
-  requireArray,
   requireRecord,
   requireString,
   runPaperDollAction,
@@ -12,28 +11,7 @@ import {
   PaperDollActionError,
   validateNamedAction,
 } from "../_shared/paperDollLifecycle.ts";
-
-type ReleaseSlot = "body" | "cap" | "roller" | "sprayer" | "overcap" | "pump";
-interface ReleaseAssetInput {
-  slot?: unknown;
-  variantKey?: unknown;
-  componentVersionId?: unknown;
-  componentCandidateId?: unknown;
-  placementVersionId?: unknown;
-  sourceBounds?: unknown;
-  editBounds?: unknown;
-  authorityBounds?: unknown;
-  placementBounds?: unknown;
-}
-
-const SLOTS = new Set<ReleaseSlot>([
-  "body",
-  "cap",
-  "roller",
-  "sprayer",
-  "overcap",
-  "pump",
-]);
+import { deriveReleaseAssetRows } from "../_shared/paperDollReleaseAssetContract.ts";
 
 Deno.serve((request) =>
   runPaperDollAction(request, async () => {
@@ -44,7 +22,6 @@ Deno.serve((request) =>
     const approvedByName = requireString(body.approvedByName, "approvedByName");
     const approvalNote = requireString(body.approvalNote, "approvalNote");
     const manifest = requireRecord(body.manifest, "manifest");
-    const assets = requireArray<ReleaseAssetInput>(body.assets, "assets");
     const expectedHeadRevision = Number(body.expectedHeadRevision);
     if (!Number.isInteger(expectedHeadRevision) || expectedHeadRevision < 0) {
       throw new PaperDollActionError(
@@ -85,61 +62,9 @@ Deno.serve((request) =>
       );
     }
 
-    const rows = assets.map((asset, index) => {
-      const slot = requireString(
-        asset.slot,
-        `assets.${index}.slot`,
-      ) as ReleaseSlot;
-      if (!SLOTS.has(slot)) {
-        throw new PaperDollActionError(
-          422,
-          "invalid_release_slot",
-          "Release asset has an unsupported slot.",
-          [
-            {
-              field: `assets.${index}.slot`,
-              message: "Unsupported release slot.",
-            },
-          ],
-        );
-      }
-      const componentVersionId = requireString(
-        asset.componentVersionId,
-        `assets.${index}.componentVersionId`,
-      );
-      const candidateId = slot === "body" ? null : requireString(
-        asset.componentCandidateId,
-        `assets.${index}.componentCandidateId`,
-      );
-      return {
-        organization_id: organizationId,
-        component_candidate_id: candidateId,
-        component_version_id: componentVersionId,
-        placement_version_id: slot === "body" ? null : requireString(
-          asset.placementVersionId,
-          `assets.${index}.placementVersionId`,
-        ),
-        slot,
-        variant_key: requireString(
-          asset.variantKey,
-          `assets.${index}.variantKey`,
-        ),
-        source_bounds: slot === "body"
-          ? null
-          : requireRecord(asset.sourceBounds, `assets.${index}.sourceBounds`),
-        edit_bounds: slot === "body"
-          ? null
-          : requireRecord(asset.editBounds, `assets.${index}.editBounds`),
-        authority_bounds: slot === "body" ? null : requireRecord(
-          asset.authorityBounds,
-          `assets.${index}.authorityBounds`,
-        ),
-        placement_bounds: slot === "body" ? null : requireRecord(
-          asset.placementBounds,
-          `assets.${index}.placementBounds`,
-        ),
-      };
-    });
+    // The immutable rows are derived from the exact reviewed manifest. The
+    // request cannot smuggle in a second, unrelated asset list.
+    const rows = deriveReleaseAssetRows(manifest);
     const { data: cutResult, error: cutError } = await context.service.rpc(
       "paper_doll_cut_release_atomic",
       {

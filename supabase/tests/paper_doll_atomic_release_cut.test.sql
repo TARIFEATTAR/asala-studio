@@ -3,7 +3,7 @@
 BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
-SELECT plan(9);
+SELECT plan(10);
 SELECT set_config('request.jwt.claim.role', 'service_role', true);
 SELECT set_config('request.jwt.claims', '{"role":"service_role"}', true);
 
@@ -36,7 +36,7 @@ INSERT INTO public.paper_doll_component_versions (
   '83000000-0000-4000-8000-000000000001',
   '81000000-0000-4000-8000-000000000001',
   '82000000-0000-4000-8000-000000000001',
-  'authority-v1', 'shiny-gold', 'authority.png', repeat('a', 64),
+  'authority-v1', 'shiny-gold', 'authority.png', repeat('e', 64),
   'authority-mask.png', repeat('b', 64), 2080, 2288,
   '{"left":869,"top":500,"right":1212,"bottom":1001}', 1041, 1002, 'approved'
 );
@@ -88,7 +88,7 @@ INSERT INTO public.paper_doll_component_candidates (
   'placement-locked'
 );
 
-INSERT INTO public.paper_doll_placement_versions (
+INSERT INTO public.paper_doll_factory_placement_versions (
   id, organization_id, family_key, geometry_family_id, version_number,
   width_px, center_x_px, seat_y_px, placement_bounds,
   authority_mask_sha256, placement_status, locked_by_user_id,
@@ -102,15 +102,40 @@ INSERT INTO public.paper_doll_placement_versions (
   'Jordan Richter', 'Atomic fixture fit', now()
 );
 
+INSERT INTO public.paper_doll_approval_events (
+  organization_id, candidate_id, action, approver_user_id,
+  approver_display_name, approval_note, evidence
+) VALUES (
+  '81000000-0000-4000-8000-000000000001',
+  '87000000-0000-4000-8000-000000000001',
+  'placement-locked',
+  '85000000-0000-4000-8000-000000000001',
+  'Jordan Richter',
+  'Atomic fixture placement',
+  '{"placementVersionId":"89000000-0000-4000-8000-000000000001"}'
+);
+
 SELECT throws_ok(
   $$SELECT public.paper_doll_cut_release_atomic(
     '81000000-0000-4000-8000-000000000001', 'CYL-9ML', '1.0.0',
-    '{"familyKey":"CYL-9ML"}', repeat('f', 64),
+    '{"familyKey":"CYL-9ML","assets":[{"componentVersionId":"83000000-0000-4000-8000-000000000001","candidateId":"87000000-0000-4000-8000-000000000001","placementVersionId":"89000000-0000-4000-8000-000000000001","slot":"cap","variantKey":"SGLD","sourceBounds":{"left":0,"top":0,"width":344,"height":502},"editBounds":{"left":0,"top":0,"width":344,"height":502},"authorityBounds":{"left":0,"top":0,"width":344,"height":502},"placementBounds":{"left":869,"top":500,"width":344,"height":502}}]}', repeat('f', 64),
+    '[{"component_candidate_id":"88000000-0000-4000-8000-000000000001","component_version_id":"83000000-0000-4000-8000-000000000001","placement_version_id":"89000000-0000-4000-8000-000000000001","slot":"cap","variant_key":"SGLD","source_bounds":{"left":0,"top":0,"width":344,"height":502},"edit_bounds":{"left":0,"top":0,"width":344,"height":502},"authority_bounds":{"left":0,"top":0,"width":344,"height":502},"placement_bounds":{"left":869,"top":500,"width":344,"height":502}}]',
+    0, '85000000-0000-4000-8000-000000000001', 'Jordan Richter', 'Mismatched reviewed manifest'
+  )$$,
+  'P0001',
+  'Release rows must equal the exact reviewed manifest assets',
+  'release rows cannot diverge from the reviewed manifest'
+);
+
+SELECT throws_ok(
+  $$SELECT public.paper_doll_cut_release_atomic(
+    '81000000-0000-4000-8000-000000000001', 'CYL-9ML', '1.0.0',
+    '{"familyKey":"CYL-9ML","assets":[{"componentVersionId":"83000000-0000-4000-8000-000000000001","candidateId":"88000000-0000-4000-8000-000000000001","placementVersionId":"89000000-0000-4000-8000-000000000001","slot":"cap","variantKey":"SGLD","sourceBounds":{"left":0,"top":0,"width":344,"height":502},"editBounds":{"left":0,"top":0,"width":344,"height":502},"authorityBounds":{"left":0,"top":0,"width":344,"height":502},"placementBounds":{"left":869,"top":500,"width":344,"height":502}}]}', repeat('f', 64),
     '[{"component_candidate_id":"88000000-0000-4000-8000-000000000001","component_version_id":"83000000-0000-4000-8000-000000000001","placement_version_id":"89000000-0000-4000-8000-000000000001","slot":"cap","variant_key":"SGLD","source_bounds":{"left":0,"top":0,"width":344,"height":502},"edit_bounds":{"left":0,"top":0,"width":344,"height":502},"authority_bounds":{"left":0,"top":0,"width":344,"height":502},"placement_bounds":{"left":869,"top":500,"width":344,"height":502}}]',
     0, '85000000-0000-4000-8000-000000000001', 'Jordan Richter', 'Invalid fixture'
   )$$,
   'P0001',
-  'Every non-body candidate must have immutable locked placement',
+  'Every non-body asset must bind its exact candidate, component version, slot, variant, placement, bounds, mask, and lock evidence',
   'failed validation aborts the transaction'
 );
 
@@ -124,7 +149,7 @@ SELECT is(
 CREATE TEMP TABLE atomic_result AS
 SELECT public.paper_doll_cut_release_atomic(
   '81000000-0000-4000-8000-000000000001', 'CYL-9ML', '1.0.0',
-  '{"familyKey":"CYL-9ML"}', repeat('f', 64),
+  '{"familyKey":"CYL-9ML","assets":[{"componentVersionId":"83000000-0000-4000-8000-000000000001","candidateId":"87000000-0000-4000-8000-000000000001","placementVersionId":"89000000-0000-4000-8000-000000000001","slot":"cap","variantKey":"SGLD","sourceBounds":{"left":0,"top":0,"width":344,"height":502},"editBounds":{"left":0,"top":0,"width":344,"height":502},"authorityBounds":{"left":0,"top":0,"width":344,"height":502},"placementBounds":{"left":869,"top":500,"width":344,"height":502}}]}', repeat('f', 64),
   '[{"component_candidate_id":"87000000-0000-4000-8000-000000000001","component_version_id":"83000000-0000-4000-8000-000000000001","placement_version_id":"89000000-0000-4000-8000-000000000001","slot":"cap","variant_key":"SGLD","source_bounds":{"left":0,"top":0,"width":344,"height":502},"edit_bounds":{"left":0,"top":0,"width":344,"height":502},"authority_bounds":{"left":0,"top":0,"width":344,"height":502},"placement_bounds":{"left":869,"top":500,"width":344,"height":502}}]',
   0, '85000000-0000-4000-8000-000000000001', 'Jordan Richter', 'Approve atomic fixture'
 ) AS result;
@@ -167,7 +192,7 @@ SELECT is(
 SELECT ok(
   (public.paper_doll_cut_release_atomic(
     '81000000-0000-4000-8000-000000000001', 'CYL-9ML', '1.0.0',
-    '{"familyKey":"CYL-9ML"}', repeat('f', 64),
+    '{"familyKey":"CYL-9ML","assets":[{"componentVersionId":"83000000-0000-4000-8000-000000000001","candidateId":"87000000-0000-4000-8000-000000000001","placementVersionId":"89000000-0000-4000-8000-000000000001","slot":"cap","variantKey":"SGLD","sourceBounds":{"left":0,"top":0,"width":344,"height":502},"editBounds":{"left":0,"top":0,"width":344,"height":502},"authorityBounds":{"left":0,"top":0,"width":344,"height":502},"placementBounds":{"left":869,"top":500,"width":344,"height":502}}]}', repeat('f', 64),
     '[{"component_candidate_id":"87000000-0000-4000-8000-000000000001","component_version_id":"83000000-0000-4000-8000-000000000001","placement_version_id":"89000000-0000-4000-8000-000000000001","slot":"cap","variant_key":"SGLD","source_bounds":{"left":0,"top":0,"width":344,"height":502},"edit_bounds":{"left":0,"top":0,"width":344,"height":502},"authority_bounds":{"left":0,"top":0,"width":344,"height":502},"placement_bounds":{"left":869,"top":500,"width":344,"height":502}}]',
     0, '85000000-0000-4000-8000-000000000001', 'Jordan Richter', 'Retry atomic fixture'
   )->>'idempotent')::BOOLEAN
