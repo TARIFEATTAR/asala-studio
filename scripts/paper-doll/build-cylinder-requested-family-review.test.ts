@@ -92,7 +92,9 @@ test("materializes full-canvas review plates with one assembly transform", async
   const outputRoot = path.join(temporary, "output");
   const sourceBytes = Buffer.from("Photoshop source fixture");
   await mkdir(path.join(archiveRoot, "100"), { recursive: true });
+  await mkdir(path.join(outputRoot, "cyl-100ml-18-415-spray", "detached-source-reviews"), { recursive: true });
   await writeFile(path.join(archiveRoot, "100/source.psd"), sourceBytes);
+  await writeFile(path.join(outputRoot, "cyl-100ml-18-415-spray", "detached-source-reviews", "stale-misclassified-layer.png"), "stale");
 
   const sourceRecipe = recipe(sha256(sourceBytes));
   const dimensions = new Map(sourceRecipe.families[0].layers.map((layer) => [
@@ -148,6 +150,10 @@ test("materializes full-canvas review plates with one assembly transform", async
   assert.equal((await sharp(family.assemblyPreviewPath).metadata()).height, 240);
   assert.equal((await sharp(result.contactSheetPath).metadata()).width, 720);
   assert.equal(JSON.parse(await readFile(result.manifestPath, "utf8")).families.length, 1);
+  await assert.rejects(
+    () => readFile(path.join(outputRoot, "cyl-100ml-18-415-spray", "detached-source-reviews", "stale-misclassified-layer.png")),
+    /ENOENT/,
+  );
 });
 
 test("rejects a mutated PSD before creating a review manifest", async () => {
@@ -181,6 +187,26 @@ test("keeps the disputed 74x21 mm regular roll-on as body-only identity-review e
     ["body", 3, true],
     ["roller-fitment", 4, false],
     ["roll-on-overcap", 2, false],
+  ]);
+});
+
+test("classifies the tall 9 ml 13-415 source as one shared body across cap, roll-on, and spray modes", async () => {
+  const productionRecipe = parseCylinderRequestedFamilySourceRecipe(JSON.parse(
+    await readFile("docs/paper-doll-rig/cylinder-requested-family-source-recipes.json", "utf8"),
+  ));
+  const family = productionRecipe.families.find((candidate) => candidate.familyKey === "CYL-9ML-13-415-SPRAY-TALL");
+  assert.ok(family);
+  assert.equal(family.label, "9 mL tall slim 13-415 shared body");
+  assert.equal(family.reviewScope, "body-only");
+  assert.equal(family.geometry.bodyHeightMm, 106);
+  assert.equal(family.geometry.bodyWidthMm, 18);
+  assert.equal(family.geometry.neckFinish, "13-415");
+  assert.match(family.source.notes!, /regular-cap, roll-on, and fine-mist/i);
+  assert.deepEqual(family.layers.map((layer) => [layer.layerId, layer.assemblyMember]), [
+    ["body", true],
+    ["dip-tube", false],
+    ["opaque-overcap", false],
+    ["sprayer-head", false],
   ]);
 });
 

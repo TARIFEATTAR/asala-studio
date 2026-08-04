@@ -47,8 +47,9 @@
   "families": [
     {
       "familyKey": "CYL-9ML-13-415-SPRAY-TALL",
-      "label": "9 mL tall slim 13-415 spray",
+      "label": "9 mL tall slim 13-415 shared body",
       "displayKey": "spray|9|tall",
+      "reviewScope": "body-only",
       "geometry": {
         "geometryKey": "body__cylinder__9ml__106x18x18.0__fca612c530",
         "capacityMl": 9,
@@ -61,13 +62,14 @@
         "originalFilename": "3. GBTallCyl9SpryBlkMt.psd",
         "sha256": "72ca21d99b451ac8409d65966fa70013c65473435c3ea1405a260cd24a65eca4",
         "canvas": { "width": 750, "height": 1594 },
-        "identityStatus": "source-backed"
+        "identityStatus": "source-backed",
+        "notes": "The 106 × 18 mm tall body is shared by regular-cap, roll-on, and fine-mist catalog modes. This PSD is spray-source evidence only; the family review places the body alone so the sprayer cannot define or visually shorten the shared body authority. The user-supplied physical comparison confirms that the capped 74 × 21 mm regular 17-415 bottle remains visibly shorter than the tall body's shoulder."
       },
       "layers": [
         { "layerId": "body", "role": "body", "sceneIndex": 2, "sourceBoundsPx": { "left": 137, "top": 265, "width": 243, "height": 1253 }, "assemblyMember": true, "zIndex": 10 },
-        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 3, "sourceBoundsPx": { "left": 220, "top": 312, "width": 74, "height": 1054 }, "assemblyMember": true, "zIndex": 20 },
+        { "layerId": "dip-tube", "role": "body-contextual", "sceneIndex": 3, "sourceBoundsPx": { "left": 220, "top": 312, "width": 74, "height": 1054 }, "assemblyMember": false, "zIndex": 20 },
         { "layerId": "opaque-overcap", "role": "detached-review", "sceneIndex": 4, "sourceBoundsPx": { "left": 451, "top": 1137, "width": 205, "height": 381 }, "assemblyMember": false, "zIndex": 40 },
-        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 158, "top": 67, "width": 181, "height": 358 }, "assemblyMember": true, "zIndex": 30 }
+        { "layerId": "sprayer-head", "role": "exterior-component", "sceneIndex": 5, "sourceBoundsPx": { "left": 158, "top": 67, "width": 181, "height": 358 }, "assemblyMember": false, "zIndex": 30 }
       ]
     },
     {

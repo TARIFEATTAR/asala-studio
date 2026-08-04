@@ -11,22 +11,23 @@ Runtime recipe:
 - current exact-identity output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v3-exact-jumbo-rollons/`
 - jumbo component decomposition: `docs/paper-doll-rig/jumbo-rollon-16mm-component-kit-decomposition.json`
 - jumbo component review: `outputs/paper-doll-component-kit-reviews/16mm-jumbo-rollon/source-extraction-v2/`
-- historical pre-resolution output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v1/`
-- historical mistaken-quarantine output: `outputs/paper-doll-cylinder-requested-family-reviews/source-registered-v2-corrected/`
+- superseded outputs are quarantined beneath `outputs/paper-doll-cylinder-requested-family-reviews/_superseded/`; only `source-registered-v3-exact-jumbo-rollons` may be used for current identity review
 
 ## Registered review families
 
 | Family | Physical truth | Display position | Source identity | Responsibilities |
 |---|---|---|---|---|
-| 9 mL tall slim spray | 106 × 18 mm, 13-415 | `spray\|9\|tall`, 71% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
+| 9 mL tall slim shared body | 106 × 18 mm, 13-415 | body-only at 67.801802% | source-backed spray PSD; shared-body identity confirmed | one body authority for regular-cap, roll-on, and fine-mist modes; all source components detached until their own Family Fit |
 | 9 mL regular roll-on | reported 74 × 21 mm, 17-415 | `roll-on\|9\|regular`, reference-only | **identity decision required** | clean body scene only; contaminated component scenes detached; five locked 70 × 20 mm plates remain active authority |
-| 28 mL large-roller bottle | 81 × 31 mm body; 100 mm capped; 16 mm | `roll-on\|28`, body-only at 74% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
-| 50 mL large-roller bottle | 98 × 37 mm body; 116 mm capped; 16 mm | `roll-on\|50`, body-only at 78% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
+| 28 mL large-roller bottle | 81 × 31 mm body; 100 mm capped; 16 mm | `roll-on\|28`, body-only at 59.94% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
+| 50 mL large-roller bottle | 98 × 37 mm body; 116 mm capped; 16 mm | `roll-on\|50`, body-only at 65.896552% | exact user/live-catalog identity | valid uncapped body; valid separable plastic large-roller candidate; metal composite requires neck removal; black/white overcaps detached |
 | 25 mL spray | 83 × 32 mm, 18-415 | `spray\|25`, 73.210526% | **manual review required** | body + body-contextual dip tube + sprayer head; overcap detached |
 | 50 mL spray | 117 × 32 mm, 18-415 | `spray\|50`, 78% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
 | 100 mL spray | 154 × 35 mm, 18-415 | `spray\|100`, 79% | source-backed | body + body-contextual dip tube + sprayer head; overcap detached |
 
 The 25 mL source archive and filename call the product “30 mL,” while current catalog truth identifies the family as 25 mL / 83 × 32 mm. The source remains reviewable but cannot become body authority until a named identity decision resolves that conflict.
+
+The tall 9 mL registration deliberately does not call the physical family “a spray.” The layered spray PSD supplies clean body evidence, but the same 106 × 18 mm 13-415 shell is sold with regular caps and roll-on assemblies as well. The body-only review uses the measured body-to-assembly ratio and the supplied side-by-side physical photograph as scale evidence. It does not allow the sprayer head's source pixels to redefine the body height.
 
 ## Jumbo roll-on identity resolution
 
