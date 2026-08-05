@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, CloudUpload, Cpu, FolderOpen, Play, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CloudUpload, Cpu, Eraser, FolderOpen, Play, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -228,7 +228,7 @@ export function CandidateActionPanel({
     setError(null);
   };
 
-  const buildRequest = async (manualOutput?: ManualCandidateAssetRef): Promise<CandidateJobRequest> => {
+  const buildRequest = async (manualOutput?: ManualCandidateAssetRef, providerOverride?: CandidateProvider): Promise<CandidateJobRequest> => {
     if (parentMaskBlocker) throw new Error(parentMaskBlocker);
     if (!asset || !requirement || !asset.geometryMaskUrl || !asset.geometryMaskReference) {
       throw new Error("A registered component requirement and authority mask are required.");
@@ -254,8 +254,8 @@ export function CandidateActionPanel({
       componentId: asset.componentId,
       parentComponentVersionId: asset.componentVersionId,
       parentSha256: asset.reference.sha256,
-      provider,
-      model,
+      provider: providerOverride ?? provider,
+      model: providerOverride ? CandidateProviderModels[providerOverride][0] : model,
       instruction,
       source: assetRef(asset),
       authoritativeMask,
@@ -267,17 +267,18 @@ export function CandidateActionPanel({
     };
   };
 
-  const queue = async (manualFile?: File) => {
+  const queue = async (manualFile?: File, providerOverride?: CandidateProvider, stripOverride?: boolean) => {
     if (!candidateEditingEnabled || !selectionReady) return;
     setBusy(true);
     setMessage(null);
     setError(null);
     try {
+      const effectiveProvider = providerOverride ?? provider;
       let manualOutput: ManualCandidateAssetRef | undefined;
-      if (provider === "manual") {
+      if (effectiveProvider === "manual") {
         if (!manualFile) throw new Error("Choose one PNG manual candidate to upload.");
         let sourceFile = manualFile;
-        if (stripBackground) {
+        if (stripOverride ?? stripBackground) {
           setMessage("Removing background (fal BiRefNet)…");
           sourceFile = await stripFileBackground(manualFile, user?.id);
         }
@@ -291,7 +292,7 @@ export function CandidateActionPanel({
           originalFilename: sourceFile.name,
         });
       }
-      const queued = await createCandidateJob(supabase, await buildRequest(manualOutput));
+      const queued = await createCandidateJob(supabase, await buildRequest(manualOutput, providerOverride));
       setMessage(`Queued ${queued.provider} / ${queued.model}. The worker has not claimed it yet.`);
       await queryClient.invalidateQueries({ queryKey: ["paper-doll-candidate-history", organizationId, familyKey] });
     } catch (cause) {
@@ -324,6 +325,40 @@ export function CandidateActionPanel({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * In-canvas background removal: take the SELECTED layer's current pixels,
+   * flatten onto white (fal expects an opaque photo), strip via BiRefNet, and
+   * queue the cutout as a normal manual candidate. The existing inspect →
+   * approve → family-fit → lock chain stays untouched.
+   */
+  const stripSelectedLayerBackground = async () => {
+    if (!asset?.imageUrl) return;
+    setBusy(true);
+    setError(null);
+    setMessage("Fetching selected layer…");
+    try {
+      const response = await fetch(asset.imageUrl);
+      if (!response.ok) throw new Error(`Layer download failed (${response.status}).`);
+      const bitmap = await createImageBitmap(await response.blob());
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas 2D context unavailable.");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bitmap, 0, 0);
+      const flattened: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Canvas export failed."))), "image/png"));
+      const file = new File([flattened], `${asset.variantKey.toLowerCase()}__layer-source.png`, { type: "image/png" });
+      setBusy(false); // queue() manages its own busy state
+      await queue(file, "manual", true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
       setBusy(false);
     }
   };
@@ -424,6 +459,9 @@ export function CandidateActionPanel({
         ) : (
           <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !instruction.trim()} onClick={() => void queue()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}><Play className="h-3.5 w-3.5" />{busy ? "Queuing…" : "Queue candidate"}</button>
         )}
+        <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !asset?.imageUrl} onClick={() => void stripSelectedLayerBackground()} title="Remove the background from the selected layer's current pixels via fal BiRefNet and stage the cutout as a candidate" className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
+          <Eraser className="h-3.5 w-3.5" />{busy ? "Working…" : "Strip background · this layer"}
+        </button>
         {approved ? (
           <button type="button" disabled={!onOpenFamilyFit} onClick={onOpenFamilyFit} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.52)", color: "#6ee7a8", background: "rgba(110,231,168,0.05)" }}><ShieldCheck className="h-3.5 w-3.5" />Pixels Approved · Open Family Fit</button>
         ) : (
