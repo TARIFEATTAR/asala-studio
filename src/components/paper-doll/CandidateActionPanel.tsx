@@ -190,9 +190,14 @@ export function CandidateActionPanel({
       .map((entry) => entry.job.requirementKey.split(":").at(-1))
       .filter((variant): variant is "PLASTIC" | "METAL" => variant === "PLASTIC" || variant === "METAL"),
   )), [componentHistory]);
+  // The PLASTIC/METAL review-variant split only applies to roller assets.
+  // Caps and other overcap components carry their variant in the requirement
+  // itself (…:OVERCAP:BKDT) and must surface their full history unfiltered.
   const selectedHistory = useMemo(
-    () => componentHistory.filter((entry) => entry.job.requirementKey.endsWith(`:${reviewVariant}`)),
-    [componentHistory, reviewVariant],
+    () => asset?.slot === "roller"
+      ? componentHistory.filter((entry) => entry.job.requirementKey.endsWith(`:${reviewVariant}`))
+      : componentHistory,
+    [asset?.slot, componentHistory, reviewVariant],
   );
   const approvedVariants = useMemo(
     () => approvedCandidateVariants(componentHistory),
