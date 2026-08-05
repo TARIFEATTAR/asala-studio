@@ -202,6 +202,14 @@
   z-index: 1;
 }
 
+/* Best Bottles is a document-height production workbench, not a fixed camera viewport. */
+.dark-room-container.best-bottles-studio-container {
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 /* -----------------------------------------------------------------------------
    Header - Camera Top Plate Aesthetic
    ----------------------------------------------------------------------------- */

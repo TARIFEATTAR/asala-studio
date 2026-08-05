@@ -218,3 +218,46 @@ npm run test:paperdoll                              # 44 tests, all passing
 constant was 4.4× low). Whole-catalog target was ~$1,000; paper-doll estimated
 $600–700 worst case. Deterministic derivation is $0 and is why the master-based
 approach matters economically as well as architecturally.
+
+---
+
+## Implementation update — 2026-08-02
+
+The CYL-9ML Production Candidate Bench now enforces this lifecycle in code:
+
+1. **Approve Pixels** creates and resolves an immutable approved child whose
+   image SHA, authority-mask SHA, alpha bounds, QA evidence, and named decision
+   all agree.
+2. **Family Fit** remains disabled until that exact child exists. It mounts the
+   approved child and permits only release-pixel X/Y translation plus uniform
+   scale across the five explicit body plates.
+3. **Lock Shared Placement** writes one append-only placement version, five
+   assembly-context reviews, and one named approval. The key is
+   `CYL-9ML + fitment__roller-ball__17-415__v1 + exact authority-mask SHA +
+   2080×2288 canvas`.
+4. **Current Release** is the user-facing name for the internal read-only
+   `release-lock` mode. It never adopts pixel approvals or placement locks by
+   implication.
+5. A later **release cut** and later **Sanity dry-run / named publication** are
+   separate milestones. Neither occurs in the pixel-approval or placement-lock
+   transactions.
+
+The placement ledger is implemented by migration
+`20260802211000_paper_doll_shared_placements.sql`, read through
+`get_paper_doll_family_placement`, and written only through the authenticated
+`lock-paper-doll-placement` Edge boundary into the service-only
+`lock_paper_doll_shared_placement` transaction. Browser roles have
+organization-scoped reads and no direct writes.
+
+The five body plates remain unchanged. There are no per-body offsets. Moving a
+loaded lock creates visible **Draft changes** and requires a new immutable named
+lock; refreshing reloads the latest exact-mask placement and displays the same
+placement ID on all five lineup cells.
+
+Still separate and not implied complete:
+
+- reusable proposed-geometry intake and compatibility mapping for vintage
+  bulbs, tassel bulbs, pumps, sprayers, and other new silhouettes;
+- release-candidate assembly and explicit release cut;
+- Sanity dry-run diff, named publication approval, publication transaction,
+  and append-only publication events.

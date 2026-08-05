@@ -1,0 +1,16 @@
+{
+  "name": "@madison/paper-doll-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx src/worker.ts",
+    "render:cyl9": "tsx src/worker.ts --render-pack"
+  },
+  "dependencies": {
+    "tsx": "^4.20.6"
+  }
+}
