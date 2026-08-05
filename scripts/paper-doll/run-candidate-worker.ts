@@ -35,21 +35,31 @@ function processJob(jobId: string): Promise<number> {
   });
 }
 
+const skipped = new Set<string>();
+
 async function tick(): Promise<void> {
   const { data, error } = await client
     .from("paper_doll_candidate_jobs")
-    .select("id,status,created_at")
+    .select("id,status,provider,created_at")
     .eq("status", "queued")
     .order("created_at", { ascending: true })
-    .limit(3);
+    .limit(5);
   if (error) {
     console.error(`[worker-loop] poll error: ${error.message}`);
     return;
   }
   for (const job of data ?? []) {
-    console.log(`[worker-loop] processing ${job.id}`);
+    if (skipped.has(job.id)) continue;
+    if (job.provider === "blender") {
+      // Blender jobs need a human-rendered --provider-output; not automatable.
+      console.log(`[worker-loop] skipping blender job ${job.id} (needs manual render)`);
+      skipped.add(job.id);
+      continue;
+    }
+    console.log(`[worker-loop] processing ${job.provider} job ${job.id}`);
     const code = await processJob(job.id);
     console.log(`[worker-loop] job ${job.id} exited ${code}`);
+    if (code !== 0) skipped.add(job.id); // don't spin on a failing job
   }
 }
 
