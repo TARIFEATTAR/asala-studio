@@ -105,7 +105,11 @@ KEEP EXACTLY AS SHOWN IN THE FIRST IMAGE: the closure's silhouette, proportions,
 
 interface Part { file: string; body: string; finish: string; aspect: string }
 
-const RHINESTONE = `Set with small clear crystal rhinestones in the same pattern and positions as the first image — each stone crisp and faceted, catching one small bright glint.`;
+// PRODUCT TRUTH (confirmed 2026-08-04, Jordan): the dots are NOT rhinestones or
+// crystals. They are small recessed dimples moulded into the cap, each with a
+// mirror-shine plastic surface inside. Naming crystals/rhinestones renders
+// faceted stones — wrong product.
+const RHINESTONE = `Decorated with small recessed circular dimples in the same pattern and positions as the first image — each dimple is a shallow moulded depression with a smooth mirror-shine surface inside that catches one small bright specular glint. They are part of the moulded cap surface, not attached stones, not crystals, not faceted.`;
 
 const PARTS: Part[] = [
   // ── roll-on over-caps (chrome/matte plastic — NEVER aluminium)
