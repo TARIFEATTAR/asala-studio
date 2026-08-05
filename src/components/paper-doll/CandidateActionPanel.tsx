@@ -67,6 +67,39 @@ const PROVIDERS: Array<{ id: CandidateProvider; label: string; detail: string }>
 const OVERCAP_VARIANTS = new Set(["SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL", "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT"]);
 const ROLLER_VARIANTS = new Set(["PLASTIC", "METAL"]);
 
+/**
+ * Run an imported candidate through Madison's remove-background edge function
+ * (fal.ai BiRefNet — the same remover used in image refine) before it enters
+ * the candidate pipeline. Returns a new PNG File with transparent background.
+ */
+async function stripFileBackground(file: File, userId: string | undefined): Promise<File> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  const { data, error } = await supabase.functions.invoke("remove-background", {
+    body: { imageBase64: btoa(binary), userId, saveToLibrary: false },
+  });
+  if (error) throw new Error(`Background removal failed: ${error.message ?? String(error)}`);
+  const result = data as { success?: boolean; imageUrl?: string; imageBase64?: string; error?: string } | null;
+  if (!result || result.error || result.success === false) {
+    throw new Error(result?.error ?? "Background removal returned no result.");
+  }
+  let outBytes: Uint8Array;
+  if (result.imageBase64) {
+    const raw = atob(result.imageBase64.replace(/^data:image\/\w+;base64,/, ""));
+    outBytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) outBytes[i] = raw.charCodeAt(i);
+  } else if (result.imageUrl) {
+    const response = await fetch(result.imageUrl);
+    if (!response.ok) throw new Error(`Cutout download failed (${response.status}).`);
+    outBytes = new Uint8Array(await response.arrayBuffer());
+  } else {
+    throw new Error("Background removal returned no image.");
+  }
+  return new File([outBytes], `${file.name.replace(/\.png$/i, "")}__bg-removed.png`, { type: "image/png" });
+}
+
 function dataUrlBytes(dataUrl: string): Uint8Array {
   const encoded = dataUrl.split(",")[1];
   if (!encoded) throw new Error("Edit mask could not be serialized.");
@@ -132,6 +165,7 @@ export function CandidateActionPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [stripBackground, setStripBackground] = useState(true);
   const [reviewVariant, setReviewVariant] = useState<"PLASTIC" | "METAL">(
     asset?.variantKey === "METAL" ? "METAL" : "PLASTIC",
   );
@@ -242,14 +276,19 @@ export function CandidateActionPanel({
       let manualOutput: ManualCandidateAssetRef | undefined;
       if (provider === "manual") {
         if (!manualFile) throw new Error("Choose one PNG manual candidate to upload.");
+        let sourceFile = manualFile;
+        if (stripBackground) {
+          setMessage("Removing background (fal BiRefNet)…");
+          sourceFile = await stripFileBackground(manualFile, user?.id);
+        }
         manualOutput = await uploadManualCandidateSource(supabase, {
           organizationId,
           familyKey,
           assetId: `manual-output-${asset?.componentVersionId ?? "unknown"}`,
-          bytes: new Uint8Array(await manualFile.arrayBuffer()),
-          contentType: manualFile.type || "image/png",
+          bytes: new Uint8Array(await sourceFile.arrayBuffer()),
+          contentType: sourceFile.type || "image/png",
           extension: "png",
-          originalFilename: manualFile.name,
+          originalFilename: sourceFile.name,
         });
       }
       const queued = await createCandidateJob(supabase, await buildRequest(manualOutput));
@@ -377,6 +416,10 @@ export function CandidateActionPanel({
             <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy} onClick={() => setLibraryOpen(true)} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
               <FolderOpen className="h-3.5 w-3.5" />Choose from Image Library
             </button>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em]" style={{ borderColor: stripBackground ? "rgba(97,214,200,0.48)" : "var(--darkroom-border-subtle)", color: stripBackground ? "#61d6c8" : "var(--darkroom-text-dim)" }}>
+              <input type="checkbox" className="h-3 w-3 accent-[#61d6c8]" checked={stripBackground} onChange={(event) => setStripBackground(event.target.checked)} disabled={busy} />
+              Remove background first · fal BiRefNet
+            </label>
           </>
         ) : (
           <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy || !instruction.trim()} onClick={() => void queue()} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}><Play className="h-3.5 w-3.5" />{busy ? "Queuing…" : "Queue candidate"}</button>
