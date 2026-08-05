@@ -64,7 +64,12 @@ const PROVIDERS: Array<{ id: CandidateProvider; label: string; detail: string }>
   { id: "google", label: "Nano Banana", detail: "Gemini image" },
   { id: "manual", label: "Upload", detail: "versioned source" },
 ];
-const OVERCAP_VARIANTS = new Set(["SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL", "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT"]);
+// Both vocabularies: legacy harvest keys (SHN-SL era) and the 1.3.0 release
+// keys (SSLV era). The live release ledger uses the latter.
+const OVERCAP_VARIANTS = new Set([
+  "SHN-SL", "SHN-GL", "MAT-CU", "SHN-BLK", "MAT-SL", "MAT-GL", "WHT", "SL-DOT", "BLK-DOT", "PNK-DOT",
+  "SSLV", "SGLD", "MCPR", "SBLK", "MSLV", "MGLD", "SLDT", "BKDT", "PKDT",
+]);
 const ROLLER_VARIANTS = new Set(["PLASTIC", "METAL"]);
 
 /**
