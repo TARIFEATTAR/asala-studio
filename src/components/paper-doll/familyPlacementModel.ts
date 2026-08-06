@@ -37,6 +37,21 @@ export const CYL9_ROLLER_CONTACT: ContactPlacementMeasurement = {
   targetOuterWidthPx: 262,
 };
 
+/**
+ * The roll-on overcap authority footprint on the locked canvas
+ * (closure__17-415__rollon-overcap__v2): 344 px wide, center X 1041,
+ * seat Y 1002. Imports are normalized into this footprint, so source and
+ * target coincide and Family Fit opens at identity, recording fine nudges.
+ */
+export const CYL9_CAP_CONTACT: ContactPlacementMeasurement = {
+  sourceContactYPx: 1002,
+  targetContactYPx: 1002,
+  sourceCenterXPx: 1041,
+  targetCenterXPx: 1041,
+  sourceOuterWidthPx: 344,
+  targetOuterWidthPx: 344,
+};
+
 export const IDENTITY_FAMILY_PLACEMENT: FamilyPlacementTransform = {
   translateXPx: 0,
   translateYPx: 0,

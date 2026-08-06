@@ -51,6 +51,7 @@ import {
 import { useCandidateMask } from "./useCandidateMask";
 import {
   CYL9_ROLLER_CONTACT,
+  CYL9_CAP_CONTACT,
   IDENTITY_FAMILY_PLACEMENT,
   deriveContactPlacement,
   fromSharedPlacementRecord,
@@ -73,7 +74,9 @@ type ReleaseAsset = PaperDollReleaseWorkbenchData["assets"][number];
 const IDENTITY_TRANSFORM = { translateXPx: 0, translateYPx: 0, scaleX: 1, scaleY: 1 };
 const CYL9_FAMILY_KEY = "CYL-9ML";
 const CYL9_ROLLER_GEOMETRY_KEY = "fitment__roller-ball__17-415__v1";
+const CYL9_CAP_GEOMETRY_KEY = "closure__17-415__rollon-overcap__v2";
 const MEASURED_ROLLER_PLACEMENT = deriveContactPlacement(CYL9_ROLLER_CONTACT);
+const MEASURED_CAP_PLACEMENT = deriveContactPlacement(CYL9_CAP_CONTACT);
 
 /**
  * Human-readable layer label. The ledger name for both roller versions is
@@ -147,11 +150,16 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
+  const selectedSlot = query.data?.assets.find((a) => a.componentVersionId === selectedLayerId)?.slot ?? null;
+  const placementSlot = selectedSlot === "roller" ? "roller" : selectedSlot === "cap" || selectedSlot === "overcap" ? "cap" : null;
+  const placementGeometryKey = placementSlot === "cap" ? CYL9_CAP_GEOMETRY_KEY : CYL9_ROLLER_GEOMETRY_KEY;
+  const placementContact = placementSlot === "cap" ? CYL9_CAP_CONTACT : CYL9_ROLLER_CONTACT;
+  const measuredPlacement = placementSlot === "cap" ? MEASURED_CAP_PLACEMENT : MEASURED_ROLLER_PLACEMENT;
   const placementQueryKey = [
     "paper-doll-shared-placement",
     organizationId,
     CYL9_FAMILY_KEY,
-    CYL9_ROLLER_GEOMETRY_KEY,
+    placementGeometryKey,
     approvedCandidate?.authorityMaskSha256 ?? null,
   ] as const;
   const placementQuery = useQuery({
@@ -161,7 +169,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
       {
         organizationId: organizationId!,
         familyKey: CYL9_FAMILY_KEY,
-        fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+        fitmentGeometryKey: placementGeometryKey,
         authorityMaskSha256: approvedCandidate!.authorityMaskSha256,
       },
     ),
@@ -177,7 +185,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
         {
           organizationId,
           familyKey: CYL9_FAMILY_KEY,
-          fitmentGeometryKey: CYL9_ROLLER_GEOMETRY_KEY,
+          fitmentGeometryKey: placementGeometryKey,
           calibrationComponentVersionId: approvedCandidate.componentVersionId,
           expectedAuthorityMaskSha256: approvedCandidate.authorityMaskSha256,
           canvas: { widthPx: 2080, heightPx: 2288 },
@@ -238,7 +246,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   useEffect(() => {
     appliedPlacementRef.current = null;
-    if (approvedComponentVersionId) setFamilyTransform(MEASURED_ROLLER_PLACEMENT);
+    if (approvedComponentVersionId) setFamilyTransform(measuredPlacement);
   }, [approvedComponentVersionId]);
 
   useEffect(() => {
@@ -271,7 +279,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const candidateEditingEnabled = mode === "edit-lab"
     && selectedAsset?.slot !== "body"
     && Boolean(selectedAsset?.geometryMaskUrl);
-  const placementEditingEnabled = mode === "family-fit" && selectedAsset?.slot === "roller" && Boolean(approvedCandidate);
+  const placementEditingEnabled = mode === "family-fit" && placementSlot !== null && Boolean(approvedCandidate);
   const activeTransform = mode === "family-fit" ? familyTransform : candidateTransform;
   const selectionReady = selectionKind === "whole-layer"
     || (selectionKind === "rectangle" && Boolean(mask.rectangle))
@@ -304,7 +312,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
     if (nextMode !== "family-fit") return;
     const amber = bodies.find((asset) => asset.variantKey === "AMB") ?? bodies[0];
     if (amber) setSelectedBodyId(amber.componentVersionId);
-    setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : MEASURED_ROLLER_PLACEMENT);
+    setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : measuredPlacement);
   };
 
   const setFamilyAxis = (axis: "translateXPx" | "translateYPx", value: number) => {
@@ -315,7 +323,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
   const setFamilyScale = (value: number) => {
     if (!Number.isFinite(value) || value <= 0) return;
     const scale = Math.round(value * 1000) / 1000;
-    setFamilyTransform((current) => resizePlacementAroundContact(current, CYL9_ROLLER_CONTACT, scale));
+    setFamilyTransform((current) => resizePlacementAroundContact(current, placementContact, scale));
   };
 
   const chooseBody = (bodyId: string) => {
@@ -393,7 +401,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             </div>
           </div>
 
-          <button type="button" onClick={() => { if (mode === "family-fit") setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : MEASURED_ROLLER_PLACEMENT); else setCandidateTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset {mode === "family-fit" ? "family placement" : "candidate edit"}</button>
+          <button type="button" onClick={() => { if (mode === "family-fit") setFamilyTransform(lockedPlacement ? fromSharedPlacementRecord(lockedPlacement) : measuredPlacement); else setCandidateTransform(IDENTITY_TRANSFORM); mask.reset(); }} className="flex w-full items-center justify-center gap-2 rounded border px-2 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}><RotateCcw className="h-3 w-3" />Reset {mode === "family-fit" ? "family placement" : "candidate edit"}</button>
         </aside>
 
         <div className="rounded border p-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "rgba(0,0,0,0.12)" }}>
@@ -407,7 +415,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             candidateEditingEnabled={candidateEditingEnabled}
             placementEditingEnabled={placementEditingEnabled}
             layerTransform={activeTransform}
-            contactGuideYPx={mode === "family-fit" ? CYL9_ROLLER_CONTACT.targetContactYPx : 1002}
+            contactGuideYPx={mode === "family-fit" ? placementContact.targetContactYPx : 1002}
             onSelectLayer={setSelectedLayerId}
             onTransformChange={mode === "family-fit" ? setFamilyTransform : setCandidateTransform}
             onRectangleChange={mask.setRectangle}
@@ -423,8 +431,8 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
             <div className="mt-3 rounded border p-3" style={{ borderColor: "rgba(97,214,200,0.35)", background: "rgba(97,214,200,0.035)" }}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]" style={{ color: "#61d6c8" }}><Move3d className="h-3.5 w-3.5" />CYL-9ML roller family placement candidate</div>
-                  <p className="mt-1 max-w-xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>Amber is the calibration reference. Move the complete cropped roller layer; the identical transform cascades to all five locked bodies and every roller material. The hidden insertion plug remains intentionally omitted.</p>
+                  <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]" style={{ color: "#61d6c8" }}><Move3d className="h-3.5 w-3.5" />CYL-9ML family placement candidate</div>
+                  <p className="mt-1 max-w-xl text-[9px] leading-4" style={{ color: "var(--darkroom-text-dim)" }}>Amber is the calibration reference. Move the complete component layer; the identical transform cascades to all five locked bodies and every material variant sharing this geometry. The hidden insertion plug remains intentionally omitted.</p>
                 </div>
                 <ToneBadge tone="good">5/5 synchronized</ToneBadge>
               </div>
@@ -453,7 +461,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               </div>
 
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-                <button type="button" onClick={() => setFamilyTransform(MEASURED_ROLLER_PLACEMENT)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>Use calibrated flush · 262 px</button>
+                <button type="button" onClick={() => setFamilyTransform(measuredPlacement)} className="rounded border px-3 py-2 text-[8px] uppercase tracking-[0.14em]" style={{ borderColor: "rgba(215,168,95,0.45)", color: "var(--darkroom-accent)" }}>Use calibrated flush</button>
                 <span className="text-[8px] uppercase tracking-[0.13em]" style={{ color: placementIsExact ? "#6ee7a8" : "#f2c078" }}>{placementIsExact ? `Placement ${lockedPlacement?.id.slice(0, 8)}… loaded` : lockedPlacement ? "Draft changes · lock a new immutable version" : "Placement version not written"}</span>
               </div>
               <SharedPlacementPanel
