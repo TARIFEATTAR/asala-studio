@@ -493,7 +493,12 @@ export function CandidateActionPanel({
         ) : (
           <>
             <button type="button" disabled={!canApprove || busy} onClick={() => void decide("approved")} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(110,231,168,0.42)", color: "#6ee7a8" }}><ShieldCheck className="h-3.5 w-3.5" />Approve Pixels</button>
-            <button type="button" disabled={latest?.job.status !== "candidate_ready" || busy} onClick={() => void decide("rejected")} className="rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}>Reject</button>
+            <button type="button" disabled={latest?.job.status !== "candidate_ready" || busy || Boolean(latest?.approval)} onClick={() => void decide("rejected")} className="rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "var(--darkroom-border-subtle)", color: "var(--darkroom-text-dim)" }}>Reject</button>
+            {latest?.approval && (
+              <span className="self-center text-[8px] uppercase tracking-[0.13em]" style={{ color: latest.approval.decision === "rejected" ? "#ef8d7d" : "#6ee7a8" }}>
+                Decision recorded · {String(latest.approval.decision)} · immutable
+              </span>
+            )}
           </>
         )}
       </div>
