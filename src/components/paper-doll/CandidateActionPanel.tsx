@@ -164,12 +164,14 @@ async function normalizeIntoAuthority(file: File, maskUrl: string): Promise<File
   const ctx = out.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D context unavailable.");
   ctx.imageSmoothingQuality = "high";
-  // Overfill by 2% (seat anchored, centered on X) so the photo's own edge
-  // pixels — cutout fringe, dust — land OUTSIDE the authority silhouette and
-  // are removed by the byte-exact clamp. Only clean interior material remains.
-  const OVERFILL = 1.02;
-  const fitW = target.w * OVERFILL;
-  const fitH = target.h * OVERFILL;
+  // Asymmetric overfill (seat anchored, centered on X) so the photo's own
+  // edge pixels — cutout fringe, top-rim matte junk, dust — land OUTSIDE the
+  // authority silhouette and are removed by the byte-exact clamp. The top gets
+  // a deeper trim: 2020-source contamination runs ~9-11px deep at the dome.
+  const OVERFILL_X = 1.02;
+  const OVERFILL_TOP = 1.05;
+  const fitW = target.w * OVERFILL_X;
+  const fitH = target.h * OVERFILL_TOP;
   const fitX = target.x - (fitW - target.w) / 2;
   const fitY = target.y - (fitH - target.h); // bottom edge (seat) stays fixed
   ctx.drawImage(sourceBitmap, sourceBox.x, sourceBox.y, sourceBox.w, sourceBox.h, fitX, fitY, fitW, fitH);
