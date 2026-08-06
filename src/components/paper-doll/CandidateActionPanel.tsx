@@ -105,6 +105,71 @@ async function stripFileBackground(file: File, userId: string | undefined): Prom
   return new File([outBytes], `${file.name.replace(/\.png$/i, "")}__bg-removed.png`, { type: "image/png" });
 }
 
+const CANVAS_W = 2080;
+const CANVAS_H = 2288;
+
+function alphaBBox(data: Uint8ClampedArray, width: number, height: number, threshold = 16) {
+  let minX = width, minY = height, maxX = -1, maxY = -1;
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    if (data[(y * width + x) * 4 + 3] > threshold) {
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+  }
+  return maxX < 0 ? null : { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
+}
+
+function imageData(bitmap: ImageBitmap): { ctx: CanvasRenderingContext2D; data: ImageData } {
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable.");
+  ctx.drawImage(bitmap, 0, 0);
+  return { ctx, data: ctx.getImageData(0, 0, bitmap.width, bitmap.height) };
+}
+
+/** Does the image contain any meaningful transparency? */
+function hasAlpha(data: ImageData): boolean {
+  const px = data.data;
+  for (let i = 3; i < px.length; i += 4) if (px[i] < 250) return true;
+  return false;
+}
+
+/**
+ * Auto-fit an imported image into the selected layer's authority silhouette:
+ * find the content (alpha bbox), find the mask bbox on the 2080×2288 canvas,
+ * and scale/position the content into it. Any crop, any resolution — the
+ * result is a correctly-sized, correctly-placed full-canvas candidate. The
+ * worker's byte-exact alpha clamp still owns the final edges.
+ */
+async function normalizeIntoAuthority(file: File, maskUrl: string): Promise<File> {
+  const [maskBitmap, sourceBitmap] = await Promise.all([
+    fetch(maskUrl).then((r) => { if (!r.ok) throw new Error(`Authority mask download failed (${r.status}).`); return r.blob(); }).then((b) => createImageBitmap(b)),
+    createImageBitmap(file),
+  ]);
+  if (sourceBitmap.width === CANVAS_W && sourceBitmap.height === CANVAS_H) return file; // already full canvas
+  const mask = imageData(maskBitmap);
+  const scaleX = CANVAS_W / maskBitmap.width;
+  const scaleY = CANVAS_H / maskBitmap.height;
+  const maskBox = alphaBBox(mask.data.data, maskBitmap.width, maskBitmap.height);
+  if (!maskBox) throw new Error("Authority mask has no occupied silhouette.");
+  const target = { x: maskBox.x * scaleX, y: maskBox.y * scaleY, w: maskBox.w * scaleX, h: maskBox.h * scaleY };
+  const source = imageData(sourceBitmap);
+  const sourceBox = alphaBBox(source.data.data, sourceBitmap.width, sourceBitmap.height)
+    ?? { x: 0, y: 0, w: sourceBitmap.width, h: sourceBitmap.height };
+  const out = document.createElement("canvas");
+  out.width = CANVAS_W;
+  out.height = CANVAS_H;
+  const ctx = out.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable.");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(sourceBitmap, sourceBox.x, sourceBox.y, sourceBox.w, sourceBox.h, target.x, target.y, target.w, target.h);
+  const blob: Blob = await new Promise((resolve, reject) =>
+    out.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed."))), "image/png"));
+  return new File([blob], `${file.name.replace(/\.png$/i, "")}__fitted.png`, { type: "image/png" });
+}
+
 function dataUrlBytes(dataUrl: string): Uint8Array {
   const encoded = dataUrl.split(",")[1];
   if (!encoded) throw new Error("Edit mask could not be serialized.");
@@ -304,9 +369,21 @@ export function CandidateActionPanel({
           }
         }
         let sourceFile = manualFile;
-        if (stripOverride ?? stripBackground) {
-          setMessage("Removing background (fal BiRefNet)…");
-          sourceFile = await stripFileBackground(manualFile, user?.id);
+        // A fully opaque import always gets a background strip — an opaque
+        // rectangle can never composite over the bottle, whatever the toggle.
+        const probe = imageData(await createImageBitmap(sourceFile));
+        const opaque = !hasAlpha(probe.data);
+        if ((stripOverride ?? stripBackground) || opaque) {
+          setMessage(opaque && !(stripOverride ?? stripBackground)
+            ? "Opaque image — removing background automatically (fal BiRefNet)…"
+            : "Removing background (fal BiRefNet)…");
+          sourceFile = await stripFileBackground(sourceFile, user?.id);
+        }
+        // Auto-fit crops into the layer's authority silhouette so any
+        // resolution imports at the correct size and position.
+        if (asset?.geometryMaskUrl) {
+          setMessage("Fitting into the authority silhouette…");
+          sourceFile = await normalizeIntoAuthority(sourceFile, asset.geometryMaskUrl);
         }
         manualOutput = await uploadManualCandidateSource(supabase, {
           organizationId,
