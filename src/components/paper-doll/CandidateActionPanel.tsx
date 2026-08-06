@@ -296,6 +296,21 @@ export function CandidateActionPanel({
   });
 
   useEffect(() => onInspectionChange(inspectionFrom(latest, candidateMaskBlocker)), [latest, candidateMaskBlocker, onInspectionChange]);
+  useEffect(() => {
+    if (!asset) return;
+    console.log("[candidate-debug]", JSON.stringify({
+      layer: `${asset.slot}:${asset.variantKey}`,
+      componentId: asset.componentId.slice(0, 8),
+      historyLoaded: Boolean(history.data),
+      historyError: history.error instanceof Error ? history.error.message : null,
+      totalJobs: history.data?.jobs.length ?? -1,
+      componentHistory: componentHistory.length,
+      selectedHistory: selectedHistory.length,
+      latest: latest?.job.id?.slice(0, 8) ?? null,
+      latestFile: latest?.job.manualOutput?.originalFilename ?? null,
+      previewUrl: Boolean((latest as { candidateImageUrl?: string | null } | null)?.candidateImageUrl),
+    }));
+  }, [asset, history.data, history.error, componentHistory.length, selectedHistory.length, latest]);
   useEffect(() => onApprovedChange(approved), [approved, onApprovedChange]);
   useEffect(() => onApprovedVariantsChange?.(approvedVariants), [approvedVariants, onApprovedVariantsChange]);
 
