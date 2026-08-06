@@ -439,12 +439,17 @@ export function CandidateActionPanel({
    * approve → family-fit → lock chain stays untouched.
    */
   const stripSelectedLayerBackground = async () => {
-    if (!asset?.imageUrl) return;
+    // Prefer the mounted candidate's pixels (post-import cleanup); fall back
+    // to the layer's release source.
+    const sourceUrl = latest?.job.status === "candidate_ready" && inspectionFrom(latest, candidateMaskBlocker)?.imageUrl
+      ? inspectionFrom(latest, candidateMaskBlocker)!.imageUrl!
+      : asset?.imageUrl;
+    if (!sourceUrl) return;
     setBusy(true);
     setError(null);
     setMessage("Fetching selected layer…");
     try {
-      const response = await fetch(asset.imageUrl);
+      const response = await fetch(sourceUrl);
       if (!response.ok) throw new Error(`Layer download failed (${response.status}).`);
       const bitmap = await createImageBitmap(await response.blob());
       const canvas = document.createElement("canvas");
