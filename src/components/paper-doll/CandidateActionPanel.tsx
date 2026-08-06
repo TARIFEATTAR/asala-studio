@@ -252,7 +252,17 @@ export function CandidateActionPanel({
 
   const history = useQuery({
     queryKey: ["paper-doll-candidate-history", organizationId, familyKey],
-    queryFn: () => loadCandidateWorkbench(supabase, organizationId, familyKey),
+    queryFn: async () => {
+      try {
+        return await loadCandidateWorkbench(supabase, organizationId, familyKey);
+      } catch (cause) {
+        // Surface the real failure — react-query's silent retries otherwise
+        // leave the panel permanently "loading" with no error anywhere.
+        console.error("[candidate-history] load failed:", cause, "| org:", organizationId);
+        throw cause;
+      }
+    },
+    retry: 1,
     refetchInterval: (candidateQuery) => candidateHistoryRefreshInterval(candidateQuery.state.data?.jobs),
     refetchOnWindowFocus: true,
   });
