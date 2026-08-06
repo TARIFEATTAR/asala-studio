@@ -164,7 +164,15 @@ async function normalizeIntoAuthority(file: File, maskUrl: string): Promise<File
   const ctx = out.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D context unavailable.");
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(sourceBitmap, sourceBox.x, sourceBox.y, sourceBox.w, sourceBox.h, target.x, target.y, target.w, target.h);
+  // Overfill by 2% (seat anchored, centered on X) so the photo's own edge
+  // pixels — cutout fringe, dust — land OUTSIDE the authority silhouette and
+  // are removed by the byte-exact clamp. Only clean interior material remains.
+  const OVERFILL = 1.02;
+  const fitW = target.w * OVERFILL;
+  const fitH = target.h * OVERFILL;
+  const fitX = target.x - (fitW - target.w) / 2;
+  const fitY = target.y - (fitH - target.h); // bottom edge (seat) stays fixed
+  ctx.drawImage(sourceBitmap, sourceBox.x, sourceBox.y, sourceBox.w, sourceBox.h, fitX, fitY, fitW, fitH);
   const blob: Blob = await new Promise((resolve, reject) =>
     out.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas export failed."))), "image/png"));
   return new File([blob], `${file.name.replace(/\.png$/i, "")}__fitted.png`, { type: "image/png" });
