@@ -179,8 +179,18 @@ async function manualProviderRaw(
   };
 }
 
+/**
+ * Occupancy of a mask pixel. Masks exist in two encodings: black/white
+ * luminance (alpha 255 everywhere, silhouette in red) and white-on-transparent
+ * (red 255 everywhere, silhouette in alpha). min(red, alpha) reads both
+ * correctly; reading red alone made alpha-encoded masks "occupied everywhere",
+ * which flattened manual candidates into opaque full-canvas rectangles.
+ */
 function channelValue(data: Buffer, channels: number, pixel: number): number {
-  return data[pixel * channels];
+  const offset = pixel * channels;
+  const red = data[offset];
+  const alpha = channels >= 4 ? data[offset + channels - 1] : 255;
+  return Math.min(red, alpha);
 }
 
 function assertSingleConnectedAuthority(
