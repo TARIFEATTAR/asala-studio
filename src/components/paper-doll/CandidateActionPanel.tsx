@@ -287,6 +287,22 @@ export function CandidateActionPanel({
       let manualOutput: ManualCandidateAssetRef | undefined;
       if (effectiveProvider === "manual") {
         if (!manualFile) throw new Error("Choose one PNG manual candidate to upload.");
+        // Guard: a filename that names a different variant than the selected
+        // layer is almost always a mis-targeted import (e.g. BKDT.png onto a
+        // roller — the mask clamp would faithfully produce a hybrid).
+        const knownKeys = [...OVERCAP_VARIANTS, "METAL", "PLASTIC"].sort((a, b) => b.length - a.length);
+        const upperName = manualFile.name.toUpperCase();
+        const nameKey = knownKeys.find((key) => upperName.includes(key));
+        if (nameKey && asset && nameKey !== asset.variantKey) {
+          const proceed = window.confirm(
+            `"${manualFile.name}" looks like variant ${nameKey}, but you are importing onto "${asset.displayName}" (${asset.variantKey}). Import anyway?`,
+          );
+          if (!proceed) {
+            setBusy(false);
+            setMessage("Import cancelled — select the matching layer first.");
+            return;
+          }
+        }
         let sourceFile = manualFile;
         if (stripOverride ?? stripBackground) {
           setMessage("Removing background (fal BiRefNet)…");
@@ -455,7 +471,7 @@ export function CandidateActionPanel({
         {provider === "manual" ? (
           <>
             <label className={`inline-flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] ${!candidateEditingEnabled || !selectionReady || busy ? "pointer-events-none opacity-35" : ""}`} style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
-              <CloudUpload className="h-3.5 w-3.5" />Upload from computer
+              <CloudUpload className="h-3.5 w-3.5" />Upload for {asset ? `${asset.variantKey}` : "selected layer"}
               <input type="file" accept="image/png" className="hidden" disabled={!candidateEditingEnabled || !selectionReady || busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void queue(file); event.target.value = ""; }} />
             </label>
             <button type="button" disabled={!candidateEditingEnabled || !selectionReady || busy} onClick={() => setLibraryOpen(true)} className="inline-flex items-center gap-2 rounded border px-3 py-2 text-[9px] uppercase tracking-[0.14em] disabled:opacity-35" style={{ borderColor: "rgba(97,214,200,0.48)", color: "#61d6c8" }}>
