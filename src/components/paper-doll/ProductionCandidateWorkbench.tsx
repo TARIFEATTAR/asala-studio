@@ -75,6 +75,19 @@ const CYL9_FAMILY_KEY = "CYL-9ML";
 const CYL9_ROLLER_GEOMETRY_KEY = "fitment__roller-ball__17-415__v1";
 const MEASURED_ROLLER_PLACEMENT = deriveContactPlacement(CYL9_ROLLER_CONTACT);
 
+/**
+ * Human-readable layer label. The ledger name for both roller versions is
+ * "natural plastic roller-ball fitment" (the HOUSING is plastic in both);
+ * the variant describes the BALL. Rendered verbatim next to "METAL" it reads
+ * as a contradiction, so rollers get an explicit ball-material label.
+ */
+function assetDisplayLabel(asset: { slot: string; variantKey: string; displayName: string }): string {
+  if (asset.slot !== "roller") return asset.displayName;
+  return asset.variantKey === "METAL"
+    ? "17-415 roller-ball fitment — steel ball"
+    : "17-415 roller-ball fitment — plastic ball";
+}
+
 function ToneBadge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "warning" }) {
   const color = tone === "good" ? "#6ee7a8" : tone === "warning" ? "#f2c078" : "var(--darkroom-text-muted)";
   return <span className="rounded-full border px-2 py-0.5 text-[8px] uppercase tracking-[0.15em]" style={{ borderColor: `${color}55`, color }}>{children}</span>;
@@ -357,7 +370,7 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
               return (
                 <div key={asset.componentVersionId} className="flex items-center gap-1 rounded border p-1" style={{ borderColor: selected ? "rgba(215,168,95,0.52)" : "var(--darkroom-border-subtle)", background: selected ? "rgba(215,168,95,0.07)" : "transparent" }}>
                   <button type="button" onClick={() => setSelectedLayerId(asset.componentVersionId)} className="min-w-0 flex-1 px-1 text-left">
-                    <div className="truncate text-[10px]" style={{ color: selected ? "var(--darkroom-text-primary)" : "var(--darkroom-text-muted)" }}>{asset.displayName}</div>
+                    <div className="truncate text-[10px]" style={{ color: selected ? "var(--darkroom-text-primary)" : "var(--darkroom-text-muted)" }}>{assetDisplayLabel(asset)}</div>
                     <div className="truncate font-mono text-[8px]" style={{ color: "var(--darkroom-text-dim)" }}>{asset.slot} · {asset.materialVariant}</div>
                   </button>
                   <button type="button" onClick={() => toggleVisibility(asset.componentVersionId)} className="rounded p-1 hover:bg-white/5" aria-label={`${hidden ? "Show" : "Hide"} ${asset.displayName}`}>{hidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}</button>
