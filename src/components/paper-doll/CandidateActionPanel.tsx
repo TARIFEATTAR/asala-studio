@@ -295,7 +295,15 @@ export function CandidateActionPanel({
   }, [availableReviewVariants, reviewVariant]);
   // Failed and revoked outputs remain immutable audit records, but they cannot
   // displace a clean candidate in the working inspector.
-  const latest = selectCandidateForReview(selectedHistory);
+  // The newest selectable candidate mounts by default; clicking a history row
+  // pins a specific candidate for review instead.
+  const [pinnedJobId, setPinnedJobId] = useState<string | null>(null);
+  useEffect(() => setPinnedJobId(null), [asset?.componentVersionId]);
+  const newestSelectable = selectCandidateForReview(selectedHistory);
+  const pinned = pinnedJobId
+    ? selectedHistory.find((entry) => entry.job.id === pinnedJobId && candidateAuditReason(entry) === null) ?? null
+    : null;
+  const latest = pinned ?? newestSelectable;
   const parentMaskBlocker = authorityMaskBlocker(asset?.geometryMaskReference?.sha256);
   const candidateMaskBlocker = candidateAuthorityBlocker(latest);
   const approved = useMemo(() => approvedCandidateDetails(latest), [latest]);
@@ -640,15 +648,27 @@ export function CandidateActionPanel({
 
       <div className="border-t pt-2" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
         <div className="mb-1 text-[8px] uppercase tracking-[0.15em]" style={{ color: "var(--darkroom-text-dim)" }}>Immutable {reviewVariant.toLowerCase()} history · {selectedHistory.length}</div>
-        {selectedHistory.length === 0 ? <div className="text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>No attempts for this component.</div> : selectedHistory.slice(0, 4).map((entry) => (
-          <div key={entry.job.id} className="flex items-center justify-between gap-2 border-t py-1.5 text-[8px]" style={{ borderColor: "var(--darkroom-border-subtle)" }}>
-            <span className="min-w-0 font-mono" style={{ color: "var(--darkroom-text-muted)" }}>
-              <span className="block truncate">{entry.job.provider} · {entry.job.model}</span>
-              {entry.job.manualOutput?.originalFilename && <span className="mt-0.5 block truncate" title={entry.job.manualOutput.originalFilename} style={{ color: "var(--darkroom-text-dim)" }}>{entry.job.manualOutput.originalFilename}</span>}
-            </span>
-            <span className="text-right uppercase tracking-wider" style={{ color: candidateAuditReason(entry) ? "#ef8d7d" : entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{candidateAuditReason(entry) ?? entry.job.status.replace("_", " ")}</span>
-          </div>
-        ))}
+        {selectedHistory.length === 0 ? <div className="text-[9px]" style={{ color: "var(--darkroom-text-dim)" }}>No attempts for this component.</div> : selectedHistory.slice(0, 6).map((entry) => {
+          const selectable = candidateAuditReason(entry) === null;
+          const mounted = latest?.job.id === entry.job.id;
+          return (
+            <button
+              key={entry.job.id}
+              type="button"
+              disabled={!selectable}
+              onClick={() => setPinnedJobId(entry.job.id)}
+              title={selectable ? "Mount this candidate for review" : undefined}
+              className="flex w-full items-center justify-between gap-2 border-t py-1.5 text-left text-[8px] disabled:cursor-default"
+              style={{ borderColor: "var(--darkroom-border-subtle)", background: mounted ? "rgba(97,214,200,0.06)" : "transparent" }}
+            >
+              <span className="min-w-0 font-mono" style={{ color: mounted ? "#61d6c8" : "var(--darkroom-text-muted)" }}>
+                <span className="block truncate">{entry.job.provider} · {entry.job.model}{mounted ? " · MOUNTED" : ""}</span>
+                {entry.job.manualOutput?.originalFilename && <span className="mt-0.5 block truncate" title={entry.job.manualOutput.originalFilename} style={{ color: "var(--darkroom-text-dim)" }}>{entry.job.manualOutput.originalFilename}</span>}
+              </span>
+              <span className="text-right uppercase tracking-wider" style={{ color: candidateAuditReason(entry) ? "#ef8d7d" : entry.job.status === "candidate_ready" ? "#6ee7a8" : entry.job.status === "failed" ? "#ef8d7d" : "#f2c078" }}>{candidateAuditReason(entry) ?? entry.job.status.replace("_", " ")}</span>
+            </button>
+          );
+        })}
       </div>
       <ImageLibraryModal
         open={libraryOpen}
