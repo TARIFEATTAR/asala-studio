@@ -513,6 +513,12 @@ export function CandidateActionPanel({
         <button type="button" onClick={() => void history.refetch()} className="rounded p-1.5 hover:bg-white/5" aria-label="Refresh candidate history"><RefreshCw className={`h-3.5 w-3.5 ${history.isFetching ? "animate-spin" : ""}`} /></button>
       </div>
 
+      {history.error != null && (
+        <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{ borderColor: "rgba(239,141,125,0.42)", color: "#ef8d7d", background: "rgba(239,141,125,0.05)" }}>
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>Candidate history failed to load: {history.error instanceof Error ? history.error.message : String(history.error)}</span>
+        </div>
+      )}
       {ancestorNotice && (
         <div className="flex items-start gap-2 rounded border px-3 py-2 text-[9px] leading-4" style={{
           borderColor: ancestorNotice.tone === "warning" ? "rgba(242,192,120,0.32)" : "rgba(239,141,125,0.42)",

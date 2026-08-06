@@ -239,6 +239,13 @@ export async function loadCandidateWorkbench(
       const signed = await client.storage!.from(output.bucket).createSignedUrl(output.path, 300);
       if (!signed.error && signed.data?.signedUrl) {
         entry.candidateImageUrl = signed.data.signedUrl;
+      } else {
+        // A silent signing failure renders as "no candidate" in the inspector —
+        // surface it so the real cause is visible instead of a generic empty state.
+        console.error(
+          `[candidate-history] preview signing failed for job ${entry.job.id.slice(0, 8)} (${output.bucket}/${output.path.slice(-24)}):`,
+          signed.error?.message ?? "no signed URL returned",
+        );
       }
       if (!entry.approvedVersion) return;
       const approvedBucket = requiredString(entry.approvedVersion.storage_bucket, "approved Storage bucket");
