@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-07T00:37:51.198Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "sourceReleaseId": "264f02d1-8686-4d5b-93c3-d3f1848ef6a3",
+  "sourceReleaseVersion": "1.3.8-roller-light.1",
+  "releaseVersion": "1.3.9-cap-lift.2",
+  "sourceGitCommit": "016c2cdbed717bb96f2f8eeeef34123a0e647f66",
+  "capPlacementVersionId": "fc560af5-16d8-47d2-9350-71ef90f018de",
+  "capComponentVersionIds": [
+    {
+      "componentVersionId": "d37a904e-a206-465c-a70a-75b7680bd93c",
+      "variantKey": "BKDT",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "80b3e008-39c3-49d4-bc33-74f36200e01e",
+      "variantKey": "MCPR",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "3d569cd8-4fae-4c51-ac61-e4a65f81234e",
+      "variantKey": "MGLD",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "f23f628c-948c-49f7-9647-314f7fa76107",
+      "variantKey": "MSLV",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "601d74ed-a12d-4cbf-9d40-aca6d4b8d0d5",
+      "variantKey": "PKDT",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "ff2da3c0-105b-4984-a2f1-2014479cab69",
+      "variantKey": "SBLK",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "65ed0860-07a4-47d9-995a-534d9eb3838f",
+      "variantKey": "SGLD",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "2b5a7786-6e5c-4106-914d-7fb1281dd010",
+      "variantKey": "SLDT",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "89abc87c-5fdb-413c-a5a7-d2d5525c734a",
+      "variantKey": "SSLV",
+      "versionOrigin": "cap-lift-v2"
+    },
+    {
+      "componentVersionId": "b9536596-83bf-448a-80f5-448d6e433044",
+      "variantKey": "WHT",
+      "versionOrigin": "cap-lift-v2"
+    }
+  ],
+  "assetCounts": {
+    "body": 5,
+    "roller": 2,
+    "cap": 10,
+    "sprayer": 6,
+    "pump": 3
+  },
+  "readiness": {
+    "ready": 145,
+    "incomplete": 0
+  },
+  "releaseCut": {
+    "readiness": {
+      "ready": 145,
+      "incomplete": 0
+    },
+    "releaseId": "1c665f94-faa6-4ed4-b130-324f22482b65",
+    "publishRunId": "8bf99d0b-26af-4f7b-82d8-727d4e7df0e2",
+    "releaseCutId": "17782fa4-5645-4c38-b257-6fd96329f055",
+    "releaseStatus": "ready",
+    "manifestSha256": "f0bf40ed6e874d9ed86ebf737df37b674829601b7b9debf1cee1651a97418a89",
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "sanityPublished": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicPublicationPerformed": false
+  }
+}
