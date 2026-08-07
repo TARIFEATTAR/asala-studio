@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Warm both roller fitment layers to the Bone body anchor per the measured light audit (METAL 1.016, PLASTIC 1.015 -> 1.03); alpha untouched, assembled mask and identity lock inherited. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-07T00:20:26.055Z",
+  "neutralAnchorTemp": 1.03,
+  "rollerComponentVersions": [
+    {
+      "variantKey": "METAL",
+      "componentVersionId": "edd8b857-0ffb-4abc-91d8-8313a587f0b5",
+      "imageSha256": "c44ac8722e14af353f7a40a02dc23ce5989b1f430dc181540cc9ef7d949adeb5",
+      "authorityMaskSha256": "d4343d853c853a54fcce9cacb91f56a24973c41ecd76c5b7d29ba7a074aceb01",
+      "placementVersionId": "d975a5a4-3ac1-4f6d-a31e-0fbe83dd7b4d",
+      "versionCreated": true
+    },
+    {
+      "variantKey": "PLASTIC",
+      "componentVersionId": "17b008bc-d341-46e7-9646-dc62d7f920c2",
+      "imageSha256": "86e727756e367f3dfa7e9ba88733fb7db41dbafe368da37f685153086ef69247",
+      "authorityMaskSha256": "d4343d853c853a54fcce9cacb91f56a24973c41ecd76c5b7d29ba7a074aceb01",
+      "placementVersionId": "d975a5a4-3ac1-4f6d-a31e-0fbe83dd7b4d",
+      "versionCreated": true
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-light-v1/METAL/c44ac8722e14af353f7a40a02dc23ce5989b1f430dc181540cc9ef7d949adeb5.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-light-v1/PLASTIC/86e727756e367f3dfa7e9ba88733fb7db41dbafe368da37f685153086ef69247.png",
+      "action": "uploaded"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "a6a01f81abf9716f0b03434fff1c6406592400b8f5d970c74b4e48fa18ac8c02"
+}

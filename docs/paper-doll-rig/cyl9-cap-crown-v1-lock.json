@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+  "placementVersionId": "335aea8d-87fc-4e36-ab7f-fd94f13fad66",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Height-exact refit of the nine Adobe caps so the cap crown is fully exposed (no top crop); harmonization gains and 2px lift baked in; identity placement on the lifted authority reused. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-07T00:13:11.701Z",
+  "placement": {
+    "translateXPx": 0,
+    "translateYPx": 0,
+    "uniformScale": 1
+  },
+  "authorityMaskSha256": "95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe",
+  "capComponentVersions": [
+    {
+      "variantKey": "BKDT",
+      "componentVersionId": "6390e65b-752c-4320-948e-a7b0c4340f62",
+      "imageSha256": "13a3666a45da6d456bd1b65a0913ae428f89e128bafe3c3e529379ea19563cc4"
+    },
+    {
+      "variantKey": "MCPR",
+      "componentVersionId": "cf80d6ad-42c0-4f81-acfe-21d1a17e70e7",
+      "imageSha256": "e6841cbc64e860fdf630da26c20aec2042c936c57e6a5bada38481431bb91c30"
+    },
+    {
+      "variantKey": "MGLD",
+      "componentVersionId": "c15f4c8b-3f7d-4b35-8236-bdb962738204",
+      "imageSha256": "af2056e01e49f6b846df6ca23869a0d4247af392e6e8e7512a1977c2c7fdc9ba"
+    },
+    {
+      "variantKey": "MSLV",
+      "componentVersionId": "0d29d8ef-38a4-4d2d-bf33-ccfdfb697421",
+      "imageSha256": "802e96a81b4731fef5874217d57b99c081d14e4685fda187a32a2be7aeb75d7a"
+    },
+    {
+      "variantKey": "PKDT",
+      "componentVersionId": "5fce1281-24e2-4344-8510-98a345773319",
+      "imageSha256": "872ede6c558e4015cdf75830102a83ee073b0bcd8b35104cf66f0f501b39070b"
+    },
+    {
+      "variantKey": "SBLK",
+      "componentVersionId": "e2f2c4c2-c313-4a21-81dd-2f0fdea18002",
+      "imageSha256": "40895dec88dd04e8d0e17bb6c4d7561710e0d043b7f785b445176be5b457eff7"
+    },
+    {
+      "variantKey": "SGLD",
+      "componentVersionId": "0f271cd5-0b08-45af-bb81-6e03cf70cf1b",
+      "imageSha256": "8f9555e89a4acd041af7b995e1743b0973ce650a55dd67072ca7cd2ea8868720"
+    },
+    {
+      "variantKey": "SLDT",
+      "componentVersionId": "970ce602-a1e8-42af-b60c-39337465dcf1",
+      "imageSha256": "f25eef079bdb3098aba166219688a03d48282ecca7bdb405e41f572547458b65"
+    },
+    {
+      "variantKey": "SSLV",
+      "componentVersionId": "857590e1-4300-4225-90ef-d85bcafd4105",
+      "imageSha256": "3e8ccb70f86b8ce8828756912036559fb4c7ce909fc9bc2771e7c92c20d6c3bb"
+    },
+    {
+      "variantKey": "WHT",
+      "componentVersionId": "528204c6-f49e-467b-9a6a-4e407d5a6dac",
+      "imageSha256": "3b7b0ea72bdb2505b5dc4fcd958de11fcb6bb101bb2792abd55495621ebd6444"
+    }
+  ],
+  "retained": [
+    {
+      "variantKey": "WHT",
+      "reason": "v1-source fit was exact; crown intact"
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/BKDT/13a3666a45da6d456bd1b65a0913ae428f89e128bafe3c3e529379ea19563cc4.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/MCPR/e6841cbc64e860fdf630da26c20aec2042c936c57e6a5bada38481431bb91c30.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/MGLD/af2056e01e49f6b846df6ca23869a0d4247af392e6e8e7512a1977c2c7fdc9ba.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/MSLV/802e96a81b4731fef5874217d57b99c081d14e4685fda187a32a2be7aeb75d7a.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/PKDT/872ede6c558e4015cdf75830102a83ee073b0bcd8b35104cf66f0f501b39070b.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/SBLK/40895dec88dd04e8d0e17bb6c4d7561710e0d043b7f785b445176be5b457eff7.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/SGLD/8f9555e89a4acd041af7b995e1743b0973ce650a55dd67072ca7cd2ea8868720.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/SLDT/f25eef079bdb3098aba166219688a03d48282ecca7bdb405e41f572547458b65.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-crown-v1/SSLV/3e8ccb70f86b8ce8828756912036559fb4c7ce909fc9bc2771e7c92c20d6c3bb.png",
+      "action": "uploaded"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "90a62baa580348c1a62e0cc63ebe86c8423608e19119fc16bd90e251ed079da6"
+}

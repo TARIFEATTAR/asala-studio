@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-06T22:12:07.839Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "sourceReleaseVersion": "1.3.4-bare-pumps.2",
+  "releaseVersion": "1.3.5-light-harmonized.1",
+  "sourceGitCommit": "fad91c74ae5cfcbfde982e75792116d85d414fed",
+  "harmonizedComponentVersionIds": [
+    {
+      "componentVersionId": "3b5643da-9d20-4366-83fd-2f28071d7531",
+      "slot": "cap",
+      "variantKey": "BKDT"
+    },
+    {
+      "componentVersionId": "c8e93c39-bfcc-4552-b0ec-e905dc30c67e",
+      "slot": "cap",
+      "variantKey": "MCPR"
+    },
+    {
+      "componentVersionId": "e1ac6e1c-3f72-479a-b1b7-2bdb73ad035b",
+      "slot": "cap",
+      "variantKey": "MGLD"
+    },
+    {
+      "componentVersionId": "ddffdcba-9ca4-493e-b197-3fb886eb2d64",
+      "slot": "cap",
+      "variantKey": "MSLV"
+    },
+    {
+      "componentVersionId": "cf83bde7-fa5e-43d1-9afe-46c8bd11ec74",
+      "slot": "cap",
+      "variantKey": "PKDT"
+    },
+    {
+      "componentVersionId": "7e2e6ee8-9872-4c59-8cf5-0068bd3018b3",
+      "slot": "cap",
+      "variantKey": "SBLK"
+    },
+    {
+      "componentVersionId": "2901b195-f2f8-4d6d-b91f-5b75dd85587e",
+      "slot": "cap",
+      "variantKey": "SGLD"
+    },
+    {
+      "componentVersionId": "39aa3fc1-33be-416b-8146-81fd55536372",
+      "slot": "cap",
+      "variantKey": "SLDT"
+    },
+    {
+      "componentVersionId": "faad41fd-ce68-4aa5-b109-ce620deab6ca",
+      "slot": "cap",
+      "variantKey": "SSLV"
+    },
+    {
+      "componentVersionId": "8dc2b025-1335-4de0-9f8d-255f8072dda6",
+      "slot": "pump",
+      "variantKey": "BLK"
+    },
+    {
+      "componentVersionId": "663d164e-17c2-4803-ba2b-7e10bab27058",
+      "slot": "pump",
+      "variantKey": "GLD"
+    },
+    {
+      "componentVersionId": "d45c0bed-003f-4a16-91ad-2e5ec3770c0e",
+      "slot": "pump",
+      "variantKey": "MSLV"
+    }
+  ],
+  "releaseCut": {
+    "readiness": {
+      "ready": 145,
+      "incomplete": 0
+    },
+    "releaseId": "f566c90d-cbb9-417a-a163-0a152becd640",
+    "publishRunId": "4fef2926-3dc0-405a-b1c5-98bc7b708340",
+    "releaseCutId": "7cc6c92e-1d6f-4a10-b7cd-528f104ac288",
+    "releaseStatus": "ready",
+    "manifestSha256": "a4776795b6baeeeac65f719da1f4427ea5382d9ae20bba26ce099300f68cfd88",
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "sanityPublished": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicPublicationPerformed": false
+  }
+}

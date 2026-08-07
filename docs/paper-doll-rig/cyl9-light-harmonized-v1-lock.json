@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "White-balance harmonization to the Bone body anchor (temp 1.03) measured from shoot-group neutrals: nine Adobe caps and three bare pumps warmed ~3%; alpha untouched. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-06T22:10:54.934Z",
+  "neutralAnchorTemp": 1.03,
+  "groups": {
+    "adobe-caps": 1,
+    "bare-pumps": 0.998
+  },
+  "harmonizedComponentVersions": [
+    {
+      "slot": "cap",
+      "variantKey": "BKDT",
+      "componentVersionId": "3b5643da-9d20-4366-83fd-2f28071d7531",
+      "imageSha256": "e00b360806900bec063b1d7b66973e9b8b4dccbff1f93c236365587ae506bf17",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "MCPR",
+      "componentVersionId": "c8e93c39-bfcc-4552-b0ec-e905dc30c67e",
+      "imageSha256": "2b3d8dfb47e02ac2670b70e2b8a28b02679b59fafec63c52a1cb00ac259d46b8",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "MGLD",
+      "componentVersionId": "e1ac6e1c-3f72-479a-b1b7-2bdb73ad035b",
+      "imageSha256": "91447d2e59e1a6d0db04830b82426153912232abea70776c202b08eed315767d",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "MSLV",
+      "componentVersionId": "ddffdcba-9ca4-493e-b197-3fb886eb2d64",
+      "imageSha256": "3ca8640abbf7f7580019dbedb4c88f3cfed217b57c307a9842c5f84fe8b4db06",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "PKDT",
+      "componentVersionId": "cf83bde7-fa5e-43d1-9afe-46c8bd11ec74",
+      "imageSha256": "55f798678bac00d678dcde62e3b4286775f468818f1b4da1aa8cb9421d139699",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "SBLK",
+      "componentVersionId": "7e2e6ee8-9872-4c59-8cf5-0068bd3018b3",
+      "imageSha256": "7a5b9e493aac78a4da890980ef108d820e508973a57bcd71ac68f821122749ed",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "SGLD",
+      "componentVersionId": "2901b195-f2f8-4d6d-b91f-5b75dd85587e",
+      "imageSha256": "ae5b1240f07e4f5dd70043bbaed14f0ca1b3ab119de59f12823e5e708e0b4d00",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "SLDT",
+      "componentVersionId": "39aa3fc1-33be-416b-8146-81fd55536372",
+      "imageSha256": "090477713e43084271c3367e137a4373d79122849222ee83b4c99450bb740564",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "cap",
+      "variantKey": "SSLV",
+      "componentVersionId": "faad41fd-ce68-4aa5-b109-ce620deab6ca",
+      "imageSha256": "6ff4e3d56f7eace06ea135b27bab499e1cfd1b02237821b1493a548ed9a7147b",
+      "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+      "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+      "versionCreated": true
+    },
+    {
+      "slot": "pump",
+      "variantKey": "BLK",
+      "componentVersionId": "8dc2b025-1335-4de0-9f8d-255f8072dda6",
+      "imageSha256": "68a229e1ad02b86757ecbe9c24689bc3848f1365a9fd2f59158b1b7114e671b6",
+      "authorityMaskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "placementVersionId": "67b9d71d-9ad0-419a-b7f8-8d40589befaa",
+      "versionCreated": true
+    },
+    {
+      "slot": "pump",
+      "variantKey": "GLD",
+      "componentVersionId": "663d164e-17c2-4803-ba2b-7e10bab27058",
+      "imageSha256": "3125b89e5a0652a12c0fa5649ac173f13d2b90c638ede00b7954a10abcefb59c",
+      "authorityMaskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "placementVersionId": "875d8a68-ed83-4acd-820f-e321cc85194c",
+      "versionCreated": true
+    },
+    {
+      "slot": "pump",
+      "variantKey": "MSLV",
+      "componentVersionId": "d45c0bed-003f-4a16-91ad-2e5ec3770c0e",
+      "imageSha256": "894b353d04a0228eaa6323c213ba6cd43a0e4bc523acef5170d4d04c5418dfea",
+      "authorityMaskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "placementVersionId": "67d337e7-df1a-4a4e-b0d7-203aa237898d",
+      "versionCreated": true
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/BKDT/e00b360806900bec063b1d7b66973e9b8b4dccbff1f93c236365587ae506bf17.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/MCPR/2b3d8dfb47e02ac2670b70e2b8a28b02679b59fafec63c52a1cb00ac259d46b8.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/MGLD/91447d2e59e1a6d0db04830b82426153912232abea70776c202b08eed315767d.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/MSLV/3ca8640abbf7f7580019dbedb4c88f3cfed217b57c307a9842c5f84fe8b4db06.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/PKDT/55f798678bac00d678dcde62e3b4286775f468818f1b4da1aa8cb9421d139699.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/SBLK/7a5b9e493aac78a4da890980ef108d820e508973a57bcd71ac68f821122749ed.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/SGLD/ae5b1240f07e4f5dd70043bbaed14f0ca1b3ab119de59f12823e5e708e0b4d00.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/SLDT/090477713e43084271c3367e137a4373d79122849222ee83b4c99450bb740564.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/cap/SSLV/6ff4e3d56f7eace06ea135b27bab499e1cfd1b02237821b1493a548ed9a7147b.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/pump/BLK/68a229e1ad02b86757ecbe9c24689bc3848f1365a9fd2f59158b1b7114e671b6.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/pump/GLD/3125b89e5a0652a12c0fa5649ac173f13d2b90c638ede00b7954a10abcefb59c.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/light-harmonized-v1/pump/MSLV/894b353d04a0228eaa6323c213ba6cd43a0e4bc523acef5170d4d04c5418dfea.png",
+      "action": "uploaded"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "f8d274de13d53b0c15be345eb8af05fb082a4264c69d7100acd1de14350d1b7e"
+}

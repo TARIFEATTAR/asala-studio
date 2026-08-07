@@ -24,16 +24,19 @@ export interface ContactPlacementMeasurement {
 export const CYL9_BODY_VARIANTS = ["AMB", "BLU", "CLR", "FRS", "SWL"] as const;
 
 /**
- * Measured from the registered PLASTIC roller alpha and the shared neck geometry
- * of the five locked CYL-9ML plates. The omitted insertion plug is intentionally
- * outside the visible paper-doll layer.
+ * As of release 1.3.2-roller-seat.1 (2026-08-06) the roller layers are baked
+ * at their ASSEMBLED canvas position (solid contact y 760, identity placement
+ * lock d975a5a4…), matching every other slot. The historical source-position
+ * transform (918 -> 760, ×0.974) lives in placement lock fbe551b9… as bake
+ * provenance; applying it again here would double-shift the layer, so the
+ * bench contact is now identity.
  */
 export const CYL9_ROLLER_CONTACT: ContactPlacementMeasurement = {
-  sourceContactYPx: 918,
+  sourceContactYPx: 760,
   targetContactYPx: 760,
   sourceCenterXPx: 1041,
   targetCenterXPx: 1041,
-  sourceOuterWidthPx: 269,
+  sourceOuterWidthPx: 262,
   targetOuterWidthPx: 262,
 };
 

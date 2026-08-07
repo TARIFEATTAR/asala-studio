@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "fitment__roller-ball__17-415__v1",
+  "placementVersionId": "fbe551b9-19ca-4202-842c-06634fdae2da",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Rebake both roller fitment layers to the assembled canvas position via the approved shared placement lock (x 27.066, y -134.132, s 0.974; contact y 760). Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-06T21:44:50.412Z",
+  "appliedTransform": {
+    "translateXPx": 27.066,
+    "translateYPx": -134.132,
+    "uniformScale": 0.974
+  },
+  "sourceAuthorityMaskSha256": "b815bcd76f39e5a54e7ff68a660c826755dd670dc7464a7d38f87103f87e70c6",
+  "assembledAuthorityMaskSha256": "d4343d853c853a54fcce9cacb91f56a24973c41ecd76c5b7d29ba7a074aceb01",
+  "assembledBounds": {
+    "left": 908,
+    "top": 514,
+    "right": 1174,
+    "bottom": 763
+  },
+  "rollerComponentVersions": [
+    {
+      "variantKey": "METAL",
+      "componentVersionId": "ea9738a6-01a2-4f63-9e19-6c871f70ad60",
+      "imageSha256": "47a608d154dd0f9273adf2a5930b39cdc4fe06a0706f16df75a39593281f67cc"
+    },
+    {
+      "variantKey": "PLASTIC",
+      "componentVersionId": "c165e290-b25f-41a4-a0a3-7be7db395fb3",
+      "imageSha256": "f50cede2c49fcc82f5b37c219ab15f58c8b7ca85eb004432c8bb5f3e1a8f3af3"
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-assembled-v2/METAL/47a608d154dd0f9273adf2a5930b39cdc4fe06a0706f16df75a39593281f67cc.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-assembled-v2/authority/d4343d853c853a54fcce9cacb91f56a24973c41ecd76c5b7d29ba7a074aceb01.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-assembled-v2/PLASTIC/f50cede2c49fcc82f5b37c219ab15f58c8b7ca85eb004432c8bb5f3e1a8f3af3.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/roller-assembled-v2/authority/d4343d853c853a54fcce9cacb91f56a24973c41ecd76c5b7d29ba7a074aceb01.png",
+      "action": "verified-existing"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "423a39c461a23de4bd5f07024b97adb74f30a6b3bd0629a3dd84dbf31687806e"
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "pump__17-415__closed__v3",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Bare pump layers refit height-exact so the actuator tip is never clipped by the authority; identity placement reused per colour. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-06T21:59:44.231Z",
+  "placement": {
+    "translateXPx": 0,
+    "translateYPx": 0,
+    "uniformScale": 1
+  },
+  "bodyComponentVersionIds": [
+    "20594dc6-e7e9-4c84-8904-e3e38c3c5a1a",
+    "8f00c3a4-267f-4846-aaa0-4b16048218c4",
+    "a8afb0f2-0746-4688-9194-a377c3382532",
+    "b1b4bc9b-fe5c-4fb5-87c8-ec34784b1001",
+    "dc1a0d63-ac0c-47b8-bc48-54173a551572"
+  ],
+  "pumpComponentVersions": [
+    {
+      "variantKey": "BLK",
+      "componentVersionId": "14ba3873-cc86-4114-af5d-63d156fba0d2",
+      "imageSha256": "bc84cc1886d6deaf9d914ddc282caa494660b0f49b39b8b518bad14be8dbc4fe",
+      "authorityMaskSha256": "67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553",
+      "placementVersionId": "67b9d71d-9ad0-419a-b7f8-8d40589befaa",
+      "versionCreated": true,
+      "lockReused": true
+    },
+    {
+      "variantKey": "GLD",
+      "componentVersionId": "aa787ed4-cbde-45fa-b618-26d1d0de7233",
+      "imageSha256": "9b1c51cc41416b184a252310e6d0585b0ad1d01394c8ba2a0a17ddfcf6deb019",
+      "authorityMaskSha256": "3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402",
+      "placementVersionId": "875d8a68-ed83-4acd-820f-e321cc85194c",
+      "versionCreated": true,
+      "lockReused": true
+    },
+    {
+      "variantKey": "MSLV",
+      "componentVersionId": "aa8a0f82-accf-4603-bae4-b1d64276d5c6",
+      "imageSha256": "c22178b3b818cd8245abcbb66fada733902de164b109d347b83802ab6a3a5701",
+      "authorityMaskSha256": "52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687",
+      "placementVersionId": "67d337e7-df1a-4a4e-b0d7-203aa237898d",
+      "versionCreated": true,
+      "lockReused": true
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/BLK/bc84cc1886d6deaf9d914ddc282caa494660b0f49b39b8b518bad14be8dbc4fe.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/authority/67c467bb0cb91f6f50e16742c02aaf1a621562c7fe534635a5d0be4155341553.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/GLD/9b1c51cc41416b184a252310e6d0585b0ad1d01394c8ba2a0a17ddfcf6deb019.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/authority/3977798c8268fbbadb8f5b3034ca4c3e726c1f606f69fd0e1156baa526104402.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/MSLV/c22178b3b818cd8245abcbb66fada733902de164b109d347b83802ab6a3a5701.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/bare-pumps-v2/authority/52c046c8c292506f81819c951b81b9038625a1a6c9420f0b14b1d8c2fb09e687.png",
+      "action": "uploaded"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "de87a50bf8cf882df5177d5b8b1ef53641bb414c8066c5ff29438ce1a939a476"
+}

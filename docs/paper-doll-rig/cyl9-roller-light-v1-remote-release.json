@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-07T00:21:12.511Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "sourceReleaseVersion": "1.3.7-cap-crown.1",
+  "releaseVersion": "1.3.8-roller-light.1",
+  "sourceGitCommit": "fad91c74ae5cfcbfde982e75792116d85d414fed",
+  "rollerComponentVersionIds": [
+    {
+      "componentVersionId": "edd8b857-0ffb-4abc-91d8-8313a587f0b5",
+      "variantKey": "METAL",
+      "placementVersionId": "d975a5a4-3ac1-4f6d-a31e-0fbe83dd7b4d"
+    },
+    {
+      "componentVersionId": "17b008bc-d341-46e7-9646-dc62d7f920c2",
+      "variantKey": "PLASTIC",
+      "placementVersionId": "d975a5a4-3ac1-4f6d-a31e-0fbe83dd7b4d"
+    }
+  ],
+  "releaseCut": {
+    "readiness": {
+      "ready": 145,
+      "incomplete": 0
+    },
+    "releaseId": "264f02d1-8686-4d5b-93c3-d3f1848ef6a3",
+    "publishRunId": "ec13573e-fb75-4fe0-9a66-f61158ecbbec",
+    "releaseCutId": "ee8b7a87-d5f7-480d-acf0-eac76307cf97",
+    "releaseStatus": "ready",
+    "manifestSha256": "1de41cedc8fde3880b523416c21004c7d821a08ebfe0468ebe2301e059a75e28",
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "sanityPublished": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicPublicationPerformed": false
+  }
+}

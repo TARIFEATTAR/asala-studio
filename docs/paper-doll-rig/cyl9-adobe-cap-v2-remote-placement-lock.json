@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+  "placementVersionId": "64099824-4079-43f2-8219-8afa6cb18dd6",
+  "approvalId": "417f0445-e2a4-4fc3-b948-42df6852cd4e",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Adobe-cleaned cap pixels fitted into the locked overcap authority (byte-exact alpha, x0 y-3 s1 inherited); WHT retained from v1. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-06T21:17:59.899Z",
+  "placement": {
+    "translateXPx": 0,
+    "translateYPx": -3,
+    "uniformScale": 1
+  },
+  "authorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+  "currentReleaseId": "66e2250e-f772-4d84-97a7-5f8a8d31a2dd",
+  "bodyComponentVersionIds": [
+    "20594dc6-e7e9-4c84-8904-e3e38c3c5a1a",
+    "8f00c3a4-267f-4846-aaa0-4b16048218c4",
+    "a8afb0f2-0746-4688-9194-a377c3382532",
+    "b1b4bc9b-fe5c-4fb5-87c8-ec34784b1001",
+    "dc1a0d63-ac0c-47b8-bc48-54173a551572"
+  ],
+  "capComponentVersions": [
+    {
+      "variantKey": "BKDT",
+      "componentVersionId": "ffd5bf55-85d3-4428-880f-b15475c0c63e",
+      "imageSha256": "d4aa5eea521164de1be4264ef602f2d010373060868bbcdd9d6049e2d7fc9c77"
+    },
+    {
+      "variantKey": "MCPR",
+      "componentVersionId": "b74d9cb9-9c74-44d7-b7ba-75fc98177ff2",
+      "imageSha256": "de53378661a0a4459d4115d93a65b5f50abcb2c85529ce736fda6089be08adbb"
+    },
+    {
+      "variantKey": "MGLD",
+      "componentVersionId": "dd217d1c-0538-42c1-8631-ba08254b1a48",
+      "imageSha256": "ca28e14e4dabc7a9debf91d392e7637b0479d2959e56184c9e68da1f37845e02"
+    },
+    {
+      "variantKey": "MSLV",
+      "componentVersionId": "838b16dd-daea-4281-9991-46e5e4d88543",
+      "imageSha256": "45bae825bb8fa3f162c67ade8937bd459ea47bd153a709941ceabb944d9ec7e6"
+    },
+    {
+      "variantKey": "PKDT",
+      "componentVersionId": "d4339b2b-688e-4341-b645-3303b0c964cc",
+      "imageSha256": "8616a8f4f1b74559d1b9188233f55d2584ff218152f4efafadfb9253aa6e3446"
+    },
+    {
+      "variantKey": "SBLK",
+      "componentVersionId": "3d220bc5-4353-4179-832e-4ba602069a50",
+      "imageSha256": "7ef854edd5f6b56da466d0c56bf34905f5bef0d6c206d2135dc2ca751d6b3d45"
+    },
+    {
+      "variantKey": "SGLD",
+      "componentVersionId": "0978950e-b184-4efb-a486-c085cbf37ed3",
+      "imageSha256": "ea4ac5ea64ff1c00a134efdc230bfbe9b02f2a9a5b1134ab2eb8e7df2df57dc5"
+    },
+    {
+      "variantKey": "SLDT",
+      "componentVersionId": "bf79d1ba-253b-4ff3-a6ed-9b123887e6ea",
+      "imageSha256": "de425f702aea3d9d800aebc174c80e657e80d472c03881e6c626c99b1a676d06"
+    },
+    {
+      "variantKey": "SSLV",
+      "componentVersionId": "58fd167b-6a9c-4424-ab09-e1f06cba019d",
+      "imageSha256": "8dae5c63baceea488ef58de5a2900f5923e1d6e789c64b2dd63e2a58edcc1d71"
+    },
+    {
+      "variantKey": "WHT",
+      "componentVersionId": "adcd518a-74de-4c86-96e0-a04a2d900e97",
+      "imageSha256": "63d7e8c2f395487b47f47b1acc6981de573dfb39586f9f69bc3737f7ce0e1bed"
+    }
+  ],
+  "retainedFromV1": [
+    {
+      "variantKey": "WHT",
+      "componentVersionId": "adcd518a-74de-4c86-96e0-a04a2d900e97",
+      "imageSha256": "63d7e8c2f395487b47f47b1acc6981de573dfb39586f9f69bc3737f7ce0e1bed",
+      "reason": "released layer is clean; Adobe re-cut destroyed the white cap shading"
+    }
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/BKDT/d4aa5eea521164de1be4264ef602f2d010373060868bbcdd9d6049e2d7fc9c77.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/MCPR/de53378661a0a4459d4115d93a65b5f50abcb2c85529ce736fda6089be08adbb.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/MGLD/ca28e14e4dabc7a9debf91d392e7637b0479d2959e56184c9e68da1f37845e02.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/MSLV/45bae825bb8fa3f162c67ade8937bd459ea47bd153a709941ceabb944d9ec7e6.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/PKDT/8616a8f4f1b74559d1b9188233f55d2584ff218152f4efafadfb9253aa6e3446.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/SBLK/7ef854edd5f6b56da466d0c56bf34905f5bef0d6c206d2135dc2ca751d6b3d45.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/SGLD/ea4ac5ea64ff1c00a134efdc230bfbe9b02f2a9a5b1134ab2eb8e7df2df57dc5.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/SLDT/de425f702aea3d9d800aebc174c80e657e80d472c03881e6c626c99b1a676d06.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/SSLV/8dae5c63baceea488ef58de5a2900f5923e1d6e789c64b2dd63e2a58edcc1d71.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/adobe-cap-v2/authority/46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be.png",
+      "action": "verified-existing"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "1977e5298361f735d08c2f57d75b95d33769863aba7c963889602f07b5c9e844"
+}

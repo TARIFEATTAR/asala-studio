@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-06T21:55:22.926Z",
+  "organizationId": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411",
+  "familyKey": "CYL-9ML",
+  "sourceReleaseVersion": "1.3.2-roller-seat.1",
+  "releaseVersion": "1.3.3-bare-pumps.1",
+  "sourceGitCommit": "fad91c74ae5cfcbfde982e75792116d85d414fed",
+  "pumpComponentVersionIds": [
+    {
+      "componentVersionId": "bd1fa170-fb11-43c1-9a8b-cfafb7a0ede4",
+      "variantKey": "BLK",
+      "placementVersionId": "67b9d71d-9ad0-419a-b7f8-8d40589befaa"
+    },
+    {
+      "componentVersionId": "73bd53e1-a677-4d9f-babc-5c6ef701f52c",
+      "variantKey": "GLD",
+      "placementVersionId": "875d8a68-ed83-4acd-820f-e321cc85194c"
+    },
+    {
+      "componentVersionId": "b866e6ff-2db7-42d7-8db5-688ca5c396c9",
+      "variantKey": "MSLV",
+      "placementVersionId": "67d337e7-df1a-4a4e-b0d7-203aa237898d"
+    }
+  ],
+  "releaseCut": {
+    "readiness": {
+      "ready": 145,
+      "incomplete": 0
+    },
+    "releaseId": "003d6df9-0522-42ba-afbd-b0baaa0b83d4",
+    "publishRunId": "f1b9bb39-eae1-423a-884f-4fc0ba8c1050",
+    "releaseCutId": "f5910f12-fdc5-4a19-aaa4-9e8e4f842b8d",
+    "releaseStatus": "ready",
+    "manifestSha256": "d9439455c3897fe2af7de34c153e6e6318bbbb0523cc2d3d5f0bf0bbdf3d4c4e",
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "sanityPublished": false,
+    "publicDocumentId": "d5291f24-f02b-4fb7-aa99-78c5f63d8c9d"
+  },
+  "sanity": {
+    "draftQueued": true,
+    "draftSynced": false,
+    "draftDocumentId": "drafts.d5291f24-f02b-4fb7-aa99-78c5f63d8c9d",
+    "publicPublicationPerformed": false
+  }
+}

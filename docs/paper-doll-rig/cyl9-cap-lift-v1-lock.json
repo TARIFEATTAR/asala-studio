@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "familyKey": "CYL-9ML",
+  "geometryFamilyId": "closure__17-415__rollon-overcap__v2",
+  "liftPx": 2,
+  "placementVersionId": "335aea8d-87fc-4e36-ab7f-fd94f13fad66",
+  "approvedByName": "Jordan Richter",
+  "approvalNote": "Lift all ten roll-on cap layers 2px per Jordan's storefront direction; lossless integer shift of layers and authority together, identity placement on the lifted mask. Operator lane executed by Claude per Jordan's direction 2026-08-06.",
+  "approvedAt": "2026-08-06T23:58:18.086Z",
+  "placement": {
+    "translateXPx": 0,
+    "translateYPx": 0,
+    "uniformScale": 1
+  },
+  "sourceAuthorityMaskSha256": "46c5d1690912fcd01982d7adc36bf1f40057050a4274dadae2c97f6ca21ff1be",
+  "liftedAuthorityMaskSha256": "95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe",
+  "authorityMaskSha256": "95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe",
+  "capComponentVersions": [
+    {
+      "variantKey": "BKDT",
+      "componentVersionId": "94b9ce37-1151-4c8f-828b-aaea8f54c7e3",
+      "imageSha256": "20cad64c123612601759530ab823bb86f37d09750e83b17ed6a2d4be5c6b0889"
+    },
+    {
+      "variantKey": "MCPR",
+      "componentVersionId": "eb6f1308-e2ac-4c10-afdf-a103b8a62c00",
+      "imageSha256": "28bf44eb77eec19cd536e78693d78df8341c7096a509dacfb767b6ef0196048a"
+    },
+    {
+      "variantKey": "MGLD",
+      "componentVersionId": "4bbe7794-a19d-482b-b1cd-f0fbc6c5aee1",
+      "imageSha256": "0736fccf9e7b144e8c922eb2d040cc387ead1be75a8ba8962d0ed8034e3c0da4"
+    },
+    {
+      "variantKey": "MSLV",
+      "componentVersionId": "f067dc24-bed3-4826-a9c1-3193165740dc",
+      "imageSha256": "6e30881c6e89b2f65e1e87c4ee44ba8916c3000e9714184de16d5a7e0467f44e"
+    },
+    {
+      "variantKey": "PKDT",
+      "componentVersionId": "cd6bc244-993f-4406-986d-1b7b9fed41ee",
+      "imageSha256": "a612537f30bd3a5c18f9ac7845e599508eceee82d2df15aaf9a97dd1f2ed2cd3"
+    },
+    {
+      "variantKey": "SBLK",
+      "componentVersionId": "bff29858-c2a7-41ec-b360-953b5c9ca2a2",
+      "imageSha256": "094359d2ce06891e714933b6bce3173cc2b40f0d6f45f65efdcbf2ae7fc552ec"
+    },
+    {
+      "variantKey": "SGLD",
+      "componentVersionId": "6fd19410-c1c8-4603-99e4-3fc9db406402",
+      "imageSha256": "fd0d971ba193861aeb678de59fcbca5b67c6bbeb22f8a0d90dd653fce36ba8da"
+    },
+    {
+      "variantKey": "SLDT",
+      "componentVersionId": "61fff22d-2e6a-4a77-b6e5-03e7980d070b",
+      "imageSha256": "7ef9bf873aab8a8d962ea4154bfb723e9b47741066d62226562a45f7425a9624"
+    },
+    {
+      "variantKey": "SSLV",
+      "componentVersionId": "87ead9fe-ff59-4f52-9966-3d543bb59348",
+      "imageSha256": "ce599aa6fcd8aa5d6203ceaacd21c6885cb5851ae097c67eb524add1345209b6"
+    },
+    {
+      "variantKey": "WHT",
+      "componentVersionId": "528204c6-f49e-467b-9a6a-4e407d5a6dac",
+      "imageSha256": "3b7b0ea72bdb2505b5dc4fcd958de11fcb6bb101bb2792abd55495621ebd6444"
+    }
+  ],
+  "bodyComponentVersionIds": [
+    "20594dc6-e7e9-4c84-8904-e3e38c3c5a1a",
+    "8f00c3a4-267f-4846-aaa0-4b16048218c4",
+    "a8afb0f2-0746-4688-9194-a377c3382532",
+    "b1b4bc9b-fe5c-4fb5-87c8-ec34784b1001",
+    "dc1a0d63-ac0c-47b8-bc48-54173a551572"
+  ],
+  "storageActions": [
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/BKDT/20cad64c123612601759530ab823bb86f37d09750e83b17ed6a2d4be5c6b0889.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/MCPR/28bf44eb77eec19cd536e78693d78df8341c7096a509dacfb767b6ef0196048a.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/MGLD/0736fccf9e7b144e8c922eb2d040cc387ead1be75a8ba8962d0ed8034e3c0da4.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/MSLV/6e30881c6e89b2f65e1e87c4ee44ba8916c3000e9714184de16d5a7e0467f44e.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/PKDT/a612537f30bd3a5c18f9ac7845e599508eceee82d2df15aaf9a97dd1f2ed2cd3.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/SBLK/094359d2ce06891e714933b6bce3173cc2b40f0d6f45f65efdcbf2ae7fc552ec.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/SGLD/fd0d971ba193861aeb678de59fcbca5b67c6bbeb22f8a0d90dd653fce36ba8da.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/SLDT/7ef9bf873aab8a8d962ea4154bfb723e9b47741066d62226562a45f7425a9624.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/SSLV/ce599aa6fcd8aa5d6203ceaacd21c6885cb5851ae097c67eb524add1345209b6.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/WHT/3b7b0ea72bdb2505b5dc4fcd958de11fcb6bb101bb2792abd55495621ebd6444.png",
+      "action": "uploaded"
+    },
+    {
+      "path": "4ab1ac72-cd7e-4faf-9152-5aa5f2862411/CYL-9ML/cap-lift-v1/authority/95965dba9192a56f81bf8da802cb22748fbb62ee9024d5bc53a96e7b00dc70fe.png",
+      "action": "verified-existing"
+    }
+  ],
+  "releaseMutation": false,
+  "sanityMutation": false,
+  "contentSha256": "11c2a5c1d2fb3cef0a83317d4197c8e4d90b43456fee811a2f26e677dede7fc6"
+}
