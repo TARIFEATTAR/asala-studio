@@ -27,6 +27,7 @@ import {
   type PaperDollReleaseRpcClient,
   type PaperDollReleaseWorkbenchData,
 } from "@/lib/paperDoll/releaseRepository";
+import { cyl9ProductionRoute } from "@/lib/paperDoll/cyl9ProductionRoute";
 import { AssemblyEditCanvas } from "./AssemblyEditCanvas";
 import { CandidateActionPanel } from "./CandidateActionPanel";
 import { CandidateInspector, type CandidateInspection } from "./CandidateInspector";
@@ -43,6 +44,7 @@ import {
   shouldMountCandidatePreview,
 } from "./candidatePreviewModel";
 import { RollonLineup } from "./RollonLineup";
+import { ProductionRoutePanel } from "./ProductionRoutePanel";
 import { SharedPlacementPanel } from "./SharedPlacementPanel";
 import {
   type AssemblyEditMode,
@@ -150,6 +152,14 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   const bodies = useMemo(() => query.data?.assets.filter((asset) => asset.slot === "body") ?? [], [query.data]);
   const components = useMemo(() => query.data?.assets.filter((asset) => asset.slot !== "body") ?? [], [query.data]);
+  const liveReleaseSnapshot = useMemo(() => query.data ? {
+    version: query.data.release.version,
+    status: query.data.release.status,
+    manifestSha256: query.data.release.manifestSha256,
+    assetCount: query.data.assets.length,
+    bodyCount: query.data.assets.filter((asset) => asset.slot === "body").length,
+    componentCount: query.data.assets.filter((asset) => asset.slot !== "body").length,
+  } : null, [query.data]);
   const selectedSlot = query.data?.assets.find((a) => a.componentVersionId === selectedLayerId)?.slot ?? null;
   const placementSlot = selectedSlot === "roller" ? "roller" : selectedSlot === "cap" || selectedSlot === "overcap" ? "cap" : null;
   const placementGeometryKey = placementSlot === "cap" ? CYL9_CAP_GEOMETRY_KEY : CYL9_ROLLER_GEOMETRY_KEY;
@@ -334,6 +344,10 @@ export function ProductionCandidateWorkbench({ organizationId, familyKey }: Prod
 
   return (
     <section className="space-y-3">
+      <ProductionRoutePanel
+        route={cyl9ProductionRoute}
+        liveRelease={liveReleaseSnapshot}
+      />
       <header className="flex flex-wrap items-start justify-between gap-3 rounded border px-4 py-3" style={{ borderColor: "var(--darkroom-border-subtle)", background: "linear-gradient(120deg,rgba(215,168,95,0.09),rgba(0,0,0,0.12))" }}>
         <div>
           <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.24em]" style={{ color: "var(--darkroom-accent)" }}><Boxes className="h-3.5 w-3.5" />Production candidate bench</div>

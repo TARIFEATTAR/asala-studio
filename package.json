@@ -74,6 +74,8 @@
     "bestbottles:images:backfill-reconciliation": "tsx scripts/backfill-bestbottles-image-reconciliation.ts",
     "bestbottles:gap-worklist:index": "tsx scripts/build-bestbottles-gap-worklist-index.ts",
     "paperdoll:intake": "tsx scripts/paper-doll/intake-component.ts",
+    "paperdoll:production-route:register": "tsx scripts/paper-doll/register-production-route.ts",
+    "paperdoll:production-route:check": "tsx scripts/paper-doll/register-production-route.ts --check",
     "paperdoll:compose": "tsx scripts/paper-doll/compose.ts",
     "paperdoll:weld": "tsx scripts/paper-doll/weld.ts",
     "paperdoll:export-doll": "tsx scripts/paper-doll/export-doll-layers.ts",

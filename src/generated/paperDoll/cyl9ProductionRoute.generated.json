@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "recordType": "production-route",
+  "routeId": "CYL-9ML-17-415-COBALT-ROLLER",
+  "familyKey": "CYL-9ML",
+  "sourceAssetKey": "cyl-009-17-415",
+  "sourceRecord": {
+    "path": "pipeline/paper-doll-3d/artifacts/records/9ml-containment-2026-08-19.json",
+    "sha256": "ee23de8a981b3c0c1db68508b195db7ebb6059a69cf5f9cd60edac361b630043",
+    "createdAt": "2026-08-19",
+    "scope": "Existing Cylinder 9 mL / 17-415 Blender scenes, working history, render evidence, drawings, reference imagery, and recoverable source checkpoint."
+  },
+  "identity": {
+    "commercialName": "Cobalt Cylinder 9 mL",
+    "graceSku": "GB-CYL-BLU-9ML-MRL-MSLV",
+    "websiteSku": "GBCylBlu9MtlRollMattSl",
+    "finish": "17-415",
+    "housing": "Natural roller housing",
+    "ball": "Metal roller ball",
+    "cap": "Matte-silver cap",
+    "catalog": {
+      "volumeMl": 9,
+      "heightMm": 70,
+      "diameterMm": 20
+    },
+    "drawing": {
+      "volumeMl": 10,
+      "heightMm": 72,
+      "diameterMm": 19.7
+    },
+    "discrepancy": "Catalog identity is 9 mL / 70 × 20 mm; the governing drawing reads 10 mL / 72 × 19.7 mm. Both remain visible until reconciled."
+  },
+  "stages": [
+    {
+      "id": "source",
+      "label": "Source",
+      "status": "verified",
+      "summary": "Drawing, Blender history, render evidence, and recovery bundle are contained and checksum-matched.",
+      "gateScope": "Document and artifact provenance"
+    },
+    {
+      "id": "identity",
+      "label": "Identity",
+      "status": "blocked",
+      "summary": "Commercial catalog and governing drawing disagree on volume and dimensions.",
+      "gateScope": "Commercial, catalog, and drawing identity"
+    },
+    {
+      "id": "contract",
+      "label": "Contract",
+      "status": "in-progress",
+      "summary": "The route preserves both identities; the canonical body contract cannot close until the discrepancy is resolved.",
+      "gateScope": "Deterministic body and finish contract"
+    },
+    {
+      "id": "blender-build",
+      "label": "Blender Build",
+      "status": "verified",
+      "summary": "The production source checkpoint, complete Git bundle, and Blender test path are recoverable.",
+      "gateScope": "Recoverable deterministic build"
+    },
+    {
+      "id": "geometry-lock",
+      "label": "Geometry Lock",
+      "status": "approved",
+      "summary": "Hash-verified approval is limited to 17-415 thread/geometry across five locked scenes.",
+      "gateScope": "Five-scene 17-415 thread/geometry lock"
+    },
+    {
+      "id": "material-studio",
+      "label": "Material + Studio",
+      "status": "candidate",
+      "summary": "The cobalt baseline is visual evidence, not blanket material, lighting, canvas, or shadow approval.",
+      "gateScope": "Materials, lighting, canvas, and shadow"
+    },
+    {
+      "id": "components-assembly",
+      "label": "Components + Assembly",
+      "status": "candidate",
+      "summary": "Natural housing, metal ball, and matte-silver cap remain component and assembled-fit candidates.",
+      "gateScope": "Housing, ball, cap, and complete assembly"
+    },
+    {
+      "id": "qa-release",
+      "label": "QA + Release",
+      "status": "blocked",
+      "summary": "Assembly QA and cap-off applicator-visible PDP approval remain separate open gates.",
+      "gateScope": "Named assembly QA, PDP approval, and release cut"
+    },
+    {
+      "id": "publish-verify",
+      "label": "Publish + Verify",
+      "status": "not-started",
+      "summary": "No Sanity, Convex, Shopify, or destination read-back is asserted by this source/build record.",
+      "gateScope": "Publication and destination read-back"
+    }
+  ],
+  "blockers": [
+    "Resolve catalog 9 mL / 70 × 20 mm versus drawing 10 mL / 72 × 19.7 mm.",
+    "Approve roller housing, metal ball, cap, and complete assembly as separately named scopes.",
+    "Approve a cap-off, applicator-visible PDP with no detached cap in frame before publication."
+  ],
+  "nextAction": "Resolve and record the commercial-versus-drawing identity decision before downstream release approval.",
+  "evidence": [
+    {
+      "id": "thread-geometry-lock",
+      "title": "Five-scene 17-415 thread lock proof",
+      "classification": "approval-evidence",
+      "previewUrl": "/data/paper-doll/production-route/CYL-9ML/thread-lock-proof-review.jpg",
+      "sourcePath": "pipeline/paper-doll-3d/renders/five-variant/locked-2026-08-11/five-variant-thread-lock-proof.png",
+      "sourceSha256": "bf834302f62c5e6a76f40a3139e530ca05857f9bd5fcd58400e3ece6e2093944",
+      "previewSha256": "637a13c6cb8b72eb8371cce26ecf70e75a687f19f2a3a183cf22b78f45d1ce5b",
+      "scope": "Approved only as 17-415 thread/geometry evidence across the five locked scenes."
+    },
+    {
+      "id": "cobalt-baseline",
+      "title": "Cobalt 9 mL baseline render",
+      "classification": "visual-reference",
+      "previewUrl": "/data/paper-doll/production-route/CYL-9ML/cobalt-baseline-review.jpg",
+      "sourcePath": "pipeline/paper-doll-3d/renders/approved/009-cobalt-approved-baseline-2026-08-11.png",
+      "sourceSha256": "015561da47e3a8ccaea37fbc42edb77de6ea08ff8d18cecfa2d9937ab5d39fa1",
+      "previewSha256": "33086824ade244364bd9f9d0b3603c01fb9f28285fb20ddd5f23b3c8c3b6db0b",
+      "scope": "Presentation baseline reference only; it does not approve material, studio, assembly, catalog, or PDP scope."
+    },
+    {
+      "id": "metal-roller-candidate",
+      "title": "Metal roller candidate",
+      "classification": "candidate-evidence",
+      "previewUrl": "/data/paper-doll/production-route/CYL-9ML/roller-steel-candidate-review.jpg",
+      "sourcePath": "pipeline/paper-doll-3d/renders/009--roller-steel.png",
+      "sourceSha256": "fd8cbb8d88da6c53969d229c6f4868cc72916b2e37e7f96571700b0d51d4f6b7",
+      "previewSha256": "c92f9ccac49381dd3c6c892ac665da3597054de171abddeeef7039cf78f6814b",
+      "scope": "Fit and look candidate; not roller housing, ball, component, assembly, or PDP approval."
+    },
+    {
+      "id": "matte-silver-cap-candidate",
+      "title": "Matte-silver capped assembly candidate",
+      "classification": "candidate-evidence",
+      "previewUrl": "/data/paper-doll/production-route/CYL-9ML/capped-matte-silver-candidate-review.jpg",
+      "sourcePath": "pipeline/paper-doll-3d/renders/009--capped-matte-silver.png",
+      "sourceSha256": "0e184a4038afe3844fde7bca26153961eeaef191f927a7339829f4b3d9a8f5f1",
+      "previewSha256": "0df0bcc266e4ea884d7f1aa693d55978b020699e1a74aab06541d3b3480f4c6a",
+      "scope": "Capped fit candidate; not cap, complete assembly, or cap-off PDP approval."
+    }
+  ],
+  "artifact": {
+    "sourceRepository": "/Users/jordanrichter/Projects/Clients/Nemat-International/Best-Bottles-Website-02-20-2026",
+    "git": {
+      "branch": "checkpoint/best-bottles-9ml-containment-2026-08-19",
+      "commit": "e8ef19aa68f96cb31a958c9272f7bd90f692e22e",
+      "bundle": "repo/best-bottles-9ml-source-checkpoint.bundle",
+      "bundleVerified": true,
+      "completeHistory": true,
+      "pushed": false
+    },
+    "protection": {
+      "protectedEntriesIncludingBundle": 413,
+      "checksumEntries": 415,
+      "totalBytesIncludingBundle": 1998854267,
+      "localCapsule": "/Users/jordanrichter/Desktop/AIOS-System/92 Generated Artifacts/Best Bottles/paper-doll-3d/containment-2026-08-19",
+      "googleDriveMirror": "/Users/jordanrichter/Library/CloudStorage/GoogleDrive-jordan@asala.ai/My Drive/02-clients/best-bottles/internal-artifacts/paper-doll-3d/containment-2026-08-19",
+      "manifestSha256": "24af1c6acc1b58a01e5391d6167ec22dcb88f1b9e7eb45f54b53aa2be34a41ea",
+      "localChecksumsPassed": 415,
+      "mirrorChecksumsPassed": 415,
+      "localFilesystemReadOnly": true,
+      "mirrorFilesystemReadOnly": true,
+      "sourceFilesMoved": false,
+      "sourceBlendFilesEdited": false,
+      "providerSideCloudSyncIndependentlyVerified": false
+    },
+    "approvalScope": {
+      "hashVerified": "17-415 thread/geometry across the five locked scenes",
+      "notImplied": [
+        "final material approval",
+        "studio approval",
+        "component approval",
+        "assembly approval",
+        "catalog approval",
+        "PDP approval"
+      ]
+    },
+    "verification": {
+      "pythonContractTests": "29/29 passed",
+      "blender17415Helix": "passed",
+      "blenderFiveVariantBaseline": "passed",
+      "gitBundle": "valid; complete history",
+      "substanceAddonWarning": "Non-fatal load_pre handler warning observed; Blender tests completed with exit code 0."
+    }
+  },
+  "stageCoverageComplete": true,
+  "provenanceComplete": true,
+  "releaseReady": false,
+  "overallStatus": "blocked"
+}

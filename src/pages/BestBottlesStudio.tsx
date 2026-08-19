@@ -15,7 +15,7 @@
  * Scope of this commit (shell only):
  * - Loads productGroup + variants from Convex
  * - Renders header, sidebar (SKU list + progress), tab switcher, library rail
- * - Three tabs exist but content is skeleton: Masters / Components / Compose
+ * - Three modes share one workspace: Masters / Components / Production
  *
  * Master creation, component generation, and compositor are follow-up commits.
  */
@@ -64,8 +64,8 @@ const TABS: Array<{ id: StudioTab; label: string; description: string }> = [
   },
   {
     id: "compose",
-    label: "Compose",
-    description: "Layer preview + variant export",
+    label: "Production",
+    description: "Route · evidence · matrix · assembly",
   },
 ];
 
