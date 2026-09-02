@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "founder": "Jordan (Asala)",
+    "company": "Asala (agency) — building for client Best Bottles",
+    "problem": "Asala already authored the Best Bottles 'Family x Stone' photography direction (6 stone registers, per-family Primary/Secondary assignments, glass-color pairing rules, per-family hero prompts + prop rules). But that creative system is a static doc written for Midjourney/Flux, and the production pipeline renders on gpt-image-2 with reference-lock + real per-SKU geometry. The PDP hero lane is explicitly the un-built 'Phase 2'. The agent operationalizes Asala's direction for one family at a time into production-ready, render-ready hero specs.",
+    "created": "2026-06-20",
+    "skill_version": "0.1"
+  },
+  "agent": {
+    "name": "family-hero-art-director",
+    "model": "claude-opus-4-8",
+    "model_rationale": "Newest Opus-class — judgment-heavy reconciliation (idealized creative direction vs real per-SKU hardware, brand guardrails, pipeline constraints). Quality first.",
+    "version": null,
+    "system_summary": "Given one Best Bottles bottle-shape family, read Asala's Family x Stone direction + the brand rules + the repo shape/applicator descriptors, and produce a production-ready Family Hero Brief: the assigned stone register applied across the family's REAL SKUs, glass-color->stone rules, PDP-uniformity rules, allowed/forbidden props, and a render-ready gpt-image-2 hero prompt grounded in real geometry and respecting reference-lock. Writes to /mnt/session/outputs/.",
+    "never_dos": [
+      "Never contradict the family's assigned stone register or glass-color rules from the Asala Family x Stone map (e.g. Empire = Ochre Limestone primary; Iron Oxide is Flair-exclusive)",
+      "Never ignore a family's 'Brief Madison Studio' prop rule (e.g. Empire gold-hardware-mandatory for the prestige hero; no fresh flowers)",
+      "Never invent bottle geometry, applicator specs, or hardware not present in the attached descriptors / real SKUs",
+      "Never produce a prompt that fights reference-lock — the attached product reference is the immutable truth; the prompt restyles the scene, not the bottle",
+      "Never generate the actual image in v0 — the deliverable is the brief + render-ready prompt; pixel generation is a separate wired step"
+    ]
+  },
+  "outcome": {
+    "description": "Produce a production-ready Family Hero Brief for the named family as hero-brief.md, ending with a render-ready gpt-image-2 hero prompt.",
+    "rubric_criteria": [
+      "hero-brief.md exists, names the family, and correctly applies the family's assigned stone register from the Asala map (Empire: Primary F Ochre Limestone; Alt A Sand Ripple / B Cool Slate) with the right glass-color->stone rules",
+      "Reconciles the idealized Asala direction with the family's REAL SKUs: states how the hero stays uniform across the family's actual hardware variants (silver/black/leather/dropper), not only the cobalt+gold prestige shot",
+      "Grounded in the repo's real Empire shape + applicator descriptors and the 2080x2288 / hero canvas contract; respects reference-lock (reference = product truth, restyle scene only)",
+      "On-brand: warm-neutral + muted-gold language, carries Empire's 'gold hardware caps mandatory' and prop rules; zero forbidden elements (navy, double borders, CTA chrome, legacy taglines, off-register stones)",
+      "Specifies PDP-uniformity rules: which hero shot(s) / angles, and what makes every Empire SKU read as one coherent set on the page",
+      "Ends with a copy-paste render-ready gpt-image-2 hero prompt (incl. negatives) that a Madison operator could run against an Empire reference today"
+    ],
+    "max_iterations": 3
+  },
+  "tools": {
+    "toolset": "agent_toolset_20260401",
+    "enabled": ["bash", "read", "write", "edit", "glob", "grep"],
+    "disabled": [],
+    "permission_overrides": [],
+    "custom_tools": []
+  },
+  "connections": {
+    "mcp_servers": [],
+    "vault_credentials": [],
+    "github": null,
+    "notes": "v0 reads attached files only; no web, no external calls. Inputs: Asala Family x Stone Mapping (PDF), Family Stone Map (PNG), Image Prompts (PDF) + repo bestBottlesBrand.ts, familyShapeDescriptors.ts, applicatorShapeDescriptors.ts, imagePresets.ts (hero preset), and an Empire catalog slice. Roadmap: wire the renderer (Supabase generate-madison-image custom tool / Higgsfield MCP / gpt-image-2 direct) to actually produce the hero."
+  },
+  "skills": [],
+  "memory": {
+    "stores": []
+  },
+  "environment": {
+    "name": "family-hero-art-director-env",
+    "type": "cloud",
+    "networking": "unrestricted",
+    "allowed_hosts": [],
+    "packages": {}
+  },
+  "schedule": {
+    "mode": "on-demand",
+    "cron": null,
+    "timezone": null,
+    "human": "Run per family (20+ families). On-demand, not scheduled.",
+    "kickoff": "user.define_outcome (task + rubric), one session per family"
+  },
+  "evals": {
+    "cases": [
+      {"name": "empire", "input": "evals/case-01-empire/", "expected": "Hero brief applying Ochre Limestone (primary) reconciled across Empire's real SKU hardware; verified v0 output becomes the baseline", "last_verdict": null}
+    ],
+    "notes": "Source of truth = Asala Family x Stone plan + brand rules (not greenfield). Case 1 = Empire (Primary F Ochre Limestone). Held-back families after case 1 passes: Cylinder (B Cool Slate), Flair (D Iron Oxide, exclusive) as a guardrail test, Geometric Group (A Sand Ripple)."
+  },
+  "defaults_applied": {
+    "iteration_bound": "Outcome stops after 3 grade-and-improve cycles",
+    "write_actions": "None in v0 — deliverable is the hero brief + render-ready prompt"
+  },
+  "interface": {
+    "who": "Jordan + Asala team",
+    "how": "Hero brief lands as a file; Console for run history. Terminal + scripts are the interface for v0."
+  },
+  "next_directions": [],
+  "ids": {}
+}

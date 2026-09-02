@@ -39,3 +39,8 @@ supabase/.temp/
 node_modules
 pnpm-lock.yaml
 .vercel
+
+public/data/bb-generated-images-export.json
+
+/outputs/
+/.hermes/
