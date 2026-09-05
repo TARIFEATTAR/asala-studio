@@ -66,6 +66,7 @@ window.addEventListener('unhandledrejection', (event) => {
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./styles/mobile-workflow.css";
 
 console.log("[main.tsx] Starting app initialization...");
 

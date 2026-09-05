@@ -507,7 +507,7 @@ export function ImageEditorModal({
       <DialogContent
         className={cn(
           // Base styles - override default DialogContent styles
-          "bg-[var(--darkroom-surface)] border border-[rgba(184,149,106,0.2)] shadow-2xl p-0",
+          "mobile-library-editor bg-[var(--darkroom-surface)] border border-[rgba(184,149,106,0.2)] shadow-2xl p-0",
           // Desktop: Large modal with constrained size
           "w-[95vw] max-w-[1000px] max-h-[90vh]",
           // Mobile: Full screen for better UX
@@ -550,7 +550,7 @@ export function ImageEditorModal({
 
             {/* Main Content */}
             {image ? (
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-[1fr_320px] min-h-0 overflow-hidden">
+            <div className="library-editor-body flex-1 grid grid-cols-1 md:grid-cols-[1fr_320px] min-h-0 overflow-hidden">
           {/* Main Image Preview */}
             <div className="flex flex-col p-3 md:p-6 bg-[var(--darkroom-bg)] md:border-r border-b md:border-b-0 border-[rgba(184,149,106,0.1)] overflow-hidden min-h-[200px] md:min-h-0">
             <motion.div
@@ -650,7 +650,7 @@ export function ImageEditorModal({
                 title="Refine Image"
               >
                 <Wand2 className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Refine</span>
+                <span className="whitespace-nowrap">Refine</span>
               </button>
               <button
                 className={cn(
@@ -663,7 +663,7 @@ export function ImageEditorModal({
                 title="Create Variations"
               >
                 <ImageIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Vary</span>
+                <span className="whitespace-nowrap">Vary</span>
               </button>
               <button
                 className={cn(
@@ -676,7 +676,7 @@ export function ImageEditorModal({
                 title="Add Text Overlay"
               >
                 <Type className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Text</span>
+                <span className="whitespace-nowrap">Text</span>
               </button>
               <button
                 className={cn(
@@ -689,7 +689,7 @@ export function ImageEditorModal({
                 title="Create Ad"
               >
                 <Layout className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Ad</span>
+                <span className="whitespace-nowrap">Ad</span>
               </button>
               <button
                 className={cn(
@@ -702,7 +702,7 @@ export function ImageEditorModal({
                 title="Remove Background"
               >
                 <Scissors className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">BG</span>
+                <span className="whitespace-nowrap">BG</span>
               </button>
             </div>
 

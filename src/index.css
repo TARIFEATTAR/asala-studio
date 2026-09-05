@@ -659,10 +659,7 @@
     flex-direction: column;
   }
   
-  /* Full width buttons on mobile when in column layout */
-  .flex-col button {
-    width: 100%;
-  }
+  /* Button widths belong to their component, not every nested flex column. */
 }
 
 /* Bottom nav haptic feedback simulation */

@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -69,12 +68,11 @@ export default function MobileCreateForm({
 }: MobileCreateFormProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [modalPrompt, setModalPrompt] = useState("");
-  const [isGeneratingFromModal, setIsGeneratingFromModal] = useState(false);
 
   const handleCardClick = (option: typeof CREATION_OPTIONS[0]) => {
     setSelectedOption(option.id);
-    setModalPrompt(option.prompt);
-    onPromptChange(option.prompt);
+    setModalPrompt(option.id === "custom" ? prompt : option.prompt);
+    onPromptChange(option.id === "custom" ? prompt : option.prompt);
     if (option.categoryKey) {
       const definition = imageCategories.find(
         (category) => category.key === option.categoryKey
@@ -88,21 +86,12 @@ export default function MobileCreateForm({
 
   const handleModalClose = () => {
     setSelectedOption(null);
-    setIsGeneratingFromModal(false);
   };
 
   const handleGenerateFromModal = () => {
     onPromptChange(modalPrompt);
-    setIsGeneratingFromModal(true);
     onGenerate(modalPrompt);
   };
-
-  // Close modal automatically when generation completes
-  useEffect(() => {
-    if (isGeneratingFromModal && !isGenerating) {
-      handleModalClose();
-    }
-  }, [isGenerating, isGeneratingFromModal]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,13 +115,14 @@ export default function MobileCreateForm({
           {CREATION_OPTIONS.map((option) => {
             const Icon = option.icon;
             return (
-              <Card
+              <button
+                type="button"
                 key={option.id}
                 onClick={() => handleCardClick(option)}
                 className={cn(
                   "relative overflow-hidden cursor-pointer transition-all duration-200 border",
                   "bg-charcoal/60 border-charcoal hover:border-aged-brass/50",
-                  "active:scale-95 h-32"
+                  "active:scale-95 h-28 rounded-lg"
                 )}
               >
                 {/* Subtle dark gradient overlay */}
@@ -147,7 +137,7 @@ export default function MobileCreateForm({
                     {option.label}
                   </span>
                 </div>
-              </Card>
+              </button>
             );
           })}
         </div>
@@ -161,7 +151,7 @@ export default function MobileCreateForm({
 
       {/* Full Screen Creation Modal - Dark Room Theme */}
       <Dialog open={!!selectedOption} onOpenChange={(open) => { if (!open) handleModalClose(); }}>
-        <DialogContent className="fixed inset-0 bg-ink-black border-none rounded-none p-0 max-w-none w-screen h-[100dvh] flex flex-col transform-none m-0">
+        <DialogContent onOpenAutoFocus={event => event.preventDefault()} aria-describedby={undefined} className="mobile-fullscreen-dialog [&>button]:hidden fixed inset-0 bg-ink-black border-none rounded-none p-0 max-w-none w-screen h-[100dvh] flex flex-col transform-none m-0">
           {/* Modal Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-charcoal bg-charcoal/50">
             <div className="flex items-center gap-3">
@@ -170,9 +160,9 @@ export default function MobileCreateForm({
                   <div className="w-9 h-9 rounded-lg bg-charcoal border border-aged-brass/30 flex items-center justify-center">
                     <selectedOptionData.icon className="w-4 h-4 text-aged-brass" />
                   </div>
-                  <h2 className="text-base font-semibold text-aged-brass">
+                  <DialogTitle className="text-base font-semibold text-aged-brass">
                     {selectedOptionData.label}
-                  </h2>
+                  </DialogTitle>
                 </>
               )}
             </div>
@@ -180,6 +170,7 @@ export default function MobileCreateForm({
               variant="ghost"
               size="icon"
               onClick={handleModalClose}
+              aria-label="Close image setup"
               className="text-parchment-white/60 hover:text-parchment-white"
             >
               <X className="w-5 h-5" />
@@ -187,15 +178,16 @@ export default function MobileCreateForm({
           </div>
 
           {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-ink-black">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-5 bg-ink-black">
             {/* Prompt Input */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-aged-brass/80 uppercase tracking-wider">
+              <label htmlFor="mobile-image-prompt" className="text-xs font-medium text-aged-brass/80 uppercase tracking-wider">
                 Describe Your Image
               </label>
               <Textarea
+                id="mobile-image-prompt"
                 value={modalPrompt}
-                onChange={(e) => setModalPrompt(e.target.value)}
+                onChange={(e) => { setModalPrompt(e.target.value); onPromptChange(e.target.value); }}
                 placeholder="Describe what you want to create..."
                 rows={4}
                 className="w-full bg-charcoal/80 border-charcoal text-parchment-white placeholder:text-parchment-white/30 resize-none focus:border-aged-brass/50 focus:ring-aged-brass/20"
@@ -218,7 +210,7 @@ export default function MobileCreateForm({
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={onReferenceRemove}
+                    onClick={onReferenceRemove} aria-label="Remove reference image"
                     className="absolute top-2 right-2 h-8 w-8 bg-black/70 hover:bg-black/90 text-parchment-white"
                   >
                     <X className="w-4 h-4" />
@@ -227,7 +219,7 @@ export default function MobileCreateForm({
               ) : (
                 <label className="block">
                   <input
-                    type="file"
+                    aria-label="Upload reference image" type="file"
                     accept="image/*"
                     onChange={handleFileUpload}
                     className="hidden"
@@ -260,7 +252,7 @@ export default function MobileCreateForm({
           </div>
 
           {/* Modal Footer - Generate Button */}
-          <div className="border-t border-charcoal bg-charcoal/50 p-4 pb-safe">
+          <div className="shrink-0 border-t border-charcoal bg-charcoal/50 p-4 pb-[max(16px,env(safe-area-inset-bottom))]">
             <Button
               onClick={handleGenerateFromModal}
               disabled={!modalPrompt.trim() || isGenerating || imagesCount >= maxImages}

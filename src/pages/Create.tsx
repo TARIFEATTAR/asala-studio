@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Lightbulb, FileText, PenTool, Mail, Instagram, Sparkles } from "lucide-react";
@@ -67,6 +68,7 @@ const STARTER_FORMATS = [
 ];
 
 export default function Create() {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const { currentOrganizationId } = useOnboarding();
@@ -695,13 +697,13 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
 
 
   return (
-    <div className="min-h-screen pb-20 md:pb-20 bg-vellum-cream overflow-x-hidden">
+    <div className="mobile-create min-h-screen pb-36 md:pb-20 bg-vellum-cream">
       <div className={`max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10 transition-opacity duration-300 ${isGenerating ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         {/* Main Form */}
         <div>
           {/* Header */}
           <div className="mb-6 md:mb-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div className="create-header flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-3 md:gap-4">
                 <img
                   src={penNibIcon}
@@ -733,7 +735,7 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
                     message: "How might I assist you?",
                     secondaryMessage: "I can recommend a framework or review your current brief."
                   })}
-                  title="Consult Madison"
+                  title="Consult Madison" aria-label="Consult Madison"
                 >
                   <span className="font-serif font-bold text-lg">M</span>
                 </Button>
@@ -764,7 +766,7 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
               </div>
             </div>
 
-            <p className="text-sm md:text-base text-warm-gray">
+            <p className="hidden md:block text-sm md:text-base text-warm-gray">
               Fill out the brief below and Madison will craft the perfect content.
             </p>
           </div>
@@ -772,22 +774,22 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
           {/* Think Mode - Inline Expandable */}
           {showThinkMode && (
             !thinkModeExpanded ? (
-              <div
+              <button type="button"
                 onClick={() => setThinkModeExpanded(true)}
-                className="mb-8 rounded-xl cursor-pointer transition-all hover:opacity-90 bg-parchment-white border-2 border-dashed border-brass"
+                className="mb-5 w-full rounded-xl text-left cursor-pointer transition-all hover:opacity-90 bg-parchment-white border border-brass/40"
               >
-                <div className="p-6 flex items-center gap-4">
+                <div className="p-3 md:p-6 flex items-center gap-3">
                   <Lightbulb className="w-6 h-6 text-brass" />
                   <div>
-                    <h3 className="font-semibold text-lg text-ink-black">
-                      Not sure where to start? Ask Madison
+                    <h3 className="font-semibold text-sm md:text-lg text-ink-black">
+                      Brainstorm with Madison
                     </h3>
-                    <p className="text-sm text-warm-gray">
+                    <p className="hidden md:block text-sm text-warm-gray">
                       Brainstorm with your Editorial Director before filling out the brief. No pressure, just ideas.
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
             ) : (
               <ThinkMode
                 userName={userName}
@@ -824,13 +826,13 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
                       key={starter.value}
                       type="button"
                       onClick={() => setFormat(starter.value)}
-                      className="group min-h-[112px] rounded-lg border border-warm-gray/20 bg-parchment-white p-4 text-left transition-colors hover:border-brass/50 hover:bg-brass/5"
+                      className="group min-h-11 md:min-h-[112px] rounded-lg border border-warm-gray/20 bg-parchment-white p-4 text-left transition-colors hover:border-brass/50 hover:bg-brass/5"
                     >
-                      <div className="mb-3 flex items-center gap-2 text-ink-black">
+                      <div className="md:mb-3 flex items-center gap-2 text-ink-black">
                         <Icon className="h-4 w-4 text-brass" />
                         <span className="font-medium">{starter.title}</span>
                       </div>
-                      <p className="text-sm leading-5 text-warm-gray">{starter.description}</p>
+                      <p className="hidden md:block text-sm leading-5 text-warm-gray">{starter.description}</p>
                     </button>
                   );
                 })}
@@ -840,10 +842,25 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
 
           {/* Form Container */}
           <div className="p-4 md:p-6 lg:p-8 rounded-xl border border-warm-gray/20 space-y-6 md:space-y-8 bg-parchment-white">
-            {/* Brand Knowledge Status Indicator */}
-            <BrandKnowledgeIndicator organizationId={currentOrganizationId} />
+            {/* Brand context remains available without displacing the brief on phones. */}
+            <details className="md:hidden"><summary className="cursor-pointer py-2 text-sm font-medium">Brand context</summary><BrandKnowledgeIndicator organizationId={currentOrganizationId} /></details>
+            <div className="hidden md:block"><BrandKnowledgeIndicator organizationId={currentOrganizationId} /></div>
 
-            {/* Product - Optional */}
+            {/* Deliverable Format - Required */}
+            <FormatPicker
+              value={format}
+              onSelect={setFormat}
+              open={formatPickerOpen}
+              onOpenChange={setFormatPickerOpen}
+            />
+
+            <div className="md:hidden space-y-2">
+              <Label htmlFor="mobile-writing-brief" className="text-base">What would you like to say?</Label>
+              <textarea id="mobile-writing-brief" value={additionalContext} onChange={event => setAdditionalContext(event.target.value)} maxLength={1000} rows={4} placeholder="Your topic, key details, and what readers should do next…" className="w-full rounded-md border border-warm-gray/20 bg-parchment-white p-3 text-base" />
+            </div>
+            <details className="mobile-targeting" open={isMobile ? undefined : true}>
+              <summary className="cursor-pointer py-3 font-medium text-ink-black">Product, audience & goal <span className="text-sm font-normal text-warm-gray">(optional)</span></summary>
+              <div className="space-y-6 pt-3">            {/* Product - Optional */}
             <div>
               <Label htmlFor="product" className="text-base mb-2 text-ink-black">
                 Product <span className="text-warm-gray text-sm font-normal">(Optional)</span>
@@ -894,13 +911,6 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
               )}
             </div>
 
-            {/* Deliverable Format - Required */}
-            <FormatPicker
-              value={format}
-              onSelect={setFormat}
-              open={formatPickerOpen}
-              onOpenChange={setFormatPickerOpen}
-            />
 
             {/* Target Audience - Optional */}
             <div>
@@ -966,6 +976,8 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
               </p>
             </div>
 
+              </div>
+            </details>
             {/* Advanced Options Collapsible */}
             <AdvancedOptions
               open={advancedOptionsOpen}
@@ -982,15 +994,17 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
           <div className="mt-8 pt-6 border-t border-warm-gray/20">
             {/* Mobile Layout (< 768px) */}
             <div className="flex flex-col gap-3 md:hidden">
+              <div className="mobile-action-bar">
               <Button
                 onClick={handleSubmit}
-                disabled={!format}
+                disabled={!format || isGenerating}
                 variant="brass"
                 className="w-full gap-2 min-h-[44px]"
               >
                 <PenTool className="w-5 h-5" />
                 <span>{selectedDeliverable ? `Generate ${selectedDeliverable.label}` : "Generate"}</span>
               </Button>
+              </div>
 
               <Button
                 variant="ghost"
@@ -1033,7 +1047,7 @@ CRITICAL: This must be a full-length blog article of 1200-1500 words. Do not sum
               <div className="text-right">
                 <Button
                   onClick={handleSubmit}
-                  disabled={!format}
+                  disabled={!format || isGenerating}
                   variant="brass"
                   className="gap-2 px-8"
                   size="lg"

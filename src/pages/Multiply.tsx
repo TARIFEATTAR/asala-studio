@@ -1020,8 +1020,8 @@ export default function Multiply() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
+    <div className="mobile-multiply min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6 pb-36 md:px-6 md:py-8">
         {/* Header */}
         <div className="mb-6">
           {selectedMaster && selectedViaNavigationRef.current && (
@@ -1070,8 +1070,8 @@ export default function Multiply() {
 
         {/* Master Content Selector - Full Width */}
         <Card className="p-4 mb-6">
-          <div className="flex items-center gap-4">
-            <Label className="text-sm font-medium whitespace-nowrap">Master Content:</Label>
+          <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-4">
+            <Label htmlFor="master-content" className="text-sm font-medium whitespace-nowrap">Master Content:</Label>
             {loadingContent ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
@@ -1079,7 +1079,7 @@ export default function Multiply() {
                 const content = masterContentList.find(c => c.id === id);
                 if (content) setSelectedMaster(content);
               }}>
-                <SelectTrigger className="flex-1">
+                <SelectTrigger id="master-content" className="min-w-0 flex-1">
                   <SelectValue placeholder="Select master content..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -1095,7 +1095,7 @@ export default function Multiply() {
         </Card>
 
         {/* Two-Column Resizable Layout */}
-        <div className="hidden md:block">
+        <div className="hidden xl:block">
           <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
             {/* Left Panel - Master Content */}
             <ResizablePanel defaultSize={40} minSize={30}>
@@ -1574,13 +1574,13 @@ export default function Multiply() {
         </div>
 
         {/* Mobile/Tablet Vertical Layout */}
-        <div className="md:hidden space-y-6">
+        <div className="xl:hidden space-y-6">
           {/* Master Content */}
           {selectedMaster && (
             <Card className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-serif text-xl">Master Content</h2>
-                <Button onClick={handleSaveToLibrary} disabled={isSavingMaster} size="sm" variant="outline">
+                <Button aria-label="Save source to library" onClick={handleSaveToLibrary} disabled={isSavingMaster} size="sm" variant="outline">
                   <Archive className="w-4 h-4" />
                 </Button>
               </div>
@@ -1591,26 +1591,30 @@ export default function Multiply() {
                   {selectedMaster.collection && <Badge variant="outline">{selectedMaster.collection}</Badge>}
                 </div>
                 <p className="text-sm text-muted-foreground">{selectedMaster.wordCount} words · {selectedMaster.charCount} characters</p>
-                <p className="text-sm line-clamp-6">{selectedMaster.content}</p>
+                <details>
+                  <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium">Read source content</summary>
+                  <p className="whitespace-pre-wrap break-words text-base leading-relaxed">{selectedMaster.content}</p>
+                </details>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/editor', {state: {contentId: selectedMaster.id, content: selectedMaster.content, contentName: selectedMaster.title, contentType: selectedMaster.contentType}})}>Edit source</Button>
               </div>
             </Card>
           )}
 
           {/* Derivative Selector & Results - Mobile */}
           <Card className="p-4 space-y-4">
-            <h2 className="font-serif text-xl">Derivative Editions</h2>
+            <h2 className="font-serif text-xl">Choose your formats</h2>
+            {derivatives.length > 0 && <Button variant="outline" className="w-full" onClick={() => document.getElementById('mobile-multiply-results')?.scrollIntoView({behavior: 'smooth', block: 'start'})}>View {derivatives.length} generated editions</Button>}
 
             <div className="space-y-3">
               <p className="text-sm font-medium">MOST POPULAR</p>
               <div className="grid grid-cols-1 gap-3">
                 {TOP_DERIVATIVE_TYPES.map((type) => (
-                  <Card
+                  <label
                     key={type.id}
-                    onClick={() => toggleTypeSelection(type.id)}
-                    className={`p-3 cursor-pointer transition-all hover:bg-brass/5 ${selectedTypes.has(type.id) ? "ring-2 ring-brass bg-brass/5" : ""}`}
+                    className={`block rounded-lg border p-3 cursor-pointer transition-all hover:bg-brass/5 ${selectedTypes.has(type.id) ? "ring-2 ring-brass bg-brass/5" : ""}`}
                   >
                     <div className="flex items-start gap-3">
-                      <Checkbox checked={selectedTypes.has(type.id)} className="mt-1" />
+                      <Checkbox aria-label={type.name} checked={selectedTypes.has(type.id)} onCheckedChange={() => toggleTypeSelection(type.id)} className="mt-1" />
                       {type.iconImage ? (
                         <img src={type.iconImage} alt={type.name} className="w-8 h-8 shrink-0" />
                       ) : type.icon && (
@@ -1621,7 +1625,7 @@ export default function Multiply() {
                         <p className="text-xs text-muted-foreground line-clamp-2">{type.description}</p>
                       </div>
                     </div>
-                  </Card>
+                  </label>
                 ))}
               </div>
             </div>
@@ -1634,13 +1638,12 @@ export default function Multiply() {
               <CollapsibleContent className="mt-3">
                 <div className="grid grid-cols-1 gap-3">
                   {ADDITIONAL_DERIVATIVE_TYPES.map((type) => (
-                    <Card
+                    <label
                       key={type.id}
-                      onClick={() => toggleTypeSelection(type.id)}
-                      className={`p-3 cursor-pointer transition-all hover:bg-brass/5 ${selectedTypes.has(type.id) ? "ring-2 ring-brass bg-brass/5" : ""}`}
+                        className={`block rounded-lg border p-3 cursor-pointer transition-all hover:bg-brass/5 ${selectedTypes.has(type.id) ? "ring-2 ring-brass bg-brass/5" : ""}`}
                     >
                       <div className="flex items-start gap-3">
-                        <Checkbox checked={selectedTypes.has(type.id)} className="mt-1" />
+                        <Checkbox aria-label={type.name} checked={selectedTypes.has(type.id)} onCheckedChange={() => toggleTypeSelection(type.id)} className="mt-1" />
                         {type.iconImage ? (
                           <img src={type.iconImage} alt={type.name} className="w-8 h-8 shrink-0" />
                         ) : type.icon && (
@@ -1651,7 +1654,7 @@ export default function Multiply() {
                           <p className="text-xs text-muted-foreground line-clamp-2">{type.description}</p>
                         </div>
                       </div>
-                    </Card>
+                    </label>
                   ))}
                 </div>
               </CollapsibleContent>
@@ -1659,19 +1662,38 @@ export default function Multiply() {
 
             <div className="flex flex-col gap-2">
               <Button variant="outline" size="sm" onClick={selectAll} className="w-full">Select All</Button>
+              <div className="mobile-action-bar">
               <Button
                 onClick={generateDerivatives}
-                disabled={isGenerating || selectedTypes.size === 0}
+                disabled={isGenerating || !selectedMaster || selectedTypes.size === 0}
                 className="gap-2 w-full"
               >
                 {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                {isGenerating ? "Generating..." : `Generate ${selectedTypes.size} Derivative${selectedTypes.size !== 1 ? "s" : ""}`}
+                {isGenerating ? "Generating..." : `Generate ${selectedTypes.size} edition${selectedTypes.size !== 1 ? "s" : ""}`}
               </Button>
+              </div>
+            </div>
+
+            <details className="border-t pt-3">
+              <summary className="cursor-pointer py-3 font-medium">Create visual prompts</summary>
+              <p className="mb-3 text-sm text-muted-foreground">Turn this content into prompts for images, videos, or backgrounds.</p>
+              <div className="space-y-2">
+                {VISUAL_DERIVATIVE_TYPES.map(type => <label key={type.id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border p-3">
+                  <Checkbox aria-label={type.name} checked={selectedVisualTypes.has(type.id)} onCheckedChange={() => toggleVisualType(type.id)} />
+                  <span className="text-sm font-medium">{type.name}</span>
+                </label>)}
+              </div>
+              <Button onClick={generateVisualPrompts} disabled={isGeneratingVisual || !selectedMaster || selectedVisualTypes.size === 0} className="mt-3 w-full">{isGeneratingVisual ? "Generating visual prompts…" : "Generate visual prompts"}</Button>
+            </details>
+            <div aria-live="polite" className="space-y-4">
+              {imagePackResult && <ImagePackResults images={imagePackResult.images} analysis={imagePackResult.analysis} />}
+              {videoScriptResult && <VideoScriptResults videos={videoScriptResult.videos} analysis={videoScriptResult.analysis} />}
+              {productBgResult && <ProductBackgroundResults backgrounds={productBgResult.backgrounds} analysis={productBgResult.analysis} />}
             </div>
 
             {/* Mobile Results */}
             {Object.keys(derivativesByType).length > 0 && (
-              <div className="space-y-3 pt-4 border-t">
+              <div id="mobile-multiply-results" className="scroll-mt-20 space-y-3 pt-4 border-t" aria-live="polite">
                 <h3 className="font-medium">Generated Derivatives</h3>
                 {Object.entries(derivativesByType).map(([typeId, derivs]) => {
                   const type = DERIVATIVE_TYPES.find(t => t.id === typeId);
@@ -1706,19 +1728,19 @@ export default function Multiply() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleOpenModal(deriv)}
+                                    aria-label="Read edition" onClick={() => handleOpenModal(deriv)}
                                   >
                                     <FileText className="w-3 h-3" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(deriv.content)}>
+                                  <Button variant="ghost" size="sm" aria-label="Copy edition" onClick={() => copyToClipboard(deriv.content)}>
                                     <Copy className="w-3 h-3" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" onClick={() => openDirector(deriv)}>
+                                  <Button variant="ghost" size="sm" aria-label="Edit edition" onClick={() => openDirector(deriv)}>
                                     <Edit className="w-3 h-3" />
                                   </Button>
                                 </div>
                               </div>
-                              <p className="text-xs line-clamp-3">{deriv.content}</p>
+                              <p className="text-sm leading-relaxed line-clamp-4">{deriv.content}</p>
                             </Card>
                           ))}
                         </div>

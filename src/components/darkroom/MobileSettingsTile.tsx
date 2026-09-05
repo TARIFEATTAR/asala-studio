@@ -46,7 +46,6 @@ export function MobileSettingsTile({
         className
       )}
       onClick={handleInteraction}
-      onTouchEnd={handleInteraction}
       disabled={disabled}
       type="button"
     >

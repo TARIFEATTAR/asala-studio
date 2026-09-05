@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 /**
  * ProductBackgroundResults Component
  * 
@@ -26,6 +27,7 @@ export function ProductBackgroundResults({
   onRegenerate,
   isRegenerating 
 }: ProductBackgroundResultsProps) {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -42,7 +44,7 @@ export function ProductBackgroundResults({
   const openInImageStudio = (prompt: string) => {
     // Navigate to Dark Room (new Image Studio) with prompt pre-filled
     const encodedPrompt = encodeURIComponent(prompt);
-    window.open(`/darkroom?prompt=${encodedPrompt}`, '_blank');
+    navigate(`/darkroom?prompt=${encodedPrompt}`);
   };
 
   const bgConfigs = [

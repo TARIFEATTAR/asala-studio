@@ -182,7 +182,7 @@ export function EditorialDirectorSplitScreen({
   }, [selectedDerivativeId, selectedDerivative]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-brand-vellum">
+    <div className="mobile-derivative-editor fixed inset-0 z-50 flex flex-col bg-brand-vellum">
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-brand-stone bg-brand-parchment">
         <div className="flex items-center gap-3 min-w-0">
@@ -487,7 +487,7 @@ export function EditorialDirectorSplitScreen({
         {/* Right Panel - Editorial Director (fills remaining space) */}
         {!isExpanded && (
           <div 
-            className="w-[550px] overflow-hidden flex flex-col bg-brand-parchment"
+            className="derivative-assistant w-[550px] overflow-hidden flex flex-col bg-brand-parchment"
           >
             {/* Panel Header */}
             <div 

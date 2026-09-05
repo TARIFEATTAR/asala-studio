@@ -12,7 +12,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Dices, Camera, Loader2, ChevronLeft, X, Save, Trash2, CheckCircle, Wand2, Sparkles, Bookmark, BookOpen } from "lucide-react";
+import { Plus, Dices, Camera, Loader2, ChevronLeft, CheckCircle, Sparkles, Bookmark, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { MobileSettingsGrid } from "./MobileSettingsGrid";
 import { MobileBottomSheet } from "./MobileBottomSheet";
@@ -132,6 +132,13 @@ export function MobileDarkRoom({
   const [styleGuideOpen, setStyleGuideOpen] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<GeneratedImage | null>(null);
 
+  useEffect(() => {
+    if (fullscreenImage) {
+      const current = images.find(image => image.id === fullscreenImage.id);
+      if (current && current !== fullscreenImage) setFullscreenImage(current);
+    }
+  }, [images, fullscreenImage]);
+
   const heroImage = images.find((img) => img.id === heroImageId) || images[0] || null;
   const isNewlyGenerated = heroImage && heroImage.id === newlyGeneratedId;
 
@@ -171,17 +178,11 @@ export function MobileDarkRoom({
 
   // Handle generate with Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey && canGenerate && !isGenerating) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && canGenerate && !isGenerating) {
       e.preventDefault();
       onGenerate();
     }
   };
-
-  // Handle button interactions with proper touch support
-  const handleBackClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (e.type === "touchend") e.preventDefault();
-    navigate(-1);
-  }, [navigate]);
 
   const handleRandomClick = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (e.type === "touchend") e.preventDefault();
@@ -206,8 +207,7 @@ export function MobileDarkRoom({
       <div className="mobile-darkroom__header">
         <div className="flex items-center gap-2">
           <button
-            onClick={handleBackClick}
-            onTouchEnd={handleBackClick}
+            aria-label="Back to Create" onClick={() => navigate("/create")}
             className="w-9 h-9 flex items-center justify-center rounded-[4px] bg-[var(--darkroom-surface)] border border-[var(--darkroom-border-subtle)] text-[var(--darkroom-text-muted)] active:bg-[var(--darkroom-surface-elevated)] active:scale-[0.97] transition-all"
             type="button"
           >
@@ -241,7 +241,7 @@ export function MobileDarkRoom({
         <textarea
           ref={textareaRef}
           className="mobile-darkroom__prompt-input"
-          placeholder="Write or talk about your idea..."
+          aria-label="Describe your image" placeholder="Describe your image…"
           value={prompt}
           onChange={handlePromptChange}
           onKeyDown={handleKeyDown}
@@ -255,7 +255,6 @@ export function MobileDarkRoom({
           <button
             className="mobile-darkroom__random-btn"
             onClick={handleRandomClick}
-            onTouchEnd={handleRandomClick}
             title="Random prompt idea"
             type="button"
           >
@@ -284,13 +283,9 @@ export function MobileDarkRoom({
               </div>
             ) : heroImage && isNewlyGenerated ? (
               // Newly generated image with reveal animation
-              <motion.div 
+              <motion.button type="button" aria-label="Open image preview"
                 className="mobile-darkroom__hero-container"
                 onClick={() => setFullscreenImage(heroImage)}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  setFullscreenImage(heroImage);
-                }}
               >
                 <DevelopingAnimation
                   imageUrl={heroImage.imageUrl}
@@ -299,16 +294,12 @@ export function MobileDarkRoom({
                   developingText="Developing..."
                 />
                 <div className="mobile-darkroom__hero-hint">Tap to expand</div>
-              </motion.div>
+              </motion.button>
             ) : heroImage ? (
               // Regular hero image display
-              <motion.div 
+              <motion.button type="button" aria-label="Open image preview"
                 className="mobile-darkroom__hero-container"
                 onClick={() => setFullscreenImage(heroImage)}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  setFullscreenImage(heroImage);
-                }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -323,7 +314,7 @@ export function MobileDarkRoom({
                   </div>
                 )}
                 <div className="mobile-darkroom__hero-hint">Tap to expand</div>
-              </motion.div>
+              </motion.button>
             ) : null}
           </motion.div>
         )}
@@ -362,7 +353,6 @@ export function MobileDarkRoom({
       <button
         className="mobile-darkroom__generate-btn"
         onClick={handleGenerateClick}
-        onTouchEnd={handleGenerateClick}
         disabled={!canGenerate || isGenerating || images.length >= maxImages}
         type="button"
       >
@@ -489,116 +479,17 @@ export function MobileDarkRoom({
         </div>
       </MobileBottomSheet>
 
-      {/* Fullscreen Image Viewer */}
-      <AnimatePresence>
-        {fullscreenImage && (
-          <motion.div
-            className="mobile-darkroom__fullscreen"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Backdrop */}
-            <div 
-              className="mobile-darkroom__fullscreen-backdrop"
-              onClick={() => setFullscreenImage(null)}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                setFullscreenImage(null);
-              }}
-            />
-
-            {/* Image Container */}
-            <motion.div
-              className="mobile-darkroom__fullscreen-content"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            >
-              <img
-                src={fullscreenImage.imageUrl}
-                alt="Generated"
-                className="mobile-darkroom__fullscreen-image"
-              />
-
-              {/* Close Button */}
-              <button
-                className="mobile-darkroom__fullscreen-close"
-                onClick={() => setFullscreenImage(null)}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  setFullscreenImage(null);
-                }}
-                type="button"
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              {/* Action Buttons */}
-              <div className="mobile-darkroom__fullscreen-actions">
-                {/* Refine - Primary action */}
-                <button
-                  className="mobile-darkroom__fullscreen-action mobile-darkroom__fullscreen-action--primary"
-                  onClick={() => {
-                    setFullscreenImage(null);
-                    onRefineImage(fullscreenImage);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    setFullscreenImage(null);
-                    onRefineImage(fullscreenImage);
-                  }}
-                  type="button"
-                >
-                  <Wand2 className="w-5 h-5" />
-                  <span>Refine</span>
-                </button>
-
-                {/* Save */}
-                <button
-                  className="mobile-darkroom__fullscreen-action"
-                  onClick={() => {
-                    onSaveImage(fullscreenImage.id);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    onSaveImage(fullscreenImage.id);
-                  }}
-                  disabled={fullscreenImage.isSaved}
-                  type="button"
-                >
-                  {fullscreenImage.isSaved ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    <Save className="w-5 h-5" />
-                  )}
-                  <span>{fullscreenImage.isSaved ? "Saved" : "Save"}</span>
-                </button>
-
-                {/* Delete */}
-                <button
-                  className="mobile-darkroom__fullscreen-action mobile-darkroom__fullscreen-action--delete"
-                  onClick={() => {
-                    onDeleteImage(fullscreenImage.id);
-                    setFullscreenImage(null);
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    onDeleteImage(fullscreenImage.id);
-                    setFullscreenImage(null);
-                  }}
-                  type="button"
-                >
-                  <Trash2 className="w-5 h-5" />
-                  <span>Delete</span>
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* The viewer shares the same focus trap and scroll handling as settings. */}
+      <MobileBottomSheet isOpen={!!fullscreenImage} onClose={() => setFullscreenImage(null)} title="Image preview">
+        {fullscreenImage && <div className="space-y-4">
+          <img src={fullscreenImage.imageUrl} alt="Generated image" className="max-h-[60dvh] w-full rounded-lg object-contain" />
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" className="min-h-12 rounded-lg bg-aged-brass px-3 text-ink-black" onClick={() => { const selected = fullscreenImage; setFullscreenImage(null); onRefineImage(selected); }}>Refine</button>
+            <button type="button" className="min-h-12 rounded-lg border border-white/20 px-3" disabled={fullscreenImage.isSaved} onClick={() => onSaveImage(fullscreenImage.id)}>{fullscreenImage.isSaved ? "Saved" : "Save"}</button>
+            <button type="button" className="min-h-12 rounded-lg border border-white/20 px-3 text-red-300" onClick={() => {onDeleteImage(fullscreenImage.id); setFullscreenImage(null);}}>Delete</button>
+          </div>
+        </div>}
+      </MobileBottomSheet>
 
       <ImageLibraryModal
         open={showBackgroundLibrary}
