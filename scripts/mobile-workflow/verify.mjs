@@ -13,10 +13,11 @@ const out = path.join(os.tmpdir(), 'madison-mobile-qa');fs.mkdirSync(out,{recurs
 const user = {id:'11111111-1111-4111-8111-111111111111',email:'preview@example.test',role:'authenticated',aud:'authenticated',app_metadata:{},user_metadata:{}};
 const org='22222222-2222-4222-8222-222222222222';
 let master={id:'33333333-3333-4333-8333-333333333333',organization_id:org,title:'A thoughtful ritual for autumn mornings',content_type:'blog_article',full_content:'A thoughtful ritual for autumn mornings.\n\n'+ 'Begin with a quiet moment. Discover our warm botanical fragrance, composed with care for everyday rituals. '.repeat(8),word_count:150,is_archived:false};
-const requests=[];let writes=0; let imageCount=0; let failNextImage=false;
+const requests=[];let writes=0; let imageCount=0; let failNextImage=false; let failNextEditionSave=false; let editionRecords=[]; let editionSaveGate=null;
+const secondMaster={...master,id:"44444444-4444-4444-8444-444444444444",title:"Second source for return navigation"};
 const previewImage=`${base}/__mobile_fixture.jpg`;
 const imageBuffer=fs.readFileSync('src/assets/vanity-table-hero.jpg');
-const browser=await chromium.launch({headless:true,channel:'chrome'});
+const browser=await chromium.launch({headless:true,channel:process.env.MOBILE_BROWSER_CHANNEL || 'chrome'});
 const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:1,permissions:['clipboard-read','clipboard-write']});
 await context.addInitScript(({key,user})=>localStorage.setItem(key,JSON.stringify({access_token:'preview-only-token',refresh_token:'preview-only-refresh',expires_at:Math.floor(Date.now()/1000)+86400,expires_in:86400,token_type:'bearer',user})),{key:`sb-${new URL(env.VITE_SUPABASE_URL).hostname.split('.')[0]}-auth-token`,user});
 await context.route('**/*',async route=>{
@@ -28,7 +29,7 @@ await context.route('**/*',async route=>{
    const pack={themes:['ritual'],mood:'quiet',colorPalette:['#b8956a'],visualElements:['stone'],surfaces:['stone'],actions:[],atmosphere:'calm',suggestedVisualMaster:'PENN_STILL_LIFE',...Object.fromEntries(['hero','social','emailHeader'].map(key=>[key,{prompt:'Botanical fragrance on stone',aspectRatio:'1:1',purpose:key}]))};
    return route.fulfill({json:{generatedContent:body.contentType?master.full_content:JSON.stringify(pack)}});
   }
-  if(name==='repurpose-content')return route.fulfill({json:{success:true,derivatives:body.derivativeTypes.map((type,index)=>({id:`edition-${index}`,asset_type:type,generated_content:'A new moment to pause. '+master.full_content,approval_status:'pending',master_content_id:master.id}))}});
+  if(name==='repurpose-content'){editionRecords=body.derivativeTypes.map((type,index)=>({id:`edition-${index}`,organization_id:org,asset_type:type,generated_content:'A new moment to pause. '+master.full_content,approval_status:'pending',master_content_id:master.id}));return route.fulfill({json:{success:true,derivatives:editionRecords}});}
   if(name==='generate-madison-image'){
    if(failNextImage){failNextImage=false;return route.fulfill({status:429,json:{error:'Rate limit reached. Please try again.'}});}
    imageCount++;return route.fulfill({json:{imageUrl:previewImage,savedImageId:`image-${imageCount}`}});
@@ -39,7 +40,16 @@ await context.route('**/*',async route=>{
  if(u.pathname.includes('/rest/v1/')){
   const table=u.pathname.split('/').pop(),object=(req.headers().accept||'').includes('object');let data=[];
   if(req.method()!=='GET'&&req.method()!=='HEAD'){writes++;if(table==='master_content')master={...master,...req.postDataJSON()};}
-  if(table==='master_content')data=[master];
+  if(table==='derivative_assets'){
+   const id=u.searchParams.get('id')?.replace(/^eq\./,'');
+   if(req.method()==='PATCH'){
+    if(editionSaveGate) await editionSaveGate;
+    if(failNextEditionSave){failNextEditionSave=false;return route.fulfill({status:500,json:{message:'Synthetic save failure'}});}
+    editionRecords=editionRecords.map(record=>record.id===id?{...record,...req.postDataJSON()}:record);
+   }
+   data=editionRecords.filter(record=>!id||record.id===id);
+  }
+  if(table==='master_content'){const id=u.searchParams.get('id')?.replace(/^eq\./,'');data=[master,secondMaster].filter(record=>!id||record.id===id);}
   if(table==='generated_images')data=[{id:'fixture-library-image',image_url:previewImage,session_name:'Preview photograph',session_id:null,goal_type:'product_photography',aspect_ratio:'1:1',final_prompt:'A fragrance still life',library_category:'product',library_tags:[],is_hero_image:false,created_at:'2026-09-01T12:00:00Z',is_archived:false}];
   if(table==='organization_members')data=[{organization_id:org,user_id:user.id,role:'owner'}];
   if(table==='organizations')data=[{id:org,name:'Preview organization',settings:{},brand_config:{},onboarding_completed:true}];
@@ -88,7 +98,25 @@ try {
  await page.getByRole('button',{name:'Close edition',exact:true}).click();
  await page.getByRole('button',{name:'Edit edition',exact:true}).first().click();
  await fit('derivative editor');await shot('derivative-editor');
+ await page.locator('.mobile-derivative-editor textarea').first().fill('Saved through the edition editor.');
+ failNextEditionSave=true;
+ await page.getByRole('button',{name:'Save Changes',exact:true}).click();
+ await page.getByText("Couldn't save changes",{exact:true}).waitFor();
+ assert.notEqual(editionRecords[0].generated_content,'Saved through the edition editor.');
+ assert.equal(await page.locator('.mobile-derivative-editor textarea').first().inputValue(),'Saved through the edition editor.');
+ let releaseSave;editionSaveGate=new Promise(resolve=>{releaseSave=resolve;});
+ await page.getByRole('button',{name:'Save Changes',exact:true}).click();
+ await page.locator('.mobile-derivative-editor[disabled]').waitFor();
+ assert(await page.locator('.mobile-derivative-editor textarea').first().isDisabled(),'Draft editing pauses during save');
+ assert(await page.getByRole('button',{name:'Exit Editor',exact:true}).isDisabled(),'Navigation pauses during save');
+ releaseSave();editionSaveGate=null;
+ await page.waitForFunction(()=>[...document.querySelectorAll('.mobile-derivative-editor button')].some(button=>button.textContent.includes('Save Changes')&&!button.disabled));
+ assert.equal(editionRecords[0].generated_content,'Saved through the edition editor.');
+ await shot('edition-saved');
  await page.getByRole('button',{name:'Exit Editor',exact:true}).click();
+ await page.getByRole('button',{name:'Read edition',exact:true}).first().click();
+ await page.getByRole('dialog').getByText('Saved through the edition editor.',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Close edition',exact:true}).click();
  await page.getByText('Create visual prompts',{exact:true}).click();
  await page.getByLabel('Image Pack',{exact:true}).check();
  await page.getByRole('button',{name:'Generate visual prompts',exact:true}).click();
@@ -96,6 +124,13 @@ try {
  await page.getByRole('button',{name:'Generate',exact:true}).first().click();
  await page.waitForURL('**/darkroom?prompt=*');
  assert.equal(await page.getByLabel('Describe your image').inputValue(),'Botanical fragrance on stone');
+ await page.goBack();
+ await page.getByText('Hero Image',{exact:true}).last().waitFor();
+ await page.getByText('Social Post',{exact:true}).last().waitFor();
+ await page.getByRole('button',{name:'Read edition',exact:true}).first().waitFor();
+ assert.equal(await page.getByRole('button',{name:'Generate',exact:true}).count(),3);
+ await page.getByRole('button',{name:'Generate',exact:true}).nth(1).click();
+ await page.waitForURL('**/darkroom?prompt=*');
  console.log('Dark Room');
  await page.getByLabel('Describe your image').fill('Botanical fragrance on stone');
  await page.getByLabel('Describe your image').press('Enter');
@@ -114,6 +149,33 @@ try {
  await page.getByRole('button',{name:'Open image preview',exact:true}).click();
  await page.getByRole('button',{name:'Refine',exact:true}).click();
  console.log('Light Table'); await page.waitForURL('**/light-table');await page.getByRole('heading',{name:'Light Table',exact:true}).waitFor();await fit('light table');await shot('light-table');
+ const beforeRefine=imageCount;
+ await page.getByPlaceholder('Short edit only, e.g. soften the contact shadow and clean the cream background').fill('Soften the contact shadow');
+ await page.getByRole('button',{name:'Refine Image',exact:true}).click();
+ await page.getByRole('button',{name:'Refine Image',exact:true}).waitFor();
+ assert.equal(imageCount,beforeRefine+1);
+ const refinement=requests.filter(r=>r.name==='generate-madison-image').at(-1).body;
+ assert.equal(refinement.goalType,'refinement');assert.equal(refinement.referenceImages[0].url,previewImage);
+ console.log('Source switching and return navigation');
+ await page.goto(base+'/multiply?id='+master.id);
+ await page.getByRole('combobox',{name:'Master Content:'}).click();
+ await page.getByRole('option',{name:/Second source for return navigation/}).click();
+ await page.getByText('Create visual prompts',{exact:true}).click();
+ await page.getByLabel('Image Pack',{exact:true}).check();
+ await page.getByRole('button',{name:'Generate visual prompts',exact:true}).click();
+ await page.getByText('Hero Image',{exact:true}).last().waitFor();
+ await page.getByRole('button',{name:'Generate',exact:true}).first().click();
+ await page.waitForURL('**/darkroom?prompt=*');
+ await page.getByLabel('Describe your image').waitFor();await page.goBack();
+ await page.getByText('Hero Image',{exact:true}).last().waitFor();
+ assert.equal(new URL(page.url()).searchParams.get('id'),secondMaster.id);
+ await page.waitForFunction(()=>!history.state?.usr?.multiplyWorkspace);
+ assert.equal(await page.evaluate(()=>history.state?.usr?.multiplyWorkspace),undefined,'Return snapshot is consumed');
+ await page.getByRole('combobox',{name:'Master Content:'}).click();
+ await page.getByRole('option',{name:new RegExp(master.title)}).click();
+ await page.getByRole('combobox',{name:'Master Content:'}).click();
+ await page.getByRole('option',{name:/Second source for return navigation/}).click();
+ assert.equal(await page.getByText('Hero Image',{exact:true}).count(),0,'Old snapshots must not replay');
  console.log('Viewport matrix'); for(const width of [360,390,430,768,1024,1440]){
   await page.setViewportSize({width,height:844});
   for(const route of ['create','multiply','image-editor','image-library']){
@@ -132,9 +194,10 @@ try {
  await page.getByRole('button',{name:'Close image setup'}).click();
  await page.getByRole('button',{name:'Custom Prompt',exact:true}).click();
  assert.equal(await page.getByLabel('Describe Your Image').inputValue(),'A bottle in soft window light');
- await page.getByRole('button',{name:'Remove reference image'}).click();
  await page.getByRole('button',{name:'Generate Image',exact:true}).click();
- await page.getByRole('button',{name:'Save image',exact:true}).waitFor();await fit('image result');await shot('image-result');
+ await page.getByRole('button',{name:'Save image',exact:true}).waitFor();
+ const attachment=requests.filter(r=>r.name==='generate-madison-image').at(-1).body.referenceImages;assert(attachment?.length>0,'Uploaded reference must reach generation');assert(attachment[0].url.startsWith('data:image/'));
+ await fit('image result');await shot('image-result');
  await page.getByText('Create a variation',{exact:true}).click();
  await page.getByLabel('Image description').fill('A bottle in warm evening light');
  await page.getByRole('button',{name:'Square 1:1'}).click();

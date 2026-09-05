@@ -19,13 +19,15 @@ interface ProductBackgroundResultsProps {
   analysis: ContentAnalysis;
   onRegenerate?: (type: 'productHero' | 'lifestyle' | 'detail') => void;
   isRegenerating?: boolean;
+  onBeforeNavigate?: () => void;
 }
 
 export function ProductBackgroundResults({ 
   backgrounds, 
   analysis, 
   onRegenerate,
-  isRegenerating 
+  isRegenerating,
+  onBeforeNavigate,
 }: ProductBackgroundResultsProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +46,7 @@ export function ProductBackgroundResults({
   const openInImageStudio = (prompt: string) => {
     // Navigate to Dark Room (new Image Studio) with prompt pre-filled
     const encodedPrompt = encodeURIComponent(prompt);
+    onBeforeNavigate?.();
     navigate(`/darkroom?prompt=${encodedPrompt}`);
   };
 

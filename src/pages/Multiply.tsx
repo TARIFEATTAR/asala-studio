@@ -394,10 +394,39 @@ export default function Multiply() {
     loadMasterContent();
   }, [currentOrganizationId, searchParams]);
 
-  // Clear derivatives when selectedMaster changes
+  // Keep the current results in this history entry when opening an image prompt.
+  // Browser Back can then restore the other prompts without another AI request.
+  const preserveWorkspace = () => {
+    const returnParams = new URLSearchParams(location.search);
+    if (selectedMaster?.id) returnParams.set('id', selectedMaster.id);
+    navigate(location.pathname + '?' + returnParams.toString(), {
+      replace: true,
+      state: { ...location.state, multiplyWorkspace: {
+        organizationId: currentOrganizationId, masterId: selectedMaster?.id,
+        derivatives, imagePackResult, videoScriptResult, productBgResult,
+        selectedTypes: [...selectedTypes], selectedVisualTypes: [...selectedVisualTypes], expandedTypes: [...expandedTypes],
+      } },
+    });
+  };
+
   useEffect(() => {
-    setDerivatives([]);
-  }, [selectedMaster?.id]);
+    const saved = location.state?.multiplyWorkspace;
+    const restore = saved && saved.organizationId === currentOrganizationId &&
+      saved?.masterId === selectedMaster?.id;
+    setDerivatives(restore ? saved.derivatives : []);
+    setImagePackResult(restore ? saved.imagePackResult : null);
+    setVideoScriptResult(restore ? saved.videoScriptResult : null);
+    setProductBgResult(restore ? saved.productBgResult : null);
+    if (restore) {
+      setSelectedTypes(new Set(saved.selectedTypes));
+      setSelectedVisualTypes(new Set(saved.selectedVisualTypes));
+      setExpandedTypes(new Set(saved.expandedTypes));
+      // Consume the snapshot so later source changes cannot resurrect old edits.
+      const nextState = { ...location.state };
+      delete nextState.multiplyWorkspace;
+      navigate(location.pathname + location.search, { replace: true, state: nextState });
+    }
+  }, [selectedMaster?.id, currentOrganizationId]);
 
 
   const toggleTypeSelection = (typeId: string) => {
@@ -1010,10 +1039,20 @@ export default function Multiply() {
           setSplitScreenMode(false);
           setSelectedDerivativeForDirector(null);
         }}
-        onUpdateDerivative={(updated) => {
-          setDerivatives(derivatives.map(d =>
-            d.id === updated.id ? updated : d
-          ));
+        onUpdateDerivative={async (updated) => {
+          if (!currentOrganizationId) throw new Error("Choose an organization before saving.");
+          const platformSpecs = updated.sequenceEmails?.length
+            ? { ...updated.platformSpecs, ...buildSequencePlatformSpecsFromContent(updated.content, updated.typeId) }
+            : updated.platformSpecs;
+          const { error } = await supabase.from('derivative_assets').update({
+            generated_content: updated.content,
+            approval_status: updated.status,
+            ...(platformSpecs ? { platform_specs: platformSpecs } : {}),
+          }).eq('id', updated.id).eq('organization_id', currentOrganizationId).select('id').single();
+          if (error) throw error;
+          const saved = { ...updated, generated_content: updated.content, platformSpecs };
+          setDerivatives(prev => prev.map(d => d.id === saved.id ? saved : d));
+          setSelectedDerivativeForDirector(saved);
         }}
       />
     );
@@ -1517,7 +1556,7 @@ export default function Multiply() {
                       {imagePackResult && (
                         <div className="mt-6">
                           <h4 className="font-medium mb-3">Image Pack</h4>
-                          <ImagePackResults
+                          <ImagePackResults onBeforeNavigate={preserveWorkspace}
                             images={imagePackResult.images}
                             analysis={imagePackResult.analysis}
                           />
@@ -1537,7 +1576,7 @@ export default function Multiply() {
                       {productBgResult && (
                         <div className="mt-6">
                           <h4 className="font-medium mb-3">Product Backgrounds</h4>
-                          <ProductBackgroundResults
+                          <ProductBackgroundResults onBeforeNavigate={preserveWorkspace}
                             backgrounds={productBgResult.backgrounds}
                             analysis={productBgResult.analysis}
                           />
@@ -1686,9 +1725,9 @@ export default function Multiply() {
               <Button onClick={generateVisualPrompts} disabled={isGeneratingVisual || !selectedMaster || selectedVisualTypes.size === 0} className="mt-3 w-full">{isGeneratingVisual ? "Generating visual prompts…" : "Generate visual prompts"}</Button>
             </details>
             <div aria-live="polite" className="space-y-4">
-              {imagePackResult && <ImagePackResults images={imagePackResult.images} analysis={imagePackResult.analysis} />}
+              {imagePackResult && <ImagePackResults onBeforeNavigate={preserveWorkspace} images={imagePackResult.images} analysis={imagePackResult.analysis} />}
               {videoScriptResult && <VideoScriptResults videos={videoScriptResult.videos} analysis={videoScriptResult.analysis} />}
-              {productBgResult && <ProductBackgroundResults backgrounds={productBgResult.backgrounds} analysis={productBgResult.analysis} />}
+              {productBgResult && <ProductBackgroundResults onBeforeNavigate={preserveWorkspace} backgrounds={productBgResult.backgrounds} analysis={productBgResult.analysis} />}
             </div>
 
             {/* Mobile Results */}

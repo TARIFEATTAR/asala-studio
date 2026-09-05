@@ -19,13 +19,15 @@ interface ImagePackResultsProps {
   analysis: ContentAnalysis;
   onRegenerate?: (type: 'hero' | 'social' | 'emailHeader') => void;
   isRegenerating?: boolean;
+  onBeforeNavigate?: () => void;
 }
 
 export function ImagePackResults({ 
   images, 
   analysis, 
   onRegenerate,
-  isRegenerating 
+  isRegenerating,
+  onBeforeNavigate,
 }: ImagePackResultsProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +46,7 @@ export function ImagePackResults({
   const openInImageStudio = (prompt: string) => {
     // Navigate to Dark Room (new Image Studio) with prompt pre-filled
     const encodedPrompt = encodeURIComponent(prompt);
+    onBeforeNavigate?.();
     navigate(`/darkroom?prompt=${encodedPrompt}`);
   };
 
