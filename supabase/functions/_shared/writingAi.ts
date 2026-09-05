@@ -10,6 +10,14 @@ export type WritingMessage = {
       } | { type: "file"; filename: string; data: string }
     >;
 };
+export function createWritingAttachment(
+  dataUrl: string,
+  filename: string,
+): Exclude<WritingMessage["content"], string>[number] {
+  return dataUrl.startsWith("data:application/pdf;")
+    ? { type: "file", filename, data: dataUrl }
+    : { type: "image_url", image_url: { url: dataUrl } };
+}
 export type WritingOptions = {
   messages: WritingMessage[];
   systemPrompt?: string;

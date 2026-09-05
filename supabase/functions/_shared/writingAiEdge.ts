@@ -20,6 +20,12 @@ export class WritingHttpError extends Error {
     super(message);
   }
 }
+type WritingResource = {
+  organization_id: string;
+  file_url?: string;
+  file_name?: string;
+};
+type WritingResourceScope = "worksheet" | "brand-consistency";
 export function writingJson(value: unknown, status = 200) {
   return new Response(JSON.stringify(value), {
     status,
@@ -40,6 +46,7 @@ export async function authorizeWritingRequest(
   body: Record<string, unknown>,
   allowService = false,
   makeClient: typeof createClient = createClient,
+  resourceScope?: WritingResourceScope,
 ) {
   const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) throw new WritingHttpError(401, "Sign in to use Writing AI.");
@@ -61,17 +68,44 @@ export async function authorizeWritingRequest(
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false },
     });
-  let org = body.organizationId ?? body.organization_id;
-  // Some established flows send the resource ID instead of an organization ID.
-  for (
-    const [field, table] of [["masterContentId", "master_content"], [
-      "documentId",
-      "brand_documents",
-    ], ["assetId", "dam_assets"]] as const
+  if (
+    body.organizationId && body.organization_id &&
+    body.organizationId !== body.organization_id
   ) {
+    throw new WritingHttpError(400, "Send one matching organization ID.");
+  }
+  let org = body.organizationId ?? body.organization_id;
+  const resources: Record<string, WritingResource> = {};
+  const resourceFields: Array<[string, string]> = [
+    ["masterContentId", "master_content"],
+    ["documentId", "brand_documents"],
+    ["assetId", "dam_assets"],
+  ];
+  if (resourceScope === "worksheet") {
+    resourceFields.push(["uploadId", "worksheet_uploads"]);
+  }
+  if (resourceScope === "brand-consistency" && body.contentId) {
+    if (!["master", "derivative"].includes(body.contentType as string)) {
+      throw new WritingHttpError(400, "Choose master or derivative content.");
+    }
+    resourceFields.push([
+      "contentId",
+      body.contentType === "master" ? "master_content" : "derivative_assets",
+    ]);
+  }
+  // Some established flows send the resource ID instead of an organization ID.
+  for (const [field, table] of resourceFields) {
     if (body[field]) {
-      const { data: resource, error: resourceError } = await scoped.from(table)
-        .select("organization_id").eq("id", body[field]).maybeSingle();
+      const { data: resourceData, error: resourceError } = await scoped.from(
+        table,
+      )
+        .select(
+          field === "uploadId"
+            ? "organization_id, file_url, file_name"
+            : "organization_id",
+        )
+        .eq("id", body[field]).maybeSingle();
+      const resource = resourceData as unknown as WritingResource | null;
       if (resourceError || !resource) {
         throw new WritingHttpError(
           403,
@@ -84,6 +118,31 @@ export async function authorizeWritingRequest(
           "The content belongs to a different organization.",
         );
       }
+      if (field === "uploadId") {
+        // The row itself can be edited by organization admins. Its storage path
+        // must also remain inside that organization's folder before a server read.
+        const path = resource.file_url;
+        if (
+          !path?.startsWith(`${resource.organization_id}/`) ||
+          /\\|%2f|%5c/i.test(path) ||
+          path.split("/").some((part) => /^(?:\.|%2e){1,2}$/i.test(part))
+        ) {
+          throw new WritingHttpError(
+            403,
+            "The worksheet file belongs to a different organization.",
+          );
+        }
+      }
+      if (
+        field === "uploadId" && body.fileUrl &&
+        body.fileUrl !== resource.file_url
+      ) {
+        throw new WritingHttpError(
+          403,
+          "The worksheet file does not match this upload.",
+        );
+      }
+      resources[field] = resource;
       org = resource.organization_id;
     }
   }
@@ -94,7 +153,7 @@ export async function authorizeWritingRequest(
         "An organization is required for background writing.",
       );
     }
-    return { admin, organizationId: org, role: "service" };
+    return { admin, organizationId: org, role: "service", resources };
   }
   let query = admin.from("organization_members").select("organization_id, role")
     .eq("user_id", data.user!.id);
@@ -107,6 +166,7 @@ export async function authorizeWritingRequest(
     admin,
     organizationId: member.organization_id as string,
     role: member.role as string,
+    resources,
   };
 }
 export async function loadWritingSettings(
@@ -153,7 +213,13 @@ export async function resolveWritingConnection(
   }
   return { ...settings, apiKey };
 }
-export function withWritingAi(handler: (req: Request) => Promise<Response>) {
+export function withWritingAi(
+  handler: (
+    req: Request,
+    authorization: Awaited<ReturnType<typeof authorizeWritingRequest>>,
+  ) => Promise<Response>,
+  resourceScope?: WritingResourceScope,
+) {
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") {
       return new Response(null, { headers: writingCors });
@@ -176,18 +242,24 @@ export function withWritingAi(handler: (req: Request) => Promise<Response>) {
       if (!body || typeof body !== "object" || Array.isArray(body)) {
         throw new WritingHttpError(400, "Send a JSON object.");
       }
-      const { admin, organizationId } = await authorizeWritingRequest(
+      const authorization = await authorizeWritingRequest(
         req,
         body,
         true,
+        createClient,
+        resourceScope,
       );
+      const { admin, organizationId } = authorization;
       const settings = await loadWritingSettings(admin, organizationId);
       const connection = await resolveWritingConnection(
         admin,
         organizationId,
         settings,
       );
-      return await writingAiContext.run(connection, () => handler(req));
+      return await writingAiContext.run(
+        connection,
+        () => handler(req, authorization),
+      );
     } catch (error) {
       return writingJson({
         error: error instanceof WritingHttpError

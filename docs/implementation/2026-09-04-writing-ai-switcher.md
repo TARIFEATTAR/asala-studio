@@ -10,14 +10,14 @@ Owners/admins can change settings, test connections, and save a replacement key.
 
 The request-local adapter covers Create, Multiply, Think Mode, marketplace assistance, copy enhancement, prompt refinement, content worksheet parsing, brand knowledge extraction/suggestions, brand consistency/health/DNA analysis, competitive intelligence, website/document scans, squad assignment, and DAM image descriptions/tags. Existing chat SSE delivery and content response shapes are preserved. Brand context and copy instructions stay in the existing functions.
 
-Image generation providers, image keys, image models, and image dimensions are unchanged. DAM search embeddings remain on their existing OpenAI embeddings endpoint; the writing selector does not make embeddings or image generation free. The unreferenced legacy text helpers in _shared/aiProviders.ts and src/src/lib/madisonLLM.ts are not runtime entrypoints for these writing flows.
+Image generation providers, image keys, image models, and image dimensions are unchanged. DAM search embeddings remain on their existing OpenAI embeddings endpoint; the writing selector does not make embeddings or image generation free. The unreferenced legacy text helpers in _shared/aiProviders.ts, src/src/lib/madisonLLM.ts, and src/lib/agents/{router,generator,editor}.ts are not runtime entrypoints for these writing flows.
 
 PDF scans use native file inputs with OpenAI/Gemini. OpenRouter PDF scans fail explicitly without a paid parser or paid-provider fallback. Image-capable requests require a compatible selected model. Model IDs can be entered manually; access and support are verified by Test connection and the provider at request time.
 
 ## Validation
 
 - Production frontend build passed.
-- 27 offline Deno tests passed: provider payloads, reasoning/text extraction, PDF handling, free-route enforcement, error redaction, token truncation, concurrent organization isolation, authentication and membership checks, custom-key isolation, settings permissions and metadata-only responses.
+- 36 offline Deno tests passed with type checking enabled: provider payloads, reasoning/text extraction, PDF handling, free-route enforcement, error redaction, token truncation, concurrent organization isolation, authentication and membership checks, custom-key isolation, settings permissions and metadata-only responses.
 - Deno type checks passed for the new settings handler and Create, Multiply, Think Mode, marketplace assistance, copy enhancement, PDF scans, and DAM processing.
 - Real OpenAI request succeeded with the existing local key: GPT-5 mini returned text through the new adapter.
 - Browser test at 390px: settings save/reload, provider switch, key input clearing, no horizontal overflow. Desktop layout also inspected. Browser API responses were mocked; no production settings or client records were accessed.
@@ -25,6 +25,13 @@ PDF scans use native file inputs with OpenAI/Gemini. OpenRouter PDF scans fail e
 - The migration and SQL security assertions passed in an isolated Supabase Postgres 17.6 container with real Vault: encrypted storage, rotation, key preservation, RLS organization isolation, denial of direct writes and secret RPC access. Repeat with `bash scripts/writing-ai/test-database.sh`. No production database was touched.
 - A second real OpenAI request returned valid structured JSON with three complete emails and respected the synthetic brand-language constraints.
 - Gemini and OpenRouter live calls were not exercised; full application workflows still require staging/deployed smoke checks.
+
+## Pre-merge review fixes
+
+- Competitive intelligence now reads only the verified organization, using the same organization that selected the writing connection. Background callers must supply an organization ID; global scans are rejected.
+- Worksheet processing checks the upload through caller permissions, verifies the organization storage folder, rejects a mismatched path, and uses the path stored on the authorized upload. PDFs use native file inputs instead of image inputs.
+- Brand consistency checks master/derivative ownership before processing and scopes writes by organization. Endpoint-specific resource checks preserve Create's existing content metadata.
+- Regression tests cover foreign uploads/content, aliased and omitted organization IDs, scoped background requests, and PDF payloads. No remote database changes were needed for these fixes.
 
 ## Rollout
 

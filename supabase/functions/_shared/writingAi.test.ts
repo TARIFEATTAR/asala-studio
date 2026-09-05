@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { generateWriting } from "./writingAi.ts";
+import { createWritingAttachment, generateWriting } from "./writingAi.ts";
 import {
   getWritingConnection,
   writingAiContext,
@@ -34,7 +34,7 @@ Deno.test("OpenAI preserves system instructions and multimodal content; extracts
     connection,
     (async (url, init) => {
       assert.equal(url, "https://api.openai.com/v1/responses");
-      const body = JSON.parse(init!.body as string);
+      const body = JSON.parse(String((init as { body?: unknown })?.body));
       assert.equal(body.instructions, "Madison rules\n\nBrand voice");
       assert.equal(body.store, false);
       assert.equal(body.temperature, undefined);
@@ -56,7 +56,7 @@ Deno.test("non-reasoning OpenAI models receive temperature", async () => {
     options,
     { ...connection, model: "gpt-4.1-mini" },
     (async (_url, init) => {
-      const body = JSON.parse(init!.body as string);
+      const body = JSON.parse(String((init as { body?: unknown })?.body));
       assert.equal(body.temperature, 0.7);
       assert.equal(body.reasoning, undefined);
       return responder({
@@ -75,10 +75,10 @@ Deno.test("Gemini sends key in header, preserves system prompt, excludes thinkin
     (async (url, init) => {
       assert.ok(!String(url).includes("offline-test-key"));
       assert.equal(
-        (init!.headers as Record<string, string>)["x-goog-api-key"],
+        (init as { headers: Record<string, string> }).headers["x-goog-api-key"],
         connection.apiKey,
       );
-      const body = JSON.parse(init!.body as string);
+      const body = JSON.parse(String((init as { body?: unknown })?.body));
       assert.equal(body.systemInstruction.parts[0].text, "Brand");
       assert.equal(body.generationConfig.thinkingConfig.thinkingBudget, 0);
       return responder({
@@ -98,7 +98,7 @@ Deno.test("free routing enforces zero token prices and never sends alternate mod
     options,
     { ...connection, provider: "openrouter", model: "openrouter/free" },
     (async (_url, init) => {
-      const body = JSON.parse(init!.body as string);
+      const body = JSON.parse(String((init as { body?: unknown })?.body));
       assert.deepEqual(body.provider.max_price, { prompt: 0, completion: 0 });
       assert.equal(body.models, undefined);
       assert.equal(body.model, "openrouter/free");
@@ -239,7 +239,7 @@ Deno.test("PDF brand scans use native OpenAI file inputs", async () => {
     },
     connection,
     (async (_url, init) => {
-      const body = JSON.parse(init!.body as string);
+      const body = JSON.parse(String((init as { body?: unknown })?.body));
       assert.deepEqual(body.input[0].content[1], {
         type: "input_file",
         filename: "brand.pdf",
@@ -277,4 +277,73 @@ Deno.test("free PDF requests fail explicitly before any paid parsing or model ca
     /PDF scans require/,
   );
   assert.equal(called, false);
+});
+
+Deno.test("worksheet PDF attachments use native file inputs and reject free PDF routing", async () => {
+  const attachment = createWritingAttachment(
+    "data:application/pdf;base64,JVBERi0=",
+    "brief.pdf",
+  );
+  const worksheetOptions = {
+    messages: [{ role: "user" as const, content: [attachment] }],
+  };
+  for (const provider of ["openai", "gemini"] as const) {
+    await generateWriting(
+      worksheetOptions,
+      {
+        ...connection,
+        provider,
+        model: provider === "gemini" ? "gemini-2.5-flash" : "gpt-5-mini",
+      },
+      (async (_url, init) => {
+        const body = JSON.parse(String((init as { body?: unknown })?.body));
+        if (provider === "openai") {
+          assert.equal(body.input[0].content[0].type, "input_file");
+          assert.equal(body.input[0].content[0].filename, "brief.pdf");
+        } else {
+          assert.equal(
+            body.contents[0].parts[0].inlineData.mimeType,
+            "application/pdf",
+          );
+        }
+        return responder(
+          provider === "openai"
+            ? {
+              output: [{
+                type: "message",
+                content: [{ type: "output_text", text: "{}" }],
+              }],
+            }
+            : {
+              candidates: [{
+                finishReason: "STOP",
+                content: { parts: [{ text: "{}" }] },
+              }],
+            },
+        )();
+      }) as typeof fetch,
+    );
+  }
+  let calls = 0;
+  await assert.rejects(
+    generateWriting(
+      worksheetOptions,
+      { ...connection, provider: "openrouter", model: "openrouter/free" },
+      (async () => {
+        calls++;
+        return new Response();
+      }) as typeof fetch,
+    ),
+    /PDF scans require/,
+  );
+  assert.equal(calls, 0);
+});
+Deno.test("worksheet image attachments retain image payloads", () => {
+  assert.deepEqual(
+    createWritingAttachment("data:image/png;base64,abcd", "brief.png"),
+    {
+      type: "image_url",
+      image_url: { url: "data:image/png;base64,abcd" },
+    },
+  );
 });

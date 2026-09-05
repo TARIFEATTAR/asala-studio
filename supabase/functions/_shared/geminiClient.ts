@@ -4,6 +4,7 @@ export const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta
 
 type OpenAIContentPart =
   | { type: "text"; text: string }
+  | { type: "file"; filename: string; data: string }
   | { type: "image_url"; image_url: { url: string } };
 
 export type OpenAIMessage = {
@@ -68,6 +69,11 @@ function convertDataUrl(
 function convertPart(part: OpenAIContentPart) {
   if (part.type === "text") {
     return { text: part.text };
+  }
+  if (part.type === "file") {
+    const dataUrl = convertDataUrl(part.data);
+    if (dataUrl) return { inlineData: dataUrl };
+    throw new Error("Attach the file as a data URL.");
   }
   if (part.type === "image_url" && part.image_url?.url) {
     const dataUrl = convertDataUrl(part.image_url.url);

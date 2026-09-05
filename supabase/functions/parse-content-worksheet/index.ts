@@ -1,4 +1,5 @@
 import { withWritingAi } from "../_shared/writingAiEdge.ts";
+import { createWritingAttachment } from "../_shared/writingAi.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.58.0';
 import {
@@ -11,7 +12,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(withWritingAi(async (req) => {
+serve(withWritingAi(async (req, authorization) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -22,7 +23,10 @@ serve(withWritingAi(async (req) => {
   try {
     // Read request body once
     requestBody = await req.json();
-    const { uploadId: id, fileUrl, organizationId } = requestBody;
+    const { uploadId: id } = requestBody;
+    const { organizationId } = authorization;
+    const worksheet = authorization.resources.uploadId;
+    const fileUrl = worksheet?.file_url;
     uploadId = id;
 
     if (!uploadId || !fileUrl) {
@@ -35,10 +39,13 @@ serve(withWritingAi(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Update status to processing
-    await supabase
+    const { error: processingError } = await supabase
       .from('worksheet_uploads')
       .update({ processing_status: 'processing' })
-      .eq('id', uploadId);
+      .eq('id', uploadId)
+      .eq('organization_id', organizationId)
+      .select('id').single();
+    if (processingError) throw new Error('The worksheet could not be opened for processing.');
 
     console.log('Downloading file from storage:', fileUrl);
 
@@ -109,7 +116,7 @@ If a field is completely blank or unreadable, return null for that field and con
           role: 'user',
           content: [
             { type: 'text', text: 'Please extract the data from this content brief worksheet.' },
-            { type: 'image_url', image_url: { url: dataUrl } },
+            createWritingAttachment(dataUrl, worksheet.file_name || 'worksheet.pdf'),
           ],
         },
       ],
@@ -155,7 +162,9 @@ If a field is completely blank or unreadable, return null for that field and con
         confidence_scores: confidenceScores,
         processing_status: 'completed'
       })
-      .eq('id', uploadId);
+      .eq('id', uploadId)
+      .eq('organization_id', organizationId)
+      .select('id').single();
 
     if (updateError) {
       throw new Error(`Failed to update record: ${updateError.message}`);
@@ -187,7 +196,8 @@ If a field is completely blank or unreadable, return null for that field and con
             processing_status: 'failed',
             error_message: error instanceof Error ? error.message : 'Unknown error'
           })
-          .eq('id', uploadId);
+          .eq('id', uploadId)
+          .eq('organization_id', authorization.organizationId);
       } catch (updateError) {
         console.error('Failed to update error status:', updateError);
       }
@@ -204,4 +214,4 @@ If a field is completely blank or unreadable, return null for that field and con
       }
     );
   }
-}));
+}, "worksheet"));
