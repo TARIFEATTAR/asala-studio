@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -140,7 +140,7 @@ export function DerivativeFullModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn(
-        "h-[90vh] p-0 gap-0 flex flex-col",
+        "mobile-derivative-modal [&>button]:hidden h-[90vh] p-0 gap-0 flex flex-col",
         assistantOpen ? "max-w-[95vw]" : "max-w-5xl"
       )}>
         {/* Fixed Header */}
@@ -150,7 +150,7 @@ export function DerivativeFullModal({
               <Icon className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-medium text-foreground">{label}</h2>
+              <DialogTitle className="font-serif text-xl font-medium text-foreground">{label}</DialogTitle>
               <Badge variant={getStatusBadgeVariant()} className="mt-1 text-xs capitalize">
                 {derivative.approval_status}
               </Badge>
@@ -169,7 +169,7 @@ export function DerivativeFullModal({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onOpenChange(false)}
+              aria-label="Close edition" onClick={() => onOpenChange(false)}
               className="h-8 w-8"
             >
               <X className="h-4 w-4" />
@@ -209,7 +209,7 @@ export function DerivativeFullModal({
           {isEditing ? (
             <div className="space-y-4">
               <Textarea
-                ref={textareaRef}
+                aria-label="Edition content" ref={textareaRef}
                 value={editedContent}
                 onChange={handleContentChange}
                 className="min-h-[400px] font-sans text-base resize-none"
@@ -359,7 +359,7 @@ export function DerivativeFullModal({
             {/* Right Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" aria-label="More edition actions">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

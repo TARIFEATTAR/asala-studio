@@ -1,3 +1,4 @@
+import { useMobileViewport } from "@/hooks/useMobileViewport";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -330,6 +331,7 @@ const RootRoute = () => {
 };
 
 const AppContent = () => {
+  useMobileViewport();
   logger.debug("[App-Con]");
   const { user } = useAuth();
   const location = useLocation();
@@ -347,7 +349,7 @@ const AppContent = () => {
         <SidebarProvider>
           <div className="flex min-h-screen w-full">
             <AppSidebar />
-            <main className="flex-1 overflow-auto pt-0">
+            <main className="madison-workspace min-w-0 flex-1 overflow-auto pt-0">
               <div className="pt-16 md:pt-0">
                 <Suspense fallback={<PageLoader />}>
                     <Routes>

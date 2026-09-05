@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -10,13 +11,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req, authorization) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { contentId, contentType, content, title, organizationId } = await req.json();
+    const { contentId, contentType, content, title } = await req.json();
+    const { organizationId } = authorization;
 
     if (!contentId || !contentType || !content || !organizationId) {
       return new Response(
@@ -111,7 +113,9 @@ Be specific and actionable in your feedback.`;
         brand_analysis: analysis,
         last_brand_check_at: new Date().toISOString(),
       })
-      .eq('id', contentId);
+      .eq('id', contentId)
+      .eq('organization_id', organizationId)
+      .select('id').single();
 
     if (updateError) {
       console.error('Error updating content:', updateError);
@@ -135,4 +139,4 @@ Be specific and actionable in your feedback.`;
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-});
+}, "brand-consistency"));

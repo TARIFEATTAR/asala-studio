@@ -224,7 +224,7 @@ export function EditorialAssistantPanel({
   }, [messages]);
 
   useEffect(() => {
-    if (textareaRef.current) {
+    if (textareaRef.current && !window.matchMedia('(max-width: 767px)').matches) {
       textareaRef.current.focus();
     }
   }, []);

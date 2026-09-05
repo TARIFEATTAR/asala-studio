@@ -2908,9 +2908,9 @@ export default function ImageLibrary() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--darkroom-bg)]">
+    <div className="mobile-image-library min-h-screen bg-[var(--darkroom-bg)]">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[var(--darkroom-bg)]/95 backdrop-blur-sm border-b border-[var(--darkroom-border)]">
+      <div className="sticky top-16 md:top-0 z-10 bg-[var(--darkroom-bg)]/95 backdrop-blur-sm border-b border-[var(--darkroom-border)]">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4 md:space-y-5">
           {/* Title Row */}
           <div className="flex items-start justify-between gap-4">
@@ -2926,7 +2926,7 @@ export default function ImageLibrary() {
               size="sm"
             >
               <Camera className="w-4 h-4 md:mr-2" />
-              <span className="hidden md:inline">Create New</span>
+              <span className="ml-2">Create</span>
             </Button>
           </div>
 
@@ -2940,7 +2940,7 @@ export default function ImageLibrary() {
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-[var(--darkroom-text)]/40 transition-colors group-focus-within:text-[var(--darkroom-accent)]" />
               <Input
-              placeholder="Search images..."
+              aria-label="Search images" placeholder="Search images..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 md:pl-10 py-2 md:py-2.5 text-sm md:text-base bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] placeholder:text-[var(--darkroom-text)]/40 focus:border-[var(--darkroom-accent)] focus:ring-2 focus:ring-[var(--darkroom-accent)]/20"
@@ -2970,7 +2970,7 @@ export default function ImageLibrary() {
             {/* Left: Asset type + Sort */}
             <div className="flex items-center gap-2 flex-wrap">
             <Select value={assetTypeFilter} onValueChange={(v) => setAssetTypeFilter(v as AssetTypeFilter)}>
-                <SelectTrigger className="w-full md:w-[180px] bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] text-sm">
+                <SelectTrigger aria-label="Asset type" className="w-full md:w-[180px] bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] text-sm">
                 <SelectValue placeholder="Asset type" />
               </SelectTrigger>
               <SelectContent className="bg-[var(--darkroom-surface)] border-[var(--darkroom-border)]">
@@ -3029,7 +3029,7 @@ export default function ImageLibrary() {
             )}
 
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-full md:w-[130px] bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] text-sm">
+                <SelectTrigger aria-label="Sort images" className="w-full md:w-[130px] bg-[var(--darkroom-surface)] border-[var(--darkroom-border)] text-[var(--darkroom-text)] text-sm">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent className="bg-[var(--darkroom-surface)] border-[var(--darkroom-border)]">
@@ -3244,6 +3244,8 @@ export default function ImageLibrary() {
                     selectedImages.has(image.id) && "ring-2 ring-[var(--darkroom-accent)]",
                     viewMode === "masonry" && "break-inside-avoid mb-4"
                   )}
+                  role="button" tabIndex={0} aria-label={`Open ${image.session_name || "image"}`}
+                  onKeyDown={event => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); handleImageClick(image); } }}
                   onClick={() => handleImageClick(image)}
                 >
                   {/* Image */}
@@ -3259,9 +3261,9 @@ export default function ImageLibrary() {
                     />
 
                     {/* Selection Checkbox */}
-                    <div
+                    <button type="button" aria-label={`Select ${image.session_name || "image"}`} aria-pressed={selectedImages.has(image.id)}
                       className={cn(
-                        "absolute top-2 left-2 w-6 h-6 md:w-6 md:h-6 rounded border-2 flex items-center justify-center transition-all touch-manipulation z-10",
+                        "absolute top-2 left-2 w-11 h-11 md:w-6 md:h-6 rounded border-2 flex items-center justify-center transition-all touch-manipulation z-10",
                         selectedImages.has(image.id)
                           ? "bg-[var(--darkroom-accent)] border-[var(--darkroom-accent)] opacity-100"
                           : "bg-black/40 border-white/40 opacity-100 md:opacity-0 md:group-hover:opacity-100"
@@ -3276,14 +3278,14 @@ export default function ImageLibrary() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                    </div>
+                    </button>
 
                     {/* Actions Menu */}
                     <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button
-                            size="sm"
+                            aria-label={`Actions for ${image.session_name || "image"}`} size="sm"
                             variant="ghost"
                             className="h-8 w-8 p-0 bg-black/40 hover:bg-black/60"
                           >

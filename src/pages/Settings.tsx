@@ -1,3 +1,4 @@
+import { WritingAiTab } from "@/components/settings/WritingAiTab";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Users, Bell, CreditCard, Sparkles, Target, Plug, Briefcase } from "lucide-react";
@@ -66,6 +67,9 @@ export default function Settings() {
             {/* Mobile: Scrollable horizontal tabs */}
             <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
               <TabsList className="bg-white border border-[#E0E0E0] p-1 flex md:flex-wrap gap-1 min-w-max md:w-full rounded-lg">
+                <TabsTrigger value="writing-ai" className="data-[state=active]:bg-brand-brass data-[state=active]:text-white px-3 py-2 gap-2 whitespace-nowrap rounded-md text-sm">
+                  <Sparkles className="w-4 h-4" /><span>Writing AI</span>
+                </TabsTrigger>
                 <TabsTrigger
                   value="brand"
                   className="data-[state=active]:bg-brand-brass data-[state=active]:text-white px-3 py-2 gap-2 whitespace-nowrap rounded-md transition-colors text-sm"
@@ -124,6 +128,8 @@ export default function Settings() {
                 </TabsTrigger>
               </TabsList>
             </div>
+
+            <TabsContent value="writing-ai"><WritingAiTab /></TabsContent>
 
             <TabsContent value="brand" className="space-y-6">
               <BrandGuidelinesTab />

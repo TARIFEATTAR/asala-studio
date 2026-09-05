@@ -12,28 +12,14 @@ import { ScheduleButton } from "@/components/forge/ScheduleButton";
 import { useToast } from "@/hooks/use-toast";
 import { parseEmailSequence } from "@/lib/emailSequence";
 
-interface DerivativeContent {
-  id: string;
-  typeId: string;
-  content: string;
-  status: "pending" | "approved" | "rejected";
-  charCount: number;
-  isSequence?: boolean;
-  sequenceEmails?: {
-    id: string;
-    sequenceNumber: number;
-    subject: string;
-    preview: string;
-    content: string;
-    charCount: number;
-  }[];
-}
+import type { DerivativeContent } from "@/types/multiply";
+import { serializeSequenceEmails } from "@/lib/multiplyUtils";
 
 interface EditorialDirectorSplitScreenProps {
   derivative: DerivativeContent;
   derivatives: DerivativeContent[];
   onClose: () => void;
-  onUpdateDerivative: (derivative: DerivativeContent) => void;
+  onUpdateDerivative: (derivative: DerivativeContent) => Promise<void>;
 }
 
 const DERIVATIVE_ICONS = {
@@ -102,6 +88,7 @@ export function EditorialDirectorSplitScreen({
   const [editedContent, setEditedContent] = useState(derivative.content);
   const [selectedDerivativeId, setSelectedDerivativeId] = useState(derivative.id);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedSequenceEmails, setEditedSequenceEmails] = useState(() => buildSequenceEmails(derivative));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -115,35 +102,28 @@ export function EditorialDirectorSplitScreen({
   const sequenceType = selectedDerivative.isSequence || selectedDerivative.typeId.includes("email_");
   const isSequence = sequenceType && editedSequenceEmails.length > 0;
 
-  const handleSave = () => {
-    onUpdateDerivative({
-      ...selectedDerivative,
-      content: editedContent,
-      charCount: editedContent.length,
-      sequenceEmails: isSequence ? editedSequenceEmails : undefined,
-    });
-    toast({
-      title: "Changes saved",
-      description: "Your derivative content has been updated",
-    });
+  const persistChanges = async (status = selectedDerivative.status) => {
+    if (isSaving) return;
+    setIsSaving(true);
+    const content = isSequence
+      ? serializeSequenceEmails(editedSequenceEmails)
+      : editedContent;
+    try {
+      await onUpdateDerivative({
+        ...selectedDerivative, content, generated_content: content,
+        charCount: content.length, status,
+        sequenceEmails: isSequence ? editedSequenceEmails : undefined,
+      });
+      toast({ title: "Changes saved", description: "Your edition has been saved." });
+    } catch (error) {
+      toast({ title: "Couldn't save changes", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setIsSaving(false);
+    }
   };
-
-  const handleApprove = () => {
-    onUpdateDerivative({
-      ...selectedDerivative,
-      content: editedContent,
-      charCount: editedContent.length,
-      status: "approved",
-      sequenceEmails: isSequence ? editedSequenceEmails : undefined,
-    });
-  };
-
-  const handleReject = () => {
-    onUpdateDerivative({
-      ...selectedDerivative,
-      status: "rejected",
-    });
-  };
+  const handleSave = () => persistChanges();
+  const handleApprove = () => persistChanges("approved");
+  const handleReject = () => persistChanges("rejected");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(editedContent);
@@ -182,7 +162,7 @@ export function EditorialDirectorSplitScreen({
   }, [selectedDerivativeId, selectedDerivative]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-brand-vellum">
+    <fieldset disabled={isSaving} aria-busy={isSaving} aria-label="Edition editor" className="mobile-derivative-editor fixed inset-0 z-50 m-0 min-w-0 border-0 p-0 flex flex-col bg-brand-vellum">
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-brand-stone bg-brand-parchment">
         <div className="flex items-center gap-3 min-w-0">
@@ -313,6 +293,7 @@ export function EditorialDirectorSplitScreen({
                   <div className="flex gap-2 pt-2 flex-wrap">
                     <Button
                       onClick={handleSave}
+                      disabled={isSaving}
                       variant="outline"
                       size="sm"
                       className="border-brand-stone text-brand-charcoal"
@@ -324,6 +305,7 @@ export function EditorialDirectorSplitScreen({
                       <>
                         <Button
                           onClick={handleApprove}
+                          disabled={isSaving}
                           variant="outline"
                           size="sm"
                           style={{ borderColor: "#3A4A3D", color: "#3A4A3D" }}
@@ -333,6 +315,7 @@ export function EditorialDirectorSplitScreen({
                         </Button>
                         <Button
                           onClick={handleReject}
+                          disabled={isSaving}
                           variant="outline"
                           size="sm"
                           style={{ borderColor: "#6B2C3E", color: "#6B2C3E" }}
@@ -387,6 +370,7 @@ export function EditorialDirectorSplitScreen({
                   <div className="flex gap-2 flex-wrap">
                     <Button
                       onClick={handleSave}
+                      disabled={isSaving}
                       variant="outline"
                       size="sm"
                       className="border-brand-stone text-brand-charcoal"
@@ -398,6 +382,7 @@ export function EditorialDirectorSplitScreen({
                       <>
                         <Button
                           onClick={handleApprove}
+                          disabled={isSaving}
                           variant="outline"
                           size="sm"
                           style={{ borderColor: "#3A4A3D", color: "#3A4A3D" }}
@@ -407,6 +392,7 @@ export function EditorialDirectorSplitScreen({
                         </Button>
                         <Button
                           onClick={handleReject}
+                          disabled={isSaving}
                           variant="outline"
                           size="sm"
                           style={{ borderColor: "#6B2C3E", color: "#6B2C3E" }}
@@ -487,7 +473,7 @@ export function EditorialDirectorSplitScreen({
         {/* Right Panel - Editorial Director (fills remaining space) */}
         {!isExpanded && (
           <div 
-            className="w-[550px] overflow-hidden flex flex-col bg-brand-parchment"
+            className="derivative-assistant w-[550px] overflow-hidden flex flex-col bg-brand-parchment"
           >
             {/* Panel Header */}
             <div 
@@ -521,6 +507,6 @@ export function EditorialDirectorSplitScreen({
           </div>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }

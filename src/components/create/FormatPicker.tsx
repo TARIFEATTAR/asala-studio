@@ -27,7 +27,7 @@ export const FormatPicker: React.FC<FormatPickerProps> = ({ value, onSelect, ope
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
-                        role="combobox"
+                        id="format" role="combobox"
                         aria-expanded={open}
                         className={cn(
                             "w-full justify-between mt-2 bg-parchment-white border-warm-gray/20 hover:bg-parchment-white/80",
@@ -51,7 +51,7 @@ export const FormatPicker: React.FC<FormatPickerProps> = ({ value, onSelect, ope
                             placeholder="Search deliverables..."
                             className="border-none focus:ring-0"
                         />
-                        <CommandList className="max-h-[400px]">
+                        <CommandList className="max-h-[min(400px,45dvh)]">
                             <CommandEmpty>No deliverable found.</CommandEmpty>
                             {DELIVERABLE_CATEGORIES.map((category) => {
                                 const CategoryIcon = category.icon;
@@ -75,7 +75,7 @@ export const FormatPicker: React.FC<FormatPickerProps> = ({ value, onSelect, ope
                                                         onSelect(deliverable.value);
                                                         onOpenChange(false);
                                                     }}
-                                                    className="cursor-pointer"
+                                                    className="min-h-11 cursor-pointer"
                                                 >
                                                     <div className="flex items-start gap-3 w-full">
                                                         <DeliverableIcon className="h-4 w-4 mt-0.5 text-brass shrink-0" />

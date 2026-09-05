@@ -143,7 +143,7 @@ export default function ImageEditor() {
   const location = useLocation();
   const { user } = useAuth();
   const { orgId } = useCurrentOrganizationId();
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(1024);
   const queryClient = useQueryClient();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -1240,7 +1240,7 @@ export default function ImageEditor() {
     return (
       <div className="flex flex-col min-h-screen bg-ink-black text-parchment-white pb-16">
         {/* Mobile Header - Dark Room Theme */}
-        <header className="flex items-center justify-between px-4 py-2 border-b border-charcoal bg-charcoal/50 backdrop-blur-sm sticky top-0 z-20 h-12">
+        <header className="flex items-center justify-between px-4 py-2 border-b border-charcoal bg-charcoal/50 backdrop-blur-sm sticky top-16 md:top-0 z-20 h-12">
           <h1 className="text-sm font-semibold text-aged-brass pl-2">Image Studio</h1>
           <div className="flex items-center gap-2">
             <Button
@@ -1322,7 +1322,7 @@ export default function ImageEditor() {
               <div className="space-y-4">
                 {/* Hero Image */}
                 {heroImage && (
-                  <div className="relative w-full overflow-hidden border border-studio-border bg-studio-card">
+                  <div className="relative w-full overflow-hidden border border-charcoal bg-charcoal">
                     <div className="relative w-full" style={{ aspectRatio: aspectRatio.replace(':', '/') }}>
                       <img
                         src={heroImage.imageUrl}
@@ -1334,8 +1334,9 @@ export default function ImageEditor() {
                       <Button
                         size="sm"
                         variant={heroImage.approvalStatus === 'flagged' ? 'default' : 'secondary'}
+                        aria-label={heroImage.approvalStatus === "flagged" ? "Unflag image" : "Flag image to save"}
                         onClick={() => handleToggleApproval(heroImage.id)}
-                        className="bg-studio-card/90 backdrop-blur-sm h-8 w-8 p-0"
+                        className="bg-charcoal/90 backdrop-blur-sm h-8 w-8 p-0"
                       >
                         <Heart className={cn("w-4 h-4", heroImage.approvalStatus === 'flagged' && "fill-current")} />
                       </Button>
@@ -1352,7 +1353,7 @@ export default function ImageEditor() {
                             toast.error(error instanceof Error ? error.message : "Failed to download image");
                           }
                         }}
-                        className="bg-studio-card/90 backdrop-blur-sm h-8 w-8 p-0"
+                        className="bg-charcoal/90 backdrop-blur-sm h-8 w-8 p-0"
                       >
                         <Download className="w-4 h-4" />
                       </Button>
@@ -1363,7 +1364,7 @@ export default function ImageEditor() {
                 {/* Thumbnail Carousel */}
                 {currentSession.images.length > 1 && (
                   <div className="space-y-2">
-                    <Label className="text-studio-text-primary text-sm">All Images ({currentSession.images.length})</Label>
+                    <Label className="text-parchment-white text-sm">All Images ({currentSession.images.length})</Label>
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                       {currentSession.images.map((img, index) => (
                         <button
@@ -1373,7 +1374,7 @@ export default function ImageEditor() {
                             "shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all",
                             img.isHero
                               ? "border-aged-brass"
-                              : "border-studio-border hover:border-studio-border/80"
+                              : "border-charcoal hover:border-charcoal/80"
                           )}
                         >
                           <img
@@ -1420,7 +1421,7 @@ export default function ImageEditor() {
                   <h3 className="text-xl font-semibold text-aged-paper mb-2">
                     No images yet
                   </h3>
-                  <p className="text-studio-text-muted mb-4">
+                  <p className="text-parchment-white/50 mb-4">
                     Create your first image in the Create tab
                   </p>
                   <Button
@@ -1440,7 +1441,7 @@ export default function ImageEditor() {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-50">
             <Loader2 className="w-12 h-12 text-aged-brass animate-spin mb-4" />
             <p className="text-aged-paper text-lg font-medium">Generating magic...</p>
-            <p className="text-studio-text-muted text-sm mt-2">This may take a moment</p>
+            <p className="text-parchment-white/50 text-sm mt-2">This may take a moment</p>
           </div>
         )}
 
@@ -1469,7 +1470,7 @@ export default function ImageEditor() {
   return (
     <div className="flex flex-col h-screen bg-ink-black text-parchment-white">
       {/* Top Toolbar */}
-      <header className="flex items-center justify-between px-6 pr-6 py-3 border-b border-charcoal/50 bg-charcoal/30 backdrop-blur-sm sticky top-0 z-20 overflow-hidden">
+      <header className="flex flex-wrap items-center justify-between gap-3 px-6 pr-6 py-3 border-b border-charcoal/50 bg-charcoal/30 backdrop-blur-sm sticky top-0 z-20 overflow-hidden">
         <div className="flex items-center gap-4 flex-shrink-0">
           <Button
             variant="ghost"
@@ -1485,7 +1486,7 @@ export default function ImageEditor() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+        <div className="flex flex-wrap items-center gap-3 min-w-0">
           {/* Product Selector */}
           <ProductSelector
             value={selectedProduct?.name || ""}
@@ -1687,7 +1688,7 @@ export default function ImageEditor() {
               <div className="relative w-full h-full flex flex-col">
                 {/* Main Image Display */}
                 <div className="flex-1 flex items-center justify-center p-8 pb-24">
-                  <div className="relative w-full max-w-5xl max-h-full flex items-center justify-center border border-studio-border/70 bg-gradient-to-br from-ink-black via-charcoal to-ink-black shadow-[0_45px_120px_rgba(26,24,22,0.65)] overflow-hidden">
+                  <div className="relative w-full max-w-5xl max-h-full flex items-center justify-center border border-charcoal/70 bg-gradient-to-br from-ink-black via-charcoal to-ink-black shadow-[0_45px_120px_rgba(26,24,22,0.65)] overflow-hidden">
                     <div
                       className="absolute inset-0 pointer-events-none opacity-30"
                       style={{ background: "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.12), transparent 60%)" }}
@@ -1705,10 +1706,10 @@ export default function ImageEditor() {
                         onClick={saveHeroImageToLibrary}
                         disabled={isSaving || heroImage.approvalStatus === 'flagged'}
                         className={cn(
-                          "bg-studio-card/90 backdrop-blur-sm h-9 px-3 transition-all",
+                          "bg-charcoal/90 backdrop-blur-sm h-9 px-3 transition-all",
                           heroImage.approvalStatus === 'flagged'
                             ? "bg-green-500/20 border-green-500/50 hover:bg-green-500/30 text-green-500"
-                            : "hover:bg-studio-card"
+                            : "hover:bg-charcoal"
                         )}
                         title={heroImage.approvalStatus === 'flagged' ? "Saved to Library" : "Save to Library"}
                       >
@@ -1726,7 +1727,7 @@ export default function ImageEditor() {
                         size="sm"
                         variant="secondary"
                         onClick={handleDownloadHeroImage}
-                        className="bg-studio-card/90 backdrop-blur-sm h-9 w-9 p-0"
+                        className="bg-charcoal/90 backdrop-blur-sm h-9 w-9 p-0"
                         title="Download"
                       >
                         <Download className="w-4 h-4" />
@@ -1754,7 +1755,7 @@ export default function ImageEditor() {
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
                 <Loader2 className="w-12 h-12 text-aged-brass animate-spin mb-4" />
                 <p className="text-aged-paper text-lg font-medium">Generating magic...</p>
-                <p className="text-studio-text-muted text-sm mt-2">This may take a moment</p>
+                <p className="text-parchment-white/50 text-sm mt-2">This may take a moment</p>
               </div>
             )}
           </div>

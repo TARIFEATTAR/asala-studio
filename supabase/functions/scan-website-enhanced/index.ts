@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 /**
  * ENHANCED BRAND SCANNER (Pomelli-Style)
  *
@@ -74,7 +75,7 @@ const corsHeaders = {
 // MAIN HANDLER
 // ═══════════════════════════════════════════════════════════════════════════════
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -340,7 +341,7 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SCREENSHOT CAPTURE HELPERS

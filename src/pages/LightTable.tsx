@@ -435,7 +435,7 @@ export default function LightTable() {
   // Handle Enter key in textarea
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         if (!isGenerating && refinementPrompt.trim()) {
           handleRefine();
@@ -927,7 +927,7 @@ Generate a polished, publication-ready advertisement image where the product and
   }
 
   return (
-    <div className="light-table-container">
+    <div className="light-table-container mobile-light-table">
       {/* Header */}
       <header className="light-table-header">
         <div className="flex items-center gap-2">
@@ -946,7 +946,7 @@ Generate a polished, publication-ready advertisement image where the product and
             size="sm"
             onClick={handleExit}
             className="light-table-exit-btn"
-            title="Exit to Create"
+            title="Exit to Create" aria-label="Exit to Create"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -1120,10 +1120,10 @@ Generate a polished, publication-ready advertisement image where the product and
               {activeTab === "refine" && (
                 <div className="light-table-refine">
                   <label className="light-table-label">
-                    Describe changes <span className="light-table-hint">(Press Enter to generate)</span>
+                    Describe changes <span className="light-table-hint">(⌘ / Ctrl + Enter to generate)</span>
                   </label>
                   <Textarea
-                    value={refinementPrompt}
+                    aria-label="Refinement instruction" value={refinementPrompt}
                     onChange={(e) => setRefinementPrompt(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Short edit only, e.g. soften the contact shadow and clean the cream background"

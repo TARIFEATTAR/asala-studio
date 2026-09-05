@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -60,7 +61,7 @@ const scoreLink = (url: string) => {
   return 0;
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -76,16 +77,6 @@ serve(async (req) => {
     }
 
     console.log("Scraping website:", url, "for organization:", organizationId);
-
-    // Check for API Key
-    const geminiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiKey) {
-      console.error("GEMINI_API_KEY is not set");
-      return new Response(
-        JSON.stringify({ error: "Server configuration error: Missing AI API key" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     
@@ -296,4 +287,4 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+}));

@@ -516,18 +516,18 @@ export default function ContentEditorPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="mobile-content-editor h-screen flex flex-col overflow-hidden bg-background">
       {/* Top Toolbar - Clean & Minimal */}
       <div className="border-b z-10 flex-shrink-0 bg-card border-border">
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2 gap-1 sm:gap-2">
+        <div className="editor-toolbar flex flex-wrap items-center justify-between px-3 sm:px-4 py-2 gap-2">
           {/* Left: Exit Button */}
-          <div className="flex items-center gap-2">
+          <div className="editor-heading min-w-0 flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => handleExit("/")}
               className="h-8 w-8 p-0"
-              title="Exit Editor"
+              title="Exit Editor" aria-label="Exit editor"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -547,7 +547,7 @@ export default function ContentEditorPage() {
               variant={showImagePicker ? "default" : "ghost"}
               onClick={() => setShowImagePicker(!showImagePicker)}
               className="gap-2 h-8"
-              title="Set featured image"
+              title="Set featured image" aria-label="Set featured image"
             >
               <ImageIcon className="w-4 h-4" />
               <span className="hidden lg:inline">
@@ -570,7 +570,7 @@ export default function ContentEditorPage() {
           {/* Right: Word Count, Quality Rating, Save, Next */}
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Word Count */}
-            <span className="text-xs text-muted-foreground px-1 tabular-nums">
+            <span className="hidden sm:block text-xs text-muted-foreground px-1 tabular-nums">
               {wordCount}w
             </span>
 
@@ -604,7 +604,7 @@ export default function ContentEditorPage() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              <span className="hidden sm:inline text-sm">Save</span>
+              <span className="text-sm">Save</span>
             </Button>
 
             {/* Continue to Multiply */}
@@ -619,7 +619,7 @@ export default function ContentEditorPage() {
               ) : (
                 <>
                   <span className="hidden md:inline text-sm">Continue to Multiply</span>
-                  <span className="md:hidden text-sm">Continue</span>
+                  <span className="md:hidden text-sm">Multiply</span>
                   <ArrowLeft className="w-4 h-4 rotate-180" />
                 </>
               )}
@@ -686,7 +686,7 @@ export default function ContentEditorPage() {
             {/* Editor Panel */}
             <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
               <div className="w-full h-full overflow-auto bg-background">
-                <div className="max-w-4xl mx-auto py-16 px-8 md:px-16">
+                <div className="max-w-4xl mx-auto py-6 px-4 md:py-16 md:px-16">
                   {USE_TIPTAP_EDITOR ? (
                     <MadisonEditor
                       initialContent={editableContent}
@@ -695,7 +695,7 @@ export default function ContentEditorPage() {
                       onReady={handleEditorReady}
                       placeholder="Start writing…"
                       organizationId={currentOrganizationId || undefined}
-                      autoFocus
+                      autoFocus={!isMobile}
                     />
                   ) : (
                     // Legacy editor fallback (not shown with USE_TIPTAP_EDITOR = true)
@@ -725,7 +725,7 @@ export default function ContentEditorPage() {
         ) : (
           /* Full-width editor when assistant is closed */
           <div className="w-full h-full overflow-auto bg-background">
-            <div className="max-w-4xl mx-auto py-16 px-8 md:px-16">
+            <div className="max-w-4xl mx-auto py-6 px-4 md:py-16 md:px-16">
               {USE_TIPTAP_EDITOR ? (
                 <MadisonEditor
                   initialContent={editableContent}
@@ -734,7 +734,7 @@ export default function ContentEditorPage() {
                   onReady={handleEditorReady}
                   placeholder="Start writing…"
                   organizationId={currentOrganizationId || undefined}
-                  autoFocus
+                  autoFocus={!isMobile}
                 />
               ) : (
                 // Legacy editor fallback

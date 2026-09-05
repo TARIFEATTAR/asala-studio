@@ -1,5 +1,6 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import {
   generateGeminiContent,
   extractTextFromGeminiResponse,
@@ -124,21 +125,9 @@ async function getMadisonSystemConfig() {
   }
 }
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
-  }
-
-  // Early check: GEMINI_API_KEY is required
-  const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-  if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === '') {
-    console.error('GEMINI_API_KEY is not configured in Supabase Edge Function secrets');
-    return new Response(
-      JSON.stringify({
-        error: 'AI service is not configured. Please add GEMINI_API_KEY in Supabase Dashboard → Project Settings → Edge Functions → Secrets.',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   }
 
   try {
@@ -178,7 +167,7 @@ serve(async (req) => {
 
     try {
       const body = await req.json() as { messages?: OpenAIMessage[]; userName?: string; mode?: string };
-      messages = body.messages;
+      messages = body.messages ?? [];
       userName = body.userName;
       mode = body.mode === 'strategic' ? 'strategic' : 'creative';
 
@@ -205,7 +194,7 @@ serve(async (req) => {
     console.log('Legacy Madison config loaded:', legacyMadisonConfig ? `${legacyMadisonConfig.length} chars` : 'none');
     
     // Fetch Madison Masters context (new Three Silos architecture)
-    let madisonStrategy = { copySquad: 'THE_STORYTELLERS' as const, primaryCopyMaster: 'PETERMAN_ROMANCE' };
+    let madisonStrategy: { copySquad: string; primaryCopyMaster: string } = { copySquad: 'THE_STORYTELLERS' as const, primaryCopyMaster: 'PETERMAN_ROMANCE' };
     let madisonMasterContext = '';
 
     try {
@@ -456,4 +445,4 @@ CRITICAL OUTPUT FORMATTING:
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-});
+}));

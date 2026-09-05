@@ -231,7 +231,7 @@ export default function MadisonPanel({
       <Sheet open={isOpen} onOpenChange={onToggle}>
         <SheetContent 
           side="bottom" 
-          className="h-[100dvh] max-h-[100dvh] bg-zinc-950 border-zinc-800 p-0 z-[1001]"
+          className="mobile-assistant-sheet h-[100dvh] max-h-[100dvh] bg-zinc-950 border-zinc-800 p-0 z-[1001]"
         >
           <div className="flex flex-col h-full">
             <SheetHeader className="border-b border-zinc-800 px-4 py-3 shrink-0">
@@ -259,7 +259,7 @@ export default function MadisonPanel({
               </div>
             </SheetHeader>
 
-          <ScrollArea className="flex-1 px-4 py-3 pb-20">
+          <ScrollArea className="min-h-0 flex-1 px-4 py-3">
             <div className="space-y-4 pb-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-8">
@@ -310,7 +310,7 @@ export default function MadisonPanel({
             </div>
           </ScrollArea>
 
-          <div className="shrink-0 flex items-end gap-2 border-t border-zinc-800 px-4 py-3 pb-20 bg-zinc-950">
+          <div className="shrink-0 flex items-end gap-2 border-t border-zinc-800 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-zinc-950">
             <Textarea
               ref={textareaRef}
               value={inputValue}
@@ -345,7 +345,7 @@ export default function MadisonPanel({
         "shadow-[-4px_0_24px_rgba(0,0,0,0.1)]",
         "transition-all duration-300 ease-out",
         "w-full md:w-[360px] lg:w-[300px] xl:w-[360px]",
-        isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+        isOpen ? "translate-x-0 opacity-100" : "hidden"
       )}
     >
       {/* Header */}

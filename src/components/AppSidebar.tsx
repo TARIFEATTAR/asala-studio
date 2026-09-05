@@ -193,11 +193,18 @@ export function AppSidebar() {
         <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-gradient-to-r from-ink-black to-charcoal border-b border-aged-brass/20 flex items-center px-4">
           <button
             onClick={toggleSidebar}
-            className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+            className="min-h-11 min-w-11 p-2 hover:bg-white/5 rounded-lg transition-colors"
             aria-label="Open menu"
           >
             <Menu strokeWidth={1} className="w-6 h-6 text-parchment-white" />
           </button>
+          <nav aria-label="Studio workflow" className="ml-3 flex min-w-0 flex-1 items-center justify-end gap-1">
+            {[{to: "/create", label: "Create"}, {to: "/multiply", label: "Multiply"}, {to: "/darkroom", label: "Images"}].map(item => (
+              <NavLink key={item.to} to={item.to} className={({isActive}) => `flex min-h-11 items-center rounded-md px-3 text-sm font-medium ${isActive ? "bg-aged-brass/20 text-aged-brass" : "text-parchment-white/80 hover:bg-white/5"}`}>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
         </header>
       )}
 

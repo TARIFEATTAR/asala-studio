@@ -1,3 +1,5 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
+import { generateWriting } from "../_shared/writingAi.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -76,14 +78,8 @@ async function getImageDimensions(imageUrl: string): Promise<ImageDimensions | n
  * Analyze image using AI (Gemini Vision or OpenAI)
  */
 async function analyzeImageWithAI(
-  imageUrl: string,
-  geminiKey?: string
+  imageUrl: string
 ): Promise<Record<string, unknown> | null> {
-  if (!geminiKey) {
-    console.warn('No Gemini API key available for image analysis');
-    return null;
-  }
-
   try {
     // Fetch image as base64
     const imageResponse = await fetch(imageUrl);
@@ -96,17 +92,8 @@ async function analyzeImageWithAI(
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
     const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-    // Call Gemini Vision API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `Analyze this image and provide a JSON response with the following structure:
+    const result = await generateWriting({ messages: [{ role: 'user', content: [
+      { type: 'text', text: `Analyze this image and provide a JSON response with the following structure:
 {
   "description": "A concise description of what's in the image (1-2 sentences)",
   "detected_objects": ["list", "of", "main", "objects"],
@@ -118,36 +105,10 @@ async function analyzeImageWithAI(
   "quality_score": 1-100 rating of image quality
 }
 
-Respond ONLY with valid JSON, no markdown or explanation.`
-              },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Image
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1024,
-          }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      console.warn('Gemini API error:', response.status);
-      return null;
-    }
-
-    const result = await response.json();
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!text) {
-      console.warn('No text in Gemini response');
-      return null;
-    }
+Respond ONLY with valid JSON, no markdown or explanation.` },
+      { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } },
+    ] }], maxOutputTokens: 4096, responseMimeType: 'application/json' });
+    const text = result.text;
 
     // Parse JSON from response (handle potential markdown wrapping)
     let jsonText = text.trim();
@@ -205,7 +166,7 @@ async function generateEmbedding(
   }
 }
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -218,7 +179,6 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get API keys
-    const geminiKey = Deno.env.get("GEMINI_API_KEY");
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
 
     // Parse request
@@ -280,9 +240,9 @@ serve(async (req) => {
     }
 
     // 3. AI Analysis
-    if (analyzeWithAI && isImage && geminiKey) {
+    if (analyzeWithAI && isImage) {
       console.log(`🤖 Running AI analysis...`);
-      const analysis = await analyzeImageWithAI(asset.file_url, geminiKey);
+      const analysis = await analyzeImageWithAI(asset.file_url);
       if (analysis) {
         updates.ai_analysis = analysis;
         
@@ -388,4 +348,4 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+}));

@@ -7,7 +7,7 @@
  * Cost: ~$0.01 per scan
  */
 
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0";
+import { generateWriting } from "./writingAi.ts";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -94,15 +94,6 @@ export async function analyzeScreenshot(
   screenshotBase64: string,
   mimeType: string = 'image/png'
 ): Promise<VisualAnalysis> {
-  const apiKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("GOOGLE_API_KEY");
-  
-  if (!apiKey) {
-    throw new Error("Missing GEMINI_API_KEY or GOOGLE_API_KEY environment variable");
-  }
-
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
   const analysisPrompt = `You are a professional brand designer analyzing a website screenshot.
 
 Extract the following brand identity elements and return ONLY valid JSON (no markdown, no backticks):
@@ -132,18 +123,12 @@ Rules:
 
   console.log(`[Visual Analyzer] Sending screenshot to Gemini Flash for analysis`);
 
-  const result = await model.generateContent([
-    analysisPrompt,
-    {
-      inlineData: {
-        mimeType,
-        data: screenshotBase64
-      }
-    }
-  ]);
+  const result = await generateWriting({ messages: [{ role: 'user', content: [
+    { type: 'text', text: analysisPrompt },
+    { type: 'image_url', image_url: { url: `data:${mimeType};base64,${screenshotBase64}` } },
+  ] }], responseMimeType: 'application/json' });
+  const responseText = result.text;
 
-  const responseText = result.response.text();
-  
   // Clean response (remove markdown fences if present)
   const cleanedResponse = responseText
     .replace(/```json\n?/g, '')

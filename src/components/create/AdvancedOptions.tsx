@@ -100,8 +100,8 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
                     </p>
                 </div>
 
-                {/* Additional Editorial Direction */}
-                <div>
+                {/* Mobile brief appears in the main form. */}
+                <div className="hidden md:block">
                     <div className="flex items-center justify-between mb-2">
                         <Label htmlFor="context" className="text-base text-ink-black">
                             Additional Editorial Direction

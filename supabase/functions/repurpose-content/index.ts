@@ -1,7 +1,9 @@
+import { generateWriting } from "../_shared/writingAi.ts";
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
-import { generateGeminiContent, extractTextFromGeminiResponse } from "../_shared/geminiClient.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+
 import { buildAuthorProfilesSection } from "../_shared/authorProfiles.ts";
 import { buildBrandAuthoritiesSection } from "../_shared/brandAuthorities.ts";
 import { getMadisonMasterContext, SQUAD_DEFINITIONS, CONTENT_TYPE_TO_SQUAD } from "../_shared/madisonMasters.ts";
@@ -858,7 +860,7 @@ const validateDerivativeOutput = (derivativeType: string, cleanedContent: string
   return { isValid: true, reason: 'ok' };
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       status: 200,
@@ -944,18 +946,6 @@ serve(async (req) => {
     }
 
     console.log(`Using organization_id: ${masterContentRecord.organization_id}`);
-
-    // Check for Gemini first (cost-effective), fallback to Anthropic
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    
-    if (!GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
-      throw new Error('Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY is configured');
-    }
-    
-    const DEFAULT_ANTHROPIC_MODEL = 'claude-3-haiku-20240307';
-    const configuredAnthropicModel = Deno.env.get('ANTHROPIC_MODEL') || DEFAULT_ANTHROPIC_MODEL;
-    const useGemini = !!GEMINI_API_KEY;
 
     // Fetch brand context for consistent voice
     const brandContext = await buildBrandContext(supabaseClient, masterContentRecord.organization_id);
@@ -1163,103 +1153,14 @@ FAILURE TO FOLLOW CODEX V2 PRINCIPLES OR BRAND GUIDELINES IS UNACCEPTABLE.`;
 
       const generationProfile = getGenerationProfile(derivativeType);
 
-      // Call Gemini first (cost-effective), fallback to Anthropic.
+      // Use the organization’s selected writing model.
       // For structured multi-part outputs (email sequences), disable Gemini's
       // internal "thinking" so the entire token budget goes to actual content.
       const disableThinking = (generationProfile as { disableThinking?: boolean }).disableThinking === true;
-      const callGemini = async (promptText: string, maxOutputTokens: number) => {
-        console.log(`Calling Gemini for ${derivativeType} with maxOutputTokens=${maxOutputTokens}, thinkingBudget=${disableThinking ? 0 : 'default'}...`);
-        try {
-          const geminiResponse = await generateGeminiContent({
-            model: 'models/gemini-2.5-flash',
-            systemPrompt,
-            messages: [{ role: 'user', content: promptText }],
-            maxOutputTokens,
-            temperature: 0.7,
-            ...(disableThinking ? { thinkingBudget: 0 } : {}),
-          });
-          return {
-            text: extractTextFromGeminiResponse(geminiResponse),
-            finishReason: geminiResponse?.candidates?.[0]?.finishReason || 'unknown',
-            provider: 'gemini',
-          };
-        } catch (error) {
-          console.error(`Gemini error for ${derivativeType}:`, error);
-          throw error;
-        }
-      };
-
-      const callAnthropic = async (model: string, promptText: string, maxTokens: number) => {
-        console.log(`Calling Anthropic with model: ${model}, max_tokens=${maxTokens}`);
-        return await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': ANTHROPIC_API_KEY!,
-            'Content-Type': 'application/json',
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: maxTokens,
-            system: systemPrompt,
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'text',
-                    text: promptText,
-                  },
-                ],
-              },
-            ],
-          }),
-        });
-      };
-
-      const generateContentWithFallback = async (promptText: string, maxTokens: number) => {
-        // Try Gemini first if available
-        if (useGemini) {
-          try {
-            const geminiResult = await callGemini(promptText, maxTokens);
-            console.log(`✅ Gemini generated ${derivativeType} successfully (finishReason=${geminiResult.finishReason})`);
-            return geminiResult;
-          } catch (geminiError) {
-            console.warn(`Gemini failed for ${derivativeType}, falling back to Anthropic:`, geminiError);
-            if (!ANTHROPIC_API_KEY) {
-              throw new Error(`Gemini failed and ANTHROPIC_API_KEY not configured: ${geminiError}`);
-            }
-          }
-        }
-
-        if (!ANTHROPIC_API_KEY) {
-          throw new Error('ANTHROPIC_API_KEY not configured');
-        }
-
-        let modelToUse = configuredAnthropicModel;
-        let aiResponse = await callAnthropic(modelToUse, promptText, maxTokens);
-
-        if (aiResponse.status === 404 && modelToUse !== DEFAULT_ANTHROPIC_MODEL) {
-          console.warn(`Anthropic model ${modelToUse} not found. Falling back to ${DEFAULT_ANTHROPIC_MODEL}.`);
-          modelToUse = DEFAULT_ANTHROPIC_MODEL;
-          aiResponse = await callAnthropic(modelToUse, promptText, maxTokens);
-        }
-
-        if (!aiResponse.ok) {
-          const t = await aiResponse.text();
-          console.error(`AI gateway error for ${derivativeType}:`, aiResponse.status, t);
-          if (aiResponse.status === 429) throw new Error('AI rate limits exceeded. Please wait a moment and retry.');
-          if (aiResponse.status === 402) throw new Error('AI billing error: please verify your API account.');
-          throw new Error(`AI gateway error: ${aiResponse.status}`);
-        }
-
-        const aiData = await aiResponse.json();
-        return {
-          text: aiData.content?.[0]?.text ?? '',
-          finishReason: aiData.stop_reason || 'unknown',
-          provider: 'anthropic',
-        };
-      };
+      const generateSelectedContent = (promptText: string, maxOutputTokens: number) => generateWriting({
+        systemPrompt, messages: [{ role: 'user', content: promptText }], maxOutputTokens,
+        temperature: 0.7, ...(disableThinking ? { thinkingBudget: 0 } : {}),
+      });
 
       let generatedContent = '';
       let cleanedContent = '';
@@ -1269,46 +1170,16 @@ FAILURE TO FOLLOW CODEX V2 PRINCIPLES OR BRAND GUIDELINES IS UNACCEPTABLE.`;
         generationProfile.retryMaxOutputTokens,
       ].filter((value, index, arr): value is number => typeof value === 'number' && arr.indexOf(value) === index);
 
-      // Attempt plan: try Gemini at each budget, then force Anthropic as a final
-      // fallback if Gemini keeps truncating (Anthropic ignores the thinking-budget
-      // quirk and reliably produces the full multi-part sequence).
-      const attempts: Array<{ maxTokens: number; forceAnthropic: boolean }> = [
-        ...attemptBudgets.map((maxTokens) => ({ maxTokens, forceAnthropic: false })),
-      ];
-      if (ANTHROPIC_API_KEY) {
-        attempts.push({
-          maxTokens: attemptBudgets[attemptBudgets.length - 1] ?? 4096,
-          forceAnthropic: true,
-        });
-      }
+      // Retry incomplete output only on the explicitly selected provider.
+      const attempts = attemptBudgets.map(maxTokens => ({ maxTokens }));
 
       for (let attemptIndex = 0; attemptIndex < attempts.length; attemptIndex += 1) {
-        const { maxTokens, forceAnthropic } = attempts[attemptIndex];
+        const { maxTokens } = attempts[attemptIndex];
         const retryInstruction = attemptIndex === 0
           ? ''
           : `\n\nIMPORTANT: Your previous response was incomplete and cut off early. Return the FULL ${derivativeType} deliverable in a single response. Every labeled section (EMAIL 1, EMAIL 2, etc.) must be present with SUBJECT, PREVIEW, and complete BODY. Do not stop after the opening section.`;
         const attemptPrompt = `${fullPrompt}${retryInstruction}`;
-        const generationResult = forceAnthropic
-          ? await (async () => {
-              if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
-              let modelToUse = configuredAnthropicModel;
-              let aiResponse = await callAnthropic(modelToUse, attemptPrompt, maxTokens);
-              if (aiResponse.status === 404 && modelToUse !== DEFAULT_ANTHROPIC_MODEL) {
-                modelToUse = DEFAULT_ANTHROPIC_MODEL;
-                aiResponse = await callAnthropic(modelToUse, attemptPrompt, maxTokens);
-              }
-              if (!aiResponse.ok) {
-                const t = await aiResponse.text();
-                throw new Error(`Anthropic fallback error ${aiResponse.status}: ${t}`);
-              }
-              const aiData = await aiResponse.json();
-              return {
-                text: aiData.content?.[0]?.text ?? '',
-                finishReason: aiData.stop_reason || 'unknown',
-                provider: 'anthropic' as const,
-              };
-            })()
-          : await generateContentWithFallback(attemptPrompt, maxTokens);
+        const generationResult = await generateSelectedContent(attemptPrompt, maxTokens);
 
         generatedContent = generationResult.text;
         cleanedContent = stripMarkdown(generatedContent);
@@ -1329,7 +1200,6 @@ FAILURE TO FOLLOW CODEX V2 PRINCIPLES OR BRAND GUIDELINES IS UNACCEPTABLE.`;
           provider: generationResult.provider,
           finishReason: generationResult.finishReason,
           maxTokens,
-          forceAnthropic,
           charCount: cleanedContent.length,
           wordCount: countWords(cleanedContent),
           adequacyResult,
@@ -1425,4 +1295,4 @@ FAILURE TO FOLLOW CODEX V2 PRINCIPLES OR BRAND GUIDELINES IS UNACCEPTABLE.`;
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
-});
+}));
