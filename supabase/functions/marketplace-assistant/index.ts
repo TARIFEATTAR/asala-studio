@@ -1,5 +1,6 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import {
   generateGeminiContent,
   extractTextFromGeminiResponse,
@@ -148,7 +149,7 @@ async function getProductData(productId: string, organizationId: string) {
   }
 }
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -376,4 +377,4 @@ Always maintain brand voice while optimizing for the platform's audience and alg
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-});
+}));

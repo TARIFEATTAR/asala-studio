@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
@@ -14,7 +15,7 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   console.log('[suggest-brand-knowledge] Function invoked, method:', req.method);
   
   if (req.method === 'OPTIONS') {
@@ -26,13 +27,6 @@ serve(async (req) => {
 
   try {
     console.log('[suggest-brand-knowledge] Starting request...');
-    
-    // Check for required environment variables
-    const geminiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiKey) {
-      console.error('[suggest-brand-knowledge] GEMINI_API_KEY is not configured!');
-      throw new Error('GEMINI_API_KEY is not configured. Please set it in Supabase Edge Function secrets.');
-    }
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -586,4 +580,4 @@ ${jsonInstruction}`,
       }
     );
   }
-});
+}));

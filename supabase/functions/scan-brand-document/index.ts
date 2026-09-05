@@ -9,7 +9,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Anthropic from "npm:@anthropic-ai/sdk@0.32.1";
+import { generateWriting } from "../_shared/writingAi.ts";
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import {
   assignSquadsFromDocument,
   inferToneFromAttributes
@@ -56,7 +57,7 @@ const corsHeaders = {
 // MAIN HANDLER
 // ═══════════════════════════════════════════════════════════════════════════════
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -103,16 +104,6 @@ serve(async (req) => {
     // ═══════════════════════════════════════════════════════════════════════════
     // STEP 2: Send to Claude for Analysis
     // ═══════════════════════════════════════════════════════════════════════════
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const anthropic = new Anthropic({ apiKey });
-
     const extractionPrompt = `You are analyzing a brand guidelines document. Extract brand identity information and return ONLY valid JSON (no markdown, no preamble):
 
 {
@@ -148,31 +139,11 @@ Important:
 
     console.log(`[Document Scan] Sending to Claude Sonnet`);
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{
-        role: 'user',
-        content: [
-          {
-            type: 'document',
-            source: {
-              type: 'base64',
-              media_type: 'application/pdf',
-              data: base64
-            }
-          },
-          {
-            type: 'text',
-            text: extractionPrompt
-          }
-        ]
-      }]
-    });
-
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const result = await generateWriting({ messages: [{ role: 'user', content: [
+      { type: 'text', text: extractionPrompt },
+      { type: 'file', filename: file.name, data: `data:application/pdf;base64,${base64}` },
+    ] }], maxOutputTokens: 8192, responseMimeType: 'application/json' });
+    const responseText = result.text;
 
     // Clean response
     const cleanedResponse = responseText
@@ -400,7 +371,7 @@ Important:
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-});
+}));
 
 
 

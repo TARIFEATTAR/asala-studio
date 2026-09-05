@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 /**
  * Enhance Copy - AI-powered text enhancement for image overlays
  * 
@@ -6,7 +7,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.2.1";
+import { generateWriting } from "../_shared/writingAi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +15,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -29,23 +30,6 @@ serve(async (req) => {
         { status: 400, headers: corsHeaders }
       );
     }
-
-    const apiKey = Deno.env.get("GOOGLE_AI_API_KEY") || Deno.env.get("GEMINI_API_KEY");
-    
-    if (!apiKey) {
-      console.warn("No Gemini API key found, using fallback enhancement");
-      // Fallback: Simple text improvements
-      return new Response(
-        JSON.stringify({
-          headline: headline ? headline.toUpperCase() : null,
-          subtext: subtext || null,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `You are a luxury brand copywriter. Enhance the following text for a product image overlay.
 
@@ -68,12 +52,8 @@ Respond ONLY with a JSON object in this exact format (no markdown, no explanatio
 
 If only headline was provided, only enhance headline. If only subtext was provided, only enhance subtext.`;
 
-    console.log("🎨 Enhancing copy with Gemini...");
-
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text().trim();
-    
-    console.log("✅ Gemini response:", responseText);
+    const result = await generateWriting({ messages: [{ role: 'user', content: prompt }], responseMimeType: 'application/json' });
+    const responseText = result.text.trim();
 
     // Parse the JSON response
     let enhanced;
@@ -107,7 +87,7 @@ If only headline was provided, only enhance headline. If only subtext was provid
 
     return new Response(
       JSON.stringify({
-        error: error.message || "Failed to enhance text",
+        error: error instanceof Error ? error.message : "Failed to enhance text",
       }),
       {
         status: 500,
@@ -118,4 +98,4 @@ If only headline was provided, only enhance headline. If only subtext was provid
       }
     );
   }
-});
+}));

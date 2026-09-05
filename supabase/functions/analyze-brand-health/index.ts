@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
@@ -12,7 +13,7 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       status: 200,
@@ -376,4 +377,4 @@ Be specific and prioritize recommendations by impact.`;
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-});
+}));

@@ -1,3 +1,5 @@
+import { generateWriting } from "../_shared/writingAi.ts";
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -6,8 +8,8 @@ import { buildAuthorProfilesSection } from '../_shared/authorProfiles.ts';
 import { buildBrandAuthoritiesSection } from '../_shared/brandAuthorities.ts';
 import { getMadisonMasterContext, getSchwartzTemplate, SQUAD_DEFINITIONS } from '../_shared/madisonMasters.ts';
 
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -1053,7 +1055,7 @@ function buildSequencingPrompt(sequenceData: any, contentType: string) {
   return parts.join('\n');
 }
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('CORS preflight request received');
@@ -1090,27 +1092,6 @@ serve(async (req) => {
 
     console.log(`Authenticated request from user: ${user.id}`);
     
-    // Determine model availability - Priority: Gemini Direct > Claude
-    // Gemini Direct is most cost-effective (subscription-based), Claude is high quality but pay-per-use
-    const hasGeminiDirect = !!GEMINI_API_KEY;
-    const hasAnthropicAPI = !!ANTHROPIC_API_KEY;
-    
-    if (!hasGeminiDirect && !hasAnthropicAPI) {
-      throw new Error('No AI API configured. Please set GEMINI_API_KEY or ANTHROPIC_API_KEY.');
-    }
-    
-    // Log which APIs are available
-    const availableAPIs = [];
-    if (hasGeminiDirect) availableAPIs.push('Gemini Direct');
-    if (hasAnthropicAPI) availableAPIs.push('Claude');
-    
-    console.log(`Using API priority: ${availableAPIs.join(' → ')}`);
-    if (hasGeminiDirect) {
-      console.log('Using Gemini Direct API as primary (cost-effective subscription)');
-    } else {
-      console.log('Using Anthropic Claude for generation');
-    }
-
     // Parse request body with error handling
     let requestBody: any;
     try {
@@ -1203,7 +1184,6 @@ serve(async (req) => {
       organizationId: organizationId || 'N/A',
       hasProductData: !!productData,
       productCategory: productData?.category || 'N/A',
-      hasAnthropicAPI,
       hasImageStudioContext: !!imageStudioContext,
     });
 
@@ -2198,332 +2178,19 @@ Return plain text only with no Markdown formatting. No asterisks, bold, italics,
     }
     }
     
-    // Retry configuration
-    const MAX_RETRIES = 3;
-    const INITIAL_RETRY_DELAY = 500; // ✨ PERFORMANCE FIX: Reduced from 1000ms to 500ms
-    const API_TIMEOUT = 60000; // ✨ PERFORMANCE FIX: 60 second timeout for API calls
-    let lastError: Error | null = null;
-    let generatedContent = '';
-    
-    // Exponential backoff retry logic
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        if (attempt > 0) {
-          const delay = INITIAL_RETRY_DELAY * Math.pow(2, attempt - 1);
-          console.log(`Retry attempt ${attempt + 1}/${MAX_RETRIES} after ${delay}ms delay`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
-        
-        // Validate system prompt size
-        if (!systemPrompt || systemPrompt.length === 0) {
-          console.error('System prompt is empty');
-          throw new Error('System prompt generation failed. Please try again.');
-        }
-        
-        if (systemPrompt.length > 200000) {
-          console.warn(`System prompt is very large: ${systemPrompt.length} characters`);
-        }
-        
-        // Build message content - support multimodal if images provided
-        let messageContent: any;
-        
-        if (images && images.length > 0) {
-          // Multimodal message with images
-          const contentBlocks: any[] = [
-            {
-              type: 'text',
-              text: prompt
-            }
-          ];
-          
-          // Add each image as a content block
-          images.forEach((imageData: string) => {
-            // Extract base64 data and media type from data URL
-            const matches = imageData.match(/^data:([^;]+);base64,(.+)$/);
-            if (matches) {
-              const mediaType = matches[1];
-              const base64Data = matches[2];
-              
-              contentBlocks.push({
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType,
-                  data: base64Data
-                }
-              });
-            }
-          });
-          
-          messageContent = contentBlocks;
-        } else {
-          // Text-only message
-          messageContent = prompt;
-        }
-        
-        let response: Response;
-        let data: any;
-        
-        if (hasGeminiDirect) {
-          // Use Gemini Direct API (most cost-effective with subscription)
-          try {
-            // Build Gemini API request format
-            // Gemini uses a different format than the Anthropic payload
-            const geminiParts: any[] = [];
-            
-            // Handle multimodal content (images + text)
-            if (images && images.length > 0) {
-              // Add text prompt
-              geminiParts.push({ text: prompt });
-              
-              // Add images
-              images.forEach((imageData: string) => {
-                const matches = imageData.match(/^data:([^;]+);base64,(.+)$/);
-                if (matches) {
-                  const mediaType = matches[1];
-                  const base64Data = matches[2];
-                  
-                  geminiParts.push({
-                    inlineData: {
-                      mimeType: mediaType,
-                      data: base64Data
-                    }
-                  });
-                }
-              });
-            } else {
-              // Text-only
-              geminiParts.push({ text: prompt });
-            }
-            
-            const geminiRequestBody: any = {
-              contents: [{
-                parts: geminiParts
-              }],
-              generationConfig: {
-                maxOutputTokens: 4096,
-                temperature: 0.7,
-              }
-            };
-            
-            // Add system instruction if provided (Gemini supports systemInstruction field)
-            if (systemPrompt) {
-              geminiRequestBody.systemInstruction = {
-                parts: [{ text: systemPrompt }]
-              };
-            }
-            
-            // Use gemini-2.5-flash (gemini-2.0-flash-001 no longer available to new users)
-            const GEMINI_MODEL = 'gemini-2.5-flash';
-            console.log('Sending request to Gemini Direct API:', {
-              model: GEMINI_MODEL,
-              partsCount: geminiParts.length,
-              hasImages: images && images.length > 0,
-              systemPromptLength: systemPrompt.length
-            });
-            
-            // ✨ PERFORMANCE FIX: Add timeout to prevent hanging requests
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-            
-            try {
-              response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(geminiRequestBody),
-                signal: controller.signal,
-              });
-              clearTimeout(timeoutId);
-            } catch (fetchError: any) {
-              clearTimeout(timeoutId);
-              if (fetchError.name === 'AbortError') {
-                throw new Error('API request timed out. Please try again.');
-              }
-              throw fetchError;
-            }
-          } catch (fetchError) {
-            console.error('Error constructing or sending Gemini Direct API request:', fetchError);
-            throw new Error(`Failed to send request to AI service: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
-          }
+    const writingResult = await generateWriting({
+      systemPrompt,
+      messages: [{ role: 'user', content: images?.length
+        ? [{ type: 'text', text: prompt }, ...images.map((url: string) => ({ type: 'image_url' as const, image_url: { url } }))]
+        : prompt }],
+      maxOutputTokens: 8192,
+      temperature: 0.7,
+    });
+    if (writingResult.finishReason !== 'STOP') throw new Error('Writing AI response was incomplete. Please try a shorter request.');
+    const generatedContent = writingResult.text;
+    console.log('Generated content with', writingResult.provider, writingResult.model);
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Gemini Direct API error (attempt ${attempt + 1}):`, {
-              status: response.status,
-              statusText: response.statusText,
-              error: errorText,
-              hasPrompt: !!prompt,
-              promptLength: prompt?.length || 0
-            });
-            
-            // If Gemini is unavailable due to quota/rate limits, fall back to Claude
-            const lower = errorText.toLowerCase();
-            const isQuotaOrRateLimit = response.status === 429 
-              || response.status === 403
-              || (response.status === 400 && (lower.includes('quota') || lower.includes('rate') || lower.includes('limit')));
-            
-            if (isQuotaOrRateLimit) {
-              if (hasAnthropicAPI) {
-                console.log('Falling back to Anthropic Claude due to Gemini quota/rate limit');
-                // Will fall through to Claude logic below
-              } else {
-                throw new Error(`Gemini API quota/rate limit exceeded: ${response.status} - ${errorText}`);
-              }
-            } else if (response.status === 500) {
-              // Retry on server errors
-              lastError = new Error(`Gemini API error: ${response.status} - ${errorText}`);
-              continue;
-            } else {
-              // For other errors, fail immediately
-              throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-            }
-          } else {
-            // Success - parse Gemini response
-            data = await response.json();
-            
-            // Validate response structure
-            if (!data || !data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
-              console.error('Invalid Gemini API response structure:', JSON.stringify(data));
-              throw new Error('Invalid response from AI service. Please try again.');
-            }
-            
-            const candidate = data.candidates[0];
-            if (!candidate || !candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
-              console.error('No content in Gemini API response:', JSON.stringify(data));
-              throw new Error('No content received from AI service. Please try again.');
-            }
-            
-            // Extract text from Gemini response (it's in parts array)
-            const textParts = candidate.content.parts
-              .filter((part: any) => part.text)
-              .map((part: any) => part.text);
-            
-            if (textParts.length === 0) {
-              console.error('No text content in Gemini API response:', JSON.stringify(data));
-              throw new Error('No text content received from AI service. Please try again.');
-            }
-            
-            generatedContent = textParts.join('\n');
-            break; // Success!
-          }
-        }
-        
-        // Fallback to Claude if Gemini not available or failed
-        if (!generatedContent && hasAnthropicAPI) {
-          // Use Anthropic Claude API
-          try {
-            const requestBody = {
-              model: 'claude-sonnet-4-20250514',
-              max_tokens: 4096,
-              system: systemPrompt,
-              messages: [
-                {
-                  role: 'user',
-                  content: messageContent
-                }
-              ],
-            };
-            
-            console.log('Sending request to Anthropic API:', {
-              model: requestBody.model,
-              systemPromptLength: systemPrompt.length,
-              messageContentType: typeof messageContent,
-              messageContentIsArray: Array.isArray(messageContent),
-              hasImages: images && images.length > 0
-            });
-            
-            // ✨ PERFORMANCE FIX: Add timeout to prevent hanging requests
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-            
-            try {
-              response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                  'x-api-key': ANTHROPIC_API_KEY!,
-                  'anthropic-version': '2023-06-01',
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-                signal: controller.signal,
-              });
-              clearTimeout(timeoutId);
-            } catch (fetchError: any) {
-              clearTimeout(timeoutId);
-              if (fetchError.name === 'AbortError') {
-                throw new Error('API request timed out. Please try again.');
-              }
-              throw fetchError;
-            }
-          } catch (fetchError) {
-            console.error('Error constructing or sending Anthropic API request:', fetchError);
-            throw new Error(`Failed to send request to AI service: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
-          }
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Claude API error (attempt ${attempt + 1}):`, {
-              status: response.status,
-              statusText: response.statusText,
-              error: errorText,
-              model: 'claude-sonnet-4-20250514',
-              hasPrompt: !!prompt,
-              promptLength: prompt?.length || 0
-            });
-            
-            // If Anthropic is unavailable due to credits/rate limits, surface the error immediately
-            const lower = errorText.toLowerCase();
-            const isCreditOrRateLimit = response.status === 429 
-              || response.status === 402 
-              || (response.status === 400 && (lower.includes('credit') || lower.includes('balance')))
-              || lower.includes('credit')
-              || lower.includes('rate');
-            if (isCreditOrRateLimit) {
-              throw new Error('Anthropic API unavailable due to credit or rate limits.');
-            }
-
-            // Only retry on 500 errors
-            if (response.status === 500) {
-              lastError = new Error(`Claude API error: ${response.status} - ${errorText}`);
-              continue; // Try again
-            }
-            
-            // For other errors, fail immediately
-            throw new Error(`Claude API error: ${response.status} - ${errorText}`);
-          }
-
-          data = await response.json();
-          
-          // Validate response structure
-          if (!data || !data.content || !Array.isArray(data.content) || data.content.length === 0) {
-            console.error('Invalid Anthropic API response structure:', JSON.stringify(data));
-            throw new Error('Invalid response from AI service. Please try again.');
-          }
-          
-          const textContent = data.content.find((item: any) => item.type === 'text');
-          if (!textContent || !textContent.text) {
-            console.error('No text content in Anthropic API response:', JSON.stringify(data));
-            throw new Error('No text content received from AI service. Please try again.');
-          }
-          
-          generatedContent = textContent.text;
-        }
-        
-        // Success - break out of retry loop
-        break;
-        
-      } catch (error) {
-        if (attempt === MAX_RETRIES - 1) {
-          // Last attempt failed
-          throw lastError || error;
-        }
-        lastError = error as Error;
-      }
-    }
-
-    console.log('Successfully generated content with Claude');
 
     return new Response(
       JSON.stringify({ generatedContent }),
@@ -2572,4 +2239,4 @@ Return plain text only with no Markdown formatting. No asterisks, bold, italics,
       }
     );
   }
-});
+}));

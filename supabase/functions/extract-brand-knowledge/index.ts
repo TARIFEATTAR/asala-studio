@@ -1,3 +1,4 @@
+import { withWritingAi } from "../_shared/writingAiEdge.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
@@ -10,7 +11,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(withWritingAi(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,11 +20,6 @@ serve(async (req) => {
     const { extractedText, organizationId, documentName, detectVisualStandards, industry } = await req.json();
 
     // DEBUG: Check API Key existence
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new Error('CRITICAL: GEMINI_API_KEY secret is missing or empty in Supabase.');
-    }
-
     if (!extractedText || !organizationId) {
       throw new Error('extractedText and organizationId are required');
     }
@@ -277,4 +273,4 @@ CRITICAL INSTRUCTIONS:
       }
     );
   }
-});
+}));

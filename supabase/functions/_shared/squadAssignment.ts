@@ -1,13 +1,12 @@
 /**
  * SQUAD AUTO-ASSIGNMENT
  *
- * Uses Claude Sonnet to intelligently assign copy and visual squads
+ * Uses the selected Writing AI model to intelligently assign copy and visual squads
  * based on brand analysis.
  *
- * Cost: ~$0.02 per assignment
  */
 
-import Anthropic from "npm:@anthropic-ai/sdk@0.32.1";
+import { generateWriting } from "./writingAi.ts";
 import type { VisualAnalysis } from "./visualAnalyzer.ts";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -94,14 +93,6 @@ export async function assignSquadsFromAnalysis(
   analysis: VisualAnalysis,
   sourceUrl: string
 ): Promise<SquadAssignment> {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) {
-    console.log('[Squad Assignment] No API key, using heuristic assignment');
-    return heuristicAssignment(analysis.brandTone, analysis.visualStyle);
-  }
-
-  const anthropic = new Anthropic({ apiKey });
-
   const assignmentPrompt = `You are a brand strategist assigning creative squads based on brand analysis.
 
 <VISUAL_ANALYSIS>
@@ -135,22 +126,15 @@ Return ONLY valid JSON (no markdown):
 }`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: assignmentPrompt }]
-    });
-
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const result = await generateWriting({ messages: [{ role: 'user', content: assignmentPrompt }], maxOutputTokens: 4096, responseMimeType: 'application/json' });
+    const responseText = result.text;
 
     const cleanedResponse = responseText
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
 
-    console.log('[Squad Assignment] Claude response:', cleanedResponse);
+    console.log('[Squad Assignment] Writing AI response:', cleanedResponse);
     return JSON.parse(cleanedResponse) as SquadAssignment;
   } catch (error) {
     console.error('[Squad Assignment] Claude failed, using heuristics:', error);
@@ -164,13 +148,6 @@ Return ONLY valid JSON (no markdown):
 export async function assignSquadsFromDocument(
   analysis: DocumentAnalysis
 ): Promise<SquadAssignment> {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) {
-    return heuristicAssignmentFromText(analysis.toneGuidelines || '');
-  }
-
-  const anthropic = new Anthropic({ apiKey });
-
   const assignmentPrompt = `Based on this brand guidelines document analysis, assign creative squads:
 
 <DOCUMENT_ANALYSIS>
@@ -194,15 +171,8 @@ Return ONLY valid JSON with squad assignments and reasoning:
 }`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: assignmentPrompt }]
-    });
-
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const result = await generateWriting({ messages: [{ role: 'user', content: assignmentPrompt }], maxOutputTokens: 4096, responseMimeType: 'application/json' });
+    const responseText = result.text;
 
     const cleanedResponse = responseText
       .replace(/```json\n?/g, '')
@@ -222,13 +192,6 @@ Return ONLY valid JSON with squad assignments and reasoning:
 export async function assignSquadsFromManual(
   brandData: ManualBrandData
 ): Promise<SquadAssignment> {
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) {
-    return heuristicAssignment(brandData.essence?.tone || 'sophisticated', 'lifestyle');
-  }
-
-  const anthropic = new Anthropic({ apiKey });
-
   const assignmentPrompt = `Based on this manually-entered brand profile, assign creative squads:
 
 <BRAND_DATA>
@@ -253,15 +216,8 @@ Return ONLY valid JSON:
 }`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: assignmentPrompt }]
-    });
-
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
+    const result = await generateWriting({ messages: [{ role: 'user', content: assignmentPrompt }], maxOutputTokens: 4096, responseMimeType: 'application/json' });
+    const responseText = result.text;
 
     const cleanedResponse = responseText
       .replace(/```json\n?/g, '')
