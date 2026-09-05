@@ -1,0 +1,60 @@
+name: Studio workflow review
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'supabase/functions/**'
+      - 'scripts/mobile-workflow/**'
+      - 'package*.json'
+      - 'index.html'
+      - '.github/workflows/studio-review.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm ci --no-audit --no-fund
+      - name: Writing provider and authorization tests
+        run: deno test --no-lock --allow-env --allow-read --allow-net=esm.sh supabase/functions/_shared/writingAi*.test.ts
+      - name: Configure synthetic preview
+        run: |
+          cat > .env.local <<'ENV'
+          VITE_SUPABASE_URL=https://mobile-review.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY=fixture-only-public-key
+          ENV
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Mobile workflow acceptance with intercepted APIs
+        env:
+          MOBILE_BROWSER_CHANNEL: chromium
+          MOBILE_BASE_URL: http://127.0.0.1:5186
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5186 --strictPort > /tmp/madison-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5186 > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/mobile-workflow/verify.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-workflow-screenshots
+          path: /tmp/madison-mobile-qa
+          if-no-files-found: ignore
